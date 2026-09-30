@@ -1,0 +1,14 @@
+#!/bin/sh
+set -e
+
+if ! command -v bun >/dev/null 2>&1; then
+  PATH="$HOME/.bun/bin:$PATH"
+  export PATH
+fi
+
+if ! command -v bun >/dev/null 2>&1; then
+  echo 'Bun is required to validate the commit message.' >&2
+  exit 127
+fi
+
+bun run lint:commit --edit "$1"
