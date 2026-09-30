@@ -4,7 +4,7 @@
 
 ## Keadaan saat ini dan prinsip
 
-Web saat ini baru memakai Tailwind CSS dan halaman starter. TanStack Form dan TanStack Query sudah tercantum sebagai dependensi; shadcn/ui dan Video.js belum dipasang. Belum ada identitas merek, token warna, komponen produk, atau pola player yang disetujui. Seluruh nilai dan pola di sini adalah usulan untuk memulai desain.
+Web masih menampilkan halaman starter. TanStack Form dan TanStack Query sudah tercantum sebagai dependensi. Fondasi shadcn/ui telah dikonfigurasi di `apps/web` dengan preset `b6Rfk0dOzI`, dan komponen Button tersedia di `apps/web/src/components/ui/button.tsx`. Video.js belum dipasang. Token warna dan font sudah tersedia di `apps/web/src/styles.css`, sementara pola player dan identitas merek akhir masih perlu ditinjau.
 
 1. **Video sebagai pusat:** pengalaman pengunjung menempatkan video vertikal di area utama, dengan navigasi ke video lain yang mudah dijangkau.
 2. **Mobile first, desktop terancang:** ponsel memberi fokus pada pemutaran; desktop mempertahankan rasio video dan memakai ruang samping untuk metadata atau navigasi.
@@ -14,16 +14,16 @@ Web saat ini baru memakai Tailwind CSS dan halaman starter. TanStack Form dan Ta
 
 ## Fondasi visual kandidat
 
-| Bagian    | Usulan awal                                                                                                 | Catatan keputusan                                                                                     |
-| --------- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| Warna     | Token semantik `background`, `surface`, `text`, `muted`, `border`, `accent`, `success`, `warning`, `danger` | Palet merek dan mode terang/gelap belum dipilih; uji kontras sebelum menetapkan nilai.                |
-| Tipografi | Skala 14, 16, 20, 28, 36 px dengan tinggi baris yang nyaman                                                 | Jenis huruf dan kebutuhan bahasa lain belum dipilih. Teks isi utama mulai 16 px.                      |
-| Spasi     | Kelipatan 4 px; jarak formulir dasar 16–24 px                                                               | Sesuaikan menurut hasil uji pada layar sempit.                                                        |
-| Radius    | 8 px untuk input/kartu kecil, 12 px untuk panel                                                             | Belum menjadi token final.                                                                            |
-| Media     | Pratinjau berbingkai rasio 9:16 sebagai bentuk utama                                                        | Kebijakan file dengan rasio lain belum diputuskan di PRD. Jangan memotong konten tanpa pemberitahuan. |
-| Gerak     | Transisi singkat untuk umpan balik, hormati `prefers-reduced-motion`                                        | Hindari animasi yang mengaburkan status pemrosesan.                                                   |
+| Bagian    | Usulan awal                                                                                                                  | Catatan keputusan                                                                                     |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Warna     | Preset lime dengan base neutral; gunakan token semantik seperti `background`, `foreground`, `primary`, `muted`, dan `border` | Mode terang/gelap telah disediakan; uji kontras pada alur produk sebelum final.                       |
+| Tipografi | Inter Variable untuk teks dan Space Grotesk Variable untuk heading; skala produk masih usulan 14, 16, 20, 28, 36 px          | Teks isi utama mulai 16 px; periksa kebutuhan bahasa lain.                                            |
+| Spasi     | Kelipatan 4 px; jarak formulir dasar 16–24 px                                                                                | Sesuaikan menurut hasil uji pada layar sempit.                                                        |
+| Radius    | Token dasar preset `0.625rem` dengan turunan `--radius-*`                                                                    | Sesuaikan pemakaian per komponen saat implementasi.                                                   |
+| Media     | Pratinjau berbingkai rasio 9:16 sebagai bentuk utama                                                                         | Kebijakan file dengan rasio lain belum diputuskan di PRD. Jangan memotong konten tanpa pemberitahuan. |
+| Gerak     | Transisi singkat untuk umpan balik, hormati `prefers-reduced-motion`                                                         | Hindari animasi yang mengaburkan status pemrosesan.                                                   |
 
-Saat diimplementasikan, definisikan token yang disetujui melalui CSS `@theme` Tailwind v4 dan komponen web berbasis shadcn/ui yang menggunakan token semantik. Simpan komponen di `apps/web`; paket UI bersama baru diperlukan bila kedua app benar-benar memakainya. Hindari nilai warna yang tersebar langsung di tiap halaman.
+Token preset kini didefinisikan melalui CSS `@theme inline` Tailwind v4. Komponen baru berbasis shadcn/ui harus menggunakan token semantik dan disimpan di `apps/web`; paket UI bersama baru diperlukan bila kedua app benar-benar memakainya. Hindari nilai warna yang tersebar langsung di tiap halaman.
 
 ## Pola komponen
 
@@ -50,7 +50,7 @@ Saat diimplementasikan, definisikan token yang disetujui melalui CSS `@theme` Ta
 
 Target yang diusulkan adalah [WCAG 2.2 AA](https://www.w3.org/TR/WCAG22/). Uji kontras token yang dipilih, urutan fokus, label formulir, pesan kesalahan, ukuran target sentuh, dan penggunaan tanpa mouse. Siapkan caption untuk video prarekaman; keputusan apakah caption menjadi syarat wajib terbit harus diselesaikan di [PRD](PRD.md). Hindari autoplay bersuara. Uji player dengan keyboard dan teknologi bantu sebelum rilis publik.
 
-Desain belum selesai sampai alur publik tanpa login dan alur admin mencakup keadaan normal, kosong, menunggu, gagal, serta terbit pada ponsel dan desktop. Pilihan merek, palet, tipografi, ikon, kebijakan caption, pola katalog, dan versi/integrasi Video.js tetap terbuka.
+Desain belum selesai sampai alur publik tanpa login dan alur admin mencakup keadaan normal, kosong, menunggu, gagal, serta terbit pada ponsel dan desktop. Preset lime, Inter, Space Grotesk, dan Remixicon adalah fondasi yang sudah dikonfigurasi, tetapi keputusan merek akhir, kebijakan caption, pola katalog, dan versi/integrasi Video.js tetap terbuka.
 
 ## Referensi
 

@@ -16,14 +16,17 @@ Catat tanggal persetujuan dan pemilik keputusan di setiap dokumen. Pisahkan peri
 
 ## Struktur saat ini
 
-| Path                                  | Tanggung jawab                                                                                                                         |
-| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `apps/api/`                           | API Elysia di Bun. `src/index.ts` saat ini hanya memiliki `GET /` dan secara default berjalan pada port 3001.                          |
-| `apps/web/`                           | Web TanStack Start. Rute ada di `src/routes/`; `src/routeTree.gen.ts` adalah file hasil generasi. Pengembangan default pada port 3000. |
-| `turbo.json`                          | Definisi task workspace dan cache output build.                                                                                        |
-| `.husky/` dan `commitlint.config.cjs` | Pemeriksaan sebelum commit dan validasi pesan Conventional Commits.                                                                    |
+| Path                                                              | Tanggung jawab                                                                                                                         |
+| ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/api/`                                                       | API Elysia di Bun. `src/index.ts` saat ini hanya memiliki `GET /` dan secara default berjalan pada port 3001.                          |
+| `apps/web/`                                                       | Web TanStack Start. Rute ada di `src/routes/`; `src/routeTree.gen.ts` adalah file hasil generasi. Pengembangan default pada port 3000. |
+| `turbo.json`                                                      | Definisi task workspace dan cache output build.                                                                                        |
+| `.husky/` dan `commitlint.config.cjs`                             | Pemeriksaan sebelum commit dan validasi pesan Conventional Commits.                                                                    |
+| `.agents/skills/`, `.commandcode/skills/`, dan `skills-lock.json` | Skill repo Elysia, Turborepo, dan shadcn beserta symlink agent dan metadata instalasinya, semuanya dikelola dari root.                 |
 
 Kedua app saat ini masih berupa starter. Model domain video, kontrak API, dan integrasi web ke API belum diimplementasikan. Catat keputusan final di sini dengan mengacu pada kode dan skrip yang benar-benar ada.
+
+Konfigurasi shadcn dan komponen UI tetap berada di `apps/web`. Video.js tersedia melalui plugin Codex yang dipasang pada lingkungan pengguna; ikuti aturan penggunaannya di `AGENTS.md` saat mengerjakan video atau audio.
 
 ## Bekerja di repo ini
 
