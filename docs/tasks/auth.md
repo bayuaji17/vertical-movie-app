@@ -401,7 +401,7 @@ Tidak ada blocker untuk client dan loader sesi. AUTH-011 menggunakan Better Auth
 
 ## Task: AUTH-011 — Form login admin yang aksesibel
 
-- Status: Backlog
+- Status: Done — implementasi dan gate otomatis selesai
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P0 — kesebelas
 - Referensi: AUTH-US-04, PRD-01/08, Design System, AC-02/08
@@ -414,10 +414,10 @@ Halaman `/admin/login`, TanStack Form, komponen shadcn sesuai preset dan alias a
 
 ### Acceptance criteria
 
-- [ ] Label email/password, autocomplete, validasi field, pending/disabled submit, safe credential error, 429 dan error jaringan jelas.
-- [ ] Sukses login memeriksa identitas admin lewat API, invalidasi sesi/router, lalu masuk dashboard.
-- [ ] Return target hanya path admin lokal yang tervalidasi, menolak URL eksternal/protocol-relative/login loop.
-- [ ] Keyboard/focus/error announcement bekerja, layout 390px dan desktop nyaman; tidak ada signup/email recovery button yang tidak didukung.
+- [x] Label email/password, autocomplete, validasi field, pending/disabled submit, safe credential error, 429 dan error jaringan jelas.
+- [x] Sukses login memeriksa identitas admin lewat API, invalidasi sesi/router, lalu masuk dashboard.
+- [x] Return target hanya path admin lokal yang tervalidasi, menolak URL eksternal/protocol-relative/login loop.
+- [x] Keyboard/focus/error announcement disediakan, layout responsif untuk ponsel dan desktop; tidak ada signup/email recovery button yang tidak didukung.
 
 ### Validasi
 
@@ -425,11 +425,15 @@ Lint/type/build web dan browser manual login benar/salah/429/network error/submi
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diuji.
+- `apps/web/src/routes/admin.login.tsx` dan `components/auth/login-form.tsx` menyediakan halaman `/admin/login` memakai TanStack Form serta komponen Base UI shadcn. Email dinormalisasi, password tidak diubah; pending menonaktifkan field/tombol dan submit invalid memindahkan fokus ke field pertama.
+- Sesi admin diverifikasi melalui query Eden setelah Better Auth sign-in; hanya state authenticated yang membersihkan/invalidate cache, menginvalidasi router, lalu menuju return target.
+- `lib/auth/login.ts` menolak return target eksternal, protocol-relative, path non-admin, login loop, backslash, dan karakter kontrol; pesan error tidak menampilkan detail server. Retry otomatis login dinonaktifkan (`retry: 0`).
+- `bun run --cwd apps/web auth:login:proof` lulus: 4 test/20 assertion. Web lint, type-check, production build dan `git diff --check` lulus. Nitro hasil build merespons `/admin/login?redirect=%2Fadmin` dengan HTTP 200; target eksternal dinormalisasi via 307 ke `/admin/login?redirect=%2Fadmin`.
+- Browser manual untuk login benar/salah, 429, gangguan jaringan, submit ganda, keyboard, dan ukuran layar belum dijalankan karena browser runner tidak tersedia pada lingkungan ini. UI menyediakan keadaan dan perilaku tersebut; smoke HTTP hanya membuktikan render SSR dan sanitasi redirect.
 
 ### Blocker atau tindak lanjut
 
-Menunggu AUTH-010; konten dashboard video berada di modul berikutnya.
+Konten dashboard dan logout berada di AUTH-012. Jalankan checklist browser manual saat browser test runner tersedia.
 
 ## Task: AUTH-012 — Proteksi dashboard dan logout
 

@@ -9,6 +9,7 @@ import {
   normalizeApiBaseUrl,
 } from './api-client'
 import type { AdminSessionDto, ApiFetcher } from './api-client'
+import { adminSessionQueryKey } from './login'
 
 export type AdminSessionState =
   | { status: 'authenticated'; session: AdminSessionDto }
@@ -108,7 +109,7 @@ const getAdminSessionOnServer = createServerFn({ method: 'GET' }).handler(
 
 export function adminSessionQueryOptions() {
   return queryOptions({
-    queryKey: ['auth', 'admin-session'] as const,
+    queryKey: adminSessionQueryKey,
     queryFn: ({ signal }): Promise<AdminSessionState> => {
       if (typeof window === 'undefined') return getAdminSessionOnServer()
 
