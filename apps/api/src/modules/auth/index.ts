@@ -5,6 +5,7 @@ import {
   createAuthMiddleware,
   createAuthServer,
   drizzleAdapter,
+  openAPI,
 } from "@repo/auth/server";
 import type { BetterAuthOptions } from "@repo/auth/server";
 import * as schema from "../../db/schema";
@@ -32,16 +33,22 @@ export const disabledAuthPaths = [
   "/delete-user/callback",
 ] as const;
 
-const supportedAuthPaths = new Set([
-  "/ok",
-  "/get-session",
-  "/sign-in/email",
-  "/sign-out",
-]);
+export const supportedAuthOperations: Readonly<
+  Record<string, readonly ("get" | "post")[]>
+> = {
+  "/ok": ["get"],
+  "/get-session": ["get", "post"],
+  "/sign-in/email": ["post"],
+  "/sign-out": ["post"],
+};
 
-export function isDisabledAuthPath(path: string): boolean {
+export function isDisabledAuthPath(path: string, method?: string): boolean {
+  const supportedMethods = supportedAuthOperations[path];
+  const normalizedMethod = method?.toLowerCase();
   return (
-    !supportedAuthPaths.has(path) ||
+    supportedMethods === undefined ||
+    (normalizedMethod !== undefined &&
+      !supportedMethods.some((supported) => supported === normalizedMethod)) ||
     disabledAuthPaths.includes(path as (typeof disabledAuthPaths)[number]) ||
     /^\/reset-password\/[^/]+$/.test(path)
   );
@@ -67,6 +74,7 @@ export function createAdminAuth({
     secret,
     database: adapter,
     trustedOrigins: [origin],
+    plugins: [openAPI({ disableDefaultReference: true })],
     emailAndPassword: {
       enabled: true,
       disableSignUp: true,

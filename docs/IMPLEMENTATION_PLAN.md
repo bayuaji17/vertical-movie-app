@@ -81,7 +81,7 @@ Layout `/admin` bersifat umum; `/admin/login` berada di luar guard. Pathless lay
 
 ### Scalar
 
-Tambahkan plugin Better Auth `openAPI({ disableDefaultReference: true })`. Bootstrap menggenerasikan schema sekali dari instance yang sama dan menginjeksi hasil ke `createApp`/plugin OpenAPI Elysia. Gabungkan paths/components dengan deteksi konflik, prefix tepat sekali, `$ref` utuh, dan security cookie yang benar. Dokumentasi hanya memuat endpoint yang memang aktif; endpoint auth yang disabled harus disaring jika generator masih mencantumkannya. `GET /` tidak mendapat syarat login. UI auth bawaan tidak menjadi halaman referensi kedua.
+Plugin Better Auth `openAPI({ disableDefaultReference: true })` menonaktifkan halaman referensi kedua. Bootstrap menghasilkan schema sekali dari instance yang sama sebelum listen. Plugin Elysia menyusun rute aplikasi; hook lokal Scalar yang hanya berjalan pada `/openapi/json` menambahkan paths/components auth, mendeteksi konflik, memberi prefix tepat sekali, mempertahankan `$ref`, dan mencatat security cookie yang benar tanpa mengubah kontrak Eden rute bisnis. Dokumen hanya memuat operasi aktif; katalog publik tidak mewarisi security admin. Detail validasi ada pada AUTH-008 di backlog.
 
 ## Impact Analysis
 
@@ -273,5 +273,7 @@ AUTH-005 — `Done`: user, credential account, dan `admin_identity` dibuat atomi
 AUTH-006 — `Done`: `admin:reset-password` hanya mengambil target dari singleton admin, memperbarui hash credential lalu menghapus seluruh session dalam transaksi yang memakai advisory lock provisioning. PostgreSQL proof lulus 4 test/44 assertion: kedua cookie lama ditolak, password baru berhasil, kegagalan delete me-rollback update hash, CLI melaporkan keadaan tanpa admin dengan aman, dan argumen user ID ditolak. Runbook mencatat operator harus login ulang pada semua perangkat. Proof hanya memakai database test lokal.
 
 AUTH-007 — `Done`: macro `requireAdmin` mengambil sesi database per request lalu mencocokkan user ke `admin_identity`; 401/403/503 memakai error JSON aman dengan requestId. `GET /admin/session` mengekspos DTO whitelist dan expiry UTC dengan `Cache-Control: no-store`. PostgreSQL proof lulus 4 test/29 assertion termasuk expiry/revoke, demotion non-admin, failure 503, public route, dan write fixture yang tidak dipanggil ketika guard menolak.
+
+AUTH-008 — `Done`: satu Scalar API pada `/openapi` dan schema gabungan `3.1.1` pada `/openapi/json`; schema dibuat dari instance Better Auth yang sama sebelum listen. Allowlist path/method docs sama dengan handler, disabled auth routes disembunyikan dan tetap 404, operasi publik tidak meminta session, sedangkan sesi/logout/admin memakai cookie scheme yang mengikuti konfigurasi HTTPS. Merge menolak path/operationId/schema conflicts dan mempertahankan `$ref`. Unit proof 4 test/8 assertion; integration proof 2 test/61 assertion; type-check, frozen install, build, lint, seluruh API unit suite, Prettier, dan diff check lulus.
 
 Validasi context dokumen sebelum eksekusi: Prettier lulus pada empat dokumen; pemeriksa Bun memvalidasi 24 tautan lokal, 13 task contract, dependensi DAG dan acceptance AC-01..AC-10.

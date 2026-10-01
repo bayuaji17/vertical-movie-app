@@ -12,6 +12,7 @@
     "auth:admin:proof": "bun test ./test/integration/auth-admin-proof.test.ts",
     "auth:recovery:proof": "bun test ./test/integration/auth-recovery-proof.test.ts",
     "auth:authorization:proof": "bun test ./test/integration/auth-authorization-proof.test.ts",
+    "auth:openapi:proof": "bun test ./test/integration/auth-openapi-proof.test.ts",
     "admin:provision": "bun run src/modules/auth/provision-cli.ts",
     "admin:reset-password": "bun run src/modules/auth/reset-cli.ts",
     "db:migrate": "bun run src/db/migrate.ts",
@@ -21,6 +22,7 @@
     "check-types": "bun run --bun tsc --noEmit"
   },
   "dependencies": {
+    "@elysia/openapi": "^1.4.16",
     "@repo/auth": "workspace:*",
     "drizzle-orm": "0.45.3",
     "elysia": "latest"

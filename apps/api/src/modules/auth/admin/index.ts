@@ -38,6 +38,7 @@ export function createAdminRoutes(
           tags: ["Admin"],
           operationId: "getAdminSession",
           summary: "Get the current admin session",
+          security: [{ betterAuthSessionCookie: [] }],
         },
       },
     );

@@ -282,7 +282,7 @@ Tidak ada blocker. Rute sesi terjaga; endpoint domain privat berikutnya memakai 
 
 ## Task: AUTH-008 — Scalar gabungan untuk API dan auth
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P0 — kedelapan
 - Referensi: AUTH-US-03, keputusan Scalar pada API Development, AC-09
@@ -295,22 +295,30 @@ Helper schema server auth, `@elysia/openapi`, merge schema paths/components, coo
 
 ### Acceptance criteria
 
-- [ ] `/openapi` dan `/openapi/json` memuat route aktif aplikasi/auth dengan refs utuh.
-- [ ] Signup/fitur disabled tidak ditampilkan sebagai tersedia; public route tidak mewarisi admin security.
-- [ ] Konflik nama komponen terdeteksi; tidak menimpa schema diam-diam.
-- [ ] Referensi UI auth bawaan disabled; response raw auth tidak dimodifikasi merge helper.
+- [x] `/openapi` dan `/openapi/json` memuat route aktif aplikasi/auth dengan refs utuh.
+- [x] Signup/fitur disabled tidak ditampilkan sebagai tersedia; public route tidak mewarisi admin security.
+- [x] Konflik nama komponen terdeteksi; tidak menimpa schema diam-diam.
+- [x] Referensi UI auth bawaan disabled; response raw auth tidak dimodifikasi merge helper.
 
 ### Validasi
 
-Unit transform/ref/conflict tests, HTTP schema tests dan Scalar smoke, type-check/build.
+Unit merge/ref/conflict tests, HTTP schema tests dan Scalar smoke, type-check/build, serta frozen install.
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diuji.
+- `@repo/auth/server` menyediakan helper `generateAuthOpenAPISchema()` dan konfigurasi Better Auth memasang `openAPI({ disableDefaultReference: true })`. Bootstrap menghasilkan schema dari instance auth yang sama sebelum listen lalu menginjeksi hasilnya ke factory Elysia yang tetap sinkron.
+- Plugin `@elysia/openapi` menyusun route API; hook lokal Scalar hanya berjalan pada `/openapi/json` dan tidak mengubah kontrak Eden rute bisnis. Path/method allowlist auth sama dengan handler: `GET /ok`, `GET/POST /get-session`, `POST /sign-in/email`, dan `POST /sign-out`. Prefix `/api/auth` ditambahkan sekali, generator server tidak disalin, endpoint auth lain disaring, dan setiap operasi auth bertag `Better Auth` serta memiliki operation ID.
+- Operasi login/status eksplisit publik (`security: []`). Session/logout dan `/admin/session` memakai `betterAuthSessionCookie`; scheme mengikuti secure cookie `__Secure-` saat konfigurasi HTTPS. Tidak ada security global yang diwariskan oleh katalog.
+- Paths dan komponen digabung per kategori; benturan path, operation ID, dan nama schema menolak dokumen. Operasi serta `$ref` generator dipertahankan tanpa memutasi schema asal. Scalar adalah satu halaman utama; route referensi Better Auth dan route handler wildcard tidak tampil di schema.
+- `bun test apps/api/src/plugins/openapi.test.ts apps/api/src/app.test.ts` lulus: 4 test, 8 assertion. Uji membuktikan merge tanpa mutasi dan penolakan konflik path/komponen.
+- `bun run --cwd apps/api auth:openapi:proof` lulus: 2 test, 61 assertion. PostgreSQL URL dibatasi ke database test lokal `vertical_movie_app_auth_admin_test`; proof hanya membangun instance adapter dan tidak reset/migrasi database atau menjalankan query.
+- Integration proof memverifikasi `/openapi` dan `/openapi/json`, status OpenAPI `3.1.1`, root/admin/auth route aktif, signup/reference disabled tersembunyi dan tetap 404, security login/public/session/logout/admin, cookie secure HTTPS, operation ID unik, serta seluruh `$ref` lokal dapat diselesaikan. `GET /api/auth/ok` tetap memberi payload raw Better Auth `{ ok: true }`.
+- Auth runtime regression proof lulus 8 test/44 assertion; authorization proof lulus 4 test/29 assertion. Allowlist metode handler tetap sama dengan allowlist OpenAPI.
+- Frozen install, workspace `check-types`, full build, web lint, seluruh API unit suite (21 test/38 assertion), Prettier, dan `git diff --check` lulus. Task mendapat commit khusus setelah review perubahan.
 
 ### Blocker atau tindak lanjut
 
-Menunggu AUTH-004/007; verifikasi OpenAPI semantic version actual, bukan mengganti label versi saja.
+Tidak ada blocker. Better Auth dan dokumen gabungan terverifikasi memakai OpenAPI `3.1.1`.
 
 ## User story: AUTH-US-04 — Login dan dashboard pada satu origin
 

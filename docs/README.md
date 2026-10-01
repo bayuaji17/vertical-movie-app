@@ -35,7 +35,7 @@ Catat tanggal persetujuan dan pemilik keputusan di setiap dokumen. Pisahkan peri
 | `.husky/` dan `commitlint.config.cjs`                             | Pemeriksaan sebelum commit dan validasi pesan Conventional Commits.                                                                                                                                          |
 | `.agents/skills/`, `.commandcode/skills/`, dan `skills-lock.json` | Skill repo Elysia, Turborepo, dan shadcn beserta symlink agent dan metadata instalasinya, semuanya dikelola dari root.                                                                                       |
 
-Kedua app masih berupa starter produk. API menyediakan login/logout/session Better Auth, provisioning/reset admin melalui CLI, sesi admin terproteksi, dan root publik; endpoint domain lain, proteksi rute dashboard, dan integrasi auth web belum diimplementasikan. Catat keputusan final di sini dengan mengacu pada kode dan skrip yang benar-benar ada.
+Kedua app masih berupa starter produk. API menyediakan login/logout/session Better Auth, provisioning/reset admin melalui CLI, sesi admin terproteksi, root publik, dan Scalar gabungan pada `/openapi` serta `/openapi/json`; endpoint domain lain, proteksi rute dashboard, dan integrasi auth web belum diimplementasikan. Catat keputusan final di sini dengan mengacu pada kode dan skrip yang benar-benar ada.
 
 Eden Treaty dipilih pengguna pada 1 Oktober 2026 untuk konsumsi kontrak API Elysia oleh web. API mengekspor tipe `App` melalui entry point type-only `api/types`; client Eden berada di web. Instalasi SDK dan konsumsi kontrak oleh web belum diimplementasikan. Ikuti [API Development](API_DEVELOPMENT.md) untuk aturan inferensi, lifecycle, scope plugin, dan akses admin.
 
