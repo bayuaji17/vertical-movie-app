@@ -19,6 +19,7 @@
 ## Aturan implementasi
 
 - API Elysia adalah sumber kebenaran untuk validasi domain, otorisasi admin, status video, dan penerbitan. Web TanStack Start menyajikan interaksi dan tidak dapat mengesahkan transisi hanya dari state klien.
+- Eden Treaty dipilih pengguna pada 1 Oktober 2026 untuk kontrak API–web. API mengekspor tipe hasil komposisi Elysia; web mengimpor tipe saja dan memakai client Eden bersama TanStack Query. Ikuti [API Development](API_DEVELOPMENT.md) untuk lifecycle, scope plugin, dan kontrak error. Pemeriksaan akses tetap dilakukan server.
 - PostgreSQL menyimpan data terstruktur melalui Drizzle. Better Auth hanya melayani login admin; pengunjung tidak memerlukan akun. Pengaturan yang dapat diedit admin dipisahkan dari rahasia server.
 - Validasi berkas dilakukan sejak pemilihan file untuk memberi umpan balik cepat, lalu ditegakkan lagi oleh layanan yang menerima unggahan dan memproses media.
 - Simpan berkas video pada Cloudflare R2 atau layanan kompatibel S3, bukan di PostgreSQL. Database hanya menyimpan referensi objek, metadata, dan status. Provider final masih terbuka.

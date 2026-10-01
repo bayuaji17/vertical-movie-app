@@ -1,10 +1,10 @@
 # Draft Architecture — Vertical Movie App
 
-> Status: **Draft untuk ditinjau** · Diperbarui 30 September 2026 · Mengacu pada [PRD](PRD.md). Pilihan stack di bawah berasal dari pemilik proyek; rincian integrasi dan infrastruktur media masih rancangan.
+> Status: **Draft untuk ditinjau** · Diperbarui 1 Oktober 2026 · Mengacu pada [PRD](PRD.md). Pilihan stack di bawah berasal dari pemilik proyek, termasuk Eden Treaty yang ditetapkan pada 1 Oktober 2026; rincian integrasi dan infrastruktur media masih rancangan.
 
 ## Keadaan repo saat ini
 
-`apps/api` baru berisi Elysia dengan `GET /`. `apps/web` berisi halaman starter TanStack Start dengan Tailwind CSS, preset shadcn/ui, Button, dan demo `VerticalVideoPlayer` 9:16. Video.js React dan core versi `10.0.0-rc.4` telah dipasang melalui registry shadcn; skin Default dan kontrolnya menjadi kode sumber web yang dapat diedit. Demo saat ini memakai MP4 resmi Video.js; HLS dan media dari storage aplikasi belum diintegrasikan. Bun, Turborepo, TanStack Form, dan TanStack Query sudah tercantum dalam workspace. Better Auth telah dipasang di package bersama `packages/auth` (`@repo/auth`), dengan entry point server, React client, dan tipe; kedua app mendeklarasikan package ini sebagai dependensi workspace. Konfigurasi auth dan alur login belum diimplementasikan. PostgreSQL, Drizzle, dan integrasi object storage **belum dipasang atau diintegrasikan**. Worker, queue PostgreSQL, dan FFmpeg juga belum tersedia. Belum ada domain video, dashboard, katalog, atau alur pemutaran konten aplikasi.
+`apps/api` baru berisi Elysia dengan `GET /`. `apps/web` berisi halaman starter TanStack Start dengan Tailwind CSS, preset shadcn/ui, Button, dan demo `VerticalVideoPlayer` 9:16. Video.js React dan core versi `10.0.0-rc.4` telah dipasang melalui registry shadcn; skin Default dan kontrolnya menjadi kode sumber web yang dapat diedit. Demo saat ini memakai MP4 resmi Video.js; HLS dan media dari storage aplikasi belum diintegrasikan. Bun, Turborepo, TanStack Form, dan TanStack Query sudah tercantum dalam workspace. Better Auth telah dipasang di package bersama `packages/auth` (`@repo/auth`), dengan entry point server, React client, dan tipe; kedua app mendeklarasikan package ini sebagai dependensi workspace. Konfigurasi auth dan alur login belum diimplementasikan. Database PostgreSQL lokal `vertical_movie_app` sudah dibuat dan koneksi Bun SQL diverifikasi; tabel aplikasi serta integrasi Drizzle dan object storage belum tersedia. Eden Treaty dipilih, tetapi SDK/client dan ekspor kontrak belum diimplementasikan. Worker, queue PostgreSQL, dan FFmpeg juga belum tersedia. Belum ada domain video, dashboard, katalog, atau alur pemutaran konten aplikasi.
 
 ## Tech stack yang dipilih
 
@@ -12,6 +12,7 @@
 | --------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Runtime dan workspace | Bun, Turborepo                           | Menjalankan kedua app dan task workspace; prioritaskan API native Bun bila cocok dengan kebutuhan dan stack terpilih.                                             |
 | Backend               | ElysiaJS (`apps/api`)                    | API publik video, API admin, validasi, otorisasi, dan aturan publikasi.                                                                                           |
+| Kontrak/client API    | Eden Treaty                             | API mengekspor tipe kontrak Elysia; web mengonsumsi endpoint aplikasi dengan client bertipe. SDK dipasang di web saat integrasi.                                 |
 | Frontend              | TanStack Start (`apps/web`)              | Halaman tonton publik dan dashboard admin yang responsif.                                                                                                         |
 | Database              | PostgreSQL                               | Menyimpan metadata video, status, pengaturan sistem, dan data autentikasi.                                                                                        |
 | ORM dan migrasi       | Drizzle ORM, Drizzle Kit                 | Definisi skema, query, dan migrasi PostgreSQL di sisi API. Prioritas driver: integrasi Drizzle dengan `Bun.SQL`, setelah kompatibilitas diverifikasi.             |
@@ -32,8 +33,8 @@ Pilihan teknologi di tabel adalah keputusan pengguna; tabel ini tidak berarti se
 flowchart LR
   V[Pengunjung tanpa login] --> W[Web publik · TanStack Start]
   A[Admin tunggal] --> D[Dashboard · TanStack Start]
-  W --> P[API publik · Elysia]
-  D --> X[API admin · Elysia]
+  W -->|Eden Treaty| P[API publik · Elysia]
+  D -->|Eden Treaty| X[API admin · Elysia]
   X --> H[Better Auth]
   P --> R[Drizzle ORM]
   X -->|Data dan enqueue| R
@@ -52,6 +53,7 @@ flowchart LR
 - **Web publik:** menampilkan katalog video terbit dan pengalaman tonton mobile first. Pada desktop, pemutar vertikal tetap berproporsi dan ruang tambahan dapat menampung metadata serta navigasi. Video.js digunakan pada komponen player.
 - **Dashboard:** akses admin tunggal untuk video, status unggah/pemrosesan, publikasi, dan pengaturan yang disetujui. shadcn/ui menyediakan komponen, Tailwind CSS menyediakan styling, TanStack Form menangani interaksi formulir, dan TanStack Query mengelola data dari API.
 - **API Elysia:** sumber kebenaran untuk daftar/detail publik, operasi admin, validasi input, syarat publikasi, serta pemeriksaan sesi dan otorisasi. Kode domain tidak diduplikasi di TanStack Start.
+- **Eden Treaty:** web memakai tipe hasil komposisi Elysia melalui entry point type-only milik API. Factory aplikasi tidak memanggil `listen`; startup berada di entry point server. Method chaining, response schema, dan helper `status(...)` mempertahankan inferensi kontrak. HTTP tetap divalidasi dan diotorisasi server. Eden dipakai bersama TanStack Query untuk endpoint aplikasi; Better Auth memakai client auth tersendiri. Aturan lifecycle, scope plugin, macro admin, dan SSR ada di [API Development](API_DEVELOPMENT.md).
 - **Better Auth:** dependensi dimiliki `packages/auth`. Konfigurasi server akan diekspor melalui `@repo/auth/server`, client React melalui `@repo/auth/client`, dan tipe melalui `@repo/auth/types`. API memberikan database dan konfigurasi rahasia, sementara web memberikan URL API; client tidak mengimpor entry point server. Implementasi sesi admin masih direncanakan: provisioning dan pemulihan akun admin dilakukan melalui jalur terkendali; pendaftaran mandiri publik dinonaktifkan. Periksa sesi dan identitas admin pada setiap operasi privat, termasuk API yang dipanggil langsung tanpa dashboard.
 - **PostgreSQL + Drizzle:** menyimpan metadata dan status video, referensi aset, job transcode, pengaturan yang dapat diedit admin, serta tabel autentikasi yang diperlukan Better Auth. Prioritaskan driver `drizzle-orm/bun-sql` yang menggunakan `Bun.SQL`, selama cocok dengan versi Bun, Drizzle, dan adapter Better Auth yang akhirnya dipasang. Berkas video besar berada di object storage, bukan PostgreSQL.
 - **Object storage:** gunakan Cloudflare R2 atau layanan kompatibel S3. Akses server melalui `Bun.S3Client` menjadi pilihan awal untuk operasi yang didukung. Simpan endpoint, bucket, dan kredensial di konfigurasi server. Perbedaan fitur antarprovider dan versi Bun harus diuji sebelum implementasi diandalkan.
@@ -107,6 +109,7 @@ Verifikasi `drizzle-orm/bun-sql` dan adapter Better Auth pada versi yang dipasan
 ## Referensi teknis
 
 - [Elysia documentation index](https://elysiajs.com/llms.txt) dan [Better Auth–Elysia integration](https://better-auth.com/docs/integrations/elysia)
+- [Eden installation](https://elysiajs.com/eden/installation), [Eden Treaty](https://elysiajs.com/eden/treaty/overview), [Elysia lifecycle](https://elysiajs.com/essential/life-cycle), dan [plugin scope](https://elysiajs.com/essential/plugin)
 - [Drizzle PostgreSQL guide](https://orm.drizzle.team/docs/get-started/postgresql-new) dan [Better Auth Drizzle adapter](https://better-auth.com/docs/adapters/drizzle)
 - [shadcn/ui for TanStack Start](https://ui.shadcn.com/docs/installation/tanstack)
 - [TanStack Form](https://tanstack.com/form/latest) dan [TanStack Query](https://tanstack.com/query/latest/docs/framework/react)

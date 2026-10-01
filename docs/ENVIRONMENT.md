@@ -29,6 +29,8 @@ Perintah `cp` cukup dijalankan sekali; jika `.env` sudah ada, tambahkan variabel
 
 Nilai database dalam sampel hanya contoh lokal. Menyalin env belum membuat database, tabel, bucket, akun admin, atau worker. Queue menggunakan PostgreSQL yang sama; tidak memerlukan Redis. Konfigurasi lease, retry, dan konkurensi ditentukan bersama task worker saat development.
 
+Pada 1 Oktober 2026, database development `vertical_movie_app` dibuat pada PostgreSQL lokal di `localhost:5433` dan koneksi dari `apps/api/.env` diverifikasi memakai Bun SQL. Kredensial sebenarnya hanya disimpan pada env lokal yang diabaikan Git. Sampel tetap menggunakan koneksi generik; sesuaikan `DATABASE_URL` pada tiap lingkungan. Database masih tanpa tabel aplikasi; integrasi Drizzle, migrasi, dan adapter auth dikerjakan melalui task development.
+
 Untuk R2, isi endpoint `https://<account-id>.r2.cloudflarestorage.com` dan region `auto`. Sesuaikan region/endpoint jika memakai provider S3 lain. Nama `S3_*` mengikuti variabel native client Bun; integrasi dan kompatibilitas operasinya tetap perlu diverifikasi saat implementasi.
 
 Generate secret baru di terminal sendiri dengan Bun, lalu masukkan hasilnya ke `apps/api/.env`:

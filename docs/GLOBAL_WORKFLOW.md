@@ -64,6 +64,7 @@ Husky menjalankan lint dan pemeriksaan tipe sebelum commit. Commitlint memvalida
 
 - Kebutuhan `PRD-xx` dan aturan `GR-xx` yang terkait jelas pada deskripsi perubahan.
 - API memeriksa identitas admin pada operasi privat, input, dan status yang relevan; akses katalog/tonton publik tidak meminta login. Web menampilkan hasil berhasil dan gagal.
+- Perubahan aturan bisnis/validasi/lifecycle API menyertakan test perilaku yang relevan memakai native `bun:test`; jalankan suite yang terdampak dan catat hasil pada task. Ikuti [standar unit test API](API_DEVELOPMENT.md#unit-test-api--bun-native); suite integrasi menggunakan environment test terpisah.
 - Bila mengubah data, periksa skema dan migrasi Drizzle, termasuk dampak pada data autentikasi Better Auth dan pengaturan situs.
 - Untuk perubahan database atau storage, coba API native Bun yang relevan pada versi repo dan uji kompatibilitasnya dengan Drizzle, Better Auth, serta provider S3 yang dipilih.
 - Untuk perubahan media, uji alur berkas tidak valid, izin unggah kedaluwarsa, unggah terputus, job ganda, worker mati saat FFmpeg berjalan, lease kedaluwarsa, retry, keluaran gagal diunggah, dan syarat terbit yang tidak terpenuhi sesuai ruang lingkupnya. Periksa juga akses video setelah publikasi ditarik sesuai kebijakan distribusi yang disetujui.

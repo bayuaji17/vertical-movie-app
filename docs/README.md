@@ -1,6 +1,6 @@
 # Dokumentasi proyek
 
-Ini adalah satu-satunya direktori dokumentasi proyek. `README.md` di root tetap menjadi panduan mulai cepat; file ini menjadi indeks dokumen produk dan teknik. Dokumen di bawah masih berupa draft untuk ditinjau, bukan deskripsi fitur yang sudah diimplementasikan.
+Ini adalah satu-satunya direktori dokumentasi proyek. `README.md` di root tetap menjadi panduan mulai cepat; file ini menjadi indeks dokumen produk dan teknik. Dokumen pada bagian draft memuat rancangan untuk ditinjau. Panduan development mencatat aturan kerja dan membedakan konfigurasi yang sudah berjalan dari integrasi yang masih direncanakan.
 
 ## Dokumen draft
 
@@ -19,6 +19,7 @@ Catat tanggal persetujuan dan pemilik keputusan di setiap dokumen. Pisahkan peri
 - [Global Workflow](GLOBAL_WORKFLOW.md): keputusan Agile dan pembagian modul → user story → task kecil disetujui pengguna pada 1 Oktober 2026.
 - [Template Task](TASK_TEMPLATE.md): format backlog per modul, acceptance criteria, dependensi, dan bukti validasi.
 - [Environment](ENVIRONMENT.md): setup env API/web, pemisahan konfigurasi publik/server, dan status variabel integrasi.
+- [API Development](API_DEVELOPMENT.md): aturan kode `apps/api`, struktur modul, kontrak Eden Treaty, lifecycle/scope Elysia, database, autentikasi, storage, queue, worker, unit test native Bun, dan validasi perubahan.
 
 ## Struktur saat ini
 
@@ -32,6 +33,8 @@ Catat tanggal persetujuan dan pemilik keputusan di setiap dokumen. Pisahkan peri
 | `.agents/skills/`, `.commandcode/skills/`, dan `skills-lock.json` | Skill repo Elysia, Turborepo, dan shadcn beserta symlink agent dan metadata instalasinya, semuanya dikelola dari root.                 |
 
 Kedua app saat ini masih berupa starter. Model domain video, kontrak API, dan integrasi web ke API belum diimplementasikan. Catat keputusan final di sini dengan mengacu pada kode dan skrip yang benar-benar ada.
+
+Eden Treaty dipilih pengguna pada 1 Oktober 2026 untuk konsumsi kontrak API Elysia oleh web. API akan mengekspor tipe `App` melalui entry point type-only; client Eden berada di web. Instalasi SDK dan ekspor tipe belum diimplementasikan. Ikuti [API Development](API_DEVELOPMENT.md) untuk aturan inferensi, lifecycle, scope plugin, dan akses admin.
 
 Konfigurasi shadcn dan komponen UI tetap berada di `apps/web`. Video.js tersedia melalui plugin Codex yang dipasang pada lingkungan pengguna; ikuti aturan penggunaannya di `AGENTS.md` saat mengerjakan video atau audio.
 
