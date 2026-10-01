@@ -437,7 +437,7 @@ Konten dashboard dan logout berada di AUTH-012. Jalankan checklist browser manua
 
 ## Task: AUTH-012 — Proteksi dashboard dan logout
 
-- Status: Backlog
+- Status: Done — guard SSR/browser dan logout
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P0 — kedua belas
 - Referensi: AUTH-US-04, PRD-01/07, GR-01/02, AC-05/06
@@ -450,10 +450,10 @@ Layout admin umum, login di luar pathless authenticated guard, dashboard minimum
 
 ### Acceptance criteria
 
-- [ ] Direct URL, refresh dan client navigation tanpa sesi menuju login tanpa flash dashboard.
-- [ ] Sesi sah menampilkan dashboard; non-admin ditolak; dependency error memiliki retry dan tidak dianggap login kosong.
-- [ ] Logout sukses mencabut sesi, membersihkan query/router state dan kembali ke login; kegagalan logout ditampilkan dengan benar.
-- [ ] Expiry/recovery/session revocation ditangani pada akses berikutnya; homepage publik tetap terbuka.
+- [x] Direct URL, refresh dan client navigation tanpa sesi menuju login tanpa flash dashboard.
+- [x] Sesi sah menampilkan dashboard; non-admin ditolak; dependency error memiliki retry dan tidak dianggap login kosong.
+- [x] Logout sukses mencabut sesi, membersihkan query/router state dan kembali ke login; kegagalan logout ditampilkan dengan benar.
+- [x] Expiry/recovery/session revocation ditangani pada akses berikutnya; homepage publik tetap terbuka.
 
 ### Validasi
 
@@ -461,11 +461,16 @@ Browser manual direct/refresh/nav/expiry/logout/recovery lintas tab/back button;
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diuji.
+- `admin.tsx` membungkus route admin dengan `Cache-Control: private, no-store`; `/admin/login` tetap sibling publik terhadap `admin._authenticated.tsx`. Pathless guard memeriksa API melalui query sesi dengan `retry: false` sebelum dashboard dapat render; state `unauthenticated` menghapus cache admin lalu redirect sambil mempertahankan path lokal, `forbidden` menolak akses, dan `unavailable` menahan dashboard serta menyediakan retry.
+- Dashboard menampilkan DTO admin yang sudah di-whitelist dan expiry ISO UTC. Logout memanggil Better Auth tanpa retry; hanya respons sukses yang membatalkan/menghapus query `auth`/`admin`, menginvalidasi router, lalu mengganti route ke login. Error logout tetap terlihat dan tidak mengklaim sesi tercabut. Query publik tidak ikut dihapus.
+- `bun run --cwd apps/web auth:guard:proof` lulus: 1 test/3 assertion untuk pembersihan cache privat sambil mempertahankan data publik. `auth:login:proof` lulus 5 test/22 assertion. Workspace type-check, lint dan build lulus.
+- Nitro/Bun SSR memakai API fixture lokal untuk status sesi: tanpa cookie, `/admin?tab=videos` mengembalikan 307 ke login dengan target terenkripsi lokal dan `Cache-Control: private, no-store`; cookie admin merender identitas/dashboard dengan `no-store`; 403 menampilkan akses ditolak; 503 menampilkan retry tanpa identitas/dashboard; `/` publik tetap HTTP 200.
+- Prettier check pada seluruh file AUTH-012 lulus. `bun run --cwd apps/web check` masih gagal pada lima file repo yang tidak diubah task ini: `.cta.json`, `prettier.config.js`, `README.md`, `src/components/ui/button.tsx`, dan `src/lib/utils.ts`.
+- Browser manual lintas tab/back button, interaksi tombol logout, serta koneksi ke PostgreSQL aktual belum dijalankan pada AUTH-012; browser runner tidak tersedia. Server-side route guards dan callback logout sudah tercakup oleh code/type checks, cache proof, serta SSR fixture smoke. Verifikasi alur terhadap Better Auth/PostgreSQL dijadwalkan pada AUTH-013.
 
 ### Blocker atau tindak lanjut
 
-Menunggu AUTH-011; UI tidak menggantikan guard API.
+Guard endpoint domain API tetap menjadi otoritas. AUTH-013 menyelesaikan integrated acceptance dan runbook; checklist browser manual tetap perlu dijalankan pada lingkungan browser.
 
 ## User story: AUTH-US-05 — Bukti selesai dan operasi yang dapat diulang
 

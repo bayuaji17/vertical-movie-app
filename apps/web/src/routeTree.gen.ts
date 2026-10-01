@@ -10,7 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AdminAuthenticatedRouteImport } from './routes/admin._authenticated'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminAuthenticatedIndexRouteImport } from './routes/admin._authenticated.index'
 import { Route as ApiAdminSessionRouteImport } from './routes/api/admin/session'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
@@ -19,10 +22,24 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminLoginRoute = AdminLoginRouteImport.update({
-  id: '/admin/login',
-  path: '/admin/login',
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAuthenticatedRoute = AdminAuthenticatedRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAuthenticatedIndexRoute = AdminAuthenticatedIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminAuthenticatedRoute,
 } as any)
 const ApiAdminSessionRoute = ApiAdminSessionRouteImport.update({
   id: '/api/admin/session',
@@ -37,12 +54,15 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/api/admin/session': typeof ApiAdminSessionRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/admin/': typeof AdminAuthenticatedIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminAuthenticatedIndexRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/admin/session': typeof ApiAdminSessionRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -50,21 +70,38 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/admin/_authenticated': typeof AdminAuthenticatedRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/api/admin/session': typeof ApiAdminSessionRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/admin/_authenticated/': typeof AdminAuthenticatedIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin/login' | '/api/admin/session' | '/api/auth/$'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/admin/login'
+    | '/api/admin/session'
+    | '/api/auth/$'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin/login' | '/api/admin/session' | '/api/auth/$'
-  id: '__root__' | '/' | '/admin/login' | '/api/admin/session' | '/api/auth/$'
+  to: '/' | '/admin' | '/admin/login' | '/api/admin/session' | '/api/auth/$'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/admin/_authenticated'
+    | '/admin/login'
+    | '/api/admin/session'
+    | '/api/auth/$'
+    | '/admin/_authenticated/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminLoginRoute: typeof AdminLoginRoute
+  AdminRoute: typeof AdminRouteWithChildren
   ApiAdminSessionRoute: typeof ApiAdminSessionRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
@@ -78,12 +115,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/_authenticated': {
+      id: '/admin/_authenticated'
+      path: ''
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminAuthenticatedRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/login': {
       id: '/admin/login'
-      path: '/admin/login'
+      path: '/login'
       fullPath: '/admin/login'
       preLoaderRoute: typeof AdminLoginRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/_authenticated/': {
+      id: '/admin/_authenticated/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminAuthenticatedIndexRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
     }
     '/api/admin/session': {
       id: '/api/admin/session'
@@ -102,9 +160,32 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminAuthenticatedRouteChildren {
+  AdminAuthenticatedIndexRoute: typeof AdminAuthenticatedIndexRoute
+}
+
+const AdminAuthenticatedRouteChildren: AdminAuthenticatedRouteChildren = {
+  AdminAuthenticatedIndexRoute: AdminAuthenticatedIndexRoute,
+}
+
+const AdminAuthenticatedRouteWithChildren =
+  AdminAuthenticatedRoute._addFileChildren(AdminAuthenticatedRouteChildren)
+
+interface AdminRouteChildren {
+  AdminAuthenticatedRoute: typeof AdminAuthenticatedRouteWithChildren
+  AdminLoginRoute: typeof AdminLoginRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAuthenticatedRoute: AdminAuthenticatedRouteWithChildren,
+  AdminLoginRoute: AdminLoginRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminLoginRoute: AdminLoginRoute,
+  AdminRoute: AdminRouteWithChildren,
   ApiAdminSessionRoute: ApiAdminSessionRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }

@@ -84,3 +84,14 @@ export function signInErrorMessage(error: unknown): string {
   }
   return 'Login belum dapat diproses. Periksa data dan coba lagi.'
 }
+
+export function logoutErrorMessage(error: unknown): string {
+  const status = statusFromError(error)
+  if (status === 429) {
+    return 'Terlalu banyak percobaan. Tunggu sebentar, lalu coba logout lagi.'
+  }
+  if (status === undefined || status >= 500) {
+    return 'Layanan autentikasi tidak dapat dihubungi. Sesi belum dapat dipastikan berakhir.'
+  }
+  return 'Sesi belum dapat ditutup. Coba lagi.'
+}

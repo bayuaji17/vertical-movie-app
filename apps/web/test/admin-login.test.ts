@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'bun:test'
 
 import {
+  logoutErrorMessage,
   normalizeLoginEmail,
   signInErrorMessage,
   validateAdminRedirect,
@@ -53,5 +54,12 @@ describe('admin login input and return target', () => {
     expect(
       signInErrorMessage(new TypeError('private network detail')),
     ).toContain('tidak dapat dihubungi')
+  })
+
+  it('keeps logout failures safe and does not imply the session was revoked', () => {
+    expect(
+      logoutErrorMessage({ status: 503, message: 'secret details' }),
+    ).toContain('Sesi belum dapat dipastikan berakhir')
+    expect(logoutErrorMessage({ status: 429 })).toContain('Terlalu banyak')
   })
 })

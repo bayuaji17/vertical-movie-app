@@ -4,6 +4,7 @@ import { AdminLoginForm } from '#/components/auth/login-form'
 import { validateAdminRedirect } from '#/lib/auth/login'
 
 export const Route = createFileRoute('/admin/login')({
+  headers: () => ({ 'Cache-Control': 'private, no-store' }),
   validateSearch: (search: Record<string, unknown>) => ({
     redirect: validateAdminRedirect(search.redirect),
   }),
