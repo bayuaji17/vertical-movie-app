@@ -9,6 +9,8 @@
     "auth:adapter:proof": "bun test ./test/integration/auth-adapter-proof.test.ts",
     "auth:schema:proof": "bun test ./test/integration/auth-schema-proof.test.ts",
     "auth:runtime:proof": "bun test ./test/integration/auth-runtime-proof.test.ts",
+    "auth:admin:proof": "bun test ./test/integration/auth-admin-proof.test.ts",
+    "admin:provision": "bun run src/modules/auth/provision-cli.ts",
     "db:migrate": "bun run src/db/migrate.ts",
     "dev": "bun run --watch src/index.ts",
     "build": "bun build src/index.ts --target=bun --outdir=dist",

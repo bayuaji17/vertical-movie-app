@@ -2,7 +2,7 @@
 
 ## Plan Metadata
 
-- Status: **executing**; AUTH-001 sampai AUTH-004 selesai, setiap task dikomit setelah acceptance dan validasinya lulus.
+- Status: **executing**; AUTH-001 sampai AUTH-005 selesai, setiap task dikomit setelah acceptance dan validasinya lulus.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `main`.
 - Base SHA: `bff1ced88f7ade37d454370ccf7d95a47cbf3aea`.
@@ -25,14 +25,14 @@ Tidak termasuk: registrasi publik, akun penonton/kreator, OAuth, MFA/passkey, la
 
 ## Current Behavior
 
-Pada planning base SHA, API hanya `GET /` dan langsung membuka port; belum ada Drizzle, auth route, provisioning, atau test API. Implementasi branch kini memisahkan app/bootstrap, memvalidasi env dan membuat Bun SQL/Drizzle client, serta menutupnya saat shutdown. Schema auth/admin dan migrasi eksplisit dibuat AUTH-003 serta diuji hanya pada database PostgreSQL test; database development belum dimigrasi. AUTH-004 memasang login/logout/session Better Auth dengan kebijakan satu admin; CLI provisioning, gateway, dan UI auth masih belum dibuat. Lihat [context](REPOSITORY_CONTEXT.md) untuk baseline source dan batas pemeriksaan.
+Pada planning base SHA, API hanya `GET /` dan langsung membuka port; belum ada Drizzle, auth route, provisioning, atau test API. Implementasi branch kini memisahkan app/bootstrap, memvalidasi env dan membuat Bun SQL/Drizzle client, serta menutupnya saat shutdown. Schema auth/admin dan migrasi eksplisit dibuat AUTH-003 serta diuji hanya pada database PostgreSQL test; database development belum dimigrasi. AUTH-004 memasang login/logout/session Better Auth dengan kebijakan satu admin, dan AUTH-005 menyediakan provisioning CLI transaksi tunggal. CLI reset password, gateway, dan UI auth masih belum dibuat. Lihat [context](REPOSITORY_CONTEXT.md) untuk baseline source dan batas pemeriksaan.
 
 ## Desired Behavior
 
 ### Identitas dan lifecycle admin
 
 - Tabel aplikasi `admin_identity`: singleton key dengan constraint nilai tetap, user ID unik dan FK ke tabel user Better Auth. Hanya satu identitas berhak menjadi admin.
-- `admin:provision` membaca email/nama dan password dari input terkontrol; password melalui prompt tersembunyi atau stdin khusus, bukan argumen CLI. Menggunakan public password hasher Better Auth yang sama dengan konfigurasi server.
+- `admin:provision` membaca email sebagai argumen dan password dari input terkontrol; password melalui prompt tersembunyi atau stdin khusus, bukan argumen CLI. Menggunakan public password hasher Better Auth yang sama dengan konfigurasi server.
 - Provisioning membuat user, account `providerId: credential`/`accountId: userId`, dan klaim singleton dalam satu transaksi. Hash dilakukan sebelum transaksi. Pemanggilan ulang untuk identitas sama adalah no-op, tidak mengganti password; identitas berbeda ditolak. Provisioning bersamaan tidak meninggalkan akun/session parsial. Tidak membuat sesi login.
 - `admin:reset-password` mencari user melalui singleton, mengganti hash dan mencabut semua sesi dalam satu transaksi. Tidak menerima user ID arbitrer dan tidak mengubah identitas admin. Sesudahnya password lama dan cookie lama ditolak.
 - HTTP instance selalu menonaktifkan signup. CLI tidak menyalakan signup pada HTTP instance dan tidak menggunakan API privat `$context`/internal adapter Better Auth. Mapping credential harus diuji terhadap source/generator versi yang dipasang.
@@ -146,7 +146,7 @@ Detail scope, acceptance criteria, validasi, owner, status dan bukti setiap step
 | AUTH-002 | **Done** — konfigurasi, lifecycle, dan boundary package | AUTH-001           | env, db client, app/types, bootstrap, auth exports; native test script | Validasi secret/origin; pool diinjeksi; type-only export                 | Unit env/lifecycle, type-check/build, startup lokal; factory terpisah dari listen                        |
 | AUTH-003 | **Done** — schema auth/admin dan migrasi eksplisit      | AUTH-002           | db/schema, drizzle config/migrations, migrate script                   | Tabel auth/rate-limit, singleton dengan FK/constraint                    | Lulus: fresh/re-run, adapter pakai schema sama, constraint/rollback DB test, migrasi tidak mencetak URL  |
 | AUTH-004 | **Done** — handler auth aman dan limiter                | AUTH-003           | server factory, auth module, errors                                    | Signup disabled; policy session, cookie/origin, rate limit; public route | Lulus HTTP/DB: login salah/benar, disabled endpoints, Origin, 429, logout (8 test/44 assertion)          |
-| AUTH-005 | Provisioning satu admin                                 | AUTH-004           | service/repository, provision CLI, exported hasher                     | Credential mapping actual; transaksi singleton; stdin rahasia            | Retry no-op, konkurensi, failed write rollback, login hasil provision                                    |
+| AUTH-005 | **Done** — provisioning satu admin                      | AUTH-004           | auth admin service, provision CLI, public hasher, Drizzle schema       | Credential mapping actual; transaksi singleton; stdin rahasia            | Lulus DB/CLI: retry no-op, konkurensi, rollback, login hasil provision (6 test/26 assertion)             |
 | AUTH-006 | Recovery password mencabut sesi                         | AUTH-005           | reset CLI, service/repository                                          | Password update + revoke satu transaksi; singleton tetap                 | Password/cookie lama gagal, password baru berhasil, rollback tidak parsial                               |
 | AUTH-007 | Guard admin dan endpoint typed                          | AUTH-004, AUTH-005 | admin plugin, auth DTO/service/controller                              | 401/403/503; ID cocok; tidak bocor guard ke public                       | app.handle; service tulis tidak dipanggil saat gagal; schema/inferensi DTO                               |
 | AUTH-008 | Scalar gabungan aktual                                  | AUTH-004, AUTH-007 | OpenAPI plugin/helper, bootstrap                                       | Paths/components/ref/security; hide disabled endpoints                   | Schema merge conflict/ref tests, `/openapi/json` dan UI smoke                                            |
@@ -267,5 +267,7 @@ AUTH-002 — `Done`, commit `85c379d`: env tervalidasi tanpa membocorkan nilai s
 AUTH-003 — `Done`: generator Better Auth membuat enam tabel model termasuk limiter database; `admin_identity` menegakkan key `primary`, FK user, dan singleton. SQL migration dijalankan fresh dan rerun pada database lokal khusus test; adapter menggunakan schema hasil generator, constraint, dan rollback teruji. Script eksplisit memakai Bun SQL, cukup membaca DATABASE_URL, dan meredaksi kegagalan. Detail bukti dan command ada di backlog; task mendapat commit tersendiri setelah gates.
 
 AUTH-004 — `Done`: login/logout/session Better Auth aktif dengan signup/recovery dan operasi akun lain disabled; session hanya dibuat bagi user pada `admin_identity`, berumur tetap 24 jam, tanpa cookie cache atau refresh. Origin web diperiksa pada setiap request dengan Origin; cookie HTTPS Secure/HttpOnly/SameSite=Lax dan host-only; limiter database menolak percobaan keenam per menit tanpa mempercayai header IP dari klien. HTTP/DB runtime proof pada database khusus test lulus 8 test/44 assertion; fixture admin hanya membuktikan kebijakan sesi, bukan provisioning. Detail gates serta batas bucket rate limit ada di backlog.
+
+AUTH-005 — `Done`: user, credential account, dan `admin_identity` dibuat atomik dalam satu transaksi dengan public Better Auth hasher. Advisory lock menjamin hanya satu proses/provisioner dapat memilih singleton; retry email yang sama tidak mengganti password dan identitas lain ditolak. CLI membaca password tanpa echo lewat TTY atau stdin; local PostgreSQL proof lulus 6 test/26 assertion. Gunakan `bun run --cwd apps/api admin:provision -- <email>` agar prompt interaktif tetap mendapat stdin pada Bun 1.4.2. Database development tidak dipakai.
 
 Validasi context dokumen sebelum eksekusi: Prettier lulus pada empat dokumen; pemeriksa Bun memvalidasi 24 tautan lokal, 13 task contract, dependensi DAG dan acceptance AC-01..AC-10.

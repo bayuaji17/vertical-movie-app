@@ -4,7 +4,7 @@
 
 Admin tunggal dapat login email/password, menggunakan dashboard yang dilindungi, logout, dan memulihkan password melalui CLI. Pengunjung tetap mengakses halaman publik tanpa login. Referensi: PRD-01, PRD-07, GR-01, GR-02; [Architecture](../ARCHITECTURE.md), [API Development](../API_DEVELOPMENT.md), dan [rencana lengkap](../IMPLEMENTATION_PLAN.md).
 
-Scope email/password + CLI provision/recovery + satu origin disetujui pengguna pada **1 Oktober 2026**. AUTH-001 dan AUTH-002 selesai; task dependen tetap `Backlog` sampai prerequisite lulus. Semua task menggunakan owner **pengembang/agent pelaksana**, prioritas wajib berurutan, dan bukti aktual saat dikerjakan. Task ini tidak menetapkan sprint atau estimasi waktu kalender.
+Scope email/password + CLI provision/recovery + satu origin disetujui pengguna pada **1 Oktober 2026**. Status tiap task dan dependensinya dicatat di bawah; task tetap `Backlog` sampai prerequisite lulus. Semua task menggunakan owner **pengembang/agent pelaksana**, prioritas wajib berurutan, dan bukti aktual saat dikerjakan. Task ini tidak menetapkan sprint atau estimasi waktu kalender.
 
 ## User story: AUTH-US-01 — Fondasi autentikasi persisten
 
@@ -169,7 +169,7 @@ Sebagai operator, saya ingin membuat satu admin dan memulihkan password lewat CL
 
 ## Task: AUTH-005 — Provision admin tunggal melalui CLI
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P0 — kelima
 - Referensi: AUTH-US-02, PRD-01, GR-01, AC-01
@@ -182,22 +182,28 @@ Service/repository API membuat user, credential account dan singleton dalam satu
 
 ### Acceptance criteria
 
-- [ ] Provision pertama bisa login lewat endpoint nyata.
-- [ ] Retry identitas sama no-op tanpa mengganti password; identitas lain ditolak.
-- [ ] Provision bersamaan menghasilkan satu admin tanpa user/account parsial.
-- [ ] Failure injection rollback seluruh row; password/token/connection string tidak tercetak.
+- [x] Provision pertama bisa login lewat endpoint nyata.
+- [x] Retry identitas sama no-op tanpa mengganti password; identitas lain ditolak.
+- [x] Provision bersamaan menghasilkan satu admin tanpa user/account parsial.
+- [x] Failure injection rollback seluruh row; password/token/connection string tidak tercetak.
 
 ### Validasi
 
-Unit orchestration dan DB integration concurrency/rollback/retry/login. Command target `bun run --filter=api admin:provision`; buktikan cwd/env script actual.
+Unit orchestration dan DB integration concurrency/rollback/retry/login. Gunakan command `bun run --cwd apps/api admin:provision -- <admin-email>` dari root agar prompt interaktif dan stdin tersembunyi diteruskan; password tidak menjadi argumen.
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diuji.
+- Service memvalidasi/menormalisasi email, menolak password di luar panjang login 12–128, menghitung hash memakai `hashPassword` publik Better Auth sebelum transaksi, lalu membuat user, account provider `credential`, dan singleton dalam satu transaksi Drizzle.
+- Advisory transaction lock menyerialisasi proses provisioning bersamaan; retry email yang sama no-op dan password tersimpan tidak berubah, sementara identitas lain atau user email yang sudah ada ditolak. Provisioning tidak membuat sesi.
+- CLI `apps/api/src/modules/auth/provision-cli.ts` mengambil email sebagai argumen biasa dan password tanpa echo dari terminal atau satu baris stdin. Output/error tidak menampilkan password, hash, token, URL database, atau kredensial. Script menutup client pada semua hasil transaksi.
+- `bun run --cwd apps/api auth:admin:proof` lulus pada database khusus `vertical_movie_app_auth_admin_test`: 6 test, 26 assertion. Proof mencakup login endpoint nyata, retry password tidak berubah, penolakan identitas kedua, race konkurensi (hanya satu user/account/admin), trigger failure yang me-rollback seluruh row, serta subprocess CLI dari stdin yang tidak membocorkan password/URL.
+- Smoke interaktif via `bun run --cwd apps/api admin:provision -- <email>` mengembalikan no-op dengan password baru dan membuktikan input terminal tidak tampil. Jangan gunakan `--filter=api` untuk command interaktif pada Bun 1.4.2: smoke workspace filter tidak meneruskan stdin ke proses CLI.
+- `createDatabase` kini memasukkan schema Drizzle supaya service dan client transaksi API memakai tipe schema auth yang sama. Database development tetap tidak dimigrasikan atau diprovision.
+- `bun install --frozen-lockfile`, API unit suite, workspace type-check/build/lint, Prettier, dan `git diff --check` dijalankan sebelum commit khusus AUTH-005.
 
 ### Blocker atau tindak lanjut
 
-Menunggu AUTH-004 dan credential schema actual; recovery hanya AUTH-006.
+Tidak ada blocker. Reset password dan pencabutan sesi tetap AUTH-006.
 
 ## Task: AUTH-006 — Reset password dan cabut seluruh sesi
 
