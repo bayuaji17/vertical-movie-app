@@ -6,7 +6,7 @@
 
 API menggunakan TypeScript strict, Elysia, dan Bun sesuai versi root `package.json`. API memiliki logika domain dan akses data aplikasi. **Eden Treaty dipilih pengguna pada 1 Oktober 2026** untuk konsumsi kontrak Elysia oleh web. Web tidak menjalankan ulang aturan publikasi atau otorisasi sebagai pengganti validasi server.
 
-Fondasi API memiliki `src/app.ts` untuk factory Elysia tanpa listen, `src/config/env.ts` untuk validasi konfigurasi, `src/db/client.ts` untuk factory Bun SQL/Drizzle, dan bootstrap dengan penutupan resource. Route aktif mencakup `GET /` publik dan handler Better Auth di `/api/auth/*`; auth hanya mengizinkan status, login, logout, dan pembacaan sesi, dengan sesi admin dan Origin diperiksa di server. Schema Better Auth/admin serta migrasi eksplisit diuji di PostgreSQL khusus. Dependensi Better Auth tetap dimiliki `packages/auth`; storage dan worker belum dipasang. Ekspor `api/types` tersedia; Eden client dan konsumsinya oleh web belum diimplementasikan.
+Fondasi API memiliki `src/app.ts` untuk factory Elysia tanpa listen, `src/config/env.ts` untuk validasi konfigurasi, `src/db/client.ts` untuk factory Bun SQL/Drizzle, dan bootstrap dengan penutupan resource. Route aktif mencakup `GET /` publik, handler Better Auth di `/api/auth/*`, dan `GET /admin/session`; macro `requireAdmin` memeriksa sesi database serta singleton admin pada setiap rute privat. Auth hanya mengizinkan status, login, logout, dan pembacaan sesi serta memeriksa Origin di server. Schema Better Auth/admin serta migrasi eksplisit diuji di PostgreSQL khusus. Dependensi Better Auth tetap dimiliki `packages/auth`; storage dan worker belum dipasang. Ekspor `api/types` tersedia; Eden client dan konsumsinya oleh web belum diimplementasikan.
 
 Instruksi agent tetap berada di [AGENTS.md](../AGENTS.md). Ikuti [Global Workflow](GLOBAL_WORKFLOW.md), [Template Task](TASK_TEMPLATE.md), dan [Environment](ENVIRONMENT.md). Kontrak produk yang belum disetujui di [Architecture](ARCHITECTURE.md) tetap berupa rancangan.
 
@@ -22,7 +22,11 @@ apps/api/
 │   │   └── env.ts                # Pembacaan dan validasi konfigurasi server
 │   ├── modules/
 │   │   ├── auth/
-│   │   │   └── index.ts          # Mount handler Better Auth dari @repo/auth/server
+│   │   │   ├── index.ts          # Mount handler Better Auth dari @repo/auth/server
+│   │   │   └── admin/
+│   │   │       ├── guard.ts      # Macro requireAdmin untuk route privat
+│   │   │       ├── model.ts      # DTO sesi dan error auth admin
+│   │   │       └── index.ts      # GET /admin/session
 │   │   ├── videos/
 │   │   │   ├── index.ts          # Komposisi rute publik dan admin
 │   │   │   ├── public.ts         # Baca video terbit tanpa login
@@ -35,7 +39,7 @@ apps/api/
 │   │   ├── media/                # Unggah dan aset; pola file sama sesuai kebutuhan
 │   │   └── settings/             # Pengaturan yang boleh diubah admin
 │   ├── plugins/
-│   │   ├── admin.ts              # Pemeriksaan sesi dan identitas admin
+│   │   ├── admin.ts              # Guard lintas modul bila domain admin memerlukannya
 │   │   ├── errors.ts             # Pemetaan error HTTP dan request ID
 │   │   ├── openapi.ts            # Komposisi dokumentasi Scalar dan schema auth
 │   │   └── logger.ts             # Logging request dengan redaksi rahasia

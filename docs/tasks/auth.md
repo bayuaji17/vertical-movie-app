@@ -161,7 +161,7 @@ HTTP `app.handle` dan DB test: cookie flags, disabled endpoints, wrong credentia
 
 ### Blocker atau tindak lanjut
 
-Tidak ada blocker. Tidak ada admin production/local development yang diprovision task ini; provisioning aktual tetap AUTH-005 dan DTO/guard privat tetap AUTH-007.
+Tidak ada blocker. Task ini tidak memprovision admin production/local development; provisioning dilakukan AUTH-005 dan DTO/guard privat diselesaikan AUTH-007.
 
 ## User story: AUTH-US-02 — Provisioning dan pemulihan terkendali
 
@@ -203,7 +203,7 @@ Unit orchestration dan DB integration concurrency/rollback/retry/login. Gunakan 
 
 ### Blocker atau tindak lanjut
 
-Tidak ada blocker. Reset password dan pencabutan sesi tetap AUTH-006.
+Tidak ada blocker. Reset password dan pencabutan sesi diselesaikan AUTH-006.
 
 ## Task: AUTH-006 — Reset password dan cabut seluruh sesi
 
@@ -247,7 +247,7 @@ Sebagai admin, saya ingin API memeriksa sesi dan hak saya serta mendokumentasika
 
 ## Task: AUTH-007 — Guard admin dan DTO sesi bertipe
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P0 — ketujuh
 - Referensi: AUTH-US-03, PRD-01/07, GR-01/02, AC-03/09
@@ -260,10 +260,10 @@ Macro `requireAdmin` memakai resolve/dependency eksplisit, database-backed sessi
 
 ### Acceptance criteria
 
-- [ ] No/invalid/expired/revoked session → 401; session non-admin fixture → 403; DB failure → error aman 503.
-- [ ] DTO hanya user id/name/email dan session expiry UTC; tanpa token/hash/internal row.
-- [ ] Fixture operasi tulis tidak dipanggil ketika akses ditolak; public route tetap 200 tanpa cookie.
-- [ ] Chaining/type `App` mempertahankan contract semua status yang dideklarasikan.
+- [x] No/invalid/expired/revoked session → 401; session non-admin fixture → 403; DB failure → error aman 503.
+- [x] DTO hanya user id/name/email dan session expiry UTC; tanpa token/hash/internal row.
+- [x] Fixture operasi tulis tidak dipanggil ketika akses ditolak; public route tetap 200 tanpa cookie.
+- [x] Chaining/type `App` mempertahankan contract semua status yang dideklarasikan.
 
 ### Validasi
 
@@ -271,11 +271,14 @@ Native Bun `app.handle(new Request(...))`, scope/lifecycle tests, DB-backed auth
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diuji.
+- Macro `requireAdmin` berada pada `apps/api/src/modules/auth/admin/guard.ts` dan menerima `getSession`/`isAdminUser` eksplisit. Ia membaca sesi dari request headers untuk tiap request, lalu memeriksa singleton terkini; hanya rute admin yang mengaktifkan macro tersebut.
+- `GET /admin/session` mengembalikan `{ user: { id, name, email }, session: { expiresAt } }`; `expiresAt` ISO 8601 UTC. Error aplikasi memuat code, message aman, dan requestId. Response schemas mendeklarasikan `200/401/403/503`; `App` tetap hasil chaining factory `createApp`.
+- PostgreSQL proof pada `vertical_movie_app_auth_admin_test` lulus 4 test, 29 assertion: public root tanpa cookie, no/invalid/expired/revoked session, admin yang valid, identitas admin dicabut (403), query authorization gagal (503), DTO no-store, dan route write fixture tidak dijalankan saat guard menolak.
+- `bun run check-types` berhasil untuk API, web, dan auth package; `bun run build`, API unit suite, `bun run --cwd apps/api auth:authorization:proof`, frozen install, lint, Prettier, dan diff check dijalankan sebelum commit khusus AUTH-007.
 
 ### Blocker atau tindak lanjut
 
-Menunggu AUTH-004/005; penerimaan sesi non-admin hanya fixture untuk rejection test.
+Tidak ada blocker. Rute sesi terjaga; endpoint domain privat berikutnya memakai macro yang sama.
 
 ## Task: AUTH-008 — Scalar gabungan untuk API dan auth
 

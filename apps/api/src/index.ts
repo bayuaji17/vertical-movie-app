@@ -12,7 +12,14 @@ const auth = createAdminAuth({
   secureCookies: env.betterAuthUrl.startsWith("https://"),
   isAdminUser: createAdminPolicy(database.db),
 });
-const app = createApp({ database, auth }).listen(env.port);
+const app = createApp({
+  database,
+  auth,
+  admin: {
+    getSession: (headers) => auth.api.getSession({ headers }),
+    isAdminUser: createAdminPolicy(database.db),
+  },
+}).listen(env.port);
 
 let isShuttingDown = false;
 const shutdown = () => {

@@ -2,7 +2,7 @@
 
 ## Plan Metadata
 
-- Status: **executing**; AUTH-001 sampai AUTH-006 selesai, setiap task dikomit setelah acceptance dan validasinya lulus.
+- Status: **executing**; AUTH-001 sampai AUTH-007 selesai, setiap task dikomit setelah acceptance dan validasinya lulus.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `main`.
 - Base SHA: `bff1ced88f7ade37d454370ccf7d95a47cbf3aea`.
@@ -25,7 +25,7 @@ Tidak termasuk: registrasi publik, akun penonton/kreator, OAuth, MFA/passkey, la
 
 ## Current Behavior
 
-Pada planning base SHA, API hanya `GET /` dan langsung membuka port; belum ada Drizzle, auth route, provisioning, atau test API. Implementasi branch kini memisahkan app/bootstrap, memvalidasi env dan membuat Bun SQL/Drizzle client, serta menutupnya saat shutdown. Schema auth/admin dan migrasi eksplisit dibuat AUTH-003 serta diuji hanya pada database PostgreSQL test; database development belum dimigrasi. AUTH-004 memasang login/logout/session Better Auth dengan kebijakan satu admin, AUTH-005 menyediakan provisioning CLI transaksi tunggal, dan AUTH-006 menyediakan recovery yang mencabut sesi secara atomik. Gateway dan UI auth masih belum dibuat. Lihat [context](REPOSITORY_CONTEXT.md) untuk baseline source dan batas pemeriksaan.
+Pada planning base SHA, API hanya `GET /` dan langsung membuka port; belum ada Drizzle, auth route, provisioning, atau test API. Implementasi branch kini memisahkan app/bootstrap, memvalidasi env dan membuat Bun SQL/Drizzle client, serta menutupnya saat shutdown. Schema auth/admin dan migrasi eksplisit dibuat AUTH-003 serta diuji hanya pada database PostgreSQL test; database development belum dimigrasi. AUTH-004 memasang login/logout/session Better Auth dengan kebijakan satu admin, AUTH-005 menyediakan provisioning CLI transaksi tunggal, AUTH-006 menyediakan recovery yang mencabut sesi secara atomik, dan AUTH-007 menambah guard serta DTO endpoint sesi admin. Gateway dan UI auth masih belum dibuat. Lihat [context](REPOSITORY_CONTEXT.md) untuk baseline source dan batas pemeriksaan.
 
 ## Desired Behavior
 
@@ -148,7 +148,7 @@ Detail scope, acceptance criteria, validasi, owner, status dan bukti setiap step
 | AUTH-004 | **Done** — handler auth aman dan limiter                | AUTH-003           | server factory, auth module, errors                                    | Signup disabled; policy session, cookie/origin, rate limit; public route | Lulus HTTP/DB: login salah/benar, disabled endpoints, Origin, 429, logout (8 test/44 assertion)                |
 | AUTH-005 | **Done** — provisioning satu admin                      | AUTH-004           | auth admin service, provision CLI, public hasher, Drizzle schema       | Credential mapping actual; transaksi singleton; stdin rahasia            | Lulus DB/CLI: retry no-op, konkurensi, rollback, login hasil provision (6 test/26 assertion)                   |
 | AUTH-006 | **Done** — recovery password mencabut sesi              | AUTH-005           | recovery service, reset CLI, shared hidden input                       | Password update + revoke satu transaksi; singleton tetap                 | Lulus PostgreSQL/CLI: dua cookie dicabut, login baru, rollback, admin absent, no user ID (4 test/44 assertion) |
-| AUTH-007 | Guard admin dan endpoint typed                          | AUTH-004, AUTH-005 | admin plugin, auth DTO/service/controller                              | 401/403/503; ID cocok; tidak bocor guard ke public                       | app.handle; service tulis tidak dipanggil saat gagal; schema/inferensi DTO                                     |
+| AUTH-007 | **Done** — guard admin dan endpoint typed               | AUTH-004, AUTH-005 | auth admin macro, session DTO/controller                               | 401/403/503; identity admin cocok; guard hanya rute privat               | PostgreSQL/app.handle: auth states, 503, write guard, DTO, type-check (4 test/29 assertion)                    |
 | AUTH-008 | Scalar gabungan aktual                                  | AUTH-004, AUTH-007 | OpenAPI plugin/helper, bootstrap                                       | Paths/components/ref/security; hide disabled endpoints                   | Schema merge conflict/ref tests, `/openapi/json` dan UI smoke                                                  |
 | AUTH-009 | Transport same-origin dev/production build              | AUTH-004, AUTH-007 | server routes/proxy, samples, Turbo env                                | Fixed upstream, multiple Set-Cookie, no-store, request forwarding        | Raw HTTP/cookie tests dan smoke output Nitro/Bun; tidak ada proxy bebas                                        |
 | AUTH-010 | Eden dan sesi SSR/browser                               | AUTH-007, AUTH-009 | manifests, clients, server function, session query                     | Type-only App; per-request cookie; parseDate false; error state          | Type consumer, HTTP/network failure, SSR dua request terisolasi, bundle review                                 |
@@ -271,5 +271,7 @@ AUTH-004 — `Done`: login/logout/session Better Auth aktif dengan signup/recove
 AUTH-005 — `Done`: user, credential account, dan `admin_identity` dibuat atomik dalam satu transaksi dengan public Better Auth hasher. Advisory lock menjamin hanya satu proses/provisioner dapat memilih singleton; retry email yang sama tidak mengganti password dan identitas lain ditolak. CLI membaca password tanpa echo lewat TTY atau stdin; local PostgreSQL proof lulus 6 test/26 assertion. Gunakan `bun run --cwd apps/api admin:provision -- <email>` agar prompt interaktif tetap mendapat stdin pada Bun 1.4.2. Database development tidak dipakai.
 
 AUTH-006 — `Done`: `admin:reset-password` hanya mengambil target dari singleton admin, memperbarui hash credential lalu menghapus seluruh session dalam transaksi yang memakai advisory lock provisioning. PostgreSQL proof lulus 4 test/44 assertion: kedua cookie lama ditolak, password baru berhasil, kegagalan delete me-rollback update hash, CLI melaporkan keadaan tanpa admin dengan aman, dan argumen user ID ditolak. Runbook mencatat operator harus login ulang pada semua perangkat. Proof hanya memakai database test lokal.
+
+AUTH-007 — `Done`: macro `requireAdmin` mengambil sesi database per request lalu mencocokkan user ke `admin_identity`; 401/403/503 memakai error JSON aman dengan requestId. `GET /admin/session` mengekspos DTO whitelist dan expiry UTC dengan `Cache-Control: no-store`. PostgreSQL proof lulus 4 test/29 assertion termasuk expiry/revoke, demotion non-admin, failure 503, public route, dan write fixture yang tidak dipanggil ketika guard menolak.
 
 Validasi context dokumen sebelum eksekusi: Prettier lulus pada empat dokumen; pemeriksa Bun memvalidasi 24 tautan lokal, 13 task contract, dependensi DAG dan acceptance AC-01..AC-10.
