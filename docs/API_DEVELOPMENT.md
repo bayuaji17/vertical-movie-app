@@ -6,7 +6,7 @@
 
 API menggunakan TypeScript strict, Elysia, dan Bun sesuai versi root `package.json`. API memiliki logika domain dan akses data aplikasi. **Eden Treaty dipilih pengguna pada 1 Oktober 2026** untuk konsumsi kontrak Elysia oleh web. Web tidak menjalankan ulang aturan publikasi atau otorisasi sebagai pengganti validasi server.
 
-Fondasi API kini memiliki `src/app.ts` untuk factory Elysia tanpa listen, `src/config/env.ts` untuk validasi konfigurasi, `src/db/client.ts` untuk factory Bun SQL/Drizzle, dan bootstrap dengan penutupan resource. Route yang aktif masih hanya `GET /`; schema Better Auth/admin serta migrasi awal dibuat pada AUTH-003, sedangkan handler auth, storage, dan worker belum dipasang. Drizzle 0.45.3 + Bun SQL serta Better Auth Drizzle adapter 1.7.7 telah dibuktikan pada database PostgreSQL khusus test. Dependensi Better Auth tetap dimiliki `packages/auth`; konfigurasi instance auth dan endpoint masih tugas berikutnya. Ekspor `api/types` tersedia; Eden client dan konsumsinya oleh web belum diimplementasikan.
+Fondasi API memiliki `src/app.ts` untuk factory Elysia tanpa listen, `src/config/env.ts` untuk validasi konfigurasi, `src/db/client.ts` untuk factory Bun SQL/Drizzle, dan bootstrap dengan penutupan resource. Route aktif mencakup `GET /` publik dan handler Better Auth di `/api/auth/*`; auth hanya mengizinkan status, login, logout, dan pembacaan sesi, dengan sesi admin dan Origin diperiksa di server. Schema Better Auth/admin serta migrasi eksplisit diuji di PostgreSQL khusus. Dependensi Better Auth tetap dimiliki `packages/auth`; storage dan worker belum dipasang. Ekspor `api/types` tersedia; Eden client dan konsumsinya oleh web belum diimplementasikan.
 
 Instruksi agent tetap berada di [AGENTS.md](../AGENTS.md). Ikuti [Global Workflow](GLOBAL_WORKFLOW.md), [Template Task](TASK_TEMPLATE.md), dan [Environment](ENVIRONMENT.md). Kontrak produk yang belum disetujui di [Architecture](ARCHITECTURE.md) tetap berupa rancangan.
 
@@ -231,13 +231,13 @@ Return `status(...)` mengirim respons langsung dan tidak melewati `onError`; thr
 
 **Gunakan satu halaman Scalar untuk dokumentasi endpoint aplikasi dan Better Auth.** Keputusan ini ditetapkan pengguna pada 1 Oktober 2026. Plugin OpenAPI dan penggabungan schema belum diimplementasikan; tambahkan bersama task integrasi API/auth. Dokumentasi pengembangan tetap berada di root `docs/`.
 
-| Bagian                   | Fungsi dan kepemilikan                                                         |
-| ------------------------ | ------------------------------------------------------------------------------ |
-| `/openapi`               | UI Scalar utama, disediakan `apps/api` melalui plugin OpenAPI Elysia.          |
-| `/openapi/json`          | Spesifikasi OpenAPI gabungan untuk tooling dan pemeriksaan kontrak.            |
-| Schema endpoint aplikasi | Dihasilkan dari rute dan schema Elysia pada modul API.                         |
-| Schema Better Auth       | Dihasilkan dari instance auth milik `packages/auth`; digabung pada API.        |
-| Root `docs/`             | Aturan kode, keputusan arsitektur, alur domain/auth, dan backlog implementasi. |
+| Bagian                   | Fungsi dan kepemilikan                                                                        |
+| ------------------------ | --------------------------------------------------------------------------------------------- |
+| `/openapi`               | UI Scalar utama, disediakan `apps/api` melalui plugin OpenAPI Elysia.                         |
+| `/openapi/json`          | Spesifikasi OpenAPI gabungan untuk tooling dan pemeriksaan kontrak.                           |
+| Schema endpoint aplikasi | Dihasilkan dari rute dan schema Elysia pada modul API.                                        |
+| Schema Better Auth       | Dihasilkan dari instance auth yang dikonfigurasi API melalui `@repo/auth`; digabung pada API. |
+| Root `docs/`             | Aturan kode, keputusan arsitektur, alur domain/auth, dan backlog implementasi.                |
 
 Path UI dan JSON mengikuti default [plugin OpenAPI Elysia](https://elysiajs.com/plugins/openapi). Gunakan `@elysia/openapi` sesuai dokumentasi resmi saat ini; referensi skill lama menyebut `@elysiajs/openapi`. Verifikasi versi serta kompatibilitas dengan Elysia saat instalasi.
 
@@ -253,7 +253,7 @@ Path UI dan JSON mengikuti default [plugin OpenAPI Elysia](https://elysiajs.com/
 ### Penggabungan Better Auth
 
 1. Tambahkan `openAPI({ disableDefaultReference: true })` pada konfigurasi server auth di `packages/auth`. Plugin ini menyediakan `auth.api.generateOpenAPISchema()`; opsi tersebut menonaktifkan UI referensi bawaan auth sehingga Scalar utama menjadi halaman dokumentasi yang digunakan. Endpoint generator schema tetap tersedia; opsi tersebut tidak menonaktifkannya. Lihat [plugin OpenAPI Better Auth](https://better-auth.com/docs/plugins/open-api).
-2. Sediakan helper schema melalui entry point server `@repo/auth/server` ketika konfigurasi auth diimplementasikan. Helper menerima/menggunakan instance auth yang sama dengan handler; jangan membuat instance auth atau pool database kedua untuk dokumentasi.
+2. Sediakan helper schema melalui entry point server `@repo/auth/server` pada AUTH-008. Helper menerima instance auth yang sama dengan handler; jangan membuat instance auth atau pool database kedua untuk dokumentasi.
 3. API menggabungkan `paths` dan `components` schema auth ke konfigurasi OpenAPI Elysia, lalu mengelompokkan operasi auth dengan tag `Better Auth`. Prefix path harus sesuai gabungan mount/basePath yang benar-benar dipakai, misalnya `/api/auth` bila memakai path default; `/auth/api` pada contoh artikel bukan nilai wajib. Periksa pula `servers` agar base path tidak ditambahkan dua kali. Pola dasarnya ada pada [integrasi Better Auth–Elysia](https://elysiajs.com/integrations/better-auth#openapi).
 4. Pertahankan parameter, request body, response, security scheme, dan seluruh referensi `$ref` dari kedua sumber. Merge komponen per kategori dengan pemeriksaan konflik nama; jangan menimpa schema aplikasi dengan objek `components` auth secara keseluruhan. Saat memberi tag, ubah hanya objek operasi metode HTTP yang valid, bukan properti path seperti `parameters`.
 5. Gunakan tipe schema library atau tipe hasil `generateOpenAPISchema()` untuk helper dan transformasi. Hindari `any` serta assertion yang menutupi ketidakcocokan. Jika schema dicache, cache terkait instance/konfigurasi auth dan tidak dimutasi saat memberi prefix/tag.

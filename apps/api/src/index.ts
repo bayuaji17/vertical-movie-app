@@ -1,10 +1,18 @@
 import { loadApiEnv } from "./config/env";
 import { createApp } from "./app";
 import { createDatabase } from "./db/client";
+import { createAdminAuth, createAdminPolicy } from "./modules/auth";
 
 const env = loadApiEnv();
 const database = createDatabase(env.databaseUrl);
-const app = createApp({ database }).listen(env.port);
+const auth = createAdminAuth({
+  database: database.db,
+  origin: env.betterAuthUrl,
+  secret: env.betterAuthSecret,
+  secureCookies: env.betterAuthUrl.startsWith("https://"),
+  isAdminUser: createAdminPolicy(database.db),
+});
+const app = createApp({ database, auth }).listen(env.port);
 
 let isShuttingDown = false;
 const shutdown = () => {

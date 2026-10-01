@@ -121,11 +121,11 @@ Integrasi PostgreSQL lokal khusus test: fresh/re-run, introspeksi tabel/indeks, 
 
 ### Blocker atau tindak lanjut
 
-Tidak ada blocker. Schema baru belum diterapkan pada database development; konfigurasi instance auth dan endpoint tetap AUTH-004.
+Tidak ada blocker. Schema belum diterapkan pada database development; endpoint dan konfigurasi instance auth diselesaikan pada AUTH-004.
 
 ## Task: AUTH-004 — Aktifkan endpoint dan kebijakan sesi Better Auth
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P0 — keempat
 - Referensi: AUTH-US-01, PRD-01, GR-01/02, AC-02/04/06
@@ -138,11 +138,11 @@ Konfigurasi `createAuthServer` di package pemilik, mount `/api/auth`, error hand
 
 ### Acceptance criteria
 
-- [ ] Login/logout mengikuti payload Better Auth tanpa envelope aplikasi; credential salah gagal dengan pesan aman.
-- [ ] Signup/email reset unsupported ditolak melalui handler langsung; non-admin tidak mendapatkan sesi baru.
-- [ ] Sesi fixed 24 jam tanpa cookie cache; Origin asing ditolak; production cookie Secure/HttpOnly/SameSite sesuai policy.
-- [ ] Limiter aktif dan menghasilkan 429; ekstraksi key/IP tidak mempercayai spoof header browser.
-- [ ] Test fixture admin policy berbeda dari provisioning produk dan tidak dianggap bukti CLI selesai.
+- [x] Login/logout mengikuti payload Better Auth tanpa envelope aplikasi; credential salah gagal dengan pesan aman.
+- [x] Signup/email reset unsupported ditolak melalui handler langsung; non-admin tidak mendapatkan sesi baru.
+- [x] Sesi fixed 24 jam tanpa cookie cache; Origin asing ditolak; production cookie Secure/HttpOnly/SameSite sesuai policy.
+- [x] Limiter aktif dan menghasilkan 429; ekstraksi key/IP tidak mempercayai spoof header browser.
+- [x] Test fixture admin policy berbeda dari provisioning produk dan tidak dianggap bukti CLI selesai.
 
 ### Validasi
 
@@ -150,11 +150,18 @@ HTTP `app.handle` dan DB test: cookie flags, disabled endpoints, wrong credentia
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diuji.
+- `apps/api/src/modules/auth/index.ts` menyusun instance Better Auth dengan schema Drizzle yang sudah dimigrasikan, email/password, signup off, password 12–128 karakter, sesi database fixed 24 jam, refresh/cookie-cache off, limiter database (lima percobaan sign-in per menit), dan allowlist endpoint HTTP hanya `/ok`, `/get-session`, `/sign-in/email`, dan `/sign-out`.
+- API memeriksa `Origin` terhadap origin web persis melalui middleware Better Auth, termasuk login pertama tanpa cookie. Pemeriksaan ini ditambahkan setelah proof awal menunjukkan pemeriksaan bawaan tidak selalu memvalidasi origin login pertama.
+- Hook pembuatan sesi memeriksa `admin_identity`; non-admin menerima 403 sebelum ada row sesi. Cookie bersifat host-only, HttpOnly, SameSite=Lax, dan Secure saat origin memakai HTTPS. GET `/` tetap publik.
+- Belum ada proxy tepercaya, maka Better Auth tidak menggunakan `X-Forwarded-For`/header IP lain untuk limiter. Proof mengirim header spoof berbeda dan menghasilkan satu bucket database yang sama. Di production tanpa IP tepercaya, bucket ini sengaja global per path sampai reverse proxy ditetapkan.
+- Database test runtime `vertical_movie_app_auth_runtime_test` dibatasi guard localhost/nama database dan boleh di-reset oleh proof; ini terpisah dari database development. Fixture admin hanya untuk menguji policy sesi dan bukan pengganti AUTH-005.
+- `bun run --cwd apps/api auth:runtime:proof` lulus: 8 test, 44 assertion; mencakup login/logout/get-session, 24 jam tanpa refresh, credential salah, non-admin, Origin asing, endpoint signup/recovery disabled, rate limit 429/IP spoof, cookie production, dan root publik.
+- `bun run check-types` lulus untuk API, web, dan `@repo/auth`. Pemeriksaan unit/API lengkap, build/lint workspace, migrasi ulang test DB, Prettier, dan diff check dilakukan sebelum commit khusus AUTH-004.
+- Task mendapat commit tersendiri setelah seluruh acceptance dan gates lulus; commit dapat ditemukan di history branch.
 
 ### Blocker atau tindak lanjut
 
-Menunggu AUTH-003. Provisioning aktual pada AUTH-005; DTO/guard privat pada AUTH-007.
+Tidak ada blocker. Tidak ada admin production/local development yang diprovision task ini; provisioning aktual tetap AUTH-005 dan DTO/guard privat tetap AUTH-007.
 
 ## User story: AUTH-US-02 — Provisioning dan pemulihan terkendali
 

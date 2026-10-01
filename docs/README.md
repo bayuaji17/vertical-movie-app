@@ -17,7 +17,7 @@ Catat tanggal persetujuan dan pemilik keputusan di setiap dokumen. Pisahkan peri
 ## Panduan development
 
 - [Repository Context — Auth](REPOSITORY_CONTEXT.md): konteks kode dan batas sistem pada snapshot `bff1ced88f7ade37d454370ccf7d95a47cbf3aea` untuk implementasi auth.
-- [Implementation Plan — Auth](IMPLEMENTATION_PLAN.md): rencana email/password, provisioning/pemulihan admin melalui CLI, proteksi API/dashboard, dan integrasi satu origin; AUTH-001 sampai AUTH-003 selesai, endpoint auth belum dipasang.
+- [Implementation Plan — Auth](IMPLEMENTATION_PLAN.md): rencana email/password, provisioning/pemulihan admin melalui CLI, proteksi API/dashboard, dan integrasi satu origin; AUTH-001 sampai AUTH-004 selesai.
 - [Backlog Auth](tasks/auth.md): user story dan 13 task kecil dengan dependensi, acceptance criteria, serta tempat pencatatan bukti validasi.
 - [Global Workflow](GLOBAL_WORKFLOW.md): keputusan Agile dan pembagian modul → user story → task kecil disetujui pengguna pada 1 Oktober 2026.
 - [Template Task](TASK_TEMPLATE.md): format backlog per modul, acceptance criteria, dependensi, dan bukti validasi.
@@ -35,7 +35,7 @@ Catat tanggal persetujuan dan pemilik keputusan di setiap dokumen. Pisahkan peri
 | `.husky/` dan `commitlint.config.cjs`                             | Pemeriksaan sebelum commit dan validasi pesan Conventional Commits.                                                                                                                              |
 | `.agents/skills/`, `.commandcode/skills/`, dan `skills-lock.json` | Skill repo Elysia, Turborepo, dan shadcn beserta symlink agent dan metadata instalasinya, semuanya dikelola dari root.                                                                           |
 
-Kedua app masih berupa starter produk. Auth memiliki schema/migrasi dan fondasi runtime; endpoint domain, provisioning, dan integrasi web belum diimplementasikan. Catat keputusan final di sini dengan mengacu pada kode dan skrip yang benar-benar ada.
+Kedua app masih berupa starter produk. API menyediakan login/logout/session Better Auth dan root publik; endpoint domain, provisioning admin, proteksi rute dashboard, dan integrasi auth web belum diimplementasikan. Catat keputusan final di sini dengan mengacu pada kode dan skrip yang benar-benar ada.
 
 Eden Treaty dipilih pengguna pada 1 Oktober 2026 untuk konsumsi kontrak API Elysia oleh web. API mengekspor tipe `App` melalui entry point type-only `api/types`; client Eden berada di web. Instalasi SDK dan konsumsi kontrak oleh web belum diimplementasikan. Ikuti [API Development](API_DEVELOPMENT.md) untuk aturan inferensi, lifecycle, scope plugin, dan akses admin.
 
@@ -43,7 +43,7 @@ Konfigurasi shadcn dan komponen UI tetap berada di `apps/web`. Video.js tersedia
 
 Player Video.js React `10.0.0-rc.4` telah dipasang di `apps/web`, bersama `@videojs/core` pada versi yang sama. Registry `@videojs` terdaftar di `apps/web/components.json`. Skin Default yang dapat diedit berada di `apps/web/src/components/videojs/`; komponen kontrol memakai Remixicon dan styling Tailwind. `VerticalVideoPlayer` di `apps/web/src/components/vertical-video-player.tsx` menyediakan layout 9:16 dengan `playsInline` dan preload metadata, tanpa autoplay. Halaman starter menampilkan MP4 demo resmi untuk pemeriksaan pemutaran; sumber demo bukan konten produk. Integrasi HLS, storage, dan katalog video belum diimplementasikan. Versi release candidate ini telah diterima untuk tahap development.
 
-API dan web bergantung pada `@repo/auth` melalui `workspace:*`. Gunakan `@repo/auth/server` untuk `createAuthServer`, adapter/hash helper; web tetap memakai `@repo/auth/client`, dan tipe melalui `@repo/auth/types`. Schema Better Auth/admin serta migrasi eksplisit sudah tersedia, tetapi instance auth, endpoint, provisioning admin, dan formulir login belum dibuat. Gateway web same-origin dan URL upstream juga belum dibuat.
+API dan web bergantung pada `@repo/auth` melalui `workspace:*`. Gunakan `@repo/auth/server` untuk `createAuthServer`, adapter/hash helper; web tetap memakai `@repo/auth/client`, dan tipe melalui `@repo/auth/types`. Schema Better Auth/admin, migrasi eksplisit, instance auth, dan handler `/api/auth` kini tersedia. Admin CLI, guard endpoint domain, gateway web same-origin, dan formulir login masih backlog.
 
 ## Bekerja di repo ini
 
