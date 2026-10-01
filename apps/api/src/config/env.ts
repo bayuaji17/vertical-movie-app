@@ -6,6 +6,28 @@ export interface ApiEnv {
   webOrigin: string;
 }
 
+export function loadDatabaseUrl(
+  source: Record<string, string | undefined> = Bun.env,
+): string {
+  const databaseUrl = source.DATABASE_URL;
+  if (!databaseUrl) throw new Error("DATABASE_URL wajib diisi.");
+
+  let database: URL;
+  try {
+    database = new URL(databaseUrl);
+  } catch {
+    throw new Error("DATABASE_URL harus berupa URL PostgreSQL yang valid.");
+  }
+  if (
+    !["postgres:", "postgresql:"].includes(database.protocol) ||
+    !database.hostname
+  ) {
+    throw new Error("DATABASE_URL harus memakai skema PostgreSQL.");
+  }
+
+  return databaseUrl;
+}
+
 function parseOrigin(name: string, value: string | undefined): string {
   if (!value) throw new Error(`${name} wajib diisi.`);
 
@@ -53,21 +75,7 @@ export function loadApiEnv(
     throw new Error("PORT harus berupa bilangan bulat antara 1 dan 65535.");
   }
 
-  const databaseUrl = source.DATABASE_URL;
-  if (!databaseUrl) throw new Error("DATABASE_URL wajib diisi.");
-
-  let database: URL;
-  try {
-    database = new URL(databaseUrl);
-  } catch {
-    throw new Error("DATABASE_URL harus berupa URL PostgreSQL yang valid.");
-  }
-  if (
-    !["postgres:", "postgresql:"].includes(database.protocol) ||
-    !database.hostname
-  ) {
-    throw new Error("DATABASE_URL harus memakai skema PostgreSQL.");
-  }
+  const databaseUrl = loadDatabaseUrl(source);
 
   const secret = source.BETTER_AUTH_SECRET;
   if (!secret || secret.trim().length < 32) {

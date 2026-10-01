@@ -2,7 +2,7 @@
 
 ## Plan Metadata
 
-- Status: **executing**; AUTH-001 dan AUTH-002 selesai, setiap task dikomit setelah acceptance dan validasinya lulus.
+- Status: **executing**; AUTH-001 sampai AUTH-003 selesai, setiap task dikomit setelah acceptance dan validasinya lulus.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `main`.
 - Base SHA: `bff1ced88f7ade37d454370ccf7d95a47cbf3aea`.
@@ -25,7 +25,7 @@ Tidak termasuk: registrasi publik, akun penonton/kreator, OAuth, MFA/passkey, la
 
 ## Current Behavior
 
-Pada planning base SHA, API hanya `GET /` dan langsung membuka port; belum ada Drizzle, auth route, provisioning, atau test API. Implementasi branch kini memisahkan app/bootstrap, memvalidasi env dan membuat Bun SQL/Drizzle client, serta menutupnya saat shutdown. Bukti kompatibilitas Drizzle/Bun SQL/adapter dan detail perubahan ada pada AUTH-001/AUTH-002 di backlog dan execution log. Login, schema/migrasi aktual, provisioning, gateway, serta UI auth masih belum dibuat. Lihat [context](REPOSITORY_CONTEXT.md) untuk baseline source dan batas pemeriksaan.
+Pada planning base SHA, API hanya `GET /` dan langsung membuka port; belum ada Drizzle, auth route, provisioning, atau test API. Implementasi branch kini memisahkan app/bootstrap, memvalidasi env dan membuat Bun SQL/Drizzle client, serta menutupnya saat shutdown. Schema auth/admin dan migrasi eksplisit dibuat AUTH-003 serta diuji hanya pada database PostgreSQL test; database development belum dimigrasi. Endpoint login, provisioning, gateway, dan UI auth masih belum dibuat. Lihat [context](REPOSITORY_CONTEXT.md) untuk baseline source dan batas pemeriksaan.
 
 ## Desired Behavior
 
@@ -144,7 +144,7 @@ Detail scope, acceptance criteria, validasi, owner, status dan bukti setiap step
 | -------- | ------------------------------------------------------- | ------------------ | ---------------------------------------------------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
 | AUTH-001 | **Done** — proof kompatibilitas dan versi terkunci      | none               | Manifest, server exports, CLI/schema test fixture                      | Bun SQL + Drizzle + Better Auth transaction/migrator                     | Lulus: PostgreSQL test, adapter rollback, credential login/session, generated migration, workspace gates |
 | AUTH-002 | **Done** — konfigurasi, lifecycle, dan boundary package | AUTH-001           | env, db client, app/types, bootstrap, auth exports; native test script | Validasi secret/origin; pool diinjeksi; type-only export                 | Unit env/lifecycle, type-check/build, startup lokal; factory terpisah dari listen                        |
-| AUTH-003 | Schema dan migrasi auth                                 | AUTH-002           | db/schema, drizzle config/migrations, migrate script                   | Tabel actual auth, rate-limit, singleton dengan FK/constraint            | Migrasi fresh/re-run, FK/unique/check dan rollback terbukti pada DB test                                 |
+| AUTH-003 | **Done** — schema auth/admin dan migrasi eksplisit      | AUTH-002           | db/schema, drizzle config/migrations, migrate script                   | Tabel auth/rate-limit, singleton dengan FK/constraint                    | Lulus: fresh/re-run, adapter pakai schema sama, constraint/rollback DB test, migrasi tidak mencetak URL  |
 | AUTH-004 | Handler auth aman dan limiter                           | AUTH-003           | server factory, auth module, errors                                    | Signup disabled; policy session, cookie/origin, rate limit; public route | HTTP/DB test login salah/benar, disabled endpoints, Origin, 429, logout                                  |
 | AUTH-005 | Provisioning satu admin                                 | AUTH-004           | service/repository, provision CLI, exported hasher                     | Credential mapping actual; transaksi singleton; stdin rahasia            | Retry no-op, konkurensi, failed write rollback, login hasil provision                                    |
 | AUTH-006 | Recovery password mencabut sesi                         | AUTH-005           | reset CLI, service/repository                                          | Password update + revoke satu transaksi; singleton tetap                 | Password/cookie lama gagal, password baru berhasil, rollback tidak parsial                               |
@@ -258,10 +258,12 @@ Tidak ada keputusan produk auth yang menghalangi penyusunan rencana: metode logi
 
 ## Execution Log
 
-Planning: context → plan → backlog ditinjau pada base SHA. Scope dan permintaan branch/commit tiap task disetujui pengguna pada 1 Oktober 2026. Branch `feature/auth-admin-module` dibuat dari base SHA. Dokumen rencana disimpan pada commit `a700e52`.
+Planning: context → plan → backlog ditinjau pada base SHA. Scope dan permintaan branch/commit tiap task disetujui pengguna pada 1 Oktober 2026. Branch `feat/auth-admin-module` dibuat dari base SHA. Dokumen rencana disimpan pada commit `a700e52`.
 
 AUTH-001 — `Done`, commit `ad585f2`: dependency dikunci; schema Better Auth generated; Bun SQL/Drizzle/adapter diuji pada PostgreSQL 18.6 `vertical_movie_app_auth_test`; callback rollback, credential signup, HTTP login, dan get-session lulus (2 test/16 assertion). Frozen install, workspace type-check, full build, lint, Prettier source, dan diff check lulus.
 
-AUTH-002 — `Done`: env tervalidasi tanpa membocorkan nilai sensitif; Bun SQL/Drizzle client dan app lifecycle diinjeksi; bootstrap menangani shutdown; API mengekspor kontrak type-only dan factory auth tersedia di package pemilik. API unit suite, frozen install, workspace checks, startup lokal, dan diff check lulus. Perubahan same-origin hanya menyentuh sample dan nilai local API yang masih default; web `.env` kustom dipertahankan. Commit task dibuat setelah validasi; SHA dicatat dari git history.
+AUTH-002 — `Done`, commit `85c379d`: env tervalidasi tanpa membocorkan nilai sensitif; Bun SQL/Drizzle client dan app lifecycle diinjeksi; bootstrap menangani shutdown; API mengekspor kontrak type-only dan factory auth tersedia di package pemilik. API unit suite, frozen install, workspace checks, startup lokal, dan diff check lulus. Perubahan same-origin hanya menyentuh sample dan nilai local API yang masih default; web `.env` kustom dipertahankan.
+
+AUTH-003 — `Done`: generator Better Auth membuat enam tabel model termasuk limiter database; `admin_identity` menegakkan key `primary`, FK user, dan singleton. SQL migration dijalankan fresh dan rerun pada database lokal khusus test; adapter menggunakan schema hasil generator, constraint, dan rollback teruji. Script eksplisit memakai Bun SQL, cukup membaca DATABASE_URL, dan meredaksi kegagalan. Detail bukti dan command ada di backlog; task mendapat commit tersendiri setelah gates.
 
 Validasi context dokumen sebelum eksekusi: Prettier lulus pada empat dokumen; pemeriksa Bun memvalidasi 24 tautan lokal, 13 task contract, dependensi DAG dan acceptance AC-01..AC-10.

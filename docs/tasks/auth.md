@@ -88,7 +88,7 @@ Tidak ada blocker; schema dan migrasi tetap ruang lingkup AUTH-003.
 
 ## Task: AUTH-003 — Buat schema dan migrasi auth/admin
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P0 — ketiga
 - Referensi: AUTH-US-01, PRD-01, GR-01, AC-01
@@ -101,22 +101,27 @@ Generate schema Better Auth sesuai konfigurasi aktual, termasuk limiter database
 
 ### Acceptance criteria
 
-- [ ] Migrasi fresh membuat semua tabel yang dibutuhkan; re-run tidak mengulang perubahan.
-- [ ] Database menolak singleton key lain, klaim admin kedua dan FK user yang tidak ada.
-- [ ] Generator/adapter memakai schema yang sama; tidak ada migrasi otomatis saat request.
-- [ ] Script memiliki cwd/env yang jelas dan tidak mencetak URL database.
+- [x] Migrasi fresh membuat semua tabel yang dibutuhkan; re-run tidak mengulang perubahan.
+- [x] Database menolak singleton key lain, klaim admin kedua dan FK user yang tidak ada.
+- [x] Generator/adapter memakai schema yang sama; tidak ada migrasi otomatis saat request.
+- [x] Script memiliki cwd/env yang jelas dan tidak mencetak URL database.
 
 ### Validasi
 
-Integrasi PostgreSQL: fresh/re-run, introspeksi tabel/indeks, constraint/FK dan rollback. Review SQL sebelum menerapkan pada DB dev.
+Integrasi PostgreSQL lokal khusus test: fresh/re-run, introspeksi tabel/indeks, constraint/FK dan rollback. Smoke command migrator dengan URL database test; tidak menjalankan migrasi pada DB development.
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diuji.
+- Better Auth CLI `1.7.7` menghasilkan `src/db/schema/auth.ts` dari konfigurasi email/password dengan database rate limiting; Drizzle Kit menghasilkan migrasi awal berisi enam tabel (`user`, `session`, `account`, `verification`, `rate_limit`, `admin_identity`). SQL dan snapshot/journal hasil generator diperiksa.
+- `admin_identity` memakai key default tetap `primary` dan check constraint, `user_id` unique, FK ke `user.id` dengan `ON DELETE RESTRICT`. SQLSTATE PostgreSQL membuktikan key kedua (23514), klaim kedua (23505), FK yang hilang (23503), serta transaksi user+identity rollback.
+- Migrasi dijalankan dua kali pada database lokal baru `vertical_movie_app_auth_schema_test`; satu journal entry dan enam tabel tetap ada. Adapter Better Auth memakai object schema yang sama untuk membuat user dan row limiter.
+- `bun run --cwd apps/api auth:schema:proof` lulus: 5 test, 19 assertion. `db:migrate` CLI lulus pada test DB dengan output generik; URL tidak dicetak. Database development tidak diubah.
+- `bun install --frozen-lockfile`, API unit suite lulus (13 test/22 assertion), workspace type-check/build/lint, Prettier, dan `git diff --check` lulus setelah validasi akhir.
+- Task dibuat menjadi commit khusus setelah seluruh acceptance dan gates lulus; SHA dicatat di git history.
 
 ### Blocker atau tindak lanjut
 
-Menunggu AUTH-002. Jangan menyimpulkan database aktual kosong hanya dari starter source.
+Tidak ada blocker. Schema baru belum diterapkan pada database development; konfigurasi instance auth dan endpoint tetap AUTH-004.
 
 ## Task: AUTH-004 — Aktifkan endpoint dan kebijakan sesi Better Auth
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 
-import { loadApiEnv } from "./env";
+import { loadApiEnv, loadDatabaseUrl } from "./env";
 
 const validEnv = {
   DATABASE_URL:
@@ -98,5 +98,20 @@ describe("loadApiEnv", () => {
     expect(message).not.toContain(secret);
     expect(message).not.toContain(databaseUrl);
     expect(message).not.toContain("private-password");
+  });
+});
+
+describe("loadDatabaseUrl", () => {
+  it("validates the database URL without requiring auth secrets", () => {
+    expect(loadDatabaseUrl({ DATABASE_URL: validEnv.DATABASE_URL })).toBe(
+      validEnv.DATABASE_URL,
+    );
+  });
+
+  it("rejects missing or non-PostgreSQL URLs without including their values", () => {
+    expect(() => loadDatabaseUrl({})).toThrow("DATABASE_URL");
+    expect(() =>
+      loadDatabaseUrl({ DATABASE_URL: "mysql://private.example/app" }),
+    ).toThrow("PostgreSQL");
   });
 });

@@ -6,7 +6,7 @@
 
 API menggunakan TypeScript strict, Elysia, dan Bun sesuai versi root `package.json`. API memiliki logika domain dan akses data aplikasi. **Eden Treaty dipilih pengguna pada 1 Oktober 2026** untuk konsumsi kontrak Elysia oleh web. Web tidak menjalankan ulang aturan publikasi atau otorisasi sebagai pengganti validasi server.
 
-Fondasi API kini memiliki `src/app.ts` untuk factory Elysia tanpa listen, `src/config/env.ts` untuk validasi konfigurasi, `src/db/client.ts` untuk factory Bun SQL/Drizzle, dan bootstrap dengan penutupan resource. Route yang aktif masih hanya `GET /`; schema, migrasi, handler auth, storage, dan worker belum dibuat. Drizzle 0.45.3 + Bun SQL serta Better Auth Drizzle adapter 1.7.7 telah dibuktikan pada database PostgreSQL khusus test. Dependensi Better Auth tetap dimiliki `packages/auth`; konfigurasi instance auth dan endpoint masih tugas berikutnya. Ekspor `api/types` tersedia; Eden client dan konsumsinya oleh web belum diimplementasikan.
+Fondasi API kini memiliki `src/app.ts` untuk factory Elysia tanpa listen, `src/config/env.ts` untuk validasi konfigurasi, `src/db/client.ts` untuk factory Bun SQL/Drizzle, dan bootstrap dengan penutupan resource. Route yang aktif masih hanya `GET /`; schema Better Auth/admin serta migrasi awal dibuat pada AUTH-003, sedangkan handler auth, storage, dan worker belum dipasang. Drizzle 0.45.3 + Bun SQL serta Better Auth Drizzle adapter 1.7.7 telah dibuktikan pada database PostgreSQL khusus test. Dependensi Better Auth tetap dimiliki `packages/auth`; konfigurasi instance auth dan endpoint masih tugas berikutnya. Ekspor `api/types` tersedia; Eden client dan konsumsinya oleh web belum diimplementasikan.
 
 Instruksi agent tetap berada di [AGENTS.md](../AGENTS.md). Ikuti [Global Workflow](GLOBAL_WORKFLOW.md), [Template Task](TASK_TEMPLATE.md), dan [Environment](ENVIRONMENT.md). Kontrak produk yang belum disetujui di [Architecture](ARCHITECTURE.md) tetap berupa rancangan.
 
@@ -41,8 +41,11 @@ apps/api/
 │   │   └── logger.ts             # Logging request dengan redaksi rahasia
 │   ├── db/
 │   │   ├── client.ts             # Factory pool Bun SQL dan Drizzle
+│   │   ├── migrate.ts            # Migrator eksplisit, tidak berjalan pada request
 │   │   └── schema/
-│   │       ├── auth.ts           # Schema tabel Better Auth saat adapter dipasang
+│   │       ├── auth.ts           # Schema Better Auth hasil generator
+│   │       ├── admin.ts          # Identitas admin singleton
+│   │       ├── index.ts          # Schema gabungan untuk migrasi/adapter
 │   │       ├── videos.ts
 │   │       ├── media.ts
 │   │       ├── jobs.ts
@@ -58,7 +61,7 @@ apps/api/
 ├── scripts/                      # Provisioning admin atau operasi terkontrol
 ├── test/
 │   └── integration/              # Pengujian PostgreSQL/storage/worker
-├── drizzle.config.ts             # Ditambahkan saat integrasi Drizzle
+├── drizzle.config.ts             # Konfigurasi schema dan output migrasi Drizzle
 ├── .env.example
 ├── package.json
 └── tsconfig.json
@@ -281,8 +284,8 @@ Dokumentasi OpenAPI menerangkan kontrak HTTP. Consumer endpoint aplikasi tetap m
 
 - Kompatibilitas Bun SQL, `drizzle-orm/bun-sql`, dan Better Auth Drizzle adapter telah dibuktikan pada versi yang dikunci di [backlog auth](tasks/auth.md). Proof tersebut memverifikasi operasi adapter tertentu; integritas migrasi/domain berikutnya tetap harus dibuktikan pada database test.
 - Query memakai parameter binding dari Drizzle atau tagged template Bun SQL. Jangan menggabungkan input pengguna menjadi SQL mentah. Identifier dinamis harus berasal dari daftar server yang tetap.
-- Schema tabel berada di `src/db/schema/`. Commit migrasi SQL dan metadata generasinya di `apps/api/drizzle/` ketika tooling dipasang. Schema Better Auth yang dihasilkan harus sesuai versi library/adapter dan ditinjau sebelum migrasi.
-- Jalankan migrasi melalui perintah eksplisit; jangan membuat/mengubah tabel otomatis saat request masuk. Nama dan skrip migrasi ditambahkan bersama task database, lalu didokumentasikan.
+- Schema tabel berada di `src/db/schema/`; migrasi SQL dan metadata generasi berada di `apps/api/drizzle/`. Schema Better Auth dihasilkan dari konfigurasi package auth dan schema admin ditinjau sebelum migrasi.
+- Jalankan `bun run --cwd apps/api db:migrate` secara eksplisit; jangan membuat/mengubah tabel otomatis saat request masuk. Migrator Bun SQL membaca env API `DATABASE_URL`, memakai path migrasi tetap dari source, dan meredaksi error agar URL tidak tercetak.
 - Gunakan constraint, foreign key, unique index, dan transaksi untuk invariant persisten. Pembaruan aset dan enqueue job harus atomik. Transaksi diselesaikan sebelum I/O storage atau FFmpeg.
 - Perubahan schema yang memengaruhi data perlu rencana migrasi/backfill dan bukti pada database pengujian. Jangan mengubah skema atau menghapus data dev melalui test.
 - Operasi berulang seperti enqueue, upload completion, dan publish memakai identitas operasi serta pemeriksaan transisi di database; penanganan idempotensi tidak cukup disimpan pada memori proses.
