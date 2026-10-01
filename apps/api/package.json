@@ -9,6 +9,7 @@
     "check-types": "bun run --bun tsc --noEmit"
   },
   "dependencies": {
+    "@repo/auth": "workspace:*",
     "elysia": "latest"
   },
   "devDependencies": {
