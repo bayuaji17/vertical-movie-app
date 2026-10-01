@@ -279,14 +279,16 @@ Dokumentasi OpenAPI menerangkan kontrak HTTP. Consumer endpoint aplikasi tetap m
 
 - Konfigurasi Better Auth dimiliki `packages/auth`; API menyediakan adapter database dan secret melalui `@repo/auth/server`. `modules/auth` memasang handler tersebut, sedangkan `plugins/admin.ts` memverifikasi sesi dan identitas admin pada setiap operasi privat.
 - Sesi valid tidak otomatis berarti admin. Verifikasi identitas admin tunggal yang disediakan melalui provisioning terkontrol; pendaftaran publik dinonaktifkan. Pengunjung katalog/player tidak perlu akun.
+- `GET /admin/session` memakai `requireAdmin` dan hanya mengembalikan DTO user/session yang diizinkan. Handler Better Auth hanya membuka login, logout, dan status sesi; form web ada di `/admin/login`, sementara dashboard memakai sesi segar melalui server function dan gateway same-origin.
 - Trusted origin, CORS, cookie, dan alur permintaan web ke API ditetapkan bersama task auth. Jangan menggunakan wildcard origin untuk request berkredensial.
 - Pembacaan env API dipusatkan di `config/env.ts` dan divalidasi saat startup HTTP. Worker mengikuti konfigurasi prosesnya saat dibuat; jangan membuat client dengan credential kosong.
 - Rahasia tetap di env API yang diabaikan Git. Daftarkan variabel baru tanpa nilai asli di `.env.example`, [Environment](ENVIRONMENT.md), dan konfigurasi env task Turbo yang relevan.
+- Script database proof auth adalah `auth:adapter:proof`, `auth:schema:proof`, `auth:runtime:proof`, `auth:admin:proof`, `auth:recovery:proof`, `auth:authorization:proof`, dan `auth:openapi:proof`. Masing-masing membatasi localhost/nama database; beberapa mereset schema, jadi jalankan satu per satu. Tidak ada script generik `test:integration`; detail env dan dampak reset ada di [Environment](ENVIRONMENT.md) serta [backlog](tasks/auth.md).
 - Database, storage client, dan instance auth dibuat sekali per proses lalu diberikan ke consumer; jangan membuat pool baru setiap request. Database Bun SQL dibuat oleh bootstrap dan ditutup pada shutdown. Factory tidak membuka port atau koneksi saat diimpor.
 
 ## Database dan migrasi
 
-- Kompatibilitas Bun SQL, `drizzle-orm/bun-sql`, dan Better Auth Drizzle adapter telah dibuktikan pada versi yang dikunci di [backlog auth](tasks/auth.md). Proof tersebut memverifikasi operasi adapter tertentu; integritas migrasi/domain berikutnya tetap harus dibuktikan pada database test.
+- Kompatibilitas Bun SQL, `drizzle-orm/bun-sql`, dan Better Auth Drizzle adapter telah dibuktikan pada versi yang dikunci di [backlog auth](tasks/auth.md). Migrasi dan operasi auth/admin juga diuji terarah pada database test lokal. Proof membatasi operasi yang diuji; database development belum dimigrasikan dan proof tidak menyatakan production-ready.
 - Query memakai parameter binding dari Drizzle atau tagged template Bun SQL. Jangan menggabungkan input pengguna menjadi SQL mentah. Identifier dinamis harus berasal dari daftar server yang tetap.
 - Schema tabel berada di `src/db/schema/`; migrasi SQL dan metadata generasi berada di `apps/api/drizzle/`. Schema Better Auth dihasilkan dari konfigurasi package auth dan schema admin ditinjau sebelum migrasi.
 - Jalankan `bun run --cwd apps/api db:migrate` secara eksplisit; jangan membuat/mengubah tabel otomatis saat request masuk. Migrator Bun SQL membaca env API `DATABASE_URL`, memakai path migrasi tetap dari source, dan meredaksi error agar URL tidak tercetak.
@@ -382,7 +384,7 @@ bun test ./apps/api/src/modules/videos/service.test.ts
 bun test --watch ./apps/api/src
 ```
 
-Perintah pertama mencakup unit/modul HTTP di source API; suite integrasi dijalankan terpisah dengan `bun test ./apps/api/test/integration` setelah environment khusus test disiapkan. Script `test` API menjalankan suite native Bun di `src`; proof PostgreSQL terisolasi memiliki script tersendiri. Direktori/file contoh lainnya ditambahkan bersama task pemiliknya. Root Husky menjalankan lint web dan type-check sebelum commit; konfigurasi CI hosted tidak termasuk workflow proyek saat ini.
+Script `test` API menjalankan suite native Bun di `src`; dari root gunakan `bun run --cwd apps/api test`. Proof PostgreSQL terisolasi dijalankan lewat command `auth:*:proof` yang didaftarkan di `apps/api/package.json`, bukan satu suite `test:integration` umum. Siapkan env khususnya dan periksa guard/nama database sebelum menjalankan. Root Husky menjalankan lint web dan type-check sebelum commit; konfigurasi CI hosted tidak termasuk workflow proyek saat ini.
 
 Perubahan aturan bisnis, validasi, atau lifecycle API menyertakan test perilaku yang relevan pada task implementasinya. Perbaikan bug menyertakan regression test bila perilakunya dapat diuji. Catat command, hasil, dan bukti pada backlog modul; test tidak menggantikan `check-types`, karena Bun menjalankan TypeScript tanpa pemeriksaan tipe penuh.
 

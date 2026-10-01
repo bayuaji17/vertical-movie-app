@@ -17,7 +17,7 @@ Catat tanggal persetujuan dan pemilik keputusan di setiap dokumen. Pisahkan peri
 ## Panduan development
 
 - [Repository Context — Auth](REPOSITORY_CONTEXT.md): konteks kode dan batas sistem pada snapshot `bff1ced88f7ade37d454370ccf7d95a47cbf3aea` untuk implementasi auth.
-- [Implementation Plan — Auth](IMPLEMENTATION_PLAN.md): rencana email/password, provisioning/pemulihan admin melalui CLI, proteksi API/dashboard, dan integrasi satu origin; AUTH-001 sampai AUTH-012 selesai.
+- [Implementation Plan — Auth](IMPLEMENTATION_PLAN.md): rencana email/password, provisioning/pemulihan admin melalui CLI, proteksi API/dashboard, dan integrasi satu origin; AUTH-001 sampai AUTH-013 selesai pada level implementasi dan validasi lokal. Browser UI manual serta deployment tetap pending.
 - [Backlog Auth](tasks/auth.md): user story dan 13 task kecil dengan dependensi, acceptance criteria, serta tempat pencatatan bukti validasi.
 - [Global Workflow](GLOBAL_WORKFLOW.md): keputusan Agile dan pembagian modul → user story → task kecil disetujui pengguna pada 1 Oktober 2026.
 - [Template Task](TASK_TEMPLATE.md): format backlog per modul, acceptance criteria, dependensi, dan bukti validasi.
@@ -35,7 +35,7 @@ Catat tanggal persetujuan dan pemilik keputusan di setiap dokumen. Pisahkan peri
 | `.husky/` dan `commitlint.config.cjs`                             | Pemeriksaan sebelum commit dan validasi pesan Conventional Commits.                                                                                                                                          |
 | `.agents/skills/`, `.commandcode/skills/`, dan `skills-lock.json` | Skill repo Elysia, Turborepo, dan shadcn beserta symlink agent dan metadata instalasinya, semuanya dikelola dari root.                                                                                       |
 
-Kedua app masih berupa starter produk. API menyediakan login/logout/session Better Auth, provisioning/reset admin melalui CLI, sesi admin terproteksi, root publik, dan Scalar gabungan pada `/openapi` serta `/openapi/json`. Web memiliki client Eden dan Better Auth, loader sesi SSR/browser, halaman login admin `/admin/login`, guard dashboard, dan logout.
+Kedua app masih berupa starter produk. API menyediakan login/logout/session Better Auth, provisioning/reset admin melalui CLI, sesi admin terproteksi, root publik, dan Scalar gabungan pada `/openapi` serta `/openapi/json`. Web memiliki client Eden dan Better Auth, loader sesi SSR/browser, halaman login admin `/admin/login`, guard dashboard, dan logout. API/database/web proofs serta Vite dan Nitro gateway HTTP smoke lulus secara lokal; UI browser, domain/TLS, dan production smoke belum diverifikasi.
 
 Eden Treaty dipilih pengguna pada 1 Oktober 2026 untuk konsumsi kontrak API Elysia oleh web. API mengekspor tipe `App` melalui entry point type-only `api/types`; web memakai client Eden pada origin publik `/api`, sementara SSR memanggil origin internal tetap dan meneruskan cookie per request ke loader sesi yang menghasilkan DTO aman. Better Auth client tetap terpisah. Ikuti [API Development](API_DEVELOPMENT.md) untuk aturan inferensi, lifecycle, scope plugin, dan akses admin.
 
@@ -57,7 +57,7 @@ bun run check-types
 bun run build
 ```
 
-Untuk setup lokal pertama kali, salin `apps/api/.env.example` ke `apps/api/.env` dan `apps/web/.env.example` ke `apps/web/.env`. Jika file tujuan sudah ada, lengkapi nilainya tanpa menimpa konfigurasi lokal. Port dev web dibaca dari env; default API 3001 dan web 3000. API kini menolak secret Better Auth kosong/pendek, URL bukan PostgreSQL, serta origin auth/web yang berbeda. Browser memakai gateway same-origin `/api/auth/*` dan `/api/admin/session`; `API_INTERNAL_URL` hanya dibaca server web saat runtime. Form login tersedia di `/admin/login`.
+Untuk setup lokal pertama kali, salin `apps/api/.env.example` ke `apps/api/.env` dan `apps/web/.env.example` ke `apps/web/.env`. Jika file tujuan sudah ada, lengkapi nilainya tanpa menimpa konfigurasi lokal. Port dev web dibaca dari env; default API 3001 dan web 3000. API kini menolak secret Better Auth kosong/pendek, URL bukan PostgreSQL, serta origin auth/web yang berbeda. Browser memakai gateway same-origin `/api/auth/*` dan `/api/admin/session`; `API_INTERNAL_URL` hanya dibaca server web saat runtime. Form login tersedia di `/admin/login`; jalur migrasi, provision, reset, serta database proof dijelaskan di [Environment](ENVIRONMENT.md).
 
 `dev` menjalankan kedua app. `build` menghasilkan `apps/api/dist/` dan `apps/web/.output/`; `bun run start` menjalankan hasil build dengan Bun. Gunakan filter `--filter=api` atau `--filter=web` untuk satu app, atau `--filter=@repo/auth` untuk pemeriksaan tipe package auth. Saat ini lint hanya mencakup `web`; pemeriksaan tipe mencakup kedua app dan `@repo/auth`, sedangkan build mencakup kedua app. Package auth mengekspor sumber TypeScript yang dikompilasi oleh Bun/Vite saat digunakan, sehingga tidak memiliki task build sendiri.
 

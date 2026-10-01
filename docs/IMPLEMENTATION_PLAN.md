@@ -2,14 +2,14 @@
 
 ## Plan Metadata
 
-- Status: **executing**; AUTH-001 sampai AUTH-012 telah diimplementasikan dan dikomit per task. Browser manual untuk AUTH-011/012 masih perlu dijalankan; batasnya tercatat pada backlog.
+- Status: **implementasi dan validasi lokal selesai**; AUTH-001 sampai AUTH-013 dikomit per task. Browser manual dan validasi deployment tetap tindak lanjut yang tercatat di backlog.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `main`.
 - Base SHA: `bff1ced88f7ade37d454370ccf7d95a47cbf3aea`.
 - Context: [REPOSITORY_CONTEXT.md](REPOSITORY_CONTEXT.md).
 - Backlog kanonis: [tasks/auth.md](tasks/auth.md).
-- Last validated SHA: `bff1ced88f7ade37d454370ccf7d95a47cbf3aea`.
-- Tanggal: 1 Oktober 2026, Asia/Jakarta.
+- Last code validated SHA: `ad0abe6` (AUTH-012); validasi backlog akhir dilakukan 2 Oktober 2026, Asia/Jakarta.
+- Tanggal persetujuan scope: 1 Oktober 2026, Asia/Jakarta.
 - Scope yang disetujui pengguna: email/password, satu admin melalui CLI, recovery melalui CLI tanpa layanan email, dan satu origin web/API.
 - Implementasi dan commit terpisah setelah setiap task disetujui pengguna pada 1 Oktober 2026. Push, PR, merge, dan deploy tidak termasuk permintaan tersebut.
 
@@ -154,7 +154,7 @@ Detail scope, acceptance criteria, validasi, owner, status dan bukti setiap step
 | AUTH-010 | **Done** — Eden dan sesi SSR/browser                    | AUTH-007, AUTH-009 | web manifests, `lib/auth/{client,api-client,session}.ts`, type-only API | Type-only App; per-request cookie; parseDate false; error state          | Lulus: 4 test/22 assertion, SSR isolation, type-check/lint/build, browser bundle scan                                |
 | AUTH-011 | **Done** — form login admin aksesibel                   | AUTH-010           | `admin.login.tsx`, `components/auth/login-form.tsx`, auth login helpers | TanStack Form; validation/pending/error/429; redirect lokal aman         | Proof 4 test/20 assertion; web lint/type/build; SSR HTTP 200 + redirect tampering normalized; manual browser pending |
 | AUTH-012 | **Done** — guard dashboard dan logout                   | AUTH-011           | admin layout/pathless guard/dashboard, cache invalidation               | SSR/direct URL guard; login di luar guard; logout gagal/sukses           | SSR fixture: 401 redirect/no-store; 200 admin; 403 denied; 503 retry; public 200; cache proof                        |
-| AUTH-013 | Alur lengkap dan runbook                                | AUTH-001..AUTH-012 | integration suite, docs/backlog                                         | Seluruh acceptance dan deploy/recovery instructions                      | Frozen install + gates + DB integration + browser smoke; bukti aktual tercatat                                       |
+| AUTH-013 | **Done** — proof terintegrasi dan runbook               | AUTH-001..AUTH-012 | proof API/web, docs/backlog                                             | Bukti lokal nyata dan instruksi operasi; batas deployment dicatat        | DB/web proofs, Vite + Nitro gateway smoke, workspace gates lulus; browser manual masih pending                       |
 
 ## Test Requirements
 
@@ -170,19 +170,32 @@ Detail scope, acceptance criteria, validasi, owner, status dan bukti setiap step
 
 Test unit/API di source memakai `bun:test`; suite DB tetap terpisah. Untuk helper transport web yang merupakan batas sesi, regression test terarah dapat memakai native Bun tanpa framework baru; rendering UI divalidasi melalui browser smoke dan gate web. Jangan menghitung mocked session sebagai bukti adapter auth nyata.
 
-Perintah target dari root setelah script tersedia:
+Perintah aktual dari root (proof PostgreSQL dijalankan serial karena beberapa script mereset schema):
 
 ```sh
 bun install --frozen-lockfile
-bun test ./apps/api/src
-bun test ./apps/api/test/integration
+bun run --cwd apps/api test
+bun run --cwd apps/api auth:adapter:proof
+bun run --cwd apps/api auth:schema:proof
+bun run --cwd apps/api auth:runtime:proof
+bun run --cwd apps/api auth:admin:proof
+bun run --cwd apps/api auth:recovery:proof
+bun run --cwd apps/api auth:authorization:proof
+bun run --cwd apps/api auth:openapi:proof
+bun run --cwd apps/web auth:gateway:proof
+bun run --cwd apps/web auth:session:proof
+bun run --cwd apps/web auth:login:proof
+bun run --cwd apps/web auth:guard:proof
+bun run --cwd apps/web auth:gateway:smoke
 bun run lint
 bun run check-types
 bun run build
 git diff --check
 ```
 
-Suite integrasi wajib membaca `TEST_DATABASE_URL` eksplisit, memastikan database berbeda dari development/production, dan berhenti jika target tidak aman. Script API `test` menjadi `bun test ./src`, `test:integration` menjadi `bun test ./test/integration` dijalankan dengan cwd API. Command migrasi/provision/reset disediakan script API dan didokumentasikan lewat `bun run --filter=api <script>`, dengan verifikasi cwd/env script aktual. Tidak menambahkan CI atau test Turbo cached untuk database.
+API unit tests berjalan melalui `bun run --cwd apps/api test` (`bun test ./src`); tidak ada script umum `test:integration`. Proof PostgreSQL mempunyai command `auth:*:proof` terpisah. `auth:adapter:proof` memerlukan `TEST_DATABASE_URL` yang hanya boleh menunjuk ke `vertical_movie_app_auth_test` pada localhost. Proof schema, runtime, dan admin/recovery/authorization menggunakan env khusus yang membatasi nama DB lokal; admin, recovery, dan authorization berbagi database sehingga jangan jalankan bersamaan. Web helper punya proof `auth:*:proof`, sedangkan `auth:gateway:smoke` menjalankan Vite dev dan server Nitro/Bun hasil build terhadap API fixture.
+
+`bun run --cwd apps/api db:migrate` membaca `DATABASE_URL`; jalankan hanya setelah operator memastikan target aplikasi. Provision dan reset memakai `bun run --cwd apps/api admin:provision -- <email>` serta `bun run --cwd apps/api admin:reset-password`, bukan `--filter`, agar stdin prompt diteruskan oleh Bun 1.4.2. Proof tidak memakai database development/production. Tidak ada CI hosted atau test Turbo cached untuk database.
 
 ## Constraints
 
@@ -190,16 +203,18 @@ Ikuti AGENTS, API Development dan Global Workflow. Bun native didahulukan; alter
 
 ## Acceptance Criteria
 
-- [ ] AC-01: Satu admin dapat diprovision melalui CLI; pengulangan tidak mengubah credential; percobaan kedua/bersamaan tidak memberi identitas admin tambahan atau row parsial. AUTH-003/005.
-- [ ] AC-02: Login email/password admin bekerja lewat origin web; credential salah, signup publik, email reset yang tidak didukung, dan sesi user lain tidak membuka dashboard. AUTH-004/009/011.
-- [ ] AC-03: API privat memeriksa sesi + user ID setiap request dan mengembalikan 401/403/503 yang tepat; public tetap tanpa login. AUTH-007.
-- [ ] AC-04: Cookie dev dan production sesuai policy; Origin asing ditolak; rate limit 429; gateway mempertahankan Set-Cookie/no-store. AUTH-004/009.
-- [ ] AC-05: SSR, direct URL, refresh, dan client navigation tidak menampilkan dashboard sebelum sesi sah; cookie antarrequest tidak tercampur. AUTH-010/012.
-- [ ] AC-06: Logout sukses mencabut sesi dan cache privat; expired/revoked session meminta login; logout/network failure memberi pesan yang benar. AUTH-004/012.
-- [ ] AC-07: Recovery CLI mengganti password dan mencabut semua sesi secara atomik; identitas admin tetap sama; failure tidak memberi keadaan parsial. AUTH-006.
-- [ ] AC-08: Login dapat dipakai keyboard, ponsel dan desktop dengan label, pending/error, dan tujuan redirect yang aman. AUTH-011.
-- [ ] AC-09: Eden type-only dan Scalar gabungan mencerminkan route/error/security aktif, tanpa server dependency/secret/token pada DTO SSR browser. AUTH-008/010.
-- [ ] AC-10: Frozen install, test native, integration DB test terpisah, lint web, type-check semua workspace, build kedua app, dan runbook memiliki hasil nyata. AUTH-013.
+- [x] AC-01: Satu admin dapat diprovision melalui CLI; pengulangan tidak mengubah credential; percobaan kedua/bersamaan tidak memberi identitas admin tambahan atau row parsial. AUTH-003/005.
+- [ ] AC-02: Login email/password admin bekerja lewat origin web; credential salah, signup publik, email reset yang tidak didukung, dan sesi user lain tidak membuka dashboard. API, gateway, SSR, dan helper login punya bukti terpisah; alur UI dalam browser masih perlu smoke manual. AUTH-004/009/011.
+- [x] AC-03: API privat memeriksa sesi + user ID setiap request dan mengembalikan 401/403/503 yang tepat; public tetap tanpa login. AUTH-007.
+- [x] AC-04: Cookie dev dan production sesuai policy; Origin asing ditolak; rate limit 429; gateway mempertahankan Set-Cookie/no-store. AUTH-004/009.
+- [ ] AC-05: SSR, direct URL, refresh, dan client navigation tidak menampilkan dashboard sebelum sesi sah; cookie antarrequest tidak tercampur. Loader isolation dan HTTP SSR fixture sudah diperiksa; refresh/client navigation menunggu browser smoke. AUTH-010/012.
+- [ ] AC-06: Logout sukses mencabut sesi dan cache privat; expired/revoked session meminta login; logout/network failure memberi pesan yang benar. API logout/revoke dan cache helper memiliki proof terpisah; alur tombol menunggu browser smoke. AUTH-004/012.
+- [x] AC-07: Recovery CLI mengganti password dan mencabut semua sesi secara atomik; identitas admin tetap sama; failure tidak memberi keadaan parsial. AUTH-006.
+- [ ] AC-08: Login dapat dipakai keyboard, ponsel dan desktop dengan label, pending/error, dan tujuan redirect yang aman. Implementasi dan SSR tersedia, tetapi keyboard/viewport belum diuji di browser. AUTH-011.
+- [x] AC-09: Eden type-only dan Scalar gabungan mencerminkan route/error/security aktif, tanpa server dependency/secret/token pada DTO SSR browser. AUTH-008/010.
+- [x] AC-10: Frozen install, test native, integration DB test terpisah, lint web, type-check semua workspace, build kedua app, dan runbook memiliki hasil nyata. AUTH-013.
+
+AC-02, AC-05, AC-06, dan AC-08 masih menunggu browser smoke untuk login UI terhubung, lifecycle navigasi/logout, serta keyboard pada beberapa ukuran layar. Bukti itu tidak digantikan dengan fixture SSR. Domain deployment belum ditetapkan, sehingga TLS/cookie production, reverse proxy trust, dan production smoke belum diverifikasi.
 
 ## Risks and Mitigations
 
@@ -285,3 +300,5 @@ AUTH-011 — `Done`: halaman `/admin/login` memakai TanStack Form dan primitive 
 AUTH-012 — `Done`: admin parent memakai `private, no-store`; pathless authenticated child mengambil sesi segar melalui API sebelum dashboard render. 401 menghapus query privat dan redirect dengan target lokal; 403 menampilkan penolakan; dependency failure menahan dashboard serta menyediakan retry. Logout hanya membersihkan prefix cache `auth`/`admin`, menginvalidasi router dan menuju login setelah Better Auth mengembalikan sukses; kegagalan tidak menyatakan sesi telah dicabut. Cache proof lulus 1 test/3 assertion dan helper login/logout 5 test/22 assertion. Nitro SSR fixture menunjukkan anonymous 307/no-store, admin 200/dashboard, non-admin denied, upstream 503 retry tanpa DTO identitas, serta homepage publik 200. Workspace type-check, lint dan build lulus. Browser manual dan koneksi PostgreSQL/Better Auth nyata belum dilakukan di task ini; browser smoke dan integrated API/DB verification dicatat sebagai batas AUTH-013.
 
 Validasi context dokumen sebelum eksekusi: Prettier lulus pada empat dokumen; pemeriksa Bun memvalidasi 24 tautan lokal, 13 task contract, dependensi DAG dan acceptance AC-01..AC-10.
+
+AUTH-013 — `Done` untuk proof lokal dan runbook, commit tersendiri. Pada 2 Oktober 2026, frozen install dan API unit suite (21 test/38 assertion) lulus. Proof API: adapter 2/16, schema 5/19, runtime 8/44, admin 6/26, recovery 4/44, authorization 4/29, dan OpenAPI 2/61. Proof web gateway/session/login/cache lulus masing-masing 8/35, 4/22, 5/22, dan 1/3; Vite dev serta built Nitro/Bun gateway smoke lulus terhadap API fixture. `bun run check-types`, `bun run lint`, `bun run build`, dan `git diff --check` lulus. Browser manual belum bisa dijalankan karena tidak tersedia browser executable/runner. Domain/TLS dan production smoke belum tersedia. Proof hanya memakai database auth test; database development tidak dimigrasikan atau diprovision.

@@ -478,7 +478,7 @@ Sebagai pemilik proyek, saya ingin bukti alur auth dan panduan operasional, sehi
 
 ## Task: AUTH-013 — Validasi modul dan perbarui runbook
 
-- Status: Backlog
+- Status: Done — proof lokal dan runbook selesai; smoke manual browser/deployment dicatat sebagai tindak lanjut
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P0 — terakhir
 - Referensi: AUTH-US-05, semua AC-01..AC-10 dan Definition of Done workflow
@@ -491,19 +491,25 @@ Jalankan integrated acceptance flow, quality gates, browser smoke, dan tulis com
 
 ### Acceptance criteria
 
-- [ ] AC-01..AC-10 rencana memiliki bukti aktual, termasuk race/rollback, revoke lintas instance, SSR isolation dan cookie gateway.
-- [ ] `bun install --frozen-lockfile`, unit API, DB integration terpisah, lint web, type-check semua workspace, build kedua app, dan diff check lulus.
-- [ ] README/Architecture/Environment/API Development dan backlog mencerminkan kode, script, origin, folder/test aktual.
-- [ ] Verifikasi lokal/build/production yang belum dilakukan dibedakan; tidak ada rahasia pada source/log/docs dan `docs/design/` tetap utuh.
+- [x] AC-01..AC-10 memiliki bukti API, database, gateway, loader SSR, dan build yang sesuai; AC-02, AC-05, AC-06, dan AC-08 yang membutuhkan browser tetap ditandai pending pada plan.
+- [x] `bun install --frozen-lockfile`, unit API, DB integration terpisah, lint web, type-check semua workspace, build kedua app, dan diff check lulus.
+- [x] README/Architecture/Environment/API Development dan backlog mencerminkan kode, script, origin, folder/test aktual.
+- [x] Verifikasi lokal/build/production yang belum dilakukan dibedakan; tidak ada rahasia pada source/log/docs dan `docs/design/` tetap utuh.
 
 ### Validasi
 
-Perintah pada Test Requirements rencana dan browser checklist di atas; record command, tanggal, hasil, serta artefak aman. Catat commit/PR hanya jika benar-benar dibuat dengan scope yang diminta.
+Validasi lokal 2 Oktober 2026; perintah auth terperinci ada pada Test Requirements rencana. Jalankan proof PostgreSQL secara serial karena beberapa mereset schema. Smoke Vite/Nitro memakai API fixture. Browser UI manual dan deployment production tidak tersedia dalam environment ini; jangan menyamakan HTTP smoke dengan verifikasi visual/interaksi.
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diuji. Bukti sesi planning: repository context dan plan disusun pada SHA yang tercantum; bukan bukti fitur auth berjalan.
+- `bun install --frozen-lockfile` dan `bun run --cwd apps/api test` lulus; API suite: 21 test/38 assertion.
+- PostgreSQL proofs lulus: `auth:adapter:proof` 2/16, `auth:schema:proof` 5/19, `auth:runtime:proof` 8/44, `auth:admin:proof` 6/26, `auth:recovery:proof` 4/44, `auth:authorization:proof` 4/29, dan `auth:openapi:proof` 2/61 (test/expectation). Proof memakai database lokal auth test dengan guard host/nama DB; tidak menggunakan database development.
+- Web proofs lulus: `auth:gateway:proof` 8/35, `auth:session:proof` 4/22, `auth:login:proof` 5/22, dan `auth:guard:proof` 1/3. `auth:gateway:smoke` menjalankan Vite dev dan server Nitro/Bun hasil build, memeriksa method, path, cookie ganda, status dan `no-store` terhadap API fixture.
+- `bun run check-types`, `bun run lint`, `bun run build`, serta `git diff --check` lulus. Build berhasil dengan peringatan directive module dari dependency; task memakai hasil cache Turbo. `bun run --cwd apps/web check` pernah gagal pada lima file baseline yang tidak berubah (`.cta.json`, `prettier.config.js`, `README.md`, `src/components/ui/button.tsx`, `src/lib/utils.ts`); file itu tidak diubah dalam backlog ini.
+- Smoke SSR fixture AUTH-012 yang tercatat di bagian sebelumnya membuktikan anonymous redirect/no-store, admin dashboard, non-admin denial, upstream error, dan halaman publik. Bukti itu memakai API fixture, bukan browser atau server deployment.
+- Environment tidak memiliki browser executable atau browser runner. Checklist login benar/salah/429/network, double submit, keyboard/focus, viewport mobile/desktop, lintas tab/back, dan logout visual masih pending. Domain/TLS, reverse-proxy trust, migrasi database development, provisioning development, dan production smoke juga belum dilakukan. `docs/design/` tetap untracked dan tidak disentuh.
+- Runbook memperbarui command proof yang benar, batas DB test, command migrasi/provision/reset, same-origin browser/API, secret policy, dan status deployment. Tidak ada secret ditulis atau dicetak.
 
 ### Blocker atau tindak lanjut
 
-Semua prerequisite wajib lulus. Hosting/domain/TLS dan production smoke merupakan tindak lanjut deployment; storage/media bukan scope modul ini.
+Tindak lanjut: jalankan browser smoke untuk menutup AC-02/AC-05/AC-06/AC-08 saat browser runner tersedia; setelah domain dipilih, verifikasi HTTPS/cookie dan reverse proxy di deployment. Storage/media di luar scope modul ini.
