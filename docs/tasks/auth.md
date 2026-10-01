@@ -207,7 +207,7 @@ Tidak ada blocker. Reset password dan pencabutan sesi tetap AUTH-006.
 
 ## Task: AUTH-006 — Reset password dan cabut seluruh sesi
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P0 — keenam
 - Referensi: AUTH-US-02, PRD-01, AC-07
@@ -220,22 +220,26 @@ CLI `admin:reset-password` menentukan target dari singleton, mengganti credentia
 
 ### Acceptance criteria
 
-- [ ] Password lama dan semua cookie sesi lama ditolak, password baru berhasil.
-- [ ] Failure setelah update hash membuat transaksi rollback termasuk pencabutan sesi.
-- [ ] Admin belum diprovision menghasilkan error yang aman; identitas target tidak berasal dari argumen user ID.
-- [ ] Runbook menjelaskan recovery dan dampak logout semua perangkat.
+- [x] Password lama dan semua cookie sesi lama ditolak, password baru berhasil.
+- [x] Failure setelah update hash membuat transaksi rollback termasuk pencabutan sesi.
+- [x] Admin belum diprovision menghasilkan error yang aman; identitas target tidak berasal dari argumen user ID.
+- [x] Runbook menjelaskan recovery dan dampak logout semua perangkat.
 
 ### Validasi
 
-Unit dan integration DB dengan beberapa sesi serta failure injection; smoke CLI tanpa password di argv/log.
+Unit dan integration DB dengan beberapa sesi serta failure injection; smoke CLI tanpa password di argv/log. Jalankan proof lokal memakai `bun run --cwd apps/api auth:recovery:proof` dan gunakan hanya `AUTH_ADMIN_TEST_DATABASE_URL`.
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diuji.
+- `resetAdminPassword` memakai public Better Auth hasher, mengunci transaksi dengan advisory lock yang sama seperti provisioning, menemukan target dari singleton `primary`, memperbarui credential admin, lalu menghapus seluruh row session target dalam satu transaksi. Email, user ID, dan singleton tetap sama; tidak ada parameter user ID.
+- CLI `bun run --cwd apps/api admin:reset-password` meminta password tersembunyi atau satu baris stdin. Password tidak ada di argv/output; pesan sukses menyatakan seluruh sesi dicabut, dan error untuk singleton yang belum ada tidak membocorkan identitas/database.
+- PostgreSQL proof pada `vertical_movie_app_auth_admin_test` lulus: 4 test, 44 assertion. Dua sesi lama tidak berlaku lagi, password lama gagal dan password baru sukses; trigger pada penghapusan sesi membuktikan update hash dan session revoke rollback bersama; keadaan tanpa admin mengembalikan error CLI aman; argumen user ID ditolak.
+- Runbook recovery dan dampak logout semua perangkat ditambahkan ke `docs/ENVIRONMENT.md`. Database development tidak dipakai.
+- `bun install --frozen-lockfile`, API unit suite, workspace type-check/build/lint, Prettier, `git diff --check`, serta provisioning proof setelah ekstraksi input CLI dijalankan sebelum commit khusus AUTH-006.
 
 ### Blocker atau tindak lanjut
 
-Menunggu AUTH-005; jangan menjalankan reset pada credential aktual sebagai test.
+Tidak ada blocker. Jalankan recovery hanya pada database aplikasi yang sudah dimigrasikan dan setelah operator mengonfirmasi database target dari environment deployment.
 
 ## User story: AUTH-US-03 — Otorisasi API dan kontrak yang dapat dipercaya
 

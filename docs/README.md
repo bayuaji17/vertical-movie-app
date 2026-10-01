@@ -17,7 +17,7 @@ Catat tanggal persetujuan dan pemilik keputusan di setiap dokumen. Pisahkan peri
 ## Panduan development
 
 - [Repository Context — Auth](REPOSITORY_CONTEXT.md): konteks kode dan batas sistem pada snapshot `bff1ced88f7ade37d454370ccf7d95a47cbf3aea` untuk implementasi auth.
-- [Implementation Plan — Auth](IMPLEMENTATION_PLAN.md): rencana email/password, provisioning/pemulihan admin melalui CLI, proteksi API/dashboard, dan integrasi satu origin; AUTH-001 sampai AUTH-005 selesai.
+- [Implementation Plan — Auth](IMPLEMENTATION_PLAN.md): rencana email/password, provisioning/pemulihan admin melalui CLI, proteksi API/dashboard, dan integrasi satu origin; AUTH-001 sampai AUTH-006 selesai.
 - [Backlog Auth](tasks/auth.md): user story dan 13 task kecil dengan dependensi, acceptance criteria, serta tempat pencatatan bukti validasi.
 - [Global Workflow](GLOBAL_WORKFLOW.md): keputusan Agile dan pembagian modul → user story → task kecil disetujui pengguna pada 1 Oktober 2026.
 - [Template Task](TASK_TEMPLATE.md): format backlog per modul, acceptance criteria, dependensi, dan bukti validasi.
@@ -43,7 +43,7 @@ Konfigurasi shadcn dan komponen UI tetap berada di `apps/web`. Video.js tersedia
 
 Player Video.js React `10.0.0-rc.4` telah dipasang di `apps/web`, bersama `@videojs/core` pada versi yang sama. Registry `@videojs` terdaftar di `apps/web/components.json`. Skin Default yang dapat diedit berada di `apps/web/src/components/videojs/`; komponen kontrol memakai Remixicon dan styling Tailwind. `VerticalVideoPlayer` di `apps/web/src/components/vertical-video-player.tsx` menyediakan layout 9:16 dengan `playsInline` dan preload metadata, tanpa autoplay. Halaman starter menampilkan MP4 demo resmi untuk pemeriksaan pemutaran; sumber demo bukan konten produk. Integrasi HLS, storage, dan katalog video belum diimplementasikan. Versi release candidate ini telah diterima untuk tahap development.
 
-API dan web bergantung pada `@repo/auth` melalui `workspace:*`. Gunakan `@repo/auth/server` untuk `createAuthServer`, adapter/hash helper; web tetap memakai `@repo/auth/client`, dan tipe melalui `@repo/auth/types`. Schema Better Auth/admin, migrasi eksplisit, instance auth, handler `/api/auth`, dan CLI provisioning admin kini tersedia. CLI reset password, guard endpoint domain, gateway web same-origin, dan formulir login masih backlog.
+API dan web bergantung pada `@repo/auth` melalui `workspace:*`. Gunakan `@repo/auth/server` untuk `createAuthServer`, adapter/hash helper; web tetap memakai `@repo/auth/client`, dan tipe melalui `@repo/auth/types`. Schema Better Auth/admin, migrasi eksplisit, instance auth, handler `/api/auth`, dan CLI provisioning/reset password admin kini tersedia. Guard endpoint domain, gateway web same-origin, dan formulir login masih backlog.
 
 ## Bekerja di repo ini
 
