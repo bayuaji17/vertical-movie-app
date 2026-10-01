@@ -14,6 +14,12 @@ Ini adalah satu-satunya direktori dokumentasi proyek. `README.md` di root tetap 
 
 Catat tanggal persetujuan dan pemilik keputusan di setiap dokumen. Pisahkan perilaku yang diusulkan dari kode yang sudah berjalan.
 
+## Panduan development
+
+- [Global Workflow](GLOBAL_WORKFLOW.md): keputusan Agile dan pembagian modul → user story → task kecil disetujui pengguna pada 1 Oktober 2026.
+- [Template Task](TASK_TEMPLATE.md): format backlog per modul, acceptance criteria, dependensi, dan bukti validasi.
+- [Environment](ENVIRONMENT.md): setup env API/web, pemisahan konfigurasi publik/server, dan status variabel integrasi.
+
 ## Struktur saat ini
 
 | Path                                                              | Tanggung jawab                                                                                                                         |
@@ -44,6 +50,8 @@ bun run lint
 bun run check-types
 bun run build
 ```
+
+Untuk setup lokal pertama kali, salin `apps/api/.env.example` ke `apps/api/.env` dan `apps/web/.env.example` ke `apps/web/.env`. Jika file tujuan sudah ada, lengkapi nilainya tanpa menimpa konfigurasi lokal. Port dev web sekarang dibaca dari env melalui konfigurasi Vite; kedua app tetap memakai default 3001 (API) dan 3000 (web). Variabel PostgreSQL/auth/storage/worker serta URL API web disiapkan untuk development dan belum mengaktifkan integrasi dengan sendirinya.
 
 `dev` menjalankan kedua app. `build` menghasilkan `apps/api/dist/` dan `apps/web/.output/`; `bun run start` menjalankan hasil build dengan Bun. Gunakan filter `--filter=api` atau `--filter=web` untuk satu app, atau `--filter=@repo/auth` untuk pemeriksaan tipe package auth. Saat ini lint hanya mencakup `web`; pemeriksaan tipe mencakup kedua app dan `@repo/auth`, sedangkan build mencakup kedua app. Package auth mengekspor sumber TypeScript yang dikompilasi oleh Bun/Vite saat digunakan, sehingga tidak memiliki task build sendiri.
 

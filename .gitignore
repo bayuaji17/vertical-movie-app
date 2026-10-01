@@ -5,12 +5,9 @@ node_modules
 .pnp
 .pnp.js
 
-# Local env files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# Local env files; commit only the sample configuration
+.env*
+!.env.example
 
 # Testing
 coverage

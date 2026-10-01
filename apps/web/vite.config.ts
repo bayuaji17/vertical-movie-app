@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import { devtools } from '@tanstack/devtools-vite'
 
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
@@ -7,15 +7,33 @@ import viteReact from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { nitro } from 'nitro/vite'
 
-const config = defineConfig({
-  resolve: { tsconfigPaths: true },
-  plugins: [
-    devtools(),
-    nitro({ preset: 'bun', rollupConfig: { external: [/^@sentry\//] } }),
-    tailwindcss(),
-    tanstackStart(),
-    viteReact(),
-  ],
+const config = defineConfig(({ mode }) => {
+  const env: Partial<Record<'PORT' | 'HOST', string>> = loadEnv(
+    mode,
+    process.cwd(),
+    ['PORT', 'HOST'],
+  )
+  const port = Number(process.env.PORT ?? env.PORT ?? 3000)
+
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error('PORT harus berupa bilangan bulat antara 1 dan 65535.')
+  }
+
+  return {
+    resolve: { tsconfigPaths: true },
+    server: {
+      port,
+      host: process.env.HOST ?? env.HOST ?? 'localhost',
+      strictPort: true,
+    },
+    plugins: [
+      devtools(),
+      nitro({ preset: 'bun', rollupConfig: { external: [/^@sentry\//] } }),
+      tailwindcss(),
+      tanstackStart(),
+      viteReact(),
+    ],
+  }
 })
 
 export default config

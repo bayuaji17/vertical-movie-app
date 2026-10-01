@@ -6,7 +6,7 @@
     "#/*": "./src/*"
   },
   "scripts": {
-    "dev": "bun run --bun vite dev --port 3000",
+    "dev": "bun run --bun vite dev",
     "generate-routes": "bun run --bun tsr generate",
     "build": "bun run --bun vite build",
     "start": "bun .output/server/index.mjs",

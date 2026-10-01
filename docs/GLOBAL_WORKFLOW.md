@@ -1,6 +1,35 @@
-# Draft Global Workflow — Vertical Movie App
+# Global Workflow — Vertical Movie App
 
-> Status: **Draft untuk ditinjau** · Diperbarui 30 September 2026 · Alur kerja pengembangan untuk admin tunggal dan penonton tanpa login.
+> Diperbarui 1 Oktober 2026. **Keputusan disetujui pengguna:** gunakan Agile dan pecah setiap modul menjadi task kecil. Rincian alur produk/rilis yang belum disetujui tetap berupa draft.
+
+## Agile dan pembagian pekerjaan
+
+Susun pekerjaan dengan urutan **modul → user story → task kecil**. Modul mempunyai tujuan pengguna dan batas yang jelas, user story menjelaskan kebutuhan aktor, dan task menghasilkan satu perubahan konkret yang dapat ditinjau serta divalidasi. Sebuah modul selesai ketika story dan task wajibnya memenuhi acceptance criteria; jumlah task selesai saja tidak membuktikan alur pengguna selesai.
+
+1. **Refinement backlog.** Petakan modul ke PRD dan arsitektur. Urutkan story menurut nilai pengguna, risiko, dan dependensi; pecah story menjadi task sebelum mulai implementasi.
+2. **Planning iterasi.** Pilih tujuan iterasi dan task berstatus `Ready` sesuai kapasitas. Durasi iterasi, estimasi, dan alat board akan ditetapkan bersama saat development dimulai; jangan menganggap seluruh modul harus selesai dalam satu iterasi.
+3. **Implementasi bertahap.** Kerjakan satu task utama sampai dapat diperiksa. Catat blocker dan keputusan saat ditemukan; perubahan kebutuhan kembali ke backlog untuk diprioritaskan.
+4. **Review hasil.** Periksa acceptance criteria dan demo hasil iterasi. Task yang masih gagal divalidasi kembali ke `In Progress`.
+5. **Retrospective.** Catat kendala dan perbaikan cara kerja, lalu gunakan umpan balik untuk iterasi berikutnya.
+
+### Standar task kecil
+
+- Satu tujuan konkret dan ruang lingkup terbatas; pisahkan pekerjaan independen atau hasil yang membutuhkan review berbeda.
+- Cantumkan ID, owner, prioritas, dependensi, acceptance criteria, dan cara validasi sebelum task berstatus `Ready`.
+- Bila task belum dapat diperkirakan karena pilihan teknis belum jelas, buat task investigasi dengan keluaran keputusan/proof yang konkret.
+- Pecah implementasi per batas yang diperlukan, misalnya konfigurasi → skema/migrasi → endpoint → UI → pemeriksaan alur. Tetap rencanakan pemeriksaan integrasi untuk hasil pengguna lintas task.
+- Catat hasil dan bukti validasi. Gunakan [template task](TASK_TEMPLATE.md) pada `docs/tasks/<module>.md` saat menyusun backlog modul.
+
+### Status pekerjaan
+
+| Status        | Makna dan syarat perpindahan                                                                                                             |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `Backlog`     | Kebutuhan tercatat, tetapi belum siap dikerjakan.                                                                                        |
+| `Ready`       | Ruang lingkup/acceptance criteria jelas dan dependensi yang diperlukan tersedia.                                                         |
+| `In Progress` | Implementasi aktif pada task tersebut.                                                                                                   |
+| `Review`      | Implementasi dan bukti validasi siap diperiksa.                                                                                          |
+| `Done`        | Acceptance criteria serta kriteria selesai yang relevan terpenuhi.                                                                       |
+| `Blocked`     | Ada hambatan konkret; catat penyebab dan task/keputusan yang diperlukan. Kembali ke `Ready` atau `In Progress` setelah hambatan selesai. |
 
 ## Dari kebutuhan ke rilis
 
@@ -18,6 +47,8 @@ Urutan potongan awal yang disarankan: skema PostgreSQL/Drizzle dan provisioning 
 Jalankan perintah dari root dengan Bun yang sesuai `package.json`:
 
 ```sh
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.example apps/web/.env
 bun install --frozen-lockfile
 bun run dev
 bun run lint
@@ -25,7 +56,7 @@ bun run check-types
 bun run build
 ```
 
-`bun run dev` menjalankan kedua app. Filter task dengan `--filter=api` atau `--filter=web` jika pekerjaan terbatas pada satu app. Saat ini `lint` hanya menjalankan lint web karena API belum memiliki skrip lint; `check-types` dan `build` mencakup kedua app. Setelah skrip atau dependensi berubah, jalankan instalasi frozen dan pemeriksaan yang relevan.
+Salin env sekali ketika setup lokal; jika file sudah ada, lengkapi nilai yang diperlukan tanpa menimpanya. Lihat [Environment](ENVIRONMENT.md) untuk variabel aktif dan placeholder integrasi. `bun run dev` menjalankan kedua app. Filter task dengan `--filter=api` atau `--filter=web` jika pekerjaan terbatas pada satu app. Saat ini `lint` hanya menjalankan lint web; `check-types` mencakup kedua app dan `@repo/auth`, sedangkan `build` mencakup kedua app. Setelah skrip atau dependensi berubah, jalankan instalasi frozen dan pemeriksaan yang relevan.
 
 Husky menjalankan lint dan pemeriksaan tipe sebelum commit. Commitlint memvalidasi pesan Conventional Commits pada hook `commit-msg`, misalnya `feat(api): add video drafts` atau `docs: update admin workflow`. Pemeriksaan hook tidak menggantikan tinjauan perilaku. Pertahankan perubahan worktree yang sudah ada dan periksa isi commit sebelum membuatnya.
 
@@ -42,4 +73,4 @@ Husky menjalankan lint dan pemeriksaan tipe sebelum commit. Commitlint memvalida
 
 ## Perubahan keputusan
 
-Gunakan status `Draft` sampai pemilik produk/teknis menyetujui isinya. Setelah persetujuan, tulis tanggal dan keputusan pada dokumen terkait. Jika implementasi menyimpang dari keputusan yang disetujui, perbarui dokumen serta alasan perubahan dalam pekerjaan yang sama. Tidak ada workflow CI, strategi branching, atau kebijakan deploy yang ditetapkan oleh draft ini.
+Keputusan Agile dan pembagian modul menjadi task kecil disetujui pengguna pada 1 Oktober 2026. Gunakan status `Draft` untuk keputusan produk/teknis lain sampai disetujui, lalu tulis tanggal dan keputusan pada dokumen terkait. Jika implementasi menyimpang dari keputusan yang disetujui, perbarui dokumen serta alasan perubahan dalam pekerjaan yang sama. Workflow ini belum menetapkan CI, strategi branching, durasi sprint, atau kebijakan deploy. HLS akan disiapkan bersama development modul pemutaran sesuai keputusan pengguna.

@@ -15,10 +15,14 @@ Use Bun 1.4.2 and install dependencies from the repository root:
 
 ```sh
 bun install --frozen-lockfile
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.example apps/web/.env
 bun run dev
 ```
 
-`bun run dev` starts both apps. The API uses port 3001 by default; set `PORT` to override it.
+Copy the env files once during initial setup; update existing local env files without overwriting their values. See [Environment setup](docs/ENVIRONMENT.md) for the active variables and planned integrations.
+
+`bun run dev` starts both apps. The API uses port 3001 and web uses port 3000 by default; set `PORT` in each app's env to override its port.
 
 ## Workspace tasks
 
@@ -30,7 +34,7 @@ bun run check-types
 bun run lint
 ```
 
-Build and type checking cover both apps. Lint currently covers `web`, which provides the only lint script. Turborepo caches the API's `dist` and the web app's `.output` build directories.
+Build covers both apps; type checking also covers `packages/auth`. Lint currently covers `web`, which provides the only lint script. Turborepo caches the API's `dist` and the web app's `.output` build directories.
 
 After building, start both production servers with Bun:
 
