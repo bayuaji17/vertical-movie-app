@@ -4,7 +4,7 @@
 
 Admin tunggal dapat login email/password, menggunakan dashboard yang dilindungi, logout, dan memulihkan password melalui CLI. Pengunjung tetap mengakses halaman publik tanpa login. Referensi: PRD-01, PRD-07, GR-01, GR-02; [Architecture](../ARCHITECTURE.md), [API Development](../API_DEVELOPMENT.md), dan [rencana lengkap](../IMPLEMENTATION_PLAN.md).
 
-Scope email/password + CLI provision/recovery + satu origin disetujui pengguna pada **1 Oktober 2026**. Implementasi belum dimulai. Task pertama `Ready`; task dependen `Backlog` sampai prerequisite lulus. `Ready` tidak berarti persetujuan melakukan commit/push/deploy. Semua task menggunakan owner **pengembang/agent pelaksana**, prioritas wajib berurutan, dan bukti aktual saat dikerjakan. Task ini tidak menetapkan sprint atau estimasi waktu kalender.
+Scope email/password + CLI provision/recovery + satu origin disetujui pengguna pada **1 Oktober 2026**. AUTH-001 dan AUTH-002 selesai; task dependen tetap `Backlog` sampai prerequisite lulus. Semua task menggunakan owner **pengembang/agent pelaksana**, prioritas wajib berurutan, dan bukti aktual saat dikerjakan. Task ini tidak menetapkan sprint atau estimasi waktu kalender.
 
 ## User story: AUTH-US-01 — Fondasi autentikasi persisten
 
@@ -49,7 +49,7 @@ Tidak ada blocker kompatibilitas. Gunakan migrator Bun SQL dan schema generated;
 
 ## Task: AUTH-002 — Siapkan konfigurasi, factory dan boundary package
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P0 — kedua
 - Referensi: AUTH-US-01, API Development, Environment
@@ -62,22 +62,29 @@ Buat validasi env API, factory Bun SQL/Drizzle, `createApp`, type-only `App`, da
 
 ### Acceptance criteria
 
-- [ ] Secret kosong/kurang panjang, database URL dan origin invalid ditolak dengan pesan aman.
-- [ ] Import factory/type tidak membuka port, pool, atau membaca secret; build tidak membutuhkan live DB.
-- [ ] API memberi adapter/env; web tidak mengimpor server runtime auth.
-- [ ] Script test API hanya menjalankan source unit suite; frozen install berhasil setelah dependency berubah.
+- [x] Secret kosong/kurang panjang, database URL dan origin invalid ditolak dengan pesan aman.
+- [x] Import factory/type tidak membuka port, pool, atau membaca secret; build tidak membutuhkan live DB.
+- [x] API memberi adapter/env; web tidak mengimpor server runtime auth.
+- [x] Script test API hanya menjalankan source unit suite; frozen install berhasil setelah dependency berubah.
 
 ### Validasi
 
-Unit konfigurasi dan import, `bun install --frozen-lockfile`, type-check workspace dan build relevan.
+Unit konfigurasi/request, `bun install --frozen-lockfile`, test native API, type-check workspace, build, lint web, smoke API lokal dan graceful shutdown, serta pemeriksaan diff.
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diuji.
+- `loadApiEnv` memvalidasi port, URL PostgreSQL ber-host, secret minimal 32 karakter, dan origin HTTP(S); nilai auth publik wajib sama. Error tidak menyertakan secret atau kredensial database.
+- `createDatabase` memakai `Bun.SQL` dan `drizzle-orm/bun-sql`; SQL client bersifat unopened hingga dipakai. `createApp` tetap dapat diuji tanpa port dan menutup database yang diinjeksi ketika berhenti.
+- Bootstrap membuat database sekali, menjalankan Elysia, dan menangani `SIGINT`/`SIGTERM`; skema dan endpoint auth belum dipasang.
+- `@repo/auth/server` menyediakan `createAuthServer(options)` bersama adapter dan helper hash terverifikasi. Entry point `@repo/auth/client`/`types` tetap terpisah; API memiliki `api/types` type-only.
+- API suite native Bun kini hanya menjalankan `./src`; migrasi/proof PostgreSQL tetap terpisah.
+- `bun run --cwd apps/api test` lulus: 11 test pada tiga file source (19 assertion), termasuk validasi env, HTTP tanpa port, dan pembuatan client yang belum terkoneksi.
+- `bun install --frozen-lockfile`, `bun run check-types`, `bun run build`, `bun run lint`, startup API lokal, dan `git diff --check` lulus.
+- Task di-commit setelah seluruh acceptance dan validasi terpenuhi; SHA dicatat di execution log rencana.
 
 ### Blocker atau tindak lanjut
 
-Menunggu AUTH-001; schema/migrasi ada pada AUTH-003.
+Tidak ada blocker; schema dan migrasi tetap ruang lingkup AUTH-003.
 
 ## Task: AUTH-003 — Buat schema dan migrasi auth/admin
 

@@ -6,7 +6,7 @@
 
 API menggunakan TypeScript strict, Elysia, dan Bun sesuai versi root `package.json`. API memiliki logika domain dan akses data aplikasi. **Eden Treaty dipilih pengguna pada 1 Oktober 2026** untuk konsumsi kontrak Elysia oleh web. Web tidak menjalankan ulang aturan publikasi atau otorisasi sebagai pengganti validasi server.
 
-Saat ini kode API masih satu `src/index.ts` dengan `GET /`. Database lokal `vertical_movie_app` telah dibuat dan koneksi diverifikasi menggunakan Bun SQL, tetapi Eden, Drizzle, migrasi, konfigurasi Better Auth, storage, dan worker belum diimplementasikan. Dependensi Better Auth dimiliki `packages/auth`; API menggunakan `@repo/auth/server`. Panduan ini menyesuaikan pola pengembangan; instalasi Eden dan ekspor kontrak dilakukan bersama task integrasi API–web.
+Fondasi API kini memiliki `src/app.ts` untuk factory Elysia tanpa listen, `src/config/env.ts` untuk validasi konfigurasi, `src/db/client.ts` untuk factory Bun SQL/Drizzle, dan bootstrap dengan penutupan resource. Route yang aktif masih hanya `GET /`; schema, migrasi, handler auth, storage, dan worker belum dibuat. Drizzle 0.45.3 + Bun SQL serta Better Auth Drizzle adapter 1.7.7 telah dibuktikan pada database PostgreSQL khusus test. Dependensi Better Auth tetap dimiliki `packages/auth`; konfigurasi instance auth dan endpoint masih tugas berikutnya. Ekspor `api/types` tersedia; Eden client dan konsumsinya oleh web belum diimplementasikan.
 
 Instruksi agent tetap berada di [AGENTS.md](../AGENTS.md). Ikuti [Global Workflow](GLOBAL_WORKFLOW.md), [Template Task](TASK_TEMPLATE.md), dan [Environment](ENVIRONMENT.md). Kontrak produk yang belum disetujui di [Architecture](ARCHITECTURE.md) tetap berupa rancangan.
 
@@ -101,7 +101,7 @@ Kode lokal API yang benar-benar dipakai beberapa modul boleh masuk `shared/`; he
 Elysia mendefinisikan kontrak server; Eden adalah client bertipe yang mengonsumsinya. Rencana penempatan dependensi mengikuti [instalasi resmi Eden](https://elysiajs.com/eden/installation): SDK di `apps/web` dan Elysia sebagai dependensi pengembangan web untuk inferensi, dengan versi Elysia yang sama dengan API. Dokumentasi resmi saat ini memakai `@elysia/eden`; referensi skill lama masih menyebut `@elysiajs/eden`. Verifikasi nama package, peer dependency, dan versi pada task instalasi.
 
 1. `app.ts` mengekspor factory `createApp` dan tipe `App = ReturnType<typeof createApp>`. Factory mengembalikan hasil chaining seluruh modul dengan tipe hasil inferensi; jangan menulis return type umum `Elysia` yang menghapus informasi rute.
-2. `types.ts` hanya mengekspor `App` melalui `export type`. Pada task integrasi, deklarasikan entry point `api/types` di package API dan dependensi `api: workspace:*` pada web agar kontrak resolvable melalui package workspace. Browser hanya menggunakan `import type`; jangan impor runtime `app.ts` atau `index.ts` ke web.
+2. `types.ts` hanya mengekspor `App` melalui `export type`; package API sudah menyediakan entry point `api/types`. Tambahkan dependensi `api: workspace:*` pada web saat konsumen kontrak dibuat. Browser hanya menggunakan `import type`; jangan impor runtime `app.ts` atau `index.ts` ke web.
 3. Kontrak tetap dimiliki API; jangan membuat salinan DTO/rute di web atau package baru hanya untuk menduplikasi tipe. TypeScript consumer harus dapat menyelesaikan seluruh impor dalam deklarasi kontrak, termasuk tipe Bun bila diperlukan. Gunakan impor relatif/entry point workspace yang jelas; alias API tidak boleh diselesaikan sebagai alias web.
 4. Client web ditempatkan di `apps/web/src/lib/api/client.ts` ketika integrasi dimulai. Gunakan `treaty<App>(apiUrl)` dan URL publik dari `VITE_API_URL`. Validasi URL sebelum membuat client; jangan menggunakan fallback origin yang menyamarkan konfigurasi salah.
 5. Tipe Eden tidak menegakkan akses runtime. Schema Elysia, pemeriksaan admin, dan query publik tetap wajib pada server. Endpoint Better Auth menggunakan client `@repo/auth/client`; direct upload ke signed URL dan pemutaran media memakai mekanismenya sendiri.
@@ -273,13 +273,13 @@ Dokumentasi OpenAPI menerangkan kontrak HTTP. Consumer endpoint aplikasi tetap m
 - Konfigurasi Better Auth dimiliki `packages/auth`; API menyediakan adapter database dan secret melalui `@repo/auth/server`. `modules/auth` memasang handler tersebut, sedangkan `plugins/admin.ts` memverifikasi sesi dan identitas admin pada setiap operasi privat.
 - Sesi valid tidak otomatis berarti admin. Verifikasi identitas admin tunggal yang disediakan melalui provisioning terkontrol; pendaftaran publik dinonaktifkan. Pengunjung katalog/player tidak perlu akun.
 - Trusted origin, CORS, cookie, dan alur permintaan web ke API ditetapkan bersama task auth. Jangan menggunakan wildcard origin untuk request berkredensial.
-- Pembacaan env dipusatkan di `config/env.ts` ketika integrasi dimulai. Validasi konfigurasi wajib sesuai proses HTTP/worker sebelum proses mulai menerima pekerjaan; jangan membuat client dengan credential kosong.
+- Pembacaan env API dipusatkan di `config/env.ts` dan divalidasi saat startup HTTP. Worker mengikuti konfigurasi prosesnya saat dibuat; jangan membuat client dengan credential kosong.
 - Rahasia tetap di env API yang diabaikan Git. Daftarkan variabel baru tanpa nilai asli di `.env.example`, [Environment](ENVIRONMENT.md), dan konfigurasi env task Turbo yang relevan.
-- Database, storage client, dan instance auth dibuat sekali per proses lalu diberikan ke consumer; jangan membuat pool baru setiap request. Tutup resource pada shutdown.
+- Database, storage client, dan instance auth dibuat sekali per proses lalu diberikan ke consumer; jangan membuat pool baru setiap request. Database Bun SQL dibuat oleh bootstrap dan ditutup pada shutdown. Factory tidak membuka port atau koneksi saat diimpor.
 
 ## Database dan migrasi
 
-- Evaluasi `drizzle-orm/bun-sql` dengan Bun SQL serta adapter Better Auth pada versi yang dipasang. Catat proof kompatibilitas sebelum memilih driver alternatif. Database lokal yang sudah dibuat belum membuktikan kompatibilitas Drizzle/adapter.
+- Kompatibilitas Bun SQL, `drizzle-orm/bun-sql`, dan Better Auth Drizzle adapter telah dibuktikan pada versi yang dikunci di [backlog auth](tasks/auth.md). Proof tersebut memverifikasi operasi adapter tertentu; integritas migrasi/domain berikutnya tetap harus dibuktikan pada database test.
 - Query memakai parameter binding dari Drizzle atau tagged template Bun SQL. Jangan menggabungkan input pengguna menjadi SQL mentah. Identifier dinamis harus berasal dari daftar server yang tetap.
 - Schema tabel berada di `src/db/schema/`. Commit migrasi SQL dan metadata generasinya di `apps/api/drizzle/` ketika tooling dipasang. Schema Better Auth yang dihasilkan harus sesuai versi library/adapter dan ditinjau sebelum migrasi.
 - Jalankan migrasi melalui perintah eksplisit; jangan membuat/mengubah tabel otomatis saat request masuk. Nama dan skrip migrasi ditambahkan bersama task database, lalu didokumentasikan.
@@ -309,7 +309,7 @@ bun run check-types --filter=api
 bun run build --filter=api
 ```
 
-Setelah perubahan script/dependensi, jalankan `bun install --frozen-lockfile` dan pemeriksaan yang relevan. Husky tetap menjalankan lint web dan pemeriksaan tipe seluruh workspace sebelum commit. API belum memiliki script lint; jangan melaporkan `bun run lint` sebagai pemeriksaan lint API. Script `test` API saat ini masih placeholder yang gagal dan bukan suite pengujian.
+Setelah perubahan script/dependensi, jalankan `bun install --frozen-lockfile` dan pemeriksaan yang relevan. Husky tetap menjalankan lint web dan pemeriksaan tipe seluruh workspace sebelum commit. API belum memiliki script lint; jangan melaporkan `bun run lint` sebagai pemeriksaan lint API. Script `test` API menjalankan native Bun suite di `src`; test yang membutuhkan PostgreSQL nyata tetap berada di suite integrasi terpisah.
 
 ## Unit test API — Bun native
 
@@ -375,7 +375,7 @@ bun test ./apps/api/src/modules/videos/service.test.ts
 bun test --watch ./apps/api/src
 ```
 
-Perintah pertama mencakup unit/modul HTTP di source API; suite integrasi dijalankan terpisah dengan `bun test ./apps/api/test/integration` setelah environment khusus test disiapkan. Direktori/file contoh belum semuanya ada. `bun run test` API saat ini masih placeholder; gantikan dengan script native Bun saat task pertama menambahkan suite. Task test Turbo, hook commit, dan gate CI belum diaktifkan oleh panduan ini.
+Perintah pertama mencakup unit/modul HTTP di source API; suite integrasi dijalankan terpisah dengan `bun test ./apps/api/test/integration` setelah environment khusus test disiapkan. Script `test` API menjalankan suite native Bun di `src`; proof PostgreSQL terisolasi memiliki script tersendiri. Direktori/file contoh lainnya ditambahkan bersama task pemiliknya. Root Husky menjalankan lint web dan type-check sebelum commit; konfigurasi CI hosted tidak termasuk workflow proyek saat ini.
 
 Perubahan aturan bisnis, validasi, atau lifecycle API menyertakan test perilaku yang relevan pada task implementasinya. Perbaikan bug menyertakan regression test bila perilakunya dapat diuji. Catat command, hasil, dan bukti pada backlog modul; test tidak menggantikan `check-types`, karena Bun menjalankan TypeScript tanpa pemeriksaan tipe penuh.
 

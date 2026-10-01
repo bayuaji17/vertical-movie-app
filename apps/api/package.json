@@ -1,8 +1,11 @@
 {
   "name": "api",
   "version": "1.0.50",
+  "exports": {
+    "./types": "./src/types.ts"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "bun test ./src",
     "auth:adapter:proof": "bun test ./test/integration/auth-adapter-proof.test.ts",
     "dev": "bun run --watch src/index.ts",
     "build": "bun build src/index.ts --target=bun --outdir=dist",
