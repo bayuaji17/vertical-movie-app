@@ -56,14 +56,14 @@ bun -e 'console.log(Array.from(crypto.getRandomValues(new Uint8Array(32)), byte 
 | `VITE_API_URL`     | Origin web publik untuk browser client API dan Better Auth melalui gateway.          | Dipakai sebagai konfigurasi publik saat build.          |
 | `API_INTERNAL_URL` | Upstream tetap Elysia untuk server TanStack Start, misalnya `http://localhost:3001`. | Khusus server saat dev/run; tidak masuk bundle browser. |
 
-`PORT` dev harus integer 1–65535. Vite menolak port yang sedang dipakai agar origin tidak bergeser tanpa diketahui. Argumen CLI `--port`/`--host` dapat dipakai untuk override saat dev. Untuk setup auth lokal, `VITE_API_URL`, `BETTER_AUTH_URL`, dan `WEB_ORIGIN` memakai origin web yang sama; `API_INTERNAL_URL` menunjuk ke server API yang tidak diekspos browser.
+`PORT` dev harus integer 1–65535. Vite menolak port yang sedang dipakai agar origin tidak bergeser tanpa diketahui. Argumen CLI `--port`/`--host` dapat dipakai untuk override saat dev. Untuk setup auth lokal, `VITE_API_URL`, `BETTER_AUTH_URL`, dan `WEB_ORIGIN` memakai origin web yang sama; `API_INTERNAL_URL` menunjuk ke server API yang tidak diekspos browser. Gateway membaca nilai ini saat setiap handler server berjalan dan meneruskan browser melalui origin web.
 
 Semua variabel `VITE_*` dapat masuk bundle browser. Simpan secret Better Auth, kredensial database, dan kredensial S3 hanya di API. Nilai `VITE_API_URL` dipilih saat build; setelah client API diimplementasikan, perubahan URL untuk rilis membutuhkan build ulang web. Gunakan HTTPS dan origin deployment yang benar saat rilis; konfigurasi production diberikan melalui environment deployment atau env lokal production yang tidak dilacak Git. Atur `NODE_ENV=production` pada runtime production, dan `HOST=0.0.0.0` untuk web jika server perlu menerima koneksi dari luar loopback.
 
 ## Pemuatan dan Turborepo
 
 - Bun memuat env aplikasi API secara native; Vite menangani env web menurut mode. Konfigurasi Vite menggunakan `loadEnv` untuk `PORT`/`HOST`. Tidak ada tambahan dependensi `dotenv`.
-- Root `turbo.json` meneruskan variabel runtime API pada task `api#dev`/`api#start`; task web memiliki daftar variabel sendiri. Environment yang diekspor oleh deployment tidak hilang karena strict mode.
+- Root `turbo.json` meneruskan variabel runtime API pada task `api#dev`/`api#start`; `API_INTERNAL_URL` diteruskan ke web `dev`/`start`. Task `web#build` hanya memasukkan `VITE_API_URL` dari konfigurasi API ke proses build client. Environment yang diekspor deployment tidak hilang karena strict mode.
 - Build memasukkan `.env*` sebagai input cache. Task `web#build` juga memasukkan `VITE_API_URL` dari environment proses ke hash. Jangan mengandalkan penggantian env setelah artefak client selesai dibangun.
 - Restart proses setelah mengubah env. API menolak secret Better Auth kosong/pendek, URL bukan PostgreSQL, serta `BETTER_AUTH_URL` dan `WEB_ORIGIN` yang berbeda.
 

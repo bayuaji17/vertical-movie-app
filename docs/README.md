@@ -43,7 +43,7 @@ Konfigurasi shadcn dan komponen UI tetap berada di `apps/web`. Video.js tersedia
 
 Player Video.js React `10.0.0-rc.4` telah dipasang di `apps/web`, bersama `@videojs/core` pada versi yang sama. Registry `@videojs` terdaftar di `apps/web/components.json`. Skin Default yang dapat diedit berada di `apps/web/src/components/videojs/`; komponen kontrol memakai Remixicon dan styling Tailwind. `VerticalVideoPlayer` di `apps/web/src/components/vertical-video-player.tsx` menyediakan layout 9:16 dengan `playsInline` dan preload metadata, tanpa autoplay. Halaman starter menampilkan MP4 demo resmi untuk pemeriksaan pemutaran; sumber demo bukan konten produk. Integrasi HLS, storage, dan katalog video belum diimplementasikan. Versi release candidate ini telah diterima untuk tahap development.
 
-API dan web bergantung pada `@repo/auth` melalui `workspace:*`. Gunakan `@repo/auth/server` untuk `createAuthServer`, adapter/hash helper; web tetap memakai `@repo/auth/client`, dan tipe melalui `@repo/auth/types`. Schema Better Auth/admin, migrasi eksplisit, instance auth, handler `/api/auth`, CLI provisioning/reset, serta guarded `GET /admin/session` kini tersedia. Guard untuk endpoint domain lain, gateway web same-origin, dan formulir login masih backlog.
+API dan web bergantung pada `@repo/auth` melalui `workspace:*`. Gunakan `@repo/auth/server` untuk `createAuthServer`, adapter/hash helper; web tetap memakai `@repo/auth/client`, dan tipe melalui `@repo/auth/types`. Schema Better Auth/admin, migrasi eksplisit, instance auth, handler `/api/auth`, CLI provisioning/reset, guarded `GET /admin/session`, serta gateway web same-origin `/api/auth/*` dan `/api/admin/session` kini tersedia. Guard endpoint domain lain dan formulir login masih backlog.
 
 ## Bekerja di repo ini
 
@@ -57,7 +57,7 @@ bun run check-types
 bun run build
 ```
 
-Untuk setup lokal pertama kali, salin `apps/api/.env.example` ke `apps/api/.env` dan `apps/web/.env.example` ke `apps/web/.env`. Jika file tujuan sudah ada, lengkapi nilainya tanpa menimpa konfigurasi lokal. Port dev web dibaca dari env; default API 3001 dan web 3000. API kini menolak secret Better Auth kosong/pendek, URL bukan PostgreSQL, serta origin auth/web yang berbeda. Endpoint Better Auth tersedia pada `/api/auth`; gateway same-origin web dan UI login masih backlog.
+Untuk setup lokal pertama kali, salin `apps/api/.env.example` ke `apps/api/.env` dan `apps/web/.env.example` ke `apps/web/.env`. Jika file tujuan sudah ada, lengkapi nilainya tanpa menimpa konfigurasi lokal. Port dev web dibaca dari env; default API 3001 dan web 3000. API kini menolak secret Better Auth kosong/pendek, URL bukan PostgreSQL, serta origin auth/web yang berbeda. Browser memakai gateway same-origin `/api/auth/*` dan `/api/admin/session`; `API_INTERNAL_URL` hanya dibaca server web saat runtime. Formulir login masih backlog.
 
 `dev` menjalankan kedua app. `build` menghasilkan `apps/api/dist/` dan `apps/web/.output/`; `bun run start` menjalankan hasil build dengan Bun. Gunakan filter `--filter=api` atau `--filter=web` untuk satu app, atau `--filter=@repo/auth` untuk pemeriksaan tipe package auth. Saat ini lint hanya mencakup `web`; pemeriksaan tipe mencakup kedua app dan `@repo/auth`, sedangkan build mencakup kedua app. Package auth mengekspor sumber TypeScript yang dikompilasi oleh Bun/Vite saat digunakan, sehingga tidak memiliki task build sendiri.
 

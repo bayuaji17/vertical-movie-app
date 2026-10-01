@@ -1,0 +1,208 @@
+import { describe, expect, test } from 'bun:test'
+
+import { createAuthGateway } from '../src/lib/server/auth-gateway'
+
+const apiOrigin = 'http://127.0.0.1:43127'
+
+describe('same-origin auth gateway', () => {
+  test('forwards method, path, query, body and approved browser headers', async () => {
+    let upstreamRequest: Request | undefined
+    const gateway = createAuthGateway('auth', {
+      getApiInternalUrl: () => apiOrigin,
+      fetcher: async (request) => {
+        upstreamRequest = request
+        return Response.json({ ok: true })
+      },
+    })
+
+    const response = await gateway(
+      new Request('http://web.example/api/auth/sign-in/email?next=%2Fadmin', {
+        method: 'POST',
+        headers: {
+          cookie: 'better-auth.session_token=opaque',
+          origin: 'http://web.example',
+          'content-type': 'application/json',
+          'x-forwarded-for': '198.51.100.1',
+          'x-private-debug': 'must-not-forward',
+        },
+        body: JSON.stringify({ email: 'admin@example.com' }),
+      }),
+    )
+
+    expect(response.status).toBe(200)
+    expect(upstreamRequest?.url).toBe(
+      `${apiOrigin}/api/auth/sign-in/email?next=%2Fadmin`,
+    )
+    expect(upstreamRequest?.method).toBe('POST')
+    expect(upstreamRequest?.redirect).toBe('manual')
+    expect(await upstreamRequest?.text()).toBe(
+      JSON.stringify({ email: 'admin@example.com' }),
+    )
+    expect(upstreamRequest?.headers.get('cookie')).toBe(
+      'better-auth.session_token=opaque',
+    )
+    expect(upstreamRequest?.headers.get('origin')).toBe('http://web.example')
+    expect(upstreamRequest?.headers.has('x-forwarded-for')).toBe(false)
+    expect(upstreamRequest?.headers.has('x-private-debug')).toBe(false)
+    expect(response.headers.get('cache-control')).toBe('no-store')
+  })
+
+  test('keeps status and separate Set-Cookie values while forcing no-store', async () => {
+    const headers = new Headers({
+      'cache-control': 'public, max-age=3600',
+      'content-type': 'application/json',
+    })
+    headers.append('set-cookie', 'session=one; Path=/; HttpOnly')
+    headers.append('set-cookie', 'csrf=two; Path=/; SameSite=Lax')
+    const gateway = createAuthGateway('auth', {
+      getApiInternalUrl: () => apiOrigin,
+      fetcher: async () => new Response('created', { status: 201, headers }),
+    })
+
+    const response = await gateway(
+      new Request('http://web.example/api/auth/sign-in/email', {
+        method: 'POST',
+      }),
+    )
+
+    expect(response.status).toBe(201)
+    expect(response.headers.getSetCookie()).toEqual([
+      'session=one; Path=/; HttpOnly',
+      'csrf=two; Path=/; SameSite=Lax',
+    ])
+    expect(response.headers.get('cache-control')).toBe('no-store')
+    expect(await response.text()).toBe('created')
+  })
+
+  test('never derives the upstream host from the incoming request', async () => {
+    let upstreamUrl = ''
+    const gateway = createAuthGateway('auth', {
+      getApiInternalUrl: () => apiOrigin,
+      fetcher: async (request) => {
+        upstreamUrl = request.url
+        return new Response(null, { status: 204 })
+      },
+    })
+
+    await gateway(new Request('https://attacker.example/api/auth/get-session'))
+    expect(upstreamUrl).toBe(`${apiOrigin}/api/auth/get-session`)
+  })
+
+  test('limits the admin target to GET at the exact fixed path', async () => {
+    const upstreamUrls: string[] = []
+    const gateway = createAuthGateway('admin-session', {
+      getApiInternalUrl: () => apiOrigin,
+      fetcher: async (request) => {
+        upstreamUrls.push(request.url)
+        return Response.json({ user: null })
+      },
+    })
+
+    const methodResponse = await gateway(
+      new Request('http://web.example/api/admin/session', { method: 'POST' }),
+    )
+    const pathResponse = await gateway(
+      new Request('http://web.example/api/admin/session/extra'),
+    )
+    const validResponse = await gateway(
+      new Request('http://web.example/api/admin/session?refresh=1'),
+    )
+
+    expect(methodResponse.status).toBe(405)
+    expect(pathResponse.status).toBe(404)
+    expect(validResponse.status).toBe(200)
+    expect(await validResponse.json()).toEqual({ user: null })
+    expect(upstreamUrls).toEqual([`${apiOrigin}/admin/session?refresh=1`])
+  })
+
+  test('rewrites same-upstream redirects to a relative web path and rejects external redirects', async () => {
+    const gateway = createAuthGateway('auth', {
+      getApiInternalUrl: () => apiOrigin,
+      fetcher: async (request) =>
+        request.url.endsWith('/safe')
+          ? new Response(null, {
+              status: 302,
+              headers: { location: `${apiOrigin}/admin?from=auth` },
+            })
+          : new Response(null, {
+              status: 302,
+              headers: { location: 'https://attacker.example/collect' },
+            }),
+    })
+
+    const safeRedirect = await gateway(
+      new Request('http://web.example/api/auth/safe'),
+    )
+    const externalRedirect = await gateway(
+      new Request('http://web.example/api/auth/external'),
+    )
+
+    expect(safeRedirect.status).toBe(302)
+    expect(safeRedirect.headers.get('location')).toBe('/admin?from=auth')
+    expect(safeRedirect.headers.get('cache-control')).toBe('no-store')
+    expect(externalRedirect.status).toBe(502)
+  })
+
+  test('fails closed for absent or non-origin API_INTERNAL_URL values', async () => {
+    let calls = 0
+    const fetcher = async () => {
+      calls += 1
+      return Response.json({ ok: true })
+    }
+
+    for (const value of [undefined, 'http://user:secret@attacker.example']) {
+      const response = await createAuthGateway('auth', {
+        getApiInternalUrl: () => value,
+        fetcher,
+      })(new Request('http://web.example/api/auth/get-session'))
+      expect(response.status).toBe(503)
+      expect(await response.text()).not.toContain('secret')
+    }
+    expect(calls).toBe(0)
+  })
+
+  test('rejects oversized request bodies before contacting the API', async () => {
+    let calls = 0
+    const gateway = createAuthGateway('auth', {
+      getApiInternalUrl: () => apiOrigin,
+      maxRequestBodyBytes: 8,
+      fetcher: async () => {
+        calls += 1
+        return Response.json({ ok: true })
+      },
+    })
+
+    const response = await gateway(
+      new Request('http://web.example/api/auth/sign-in/email', {
+        method: 'POST',
+        body: 'body exceeds limit',
+      }),
+    )
+
+    expect(response.status).toBe(413)
+    expect(response.headers.get('cache-control')).toBe('no-store')
+    expect(calls).toBe(0)
+  })
+
+  test('returns a generic timeout response when the API does not respond', async () => {
+    const gateway = createAuthGateway('auth', {
+      getApiInternalUrl: () => apiOrigin,
+      timeoutMs: 5,
+      fetcher: (request) =>
+        new Promise((_, reject) => {
+          request.signal.addEventListener(
+            'abort',
+            () => reject(new Error('transport aborted')),
+            { once: true },
+          )
+        }),
+    })
+
+    const response = await gateway(
+      new Request('http://web.example/api/auth/get-session'),
+    )
+    expect(response.status).toBe(504)
+    expect(response.headers.get('cache-control')).toBe('no-store')
+    expect(await response.text()).not.toContain('transport aborted')
+  })
+})

@@ -326,7 +326,7 @@ Sebagai admin, saya ingin login, refresh/dashboard dan logout bekerja pada brows
 
 ## Task: AUTH-009 — Gateway same-origin dan konfigurasi env
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P0 — kesembilan
 - Referensi: AUTH-US-04, keputusan same-origin, AC-02/04
@@ -339,10 +339,10 @@ Server routes web `/api/auth/*` dan `/api/admin/session` menuju upstream API tet
 
 ### Acceptance criteria
 
-- [ ] Request method/body/query/cookie/Origin/status terjaga; multiple Set-Cookie utuh; response no-store.
-- [ ] Upstream fixed, header/filter/redirect/timeout aman; input tidak menjadi proxy URL bebas.
-- [ ] Gateway bekerja saat dev dan pada build Nitro yang dijalankan Bun.
-- [ ] Browser memakai origin web; URL internal/secret auth tidak masuk bundle; env lokal existing tidak ditimpa.
+- [x] Request method/body/query/cookie/Origin/status terjaga; multiple Set-Cookie utuh; response no-store.
+- [x] Upstream fixed, header/filter/redirect/timeout aman; input tidak menjadi proxy URL bebas.
+- [x] Gateway bekerja saat dev dan pada build Nitro yang dijalankan Bun.
+- [x] Browser memakai origin web; URL internal/secret auth tidak masuk bundle; env lokal existing tidak ditimpa.
 
 ### Validasi
 
@@ -350,11 +350,17 @@ Regression test transport dengan upstream fake, smoke cookie lewat dev dan built
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diuji.
+- Server routes TanStack Start menerima semua method pada `/api/auth/*` dan GET `/api/admin/session`. Gateway memetakan sesi admin ke endpoint API tetap `/admin/session`; path dan query auth diteruskan sesuai jalurnya. `API_INTERNAL_URL` dibaca per request hanya di handler server; browser tetap memakai `VITE_API_URL` dengan origin web.
+- Gateway menerima hanya origin HTTP(S) tanpa userinfo/path/query/fragment, menetapkan target upstream dari dua jalur tetap, mem-forward allowlist header browser tanpa Host/forwarded header, membatasi body request 1 MiB, dan memakai timeout/abort sampai body respons selesai. Redirect otomatis dimatikan; Location same-origin dibuat relatif dan host lain ditolak. Header respons di-allowlist, tiap Set-Cookie dipertahankan, dan semua respons gateway `Cache-Control: no-store`.
+- `.env.example` web sudah berisi `VITE_API_URL=http://localhost:3000` dan `API_INTERNAL_URL=http://localhost:3001`; tidak ada env lokal yang ditimpa. Turbo sudah meneruskan `API_INTERNAL_URL` untuk dev/start dan hanya `VITE_API_URL` untuk build browser.
+- `bun run --cwd apps/web auth:gateway:proof` lulus: 8 test dengan 35 expectation untuk forwarding, header filter, cookie ganda, status/no-store, path admin tetap, URL upstream tetap, redirect, konfigurasi invalid, batas body, dan timeout.
+- `bun run --cwd apps/web auth:gateway:smoke` lulus terhadap upstream HTTP palsu melalui server Vite dev dan build Nitro/Bun: POST/DELETE, body/query/cookie/Origin, GET admin ke `/admin/session`, status 201, dua Set-Cookie, serta no-store.
+- `bun install --frozen-lockfile`, `bun run check-types`, `bun run lint`, `bun run build`, Prettier, dan `git diff --check` lulus. Pencarian bundle `.output/public` tidak menemukan `API_INTERNAL_URL`, `createAuthGateway`, atau marker error internal gateway. Build hanya menampilkan warning directive module dari dependency client yang sudah ada.
+- AUTH-009 dibuat menjadi commit tersendiri setelah semua acceptance dan validasi lulus.
 
 ### Blocker atau tindak lanjut
 
-Menunggu AUTH-004/007. Domain/TLS deployment belum dipilih; dokumentasikan konfigurasi lokal dan batas verifikasi.
+Tidak ada blocker implementasi lokal. Domain/TLS deployment belum dipilih; production domain/cookie belum dapat diverifikasi hingga konfigurasi deployment tersedia.
 
 ## Task: AUTH-010 — Client Eden dan pemeriksaan sesi SSR/browser
 

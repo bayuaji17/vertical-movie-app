@@ -59,7 +59,7 @@ Pada planning base SHA, API hanya `GET /` dan langsung membuka port; belum ada D
 | UI                      | `/admin/login`, `/admin`                        | TanStack Start                      |
 | Dokumentasi development | API `/openapi`, `/openapi/json`                 | Scalar/schema gabungan pada API     |
 
-Server routes TanStack Start menjadi gateway transport, tanpa auth server/database di web. Pada modul ini gateway hanya meneruskan auth dan endpoint sesi admin; tidak membuat proxy URL bebas atau mem-forward semua path. Nama file target `api.auth.$.ts` dan `api.admin.session.ts` harus dikonfirmasi lewat generator versi terpasang.
+Server routes TanStack Start menjadi gateway transport, tanpa auth server/database di web. Route hasil generator `api/auth/$.ts` dan `api/admin/session.ts` membatasi gateway pada auth dan endpoint sesi admin; tidak ada proxy URL bebas atau forward path lain. Endpoint sesi browser `/api/admin/session` dipetakan ke endpoint API `/admin/session`.
 
 Konfigurasi lokal target:
 
@@ -275,5 +275,7 @@ AUTH-006 — `Done`: `admin:reset-password` hanya mengambil target dari singleto
 AUTH-007 — `Done`: macro `requireAdmin` mengambil sesi database per request lalu mencocokkan user ke `admin_identity`; 401/403/503 memakai error JSON aman dengan requestId. `GET /admin/session` mengekspos DTO whitelist dan expiry UTC dengan `Cache-Control: no-store`. PostgreSQL proof lulus 4 test/29 assertion termasuk expiry/revoke, demotion non-admin, failure 503, public route, dan write fixture yang tidak dipanggil ketika guard menolak.
 
 AUTH-008 — `Done`: satu Scalar API pada `/openapi` dan schema gabungan `3.1.1` pada `/openapi/json`; schema dibuat dari instance Better Auth yang sama sebelum listen. Allowlist path/method docs sama dengan handler, disabled auth routes disembunyikan dan tetap 404, operasi publik tidak meminta session, sedangkan sesi/logout/admin memakai cookie scheme yang mengikuti konfigurasi HTTPS. Merge menolak path/operationId/schema conflicts dan mempertahankan `$ref`. Unit proof 4 test/8 assertion; integration proof 2 test/61 assertion; type-check, frozen install, build, lint, seluruh API unit suite, Prettier, dan diff check lulus.
+
+AUTH-009 — `Done`: gateway server-side TanStack Start aktif pada `/api/auth/*` dan `/api/admin/session`; endpoint admin dipetakan ke `/admin/session` pada API. Upstream hanya origin `API_INTERNAL_URL`; browser host tidak memengaruhi target. Header allowlist, body 1 MiB, timeout/abort sampai stream respons selesai, redirect internal relatif, multi-`Set-Cookie`, dan `no-store` diterapkan. Proof upstream palsu lulus 8 test/35 assertion; Vite dev dan build Nitro/Bun sama-sama lulus smoke POST/DELETE/auth dan sesi admin. Frozen install, type-check, lint, build, bundle scan, Prettier, dan diff check lulus. Domain/TLS deployment belum dipilih.
 
 Validasi context dokumen sebelum eksekusi: Prettier lulus pada empat dokumen; pemeriksa Bun memvalidasi 24 tautan lokal, 13 task contract, dependensi DAG dan acceptance AC-01..AC-10.
