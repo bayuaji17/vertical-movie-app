@@ -3,6 +3,7 @@
   "version": "1.0.50",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "auth:adapter:proof": "bun test ./test/integration/auth-adapter-proof.test.ts",
     "dev": "bun run --watch src/index.ts",
     "build": "bun build src/index.ts --target=bun --outdir=dist",
     "start": "bun dist/index.js",
@@ -10,10 +11,12 @@
   },
   "dependencies": {
     "@repo/auth": "workspace:*",
+    "drizzle-orm": "0.45.3",
     "elysia": "latest"
   },
   "devDependencies": {
-    "bun-types": "latest"
+    "bun-types": "latest",
+    "drizzle-kit": "0.31.11"
   },
   "engines": {
     "bun": ">=1.4.2"

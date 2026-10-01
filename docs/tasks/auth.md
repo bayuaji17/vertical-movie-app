@@ -12,7 +12,7 @@ Sebagai pengelola sistem, saya ingin konfigurasi dan data auth tersimpan dengan 
 
 ## Task: AUTH-001 — Buktikan kompatibilitas driver dan adapter
 
-- Status: Ready
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P0 — pertama
 - Referensi: AUTH-US-01, PRD-01, evaluasi Bun SQL pada API Development
@@ -25,10 +25,10 @@ Periksa peer/export versi kandidat Drizzle stabil, Bun 1.4.2, Better Auth/adapte
 
 ### Acceptance criteria
 
-- [ ] Bun SQL + Drizzle dapat select/write, commit dan rollback.
-- [ ] Adapter membuat/membaca credential/session yang benar; login memakai hash public Better Auth; migrator bekerja dengan driver yang dipilih.
-- [ ] Opsi transaksi adapter diperiksa eksplisit dan kegagalan tulis tidak dianggap otomatis atomik.
-- [ ] Hasil, versi, dan batas proof tercatat; tidak memakai database development untuk cleanup.
+- [x] Bun SQL + Drizzle dapat select/write; callback transaksi adapter yang melempar error rollback seluruh row user+account.
+- [x] CLI Better Auth 1.7.7 menghasilkan schema Drizzle; migrasi yang digenerate diterapkan melalui `drizzle-orm/bun-sql/migrator`; handler HTTP menyimpan credential, public `verifyPassword` cocok, login mengeluarkan cookie, dan get-session membaca kembali user/sesi.
+- [x] `transaction: true` ditetapkan eksplisit setelah proof. Ini membuktikan callback transaksi adapter; sign-up multi-operation tetap tidak dianggap sebagai satu transaksi bila versi endpoint tidak membungkusnya.
+- [x] Proof hanya menyentuh database baru `vertical_movie_app_auth_test` pada PostgreSQL lokal; test gagal-aman untuk URL yang bukan localhost/database tersebut.
 
 ### Validasi
 
@@ -36,11 +36,16 @@ Proof query/transaksi dan auth pada database test; type-check kandidat; review p
 
 ### Hasil dan bukti
 
-Belum dijalankan. Planning hanya memverifikasi versi terpasang, public hash export, opsi adapter, dan metadata kandidat.
+- Dependency dikunci: `drizzle-orm` 0.45.3 pada API, `drizzle-kit` 0.31.11 sebagai dev dependency API, `@better-auth/drizzle-adapter` 1.7.7 serta CLI `auth` 1.7.7 pada `@repo/auth`.
+- Bukti schema CLI: `packages/auth/test/fixtures/auth-probe.config.ts` → schema Drizzle di `apps/api/test/fixtures/auth-probe-schema.ts`; SQL migrasi fixture tersimpan di `apps/api/test/fixtures/auth-probe-migrations/`.
+- Native Bun suite lulus: 2 test, 16 assertion; database nyata PostgreSQL 18.6 khusus test.
+- `bun install --frozen-lockfile`, `bun run check-types`, `bun run build`, `bun run lint`, Prettier untuk source TypeScript/JSON, dan `git diff --check` lulus.
+- `drizzle-kit push` dicoba hanya sebelum ada schema di database test; perintah berhenti karena meminta `pg`, `postgres`, atau driver provider lain. Tidak ada driver alternatif dipasang dan tidak ada perubahan database yang terjadi lewat perintah tersebut. Pembuatan schema berhasil dengan SQL migrasi Drizzle yang dijalankan Drizzle ORM menggunakan Bun SQL.
+- Commit AUTH-001 dibuat setelah validasi; SHA dicatat pada history commit. No proof atau test memakai database development.
 
 ### Blocker atau tindak lanjut
 
-Jika proof gagal, dokumentasikan error dan alternatif dengan alasan; task dependen belum dapat dimulai.
+Tidak ada blocker kompatibilitas. Gunakan migrator Bun SQL dan schema generated; jadikan hasil `push` yang meminta driver server alternatif sebagai alasan untuk tidak menggunakannya.
 
 ## Task: AUTH-002 — Siapkan konfigurasi, factory dan boundary package
 
