@@ -364,7 +364,7 @@ Tidak ada blocker implementasi lokal. Domain/TLS deployment belum dipilih; produ
 
 ## Task: AUTH-010 — Client Eden dan pemeriksaan sesi SSR/browser
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P0 — kesepuluh
 - Referensi: AUTH-US-04, keputusan Eden, AC-05/09
@@ -377,10 +377,10 @@ API export `api/types`, dependency type-only web, client Eden/browser base origi
 
 ### Acceptance criteria
 
-- [ ] `parseDate: false`, `credentials: include`, AbortSignal dan HTTP/network error ditangani.
-- [ ] Consumer mengenali DTO/status error tanpa runtime import API/auth server.
-- [ ] SSR dua request berbeda tidak berbagi cookie atau private query cache; hydration hanya DTO aman.
-- [ ] `401`, `403`, dan gangguan upstream dibedakan; tidak retry login mutation otomatis.
+- [x] `parseDate: false`, `credentials: include`, AbortSignal dan HTTP/network error ditangani.
+- [x] Consumer mengenali DTO/status error tanpa runtime import API/auth server.
+- [x] SSR dua request berbeda tidak berbagi cookie atau private query cache; hydration hanya DTO aman.
+- [x] `401`, `403`, dan gangguan upstream dibedakan; belum ada login mutation yang dapat retry.
 
 ### Validasi
 
@@ -388,11 +388,16 @@ Type assertions untuk consumer, HTTP/network error state, request-isolation regr
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diuji.
+- Web memasang `@elysia/eden` `1.4.10` dan dependency workspace `api`; `App` hanya diimpor dengan `import type` dari `api/types`. `elysia` `1.4.30` adalah dev dependency web untuk menyamakan deklarasi peer Eden ketika TypeScript menginfer kontrak. Client Eden memakai base `/api` pada origin publik web, `parseDate: false`, `credentials: include`, `cache: no-store`, dan menerima AbortSignal per pemanggilan. Base URL hanya menerima origin HTTP(S) yang valid dengan path `/api`.
+- `apps/web/src/lib/auth/client.ts` membuat Better Auth client terpisah melalui `@repo/auth/client`; credentials dikirim dengan `include`. Tidak ada import runtime `api` atau `@repo/auth/server` di client.
+- `adminSessionQueryOptions` memakai key privat tetap dan QueryClient dari `getRouter()` yang baru untuk tiap router/request. SSR membaca cookie dari `getRequest()` pada pemanggilan server function tersebut, memvalidasi `API_INTERNAL_URL`, lalu memanggil API melalui origin internal tetap dan `/api/admin/session` (route API aktual `/admin/session`). Browser memakai Eden menuju gateway same-origin. Loader mengirim cookie per pemanggilan, meneruskan AbortSignal, dan hanya memproyeksikan whitelist DTO user serta `expiresAt`; cookie dan body error upstream tidak masuk hasil serializable.
+- State membedakan 401 (`unauthenticated`), 403 (`forbidden`), HTTP upstream lain termasuk 503, kegagalan jaringan yang dipetakan Eden menjadi 503 internal tanpa Response, dan konfigurasi invalid. Abort tetap dibatalkan, bukan disamarkan sebagai kegagalan jaringan. API tetap menjadi otoritas sesi/admin.
+- `bun run --cwd apps/web auth:session:proof` lulus: 4 test/22 assertion untuk tipe DTO/string tanggal, origin/path dan fetch config, cookie + AbortSignal pada dua load SSR paralel, state 401/403/HTTP 503/network, pembatalan request, hasil tanpa cookie, dan QueryClient request-isolation. `bun install --frozen-lockfile`, `bun run check-types`, `bun run lint`, dan `bun run build` lulus. Pemeriksaan bundle hasil build tidak menemukan konfigurasi `API_INTERNAL_URL` atau runtime API/auth server pada asset browser.
+- Tidak dilakukan smoke login dengan database karena formulir dan dashboard adalah backlog AUTH-011/012; deployment domain/TLS juga belum tersedia.
 
 ### Blocker atau tindak lanjut
 
-Menunggu AUTH-007/009; API tetap sumber otorisasi.
+Tidak ada blocker untuk client dan loader sesi. AUTH-011 menggunakan Better Auth client ini untuk formulir; AUTH-012 menggunakan state SSR/browser untuk guard.
 
 ## Task: AUTH-011 — Form login admin yang aksesibel
 

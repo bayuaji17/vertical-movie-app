@@ -31,6 +31,7 @@
       "name": "web",
       "dependencies": {
         "@base-ui/react": "^1.8.0",
+        "@elysia/eden": "1.4.10",
         "@fontsource-variable/inter": "^5.3.0",
         "@fontsource-variable/space-grotesk": "^5.3.0",
         "@remixicon/react": "^4.9.0",
@@ -46,6 +47,7 @@
         "@tanstack/react-start": "latest",
         "@videojs/core": "10.0.0-rc.4",
         "@videojs/react": "10.0.0-rc.4",
+        "api": "workspace:*",
         "class-variance-authority": "^0.7.1",
         "cn": "^0.4.0",
         "nitro": "3.0.260610-beta",
@@ -66,6 +68,7 @@
         "@types/react": "^19.2.0",
         "@types/react-dom": "^19.2.0",
         "@vitejs/plugin-react": "^6.0.1",
+        "elysia": "1.4.30",
         "eslint": "^9.20.0",
         "prettier": "^3.8.1",
         "typescript": "^6.0.2",
@@ -243,6 +246,8 @@
     "@dotenvx/primitives": ["@dotenvx/primitives@0.8.0", "", {}, "sha512-VYJy0uhFm9zTJ1TxBaW/pA8bjbOM/OttaNMwZ1RHG4JKyRG7DhSdiqD1ipQoAyoD22olUtxbP78W9xY3Wd11bg=="],
 
     "@drizzle-team/brocli": ["@drizzle-team/brocli@0.10.2", "", {}, "sha512-z33Il7l5dKjUgGULTqBsQBQwckHh5AbIuxhdsIxDDiZAzBOrZO6q9ogcWC65kU382AfynTfgNumVcNIjuIua6w=="],
+
+    "@elysia/eden": ["@elysia/eden@1.4.10", "", { "peerDependencies": { "elysia": ">=1.4.19" } }, "sha512-vcZXQcW6wZj6rhTxaiTkuCbVuS/yAJQ9jqCM6b83a5hu99F5Aj3HOyWXL17iod2Rz+pJpYsQGX0XaeoCsMpw2g=="],
 
     "@elysia/openapi": ["@elysia/openapi@1.4.16", "", { "peerDependencies": { "@sinclair/typebox": ">= 0.34.0 < 1", "elysia": ">= 1.4.0", "typescript": ">= 5.0.0" } }, "sha512-bAaU1yOn8oxTv+EdzrW8z7RccUQ/y9zeMEPLz+K6lyc4KJ2MLTT0QI9H7Inh2O6N8PDv2nfXGFH8YDfJUOLPOQ=="],
 

@@ -4,7 +4,7 @@ import type { AuthOpenAPISchema } from "@repo/auth/server";
 import type { createDatabase } from "./db/client";
 import { createAdminRoutes } from "./modules/auth/admin";
 import type { RequireAdminDependencies } from "./modules/auth/admin/guard";
-import { isDisabledAuthPath, supportedAuthOperations } from "./modules/auth";
+import { isDisabledAuthPath } from "./modules/auth";
 import type { createAdminAuth } from "./modules/auth";
 import {
   createAuthOpenApiFragment,
