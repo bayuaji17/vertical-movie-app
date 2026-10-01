@@ -37,6 +37,7 @@ apps/api/
 │   ├── plugins/
 │   │   ├── admin.ts              # Pemeriksaan sesi dan identitas admin
 │   │   ├── errors.ts             # Pemetaan error HTTP dan request ID
+│   │   ├── openapi.ts            # Komposisi dokumentasi Scalar dan schema auth
 │   │   └── logger.ts             # Logging request dengan redaksi rahasia
 │   ├── db/
 │   │   ├── client.ts             # Factory pool Bun SQL dan Drizzle
@@ -222,6 +223,50 @@ Untuk endpoint aplikasi baru, gunakan error terstruktur `{ error: { code, messag
 Error domain milik modul didefinisikan di `model.ts` dan dipetakan di controller atau plugin `errors.ts`. Kegagalan domain yang diperkirakan dapat dikembalikan sebagai hasil bertipe; tangani sebelum membentuk respons HTTP dengan `status(...)`. Jangan mengembalikan objek `Error` mentah sebagai payload sukses. Kesalahan infrastruktur yang dilempar ditangani melalui `onError`, dicatat dengan redaksi, dan menghasilkan respons aman.
 
 Return `status(...)` mengirim respons langsung dan tidak melewati `onError`; throw masuk jalur error. Karena respons dari `onError` lintas aplikasi belum tentu otomatis muncul sebagai union error tiap rute, deklarasikan response schema status error yang memang menjadi kontrak rute/guard dan buktikan inferensinya di consumer Eden. Jangan menganggap error runtime bertipe hanya karena body-nya berbentuk JSON. Lihat [error handling Elysia](https://elysiajs.com/patterns/error-handling).
+
+## Dokumentasi API — OpenAPI dan Scalar
+
+**Gunakan satu halaman Scalar untuk dokumentasi endpoint aplikasi dan Better Auth.** Keputusan ini ditetapkan pengguna pada 1 Oktober 2026. Plugin OpenAPI dan penggabungan schema belum diimplementasikan; tambahkan bersama task integrasi API/auth. Dokumentasi pengembangan tetap berada di root `docs/`.
+
+| Bagian                   | Fungsi dan kepemilikan                                                         |
+| ------------------------ | ------------------------------------------------------------------------------ |
+| `/openapi`               | UI Scalar utama, disediakan `apps/api` melalui plugin OpenAPI Elysia.          |
+| `/openapi/json`          | Spesifikasi OpenAPI gabungan untuk tooling dan pemeriksaan kontrak.            |
+| Schema endpoint aplikasi | Dihasilkan dari rute dan schema Elysia pada modul API.                         |
+| Schema Better Auth       | Dihasilkan dari instance auth milik `packages/auth`; digabung pada API.        |
+| Root `docs/`             | Aturan kode, keputusan arsitektur, alur domain/auth, dan backlog implementasi. |
+
+Path UI dan JSON mengikuti default [plugin OpenAPI Elysia](https://elysiajs.com/plugins/openapi). Gunakan `@elysia/openapi` sesuai dokumentasi resmi saat ini; referensi skill lama menyebut `@elysiajs/openapi`. Verifikasi versi serta kompatibilitas dengan Elysia saat instalasi.
+
+### Endpoint aplikasi tampil otomatis
+
+- Endpoint yang didaftarkan pada instance Elysia utama atau modul yang dikomposisikan melalui `.use()` masuk ke dokumentasi secara otomatis setelah plugin dipasang. Endpoint baru harus ikut terlihat pada schema dan Scalar ketika versi aplikasi yang memuat rute tersebut dijalankan.
+- Berikan setiap endpoint `detail.summary`, `detail.tags`, dan `detail.operationId` yang unik/stabil. Gunakan `detail.description` untuk aturan akses, transisi status, idempotensi, atau efek samping yang perlu dipahami consumer.
+- Definisikan schema request dan response sesuai status HTTP yang didokumentasikan. Dokumentasikan pagination, satuan nilai, dan contoh payload tanpa credential asli; jangan menulis salinan kontrak JSON secara manual di Markdown.
+- Kelompokkan endpoint dengan tag `Videos`, `Media`, `Settings`, dan `Better Auth`; tambahkan tag lain saat modul benar-benar memerlukannya. Operasi publik dan admin harus memiliki deskripsi akses yang jelas.
+- `detail.hide: true` atau konfigurasi exclusion dipakai hanya jika endpoint sengaja tidak didokumentasikan dan alasannya tercatat. Menyembunyikan endpoint tidak memberi perlindungan akses; macro/guard admin tetap memeriksa request.
+- Schema keamanan mengikuti mekanisme sesi yang benar-benar digunakan. Jangan mendeklarasikan bearer JWT jika aplikasi memakai cookie sesi. Rute publik tidak boleh mewarisi persyaratan admin dari dokumentasi global; nyatakan `security: []` bila perlu menghapus security yang diwariskan.
+
+### Penggabungan Better Auth
+
+1. Tambahkan `openAPI({ disableDefaultReference: true })` pada konfigurasi server auth di `packages/auth`. Plugin ini menyediakan `auth.api.generateOpenAPISchema()`; opsi tersebut menonaktifkan UI referensi bawaan auth sehingga Scalar utama menjadi halaman dokumentasi yang digunakan. Endpoint generator schema tetap tersedia; opsi tersebut tidak menonaktifkannya. Lihat [plugin OpenAPI Better Auth](https://better-auth.com/docs/plugins/open-api).
+2. Sediakan helper schema melalui entry point server `@repo/auth/server` ketika konfigurasi auth diimplementasikan. Helper menerima/menggunakan instance auth yang sama dengan handler; jangan membuat instance auth atau pool database kedua untuk dokumentasi.
+3. API menggabungkan `paths` dan `components` schema auth ke konfigurasi OpenAPI Elysia, lalu mengelompokkan operasi auth dengan tag `Better Auth`. Prefix path harus sesuai gabungan mount/basePath yang benar-benar dipakai, misalnya `/api/auth` bila memakai path default; `/auth/api` pada contoh artikel bukan nilai wajib. Periksa pula `servers` agar base path tidak ditambahkan dua kali. Pola dasarnya ada pada [integrasi Better Auth–Elysia](https://elysiajs.com/integrations/better-auth#openapi).
+4. Pertahankan parameter, request body, response, security scheme, dan seluruh referensi `$ref` dari kedua sumber. Merge komponen per kategori dengan pemeriksaan konflik nama; jangan menimpa schema aplikasi dengan objek `components` auth secara keseluruhan. Saat memberi tag, ubah hanya objek operasi metode HTTP yang valid, bukan properti path seperti `parameters`.
+5. Gunakan tipe schema library atau tipe hasil `generateOpenAPISchema()` untuk helper dan transformasi. Hindari `any` serta assertion yang menutupi ketidakcocokan. Jika schema dicache, cache terkait instance/konfigurasi auth dan tidak dimutasi saat memberi prefix/tag.
+6. Better Auth menghasilkan OpenAPI `3.1.1`; verifikasi plugin, spesifikasi gabungan, dan tooling mendukung semantik versi tersebut. Jangan hanya mengganti field versi untuk menyamarkan schema yang tidak kompatibel.
+
+Komposisi plugin berada di `apps/api/src/plugins/openapi.ts` saat task ini dimulai. Generasi schema async dilakukan pada wiring/bootstrap sebelum server menerima request, lalu hasilnya diinjeksi ke factory `createApp` yang tetap mengembalikan instance Elysia bertipe. Jangan menjalankan generator pada setiap request bisnis atau membuat factory kontrak Eden mengembalikan promise tanpa menyesuaikan konsumen tipenya.
+
+Dokumentasi OpenAPI menerangkan kontrak HTTP. Consumer endpoint aplikasi tetap memakai Eden Treaty dan consumer auth memakai `@repo/auth/client`; menggabungkan schema auth ke Scalar tidak otomatis membuat endpoint handler `.mount()` terinferensi pada Eden.
+
+### Bukti validasi saat implementasi
+
+- Tambahkan test yang memastikan rute aplikasi/modul baru masuk ke `/openapi/json` dan rute yang sengaja disembunyikan mengikuti konfigurasi.
+- Periksa path auth terhadap URL handler sebenarnya, operation ID, tag, response, dan security scheme. Semua `$ref` harus dapat diselesaikan; konflik nama dan prefix ganda harus terdeteksi.
+- Verifikasi Scalar menampilkan endpoint aplikasi serta auth dan dapat mengirim request dengan sesi yang sesuai pada environment development.
+- Pastikan metadata security tidak ikut membuat katalog publik meminta login, dan respons `401`/`403` sesuai pemeriksaan admin sebenarnya.
+- Jalankan validasi spesifikasi gabungan serta pemeriksaan tipe API/web yang relevan. Catat hasil pada task integrasi; halaman UI yang terbuka saja tidak membuktikan kontrak sudah benar.
 
 ## Autentikasi dan konfigurasi
 
