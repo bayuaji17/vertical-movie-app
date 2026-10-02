@@ -12,6 +12,7 @@ export type AuthConfiguration = {
   origin: string;
   secret: string;
   secureCookies: boolean;
+  onRecoveryToken?: (input: { token: string }) => Promise<void>;
 };
 export function createAuthOptions(config: AuthConfiguration) {
   return {
@@ -30,6 +31,9 @@ export function createAuthOptions(config: AuthConfiguration) {
       minPasswordLength: passwordPolicy.minLength,
       maxPasswordLength: passwordPolicy.maxLength,
       revokeSessionsOnPasswordReset: true,
+      ...(config.onRecoveryToken
+        ? { sendResetPassword: config.onRecoveryToken }
+        : {}),
     },
     session: {
       expiresIn: 86400,
@@ -47,6 +51,16 @@ export function createAuthOptions(config: AuthConfiguration) {
     disabledPaths: [...disabledAuthPaths],
     hooks: {
       before: createAuthMiddleware(async (context) => {
+        // The native admin endpoint currently checks only the maximum length.
+        // Apply the configured policy to trusted CLI creation as well.
+        if (context.path === "/admin/create-user") {
+          const password = context.body?.password;
+          if (typeof password === "string" && password.length < passwordPolicy.minLength) {
+            throw APIError.from("BAD_REQUEST", {
+              code: "PASSWORD_TOO_SHORT", message: "Password must contain at least 12 characters.",
+            });
+          }
+        }
         if (!context.request) return;
         if (isDisabledAuthPath(context.path, context.request.method)) {
           throw APIError.from("NOT_FOUND", {

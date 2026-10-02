@@ -730,7 +730,7 @@ Contract migration penghapusan admin_identity hanya pada AUTH-REF-009.
 
 ### Task: AUTH-REF-003 — Seed CLI resmi dan recovery native dalam maintenance
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: 8 dalam urutan eksekusi refactor.
 - Referensi: AUTH-REF-US04; AUTH_REFACTOR_PLAN.md; AGENTS.md; API_DEVELOPMENT.md.
@@ -762,23 +762,23 @@ Path bertanda baru adalah target yang dibuat saat eksekusi, bukan file yang suda
 
 #### Rencana implementasi terurut
 
-- [ ] **AUTH-REF-003.01 — Sediakan config entry CLI.** Buat auth.ts yang membaca env API tervalidasi dan membuat DB/factory tanpa listen; buktikan loader CLI menemukan config dan plugin.
-- [ ] **AUTH-REF-003.02 — Alihkan command seed.** Resolve binary workspace yang terpasang; jalankan create-admin dengan email/name/role/config yang eksplisit tanpa password flag. Pertahankan wrapper hanya untuk cwd/prompt/resource orchestration.
-- [ ] **AUTH-REF-003.03 — Bangun mode recovery.** Callback token hanya pada instance operator; jalankan requestPasswordReset lalu resetPassword native. Bersihkan reference token/password saat selesai dan close pool dalam finally.
-- [ ] **AUTH-REF-003.04 — Tuliskan maintenance preflight.** Operator memastikan semua penerima login berhenti; catat maintenance confirmation pada runbook/flow command. Jangan menganggap app advisory lock lama melindungi native login.
-- [ ] **AUTH-REF-003.05 — Buktikan hasil native.** Di DB test, gunakan cookie sesi lama untuk memastikan denial, password lama gagal/new password berhasil, expiry/replay reset gagal; public HTTP reset tetap tertutup.
-- [ ] **AUTH-REF-003.06 — Tangani failure parsial.** Uji gagal update password/gagal revoke; command tidak memberi sukses atau membuka API. Runbook menyediakan pengulangan reset native/pencabutan native yang didukung versi sebelum restart, tanpa SQL writer.
-- [ ] **AUTH-REF-003.07 — Reproduksi race dan commit.** Jalankan controlled concurrent-login proof untuk mencatat batas upstream; uji maintenance menghilangkan race. Writer lama belum dihapus sampai AUTH-REF-009.
+- [x] **AUTH-REF-003.01 — Sediakan config entry CLI.** Buat auth.ts yang membaca env API tervalidasi dan membuat DB/factory tanpa listen; buktikan loader CLI menemukan config dan plugin.
+- [x] **AUTH-REF-003.02 — Alihkan command seed.** Resolve binary workspace yang terpasang; jalankan create-admin dengan email/name/role/config yang eksplisit tanpa password flag. Pertahankan wrapper hanya untuk cwd/prompt/resource orchestration.
+- [x] **AUTH-REF-003.03 — Bangun mode recovery.** Callback token hanya pada instance operator; jalankan requestPasswordReset lalu resetPassword native. Bersihkan reference token/password saat selesai dan close pool dalam finally.
+- [x] **AUTH-REF-003.04 — Tuliskan maintenance preflight.** Operator memastikan semua penerima login berhenti; catat maintenance confirmation pada runbook/flow command. Jangan menganggap app advisory lock lama melindungi native login.
+- [x] **AUTH-REF-003.05 — Buktikan hasil native.** Di DB test, gunakan cookie sesi lama untuk memastikan denial, password lama gagal/new password berhasil, expiry/replay reset gagal; public HTTP reset tetap tertutup.
+- [x] **AUTH-REF-003.06 — Tangani failure parsial.** Uji gagal update password/gagal revoke; command tidak memberi sukses atau membuka API. Runbook menyediakan pengulangan reset native/pencabutan native yang didukung versi sebelum restart, tanpa SQL writer.
+- [x] **AUTH-REF-003.07 — Reproduksi race dan commit.** Jalankan controlled concurrent-login proof untuk mencatat batas upstream; uji maintenance menghilangkan race. Writer lama belum dihapus sampai AUTH-REF-009.
 
 #### Acceptance criteria
 
-- [ ] CLI resmi menemukan config/env dan menghasilkan admin yang bisa login; existing admin tidak dibuat ulang.
-- [ ] Password/token tidak tercetak atau berada dalam argumen/source; wrapper menutup resource miliknya.
-- [ ] Recovery berhasil tanpa email/session admin; token expired/replay ditolak native.
-- [ ] Password lama dan session lama ditolak setelah recovery maintenance dan restart.
-- [ ] Failure parsial dicatat; API dibuka kembali hanya setelah pencabutan session terverifikasi.
-- [ ] Race login-vs-reset dari review diuji dan batas native dicatat; tidak mengklaim reset online atomic.
-- [ ] Endpoint operator tetap tertutup pada public HTTP.
+- [x] CLI resmi menemukan config/env dan menghasilkan admin yang bisa login; existing admin tidak dibuat ulang.
+- [x] Password/token tidak tercetak atau berada dalam argumen/source; wrapper menutup resource miliknya.
+- [x] Recovery berhasil tanpa email/session admin; token expired/replay ditolak native.
+- [x] Password lama dan session lama ditolak setelah recovery maintenance dan restart.
+- [x] Failure parsial dicatat; API dibuka kembali hanya setelah pencabutan session terverifikasi.
+- [x] Race login-vs-reset dari review diuji dan batas native dicatat; tidak mengklaim reset online atomic.
+- [x] Endpoint operator tetap tertutup pada public HTTP.
 
 #### Validasi
 
@@ -814,7 +814,7 @@ Commit setelah acceptance criteria task terpenuhi: `refactor(auth): provision an
 
 #### Hasil dan bukti
 
-Belum diimplementasikan. Catat perintah, hasil, batas bukti dan commit ketika task dikerjakan.
+CLI resmi auth 1.7.7 memuat apps/api/src/auth.ts tanpa HTTP listen; prompt native diuji dengan Bun PTY, tanpa password flag atau credential development. Admin proof: 4 pass/18 assertions; recovery proof: 8 pass/46 assertions; runtime: 8 pass/44 assertions; package: 3 pass/14 assertions; check-types lulus. Proof mencakup seed kedua/concurrent, min password, expiry/replay, endpoint HTTP operator tertutup, update/revoke parsial dan exit nonzero aman, native retry, orphan credential repair, serta race login/reset online. Runbook AUTH_OPERATIONS.md mewajibkan seluruh penerima login dan request in-flight berhenti. Database development/credential existing tidak diubah. Commit: feat(auth): use native admin provisioning and recovery.
 
 #### Blocker atau tindak lanjut
 

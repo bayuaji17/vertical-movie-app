@@ -60,3 +60,5 @@ export { APIError } from "better-auth/api";
 export { createAuthMiddleware } from "better-auth/api";
 export { hashPassword, verifyPassword } from "better-auth/crypto";
 export { drizzleAdapter } from "@better-auth/drizzle-adapter";
+
+export { resolveAuthCliPath, createAdminRecovery } from './internal/operator';

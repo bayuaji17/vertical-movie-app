@@ -16,6 +16,8 @@ Catat tanggal persetujuan dan pemilik keputusan di setiap dokumen. Pisahkan peri
 
 ## Panduan development
 
+- [Auth Operations](AUTH_OPERATIONS.md) — seed native dan recovery admin selama maintenance.
+
 - [Repository Context — Auth](REPOSITORY_CONTEXT.md): konteks kode dan batas sistem pada snapshot `bff1ced88f7ade37d454370ccf7d95a47cbf3aea` untuk implementasi auth.
 - [Implementation Plan — Auth](IMPLEMENTATION_PLAN.md): rencana email/password, provisioning/pemulihan admin melalui CLI, proteksi API/dashboard, dan integrasi satu origin; AUTH-001 sampai AUTH-013 selesai pada level implementasi dan validasi lokal. Browser UI manual serta deployment tetap pending.
 - [Backlog Auth](tasks/auth.md): riwayat AUTH-001–013 dan 10 task refactor dengan peta file, kontrak, 72 langkah implementasi, 57 skenario uji, acceptance criteria, gerbang cutover/commit, serta bukti validasi. AUTH-REF-001 Ready; task berikutnya menunggu dependensi.
