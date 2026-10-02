@@ -9,14 +9,21 @@ import { useEffect, useState } from 'react'
 import { readClientSession, isAdminSession } from '@repo/auth/client'
 import type { SessionSnapshot } from '@repo/auth/types'
 import { authClient } from './client'
-import { readSessionOnServer } from './session.server'
-import { sessionQueryKey } from './session-cache'
+import {
+  readSessionOnServer,
+  setAuthFailureStatusOnServer,
+} from './session.server'
+import { sessionQueryKey, clearAdminDataQueries } from './session-cache'
 
 export const readSession = createIsomorphicFn()
   .server(readSessionOnServer)
   .client((options: { signal?: AbortSignal; authoritative?: boolean } = {}) =>
     readClientSession(authClient, options),
   )
+
+export const setAuthFailureStatus = createIsomorphicFn()
+  .server(setAuthFailureStatusOnServer)
+  .client((_status: 403 | 503) => undefined)
 
 export type AdminSessionState =
   | { status: 'authenticated'; session: SessionSnapshot }
@@ -75,6 +82,13 @@ export function useAdminSession() {
   const result = useQuery(sessionObserverOptions())
   const [, updateClock] = useState(0)
   const expiresAt = result.data?.session.expiresAt
+  const state = result.isError
+    ? ({ status: 'unavailable' } as const)
+    : sessionState(result.data)
+  useEffect(() => {
+    if (state.status !== 'authenticated')
+      void clearAdminDataQueries(queryClient)
+  }, [state.status, queryClient])
   useEffect(() => {
     if (!expiresAt) return
     const timer = setTimeout(
@@ -92,8 +106,6 @@ export function useAdminSession() {
   }, [expiresAt, queryClient])
   return {
     ...result,
-    sessionState: result.isError
-      ? ({ status: 'unavailable' } as const)
-      : sessionState(result.data),
+    sessionState: state,
   }
 }

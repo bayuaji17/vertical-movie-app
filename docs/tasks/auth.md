@@ -1201,7 +1201,7 @@ AUTH-REF-008 menghubungkan invalidation dengan routing/login/logout. Bukti brows
 
 ### Task: AUTH-REF-008 — Protected admin routes dan transisi login/logout
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: 7 dalam urutan eksekusi refactor.
 - Referensi: AUTH-REF-US02, AUTH-REF-US03; AUTH_REFACTOR_PLAN.md; AGENTS.md; API_DEVELOPMENT.md.
@@ -1233,24 +1233,24 @@ Path bertanda baru adalah target yang dibuat saat eksekusi, bukan file yang suda
 
 #### Rencana implementasi terurut
 
-- [ ] **AUTH-REF-008.01 — Ubah beforeLoad.** Gunakan queryClient.query options bersama; periksa role/banned/expiry, validasi redirect lokal, throw redirect/error sebelum loader anak. Login tetap di luar pathless guard.
-- [ ] **AUTH-REF-008.02 — Jadikan layout reaktif.** Observe Query yang sama; error/null/denial menutup Outlet dan cancel data privat segera. State route context lama tidak mengalahkan state observer baru.
-- [ ] **AUTH-REF-008.03 — Alihkan login transition.** Native signIn -> cancel/remove cache lama -> force authoritative read sekali -> navigate hanya admin valid. UI password policy berasal dari package; error401/403/429/network tetap jelas.
-- [ ] **AUTH-REF-008.04 — Alihkan logout transition.** Native signOut sukses -> cancel in-flight Query -> hapus data privat -> set anonymous -> invalidate/navigate. Gagal logout memberi error tanpa klaim server session dicabut.
-- [ ] **AUTH-REF-008.05 — Tangani private API failure.** 401 clears/redirects,403 locks/revalidates,503/network stays unavailable/retry; jangan terapkan handler pada media/public requests.
-- [ ] **AUTH-REF-008.06 — Tambahkan invalidation lintas tab.** Gunakan surface SDK publik bila tersedia tanpa reader kedua; bila tidak, bridge event browser tipis untuk invalidation. Cleanup subscription dan cegah ping-pong invalidation.
-- [ ] **AUTH-REF-008.07 — Uji denial/race.** Spies membuktikan child loader/private query tidak dimulai pada initial denial; pending response sebelum logout tidak mengisi principal kembali.
-- [ ] **AUTH-REF-008.08 — Rekam alur browser.** Login benar/salah/429, refresh/direct link, outage, role change, expiry idle, dua tab/back; catat request counts dan DOM/private-content absence.
+- [x] **AUTH-REF-008.01 — Ubah beforeLoad.** Gunakan queryClient.query options bersama; periksa role/banned/expiry, validasi redirect lokal, throw redirect/error sebelum loader anak. Login tetap di luar pathless guard.
+- [x] **AUTH-REF-008.02 — Jadikan layout reaktif.** Observe Query yang sama; error/null/denial menutup Outlet dan cancel data privat segera. State route context lama tidak mengalahkan state observer baru.
+- [x] **AUTH-REF-008.03 — Alihkan login transition.** Native signIn -> cancel/remove cache lama -> force authoritative read sekali -> navigate hanya admin valid. UI password policy berasal dari package; error401/403/429/network tetap jelas.
+- [x] **AUTH-REF-008.04 — Alihkan logout transition.** Native signOut sukses -> cancel in-flight Query -> hapus data privat -> set anonymous -> invalidate/navigate. Gagal logout memberi error tanpa klaim server session dicabut.
+- [x] **AUTH-REF-008.05 — Tangani private API failure.** 401 clears/redirects,403 locks/revalidates,503/network stays unavailable/retry; jangan terapkan handler pada media/public requests.
+- [x] **AUTH-REF-008.06 — Tambahkan invalidation lintas tab.** Gunakan surface SDK publik bila tersedia tanpa reader kedua; bila tidak, bridge event browser tipis untuk invalidation. Cleanup subscription dan cegah ping-pong invalidation.
+- [x] **AUTH-REF-008.07 — Uji denial/race.** Spies membuktikan child loader/private query tidak dimulai pada initial denial; pending response sebelum logout tidak mengisi principal kembali.
+- [x] **AUTH-REF-008.08 — Rekam alur browser.** Login benar/salah/429, refresh/direct link, outage, role change, expiry idle, dua tab/back; catat request counts dan DOM/private-content absence.
 
 #### Acceptance criteria
 
-- [ ] /admin/login di luar guard; hanya admin tidak banned/session belum expired yang masuk.
-- [ ] Anonymous redirect tujuan lokal aman; forbidden/outage mengunci dashboard; loader anak dan private HTML tidak muncul saat denied.
-- [ ] Background denial/error menutup Outlet dan cancel query privat walau Query menyimpan data sukses lama.
-- [ ] Login sukses membaca session authoritative sekali sebelum navigate; payload login/token tidak masuk cache.
-- [ ] Logout sukses menghapus cache privat dan fetch in-flight tidak mengisi snapshot admin kembali.
-- [ ] Logout gagal tidak diklaim telah revoke; lintas tab/back navigation tidak menampilkan data privat lama.
-- [ ] API401 mengarahkan login, API403 mengunci/revalidasi, outage memberi retry tanpa loop login.
+- [x] /admin/login di luar guard; hanya admin tidak banned/session belum expired yang masuk.
+- [x] Anonymous redirect tujuan lokal aman; forbidden/outage mengunci dashboard; loader anak dan private HTML tidak muncul saat denied.
+- [x] Background denial/error menutup Outlet dan cancel query privat walau Query menyimpan data sukses lama.
+- [x] Login sukses membaca session authoritative sekali sebelum navigate; payload login/token tidak masuk cache.
+- [x] Logout sukses menghapus cache privat dan fetch in-flight tidak mengisi snapshot admin kembali.
+- [x] Logout gagal tidak diklaim telah revoke; lintas tab/back navigation tidak menampilkan data privat lama.
+- [x] API401 mengarahkan login, API403 mengunci/revalidasi, outage memberi retry tanpa loop login.
 
 #### Validasi
 
@@ -1288,7 +1288,12 @@ Commit setelah acceptance criteria task terpenuhi: `refactor(web): enforce admin
 
 #### Hasil dan bukti
 
-Belum diimplementasikan. Catat perintah, hasil, batas bukti dan commit ketika task dikerjakan.
+- beforeLoad induk memakai requireAdminSession dan throw redirect/denial/dependency error sebelum loader anak. Protected layout mengamati Query yang sama, membatalkan/hapus query admin saat denied/error, dan memberi principal live lewat React context tanpa session reader kedua. SSR request middleware mempertahankan status403/503 eksplisit karena Router terpasang default merender exception dengan500.
+- Login native -> cancel/hapus data privat -> satu read authoritative -> admin-only navigate; raw token login tidak dicache. Logout native sukses -> cancel fetch -> snapshotnull/private erased -> router/login. Logout gagal mempertahankan status sesi dan menampilkan pesan aman. Password policy berasal package.
+- Bridge BroadcastChannel hanya auth-changed, memakai satu transport per tab sehingga publisher tidak memicu fetch sendiri; notifikasi beruntun diantre untuk pemeriksaan ulang terakhir, subscription dibersihkan. Private Eden client opt-in menangani401/403/5xx; client publik tidak memakai hook ini.
+- Guard/cache proof 10 test/31 assertion lulus, termasuk loader spy0 pada anonymous/user/banned/expired/outage, in-flight result tidak memulihkan admin, API401 clear dan403/outage tetap terkunci setelah revalidation gagal. Login policy proof 5 test/24 assertion lulus. Frozen install dan type/build lulus; lint/type hook commit.
+- Built SSR smoke lulus dengan anonymous redirect, user403, outage503, bounded stall, cookies terisolasi dan tanpa private HTML. Chromium browser phase routes pada viewport390x844 lulus login salah/429/non-admin/admin, authoritative1, cache tanpa token, refresh, logout failure, role lock, delayed fetch setelah logout, dua tab dan Back/direct-link denial. Cache browser regression SSR1/hydrate0/fresh0/stale1/focus/reconnect/poll/expiry juga lulus.
+- Commit: refactor(web): enforce admin route access. Domain/TLS deployment belum diverifikasi; semua browser credential adalah fixture.
 
 #### Blocker atau tindak lanjut
 

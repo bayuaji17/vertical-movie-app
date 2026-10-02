@@ -15,7 +15,9 @@ import {
 import { authClient } from '#/lib/auth/client'
 import { logoutErrorMessage } from '#/lib/auth/login'
 import { clearAdminPrivateQueries } from '#/lib/auth/session-cache'
-import type { AdminSessionState } from '#/lib/auth/session'
+import type { SessionSnapshot } from '@repo/auth/types'
+import { useAdminPrincipal } from '#/lib/auth/session-context'
+import { publishAuthChange } from '#/lib/auth/transitions'
 
 export const Route = createFileRoute('/admin/_authenticated/')({
   head: () => ({
@@ -28,17 +30,13 @@ export const Route = createFileRoute('/admin/_authenticated/')({
 })
 
 function AdminDashboard() {
-  const { adminSessionState } = Route.useRouteContext()
-
-  if (adminSessionState.status !== 'authenticated') return null
-
-  return <AdminDashboardContent sessionState={adminSessionState} />
+  return <AdminDashboardContent session={useAdminPrincipal()} />
 }
 
 function AdminDashboardContent({
-  sessionState,
+  session: principal,
 }: {
-  sessionState: Extract<AdminSessionState, { status: 'authenticated' }>
+  session: SessionSnapshot
 }) {
   const queryClient = useQueryClient()
   const router = useRouter()
@@ -56,6 +54,7 @@ function AdminDashboardContent({
       }
 
       await clearAdminPrivateQueries(queryClient)
+      publishAuthChange()
       await router.invalidate()
       await router.navigate({
         to: '/admin/login',
@@ -69,7 +68,7 @@ function AdminDashboardContent({
     }
   }
 
-  const { user, session } = sessionState.session
+  const { user, session } = principal
 
   return (
     <main className="min-h-svh bg-muted/35 px-4 py-6 sm:px-8 sm:py-10">

@@ -15,7 +15,7 @@
     "auth:gateway:smoke": "bun ./test/auth-gateway-smoke.mjs",
     "auth:session:proof": "bun test ./test/auth-session.test.ts",
     "auth:login:proof": "bun test ./test/admin-login.test.ts",
-    "auth:guard:proof": "bun test ./test/session-cache.test.ts",
+    "auth:guard:proof": "bun test ./test/session-cache.test.ts ./test/admin-route-guard.test.ts",
     "lint": "bun run --bun eslint",
     "check-types": "bun run --bun tsc --noEmit",
     "format": "bun run --bun prettier --write . && bun run --bun eslint --fix",

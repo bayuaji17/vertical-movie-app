@@ -1,4 +1,5 @@
 import { sessionQueryKey } from './session-cache'
+import { passwordPolicy } from '@repo/auth/client'
 
 export const adminSessionQueryKey = sessionQueryKey
 
@@ -56,7 +57,10 @@ export function validateLoginEmail(value: string): string | undefined {
 
 export function validateLoginPassword(value: string): string | undefined {
   if (!value) return 'Masukkan password.'
-  if (value.length < 12 || value.length > 128) {
+  if (
+    value.length < passwordPolicy.minLength ||
+    value.length > passwordPolicy.maxLength
+  ) {
     return 'Password harus terdiri dari 12–128 karakter.'
   }
   return undefined

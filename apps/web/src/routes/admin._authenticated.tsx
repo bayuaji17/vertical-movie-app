@@ -1,60 +1,58 @@
-import { useState } from 'react'
-import {
-  createFileRoute,
-  Outlet,
-  redirect,
-  useRouter,
-} from '@tanstack/react-router'
+import { useState, useEffect } from 'react'
+import { createFileRoute, Outlet, useRouter } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
-import { AuthDependencyError } from '@repo/auth/client'
+import { requireAdminSession, AdminAccessDeniedError } from '#/lib/auth/guard'
+import { AdminSessionContext } from '#/lib/auth/session-context'
 
 import { Alert, AlertDescription, AlertTitle } from '#/components/ui/alert'
 import { Button } from '#/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card'
-import {
-  adminSessionQueryOptions,
-  useAdminSession,
-  sessionState,
-} from '#/lib/auth/session'
-import { validateAdminRedirect } from '#/lib/auth/login'
-import { clearAdminPrivateQueries } from '#/lib/auth/session-cache'
+import { useAdminSession, setAuthFailureStatus } from '#/lib/auth/session'
+import { AuthDependencyError } from '@repo/auth/client'
 
 export const Route = createFileRoute('/admin/_authenticated')({
   headers: () => ({ 'Cache-Control': 'private, no-store' }),
   beforeLoad: async ({ context, location }) => {
-    const snapshot = await context.queryClient
-      .query(adminSessionQueryOptions())
-      .catch((error: unknown) => {
-        if (error instanceof AuthDependencyError) return undefined
-        throw error
-      })
-
-    const currentState =
-      snapshot === undefined
-        ? ({ status: 'unavailable' } as const)
-        : sessionState(snapshot)
-    if (currentState.status === 'unauthenticated') {
-      await clearAdminPrivateQueries(context.queryClient)
-      throw redirect({
-        to: '/admin/login',
-        search: { redirect: validateAdminRedirect(location.href) },
-        replace: true,
-        headers: { 'Cache-Control': 'private, no-store' },
-      })
+    try {
+      return {
+        adminSession: await requireAdminSession(
+          context.queryClient,
+          location.href,
+        ),
+      }
+    } catch (error) {
+      if (error instanceof AdminAccessDeniedError) setAuthFailureStatus(403)
+      if (error instanceof AuthDependencyError) setAuthFailureStatus(503)
+      throw error
     }
-
-    if (currentState.status === 'forbidden') {
-      await clearAdminPrivateQueries(context.queryClient)
-    }
-
-    return { adminSessionState: currentState }
   },
+  errorComponent: ({ error }) =>
+    error instanceof AdminAccessDeniedError ||
+    (error instanceof Error && error.name === 'AdminAccessDeniedError') ? (
+      <AdminAccessDenied />
+    ) : (
+      <AdminSessionUnavailable />
+    ),
   component: ProtectedAdminLayout,
 })
 
 function ProtectedAdminLayout() {
-  const { sessionState: adminSessionState } = useAdminSession()
-  if (adminSessionState.status === 'authenticated') return <Outlet />
+  const { sessionState: adminSessionState, isFetching } = useAdminSession()
+  const router = useRouter()
+  useEffect(() => {
+    if (adminSessionState.status === 'unauthenticated' && !isFetching)
+      void router.navigate({
+        to: '/admin/login',
+        search: { redirect: '/admin' },
+        replace: true,
+      })
+  }, [adminSessionState.status, isFetching, router])
+  if (adminSessionState.status === 'authenticated')
+    return (
+      <AdminSessionContext value={adminSessionState.session}>
+        <Outlet />
+      </AdminSessionContext>
+    )
   if (adminSessionState.status === 'forbidden') return <AdminAccessDenied />
   return <AdminSessionUnavailable />
 }
@@ -89,7 +87,10 @@ function AdminSessionUnavailable() {
   async function retrySessionCheck() {
     setRetrying(true)
     try {
-      await clearAdminPrivateQueries(queryClient)
+      await queryClient.invalidateQueries({
+        queryKey: ['auth', 'session'],
+        refetchType: 'none',
+      })
       await router.invalidate()
     } catch {
       // Keep the locked state visible; the operator can retry this check.

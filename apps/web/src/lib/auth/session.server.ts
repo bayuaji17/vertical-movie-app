@@ -3,8 +3,13 @@ import {
   getRequest,
   getResponseHeaders,
   setResponseHeader,
+  setResponseStatus,
 } from '@tanstack/react-start/server'
 import { readServerSession } from '@repo/auth/server'
+
+export const setAuthFailureStatusOnServer = createServerOnlyFn(
+  (status: 403 | 503) => setResponseStatus(status),
+)
 
 export const readSessionOnServer = createServerOnlyFn(
   async (options: { signal?: AbortSignal; authoritative?: boolean } = {}) => {

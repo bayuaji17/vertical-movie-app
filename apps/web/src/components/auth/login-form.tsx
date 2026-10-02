@@ -24,13 +24,12 @@ import {
 import { Input } from '#/components/ui/input'
 import { authClient } from '#/lib/auth/client'
 import {
-  adminSessionQueryKey,
   normalizeLoginEmail,
   signInErrorMessage,
   validateLoginEmail,
   validateLoginPassword,
 } from '#/lib/auth/login'
-import { adminSessionQueryOptions, sessionState } from '#/lib/auth/session'
+import { verifyAdminLogin, publishAuthChange } from '#/lib/auth/transitions'
 
 type AdminLoginFormProps = {
   redirectTo: string
@@ -67,30 +66,16 @@ export function AdminLoginForm({ redirectTo }: AdminLoginFormProps) {
           setFormError(signInErrorMessage(result.error))
           return
         }
-        queryClient.removeQueries({ queryKey: adminSessionQueryKey })
-        const snapshot = await queryClient.query({
-          ...adminSessionQueryOptions(),
-          retry: false,
-          staleTime: 0,
-        })
-
-        const session = sessionState(snapshot)
-        if (session.status !== 'authenticated') {
-          setFormError(
-            session.status === 'forbidden'
-              ? 'Akun ini tidak memiliki akses admin.'
-              : session.status === 'unavailable'
-                ? 'Sesi admin belum dapat diverifikasi. Periksa koneksi, lalu coba lagi.'
-                : 'Login belum dapat diverifikasi. Coba lagi.',
-          )
-          return
-        }
-
-        await queryClient.invalidateQueries({ queryKey: adminSessionQueryKey })
+        await verifyAdminLogin(queryClient)
+        publishAuthChange()
         await router.invalidate()
         await router.navigate({ to: redirectTo as never })
       } catch (error) {
-        setFormError(signInErrorMessage(error))
+        setFormError(
+          error instanceof Error && error.name === 'AdminAccessDeniedError'
+            ? 'Akun ini tidak memiliki akses admin.'
+            : signInErrorMessage(error),
+        )
       }
     },
   })

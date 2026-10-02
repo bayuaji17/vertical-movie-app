@@ -13,5 +13,17 @@ export async function clearAdminPrivateQueries(
     isAdminPrivateQueryKey(queryKey)
 
   await queryClient.cancelQueries({ predicate })
+  queryClient.removeQueries({
+    predicate: (query) =>
+      predicate(query) &&
+      !(query.queryKey[0] === 'auth' && query.queryKey[1] === 'session'),
+  })
+  queryClient.setQueryData(sessionQueryKey, null)
+}
+
+export async function clearAdminDataQueries(queryClient: QueryClient) {
+  const predicate = ({ queryKey }: { queryKey: readonly unknown[] }) =>
+    queryKey[0] === 'admin'
+  await queryClient.cancelQueries({ predicate })
   queryClient.removeQueries({ predicate })
 }
