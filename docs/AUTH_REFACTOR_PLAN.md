@@ -1,11 +1,11 @@
 # Rencana refactor auth: package, isomorphic, dan TanStack Query
 
-- Status: rencana disetujui pengguna; kode refactor belum diimplementasikan.
+- Status: implementasi AUTH-REF-001–010 selesai pada 2 Oktober 2026; evidence/commit pada backlog. Deployment dan migrasi database development terpisah.
 - Tanggal: 2 Oktober 2026, Asia/Jakarta.
 - Persetujuan: 2 Oktober 2026, melalui arahan pengguna untuk melanjutkan perincian rencana pada setiap task.
 - Baseline: `feat/auth-admin-module`, commit `34f8ec59b125bbabaae87b3939de38874afb3a58`.
 - Scope tetap: satu admin, email/password, tanpa signup publik/email service, seed/recovery CLI lokal, satu origin publik; penonton anonim.
-- Dokumen ini menggantikan usulan cache `useSession` saja sebelumnya. AUTH-001–013 adalah riwayat; AUTH-REF-001 pada [backlog auth](tasks/auth.md) berstatus Ready, AUTH-REF-002–010 masih Backlog sampai dependensinya selesai.
+- Dokumen ini menggantikan usulan cache `useSession` saja sebelumnya. AUTH-001–013 adalah riwayat; AUTH-REF-001–010 pada [backlog auth](tasks/auth.md) sudah selesai.
 
 ## 1. Temuan baseline dan keputusan
 
@@ -67,7 +67,7 @@ Cutover bertahap: AUTH-REF-001 memperkenalkan factory terkonfigurasi/kontrak bar
 `packages/auth` adalah library yang dikompilasi konsumen, bukan proses/service baru. Import package tidak membuka koneksi. API menginisialisasi resource dan menyerahkannya ke factory:
 
 ```ts
-// Sketsa target, belum aktif.
+// Sketsa arsitektur; implementasi konkret memakai createAdminAuthServer pada server.ts.
 import { createAuthServer } from "@repo/auth/server";
 import { createDatabase } from "./db/client";
 
@@ -193,7 +193,7 @@ Layout mengamati query yang sama melalui `useQuery`, bukan hanya snapshot route 
 
 Target network: SSR pertama satu request session; hydration fresh nol request tambahan; N navigasi admin dalam 60 detik tanpa event lain nol request tambahan; navigasi pertama setelah stale satu fetch. Focus/poll/expiry/transisi auth merupakan trigger terpisah.
 
-TTL Query dan cookie adalah dua jendela: tampilan revocation/role bisa tertunda kira-kira gabungannya pada tab aktif, ditambah latency. Background/offline tidak mempunyai janji wall-clock; revalidasi saat aktif kembali. API privat selalu memeriksa DB. TTL awal adalah usulan, belum hasil benchmark.
+TTL Query dan cookie adalah dua jendela: tampilan revocation/role bisa tertunda kira-kira gabungannya pada tab aktif, ditambah latency. Background/offline tidak mempunyai janji wall-clock; revalidasi saat aktif kembali. API privat selalu memeriksa DB. TTL awal sudah dipakai dan network counts diuji; belum merupakan hasil benchmark deployment.
 
 ## 7. Protected route dan authorization API
 
@@ -281,7 +281,7 @@ Browser/network proof diperlukan untuk menutup AC cache/route; bila runner tidak
 - [Elysia Better Auth handler/macro](https://elysiajs.com/integrations/better-auth).
 - Turbo 2.11.5 bundled docs: `node_modules/turbo/docs/README.md`, `core-concepts/internal-packages.mdx`, `crafting-your-repository/using-environment-variables.mdx`.
 
-Rencana diperiksa terhadap baseline dan dokumentasi/source terpasang. Migrasi, cache counts, guard baru, dan recovery native belum diimplementasikan atau diuji pada turn perencanaan ini.
+Saat perencanaan, hasil baseline tidak dianggap sebagai evidence refactor. Implementasi berikutnya membuktikan migrasi, cache counts, guard, native recovery, import boundary, SSR/gateway deadline, browser dan native end-to-end lokal; rincian aktual pada [backlog auth](tasks/auth.md) serta [Auth Operations](AUTH_OPERATIONS.md).
 
 # Penerapan expand migration
 

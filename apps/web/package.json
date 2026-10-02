@@ -19,7 +19,10 @@
     "lint": "bun run --bun eslint",
     "check-types": "bun run --bun tsc --noEmit",
     "format": "bun run --bun prettier --write . && bun run --bun eslint --fix",
-    "check": "bun run --bun prettier --check ."
+    "check": "bun run --bun prettier --check .",
+    "auth:import:proof": "bun ./test/auth-import-boundary-proof.mjs",
+    "auth:ssr:smoke": "bun ./test/auth-ssr-smoke.mjs",
+    "auth:browser:smoke": "bun ./test/auth-browser-smoke.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",

@@ -20,6 +20,8 @@ cp apps/web/.env.example apps/web/.env
 bun run dev
 ```
 
+Before running auth on a fresh database, apply migrations and provision the admin with the native CLI; for an existing database, follow the staged [Auth operations runbook](docs/AUTH_OPERATIONS.md).
+
 Copy the env files once during initial setup; update existing local env files without overwriting their values. See [Environment setup](docs/ENVIRONMENT.md) for the active variables and planned integrations.
 
 `bun run dev` starts both apps. The API uses port 3001 and web uses port 3000 by default; set `PORT` in each app's env to override its port.

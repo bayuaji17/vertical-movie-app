@@ -6,7 +6,7 @@
 
 API menggunakan TypeScript strict, Elysia, dan Bun sesuai versi root `package.json`. API memiliki logika domain dan akses data aplikasi. **Eden Treaty dipilih pengguna pada 1 Oktober 2026** untuk konsumsi kontrak Elysia oleh web. Web tidak menjalankan ulang aturan publikasi atau otorisasi sebagai pengganti validasi server.
 
-Fondasi API memiliki `src/app.ts` untuk factory Elysia tanpa listen, `src/config/env.ts` untuk validasi konfigurasi, `src/db/client.ts` untuk factory Bun SQL/Drizzle, dan bootstrap dengan penutupan resource. Route aktif mencakup `GET /` publik, handler Better Auth di `/api/auth/*`, `GET /admin/session`, serta Scalar gabungan di `/openapi` dan `/openapi/json`; macro `requireAdmin` memeriksa sesi database serta singleton admin pada setiap rute privat. Auth hanya mengizinkan status, login, logout, dan pembacaan sesi serta memeriksa Origin di server. Schema Better Auth/admin serta migrasi eksplisit diuji di PostgreSQL khusus. Dependensi Better Auth tetap dimiliki `packages/auth`; storage dan worker belum dipasang. Ekspor `api/types` dikonsumsi web dengan Eden Treaty dan helper sesi SSR/browser; endpoint domain lain belum dibuat.
+Fondasi API memiliki factory Elysia tanpa listen, env tervalidasi, satu pool Bun SQL/Drizzle dan shutdown. Route aktif: `GET /`, handler native Better Auth `/api/auth/*`, serta Scalar `/openapi` dan `/openapi/json`. API mengimpor factory/schema dari `@repo/auth/server`, menyuntikkan pool yang sama; package tidak membaca env atau membuat pool global. Schema auth dimiliki package dan diekspor ulang API untuk migrasi. Macro `requireAdmin` memanggil getSession native dengan disableCookieCache setiap rute privat, kemudian mengecek role admin, ban dan expiry; register sebelum rute privat dengan chaining Elysia. Auth publik hanya status/login/logout/session; operator HTTP tertutup. Seed memakai CLI resmi dan recovery memakai reset native selama maintenance. `/admin/session` dan singleton/writer custom sudah dihapus. Guard web tidak menggantikan otorisasi endpoint bisnis. Eden bisnis tetap type-only `api/types`; auth browser/SSR memakai SDK package. Lihat [Auth Operations](AUTH_OPERATIONS.md) untuk konfigurasi, command, failure, migration dan bukti. Storage/worker belum dipasang.
 
 Instruksi agent tetap berada di [AGENTS.md](../AGENTS.md). Ikuti [Global Workflow](GLOBAL_WORKFLOW.md), [Template Task](TASK_TEMPLATE.md), dan [Environment](ENVIRONMENT.md). Kontrak produk yang belum disetujui di [Architecture](ARCHITECTURE.md) tetap berupa rancangan.
 
@@ -18,15 +18,17 @@ apps/api/
 │   ├── index.ts                  # Startup HTTP, listen, dan shutdown
 │   ├── app.ts                    # Factory createApp; komposisi tanpa listen
 │   ├── types.ts                  # Ekspor type-only App untuk Eden
+│   ├── auth.ts                   # Config CLI operator native; tidak listen
 │   ├── config/
 │   │   └── env.ts                # Pembacaan dan validasi konfigurasi server
 │   ├── modules/
 │   │   ├── auth/
-│   │   │   ├── index.ts          # Mount handler Better Auth dari @repo/auth/server
+│   │   │   ├── provision-cli.ts  # Orkestrasi CLI resmi create-admin
+│   │   │   ├── reset-cli.ts      # Orkestrasi reset native dalam maintenance
+│   │   │   ├── cli-input.ts      # Input password recovery tersembunyi
 │   │   │   └── admin/
 │   │   │       ├── guard.ts      # Macro requireAdmin untuk route privat
-│   │   │       ├── model.ts      # DTO sesi dan error auth admin
-│   │   │       └── index.ts      # GET /admin/session
+│   │   │       └── model.ts      # Schema error guard admin
 │   │   ├── videos/
 │   │   │   ├── index.ts          # Komposisi rute publik dan admin
 │   │   │   ├── public.ts         # Baca video terbit tanpa login
@@ -47,8 +49,7 @@ apps/api/
 │   │   ├── client.ts             # Factory pool Bun SQL dan Drizzle
 │   │   ├── migrate.ts            # Migrator eksplisit, tidak berjalan pada request
 │   │   └── schema/
-│   │       ├── auth.ts           # Schema Better Auth hasil generator
-│   │       ├── admin.ts          # Identitas admin singleton
+│   │       ├── auth.ts           # Re-export schema canonical @repo/auth/server
 │   │       ├── index.ts          # Schema gabungan untuk migrasi/adapter
 │   │       ├── videos.ts
 │   │       ├── media.ts
@@ -277,9 +278,9 @@ Dokumentasi OpenAPI menerangkan kontrak HTTP. Consumer endpoint aplikasi tetap m
 
 ## Autentikasi dan konfigurasi
 
-- Konfigurasi Better Auth dimiliki `packages/auth`; API menyediakan adapter database dan secret melalui `@repo/auth/server`. `modules/auth` memasang handler tersebut, sedangkan `plugins/admin.ts` memverifikasi sesi dan identitas admin pada setiap operasi privat.
+- Konfigurasi Better Auth dimiliki `packages/auth`; API menyediakan adapter database dan secret melalui `@repo/auth/server`. `app.ts` memasang handler tersebut; `modules/auth/admin/guard.ts` menyediakan macro authorization authoritative untuk rute bisnis privat.
 - Sesi valid tidak otomatis berarti admin. Verifikasi identitas admin tunggal yang disediakan melalui provisioning terkontrol; pendaftaran publik dinonaktifkan. Pengunjung katalog/player tidak perlu akun.
-- `GET /admin/session` memakai `requireAdmin` dan hanya mengembalikan DTO user/session yang diizinkan. Handler Better Auth hanya membuka login, logout, dan status sesi; form web ada di `/admin/login`, sementara dashboard memakai sesi segar melalui server function dan gateway same-origin.
+- Session memakai native `/api/auth/get-session`, role/admin plugin, dan projection whitelist sebelum cache/SSR. Web memakai reader isomorphic dan TanStack Query; guard parent menolak sebelum child loaders. Form ada di `/admin/login`; `/admin/session` lama tidak tersedia. Lifecycle operator mengikuti runbook native, tanpa writer SQL aplikasi.
 - Trusted origin, CORS, cookie, dan alur permintaan web ke API ditetapkan bersama task auth. Jangan menggunakan wildcard origin untuk request berkredensial.
 - Pembacaan env API dipusatkan di `config/env.ts` dan divalidasi saat startup HTTP. Worker mengikuti konfigurasi prosesnya saat dibuat; jangan membuat client dengan credential kosong.
 - Rahasia tetap di env API yang diabaikan Git. Daftarkan variabel baru tanpa nilai asli di `.env.example`, [Environment](ENVIRONMENT.md), dan konfigurasi env task Turbo yang relevan.
@@ -288,7 +289,7 @@ Dokumentasi OpenAPI menerangkan kontrak HTTP. Consumer endpoint aplikasi tetap m
 
 ## Database dan migrasi
 
-- Kompatibilitas Bun SQL, `drizzle-orm/bun-sql`, dan Better Auth Drizzle adapter telah dibuktikan pada versi yang dikunci di [backlog auth](tasks/auth.md). Migrasi dan operasi auth/admin juga diuji terarah pada database test lokal. Proof membatasi operasi yang diuji; database development belum dimigrasikan dan proof tidak menyatakan production-ready.
+- Kompatibilitas Bun SQL, `drizzle-orm/bun-sql`, dan Better Auth Drizzle adapter telah dibuktikan pada versi yang dikunci di [backlog auth](tasks/auth.md). Migrasi dan operasi auth/admin juga diuji terarah pada database test lokal. Proof membatasi operasi yang diuji; expand/contract refactor belum diterapkan pada database development dan proof tidak menyatakan production-ready.
 - Query memakai parameter binding dari Drizzle atau tagged template Bun SQL. Jangan menggabungkan input pengguna menjadi SQL mentah. Identifier dinamis harus berasal dari daftar server yang tetap.
 - Schema tabel berada di `src/db/schema/`; migrasi SQL dan metadata generasi berada di `apps/api/drizzle/`. Schema Better Auth dihasilkan dari konfigurasi package auth dan schema admin ditinjau sebelum migrasi.
 - Jalankan `bun run --cwd apps/api db:migrate` secara eksplisit; jangan membuat/mengubah tabel otomatis saat request masuk. Migrator Bun SQL membaca env API `DATABASE_URL`, memakai path migrasi tetap dari source, dan meredaksi error agar URL tidak tercetak.

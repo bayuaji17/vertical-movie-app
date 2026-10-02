@@ -19,7 +19,8 @@
     "dev": "bun run --watch src/index.ts",
     "build": "bun build src/index.ts --target=bun --outdir=dist",
     "start": "bun dist/index.js",
-    "check-types": "bun run --bun tsc --noEmit"
+    "check-types": "bun run --bun tsc --noEmit",
+    "auth:browser:smoke": "bun ./test/integration/auth-browser-smoke.mjs"
   },
   "dependencies": {
     "@elysia/openapi": "^1.4.16",

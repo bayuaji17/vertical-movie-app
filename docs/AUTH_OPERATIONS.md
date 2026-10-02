@@ -30,3 +30,50 @@ bun run --cwd apps/api admin:reset-password -- admin@example.com --maintenance-c
 **Batas concurrency:** proof lokal menahan verifikasi login lama, menjalankan reset/revoke, lalu melanjutkan login; sesi baru dari login lama masih bisa terbentuk. Karena itu reset online tidak dijanjikan atomic. Maintenance tanpa penerima/login in-flight adalah prasyarat MVP.
 
 Endpoint HTTP operator (`admin/*`, signup, request/reset password, change password, dan mutasi profil) ditutup pada factory normal maupun instance recovery. Factory membedakan native server API calls dari request HTTP; fungsi operator tidak dipasang pada server HTTP.
+
+## Migrasi expand → cutover → contract
+
+Migrasi tidak berjalan saat API start dan tidak dijalankan otomatis pada database development/deployment. Verifikasi `DATABASE_URL` sendiri; jangan memakai variabel proof untuk deployment. Database development pada pemeriksaan akhir refactor masih mempunyai satu migration baseline dan belum mempunyai kolom native `role`; credential admin existing tidak direset.
+
+1. Backup PostgreSQL sebelum perubahan dan uji prosedur restore pada target operasional. Hentikan penerima login/mutasi auth selama migrasi. Backup mencakup user, account, session, verification, rate limiter dan journal Drizzle.
+2. Jalankan ekspansi terbatas berikut. Command menyalin journal sampai migration `0001_native-admin-expand` ke folder sementara, menerapkannya, dan membersihkan folder/pool. `0000` dan `0001` tidak diubah.
+
+```sh
+bun run --cwd apps/api db:migrate -- --stage=expand
+```
+
+Ekspansi menambah role/ban/impersonation, backfill admin dari identity existing, serta constraint role canonical dan unique partial index satu admin. Preflight menolak identity tanpa credential. ID, email, hash, dan sesi tidak ditulis ulang.
+
+3. Deploy kode native refactor ke **semua** API/web dan CLI operator. Verifikasi login existing, guard authoritative, SSR, logout, dan command operator. Schema expand masih memiliki tabel legacy sehingga rollback aplikasi sebelum contract dapat memakai snapshot sebelumnya; hentikan mutasi auth selama rollback, terutama seed native yang tidak membuat identity legacy. Jangan menjalankan operator lama bersama operator baru.
+4. Sesudah semua consumer native dan verifikasi cutover selesai, stop penerima login/mutasi dan ambil backup cutover. Terapkan contract:
+
+```sh
+bun run --cwd apps/api db:migrate -- --stage=contract
+```
+
+Command contract menerapkan semua migration pending. Migration `0002_native-admin-contract` memeriksa identity legacy cocok dengan role admin dan credential sebelum DROP tabel singleton. DROP tanpa CASCADE menolak dependency tak terduga. Migration ulang idempotent. `db:migrate` tanpa flag juga menerapkan semua migration pending; gunakan tahap eksplisit untuk rollout bertahap di atas. Pada database kosong, seluruh migration dapat dijalankan sebelum seed native.
+
+5. Verifikasi kembali akses admin dan native recovery pada schema final, baru buka API. Setelah DROP, aplikasi lama yang membaca `admin_identity` tidak kompatibel. Rollback membutuhkan restore backup konsisten saat semua penerima berhenti, atau forward fix native; tidak ada otomatis down migration. Jangan mengedit migration historis atau membuat singleton lewat SQL ad hoc.
+
+Proof upgrade/contract berjalan hanya pada database PostgreSQL test yang dijaga host/nama. Ia membuktikan hash/ID/sesi existing tetap sama, login sebelum/sesudah contract berhasil, dan preflight mismatch menggagalkan DROP.
+
+## Session dan cache
+
+| Lapisan | Perilaku | Batas |
+| --- | --- | --- |
+| Better Auth session | Expiry tetap 24 jam; refresh sesi dimatikan | Login ulang setelah expiry. |
+| Cookie cache native | Maksimum 60 detik; refresh cache dimatikan | Membantu pembacaan UI, bukan izin operasi privat. |
+| TanStack Query | Satu key `['auth', 'session']`, whitelist snapshot/null, fresh maksimum 60 detik dibatasi expiry, retry otomatis dimatikan | Cache baru tiap router/request SSR; navigasi/preload fresh tidak fetch, stale concurrent dideduplicate. |
+| Observer layout admin | Poll 60 detik hanya online/visible; focus/reconnect stale revalidates; timer expiry menutup UI | Background/offline tidak menjanjikan revocation langsung. |
+| API guard privat | Native `getSession` dengan `disableCookieCache: true` setiap request, lalu role/ban/expiry | 401 missing/expired/revoked; 403 user/banned; 503 dependency failure. |
+| SSR/gateway HTTP | `private, no-store`, fixed API internal origin, deadline 10 detik termasuk body | Cookie cache bukan HTTP/CDN cache. UI outage menutup konten privat meskipun cache lama ada. |
+
+TTL Query dan cookie cache dapat menambah delay tampilan perubahan sesi/role hingga kira-kira dua jendela cache pada tab aktif, ditambah latency. Guard API tidak memakai jendela ini. Logout sukses membatalkan fetch, menghapus private query/data, dan mengirim notifikasi lintas tab tanpa token/snapshot; logout gagal tidak mengaku sesi tercabut. Login melakukan satu pembacaan authoritative sebelum navigasi. Response 401 dari API privat membersihkan snapshot; 403/5xx memicu revalidasi. Eden bisnis menggunakan `createPrivateApiClient` secara eksplisit, terpisah dari SDK auth.
+
+## Validasi lokal dan deployment
+
+`auth:adapter:proof`, `auth:schema:proof`, `auth:runtime:proof`, `auth:admin:proof`, `auth:recovery:proof`, `auth:authorization:proof`, `auth:openapi:proof` berada pada app API. Jalankan serial karena sebagian berbagi dedicated database. API unit memakai Bun native tanpa port/database. Web menyediakan `auth:gateway:proof`, `auth:session:proof`, `auth:login:proof`, `auth:guard:proof`, `auth:import:proof`, `auth:ssr:smoke`, `auth:gateway:smoke`, dan `auth:browser:smoke`. Negative import proof memulihkan fixture dalam finally; build normal harus diulang sesudahnya.
+
+Browser runner dikonfigurasi dengan `AUTH_BROWSER_NODE`, `AUTH_PLAYWRIGHT_MODULE`, `AUTH_BROWSER_EXECUTABLE`, dan `AUTH_BROWSER_WORKER_PATH` sesuai runtime/path yang terpasang. Worker path harus dapat dibaca runner dan bukan file sumber repo. Web browser smoke memakai native SDK dengan HTTP fixture yang dapat mensimulasikan outage/race; `AUTH_BROWSER_RUNTIME=built AUTH_BROWSER_PHASE=all` menguji dua suite pada hasil build Bun/Nitro. API `auth:browser:smoke` memakai **Better Auth asli + PostgreSQL dedicated + Elysia + hasil build web**, bukan fixture respons auth. Command API tersebut mereset database admin proof, jadi tetap jalankan serial dan set `AUTH_ADMIN_TEST_DATABASE_URL` ke database test yang diizinkan.
+
+Bukti lengkap dan commit per task berada pada [backlog auth](tasks/auth.md). Browser lokal Chromium lolos pada viewport mobile 390×844; cache/network suite juga berjalan di desktop. Hasil build lokal bukan deployment production. Domain/TLS, backup/restore target, reverse proxy, browser/perangkat lain dan production smoke masih pending. API belum mempercayai header IP proxy; Better Auth memakai bucket limiter bersama per-path saat IP tidak tersedia. Konfigurasi trusted proxy/IP harus dibuktikan pada deployment sebelum mengaktifkan header tersebut. Tidak ada GitHub CI baru.

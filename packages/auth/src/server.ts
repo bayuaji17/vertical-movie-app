@@ -48,4 +48,4 @@ export function generateAuthOpenAPISchema(auth: {
 
 export { drizzleAdapter } from "@better-auth/drizzle-adapter";
 
-export { resolveAuthCliPath, createAdminRecovery } from './internal/operator';
+export { resolveAuthCliPath, createAdminRecovery } from "./internal/operator";

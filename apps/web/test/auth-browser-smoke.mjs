@@ -129,18 +129,43 @@ const port = reserve.port
 reserve.stop(true)
 const url = `http://127.0.0.1:${port}`
 const app = import.meta.dir.replace(/\/test$/, '')
-const child = Bun.spawn(['bun', 'run', '--bun', 'vite', 'dev'], {
-  cwd: app,
-  env: {
-    ...process.env,
-    HOST: '127.0.0.1',
-    PORT: String(port),
-    VITE_API_URL: url,
-    API_INTERNAL_URL: `http://127.0.0.1:${api.port}`,
+const built = process.env.AUTH_BROWSER_RUNTIME === 'built'
+const appEnv = {
+  ...process.env,
+  HOST: '127.0.0.1',
+  PORT: String(port),
+  VITE_API_URL: url,
+  API_INTERNAL_URL: 'http://127.0.0.1:' + api.port,
+}
+if (built) {
+  const build = Bun.spawn([process.execPath, 'run', 'build'], {
+    cwd: app,
+    env: appEnv,
+    stdout: 'pipe',
+    stderr: 'pipe',
+  })
+  const [code, out, err] = await Promise.all([
+    build.exited,
+    new Response(build.stdout).text(),
+    new Response(build.stderr).text(),
+  ])
+  if (code) {
+    api.stop(true)
+    throw new Error('Browser fixture build failed: ' + (out + err).slice(-4000))
+  }
+}
+const child = Bun.spawn(
+  built
+    ? [process.execPath, '.output/server/index.mjs']
+    : [process.execPath, 'run', '--bun', 'vite', 'dev'],
+  {
+    cwd: app,
+    env: { ...appEnv, NODE_ENV: built ? 'production' : 'development' },
+    stdout: 'ignore',
+    stderr: 'ignore',
   },
-  stdout: 'ignore',
-  stderr: 'ignore',
-})
+)
+
 try {
   let ready = false
   for (let i = 0; i < 150; i++) {
@@ -153,38 +178,51 @@ try {
     }
   }
   assert.ok(ready)
-  const workerSource = await Bun.file(
-    import.meta.dir +
-      (process.env.AUTH_BROWSER_PHASE === 'routes'
-        ? '/auth-routes-browser-worker.mjs'
-        : '/auth-browser-worker.mjs'),
-  ).text()
-  const workerPath = process.env.AUTH_BROWSER_WORKER_PATH
-  assert.ok(
-    workerPath,
-    'Provide AUTH_BROWSER_WORKER_PATH on a filesystem the runner can read',
-  )
-  await Bun.write(workerPath, workerSource)
-  const nativePath = workerPath.startsWith('/mnt/')
-    ? workerPath.replace(
-        /^\/mnt\/([a-z])\//,
-        (_all, drive) => drive.toUpperCase() + ':/',
-      )
-    : workerPath
-  const worker = Bun.spawn(
-    [node, nativePath, url, module, executable, 'http://127.0.0.1:' + api.port],
-    { stdout: 'pipe', stderr: 'pipe' },
-  )
-  const [code, stdout, stderr] = await Promise.all([
-    worker.exited,
-    new Response(worker.stdout).text(),
-    new Response(worker.stderr).text(),
-  ])
-  if (stderr) console.error(stderr)
-  if (code && stdout) console.log(stdout.trim())
-  assert.equal(code, 0, 'Browser acceptance worker must pass')
-  assert.ok(stdout.includes('Browser:'))
-  console.log(stdout.trim())
+  const phases =
+    process.env.AUTH_BROWSER_PHASE === 'all'
+      ? ['cache', 'routes']
+      : [process.env.AUTH_BROWSER_PHASE ?? 'cache']
+  for (const phase of phases) {
+    const workerSource = await Bun.file(
+      import.meta.dir +
+        (phase === 'routes'
+          ? '/auth-routes-browser-worker.mjs'
+          : '/auth-browser-worker.mjs'),
+    ).text()
+    const workerPath = process.env.AUTH_BROWSER_WORKER_PATH
+    assert.ok(
+      workerPath,
+      'Provide AUTH_BROWSER_WORKER_PATH on a filesystem the runner can read',
+    )
+    await Bun.write(workerPath, workerSource)
+    const nativePath = workerPath.startsWith('/mnt/')
+      ? workerPath.replace(
+          /^\/mnt\/([a-z])\//,
+          (_all, drive) => drive.toUpperCase() + ':/',
+        )
+      : workerPath
+    const worker = Bun.spawn(
+      [
+        node,
+        nativePath,
+        url,
+        module,
+        executable,
+        'http://127.0.0.1:' + api.port,
+      ],
+      { stdout: 'pipe', stderr: 'pipe' },
+    )
+    const [code, stdout, stderr] = await Promise.all([
+      worker.exited,
+      new Response(worker.stdout).text(),
+      new Response(worker.stderr).text(),
+    ])
+    if (stderr) console.error(stderr)
+    if (code && stdout) console.log(stdout.trim())
+    assert.equal(code, 0, 'Browser acceptance worker must pass')
+    assert.ok(stdout.includes('Browser:'))
+    console.log((built ? 'Built Bun/Nitro ' : 'Vite ') + stdout.trim())
+  }
 } finally {
   child.kill()
   await child.exited

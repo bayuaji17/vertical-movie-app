@@ -1,3 +1,4 @@
+> Snapshot historis sebelum refactor native. AUTH-REF-001–010 telah selesai; kondisi aktif dan bukti lokal ada pada [Auth Operations](AUTH_OPERATIONS.md) dan [backlog auth](tasks/auth.md). Database development belum menerima expand/contract baru.
 # Repository Context — Auth
 
 ## Snapshot

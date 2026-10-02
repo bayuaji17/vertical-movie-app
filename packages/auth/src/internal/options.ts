@@ -55,9 +55,13 @@ export function createAuthOptions(config: AuthConfiguration) {
         // Apply the configured policy to trusted CLI creation as well.
         if (context.path === "/admin/create-user") {
           const password = context.body?.password;
-          if (typeof password === "string" && password.length < passwordPolicy.minLength) {
+          if (
+            typeof password === "string" &&
+            password.length < passwordPolicy.minLength
+          ) {
             throw APIError.from("BAD_REQUEST", {
-              code: "PASSWORD_TOO_SHORT", message: "Password must contain at least 12 characters.",
+              code: "PASSWORD_TOO_SHORT",
+              message: "Password must contain at least 12 characters.",
             });
           }
         }
