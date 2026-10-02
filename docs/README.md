@@ -18,8 +18,8 @@ Catat tanggal persetujuan dan pemilik keputusan di setiap dokumen. Pisahkan peri
 
 - [Repository Context — Auth](REPOSITORY_CONTEXT.md): konteks kode dan batas sistem pada snapshot `bff1ced88f7ade37d454370ccf7d95a47cbf3aea` untuk implementasi auth.
 - [Implementation Plan — Auth](IMPLEMENTATION_PLAN.md): rencana email/password, provisioning/pemulihan admin melalui CLI, proteksi API/dashboard, dan integrasi satu origin; AUTH-001 sampai AUTH-013 selesai pada level implementasi dan validasi lokal. Browser UI manual serta deployment tetap pending.
-- [Backlog Auth](tasks/auth.md): riwayat AUTH-001–013 dan 10 task refactor AUTH-REF-001–010 dengan user story, dependensi, acceptance criteria, serta bukti validasi.
-- [Rencana Refactor Auth](AUTH_REFACTOR_PLAN.md): ownership entry client/server package, dependency injection database, native role/CLI, TanStack isomorphic/Query, SSR dan protected routes, cache/invalidation, migrasi serta regression; AUTH-REF-001–010 masih backlog.
+- [Backlog Auth](tasks/auth.md): riwayat AUTH-001–013 dan 10 task refactor dengan peta file, kontrak, 72 langkah implementasi, 57 skenario uji, acceptance criteria, gerbang cutover/commit, serta bukti validasi. AUTH-REF-001 Ready; task berikutnya menunggu dependensi.
+- [Rencana Refactor Auth](AUTH_REFACTOR_PLAN.md): rencana disetujui pada 2 Oktober 2026; ownership entry client/server package, dependency injection database, native role/CLI, TanStack isomorphic/Query, SSR/protected routes, cache/invalidation, migrasi serta regression. Implementasi refactor belum dimulai.
 - [Global Workflow](GLOBAL_WORKFLOW.md): keputusan Agile dan pembagian modul → user story → task kecil disetujui pengguna pada 1 Oktober 2026.
 - [Template Task](TASK_TEMPLATE.md): format backlog per modul, acceptance criteria, dependensi, dan bukti validasi.
 - [Environment](ENVIRONMENT.md): setup env API/web, pemisahan konfigurasi publik/server, dan status variabel integrasi.
