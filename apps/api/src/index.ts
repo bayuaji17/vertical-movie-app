@@ -20,9 +20,6 @@ const app = createApp({
   auth,
   authOpenApiSchema,
   secureCookies: env.betterAuthUrl.startsWith("https://"),
-  admin: {
-    getSession: (input) => auth.api.getSession(input),
-  },
 }).listen(env.port);
 
 let isShuttingDown = false;

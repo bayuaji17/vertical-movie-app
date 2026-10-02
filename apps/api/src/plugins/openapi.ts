@@ -1,5 +1,5 @@
 import { toOpenAPISchema } from "@elysia/openapi";
-import { supportedAuthOperations } from "../modules/auth";
+import { supportedAuthOperations } from "@repo/auth/server";
 import type { AuthOpenAPISchema } from "@repo/auth/server";
 
 const AUTH_BASE_PATH = "/api/auth";

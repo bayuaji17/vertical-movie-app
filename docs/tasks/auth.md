@@ -37,7 +37,7 @@ Proof query/transaksi dan auth pada database test; type-check kandidat; review p
 ### Hasil dan bukti
 
 - Dependency dikunci: `drizzle-orm` 0.45.3 pada API, `drizzle-kit` 0.31.11 sebagai dev dependency API, `@better-auth/drizzle-adapter` 1.7.7 serta CLI `auth` 1.7.7 pada `@repo/auth`.
-- Bukti schema CLI: `packages/auth/test/fixtures/auth-probe.config.ts` → schema Drizzle di `apps/api/test/fixtures/auth-probe-schema.ts`; SQL migrasi fixture tersimpan di `apps/api/test/fixtures/auth-probe-migrations/`.
+- Bukti schema CLI: `packages/auth/test/fixtures/auth-probe.config.ts` → schema Drizzle di `apps/api/test/fixtures/auth-probe-schema.ts`; SQL migrasi fixture tersimpan di `apps/api/test/fixtures/auth-probe-migrations/` pada proof awal. Fixture legacy ini dihapus pada AUTH-REF-009; proof final memakai schema canonical dan migrasi aplikasi.
 - Native Bun suite lulus: 2 test, 16 assertion; database nyata PostgreSQL 18.6 khusus test.
 - `bun install --frozen-lockfile`, `bun run check-types`, `bun run build`, `bun run lint`, Prettier untuk source TypeScript/JSON, dan `git diff --check` lulus.
 - `drizzle-kit push` dicoba hanya sebelum ada schema di database test; perintah berhenti karena meminta `pg`, `postgres`, atau driver provider lain. Tidak ada driver alternatif dipasang dan tidak ada perubahan database yang terjadi lewat perintah tersebut. Pembuatan schema berhasil dengan SQL migrasi Drizzle yang dijalankan Drizzle ORM menggunakan Bun SQL.
@@ -1301,7 +1301,7 @@ AUTH-REF-009 menghapus jalur session/writer lama setelah semua consumer berpinda
 
 ### Task: AUTH-REF-009 — Hapus auth legacy dan contract migration singleton
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: 9 dalam urutan eksekusi refactor.
 - Referensi: AUTH-REF-US01; AUTH_REFACTOR_PLAN.md; AGENTS.md; API_DEVELOPMENT.md.
@@ -1332,21 +1332,21 @@ Path bertanda baru adalah target yang dibuat saat eksekusi, bukan file yang suda
 
 #### Rencana implementasi terurut
 
-- [ ] **AUTH-REF-009.01 — Audit consumer sebelum hapus.** rg seluruh imports/routes/schema/writers; identifikasi test yang mengunci implementasi lama versus perilaku yang masih wajib.
-- [ ] **AUTH-REF-009.02 — Hapus jalur session custom.** Hapus route web/API/DTO khusus auth; jika directory kosong biarkan generator merapikan via command generate-routes, tidak hand-edit routeTree.gen.ts.
-- [ ] **AUTH-REF-009.03 — Hapus writer dan compatibility.** Seed/reset CLI native tetap entry yang didukung; hilangkan SQL credential/session writes dari aplikasi serta exports/hook singleton legacy.
-- [ ] **AUTH-REF-009.04 — Perbarui tests/fixtures.** Pertahankan proof credential migration/one-admin/revocation melalui API native; fixture SQL tetap boleh untuk persiapan/inspection, bukan production auth lifecycle.
-- [ ] **AUTH-REF-009.05 — Buat contract migration.** Preflight kesetaraan identity/role; hapus FK/tabel admin_identity melalui migration baru. Jangan mengubah expand/baseline migration yang sudah diterapkan.
-- [ ] **AUTH-REF-009.06 — Buktikan tiga tahap.** Baseline account -> expand -> native consumer -> contract -> login/logout/recovery; fingerprint credential tetap sama. Dokumentasikan batas rollback setelah DROP.
-- [ ] **AUTH-REF-009.07 — Audit final lalu commit.** Tidak ada session endpoint/writer custom aktif; business API/Eden tetap type-only/inferred. Generated assets/build tidak masuk commit.
+- [x] **AUTH-REF-009.01 — Audit consumer sebelum hapus.** rg seluruh imports/routes/schema/writers; identifikasi test yang mengunci implementasi lama versus perilaku yang masih wajib.
+- [x] **AUTH-REF-009.02 — Hapus jalur session custom.** Hapus route web/API/DTO khusus auth; jika directory kosong biarkan generator merapikan via command generate-routes, tidak hand-edit routeTree.gen.ts.
+- [x] **AUTH-REF-009.03 — Hapus writer dan compatibility.** Seed/reset CLI native tetap entry yang didukung; hilangkan SQL credential/session writes dari aplikasi serta exports/hook singleton legacy.
+- [x] **AUTH-REF-009.04 — Perbarui tests/fixtures.** Pertahankan proof credential migration/one-admin/revocation melalui API native; fixture SQL tetap boleh untuk persiapan/inspection, bukan production auth lifecycle.
+- [x] **AUTH-REF-009.05 — Buat contract migration.** Preflight kesetaraan identity/role; hapus FK/tabel admin_identity melalui migration baru. Jangan mengubah expand/baseline migration yang sudah diterapkan.
+- [x] **AUTH-REF-009.06 — Buktikan tiga tahap.** Baseline account -> expand -> native consumer -> contract -> login/logout/recovery; fingerprint credential tetap sama. Dokumentasikan batas rollback setelah DROP.
+- [x] **AUTH-REF-009.07 — Audit final lalu commit.** Tidak ada session endpoint/writer custom aktif; business API/Eden tetap type-only/inferred. Generated assets/build tidak masuk commit.
 
 #### Acceptance criteria
 
-- [ ] Tidak ada consumer legacy /admin/session atau writer/hash credential/session aplikasi.
-- [ ] Tidak ada impor auth library langsung pada app; konfigurasi package adalah sumber tunggal.
-- [ ] Contract migration hanya berjalan setelah backfill/cutover; akun/credential tetap bisa login.
-- [ ] Eden/type-only api/types bisnis tidak berubah menjadi dependency runtime API pada browser.
-- [ ] Proof yang masih relevan dipindah ke perilaku native; baseline migration tidak diubah.
+- [x] Tidak ada consumer legacy /admin/session atau writer/hash credential/session aplikasi.
+- [x] Tidak ada impor auth library langsung pada app; konfigurasi package adalah sumber tunggal.
+- [x] Contract migration hanya berjalan setelah backfill/cutover; akun/credential tetap bisa login.
+- [x] Eden/type-only api/types bisnis tidak berubah menjadi dependency runtime API pada browser.
+- [x] Proof yang masih relevan dipindah ke perilaku native; baseline migration tidak diubah.
 
 #### Validasi
 
@@ -1384,7 +1384,7 @@ Commit setelah acceptance criteria task terpenuhi: `refactor(auth): remove legac
 
 #### Hasil dan bukti
 
-Belum diimplementasikan. Catat perintah, hasil, batas bukti dan commit ketika task dikerjakan.
+Audit source: tidak ada writer/hash auth produksi atau impor library auth langsung pada apps. /admin/session dan gateway legacy dihapus; business Eden tetap type-only api/types di lib/api/client.ts. Schema package canonical; fixture schema legacy/compatibility factory/raw crypto exports dihapus. Migration 0002 preflight role/credential lalu DROP tanpa CASCADE; baseline/expand tidak diubah. Upgrade baseline→expand→login native→contract menjaga ID/hash/session: schema 5 pass/24 assertions; adapter 2/15; runtime 8/44; authorization 5/36; OpenAPI 2/56; admin 4/18; recovery 8/46. API unit 22/56 dan web proofs 29/122 lulus; check-types/build lulus, Vite+Nitro gateway smoke membuktikan legacy path404. Contract belum diterapkan pada DB development. Commit: refactor(auth): remove legacy auth ownership.
 
 #### Blocker atau tindak lanjut
 

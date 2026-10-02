@@ -10,11 +10,10 @@ import { SQL } from "bun";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/bun-sql";
 
-import { hashPassword } from "@repo/auth/server";
 import { createApp } from "../../src/app";
 import { applyDatabaseMigrations } from "../../src/db/migrate";
 import * as schema from "../../src/db/schema";
-import { createAdminAuth, createAdminPolicy } from "../../src/modules/auth";
+import { createAdminAuthServer } from "@repo/auth/server";
 
 const testDatabaseName = "vertical_movie_app_auth_runtime_test";
 const authOrigin = "http://localhost:3000";
@@ -54,12 +53,11 @@ function getTestDatabaseUrl(): string {
 const testDatabaseUrl = getTestDatabaseUrl();
 const client = new SQL(testDatabaseUrl);
 const database = drizzle({ client, schema });
-const auth = createAdminAuth({
+const auth = createAdminAuthServer({
   database,
   origin: authOrigin,
   secret: "auth-runtime-proof-secret-never-use-outside-this-test",
   secureCookies: false,
-  isAdminUser: createAdminPolicy(database),
 });
 const app = createApp({ auth });
 
@@ -79,32 +77,9 @@ async function resetTestDatabase() {
   }
 }
 
-async function createFixtureUser(id: string, email: string, admin = false) {
-  const now = new Date();
-  await database.insert(schema.user).values({
-    id,
-    name: "Runtime Test",
-    email,
-    emailVerified: true,
-    role: admin ? "admin" : "user",
-    createdAt: now,
-    updatedAt: now,
-  });
-  await database.insert(schema.account).values({
-    id: `credential-${id}`,
-    accountId: id,
-    providerId: "credential",
-    userId: id,
-    password: await hashPassword(fixturePassword),
-    createdAt: now,
-    updatedAt: now,
-  });
-  if (admin) {
-    await database.insert(schema.adminIdentity).values({
-      id: "primary",
-      userId: id,
-    });
-  }
+async function createFixtureUser(_id: string, email: string, admin = false) {
+  const result = await auth.api.createUser({ body: { email, name: 'Runtime Test', password: fixturePassword, role: admin ? 'admin' : 'user' } });
+  fixtures[admin ? 'admin' : 'user'].id = result.user.id;
 }
 
 function makeRequest(
@@ -305,12 +280,11 @@ describe("admin auth HTTP runtime", () => {
   });
 
   it("sets secure, HTTP-only, same-site, host-only cookies for HTTPS", async () => {
-    const productionAuth = createAdminAuth({
+    const productionAuth = createAdminAuthServer({
       database,
       origin: "https://admin.example.test",
       secret: "auth-runtime-proof-production-only-test-secret",
       secureCookies: true,
-      isAdminUser: createAdminPolicy(database),
     });
     const productionApp = createApp({ auth: productionAuth });
     const response = await productionApp.handle(

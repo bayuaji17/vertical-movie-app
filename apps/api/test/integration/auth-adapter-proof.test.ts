@@ -2,9 +2,10 @@ import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import { SQL } from "bun";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/bun-sql";
-import { betterAuth, drizzleAdapter, verifyPassword } from "@repo/auth/server";
+import { createAdminAuthServer, drizzleAdapter } from "@repo/auth/server";
+import { applyDatabaseMigrations } from "../../src/db/migrate";
 
-import * as schema from "../fixtures/auth-probe-schema";
+import * as schema from "../../src/db/schema";
 
 const testDatabaseUrl = Bun.env.TEST_DATABASE_URL;
 if (!testDatabaseUrl) {
@@ -35,10 +36,7 @@ const databaseAdapter = drizzleAdapter(db, {
   schema,
   transaction: true,
 });
-const auth = betterAuth({
-  ...authOptions,
-  database: databaseAdapter,
-});
+const auth = createAdminAuthServer({ database: db, origin: authOptions.baseURL, secret: authOptions.secret, secureCookies: false });
 
 function authRequest(path: string, init: RequestInit = {}) {
   const headers = new Headers(init.headers);
@@ -54,6 +52,10 @@ function authRequest(path: string, init: RequestInit = {}) {
 
 describe("Better Auth PostgreSQL adapter with Bun SQL", () => {
   beforeAll(async () => {
+    await client.unsafe('DROP SCHEMA IF EXISTS public CASCADE');
+    await client.unsafe('CREATE SCHEMA public');
+    await client.unsafe('DROP SCHEMA IF EXISTS drizzle CASCADE');
+    await applyDatabaseMigrations(testDatabaseUrl);
     await db.delete(schema.session);
     await db.delete(schema.account);
     await db.delete(schema.verification);
@@ -108,16 +110,7 @@ describe("Better Auth PostgreSQL adapter with Bun SQL", () => {
   it("stores, verifies and reads email credentials and sessions through HTTP", async () => {
     const email = `auth-probe-${crypto.randomUUID()}@example.test`;
     const password = `probe-${crypto.randomUUID()}-WithEnoughLength`;
-    const signUp = await authRequest("/sign-up/email", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ name: "Auth Probe", email, password }),
-    });
-
-    expect(signUp.status).toBe(200);
-    const signUpBody = (await signUp.json()) as {
-      user: { id: string; email: string };
-    };
+    const signUpBody = await auth.api.createUser({ body: { name: 'Auth Probe', email, password, role: 'user' } });
     expect(signUpBody.user.email).toBe(email);
 
     const accounts = await db
@@ -130,7 +123,7 @@ describe("Better Auth PostgreSQL adapter with Bun SQL", () => {
     expect(accounts[0]?.password).toBeDefined();
     expect(accounts[0]?.password).not.toBe(password);
     expect(
-      await verifyPassword({ hash: accounts[0]!.password!, password }),
+      await (await auth.$context).password.verify({ hash: accounts[0]!.password!, password }),
     ).toBe(true);
 
     const signIn = await authRequest("/sign-in/email", {

@@ -90,17 +90,10 @@ async function verifyGateway(port, label) {
   assert.equal(methodResponse.status, 201)
   assert.equal(methodPayload.method, 'POST')
   assert.equal(methodPayload.search, '?method=post')
-  const adminResponse = await fetch(
-    `http://127.0.0.1:${port}/api/admin/session?from=smoke`,
-    { headers: { cookie: 'admin-session=cookie' } },
-  )
-  const adminPayload = await adminResponse.json()
-  assert.equal(adminResponse.status, 201)
-  assert.equal(adminPayload.pathname, '/admin/session')
-  assert.equal(adminPayload.search, '?from=smoke')
-  assert.equal(adminPayload.cookie, 'admin-session=cookie')
+  const legacyResponse = await fetch(`http://127.0.0.1:${port}/api/admin/session`)
+  assert.equal(legacyResponse.status, 404)
   console.log(
-    `${label}: status 201, cookies/no-store, POST/logout, admin path preserved`,
+    `${label}: status 201, cookies/no-store, POST/logout, legacy session path removed`,
   )
 }
 

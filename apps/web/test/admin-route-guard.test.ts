@@ -1,4 +1,4 @@
-import { privateApiFetcher } from '../src/lib/auth/api-client'
+import { privateApiFetcher } from '../src/lib/api/client'
 import { describe, expect, it } from 'bun:test'
 import { QueryClient } from '@tanstack/react-query'
 import {

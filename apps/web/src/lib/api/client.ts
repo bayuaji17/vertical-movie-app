@@ -2,7 +2,7 @@ import { treaty } from '@elysia/eden'
 import type { Elysia } from 'elysia'
 import type { App } from 'api/types'
 import type { QueryClient } from '@tanstack/react-query'
-import { handlePrivateApiFailure } from './transitions'
+import { handlePrivateApiFailure } from '../auth/transitions'
 
 export type ApiFetcher = (
   input: RequestInfo | URL,
@@ -86,11 +86,6 @@ export function createApiClient(baseUrl: string, fetcher?: ApiFetcher) {
   })
 }
 
-export type AdminSessionDto = NonNullable<
-  Awaited<
-    ReturnType<ReturnType<typeof createApiClient>['admin']['session']['get']>
-  >['data']
->
 
 /** Use only for private admin business routes; public clients keep their normal behavior. */
 export function createPrivateApiClient(

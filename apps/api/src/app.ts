@@ -2,10 +2,8 @@ import { Elysia } from "elysia";
 import { openapi, toOpenAPISchema } from "@elysia/openapi";
 import type { AuthOpenAPISchema } from "@repo/auth/server";
 import type { createDatabase } from "./db/client";
-import { createAdminRoutes } from "./modules/auth/admin";
-import type { RequireAdminDependencies } from "./modules/auth/admin/guard";
-import { isDisabledAuthPath } from "./modules/auth";
-import type { createAdminAuth } from "./modules/auth";
+import { isDisabledAuthPath } from "@repo/auth/server";
+import type { AuthServer } from "@repo/auth/server";
 import {
   createAuthOpenApiFragment,
   mergeOpenApiResponse,
@@ -13,10 +11,9 @@ import {
 
 type AppDependencies = {
   database?: Pick<ReturnType<typeof createDatabase>, "client">;
-  auth?: Pick<ReturnType<typeof createAdminAuth>, "handler">;
+  auth?: Pick<AuthServer, "handler">;
   authOpenApiSchema?: AuthOpenAPISchema;
   secureCookies?: boolean;
-  admin?: RequireAdminDependencies;
 };
 
 function createAuthRoutes(auth?: AppDependencies["auth"]) {
@@ -41,7 +38,6 @@ export function createApp({
   auth,
   authOpenApiSchema,
   secureCookies = false,
-  admin,
 }: AppDependencies = {}) {
   const app = new Elysia()
     .get("/", () => "Hello Elysia", {
@@ -51,8 +47,7 @@ export function createApp({
         summary: "Check API availability",
       },
     })
-    .use(createAuthRoutes(auth))
-    .use(createAdminRoutes(admin));
+    .use(createAuthRoutes(auth));
 
   const applicationSchema = toOpenAPISchema(
     app,

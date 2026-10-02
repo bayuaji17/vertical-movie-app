@@ -4,7 +4,7 @@ import { drizzle } from "drizzle-orm/bun-sql";
 
 import { generateAuthOpenAPISchema } from "@repo/auth/server";
 import { createApp } from "../../src/app";
-import { createAdminAuth } from "../../src/modules/auth";
+import { createAdminAuthServer } from "@repo/auth/server";
 
 const testDatabaseName = "vertical_movie_app_auth_admin_test";
 const authOrigin = "http://localhost:3000";
@@ -79,29 +79,22 @@ function collectReferences(
 const databaseUrl = getTestDatabaseUrl();
 const client = new SQL(databaseUrl);
 const database = drizzle({ client });
-const auth = createAdminAuth({
+const auth = createAdminAuthServer({
   database,
   origin: authOrigin,
   secret: "auth-openapi-proof-secret-never-use-outside-this-test",
   secureCookies: false,
-  isAdminUser: async () => false,
 });
 const authOpenApiSchema = await generateAuthOpenAPISchema(auth);
 const originalAuthSchema = JSON.stringify(authOpenApiSchema);
 const app = createApp({
   auth,
   authOpenApiSchema,
-  admin: {
-    getSession: async () => null,
-  },
 });
 const secureApp = createApp({
   auth,
   authOpenApiSchema,
   secureCookies: true,
-  admin: {
-    getSession: async () => null,
-  },
 });
 
 afterAll(async () => {
@@ -123,7 +116,7 @@ describe("AUTH-008 combined OpenAPI and Scalar", () => {
     expect(isRecord(paths)).toBe(true);
     if (!isRecord(paths)) throw new Error("Expected OpenAPI paths.");
     expect(paths["/"]).toBeDefined();
-    expect(paths["/admin/session"]).toBeDefined();
+    expect(paths["/admin/session"]).toBeUndefined();
     expect(paths["/api/auth/ok"]).toBeDefined();
     expect(paths["/api/auth/get-session"]).toBeDefined();
     expect(paths["/api/auth/sign-in/email"]).toBeDefined();
@@ -154,31 +147,25 @@ describe("AUTH-008 combined OpenAPI and Scalar", () => {
 
     const signInPath = paths["/api/auth/sign-in/email"];
     const getSessionPath = paths["/api/auth/get-session"];
-    const adminPath = paths["/admin/session"];
     expect(isRecord(signInPath)).toBe(true);
     expect(isRecord(getSessionPath)).toBe(true);
-    expect(isRecord(adminPath)).toBe(true);
     if (
       !isRecord(signInPath) ||
-      !isRecord(getSessionPath) ||
-      !isRecord(adminPath)
+      !isRecord(getSessionPath)
     ) {
       throw new Error("Expected documented route objects.");
     }
     const signIn = signInPath["post"];
     const getSession = getSessionPath["get"];
-    const adminSession = adminPath["get"];
     expect(isRecord(signIn)).toBe(true);
     expect(isRecord(getSession)).toBe(true);
-    expect(isRecord(adminSession)).toBe(true);
-    if (!isRecord(signIn) || !isRecord(getSession) || !isRecord(adminSession)) {
+    if (!isRecord(signIn) || !isRecord(getSession)) {
       throw new Error("Expected documented operations.");
     }
     expect(signIn["security"]).toEqual([]);
     expect(signIn["tags"]).toEqual(["Better Auth"]);
     expect(Object.keys(signInPath)).toEqual(["post"]);
     expect(Object.keys(getSessionPath).sort()).toEqual(["get", "post"]);
-    expect(Object.keys(adminPath)).toEqual(["get"]);
     const healthPath = paths["/"];
     const okPath = paths["/api/auth/ok"];
     const signOutPath = paths["/api/auth/sign-out"];
@@ -201,8 +188,6 @@ describe("AUTH-008 combined OpenAPI and Scalar", () => {
     expect(ok["security"]).toEqual([]);
     expect(signOut["security"]).toEqual([{ betterAuthSessionCookie: [] }]);
     expect(getSession["security"]).toEqual([{ betterAuthSessionCookie: [] }]);
-    expect(adminSession["security"]).toEqual([{ betterAuthSessionCookie: [] }]);
-    expect(adminSession["operationId"]).toBe("getAdminSession");
 
     const references = collectReferences(document);
     for (const reference of references) {

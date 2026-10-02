@@ -32,7 +32,6 @@ export async function resetDatabase() {
   await applyDatabaseMigrations(url!);
 }
 export async function clearDatabase() {
-  await database.delete(schema.adminIdentity);
   await database.delete(schema.session);
   await database.delete(schema.account);
   await database.delete(schema.user);

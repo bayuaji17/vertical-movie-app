@@ -1,7 +1,4 @@
-import { sessionQueryKey } from './session-cache'
 import { passwordPolicy } from '@repo/auth/client'
-
-export const adminSessionQueryKey = sessionQueryKey
 
 const ADMIN_LOGIN_PATH = '/admin/login'
 

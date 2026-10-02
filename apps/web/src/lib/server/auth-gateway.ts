@@ -1,6 +1,6 @@
 import { isDisabledAuthPath } from '@repo/auth/server'
 
-type GatewayTarget = 'auth' | 'admin-session'
+type GatewayTarget = 'auth'
 
 type GatewayDependencies = {
   getApiInternalUrl?: () => string | undefined
@@ -16,7 +16,6 @@ type RequestBodyRead =
 const targetPaths: Record<GatewayTarget, (pathname: string) => boolean> = {
   auth: (pathname) =>
     pathname === '/api/auth' || pathname.startsWith('/api/auth/'),
-  'admin-session': (pathname) => pathname === '/api/admin/session',
 }
 
 const requestHeaderAllowlist = new Set([
@@ -190,16 +189,8 @@ export function createAuthGateway(
         'The requested route is unavailable.',
       )
     }
-    if (target === 'admin-session' && request.method !== 'GET') {
-      return errorResponse(
-        405,
-        'METHOD_NOT_ALLOWED',
-        'This route only accepts GET requests.',
-      )
-    }
 
     if (
-      target === 'auth' &&
       isDisabledAuthPath(
         incomingUrl.pathname.replace(/^\/api\/auth/, ''),
         request.method,
@@ -217,8 +208,7 @@ export function createAuthGateway(
       )
     }
 
-    const upstreamPath =
-      target === 'admin-session' ? '/admin/session' : incomingUrl.pathname
+    const upstreamPath = incomingUrl.pathname
     const upstreamUrl = new URL(
       `${upstreamPath}${incomingUrl.search}`,
       apiOrigin,

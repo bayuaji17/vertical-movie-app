@@ -1,16 +1,5 @@
 import { t } from "elysia";
 
-export const AdminSessionResponse = t.Object({
-  user: t.Object({
-    id: t.String(),
-    name: t.String(),
-    email: t.String(),
-  }),
-  session: t.Object({
-    expiresAt: t.String({ format: "date-time" }),
-  }),
-});
-
 export const AdminAuthErrorResponse = t.Object({
   error: t.Object({
     code: t.String(),
@@ -19,5 +8,4 @@ export const AdminAuthErrorResponse = t.Object({
   }),
 });
 
-export type AdminSessionDto = typeof AdminSessionResponse.static;
 export type AdminAuthErrorDto = typeof AdminAuthErrorResponse.static;

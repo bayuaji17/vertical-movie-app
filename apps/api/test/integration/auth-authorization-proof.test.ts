@@ -14,10 +14,9 @@ import { Elysia, t } from "elysia";
 import { createApp } from "../../src/app";
 import { applyDatabaseMigrations } from "../../src/db/migrate";
 import * as schema from "../../src/db/schema";
-import { createAdminAuth, createAdminPolicy } from "../../src/modules/auth";
+import { createAdminAuthServer } from "@repo/auth/server";
 import { createRequireAdmin } from "../../src/modules/auth/admin/guard";
 import { AdminAuthErrorResponse } from "../../src/modules/auth/admin/model";
-import { provisionAdmin } from "../../src/modules/auth/admin-provision";
 
 const testDatabaseName = "vertical_movie_app_auth_admin_test";
 const authOrigin = "http://localhost:3000";
@@ -58,18 +57,21 @@ function getTestDatabaseUrl(): string {
 const testDatabaseUrl = getTestDatabaseUrl();
 const client = new SQL(testDatabaseUrl);
 const database = drizzle({ client, schema });
-const auth = createAdminAuth({
+const auth = createAdminAuthServer({
   database,
   origin: authOrigin,
   secret: "auth-admin-authorization-proof-secret-never-use-outside-this-test",
   secureCookies: false,
-  isAdminUser: createAdminPolicy(database),
 });
 const adminDependencies = {
   getSession: (input: Parameters<typeof auth.api.getSession>[0]) =>
     auth.api.getSession(input),
 };
-const app = createApp({ auth, admin: adminDependencies });
+function fixtureApp(dependencies = adminDependencies) {
+  return createApp({ auth }).use(createRequireAdmin(dependencies))
+    .get('/admin/private-fixture', ({ adminSession }) => adminSession, { requireAdmin: true });
+}
+const app = fixtureApp();
 
 async function resetTestDatabase() {
   const resetClient = new SQL(testDatabaseUrl);
@@ -104,20 +106,17 @@ function sessionCookie(response: Response): string {
 
 function adminSessionRequest(cookie?: string) {
   return app.handle(
-    new Request(`${authOrigin}/admin/session`, {
+    new Request(`${authOrigin}/admin/private-fixture`, {
       headers: cookie ? { Cookie: cookie } : {},
     }),
   );
 }
 
 async function provisionAndSignIn() {
-  const admin = await provisionAdmin(database, {
-    email: adminEmail,
-    password: adminPassword,
-  });
+  const admin = await auth.api.createUser({ body: { email: adminEmail, name: adminEmail, password: adminPassword, role: 'admin' } });
   const response = await signInRequest();
   expect(response.status).toBe(200);
-  return { userId: admin.userId, cookie: sessionCookie(response) };
+  return { userId: admin.user.id, cookie: sessionCookie(response) };
 }
 
 describe("admin route authorization", () => {
@@ -127,7 +126,6 @@ describe("admin route authorization", () => {
   });
 
   beforeEach(async () => {
-    await database.delete(schema.adminIdentity);
     await database.delete(schema.session);
     await database.delete(schema.account);
     await database.delete(schema.user);
@@ -186,9 +184,11 @@ describe("admin route authorization", () => {
       id: userId,
       name: adminEmail,
       email: adminEmail,
+      role: "admin",
+      banned: false,
     });
     expect(Object.keys(body).sort()).toEqual(["session", "user"]);
-    expect(Object.keys(body.user).sort()).toEqual(["email", "id", "name"]);
+    expect(Object.keys(body.user).sort()).toEqual(["banned", "email", "id", "name", "role"]);
     expect(Object.keys(body.session)).toEqual(["expiresAt"]);
     expect(typeof body.session.expiresAt).toBe("string");
     expect(body.session.expiresAt.endsWith("Z")).toBe(true);
@@ -260,16 +260,13 @@ describe("admin route authorization", () => {
 
   it("maps authorization database failures to a safe 503 response", async () => {
     const { cookie } = await provisionAndSignIn();
-    const failedApp = createApp({
-      auth,
-      admin: {
+    const failedApp = fixtureApp({
         getSession: async () => {
           throw new Error(`private database detail: ${testDatabaseUrl}`);
         },
-      },
     });
     const response = await failedApp.handle(
-      new Request(`${authOrigin}/admin/session`, {
+      new Request(`${authOrigin}/admin/private-fixture`, {
         headers: { Cookie: cookie },
       }),
     );

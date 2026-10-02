@@ -91,32 +91,14 @@ describe('same-origin auth gateway', () => {
     expect(upstreamUrl).toBe(`${apiOrigin}/api/auth/get-session`)
   })
 
-  test('limits the admin target to GET at the exact fixed path', async () => {
-    const upstreamUrls: string[] = []
-    const gateway = createAuthGateway('admin-session', {
-      getPublicOrigin: () => 'http://web.example',
-      getApiInternalUrl: () => apiOrigin,
-      fetcher: async (request) => {
-        upstreamUrls.push(request.url)
-        return Response.json({ user: null })
-      },
-    })
-
-    const methodResponse = await gateway(
-      new Request('http://web.example/api/admin/session', { method: 'POST' }),
-    )
-    const pathResponse = await gateway(
-      new Request('http://web.example/api/admin/session/extra'),
-    )
-    const validResponse = await gateway(
-      new Request('http://web.example/api/admin/session?refresh=1'),
-    )
-
-    expect(methodResponse.status).toBe(405)
-    expect(pathResponse.status).toBe(404)
-    expect(validResponse.status).toBe(200)
-    expect(await validResponse.json()).toEqual({ user: null })
-    expect(upstreamUrls).toEqual([`${apiOrigin}/admin/session?refresh=1`])
+  test('rejects the removed legacy session endpoint before fetching', async () => {
+    let calls = 0;
+    const gateway = createAuthGateway('auth', {
+      getPublicOrigin: () => 'http://web.example', getApiInternalUrl: () => apiOrigin,
+      fetcher: async () => { calls++; return new Response(null); },
+    });
+    expect((await gateway(new Request('http://web.example/api/admin/session'))).status).toBe(404);
+    expect(calls).toBe(0);
   })
 
   test('rewrites same-upstream redirects to a relative web path and rejects external redirects', async () => {
