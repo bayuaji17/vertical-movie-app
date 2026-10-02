@@ -1,10 +1,16 @@
-import { queryOptions } from '@tanstack/react-query'
+import {
+  onlineManager,
+  queryOptions,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query'
 import { createIsomorphicFn } from '@tanstack/react-start'
+import { useEffect, useState } from 'react'
 import { readClientSession, isAdminSession } from '@repo/auth/client'
 import type { SessionSnapshot } from '@repo/auth/types'
 import { authClient } from './client'
 import { readSessionOnServer } from './session.server'
-import { adminSessionQueryKey } from './login'
+import { sessionQueryKey } from './session-cache'
 
 export const readSession = createIsomorphicFn()
   .server(readSessionOnServer)
@@ -12,23 +18,82 @@ export const readSession = createIsomorphicFn()
     readClientSession(authClient, options),
   )
 
-// Compatibility UI facade until the Query and protected route tasks cut over.
 export type AdminSessionState =
   | { status: 'authenticated'; session: SessionSnapshot }
   | { status: 'unauthenticated' }
   | { status: 'forbidden' }
   | { status: 'unavailable' }
 
-export function adminSessionQueryOptions() {
-  return queryOptions({
-    queryKey: adminSessionQueryKey,
+export function sessionState(
+  snapshot: SessionSnapshot | null | undefined,
+): AdminSessionState {
+  if (!snapshot || Date.parse(snapshot.session.expiresAt) <= Date.now())
+    return { status: 'unauthenticated' }
+  if (!isAdminSession(snapshot)) return { status: 'forbidden' }
+  return { status: 'authenticated', session: snapshot }
+}
+
+export function adminSessionQueryOptions(
+  options: { authoritative?: boolean } = {},
+) {
+  return queryOptions<SessionSnapshot | null>({
+    queryKey: sessionQueryKey,
+    gcTime: 300_000,
     retry: false,
-    queryFn: async ({ signal }): Promise<AdminSessionState> => {
-      const session = await readSession({ signal })
-      if (!session || Date.parse(session.session.expiresAt) <= Date.now())
-        return { status: 'unauthenticated' }
-      if (!isAdminSession(session)) return { status: 'forbidden' }
-      return { status: 'authenticated', session }
+    staleTime: (query) => {
+      if (query.state.status === 'error') return 0
+      const expiresAt = query.state.data?.session.expiresAt
+      return expiresAt
+        ? Math.max(
+            0,
+            Math.min(60_000, Date.parse(expiresAt) - query.state.dataUpdatedAt),
+          )
+        : 60_000
     },
+    queryFn: ({ signal }) =>
+      readSession({ signal, authoritative: options.authoritative }),
   })
+}
+
+export function sessionObserverOptions() {
+  return {
+    ...adminSessionQueryOptions(),
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    refetchIntervalInBackground: false,
+    refetchInterval: () =>
+      typeof document !== 'undefined' &&
+      document.visibilityState === 'visible' &&
+      onlineManager.isOnline()
+        ? 60_000
+        : false,
+  }
+}
+
+export function useAdminSession() {
+  const queryClient = useQueryClient()
+  const result = useQuery(sessionObserverOptions())
+  const [, updateClock] = useState(0)
+  const expiresAt = result.data?.session.expiresAt
+  useEffect(() => {
+    if (!expiresAt) return
+    const timer = setTimeout(
+      () => {
+        updateClock((revision) => revision + 1)
+        void queryClient
+          .cancelQueries({ queryKey: sessionQueryKey })
+          .then(() => {
+            queryClient.setQueryData(sessionQueryKey, null)
+          })
+      },
+      Math.max(0, Date.parse(expiresAt) - Date.now()),
+    )
+    return () => clearTimeout(timer)
+  }, [expiresAt, queryClient])
+  return {
+    ...result,
+    sessionState: result.isError
+      ? ({ status: 'unavailable' } as const)
+      : sessionState(result.data),
+  }
 }

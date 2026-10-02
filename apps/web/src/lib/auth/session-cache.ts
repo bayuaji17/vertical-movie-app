@@ -1,5 +1,7 @@
 import type { QueryClient } from '@tanstack/react-query'
 
+export const sessionQueryKey = ['auth', 'session'] as const
+
 export function isAdminPrivateQueryKey(queryKey: readonly unknown[]): boolean {
   return queryKey[0] === 'auth' || queryKey[0] === 'admin'
 }

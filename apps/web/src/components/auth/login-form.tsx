@@ -30,7 +30,7 @@ import {
   validateLoginEmail,
   validateLoginPassword,
 } from '#/lib/auth/login'
-import { adminSessionQueryOptions } from '#/lib/auth/session'
+import { adminSessionQueryOptions, sessionState } from '#/lib/auth/session'
 
 type AdminLoginFormProps = {
   redirectTo: string
@@ -68,12 +68,13 @@ export function AdminLoginForm({ redirectTo }: AdminLoginFormProps) {
           return
         }
         queryClient.removeQueries({ queryKey: adminSessionQueryKey })
-        const session = await queryClient.fetchQuery({
+        const snapshot = await queryClient.query({
           ...adminSessionQueryOptions(),
           retry: false,
           staleTime: 0,
         })
 
+        const session = sessionState(snapshot)
         if (session.status !== 'authenticated') {
           setFormError(
             session.status === 'forbidden'

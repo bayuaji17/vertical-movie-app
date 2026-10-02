@@ -1105,7 +1105,7 @@ AUTH-REF-007 menyatukan hydration dan cache; browser UI guard pada AUTH-REF-008.
 
 ### Task: AUTH-REF-007 — TanStack Query sebagai cache snapshot auth tunggal
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: 6 dalam urutan eksekusi refactor.
 - Referensi: AUTH-REF-US03; AUTH_REFACTOR_PLAN.md; AGENTS.md; API_DEVELOPMENT.md.
@@ -1137,23 +1137,23 @@ Path bertanda baru adalah target yang dibuat saat eksekusi, bukan file yang suda
 
 #### Rencana implementasi terurut
 
-- [ ] **AUTH-REF-007.01 — Pusatkan key dan options.** Semua consumer guard/UI memakai satu key/queryFn/TTL; old admin-session key hanya dihapus/invalidate pada transisi cutover.
-- [ ] **AUTH-REF-007.02 — Pertahankan SSR integration tunggal.** QueryClient dibuat dalam factory router/context; gunakan setupRouterSsrQueryIntegration yang sudah ada, tanpa provider/dehydrate kedua.
-- [ ] **AUTH-REF-007.03 — Pisahkan options imperative/observer.** Guard memanggil queryClient.query; useQuery memakai options observer dengan focus/reconnect/poll/retry terkontrol; tidak memasang useSession native reader.
-- [ ] **AUTH-REF-007.04 — Batasi freshness oleh expiry.** Guard mengecek expiresAt setiap akses; expiry scheduler layout memicu penguncian/query update pada waktunya, termasuk ketika halaman idle.
-- [ ] **AUTH-REF-007.05 — Atur revalidation aktif.** Konfigurasi visible/online supaya interval/focus tidak membuat request ganda/background polling. Navigasi fresh tidak memaksa invalidate/refetch.
-- [ ] **AUTH-REF-007.06 — Uji network timeline.** Dengan clock/fetch spies: SSR1, hydrate0, fresh navigation0, stale navigation1, concurrent/preload1. Pisahkan focus/poll/expiry sebagai trigger tambahan.
-- [ ] **AUTH-REF-007.07 — Buktikan Turbo consumer invalidation.** Inspeksi dry-run/hash; ubah source auth secara sementara lalu buktikan build consumer cache berubah. Pulihkan perubahan probe; jangan menambah build package auth hanya untuk cache.
-- [ ] **AUTH-REF-007.08 — Rekam browser evidence.** Gunakan runner/browser yang tersedia, tanpa instalasi tooling spekulatif. Jika belum tersedia, catat AC browser pending sehingga task belum Done.
+- [x] **AUTH-REF-007.01 — Pusatkan key dan options.** Semua consumer guard/UI memakai satu key/queryFn/TTL; old admin-session key hanya dihapus/invalidate pada transisi cutover.
+- [x] **AUTH-REF-007.02 — Pertahankan SSR integration tunggal.** QueryClient dibuat dalam factory router/context; gunakan setupRouterSsrQueryIntegration yang sudah ada, tanpa provider/dehydrate kedua.
+- [x] **AUTH-REF-007.03 — Pisahkan options imperative/observer.** Guard memanggil queryClient.query; useQuery memakai options observer dengan focus/reconnect/poll/retry terkontrol; tidak memasang useSession native reader.
+- [x] **AUTH-REF-007.04 — Batasi freshness oleh expiry.** Guard mengecek expiresAt setiap akses; expiry scheduler layout memicu penguncian/query update pada waktunya, termasuk ketika halaman idle.
+- [x] **AUTH-REF-007.05 — Atur revalidation aktif.** Konfigurasi visible/online supaya interval/focus tidak membuat request ganda/background polling. Navigasi fresh tidak memaksa invalidate/refetch.
+- [x] **AUTH-REF-007.06 — Uji network timeline.** Dengan clock/fetch spies: SSR1, hydrate0, fresh navigation0, stale navigation1, concurrent/preload1. Pisahkan focus/poll/expiry sebagai trigger tambahan.
+- [x] **AUTH-REF-007.07 — Buktikan Turbo consumer invalidation.** Inspeksi dry-run/hash; ubah source auth secara sementara lalu buktikan build consumer cache berubah. Pulihkan perubahan probe; jangan menambah build package auth hanya untuk cache.
+- [x] **AUTH-REF-007.08 — Rekam browser evidence.** Gunakan runner/browser yang tersedia, tanpa instalasi tooling spekulatif. Jika belum tersedia, catat AC browser pending sehingga task belum Done.
 
 #### Acceptance criteria
 
-- [ ] SSR QueryClient terisolasi per request; browser mempertahankan satu cache selama navigation.
-- [ ] Hydration fresh tidak menambah session request; N navigasi/preload fresh tanpa event lain menambah nol request.
-- [ ] Fetch concurrent dedup; navigasi stale menunggu satu fetch sebelum guard menentukan akses.
-- [ ] Focus/reconnect/poll/expiry diuji terpisah; tab background/offline tidak polling; fresh cache tidak melampaui session expiry.
-- [ ] Tidak ada Query auth global pada halaman publik atau observer native kedua.
-- [ ] Outage tidak disimpan sebagai sukses/anonymous; data lama setelah error tidak dipakai membuka dashboard.
+- [x] SSR QueryClient terisolasi per request; browser mempertahankan satu cache selama navigation.
+- [x] Hydration fresh tidak menambah session request; N navigasi/preload fresh tanpa event lain menambah nol request.
+- [x] Fetch concurrent dedup; navigasi stale menunggu satu fetch sebelum guard menentukan akses.
+- [x] Focus/reconnect/poll/expiry diuji terpisah; tab background/offline tidak polling; fresh cache tidak melampaui session expiry.
+- [x] Tidak ada Query auth global pada halaman publik atau observer native kedua.
+- [x] Outage tidak disimpan sebagai sukses/anonymous; data lama setelah error tidak dipakai membuka dashboard.
 
 #### Validasi
 
@@ -1189,7 +1189,11 @@ Commit setelah acceptance criteria task terpenuhi: `feat(web): cache auth snapsh
 
 #### Hasil dan bukti
 
-Belum diimplementasikan. Catat perintah, hasil, batas bukti dan commit ketika task dikerjakan.
+- Query auth final memakai satu key [auth,session], snapshot/null saja, staleTime60s dibatasi expiry, gcTime5m, retryfalse. Guard memakai queryClient.query; observer hanya di protected layout, focus/reconnect stale dan interval60s visible-online. Expiry timer mengunci/mengosongkan snapshot; error dengan cached data mengunci UI.
+- QueryClient tetap dibuat per router/request dan SSR integration existing dipakai satu kali. Tidak memakai native useSession observer kedua; HTTP tetap no-store, Query tidak dipersist ke storage.
+- Cache proof 2 test/10 assertion serta native reader 4 test/28 assertion lulus. Chromium/Playwright Windows runner lulus terhadap Vite dengan fixture native: SSR1/hydrate0, tiga navigasi/preload fresh tambahan0, concurrent stale tambahan1, offline0, reconnect1, polling visible1, visibility hidden0, focus stale1, outage menghilangkan dashboard dari DOM, expiry idle mengunci. Clock/event/visibility dikendalikan runner; ini bukan klaim wall-clock untuk tab suspended/offline.
+- Runner menunggu hydration React sebelum interaksi; percobaan navigasi terlalu dini pada clock paused diperbaiki dalam test. Browser fixtures tidak memakai credential development. File auth-browser-smoke/worker menyediakan runner dengan AUTH_BROWSER_NODE, AUTH_PLAYWRIGHT_MODULE, AUTH_BROWSER_EXECUTABLE, AUTH_BROWSER_WORKER_PATH.
+- Probe Turbo dry-run sebelum/sesudah perubahan sementara source auth menunjukkan hash API c73da1e6b8c6c917 -> 8200da55bcffed0b dan web b1b97f17505bafcf -> d827efb3aeb3f1a5; source dipulihkan. Tidak perlu build package auth tambahan. Build web/check-types lulus; hook lint/type untuk commit. Commit: feat(web): cache auth snapshots with tanstack query.
 
 #### Blocker atau tindak lanjut
 

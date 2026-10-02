@@ -7,7 +7,7 @@ import {
 import { readServerSession } from '@repo/auth/server'
 
 export const readSessionOnServer = createServerOnlyFn(
-  async (options: { signal?: AbortSignal } = {}) => {
+  async (options: { signal?: AbortSignal; authoritative?: boolean } = {}) => {
     const request = getRequest()
     setResponseHeader('cache-control', 'private, no-store')
     return readServerSession({

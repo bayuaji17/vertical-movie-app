@@ -11,26 +11,29 @@ import { AuthDependencyError } from '@repo/auth/client'
 import { Alert, AlertDescription, AlertTitle } from '#/components/ui/alert'
 import { Button } from '#/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card'
-import { adminSessionQueryOptions } from '#/lib/auth/session'
+import {
+  adminSessionQueryOptions,
+  useAdminSession,
+  sessionState,
+} from '#/lib/auth/session'
 import { validateAdminRedirect } from '#/lib/auth/login'
 import { clearAdminPrivateQueries } from '#/lib/auth/session-cache'
 
 export const Route = createFileRoute('/admin/_authenticated')({
   headers: () => ({ 'Cache-Control': 'private, no-store' }),
   beforeLoad: async ({ context, location }) => {
-    const sessionState = await context.queryClient
-      .fetchQuery({
-        ...adminSessionQueryOptions(),
-        retry: false,
-        staleTime: 0,
-      })
+    const snapshot = await context.queryClient
+      .query(adminSessionQueryOptions())
       .catch((error: unknown) => {
-        if (error instanceof AuthDependencyError)
-          return { status: 'unavailable' } as const
+        if (error instanceof AuthDependencyError) return undefined
         throw error
       })
 
-    if (sessionState.status === 'unauthenticated') {
+    const currentState =
+      snapshot === undefined
+        ? ({ status: 'unavailable' } as const)
+        : sessionState(snapshot)
+    if (currentState.status === 'unauthenticated') {
       await clearAdminPrivateQueries(context.queryClient)
       throw redirect({
         to: '/admin/login',
@@ -40,21 +43,19 @@ export const Route = createFileRoute('/admin/_authenticated')({
       })
     }
 
-    if (sessionState.status === 'forbidden') {
+    if (currentState.status === 'forbidden') {
       await clearAdminPrivateQueries(context.queryClient)
     }
 
-    return { adminSessionState: sessionState }
+    return { adminSessionState: currentState }
   },
   component: ProtectedAdminLayout,
 })
 
 function ProtectedAdminLayout() {
-  const { adminSessionState } = Route.useRouteContext()
-
+  const { sessionState: adminSessionState } = useAdminSession()
   if (adminSessionState.status === 'authenticated') return <Outlet />
   if (adminSessionState.status === 'forbidden') return <AdminAccessDenied />
-
   return <AdminSessionUnavailable />
 }
 

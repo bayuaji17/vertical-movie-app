@@ -1,4 +1,6 @@
-export const adminSessionQueryKey = ['auth', 'admin-session'] as const
+import { sessionQueryKey } from './session-cache'
+
+export const adminSessionQueryKey = sessionQueryKey
 
 const ADMIN_LOGIN_PATH = '/admin/login'
 
