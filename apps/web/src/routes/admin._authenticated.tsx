@@ -6,6 +6,7 @@ import {
   useRouter,
 } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
+import { AuthDependencyError } from '@repo/auth/client'
 
 import { Alert, AlertDescription, AlertTitle } from '#/components/ui/alert'
 import { Button } from '#/components/ui/button'
@@ -17,11 +18,17 @@ import { clearAdminPrivateQueries } from '#/lib/auth/session-cache'
 export const Route = createFileRoute('/admin/_authenticated')({
   headers: () => ({ 'Cache-Control': 'private, no-store' }),
   beforeLoad: async ({ context, location }) => {
-    const sessionState = await context.queryClient.fetchQuery({
-      ...adminSessionQueryOptions(),
-      retry: false,
-      staleTime: 0,
-    })
+    const sessionState = await context.queryClient
+      .fetchQuery({
+        ...adminSessionQueryOptions(),
+        retry: false,
+        staleTime: 0,
+      })
+      .catch((error: unknown) => {
+        if (error instanceof AuthDependencyError)
+          return { status: 'unavailable' } as const
+        throw error
+      })
 
     if (sessionState.status === 'unauthenticated') {
       await clearAdminPrivateQueries(context.queryClient)

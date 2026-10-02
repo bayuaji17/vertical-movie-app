@@ -1011,7 +1011,7 @@ Reader SSR AUTH-REF-006 memakai prinsip transport/deadline yang sama; OpenAPI/ru
 
 ### Task: AUTH-REF-006 — Reader session isomorphic dan SSR aman
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: 5 dalam urutan eksekusi refactor.
 - Referensi: AUTH-REF-US02; AUTH_REFACTOR_PLAN.md; AGENTS.md; API_DEVELOPMENT.md.
@@ -1043,22 +1043,22 @@ Path bertanda baru adalah target yang dibuat saat eksekusi, bukan file yang suda
 
 #### Rencana implementasi terurut
 
-- [ ] **AUTH-REF-006.01 — Implementasikan reader package.** SDK vanilla untuk server dan SDK React client untuk browser; centralize proyeksi/typed error. Jangan memakai customSession yang mengubah DB outage menjadi null.
-- [ ] **AUTH-REF-006.02 — Buat adapter server-only.** Ambil getRequest saat pemanggilan, runtime internal URL, signal request; kombinasikan signal dan deadline. Tidak membaca env/cookie pada module scope.
-- [ ] **AUTH-REF-006.03 — Forward headers secara eksplisit.** Ambil multi Set-Cookie respons SDK melalui surface fetch yang didukung versi; append pada respons TanStack yang sama dan pasang private/no-store.
-- [ ] **AUTH-REF-006.04 — Gunakan createIsomorphicFn.** Cabang server memanggil utility server-only request-scoped; cabang client SDK. Bila RPC dipilih, gunakan serverFn handler; browser tidak menserialisasikan AbortSignal/cookie/origin sebagai payload.
-- [ ] **AUTH-REF-006.05 — Selaraskan state caller.** Map snapshot/null/error secara konsisten agar API outage tidak diperlakukan sebagai logout; cancelled request tidak ditulis sebagai query sukses.
-- [ ] **AUTH-REF-006.06 — Enforce import boundary.** Specifier @repo/auth/server ditolak pada client; public types type-only. Negative build fixture sementara harus gagal lalu dibersihkan; build normal lulus.
-- [ ] **AUTH-REF-006.07 — Buktikan SSR.** Admin direct link/refresh/null/non-admin/outage, request isolation, cookie output, deadline dan safe HTML projection; Query tuning dilakukan AUTH-REF-007.
+- [x] **AUTH-REF-006.01 — Implementasikan reader package.** SDK vanilla untuk server dan SDK React client untuk browser; centralize proyeksi/typed error. Jangan memakai customSession yang mengubah DB outage menjadi null.
+- [x] **AUTH-REF-006.02 — Buat adapter server-only.** Ambil getRequest saat pemanggilan, runtime internal URL, signal request; kombinasikan signal dan deadline. Tidak membaca env/cookie pada module scope.
+- [x] **AUTH-REF-006.03 — Forward headers secara eksplisit.** Ambil multi Set-Cookie respons SDK melalui surface fetch yang didukung versi; append pada respons TanStack yang sama dan pasang private/no-store.
+- [x] **AUTH-REF-006.04 — Gunakan createIsomorphicFn.** Cabang server memanggil utility server-only request-scoped; cabang client SDK. Bila RPC dipilih, gunakan serverFn handler; browser tidak menserialisasikan AbortSignal/cookie/origin sebagai payload.
+- [x] **AUTH-REF-006.05 — Selaraskan state caller.** Map snapshot/null/error secara konsisten agar API outage tidak diperlakukan sebagai logout; cancelled request tidak ditulis sebagai query sukses.
+- [x] **AUTH-REF-006.06 — Enforce import boundary.** Specifier @repo/auth/server ditolak pada client; public types type-only. Negative build fixture sementara harus gagal lalu dibersihkan; build normal lulus.
+- [x] **AUTH-REF-006.07 — Buktikan SSR.** Admin direct link/refresh/null/non-admin/outage, request isolation, cookie output, deadline dan safe HTML projection; Query tuning dilakukan AUTH-REF-007.
 
 #### Acceptance criteria
 
-- [ ] SSR/browser membaca native get-session; Eden /admin/session bukan sumber baru.
-- [ ] SSR memakai cookie request saat ini, fixed internal origin dan authoritative read; tidak ada shared cookie/session state.
-- [ ] Browser tidak dapat menyuplai cookie/origin target server; server runtime/config tidak masuk client bundle.
-- [ ] DTO Query/HTML tidak mengandung token/hash/account/IP/secret; UTC expiresAt konsisten.
-- [ ] Session kosong tetap anonymous, 5xx/network/deadline tetap unavailable; tidak memakai customSession yang menyamarkan error.
-- [ ] Set-Cookie upstream diteruskan dan SSR stalled selesai dalam deadline; request abort tetap cancellation.
+- [x] SSR/browser membaca native get-session; Eden /admin/session bukan sumber baru.
+- [x] SSR memakai cookie request saat ini, fixed internal origin dan authoritative read; tidak ada shared cookie/session state.
+- [x] Browser tidak dapat menyuplai cookie/origin target server; server runtime/config tidak masuk client bundle.
+- [x] DTO Query/HTML tidak mengandung token/hash/account/IP/secret; UTC expiresAt konsisten.
+- [x] Session kosong tetap anonymous, 5xx/network/deadline tetap unavailable; tidak memakai customSession yang menyamarkan error.
+- [x] Set-Cookie upstream diteruskan dan SSR stalled selesai dalam deadline; request abort tetap cancellation.
 
 #### Validasi
 
@@ -1094,7 +1094,10 @@ Commit setelah acceptance criteria task terpenuhi: `refactor(web): read native s
 
 #### Hasil dan bukti
 
-Belum diimplementasikan. Catat perintah, hasil, batas bukti dan commit ketika task dikerjakan.
+- Package server memakai vanilla SDK request-scoped ke fixed /api/auth/get-session?disableCookieCache=true; browser memakai React SDK getSession melalui entry client. createIsomorphicFn memilih server-only helper versus browser tanpa RPC input cookie/origin. SDK result diproyeksi sebelum Query/serialization; outage throw AuthDependencyError, cancellation dipertahankan.
+- SSR mengambil cookie saat request, menggabungkan request/query cancellation dan deadline10s, append setiap Set-Cookie ke response TanStack, dan private/no-store. Tidak membuka pool atau memakai secret API di web. Compatibility UI facade sementara sampai task Query/guard.
+- Native reader proof 4 test/28 assertion lulus: dua cookie paralel terisolasi, fixed endpoint/authoritative flag, semua cookie output, native browser credentials, whitelist DTO, null/5xx/network/deadline/abort dan QueryClient isolation.
+- Negative build fixture menolak @repo/auth/server lalu memulihkan file; clean build lulus. Built SSR smoke admin/anonymous/user/outage/stall lulus, multi Set-Cookie dan no-store utuh, token/IP/hash fixture tidak muncul di HTML. Import protection specifier eksplisit aktif. Gate tipe/lint pada commit. Commit: refactor(web): read native sessions isomorphically.
 
 #### Blocker atau tindak lanjut
 

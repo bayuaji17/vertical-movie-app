@@ -7,6 +7,7 @@ import type { AuthConfiguration } from "./internal/options";
 import * as authSchema from "./internal/schema";
 
 export { authSchema };
+export { readServerSession } from "./internal/server-session";
 export * from "./internal/schema";
 export {
   passwordPolicy,

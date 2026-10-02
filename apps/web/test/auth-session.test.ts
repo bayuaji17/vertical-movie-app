@@ -1,152 +1,139 @@
 import { describe, expect, test } from 'bun:test'
-
+import { createAuthClient, readClientSession } from '@repo/auth/client'
+import { readServerSession, AuthDependencyError } from '@repo/auth/server'
 import { getContext } from '../src/integrations/tanstack-query/root-provider'
-import {
-  apiBaseUrlFromOrigin,
-  apiOriginFromOrigin,
-  createApiClient,
-  normalizeApiBaseUrl,
-} from '../src/lib/auth/api-client'
-import type { ApiFetcher } from '../src/lib/auth/api-client'
-import { loadAdminSession } from '../src/lib/auth/session'
 
-const apiBaseUrl = 'http://api.internal.test/api'
-
-function sessionResponse(status = 200): Response {
-  return Response.json(
-    status === 200
-      ? {
-          user: { id: 'admin-id', name: 'Admin', email: 'admin@example.test' },
-          session: { expiresAt: '2026-10-02T00:00:00.000Z' },
-        }
-      : {
-          error: {
-            code: 'AUTH_ERROR',
-            message: 'Request was denied.',
-            requestId: 'request-id',
-          },
-        },
-    { status, headers: { 'cache-control': 'no-store' } },
-  )
+const apiOrigin = 'http://api.internal.test'
+const fixture = {
+  user: {
+    id: 'admin-id',
+    name: 'Admin',
+    email: 'admin@example.test',
+    role: 'admin',
+    banned: false,
+  },
+  session: {
+    expiresAt: '2026-10-03T00:00:00.000Z',
+    token: 'secret-session-token',
+    ipAddress: 'private-ip',
+  },
+  account: { password: 'private-hash' },
 }
-
-describe('admin session client', () => {
-  test('uses a type-only API contract and keeps date strings serializable', async () => {
-    let requestedUrl = ''
-    let requestInit: RequestInit | undefined
-    const api = createApiClient(apiBaseUrl, async (input, init) => {
-      requestedUrl = String(input)
-      requestInit = init
-      return sessionResponse()
-    })
-
-    const response = await api.admin.session.get()
-    expect(requestedUrl).toBe(`${apiBaseUrl}/admin/session`)
-    expect(response.data?.session.expiresAt).toBe('2026-10-02T00:00:00.000Z')
-    expect(requestInit?.credentials).toBe('include')
-    expect(requestInit?.cache).toBe('no-store')
-  })
-
-  test('uses the API origin for direct SSR requests without the browser gateway prefix', async () => {
-    let requestedUrl = ''
-    const apiOrigin = apiOriginFromOrigin('http://api.internal.test')
-    expect(apiOrigin).toBe('http://api.internal.test')
-    expect(apiOrigin).toBeDefined()
-
-    const api = createApiClient(apiOrigin!, async (input) => {
-      requestedUrl = String(input)
-      return sessionResponse(401)
-    })
-
-    const response = await api.admin.session.get()
-    expect(requestedUrl).toBe('http://api.internal.test/admin/session')
-    expect(response.status).toBe(401)
-  })
-
-  test('isolates cookies and abort signals across concurrent SSR requests', async () => {
-    const observed = new Map<string, string | null>()
-    const controllers = [new AbortController(), new AbortController()]
-    const fetcher: ApiFetcher = async (input, init) => {
-      expect(String(input)).toBe(`${apiBaseUrl}/admin/session`)
-      const cookie = new Headers(init?.headers).get('cookie')
-      const requestId = cookie === 'session=first' ? '0' : '1'
-      observed.set(requestId, cookie)
-      expect(init?.signal).toBe(controllers[Number(requestId)]?.signal)
-      return sessionResponse()
-    }
-
-    const states = await Promise.all([
-      loadAdminSession({
-        apiBaseUrl,
-        cookie: 'session=first',
-        signal: controllers[0]?.signal,
-        fetcher,
+describe('native session readers', () => {
+  test('reads fixed native endpoint authoritatively, isolates cookies, and forwards multiple cookies', async () => {
+    const observations: string[] = []
+    const results = await Promise.all(
+      ['first', 'second'].map(async (cookie) => {
+        const cookies: string[] = []
+        const session = await readServerSession({
+          apiOrigin,
+          cookie,
+          onSetCookie: (values) => cookies.push(...values),
+          fetcher: async (input, init) => {
+            const url = new URL(String(input))
+            expect(url.origin + url.pathname).toBe(
+              apiOrigin + '/api/auth/get-session',
+            )
+            expect(url.searchParams.get('disableCookieCache')).toBe('true')
+            expect(init?.cache).toBe('no-store')
+            expect(init?.redirect).toBe('manual')
+            observations.push(new Headers(init?.headers).get('cookie') ?? '')
+            const headers = new Headers()
+            headers.append('set-cookie', `cache=${cookie}; HttpOnly`)
+            headers.append('set-cookie', `other=${cookie}; HttpOnly`)
+            return Response.json(cookie === 'first' ? fixture : null, {
+              headers,
+            })
+          },
+        })
+        return { session, cookies }
       }),
-      loadAdminSession({
-        apiBaseUrl,
-        cookie: 'session=second',
-        signal: controllers[1]?.signal,
-        fetcher,
-      }),
+    )
+    expect(observations.sort()).toEqual(['first', 'second'])
+    expect(results[0]?.cookies).toEqual([
+      'cache=first; HttpOnly',
+      'other=first; HttpOnly',
     ])
-
-    expect(states.map((state) => state.status)).toEqual([
-      'authenticated',
-      'authenticated',
+    expect(results[1]?.session).toBeNull()
+    const text = JSON.stringify(results[0]?.session)
+    for (const value of [
+      'secret-session-token',
+      'private-ip',
+      'private-hash',
+      'account',
     ])
-    expect(observed.get('0')).toBe('session=first')
-    expect(observed.get('1')).toBe('session=second')
-    expect(JSON.stringify(states)).not.toContain('session=')
+      expect(text).not.toContain(value)
+    expect(results[0]?.session?.session.expiresAt).toBe(
+      fixture.session.expiresAt,
+    )
   })
-
-  test('distinguishes unauthorized, forbidden, upstream, and network failures', async () => {
-    const loadWithStatus = (status: number) =>
-      loadAdminSession({
-        apiBaseUrl,
-        fetcher: async () => sessionResponse(status),
-      })
-
-    expect(await loadWithStatus(401)).toEqual({ status: 'unauthenticated' })
-    expect(await loadWithStatus(403)).toEqual({ status: 'forbidden' })
-    expect(await loadWithStatus(503)).toEqual({
-      status: 'unavailable',
-      reason: 'upstream',
-      httpStatus: 503,
+  test('browser uses native SDK and projects the same DTO', async () => {
+    const client = createAuthClient({
+      baseURL: 'http://web.example',
+      fetchOptions: {
+        customFetchImpl: async (input, init) => {
+          expect(String(input)).toContain('/api/auth/get-session')
+          expect(init?.credentials).toBe('include')
+          return Response.json(fixture)
+        },
+      },
     })
+    const value = await readClientSession(client)
+    expect(value?.user.role).toBe('admin')
+    expect(Object.keys(value?.session ?? {})).toEqual(['expiresAt'])
+  })
+  test('preserves null, throws safe dependency errors, and bounds stalls', async () => {
     expect(
-      await loadAdminSession({
-        apiBaseUrl,
+      await readServerSession({
+        apiOrigin,
+        fetcher: async () => Response.json(null),
+      }),
+    ).toBeNull()
+    await expect(
+      readServerSession({
+        apiOrigin,
+        fetcher: async () =>
+          Response.json({ error: 'private detail' }, { status: 503 }),
+      }),
+    ).rejects.toBeInstanceOf(AuthDependencyError)
+    await expect(
+      readServerSession({
+        apiOrigin,
         fetcher: async () => {
-          throw new TypeError('network details must not escape')
+          throw new Error('private network detail')
         },
       }),
-    ).toEqual({ status: 'unavailable', reason: 'network' })
-
-    const controller = new AbortController()
-    controller.abort(new DOMException('Request cancelled.', 'AbortError'))
+    ).rejects.toBeInstanceOf(AuthDependencyError)
+    expect(() =>
+      readServerSession({ apiOrigin: 'http://user:secret@foreign.test' }),
+    ).toThrow(AuthDependencyError)
+    const start = Date.now()
     await expect(
-      loadAdminSession({ apiBaseUrl, signal: controller.signal }),
-    ).rejects.toThrow('Request cancelled.')
+      readServerSession({
+        apiOrigin,
+        timeoutMs: 10,
+        fetcher: async (_input, init) =>
+          new Promise((_resolve, reject) =>
+            init?.signal?.addEventListener(
+              'abort',
+              () => reject(init.signal?.reason),
+              { once: true },
+            ),
+          ),
+      }),
+    ).rejects.toMatchObject({ reason: 'timeout' })
+    expect(Date.now() - start).toBeLessThan(1000)
   })
-
-  test('validates configured origins and creates a fresh query cache per router', () => {
-    expect(apiBaseUrlFromOrigin('https://web.example.test')).toBe(
-      'https://web.example.test/api',
-    )
-    expect(apiBaseUrlFromOrigin('https://user:pass@web.example.test')).toBe(
-      undefined,
-    )
-    expect(normalizeApiBaseUrl(apiBaseUrl)).toBe(apiBaseUrl)
-    expect(normalizeApiBaseUrl('http://api.internal.test')).toBe(
-      'http://api.internal.test',
-    )
-    expect(normalizeApiBaseUrl('https://api.example.test/other')).toBe(
-      undefined,
-    )
-    expect(apiOriginFromOrigin('http://api.internal.test/api')).toBe(undefined)
-
-    const firstQueryClient = getContext().queryClient
-    const secondQueryClient = getContext().queryClient
-    expect(firstQueryClient).not.toBe(secondQueryClient)
+  test('keeps cancellation distinct and QueryClient state request-local', async () => {
+    const controller = new AbortController()
+    const reason = new DOMException('Cancelled', 'AbortError')
+    controller.abort(reason)
+    await expect(
+      readServerSession({ apiOrigin, signal: controller.signal }),
+    ).rejects.toBe(reason)
+    const first = getContext()
+    const second = getContext()
+    first.queryClient.setQueryData(['auth', 'session'], fixture)
+    expect(second.queryClient.getQueryData(['auth', 'session'])).toBeUndefined()
   })
 })
