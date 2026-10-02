@@ -917,7 +917,7 @@ Endpoint legacy /admin/session dipertahankan sementara sampai consumer web berpi
 
 ### Task: AUTH-REF-005 — Gateway native, callback publik, cookie, dan deadline
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: 4 dalam urutan eksekusi refactor.
 - Referensi: AUTH-REF-US02; AUTH_REFACTOR_PLAN.md; AGENTS.md; API_DEVELOPMENT.md.
@@ -949,22 +949,22 @@ Path bertanda baru adalah target yang dibuat saat eksekusi, bukan file yang suda
 
 #### Rencana implementasi terurut
 
-- [ ] **AUTH-REF-005.01 — Tetapkan konfigurasi origin.** Resolve fixed internal dan configured public origin secara server-only; validasi scheme/no userinfo/path. Pastikan runtime Nitro menerima konfigurasi yang diperlukan.
-- [ ] **AUTH-REF-005.02 — Pusatkan operation policy.** Gunakan allowlist package untuk path/method; pertahankan limit body dan header allowlist; jangan membaca cookie/token untuk menentukan izin.
-- [ ] **AUTH-REF-005.03 — Benarkan redirect/callback.** Terima public callback valid yang sebelumnya gagal; rewrite Location ke path lokal dan tolak origin asing, termasuk redirect credentials.
-- [ ] **AUTH-REF-005.04 — Teruskan respons native.** Raw status/body/retry headers dan semua Set-Cookie dipertahankan; forced private/no-store termasuk denial/config error.
-- [ ] **AUTH-REF-005.05 — Selaraskan abort/deadline.** Gabungkan request abort dan batas10s; timer/listener dibersihkan dalam finally; jangan swallow abort menjadi login failure.
-- [ ] **AUTH-REF-005.06 — Uji portless transport.** Fixture mock upstream memeriksa tidak ada follow request ke foreign origin, cookie tepat, dan deadline override pendek pada test.
-- [ ] **AUTH-REF-005.07 — Buktikan kedua runtime.** Smoke Vite dan hasil build Bun/Nitro; catat public origin/internal path dan cookie properties tanpa nilai credential.
+- [x] **AUTH-REF-005.01 — Tetapkan konfigurasi origin.** Resolve fixed internal dan configured public origin secara server-only; validasi scheme/no userinfo/path. Pastikan runtime Nitro menerima konfigurasi yang diperlukan.
+- [x] **AUTH-REF-005.02 — Pusatkan operation policy.** Gunakan allowlist package untuk path/method; pertahankan limit body dan header allowlist; jangan membaca cookie/token untuk menentukan izin.
+- [x] **AUTH-REF-005.03 — Benarkan redirect/callback.** Terima public callback valid yang sebelumnya gagal; rewrite Location ke path lokal dan tolak origin asing, termasuk redirect credentials.
+- [x] **AUTH-REF-005.04 — Teruskan respons native.** Raw status/body/retry headers dan semua Set-Cookie dipertahankan; forced private/no-store termasuk denial/config error.
+- [x] **AUTH-REF-005.05 — Selaraskan abort/deadline.** Gabungkan request abort dan batas10s; timer/listener dibersihkan dalam finally; jangan swallow abort menjadi login failure.
+- [x] **AUTH-REF-005.06 — Uji portless transport.** Fixture mock upstream memeriksa tidak ada follow request ke foreign origin, cookie tepat, dan deadline override pendek pada test.
+- [x] **AUTH-REF-005.07 — Buktikan kedua runtime.** Smoke Vite dan hasil build Bun/Nitro; catat public origin/internal path dan cookie properties tanpa nilai credential.
 
 #### Acceptance criteria
 
-- [ ] Callback absolut pada origin publik yang dikonfigurasi mempertahankan respons/cookie; origin asing ditolak.
-- [ ] API_INTERNAL_URL adalah fixed target server, tidak menjadi callback publik atau input browser.
-- [ ] Semua Set-Cookie diteruskan tanpa digabung/rusak; cache-control private/no-store benar.
-- [ ] Upstream stalled berhenti dalam deadline 10 detik dengan error unavailable; cancellation dibedakan.
-- [ ] Redirect tidak mengirim cookie ke origin asing; path/method operator ditutup.
-- [ ] Gateway berjalan pada Vite dan hasil build Bun/Nitro.
+- [x] Callback absolut pada origin publik yang dikonfigurasi mempertahankan respons/cookie; origin asing ditolak.
+- [x] API_INTERNAL_URL adalah fixed target server, tidak menjadi callback publik atau input browser.
+- [x] Semua Set-Cookie diteruskan tanpa digabung/rusak; cache-control private/no-store benar.
+- [x] Upstream stalled berhenti dalam deadline 10 detik dengan error unavailable; cancellation dibedakan.
+- [x] Redirect tidak mengirim cookie ke origin asing; path/method operator ditutup.
+- [x] Gateway berjalan pada Vite dan hasil build Bun/Nitro.
 
 #### Validasi
 
@@ -1000,7 +1000,10 @@ Commit setelah acceptance criteria task terpenuhi: `fix(auth): preserve native g
 
 #### Hasil dan bukti
 
-Belum diimplementasikan. Catat perintah, hasil, batas bukti dan commit ketika task dikerjakan.
+- Gateway memakai operation policy package, fixed internal origin dan configured public origin. Callback public/internal direwrite ke path relatif; origin asing/userinfo ditolak, cookie tidak di-forward ke redirect asing. Multiple Set-Cookie/raw body/status/retry headers dipertahankan dengan private,no-store.
+- Deadline 10s mencakup request dan response body; body auth dibatasi 1 MiB. Cancellation mengembalikan transport 499 terpisah dari timeout 504/unavailable 503. Timer/listener dibersihkan. Operator path serta metode yang salah ditutup.
+- Gateway proof 10 test/44 assertion lulus termasuk callback publik yang sebelumnya 502, multiple cookie, wrong method/operator, stalled headers/body dan cancellation. Smoke Vite dev dan built Bun/Nitro lulus: raw status201, POST/logout, query/body/cookie/Origin, callback /admin dan dua Set-Cookie utuh.
+- Web build dan workspace check-types lulus. ENVIRONMENT/Turbo start meneruskan VITE_API_URL sebagai origin publik server, selaras konfigurasi API. Browser runner Windows Chromium berhasil diinisialisasi untuk task selanjutnya. Commit: fix(auth): preserve native gateway cookies and callbacks.
 
 #### Blocker atau tindak lanjut
 

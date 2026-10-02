@@ -12,7 +12,10 @@ const api = Bun.serve({
       origin: request.headers.get('origin'),
       body: await request.text(),
     }
-    const headers = new Headers({ 'content-type': 'application/json' })
+    const headers = new Headers({
+      'content-type': 'application/json',
+      location: 'http://localhost:3000/admin',
+    })
     headers.append('set-cookie', 'smoke-one=1; Path=/; HttpOnly')
     headers.append('set-cookie', 'smoke-two=2; Path=/; SameSite=Lax')
     return Response.json(payload, { status: 201, headers })
@@ -63,8 +66,9 @@ async function verifyGateway(port, label) {
   )
   const payload = await response.json()
 
+  assert.equal(response.headers.get('location'), '/admin')
   assert.equal(response.status, 201, `${label} preserves upstream status`)
-  assert.equal(response.headers.get('cache-control'), 'no-store')
+  assert.equal(response.headers.get('cache-control'), 'private, no-store')
   assert.deepEqual(response.headers.getSetCookie(), [
     'smoke-one=1; Path=/; HttpOnly',
     'smoke-two=2; Path=/; SameSite=Lax',
@@ -79,13 +83,13 @@ async function verifyGateway(port, label) {
   })
 
   const methodResponse = await fetch(
-    `http://127.0.0.1:${port}/api/auth/sign-out?method=delete`,
-    { method: 'DELETE', headers: { origin: `http://127.0.0.1:${port}` } },
+    `http://127.0.0.1:${port}/api/auth/sign-out?method=post`,
+    { method: 'POST', headers: { origin: `http://127.0.0.1:${port}` } },
   )
   const methodPayload = await methodResponse.json()
   assert.equal(methodResponse.status, 201)
-  assert.equal(methodPayload.method, 'DELETE')
-  assert.equal(methodPayload.search, '?method=delete')
+  assert.equal(methodPayload.method, 'POST')
+  assert.equal(methodPayload.search, '?method=post')
   const adminResponse = await fetch(
     `http://127.0.0.1:${port}/api/admin/session?from=smoke`,
     { headers: { cookie: 'admin-session=cookie' } },
@@ -96,7 +100,7 @@ async function verifyGateway(port, label) {
   assert.equal(adminPayload.search, '?from=smoke')
   assert.equal(adminPayload.cookie, 'admin-session=cookie')
   console.log(
-    `${label}: status 201, cookies/no-store, POST/DELETE, admin path preserved`,
+    `${label}: status 201, cookies/no-store, POST/logout, admin path preserved`,
   )
 }
 
@@ -108,6 +112,7 @@ async function runServer(label, command, port) {
       NODE_ENV: label === 'built Bun server' ? 'production' : 'development',
       PORT: String(port),
       HOST: '127.0.0.1',
+      VITE_API_URL: 'http://localhost:3000',
       API_INTERNAL_URL: `http://127.0.0.1:${api.port}`,
     },
     stdout: 'ignore',

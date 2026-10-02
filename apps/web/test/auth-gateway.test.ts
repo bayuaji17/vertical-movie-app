@@ -8,6 +8,7 @@ describe('same-origin auth gateway', () => {
   test('forwards method, path, query, body and approved browser headers', async () => {
     let upstreamRequest: Request | undefined
     const gateway = createAuthGateway('auth', {
+      getPublicOrigin: () => 'http://web.example',
       getApiInternalUrl: () => apiOrigin,
       fetcher: async (request) => {
         upstreamRequest = request
@@ -44,7 +45,7 @@ describe('same-origin auth gateway', () => {
     expect(upstreamRequest?.headers.get('origin')).toBe('http://web.example')
     expect(upstreamRequest?.headers.has('x-forwarded-for')).toBe(false)
     expect(upstreamRequest?.headers.has('x-private-debug')).toBe(false)
-    expect(response.headers.get('cache-control')).toBe('no-store')
+    expect(response.headers.get('cache-control')).toBe('private, no-store')
   })
 
   test('keeps status and separate Set-Cookie values while forcing no-store', async () => {
@@ -55,6 +56,7 @@ describe('same-origin auth gateway', () => {
     headers.append('set-cookie', 'session=one; Path=/; HttpOnly')
     headers.append('set-cookie', 'csrf=two; Path=/; SameSite=Lax')
     const gateway = createAuthGateway('auth', {
+      getPublicOrigin: () => 'http://web.example',
       getApiInternalUrl: () => apiOrigin,
       fetcher: async () => new Response('created', { status: 201, headers }),
     })
@@ -70,13 +72,14 @@ describe('same-origin auth gateway', () => {
       'session=one; Path=/; HttpOnly',
       'csrf=two; Path=/; SameSite=Lax',
     ])
-    expect(response.headers.get('cache-control')).toBe('no-store')
+    expect(response.headers.get('cache-control')).toBe('private, no-store')
     expect(await response.text()).toBe('created')
   })
 
   test('never derives the upstream host from the incoming request', async () => {
     let upstreamUrl = ''
     const gateway = createAuthGateway('auth', {
+      getPublicOrigin: () => 'http://web.example',
       getApiInternalUrl: () => apiOrigin,
       fetcher: async (request) => {
         upstreamUrl = request.url
@@ -91,6 +94,7 @@ describe('same-origin auth gateway', () => {
   test('limits the admin target to GET at the exact fixed path', async () => {
     const upstreamUrls: string[] = []
     const gateway = createAuthGateway('admin-session', {
+      getPublicOrigin: () => 'http://web.example',
       getApiInternalUrl: () => apiOrigin,
       fetcher: async (request) => {
         upstreamUrls.push(request.url)
@@ -117,9 +121,10 @@ describe('same-origin auth gateway', () => {
 
   test('rewrites same-upstream redirects to a relative web path and rejects external redirects', async () => {
     const gateway = createAuthGateway('auth', {
+      getPublicOrigin: () => 'http://web.example',
       getApiInternalUrl: () => apiOrigin,
       fetcher: async (request) =>
-        request.url.endsWith('/safe')
+        request.url.includes('?safe')
           ? new Response(null, {
               status: 302,
               headers: { location: `${apiOrigin}/admin?from=auth` },
@@ -131,15 +136,15 @@ describe('same-origin auth gateway', () => {
     })
 
     const safeRedirect = await gateway(
-      new Request('http://web.example/api/auth/safe'),
+      new Request('http://web.example/api/auth/get-session?safe'),
     )
     const externalRedirect = await gateway(
-      new Request('http://web.example/api/auth/external'),
+      new Request('http://web.example/api/auth/get-session?external'),
     )
 
     expect(safeRedirect.status).toBe(302)
     expect(safeRedirect.headers.get('location')).toBe('/admin?from=auth')
-    expect(safeRedirect.headers.get('cache-control')).toBe('no-store')
+    expect(safeRedirect.headers.get('cache-control')).toBe('private, no-store')
     expect(externalRedirect.status).toBe(502)
   })
 
@@ -152,6 +157,7 @@ describe('same-origin auth gateway', () => {
 
     for (const value of [undefined, 'http://user:secret@attacker.example']) {
       const response = await createAuthGateway('auth', {
+        getPublicOrigin: () => 'http://web.example',
         getApiInternalUrl: () => value,
         fetcher,
       })(new Request('http://web.example/api/auth/get-session'))
@@ -164,6 +170,7 @@ describe('same-origin auth gateway', () => {
   test('rejects oversized request bodies before contacting the API', async () => {
     let calls = 0
     const gateway = createAuthGateway('auth', {
+      getPublicOrigin: () => 'http://web.example',
       getApiInternalUrl: () => apiOrigin,
       maxRequestBodyBytes: 8,
       fetcher: async () => {
@@ -180,12 +187,13 @@ describe('same-origin auth gateway', () => {
     )
 
     expect(response.status).toBe(413)
-    expect(response.headers.get('cache-control')).toBe('no-store')
+    expect(response.headers.get('cache-control')).toBe('private, no-store')
     expect(calls).toBe(0)
   })
 
   test('returns a generic timeout response when the API does not respond', async () => {
     const gateway = createAuthGateway('auth', {
+      getPublicOrigin: () => 'http://web.example',
       getApiInternalUrl: () => apiOrigin,
       timeoutMs: 5,
       fetcher: (request) =>
@@ -202,7 +210,68 @@ describe('same-origin auth gateway', () => {
       new Request('http://web.example/api/auth/get-session'),
     )
     expect(response.status).toBe(504)
-    expect(response.headers.get('cache-control')).toBe('no-store')
+    expect(response.headers.get('cache-control')).toBe('private, no-store')
     expect(await response.text()).not.toContain('transport aborted')
+  })
+  test('preserves cookies on public-origin callbacks and blocks operator methods', async () => {
+    let calls = 0
+    const gateway = createAuthGateway('auth', {
+      getApiInternalUrl: () => apiOrigin,
+      getPublicOrigin: () => 'http://web.example',
+      fetcher: async () => {
+        calls++
+        return new Response('{}', {
+          status: 200,
+          headers: {
+            location: 'http://web.example/admin',
+            'set-cookie': 'session=fixture; HttpOnly; Path=/',
+          },
+        })
+      },
+    })
+    const response = await gateway(
+      new Request('http://web.example/api/auth/sign-in/email', {
+        method: 'POST',
+      }),
+    )
+    expect(response.status).toBe(200)
+    expect(response.headers.get('location')).toBe('/admin')
+    expect(response.headers.getSetCookie()).toHaveLength(1)
+    for (const [path, method] of [
+      ['/admin/create-user', 'POST'],
+      ['/reset-password', 'POST'],
+      ['/sign-out', 'DELETE'],
+    ])
+      expect(
+        (
+          await gateway(
+            new Request('http://web.example/api/auth' + path, { method }),
+          )
+        ).status,
+      ).toBe(404)
+    expect(calls).toBe(1)
+  })
+  test('distinguishes request cancellation and times out a stalled response body', async () => {
+    const cancelled = new AbortController()
+    cancelled.abort()
+    const gateway = createAuthGateway('auth', {
+      getApiInternalUrl: () => apiOrigin,
+      getPublicOrigin: () => 'http://web.example',
+      timeoutMs: 5,
+      fetcher: async () => new Response(new ReadableStream({ start() {} })),
+    })
+    expect(
+      (
+        await gateway(
+          new Request('http://web.example/api/auth/get-session', {
+            signal: cancelled.signal,
+          }),
+        )
+      ).status,
+    ).toBe(499)
+    expect(
+      (await gateway(new Request('http://web.example/api/auth/get-session')))
+        .status,
+    ).toBe(504)
   })
 })

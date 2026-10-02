@@ -64,6 +64,8 @@ Semua variabel `VITE_*` dapat masuk bundle browser. Simpan secret Better Auth, k
 
 ## Pemuatan dan Turborepo
 
+Gateway memakai origin publik terkonfigurasi `VITE_API_URL` (runtime server jika tersedia, fallback nilai build) untuk callback, bersama target tetap `API_INTERNAL_URL`. Nilainya harus konsisten dengan `BETTER_AUTH_URL`/`WEB_ORIGIN`; request Host/Origin tidak memilih target. Callback publik/internal diubah menjadi path relatif; callback asing atau ber-userinfo ditolak. Respons auth memakai `private, no-store`, deadline 10 detik mencakup body, dan endpoint operator tertutup. Turbo meneruskan `VITE_API_URL` pada `start` agar deployment dapat menyediakan konfigurasi origin server yang sama.
+
 - Bun memuat env aplikasi API secara native; Vite menangani env web menurut mode. Konfigurasi Vite menggunakan `loadEnv` untuk `PORT`/`HOST`. Tidak ada tambahan dependensi `dotenv`.
 - Root `turbo.json` meneruskan variabel runtime API pada task `api#dev`/`api#start`; `API_INTERNAL_URL` diteruskan ke web `dev`/`start`. Task `web#build` hanya memasukkan `VITE_API_URL` dari konfigurasi API ke proses build client. Environment yang diekspor deployment tidak hilang karena strict mode.
 - Build memasukkan `.env*` sebagai input cache. Task `web#build` juga memasukkan `VITE_API_URL` dari environment proses ke hash. Jangan mengandalkan penggantian env setelah artefak client selesai dibangun.

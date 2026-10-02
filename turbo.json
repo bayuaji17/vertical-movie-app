@@ -22,7 +22,7 @@
     "start": {
       "cache": false,
       "persistent": true,
-      "env": ["NODE_ENV", "PORT", "HOST", "API_INTERNAL_URL"]
+      "env": ["NODE_ENV", "PORT", "HOST", "VITE_API_URL", "API_INTERNAL_URL"]
     },
     "web#build": {
       "dependsOn": ["^build"],

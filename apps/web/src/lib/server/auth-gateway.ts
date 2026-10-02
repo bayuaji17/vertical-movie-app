@@ -1,7 +1,10 @@
+import { isDisabledAuthPath } from '@repo/auth/server'
+
 type GatewayTarget = 'auth' | 'admin-session'
 
 type GatewayDependencies = {
   getApiInternalUrl?: () => string | undefined
+  getPublicOrigin?: () => string | undefined
   fetcher?: (request: Request) => Promise<Response>
   timeoutMs?: number
   maxRequestBodyBytes?: number
@@ -44,7 +47,7 @@ function errorResponse(
 ): Response {
   return Response.json(
     { error: { code, message } },
-    { status, headers: { 'cache-control': 'no-store' } },
+    { status, headers: { 'cache-control': 'private, no-store' } },
   )
 }
 
@@ -129,6 +132,7 @@ function forwardedRequestHeaders(request: Request): Headers {
 function forwardedResponseHeaders(
   response: Response,
   apiOrigin: string,
+  publicOrigin: string,
 ): Headers | undefined {
   const headers = new Headers()
   for (const name of responseHeaderAllowlist) {
@@ -139,11 +143,12 @@ function forwardedResponseHeaders(
   const location = response.headers.get('location')
   if (location !== null) {
     try {
-      const target = new URL(location, 'http://upstream.invalid')
+      const target = new URL(location, publicOrigin)
       if (
         !['http:', 'https:'].includes(target.protocol) ||
-        (target.origin !== 'http://upstream.invalid' &&
-          target.origin !== apiOrigin)
+        target.username !== '' ||
+        target.password !== '' ||
+        (target.origin !== publicOrigin && target.origin !== apiOrigin)
       ) {
         return undefined
       }
@@ -159,7 +164,7 @@ function forwardedResponseHeaders(
   for (const cookie of response.headers.getSetCookie()) {
     headers.append('set-cookie', cookie)
   }
-  headers.set('cache-control', 'no-store')
+  headers.set('cache-control', 'private, no-store')
   return headers
 }
 
@@ -169,6 +174,9 @@ export function createAuthGateway(
 ): (request: Request) => Promise<Response> {
   const getApiInternalUrl =
     dependencies.getApiInternalUrl ?? (() => process.env.API_INTERNAL_URL)
+  const getPublicOrigin =
+    dependencies.getPublicOrigin ??
+    (() => process.env.VITE_API_URL ?? import.meta.env.VITE_API_URL)
   const fetcher = dependencies.fetcher ?? ((request) => fetch(request))
   const timeoutMs = dependencies.timeoutMs ?? 10_000
   const maxRequestBodyBytes = dependencies.maxRequestBodyBytes ?? 1_048_576
@@ -190,8 +198,18 @@ export function createAuthGateway(
       )
     }
 
+    if (
+      target === 'auth' &&
+      isDisabledAuthPath(
+        incomingUrl.pathname.replace(/^\/api\/auth/, ''),
+        request.method,
+      )
+    ) {
+      return errorResponse(404, 'NOT_FOUND', 'This operation is unavailable.')
+    }
     const apiOrigin = getApiOrigin(getApiInternalUrl())
-    if (!apiOrigin) {
+    const publicOrigin = getApiOrigin(getPublicOrigin())
+    if (!apiOrigin || !publicOrigin) {
       return errorResponse(
         503,
         'AUTH_GATEWAY_UNAVAILABLE',
@@ -250,7 +268,11 @@ export function createAuthGateway(
       if (body !== null) requestInit.body = body
       const upstreamRequest = new Request(upstreamUrl, requestInit)
       const upstreamResponse = await fetcher(upstreamRequest)
-      const headers = forwardedResponseHeaders(upstreamResponse, apiOrigin)
+      const headers = forwardedResponseHeaders(
+        upstreamResponse,
+        apiOrigin,
+        publicOrigin,
+      )
       if (!headers) {
         await upstreamResponse.body?.cancel().catch(() => undefined)
         cleanup()
@@ -261,37 +283,29 @@ export function createAuthGateway(
         )
       }
       const noBodyStatus = [204, 205, 304].includes(upstreamResponse.status)
-      let responseBody: ReadableStream<Uint8Array> | null = null
+      let responseBody: ArrayBuffer | null = null
       if (!noBodyStatus && upstreamResponse.body) {
-        const reader = upstreamResponse.body.getReader()
-        responseBody = new ReadableStream<Uint8Array>({
-          async pull(controller) {
-            try {
-              const chunk = await reader.read()
-              if (chunk.done) {
-                controller.close()
-                cleanup()
-                return
-              }
-              controller.enqueue(chunk.value)
-            } catch (error) {
-              controller.error(error)
-              cleanup()
-            }
-          },
-          async cancel(reason) {
-            abortController.abort(reason)
-            try {
-              await reader.cancel(reason)
-            } finally {
-              cleanup()
-            }
-          },
-        })
-      } else {
-        await upstreamResponse.body?.cancel().catch(() => undefined)
-        cleanup()
+        const result = await readLimitedBody(
+          new Request('http://response.invalid', {
+            method: 'POST',
+            body: upstreamResponse.body,
+            duplex: 'half',
+          } as RequestInit),
+          maxRequestBodyBytes,
+          abortController.signal,
+        )
+        if (abortController.signal.aborted) throw abortController.signal.reason
+        if (!result.ok) {
+          cleanup()
+          return errorResponse(
+            502,
+            'AUTH_GATEWAY_INVALID_RESPONSE',
+            'The authentication service returned an invalid response.',
+          )
+        }
+        responseBody = result.body
       }
+      cleanup()
       return new Response(responseBody, {
         status: upstreamResponse.status,
         statusText: upstreamResponse.statusText,
@@ -299,6 +313,12 @@ export function createAuthGateway(
       })
     } catch {
       cleanup()
+      if (request.signal.aborted)
+        return errorResponse(
+          499,
+          'AUTH_REQUEST_ABORTED',
+          'The request was cancelled.',
+        )
       if (abortController.signal.reason === timeoutReason) {
         return errorResponse(
           504,
