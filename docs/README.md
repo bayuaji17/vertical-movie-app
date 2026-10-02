@@ -23,6 +23,7 @@ Catat tanggal persetujuan dan pemilik keputusan di setiap dokumen. Pisahkan peri
 - [Rencana Refactor Auth](AUTH_REFACTOR_PLAN.md): rencana disetujui pada 2 Oktober 2026; ownership entry client/server package, dependency injection database, native role/CLI, TanStack isomorphic/Query, SSR/protected routes, cache/invalidation, migrasi serta regression. Implementasi refactor selesai; command operasional pada Auth Operations.
 - [Global Workflow](GLOBAL_WORKFLOW.md): keputusan Agile dan pembagian modul → user story → task kecil disetujui pengguna pada 1 Oktober 2026.
 - [Template Task](TASK_TEMPLATE.md): format backlog per modul, acceptance criteria, dependensi, dan bukti validasi.
+- [Backlog Database Tooling](tasks/database-tooling.md): konfigurasi dan validasi Drizzle Studio lokal.
 - [Environment](ENVIRONMENT.md): setup env API/web, pemisahan konfigurasi publik/server, dan status variabel integrasi.
 - [API Development](API_DEVELOPMENT.md): aturan kode `apps/api`, struktur modul, kontrak Eden Treaty, dokumentasi OpenAPI/Scalar, lifecycle/scope Elysia, database, autentikasi, storage, queue, worker, unit test native Bun, dan validasi perubahan.
 
@@ -54,6 +55,7 @@ Gunakan Bun 1.4.2 dari root repo:
 ```sh
 bun install --frozen-lockfile
 bun run dev
+bun run db:studio
 bun run lint
 bun run check-types
 bun run build
@@ -61,6 +63,6 @@ bun run build
 
 Untuk setup lokal pertama kali, salin `apps/api/.env.example` ke `apps/api/.env` dan `apps/web/.env.example` ke `apps/web/.env`. Jika file tujuan sudah ada, lengkapi nilainya tanpa menimpa konfigurasi lokal. Port dev web dibaca dari env; default API 3001 dan web 3000. API kini menolak secret Better Auth kosong/pendek, URL bukan PostgreSQL, serta origin auth/web yang berbeda. Browser memakai gateway same-origin `/api/auth/*`; `API_INTERNAL_URL` hanya dibaca server web saat runtime. Form login tersedia di `/admin/login`; jalur migrasi, provision, reset, serta database proof dijelaskan di [Environment](ENVIRONMENT.md).
 
-`dev` menjalankan kedua app. `build` menghasilkan `apps/api/dist/` dan `apps/web/.output/`; `bun run start` menjalankan hasil build dengan Bun. Gunakan filter `--filter=api` atau `--filter=web` untuk satu app, atau `--filter=@repo/auth` untuk pemeriksaan tipe package auth. Saat ini lint hanya mencakup `web`; pemeriksaan tipe mencakup kedua app dan `@repo/auth`, sedangkan build mencakup kedua app. Package auth mengekspor sumber TypeScript yang dikompilasi oleh Bun/Vite saat digunakan, sehingga tidak memiliki task build sendiri.
+`db:studio` menjalankan Drizzle Studio dari konfigurasi API pada loopback port4983; buka [local.drizzle.studio](https://local.drizzle.studio) selama command berjalan. `dev` menjalankan kedua app. `build` menghasilkan `apps/api/dist/` dan `apps/web/.output/`; `bun run start` menjalankan hasil build dengan Bun. Gunakan filter `--filter=api` atau `--filter=web` untuk satu app, atau `--filter=@repo/auth` untuk pemeriksaan tipe package auth. Saat ini lint hanya mencakup `web`; pemeriksaan tipe mencakup kedua app dan `@repo/auth`, sedangkan build mencakup kedua app. Package auth mengekspor sumber TypeScript yang dikompilasi oleh Bun/Vite saat digunakan, sehingga tidak memiliki task build sendiri.
 
 Gunakan pesan Conventional Commits seperti `feat(api): add movie endpoint`. Husky menjalankan lint dan pemeriksaan tipe sebelum commit, lalu Commitlint memvalidasi pesannya.

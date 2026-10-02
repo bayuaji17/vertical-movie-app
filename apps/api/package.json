@@ -16,6 +16,7 @@
     "admin:provision": "bun run src/modules/auth/provision-cli.ts",
     "admin:reset-password": "bun run src/modules/auth/reset-cli.ts",
     "db:migrate": "bun run src/db/migrate.ts",
+    "db:studio": "bun run --bun drizzle-kit studio --host=127.0.0.1",
     "dev": "bun run --watch src/index.ts",
     "build": "bun build src/index.ts --target=bun --outdir=dist",
     "start": "bun dist/index.js",
@@ -30,7 +31,8 @@
   },
   "devDependencies": {
     "bun-types": "latest",
-    "drizzle-kit": "0.31.11"
+    "drizzle-kit": "0.31.11",
+    "postgres": "3.4.9"
   },
   "engines": {
     "bun": ">=1.4.2"

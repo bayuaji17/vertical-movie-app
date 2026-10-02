@@ -37,6 +37,18 @@ Setelah database aplikasi dimigrasikan dan operator siap membuat admin, jalankan
 
 Admin masuk dari halaman web `/admin/login`; setelah login, guard membaca snapshot native lewat TanStack Query sebelum menampilkan dashboard `/admin`. Browser mengakses `/api/auth/*` pada origin web; server TanStack Start meneruskan request ke `API_INTERNAL_URL` yang tetap. Untuk setup lokal, `VITE_API_URL`, `BETTER_AUTH_URL`, dan `WEB_ORIGIN` memakai origin web yang sama. Password dan sesi tidak disimpan pada `VITE_*` atau browser storage.
 
+### Drizzle Studio
+
+Jalankan dari root:
+
+```sh
+bun run db:studio
+```
+
+Alternatif app-local: `bun run --cwd apps/api db:studio`. Bun memuat `apps/api/.env`; Studio menggunakan `DATABASE_URL` yang sama dan schema `apps/api/src/db/schema/index.ts`. Buka [Drizzle Studio](https://local.drizzle.studio) selama command berjalan. Server penghubung bind pada `127.0.0.1:4983`, terpisah dari API/web. Hentikan dengan Ctrl+C. Untuk port lain gunakan `bun run --cwd apps/api db:studio --port=4984` lalu pilih port koneksi tersebut di UI Studio.
+
+Drizzle Kit `0.31.11` membutuhkan driver yang didukung untuk Studio dan belum mendukung Bun SQL di jalur ini. `postgres@3.4.9` adalah devDependency API khusus tooling; runtime API tetap memakai `drizzle-orm/bun-sql`. Config menyediakan credential hanya ketika DATABASE_URL tersedia, sehingga generate schema tetap dapat berjalan tanpa koneksi. Command Studio tidak menjalankan migration; untuk provisioning/reset admin gunakan command native pada Auth Operations.
+
 ### Pemulihan password admin
 
 Hentikan seluruh instance API penerima login dan selesaikan/batalkan request in-flight. Jalankan `bun run --cwd apps/api admin:reset-password -- admin@example.com --maintenance-confirmed`, lalu masukkan password baru melalui prompt tersembunyi. Operator memakai `requestPasswordReset/resetPassword` native dengan callback token di memori, tanpa email/sesi admin. Revoke sessions aktif dan diverifikasi sebelum sukses. Reset native tidak atomic: failure dapat terjadi setelah password berubah; tetap maintenance dan ulangi native reset sampai pencabutan terverifikasi sebelum restart. Detail recovery, seed parsial, concurrency, rollback, dan migrasi ada pada [Auth Operations](AUTH_OPERATIONS.md).

@@ -26,6 +26,16 @@ Copy the env files once during initial setup; update existing local env files wi
 
 `bun run dev` starts both apps. The API uses port 3001 and web uses port 3000 by default; set `PORT` in each app's env to override its port.
 
+## Drizzle Studio
+
+Open the local database browser from the repository root:
+
+```sh
+bun run db:studio
+```
+
+Then visit [Drizzle Studio](https://local.drizzle.studio). It reads the API's local DATABASE_URL and listens on 127.0.0.1:4983 while the command runs. See [Environment setup](docs/ENVIRONMENT.md#drizzle-studio).
+
 ## Workspace tasks
 
 Run these commands from the repository root:
