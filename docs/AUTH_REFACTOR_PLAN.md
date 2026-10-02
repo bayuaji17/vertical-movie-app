@@ -1,6 +1,6 @@
 # Rencana refactor auth: package, isomorphic, dan TanStack Query
 
-- Status: implementasi AUTH-REF-001–010 selesai pada 2 Oktober 2026; evidence/commit pada backlog. Deployment dan migrasi database development terpisah.
+- Status: implementasi AUTH-REF-001–010 selesai pada 2 Oktober 2026; evidence/commit pada backlog. Migrasi database development selesai pada tindak lanjut 2 Oktober 2026; deployment masih terpisah.
 - Tanggal: 2 Oktober 2026, Asia/Jakarta.
 - Persetujuan: 2 Oktober 2026, melalui arahan pengguna untuk melanjutkan perincian rencana pada setiap task.
 - Baseline: `feat/auth-admin-module`, commit `34f8ec59b125bbabaae87b3939de38874afb3a58`.
@@ -287,4 +287,4 @@ Saat perencanaan, hasil baseline tidak dianggap sebagai evidence refactor. Imple
 
 AUTH-REF-002 menghasilkan `0001_native-admin-expand.sql` melalui Drizzle Kit 0.31.11; schema pembanding memakai CLI Better Auth 1.7.7. Role dibuat lebih ketat dari generator: default `user`, non-null, hanya `user`/`admin`, dengan unique partial index untuk satu admin.
 
-Sebelum cutover API, backup database dan pastikan identitas singleton memiliki credential account. Migrasi menolak identitas tanpa password; tidak memilih admin berdasarkan email, membuat akun, atau mengubah hash. Jalankan `bun run --cwd apps/api db:migrate` sebagai langkah eksplisit pada database target sebelum menyalakan API native. Eksekusi implementasi ini hanya membuktikan upgrade pada database test lokal; database development tidak dimigrasi otomatis. Tabel `admin_identity` tetap tersedia untuk rollback versi aplikasi sebelum contract migration. Jangan mengembalikan schema dengan DROP atau mengubah `0000_auth-admin.sql`.
+Sebelum cutover API, backup database dan pastikan identitas singleton memiliki credential account. Migrasi menolak identitas tanpa password; tidak memilih admin berdasarkan email, membuat akun, atau mengubah hash. Jalankan `bun run --cwd apps/api db:migrate` sebagai langkah eksplisit pada database target sebelum menyalakan API native. Eksekusi refactor awal membuktikan upgrade pada database test lokal; migrasi tidak otomatis saat startup. Tindak lanjut 2 Oktober 2026 sudah menerapkan expand/contract pada database development, sehingga tabel `admin_identity` di sana telah dihapus. Sebelum contract pada target lain, tabel tersebut tetap tersedia untuk rollback aplikasi. Jangan mengembalikan schema dengan DROP atau mengubah `0000_auth-admin.sql`.

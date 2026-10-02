@@ -6,7 +6,7 @@ Admin tunggal dapat login email/password, menggunakan dashboard yang dilindungi,
 
 Scope email/password + CLI provision/recovery + satu origin disetujui pengguna pada **1 Oktober 2026**. Status tiap task dan dependensinya dicatat di bawah; task tetap `Backlog` sampai prerequisite lulus. Semua task menggunakan owner **pengembang/agent pelaksana**, prioritas wajib berurutan, dan bukti aktual saat dikerjakan. Task ini tidak menetapkan sprint atau estimasi waktu kalender.
 
-> Status aktif 2 Oktober 2026: AUTH-REF-001–010 selesai dan memiliki commit per task. AUTH-001–013 di bawah dipertahankan sebagai riwayat. Kontrak/command native aktif ada pada [Auth Operations](../AUTH_OPERATIONS.md); expand/contract database development dan deployment masih pending.
+> Status aktif 2 Oktober 2026: AUTH-REF-001–010 selesai dan memiliki commit per task. AUTH-001–013 di bawah dipertahankan sebagai riwayat. Kontrak/command native aktif ada pada [Auth Operations](../AUTH_OPERATIONS.md); expand/contract database development selesai pada AUTH-FUP-001; rollout deployment masih pending.
 
 ## User story: AUTH-US-01 — Fondasi autentikasi persisten
 
@@ -1514,4 +1514,41 @@ Tidak menambah GitHub CI. Domain/TLS/trusted proxy dan production smoke menunggu
 | Chromium native end-to-end | Pass | Better Auth asli + PostgreSQL dedicated + Elysia + build Bun/Nitro, mobile390×844. |
 | Frozen install / lint / type-check / build / import boundary | Pass | Bun1.4.2, Turbo2.11.5; lint hanya web; auth source dikompilasi consumer; no server import browser. |
 
-Source kode task AUTH-REF-001–009 dapat diperiksa pada SHA masing-masing; task010 berisi evidence/runbook, staged migration CLI, safe CLI diagnostics dan browser runner final. Setiap task telah di-commit sesudah validasi. Skenario deployment belum dijalankan: domain/TLS/trusted proxy/IP, backup/restore target, browser/perangkat lain, production smoke dan rollout expand/contract database development. Detail current/database/maintenance tidak disamakan dengan hasil proof test.
+Source kode task AUTH-REF-001–009 dapat diperiksa pada SHA masing-masing; task010 berisi evidence/runbook, staged migration CLI, safe CLI diagnostics dan browser runner final. Setiap task telah di-commit sesudah validasi. Skenario deployment belum dijalankan: domain/TLS/trusted proxy/IP, backup/restore target, browser/perangkat lain, production smoke. Pada saat commit refactor final, rollout database development juga belum dijalankan; status itu diperbarui oleh AUTH-FUP-001 di bawah. Detail current/database/maintenance tidak disamakan dengan hasil proof test.
+
+
+## User story: AUTH-US-FUP — Operasi development dan feedback auth
+
+Sebagai admin, saya ingin database development menggunakan schema native dan menerima feedback saat menjalankan login/logout.
+
+## Task: AUTH-FUP-001 — Terapkan migrasi native pada database development
+
+- Status: Done
+- Owner: Pengembang/agent pelaksana
+- Prioritas: P0
+- Referensi: AUTH-US-FUP, permintaan migrasi pengguna 2 Oktober 2026
+- Dependensi: AUTH-REF-001–010
+- Ukuran: Operasi lokal terarah
+
+### Ruang lingkup
+
+Backup dan migrasi expand → verifikasi native → contract pada database development yang dikonfigurasi API, tanpa seed/reset credential.
+
+### Acceptance criteria
+
+- [x] Target localhost:5433/vertical_movie_app terverifikasi dan backup dibuat sebelum perubahan.
+- [x] Expand/contract selesai, journal tiga migration dan tabel legacy dihapus.
+- [x] ID admin, credential account, hash password dan seluruh sesi existing tetap sama.
+- [x] Adapter native membaca user/account admin dan API development kembali berjalan.
+
+### Validasi
+
+Backup pg_dump custom-format dengan akses file 600, pg_restore --list exit 0; helper migrator yang sama dengan CLI aplikasi menjalankan expand dan contract secara bertahap. Perbandingan identitas/hash/sesi dilakukan di memori tanpa mencetak secret. HTTP root/get-session anonymous/OpenAPI native diperiksa setelah proses dilanjutkan.
+
+### Hasil dan bukti
+
+2 Oktober 2026: migrationCount=3, nativeAdmin=true, identityAndHashPreserved=true, sessionsPreserved=true, legacyTableRemoved=true. API root, get-session anonymous dan OpenAPI JSON 200; route native tersedia dan legacy admin/session tidak ada. Lokasi backup dan batas verifikasi tercatat pada Auth Operations. Tidak ada login memakai password existing atau reset akun. Commit: docs(auth): record development database migration.
+
+### Blocker atau tindak lanjut
+
+Restore penuh dan rollout deployment masih pending. AUTH-FUP-002 menambahkan toast auth pada web.
