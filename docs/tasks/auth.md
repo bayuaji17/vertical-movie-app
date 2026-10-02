@@ -640,7 +640,7 @@ AUTH-REF-002 memperluas schema database; API handler/guard berpindah pada AUTH-R
 
 ### Task: AUTH-REF-002 — Expand migration role/plugin dan admin yang sudah ada
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: 2 dalam urutan eksekusi refactor.
 - Referensi: AUTH-REF-US01; AUTH_REFACTOR_PLAN.md; AGENTS.md; API_DEVELOPMENT.md.
@@ -671,21 +671,21 @@ Path bertanda baru adalah target yang dibuat saat eksekusi, bukan file yang suda
 
 #### Rencana implementasi terurut
 
-- [ ] **AUTH-REF-002.01 — Generate schema pembanding.** Jalankan CLI/generator 1.7.7 ke output sementara; bandingkan field/default/nullability/SQL mapping. Jangan menimpa schema produksi dengan hasil generator mentah.
-- [ ] **AUTH-REF-002.02 — Perluas schema package.** Tambahkan role/banned/banReason/banExpires/impersonatedBy sesuai declaration, dengan mapping yang menjaga tabel lama.
-- [ ] **AUTH-REF-002.03 — Tuliskan expand migration.** Urutkan penambahan kolom -> validasi data -> backfill -> constraint/index. Migration metadata dibuat dari tooling yang sudah dipakai repo, bukan pengeditan journal sembarang.
-- [ ] **AUTH-REF-002.04 — Siapkan fixture upgrade.** Pada DB test khusus, terapkan migration baseline saja dan masukkan admin/credential/session lama; ambil fingerprint ID/email/hash secara in-memory.
-- [ ] **AUTH-REF-002.05 — Buktikan upgrade.** Terapkan expand migration; bandingkan fingerprint dan lakukan login melalui factory native. Pastikan sesi/credential tidak terhapus.
-- [ ] **AUTH-REF-002.06 — Uji invariant dan rollback operasional.** Uji concurrent native createUser/admin CLI equivalent dan role gabungan/invalid. Simpan tabel lama untuk rollback aplikasi sebelum contract; jangan membuat down migration destruktif otomatis.
-- [ ] **AUTH-REF-002.07 — Catat langkah penerapan.** Dokumentasikan backup/preflight dan kewajiban expand sebelum cutover API. Validasi tidak menjalankan migration pada DB development secara otomatis.
+- [x] **AUTH-REF-002.01 — Generate schema pembanding.** Jalankan CLI/generator 1.7.7 ke output sementara; bandingkan field/default/nullability/SQL mapping. Jangan menimpa schema produksi dengan hasil generator mentah.
+- [x] **AUTH-REF-002.02 — Perluas schema package.** Tambahkan role/banned/banReason/banExpires/impersonatedBy sesuai declaration, dengan mapping yang menjaga tabel lama.
+- [x] **AUTH-REF-002.03 — Tuliskan expand migration.** Urutkan penambahan kolom -> validasi data -> backfill -> constraint/index. Migration metadata dibuat dari tooling yang sudah dipakai repo, bukan pengeditan journal sembarang.
+- [x] **AUTH-REF-002.04 — Siapkan fixture upgrade.** Pada DB test khusus, terapkan migration baseline saja dan masukkan admin/credential/session lama; ambil fingerprint ID/email/hash secara in-memory.
+- [x] **AUTH-REF-002.05 — Buktikan upgrade.** Terapkan expand migration; bandingkan fingerprint dan lakukan login melalui factory native. Pastikan sesi/credential tidak terhapus.
+- [x] **AUTH-REF-002.06 — Uji invariant dan rollback operasional.** Uji concurrent native createUser/admin CLI equivalent dan role gabungan/invalid. Simpan tabel lama untuk rollback aplikasi sebelum contract; jangan membuat down migration destruktif otomatis.
+- [x] **AUTH-REF-002.07 — Catat langkah penerapan.** Dokumentasikan backup/preflight dan kewajiban expand sebelum cutover API. Validasi tidak menjalankan migration pada DB development secara otomatis.
 
 #### Acceptance criteria
 
-- [ ] ID/email/hash/account admin lama dipertahankan dan native login tetap berhasil.
-- [ ] Field role/banned/banReason/banExpires/impersonatedBy kompatibel dengan plugin.
-- [ ] Admin kedua ditolak termasuk dua operasi concurrent; role gabungan tidak melewati invariant.
-- [ ] Data invalid menghentikan migrasi, tanpa reset schema development atau penghapusan akun diam-diam.
-- [ ] Migrasi baru tidak mengubah migration file yang sudah diterapkan; singleton lama belum dihapus.
+- [x] ID/email/hash/account admin lama dipertahankan dan native login tetap berhasil.
+- [x] Field role/banned/banReason/banExpires/impersonatedBy kompatibel dengan plugin.
+- [x] Admin kedua ditolak termasuk dua operasi concurrent; role gabungan tidak melewati invariant.
+- [x] Data invalid menghentikan migrasi, tanpa reset schema development atau penghapusan akun diam-diam.
+- [x] Migrasi baru tidak mengubah migration file yang sudah diterapkan; singleton lama belum dihapus.
 
 #### Validasi
 
@@ -720,7 +720,9 @@ Commit setelah acceptance criteria task terpenuhi: `feat(auth): migrate native a
 
 #### Hasil dan bukti
 
-Belum diimplementasikan. Catat perintah, hasil, batas bukti dan commit ketika task dikerjakan.
+- CLI Better Auth 1.7.7 generate ke /tmp menghasilkan field role/banned/banReason/banExpires/impersonatedBy dengan mapping snake_case yang sesuai. Drizzle Kit 0.31.11 menghasilkan 0001 dan metadata; ditambahkan preflight credential serta backfill dari admin_identity sebelum constraint/index. Migration 0000 tetap identik.
+- Schema proof 8 test/36 assertion lulus: upgrade mempertahankan ID/email/hash/account/session, login native berhasil, hanya satu createUser concurrent menjadi admin tanpa account orphan kedua, role gabungan/unknown ditolak, data invalid menggagalkan dan me-rollback expansion. Adapter proof 2 test/16 assertion dan legacy admin regression 6 test/26 assertion lulus.
+- Semua proof memakai database test lokal khusus. Database development tidak dimigrasi atau akun direset. Backup/preflight, expand sebelum cutover, serta batas rollback aplikasi dicatat dalam AUTH_REFACTOR_PLAN.md. Gate tipe dan lint dijalankan hook commit. Commit: feat(auth): migrate native admin roles.
 
 #### Blocker atau tindak lanjut
 

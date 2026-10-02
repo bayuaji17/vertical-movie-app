@@ -282,3 +282,9 @@ Browser/network proof diperlukan untuk menutup AC cache/route; bila runner tidak
 - Turbo 2.11.5 bundled docs: `node_modules/turbo/docs/README.md`, `core-concepts/internal-packages.mdx`, `crafting-your-repository/using-environment-variables.mdx`.
 
 Rencana diperiksa terhadap baseline dan dokumentasi/source terpasang. Migrasi, cache counts, guard baru, dan recovery native belum diimplementasikan atau diuji pada turn perencanaan ini.
+
+# Penerapan expand migration
+
+AUTH-REF-002 menghasilkan `0001_native-admin-expand.sql` melalui Drizzle Kit 0.31.11; schema pembanding memakai CLI Better Auth 1.7.7. Role dibuat lebih ketat dari generator: default `user`, non-null, hanya `user`/`admin`, dengan unique partial index untuk satu admin.
+
+Sebelum cutover API, backup database dan pastikan identitas singleton memiliki credential account. Migrasi menolak identitas tanpa password; tidak memilih admin berdasarkan email, membuat akun, atau mengubah hash. Jalankan `bun run --cwd apps/api db:migrate` sebagai langkah eksplisit pada database target sebelum menyalakan API native. Eksekusi implementasi ini hanya membuktikan upgrade pada database test lokal; database development tidak dimigrasi otomatis. Tabel `admin_identity` tetap tersedia untuk rollback versi aplikasi sebelum contract migration. Jangan mengembalikan schema dengan DROP atau mengubah `0000_auth-admin.sql`.

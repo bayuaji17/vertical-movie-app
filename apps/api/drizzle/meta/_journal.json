@@ -8,6 +8,13 @@
       "when": 1790862090779,
       "tag": "0000_auth-admin",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790945151187,
+      "tag": "0001_native-admin-expand",
+      "breakpoints": true
     }
   ]
 }

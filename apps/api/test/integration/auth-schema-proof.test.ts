@@ -2,8 +2,15 @@ import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import { SQL } from "bun";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/bun-sql";
+import { mkdtemp, cp, writeFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { resolve, join } from "node:path";
 
-import { drizzleAdapter } from "@repo/auth/server";
+import {
+  drizzleAdapter,
+  createAdminAuthServer,
+  hashPassword,
+} from "@repo/auth/server";
 import { applyDatabaseMigrations } from "../../src/db/migrate";
 import * as schema from "../../src/db/schema";
 
@@ -40,6 +47,8 @@ function getTestDatabaseUrl(): string {
 }
 
 const testDatabaseUrl = getTestDatabaseUrl();
+const fixturePassword = "upgrade-proof-password-2026";
+let baselineHash = "";
 const client = new SQL(testDatabaseUrl);
 const db = drizzle({ client, schema });
 const databaseAdapter = drizzleAdapter(db, {
@@ -96,9 +105,39 @@ async function expectPostgresFailure(
   expect((cause as Error & { errno?: string }).errno).toBe(errno);
 }
 
+async function applyBaseline() {
+  const baseline = await mkdtemp(join(tmpdir(), "auth-baseline-"));
+  try {
+    await cp(
+      resolve(import.meta.dir, "../../drizzle/0000_auth-admin.sql"),
+      join(baseline, "0000_auth-admin.sql"),
+    );
+    await cp(
+      resolve(import.meta.dir, "../../drizzle/meta"),
+      join(baseline, "meta"),
+      { recursive: true },
+    );
+    const journal = await Bun.file(join(baseline, "meta/_journal.json")).json();
+    journal.entries = journal.entries.slice(0, 1);
+    await writeFile(
+      join(baseline, "meta/_journal.json"),
+      JSON.stringify(journal),
+    );
+    await applyDatabaseMigrations(testDatabaseUrl, baseline);
+  } finally {
+    await rm(baseline, { recursive: true, force: true });
+  }
+}
+
 describe("auth/admin PostgreSQL schema", () => {
   beforeAll(async () => {
     await resetTestDatabase();
+    await applyBaseline();
+    baselineHash = await hashPassword(fixturePassword);
+    await client`INSERT INTO "user" (id,name,email,created_at,updated_at) VALUES ('legacy-admin','Legacy Admin','legacy@example.test',now(),now())`;
+    await client`INSERT INTO account (id,account_id,provider_id,user_id,password,created_at,updated_at) VALUES ('legacy-account','legacy-admin','credential','legacy-admin',${baselineHash},now(),now())`;
+    await client`INSERT INTO admin_identity (user_id) VALUES ('legacy-admin')`;
+    await client`INSERT INTO session (id,token,user_id,expires_at,created_at,updated_at) VALUES ('legacy-session','fixture-old-token','legacy-admin',now()+interval '1 day',now(),now())`;
     await applyDatabaseMigrations(testDatabaseUrl);
     await applyDatabaseMigrations(testDatabaseUrl);
   });
@@ -126,7 +165,76 @@ describe("auth/admin PostgreSQL schema", () => {
     const migrationRows = await client`
       SELECT COUNT(*)::int AS count FROM drizzle.__drizzle_migrations
     `;
-    expect(migrationRows[0]?.count).toBe(1);
+    expect(migrationRows[0]?.count).toBe(2);
+  });
+
+  it("upgrades the existing admin without rewriting credentials or sessions", async () => {
+    const [row] =
+      await client`SELECT u.id,u.email,u.role,a.id AS account_id,a.password FROM "user" u JOIN account a ON a.user_id=u.id WHERE u.id='legacy-admin'`;
+    expect(row).toMatchObject({
+      id: "legacy-admin",
+      email: "legacy@example.test",
+      role: "admin",
+      account_id: "legacy-account",
+      password: baselineHash,
+    });
+    expect(
+      (await client`SELECT id FROM session WHERE id='legacy-session'`).length,
+    ).toBe(1);
+    const native = createAdminAuthServer({
+      database: db,
+      origin: "http://localhost:3000",
+      secret: "schema-native-proof-secret-with-no-live-credentials",
+      secureCookies: false,
+    });
+    const login = await native.api.signInEmail({
+      body: { email: "legacy@example.test", password: fixturePassword },
+    });
+    expect(login.user.id).toBe("legacy-admin");
+    expect(login.user.role).toBe("admin");
+    await db.delete(schema.adminIdentity);
+    await db.delete(schema.user).where(eq(schema.user.id, "legacy-admin"));
+  });
+
+  it("enforces canonical roles and the single native admin under concurrency", async () => {
+    const native = createAdminAuthServer({
+      database: db,
+      origin: "http://localhost:3000",
+      secret: "schema-native-proof-secret-with-no-live-credentials",
+      secureCookies: false,
+    });
+    const results = await Promise.allSettled(
+      ["native-one", "native-two"].map((name) =>
+        native.api.createUser({
+          body: {
+            email: `${name}@example.test`,
+            name,
+            password: fixturePassword,
+            role: "admin",
+          },
+        }),
+      ),
+    );
+    expect(results.filter((r) => r.status === "fulfilled")).toHaveLength(1);
+    const admins = await db
+      .select()
+      .from(schema.user)
+      .where(eq(schema.user.role, "admin"));
+    expect(admins).toHaveLength(1);
+    expect(
+      (
+        await client`SELECT count(*)::int AS count FROM account a JOIN "user" u ON a.user_id=u.id WHERE u.role='admin'`
+      )[0].count,
+    ).toBe(1);
+    for (const role of ["admin,user", "owner"]) {
+      await expectPostgresFailure(async () => {
+        await db
+          .update(schema.user)
+          .set({ role })
+          .where(eq(schema.user.id, admins[0]!.id));
+      }, "23514");
+    }
+    await db.delete(schema.user).where(eq(schema.user.role, "admin"));
   });
 
   it("preserves expected indexes, timestamp mappings, limiter, and admin constraints", async () => {
@@ -272,5 +380,25 @@ describe("auth/admin PostgreSQL schema", () => {
       await db.select().from(schema.user).where(eq(schema.user.id, id)),
     ).toHaveLength(0);
     expect(await db.select().from(schema.adminIdentity)).toHaveLength(0);
+  });
+  it("refuses an inconsistent legacy admin and rolls back expansion", async () => {
+    await resetTestDatabase();
+    await applyBaseline();
+    await client`INSERT INTO "user" (id,name,email,created_at,updated_at) VALUES ('broken-admin','Broken','broken@example.test',now(),now())`;
+    await client`INSERT INTO admin_identity (user_id) VALUES ('broken-admin')`;
+    await expect(applyDatabaseMigrations(testDatabaseUrl)).rejects.toThrow();
+    expect(
+      (
+        await client`SELECT count(*)::int AS count FROM information_schema.columns WHERE table_name='user' AND column_name='role'`
+      )[0].count,
+    ).toBe(0);
+    expect((await client`SELECT user_id FROM admin_identity`)[0].user_id).toBe(
+      "broken-admin",
+    );
+    expect(
+      (
+        await client`SELECT count(*)::int AS count FROM drizzle.__drizzle_migrations`
+      )[0].count,
+    ).toBe(1);
   });
 });

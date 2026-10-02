@@ -1,15 +1,9 @@
-import { betterAuth } from "better-auth";
+import { createAdminAuthServer } from "../../src/server";
 
-export const auth = betterAuth({
-  baseURL: "http://localhost:3000",
-  secret: "schema-generator-fixture-secret-never-use-outside-tests",
-  emailAndPassword: {
-    enabled: true,
-  },
-  rateLimit: {
-    enabled: true,
-    storage: "database",
-    window: 60,
-    max: 5,
-  },
+// CLI generation only: the adapter inspects schema/config without opening a pool.
+export const auth = createAdminAuthServer({
+  database: {} as Parameters<typeof createAdminAuthServer>[0]["database"],
+  origin: "http://localhost:3000",
+  secret: "schema-fixture-only-secret-with-no-live-credentials",
+  secureCookies: false,
 });
