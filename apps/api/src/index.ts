@@ -1,17 +1,18 @@
 import { loadApiEnv } from "./config/env";
 import { createApp } from "./app";
 import { createDatabase } from "./db/client";
-import { createAdminAuth, createAdminPolicy } from "./modules/auth";
-import { generateAuthOpenAPISchema } from "@repo/auth/server";
+import {
+  createAdminAuthServer,
+  generateAuthOpenAPISchema,
+} from "@repo/auth/server";
 
 const env = loadApiEnv();
 const database = createDatabase(env.databaseUrl);
-const auth = createAdminAuth({
+const auth = createAdminAuthServer({
   database: database.db,
   origin: env.betterAuthUrl,
   secret: env.betterAuthSecret,
   secureCookies: env.betterAuthUrl.startsWith("https://"),
-  isAdminUser: createAdminPolicy(database.db),
 });
 const authOpenApiSchema = await generateAuthOpenAPISchema(auth);
 const app = createApp({
@@ -20,8 +21,7 @@ const app = createApp({
   authOpenApiSchema,
   secureCookies: env.betterAuthUrl.startsWith("https://"),
   admin: {
-    getSession: (headers) => auth.api.getSession({ headers }),
-    isAdminUser: createAdminPolicy(database.db),
+    getSession: (input) => auth.api.getSession(input),
   },
 }).listen(env.port);
 

@@ -6,7 +6,6 @@ import type { RequireAdminDependencies } from "./guard";
 
 const anonymousAdmin: RequireAdminDependencies = {
   getSession: async () => null,
-  isAdminUser: async () => false,
 };
 
 export function createAdminRoutes(
@@ -23,7 +22,7 @@ export function createAdminRoutes(
           email: adminSession.user.email,
         },
         session: {
-          expiresAt: adminSession.session.expiresAt.toISOString(),
+          expiresAt: new Date(adminSession.session.expiresAt).toISOString(),
         },
       }),
       {

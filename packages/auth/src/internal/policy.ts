@@ -1,6 +1,6 @@
 export const passwordPolicy = { minLength: 12, maxLength: 128 } as const;
 export const supportedAuthOperations: Readonly<
-  Record<string, readonly string[]>
+  Record<string, readonly ("get" | "post")[]>
 > = {
   "/ok": ["get"],
   "/get-session": ["get", "post"],
@@ -23,6 +23,7 @@ export function isDisabledAuthPath(path: string, method?: string): boolean {
   const methods = supportedAuthOperations[path];
   return (
     !methods ||
-    (method !== undefined && !methods.includes(method.toLowerCase()))
+    (method !== undefined &&
+      !methods.some((allowed) => allowed === method.toLowerCase()))
   );
 }

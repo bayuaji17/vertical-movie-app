@@ -93,7 +93,6 @@ const app = createApp({
   authOpenApiSchema,
   admin: {
     getSession: async () => null,
-    isAdminUser: async () => false,
   },
 });
 const secureApp = createApp({
@@ -102,7 +101,6 @@ const secureApp = createApp({
   secureCookies: true,
   admin: {
     getSession: async () => null,
-    isAdminUser: async () => false,
   },
 });
 

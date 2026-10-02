@@ -65,10 +65,9 @@ const auth = createAdminAuth({
   secureCookies: false,
   isAdminUser: createAdminPolicy(database),
 });
-const isAdminUser = createAdminPolicy(database);
 const adminDependencies = {
-  getSession: (headers: Headers) => auth.api.getSession({ headers }),
-  isAdminUser,
+  getSession: (input: Parameters<typeof auth.api.getSession>[0]) =>
+    auth.api.getSession(input),
 };
 const app = createApp({ auth, admin: adminDependencies });
 
@@ -97,13 +96,10 @@ function signInRequest() {
 }
 
 function sessionCookie(response: Response): string {
-  const setCookie = response.headers.get("set-cookie") ?? "";
-  const sessionCookie = setCookie
-    .split(/,\s*(?=[^;,]+=)/u)
-    .find((cookie) => cookie.trim().startsWith("better-auth.session_token="));
-  if (!sessionCookie)
-    throw new Error("Expected the Better Auth session cookie.");
-  return sessionCookie.split(";")[0]!.trim();
+  return response.headers
+    .getSetCookie()
+    .map((cookie) => cookie.split(";")[0])
+    .join("; ");
 }
 
 function adminSessionRequest(cookie?: string) {
@@ -183,7 +179,7 @@ describe("admin route authorization", () => {
     const { userId, cookie } = await provisionAndSignIn();
     const response = await adminSessionRequest(cookie);
     expect(response.status).toBe(200);
-    expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(response.headers.get("cache-control")).toBe("private, no-store");
     const responseBody = await response.text();
     const body = JSON.parse(responseBody);
     expect(body.user).toEqual({
@@ -223,12 +219,17 @@ describe("admin route authorization", () => {
     expect(revoked.status).toBe(401);
   });
 
-  it("returns 403 for a valid session whose singleton admin identity was removed", async () => {
+  it("returns 403 for a valid session whose native admin role was removed", async () => {
     const { userId, cookie } = await provisionAndSignIn();
     await database
-      .delete(schema.adminIdentity)
-      .where(eq(schema.adminIdentity.userId, userId));
+      .update(schema.user)
+      .set({ role: "user" })
+      .where(eq(schema.user.id, userId));
 
+    const cached = await auth.api.getSession({
+      headers: new Headers({ cookie }),
+    });
+    expect(cached?.user.role).toBe("admin");
     const response = await adminSessionRequest(cookie);
     expect(response.status).toBe(403);
     expect(await response.json()).toMatchObject({
@@ -236,13 +237,33 @@ describe("admin route authorization", () => {
     });
   });
 
+  it("ignores fresh cached cookies after revocation or banning", async () => {
+    const { userId, cookie } = await provisionAndSignIn();
+    expect(cookie).toContain("session_data=");
+    await database
+      .update(schema.user)
+      .set({ banned: true })
+      .where(eq(schema.user.id, userId));
+    expect(
+      (await auth.api.getSession({ headers: new Headers({ cookie }) }))?.user
+        .banned,
+    ).toBe(false);
+    expect((await adminSessionRequest(cookie)).status).toBe(403);
+    await database
+      .delete(schema.session)
+      .where(eq(schema.session.userId, userId));
+    expect(
+      await auth.api.getSession({ headers: new Headers({ cookie }) }),
+    ).not.toBeNull();
+    expect((await adminSessionRequest(cookie)).status).toBe(401);
+  });
+
   it("maps authorization database failures to a safe 503 response", async () => {
     const { cookie } = await provisionAndSignIn();
     const failedApp = createApp({
       auth,
       admin: {
-        getSession: adminDependencies.getSession,
-        isAdminUser: async () => {
+        getSession: async () => {
           throw new Error(`private database detail: ${testDatabaseUrl}`);
         },
       },

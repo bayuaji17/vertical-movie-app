@@ -822,7 +822,7 @@ Reset online tanpa downtime merupakan keputusan/proof terpisah apabila native ra
 
 ### Task: AUTH-REF-004 — Session native, cookie cache, dan guard API authoritative
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: 3 dalam urutan eksekusi refactor.
 - Referensi: AUTH-REF-US02; AUTH_REFACTOR_PLAN.md; AGENTS.md; API_DEVELOPMENT.md.
@@ -854,22 +854,22 @@ Path bertanda baru adalah target yang dibuat saat eksekusi, bukan file yang suda
 
 #### Rencana implementasi terurut
 
-- [ ] **AUTH-REF-004.01 — Pastikan expand terpasang pada target test.** Preflight schema plugin sebelum bootstrap native; jangan melakukan migrate otomatis ketika request masuk.
-- [ ] **AUTH-REF-004.02 — Alihkan bootstrap.** Buat DB/factory sekali, injeksikan instance ke handler/guard/OpenAPI; pertahankan onStop menutup resource.
-- [ ] **AUTH-REF-004.03 — Pasang handler.** API raw request diteruskan ke auth.handler hanya pada path/method yang diizinkan. Payload/status/cookie SDK tidak dibungkus ulang.
-- [ ] **AUTH-REF-004.04 — Ubah macro requireAdmin.** Named plugin dan resolve memakai session authoritative; hasil role/banned normalisasi native dijadikan principal aman. Gunakan chaining dan scope private.
-- [ ] **AUTH-REF-004.05 — Pertahankan adapter legacy.** Jangan menghapus /admin/session sebelum web berpindah; adapter safe DTO tidak menjadi sumber auth baru dan tidak memakai admin_identity.
-- [ ] **AUTH-REF-004.06 — Buktikan penolakan.** Uji missing/expired/revoked/non-admin/banned/DB outage dan private fixture service spy. Semua public route tetap bebas auth.
-- [ ] **AUTH-REF-004.07 — Uji cache berbeda dengan izin.** Pertahankan cookie cache fresh, ubah/revoke state melalui native operasi/fixture yang tepat, lalu buktikan API privat menolak. Catat observed DB/session behavior.
+- [x] **AUTH-REF-004.01 — Pastikan expand terpasang pada target test.** Preflight schema plugin sebelum bootstrap native; jangan melakukan migrate otomatis ketika request masuk.
+- [x] **AUTH-REF-004.02 — Alihkan bootstrap.** Buat DB/factory sekali, injeksikan instance ke handler/guard/OpenAPI; pertahankan onStop menutup resource.
+- [x] **AUTH-REF-004.03 — Pasang handler.** API raw request diteruskan ke auth.handler hanya pada path/method yang diizinkan. Payload/status/cookie SDK tidak dibungkus ulang.
+- [x] **AUTH-REF-004.04 — Ubah macro requireAdmin.** Named plugin dan resolve memakai session authoritative; hasil role/banned normalisasi native dijadikan principal aman. Gunakan chaining dan scope private.
+- [x] **AUTH-REF-004.05 — Pertahankan adapter legacy.** Jangan menghapus /admin/session sebelum web berpindah; adapter safe DTO tidak menjadi sumber auth baru dan tidak memakai admin_identity.
+- [x] **AUTH-REF-004.06 — Buktikan penolakan.** Uji missing/expired/revoked/non-admin/banned/DB outage dan private fixture service spy. Semua public route tetap bebas auth.
+- [x] **AUTH-REF-004.07 — Uji cache berbeda dengan izin.** Pertahankan cookie cache fresh, ubah/revoke state melalui native operasi/fixture yang tepat, lalu buktikan API privat menolak. Catat observed DB/session behavior.
 
 #### Acceptance criteria
 
-- [ ] Pool DB/auth instance dibuat sekali per proses API dan pool ditutup onStop.
-- [ ] Guard tidak lagi bergantung pada lookup admin_identity; role native menjadi sumber kebenaran.
-- [ ] 401 untuk missing/expired/revoked; 403 untuk session valid dengan role salah/banned; dependency failure menjadi 503.
-- [ ] Cookie cache yang masih fresh tidak membuat session revoked/role berubah/banned lolos endpoint privat.
-- [ ] Hook/plugin scope dan registration order benar; route publik tetap dapat diakses.
-- [ ] Service privat tidak terpanggil pada denial; native error/cookie contract dipertahankan.
+- [x] Pool DB/auth instance dibuat sekali per proses API dan pool ditutup onStop.
+- [x] Guard tidak lagi bergantung pada lookup admin_identity; role native menjadi sumber kebenaran.
+- [x] 401 untuk missing/expired/revoked; 403 untuk session valid dengan role salah/banned; dependency failure menjadi 503.
+- [x] Cookie cache yang masih fresh tidak membuat session revoked/role berubah/banned lolos endpoint privat.
+- [x] Hook/plugin scope dan registration order benar; route publik tetap dapat diakses.
+- [x] Service privat tidak terpanggil pada denial; native error/cookie contract dipertahankan.
 
 #### Validasi
 
@@ -906,7 +906,10 @@ Commit setelah acceptance criteria task terpenuhi: `refactor(api): authorize adm
 
 #### Hasil dan bukti
 
-Belum diimplementasikan. Catat perintah, hasil, batas bukti dan commit ketika task dikerjakan.
+- Bootstrap API kini membuat satu pool Bun SQL/Drizzle dan satu factory package; instance yang sama dipakai handler, guard, generator OpenAPI, dengan close onStop. Guard menerima native getSession dan selalu meminta disableCookieCache:true; role/banned/expiry diperiksa sebelum service. /admin/session masih adapter DTO sementara untuk web lama.
+- Unit API 27 test/66 assertion lulus termasuk service spy pada missing/expired/user/banned/outage dan route publik. PostgreSQL runtime 8 test/44 assertion, authorization 5 test/36 assertion serta OpenAPI 2 test/61 assertion lulus. Proof menyimpan cookie cache fresh dan membuktikan role berubah/banned/revoked tetap ditolak API privat.
+- Origin eksplisit diperiksa melalui middleware native package: proof menemukan native menerima login non-browser dengan foreign Origin tanpa Fetch Metadata; rule one-origin tetap ditegakkan. Native session bagi non-admin tidak memberi akses admin. Compatibility provisioning lama sementara mengisi role admin sampai CLI cutover.
+- API build lulus; hook commit memvalidasi tipe/lint. Database development belum mendapat expand migration. Commit: refactor(api): authorize admins with native sessions.
 
 #### Blocker atau tindak lanjut
 

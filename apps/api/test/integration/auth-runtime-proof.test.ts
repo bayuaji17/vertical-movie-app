@@ -86,6 +86,7 @@ async function createFixtureUser(id: string, email: string, admin = false) {
     name: "Runtime Test",
     email,
     emailVerified: true,
+    role: admin ? "admin" : "user",
     createdAt: now,
     updatedAt: now,
   });
@@ -193,7 +194,7 @@ describe("admin auth HTTP runtime", () => {
     expect(sessionCookieHeader).toContain("HttpOnly");
     expect(sessionCookieHeader).toContain("SameSite=Lax");
     expect(sessionCookieHeader).not.toContain("Secure");
-    expect(sessionCookieHeader).not.toContain("session_data");
+    expect(sessionCookieHeader).toContain("session_data");
 
     const [storedSession] = await database
       .select()
@@ -248,10 +249,10 @@ describe("admin auth HTTP runtime", () => {
     expect(await database.select().from(schema.session)).toHaveLength(0);
   });
 
-  it("denies authenticated non-admin identities before creating a session", async () => {
+  it("returns a native session for users while private guards enforce the role", async () => {
     const response = await signIn(fixtures.user.email);
-    expect(response.status).toBe(403);
-    expect(await database.select().from(schema.session)).toHaveLength(0);
+    expect(response.status).toBe(200);
+    expect(await database.select().from(schema.session)).toHaveLength(1);
   });
 
   it("rejects a foreign Origin without creating a session", async () => {

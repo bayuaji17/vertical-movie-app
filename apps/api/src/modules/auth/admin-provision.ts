@@ -73,6 +73,7 @@ export async function provisionAdmin(
       name: email,
       email,
       emailVerified: false,
+      role: "admin", // Compatibility writer, removed after native CLI cutover.
       createdAt: now,
       updatedAt: now,
     });
