@@ -1,6 +1,6 @@
 # Implementation Plan: Modul Auth Admin Tunggal
 
-> Revisi arah pada 2 Oktober 2026: pengguna meminta lifecycle auth, role, seed, dan recovery menggunakan API/plugin/CLI Better Auth, serta session client yang tidak melakukan request pada setiap navigasi. Implementasi di bawah adalah riwayat desain sebelumnya. Rencana perubahan dan backlog terbaru berada di [AUTH_REFACTOR_PLAN.md](AUTH_REFACTOR_PLAN.md); refactor tersebut belum diimplementasikan.
+> Revisi arah pada 2 Oktober 2026: seluruh auth melalui entry client/server `@repo/auth`, memakai API/plugin/CLI Better Auth, dependency injection database, serta protected routes TanStack isomorphic dengan cache TanStack Query. Implementasi di bawah adalah riwayat desain sebelumnya. Rencana detail dan 10 backlog refactor terbaru berada di [AUTH_REFACTOR_PLAN.md](AUTH_REFACTOR_PLAN.md); AUTH-REF-001–010 belum diimplementasikan.
 
 ## Plan Metadata
 

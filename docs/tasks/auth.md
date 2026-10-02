@@ -514,102 +514,361 @@ Validasi lokal 2 Oktober 2026; perintah auth terperinci ada pada Test Requiremen
 
 Tindak lanjut: jalankan browser smoke untuk menutup AC-02/AC-05/AC-06/AC-08 saat browser runner tersedia; setelah domain dipilih, verifikasi HTTPS/cookie dan reverse proxy di deployment. Storage/media di luar scope modul ini.
 
+Arahan refactor diperinci pengguna pada 2 Oktober 2026. Desain lengkap ada pada [AUTH_REFACTOR_PLAN.md](../AUTH_REFACTOR_PLAN.md). Task AUTH-001–013 tetap menjadi riwayat. ID AUTH-REF-001–005 dipertahankan; scope web/cleanup/acceptance dipecah menjadi AUTH-REF-006–010. Semua task revisi masih Backlog.
 
-Arahan refactor diminta pengguna pada 2 Oktober 2026. Desain dan batas cache ada di [AUTH_REFACTOR_PLAN.md](../AUTH_REFACTOR_PLAN.md). Task AUTH-001–013 di atas tetap menjadi riwayat implementasi sebelumnya.
+## Revisi berikutnya — package auth dan TanStack isomorphic/Query
 
-## Revisi berikutnya — lifecycle native Better Auth
+### User story AUTH-REF-US01 — Satu pemilik auth
 
-### Task: AUTH-REF-001 — Konfigurasi dan kontrak native Better Auth
+Sebagai pengembang, saya ingin seluruh auth berasal dari entry client/server package, sehingga konfigurasi, tipe dan migrasi konsisten tanpa duplikasi lifecycle.
 
-- Status: Backlog
-- Owner: Codex
-- Prioritas: 1
-- Referensi: keputusan desain di atas; `AGENTS.md`; `API_DEVELOPMENT.md`.
-- Dependensi: tidak ada.
-- Ukuran: satu perubahan konfigurasi package/API dan kontrak type-only.
+### User story AUTH-REF-US02 — Akses admin aman
 
-**Ruang lingkup:** aktifkan plugin admin dan client-nya melalui `@repo/auth`; sediakan konfigurasi native yang dapat dipakai bootstrap serta CLI. Gunakan plugin `customSession` jika proyeksi aman diperlukan. Eden tetap untuk endpoint bisnis.
+Sebagai operator, saya ingin dashboard terlindungi pada refresh/SSR/navigasi dan API mengotorisasi setiap request privat, sehingga akun selain admin tidak memperoleh data privat.
 
-**Acceptance criteria:** [ ] plugin admin aktif dengan inferensi role/permission; [ ] server config/secrets tidak masuk client; [ ] login/logout memakai SDK native; [ ] signup publik tetap tertutup.
+### User story AUTH-REF-US03 — Cache session saat navigasi
 
-**Validasi:** frozen install bila dependensi/script berubah, pemeriksaan tipe, bundle scan, serta HTTP native handler tanpa membuka port.
+Sebagai admin, saya ingin snapshot session dipakai bersama guard/UI selama masih fresh, sehingga perpindahan halaman tidak selalu menghubungi backend dan perubahan akses tetap direvalidasi.
 
-**Hasil dan bukti:** belum diimplementasikan.
+### User story AUTH-REF-US04 — Seed dan recovery native
 
-**Blocker atau tindak lanjut:** schema plugin sebelum runtime database pada AUTH-REF-002.
+Sebagai operator, saya ingin membuat/memulihkan satu admin memakai API/CLI Better Auth lokal, sehingga credential/session dikelola library tanpa email service.
 
-### Task: AUTH-REF-002 — Migrasi role dan admin yang sudah ada
+### Task: AUTH-REF-001 — Konfigurasi, schema, dan kontrak native pada package auth
 
 - Status: Backlog
 - Owner: Codex
-- Prioritas: 2
-- Referensi: scope satu admin; schema plugin admin 1.7.7.
+- Prioritas: sesuai urutan eksekusi pada AUTH_REFACTOR_PLAN.md.
+- Referensi: AUTH-REF-US01; AUTH_REFACTOR_PLAN.md; AGENTS.md; API_DEVELOPMENT.md.
+- Dependensi: Tidak ada.
+- Ukuran: Satu perubahan ownership dan public entry point.
+
+#### Ruang lingkup
+
+Pindahkan opsi Better Auth, plugin admin, schema auth dan policy ke packages/auth; factory menerima DB/config secara eksplisit. Sediakan factory client dengan adminClient, server HTTP session reader contract, proyeksi DTO aman, dan inferensi type-only. API/web tetap hanya memiliki composition/framework adapter. Tambahkan dependency Drizzle langsung bila schema membutuhkannya, selaras versi API. Pertahankan compatibility wrapper sampai expand migration dan cutover API selesai, agar commit task tetap runnable tanpa memakai kolom plugin sebelum migrasi.
+
+#### Acceptance criteria
+
+- [ ] Semua impor runtime library/plugin/adapter auth ada di package; app menggunakan @repo/auth/client atau /server dan import type /types.
+- [ ] Import package tidak membaca env, membuat pool atau menginisialisasi singleton session user.
+- [ ] Client/types tidak membawa DB, secret, atau runtime server; inferensi role/plugin dan DTO aman bekerja.
+- [ ] Factory server menerima instance DB API; plugin admin aktif dan signup publik tetap nonaktif.
+- [ ] Perubahan schema ownership tidak menghapus tabel/credential atau mengubah migrasi terapan.
+
+#### Validasi
+
+Pemeriksaan tipe package/API/web, frozen install jika dependency/script berubah, adapter/type proof dan bundle inspection. Runtime database plugin dibuktikan setelah migrasi AUTH-REF-002.
+
+#### Hasil dan bukti
+
+Belum diimplementasikan. Catat perintah, hasil, batas bukti dan commit ketika task dikerjakan.
+
+#### Blocker atau tindak lanjut
+
+AUTH-REF-002 memperluas schema database; API handler/guard berpindah pada AUTH-REF-004.
+
+### Task: AUTH-REF-002 — Expand migration role/plugin dan admin yang sudah ada
+
+- Status: Backlog
+- Owner: Codex
+- Prioritas: sesuai urutan eksekusi pada AUTH_REFACTOR_PLAN.md.
+- Referensi: AUTH-REF-US01; AUTH_REFACTOR_PLAN.md; AGENTS.md; API_DEVELOPMENT.md.
 - Dependensi: AUTH-REF-001.
-- Ukuran: satu migrasi eksplisit beserta proof database.
+- Ukuran: Satu migrasi eksplisit dan proof upgrade data lama.
 
-**Ruang lingkup:** tambahkan field schema plugin, backfill role admin dari identitas saat ini, dan alihkan invariant satu admin ke sumber role yang baru. Hilangkan `admin_identity` setelah seluruh consumer berpindah.
+#### Ruang lingkup
 
-**Acceptance criteria:** [ ] identitas, email, dan credential admin yang ada tetap dapat dipakai; [ ] constraint mempertahankan satu admin pada operasi bersamaan; [ ] tidak ada duplikasi sumber role; [ ] schema/migrasi sesuai generator versi terpasang.
+Tambahkan field plugin sesuai generator 1.7.7, backfill role admin dari admin_identity, role default user, constraint role kanonis dan unique index admin tunggal. Tabel singleton tetap tersedia sampai seluruh consumer berpindah.
 
-**Validasi:** proof pada database test khusus, termasuk migrasi data lama dan penolakan admin kedua; login native setelah migrasi.
+#### Acceptance criteria
 
-**Hasil dan bukti:** belum diimplementasikan.
+- [ ] ID/email/hash/account admin lama dipertahankan dan native login tetap berhasil.
+- [ ] Field role/banned/banReason/banExpires/impersonatedBy kompatibel dengan plugin.
+- [ ] Admin kedua ditolak termasuk dua operasi concurrent; role gabungan tidak melewati invariant.
+- [ ] Data invalid menghentikan migrasi, tanpa reset schema development atau penghapusan akun diam-diam.
+- [ ] Migrasi baru tidak mengubah migration file yang sudah diterapkan; singleton lama belum dihapus.
 
-**Blocker atau tindak lanjut:** migrasi database development mengikuti hasil proof, bukan reset schema development.
+#### Validasi
 
-### Task: AUTH-REF-003 — Seed dan recovery melalui API/CLI library
+Proof serial pada DB test khusus: upgrade schema lama berisi akun/session, login admin lama, penolakan role/admin kedua termasuk konkurensi, serta kompatibilitas schema native.
+
+#### Hasil dan bukti
+
+Belum diimplementasikan. Catat perintah, hasil, batas bukti dan commit ketika task dikerjakan.
+
+#### Blocker atau tindak lanjut
+
+Contract migration penghapusan admin_identity hanya pada AUTH-REF-009.
+
+### Task: AUTH-REF-003 — Seed CLI resmi dan recovery native dalam maintenance
 
 - Status: Backlog
 - Owner: Codex
-- Prioritas: 3
-- Referensi: CLI `create-admin`; API password reset native; scope recovery lokal.
+- Prioritas: sesuai urutan eksekusi pada AUTH_REFACTOR_PLAN.md.
+- Referensi: AUTH-REF-US04; AUTH_REFACTOR_PLAN.md; AGENTS.md; API_DEVELOPMENT.md.
+- Dependensi: AUTH-REF-001, AUTH-REF-002, AUTH-REF-004.
+- Ukuran: Composition entry operator, script seed dan wrapper recovery.
+
+#### Ruang lingkup
+
+Sediakan auth.ts composition entry tanpa HTTP listen; gunakan CLI auth 1.7.7 create-admin dengan password prompt. Recovery memakai requestPasswordReset/resetPassword native, callback token di memori, revokeSessionsOnPasswordReset, tanpa email/admin session. Jalankan recovery ketika semua API penerima login dihentikan; writer lama dihapus pada cleanup.
+
+#### Acceptance criteria
+
+- [ ] CLI resmi menemukan config/env dan menghasilkan admin yang bisa login; existing admin tidak dibuat ulang.
+- [ ] Password/token tidak tercetak atau berada dalam argumen/source; wrapper menutup resource miliknya.
+- [ ] Recovery berhasil tanpa email/session admin; token expired/replay ditolak native.
+- [ ] Password lama dan session lama ditolak setelah recovery maintenance dan restart.
+- [ ] Failure parsial dicatat; API dibuka kembali hanya setelah pencabutan session terverifikasi.
+- [ ] Race login-vs-reset dari review diuji dan batas native dicatat; tidak mengklaim reset online atomic.
+- [ ] Endpoint operator tetap tertutup pada public HTTP.
+
+#### Validasi
+
+DB test khusus: native seed/reset, expiry/replay, pencabutan, failure injection, maintenance/restart dan reproduksi concurrency upstream. Verifikasi command Bun/config/prompt tanpa password flag.
+
+#### Hasil dan bukti
+
+Belum diimplementasikan. Catat perintah, hasil, batas bukti dan commit ketika task dikerjakan.
+
+#### Blocker atau tindak lanjut
+
+Reset online tanpa downtime merupakan keputusan/proof terpisah apabila native race belum teratasi; cleanup writer pada AUTH-REF-009.
+
+### Task: AUTH-REF-004 — Session native, cookie cache, dan guard API authoritative
+
+- Status: Backlog
+- Owner: Codex
+- Prioritas: sesuai urutan eksekusi pada AUTH_REFACTOR_PLAN.md.
+- Referensi: AUTH-REF-US02; AUTH_REFACTOR_PLAN.md; AGENTS.md; API_DEVELOPMENT.md.
 - Dependensi: AUTH-REF-001, AUTH-REF-002.
-- Ukuran: command seed resmi dan wrapper recovery kecil.
+- Ukuran: Cutover handler/policy API dengan proof authorization.
 
-**Ruang lingkup:** ganti SQL/hash provisioning dengan CLI resmi; ganti SQL/hash reset dengan request/reset native dan callback token lokal. Hapus credential/session writer aplikasi yang sudah tidak digunakan.
+#### Ruang lingkup
 
-**Acceptance criteria:** [ ] seed menghasilkan admin yang bisa login melalui native handler; [ ] recovery dapat berjalan tanpa session admin dan tanpa email; [ ] token/password tidak keluar ke log/argumen; [ ] password lama dan session lama ditolak setelah reset; [ ] endpoint operator tidak terbuka pada HTTP publik.
+Bootstrap memakai factory package dan satu pool API. Handler native mengikuti allowlist package. Aktifkan cookie cache pendek untuk snapshot UI; macro Elysia privat memanggil auth.api.getSession dengan disableCookieCache:true dan mengecek role/banned sebelum service.
 
-**Validasi:** proof CLI/API pada database test khusus, expiry/replay token, pencabutan session, dan login yang berbarengan dengan reset. Temuan race review tetap menjadi regression test; memakai library tidak otomatis membuktikan race tersebut selesai. Catat keterbatasan upstream yang masih ada sebelum task dinyatakan Done.
+#### Acceptance criteria
 
-**Hasil dan bukti:** belum diimplementasikan.
+- [ ] Pool DB/auth instance dibuat sekali per proses API dan pool ditutup onStop.
+- [ ] Guard tidak lagi bergantung pada lookup admin_identity; role native menjadi sumber kebenaran.
+- [ ] 401 untuk missing/expired/revoked; 403 untuk role salah/banned; dependency failure menjadi 503.
+- [ ] Cookie cache yang masih fresh tidak membuat session revoked/role berubah/banned lolos endpoint privat.
+- [ ] Hook/plugin scope dan registration order benar; route publik tetap dapat diakses.
+- [ ] Service privat tidak terpanggil pada denial; native error/cookie contract dipertahankan.
 
-**Blocker atau tindak lanjut:** perilaku failure/konkurensi native harus dibuktikan, tidak diasumsikan setara dengan transaksi custom sebelumnya.
+#### Validasi
 
-### Task: AUTH-REF-004 — Session native, cache client, dan guard API
+Bun unit app.handle tanpa port, PostgreSQL native session/authorization proofs dan cache-cookie-versus-DB test. Type-only API contract tetap inferred.
 
-- Status: Backlog
-- Owner: Codex
-- Prioritas: 4
-- Referensi: strategi cache di atas; session/access control Better Auth.
-- Dependensi: AUTH-REF-001, AUTH-REF-002.
-- Ukuran: integrasi layout admin dan guard bisnis.
+#### Hasil dan bukti
 
-**Ruang lingkup:** ganti query/session endpoint custom dengan native get-session/useSession, gunakan subscription layout yang stabil, dan terapkan cookie cache pendek. Guard endpoint privat memakai session/permission library; operasi sensitif melewati cookie cache.
+Belum diimplementasikan. Catat perintah, hasil, batas bukti dan commit ketika task dikerjakan.
 
-**Acceptance criteria:** [ ] navigasi antar halaman anak admin tidak menambah request session karena perpindahan route itu sendiri; [ ] refresh dokumen SSR tetap terlindungi dan tidak menggantung ketika API macet; [ ] session client tidak dibagi antar request SSR; [ ] logout serta revalidasi role/banned state diperbarui oleh lifecycle native; [ ] cookie/session yang dicabut ditolak pada operasi sensitif walaupun cache UI masih ada; [ ] response auth/SSR tetap private/no-store.
+#### Blocker atau tindak lanjut
 
-**Validasi:** browser/network proof untuk jumlah request dan lifecycle; HTTP SSR anonim/admin/forbidden/outage; proof API dengan cache cookie masih valid tetapi database session sudah dicabut.
+Endpoint legacy /admin/session dipertahankan sementara sampai consumer web berpindah; dihapus AUTH-REF-009.
 
-**Hasil dan bukti:** belum diimplementasikan.
-
-**Blocker atau tindak lanjut:** jangan menggunakan secret API pada web untuk membaca cookie cache secara lokal.
-
-### Task: AUTH-REF-005 — Transport, dokumentasi, dan regression suite
+### Task: AUTH-REF-005 — Gateway native, callback publik, cookie, dan deadline
 
 - Status: Backlog
 - Owner: Codex
-- Prioritas: 5
-- Referensi: hasil review pada branch `feat/auth-admin-module`; runbook auth.
-- Dependensi: AUTH-REF-003, AUTH-REF-004.
-- Ukuran: penyelarasan endpoint/suite/runbook dan pemeriksaan akhir.
+- Prioritas: sesuai urutan eksekusi pada AUTH_REFACTOR_PLAN.md.
+- Referensi: AUTH-REF-US02; AUTH_REFACTOR_PLAN.md; AGENTS.md; API_DEVELOPMENT.md.
+- Dependensi: AUTH-REF-004.
+- Ukuran: Satu perbaikan transport dan proof dev/production runtime.
 
-**Ruang lingkup:** sederhanakan gateway menjadi transport native auth, benarkan callback ke origin publik yang dikonfigurasi, selaraskan Scalar/allowlist dengan endpoint aktif, hapus proof khusus implementasi lama, dan perbarui runbook/lingkup bukti.
+#### Ruang lingkup
 
-**Acceptance criteria:** [ ] callback publik yang valid mempertahankan cookie dan respons; [ ] origin redirect tak tepercaya ditolak; [ ] OpenAPI sesuai endpoint native yang benar-benar terbuka; [ ] test lama tidak lagi mengasumsikan writer/session custom; [ ] tiap backlog selesai mempunyai commit dan bukti yang aktual.
+Selaraskan fixed upstream/allowlist/path-method dari package, public origin callback, raw SDK contract, multiple Set-Cookie, deadline/cancellation dan manual redirect. Transport tidak melakukan validasi token atau mengubah auth response menjadi envelope baru.
 
-**Validasi:** Bun unit/integration suite yang relevan, lint, workspace type-check, build, frozen install bila diperlukan, browser/network smoke, dan diff check. Proof database bersama dijalankan serial.
+#### Acceptance criteria
 
-**Hasil dan bukti:** belum diimplementasikan.
+- [ ] Callback absolut pada origin publik yang dikonfigurasi mempertahankan respons/cookie; origin asing ditolak.
+- [ ] API_INTERNAL_URL adalah fixed target server, tidak menjadi callback publik atau input browser.
+- [ ] Semua Set-Cookie diteruskan tanpa digabung/rusak; cache-control private/no-store benar.
+- [ ] Upstream stalled berhenti dalam deadline 10 detik dengan error unavailable; cancellation dibedakan.
+- [ ] Redirect tidak mengirim cookie ke origin asing; path/method operator ditutup.
+- [ ] Gateway berjalan pada Vite dan hasil build Bun/Nitro.
 
-**Blocker atau tindak lanjut:** domain/TLS serta production smoke tetap mengikuti deployment yang belum ditentukan.
+#### Validasi
+
+Bun gateway unit/proof dan HTTP smoke dev serta production build: callback, foreign origin, multi-cookie, deadline/abort/path/method/redirect.
+
+#### Hasil dan bukti
+
+Belum diimplementasikan. Catat perintah, hasil, batas bukti dan commit ketika task dikerjakan.
+
+#### Blocker atau tindak lanjut
+
+Reader SSR AUTH-REF-006 memakai prinsip transport/deadline yang sama; OpenAPI/runbook final pada AUTH-REF-010.
+
+### Task: AUTH-REF-006 — Reader session isomorphic dan SSR aman
+
+- Status: Backlog
+- Owner: Codex
+- Prioritas: sesuai urutan eksekusi pada AUTH_REFACTOR_PLAN.md.
+- Referensi: AUTH-REF-US02; AUTH_REFACTOR_PLAN.md; AGENTS.md; API_DEVELOPMENT.md.
+- Dependensi: AUTH-REF-001, AUTH-REF-004, AUTH-REF-005.
+- Ukuran: Cutover session transport SSR/browser dan boundary serialization.
+
+#### Ruang lingkup
+
+Gunakan createIsomorphicFn; browser membaca SDK dari entry client, SSR memakai server-only request-scoped reader dari entry server. Reader HTTP server memakai vanilla native SDK tanpa pool/secret. SSR bypass cookie cache, forward cookie request dan Set-Cookie, deadline, klasifikasi null vs outage, dan DTO aman.
+
+#### Acceptance criteria
+
+- [ ] SSR/browser membaca native get-session; Eden /admin/session bukan sumber baru.
+- [ ] SSR memakai cookie request saat ini, fixed internal origin dan authoritative read; tidak ada shared cookie/session state.
+- [ ] Browser tidak dapat menyuplai cookie/origin target server; server runtime/config tidak masuk client bundle.
+- [ ] DTO Query/HTML tidak mengandung token/hash/account/IP/secret; UTC expiresAt konsisten.
+- [ ] Session kosong tetap anonymous, 5xx/network/deadline tetap unavailable; tidak memakai customSession yang menyamarkan error.
+- [ ] Set-Cookie upstream diteruskan dan SSR stalled selesai dalam deadline; request abort tetap cancellation.
+
+#### Validasi
+
+Reader/transport proof, build import-deny rule untuk @repo/auth/server, bundle scan dengan sentinel secret nonproduksi, SSR HTTP anonymous/admin/non-admin/outage serta dua request terisolasi.
+
+#### Hasil dan bukti
+
+Belum diimplementasikan. Catat perintah, hasil, batas bukti dan commit ketika task dikerjakan.
+
+#### Blocker atau tindak lanjut
+
+AUTH-REF-007 menyatukan hydration dan cache; browser UI guard pada AUTH-REF-008.
+
+### Task: AUTH-REF-007 — TanStack Query sebagai cache snapshot auth tunggal
+
+- Status: Backlog
+- Owner: Codex
+- Prioritas: sesuai urutan eksekusi pada AUTH_REFACTOR_PLAN.md.
+- Referensi: AUTH-REF-US03; AUTH_REFACTOR_PLAN.md; AGENTS.md; API_DEVELOPMENT.md.
+- Dependensi: AUTH-REF-006.
+- Ukuran: Satu query options/observer/cache integration dan network proof.
+
+#### Ruang lingkup
+
+Satu key/options untuk guard dan UI, queryClient.query dengan staleTime 60 detik, gcTime 5 menit, dan retry false; QueryClient per router/SSR request serta SSR hydration integration. Layout observer focus/reconnect/poll visible-online serta expiry. Tidak memasang native useSession reader kedua.
+
+#### Acceptance criteria
+
+- [ ] SSR QueryClient terisolasi per request; browser mempertahankan satu cache selama navigation.
+- [ ] Hydration fresh tidak menambah session request; N navigasi/preload fresh tanpa event lain menambah nol request.
+- [ ] Fetch concurrent dedup; navigasi stale menunggu satu fetch sebelum guard menentukan akses.
+- [ ] Focus/reconnect/poll/expiry diuji terpisah; tab background/offline tidak polling; fresh cache tidak melampaui session expiry.
+- [ ] Tidak ada Query auth global pada halaman publik atau observer native kedua.
+- [ ] Outage tidak disimpan sebagai sukses/anonymous; data lama setelah error tidak dipakai membuka dashboard.
+
+#### Validasi
+
+Bun cache/network behavior proof dan browser/network recording untuk SSR hydration, fresh/stale/preload/dedup, active/background tab, focus/reconnect/expiry. Perubahan source package harus menginvalidasi build consumer Turbo.
+
+#### Hasil dan bukti
+
+Belum diimplementasikan. Catat perintah, hasil, batas bukti dan commit ketika task dikerjakan.
+
+#### Blocker atau tindak lanjut
+
+AUTH-REF-008 menghubungkan invalidation dengan routing/login/logout. Bukti browser pending bila runner belum tersedia.
+
+### Task: AUTH-REF-008 — Protected admin routes dan transisi login/logout
+
+- Status: Backlog
+- Owner: Codex
+- Prioritas: sesuai urutan eksekusi pada AUTH_REFACTOR_PLAN.md.
+- Referensi: AUTH-REF-US02, AUTH-REF-US03; AUTH_REFACTOR_PLAN.md; AGENTS.md; API_DEVELOPMENT.md.
+- Dependensi: AUTH-REF-007.
+- Ukuran: Integrasi pathless guard, reactive layout dan mutation transitions.
+
+#### Ruang lingkup
+
+beforeLoad induk menunggu Query lalu redirect/throw sebelum loader anak. Layout mengamati query yang sama. Native login/logout memperbarui Query/router, membatalkan/hapus cache privat; lintas tab bridge hanya notifikasi tanpa data personal. Denial API privat ikut invalidation.
+
+#### Acceptance criteria
+
+- [ ] /admin/login di luar guard; hanya admin tidak banned/session belum expired yang masuk.
+- [ ] Anonymous redirect tujuan lokal aman; forbidden/outage mengunci dashboard; loader anak dan private HTML tidak muncul saat denied.
+- [ ] Background denial/error menutup Outlet dan cancel query privat walau Query menyimpan data sukses lama.
+- [ ] Login sukses membaca session authoritative sekali sebelum navigate; payload login/token tidak masuk cache.
+- [ ] Logout sukses menghapus cache privat dan fetch in-flight tidak mengisi snapshot admin kembali.
+- [ ] Logout gagal tidak diklaim telah revoke; lintas tab/back navigation tidak menampilkan data privat lama.
+- [ ] API401 mengarahkan login, API403 mengunci/revalidasi, outage memberi retry tanpa loop login.
+
+#### Validasi
+
+Guard/transition tests dengan spy loader/service, HTTP SSR statuses/HTML, browser login/logout/query-in-flight/multitab/back/expiry/outage dan network counts.
+
+#### Hasil dan bukti
+
+Belum diimplementasikan. Catat perintah, hasil, batas bukti dan commit ketika task dikerjakan.
+
+#### Blocker atau tindak lanjut
+
+AUTH-REF-009 menghapus jalur session/writer lama setelah semua consumer berpindah.
+
+### Task: AUTH-REF-009 — Hapus auth legacy dan contract migration singleton
+
+- Status: Backlog
+- Owner: Codex
+- Prioritas: sesuai urutan eksekusi pada AUTH_REFACTOR_PLAN.md.
+- Referensi: AUTH-REF-US01; AUTH_REFACTOR_PLAN.md; AGENTS.md; API_DEVELOPMENT.md.
+- Dependensi: AUTH-REF-003, AUTH-REF-008.
+- Ukuran: Cleanup jalur mati dan satu contract migration.
+
+#### Ruang lingkup
+
+Hapus endpoint GET /admin/session/gateway-nya, Eden DTO khusus auth, SQL provisioning/recovery/helper hash dan lookup singleton yang tidak dipakai. Hapus admin_identity melalui migrasi baru setelah role cutover, tetap pertahankan Eden bisnis.
+
+#### Acceptance criteria
+
+- [ ] Tidak ada consumer legacy /admin/session atau writer/hash credential/session aplikasi.
+- [ ] Tidak ada impor auth library langsung pada app; konfigurasi package adalah sumber tunggal.
+- [ ] Contract migration hanya berjalan setelah backfill/cutover; akun/credential tetap bisa login.
+- [ ] Eden/type-only api/types bisnis tidak berubah menjadi dependency runtime API pada browser.
+- [ ] Proof yang masih relevan dipindah ke perilaku native; baseline migration tidak diubah.
+
+#### Validasi
+
+rg import/path/writer audit, frozen install bila script/dependency berubah, type/build dan proof upgrade+contract DB khusus test. Diff review memeriksa perubahan tetap scoped.
+
+#### Hasil dan bukti
+
+Belum diimplementasikan. Catat perintah, hasil, batas bukti dan commit ketika task dikerjakan.
+
+#### Blocker atau tindak lanjut
+
+Backup/maintenance/rollback contract migration didokumentasikan AUTH-REF-010; tidak reset database development.
+
+### Task: AUTH-REF-010 — Regression acceptance, OpenAPI, dan runbook final
+
+- Status: Backlog
+- Owner: Codex
+- Prioritas: sesuai urutan eksekusi pada AUTH_REFACTOR_PLAN.md.
+- Referensi: AUTH-REF-US01–04; AUTH_REFACTOR_PLAN.md; AGENTS.md; API_DEVELOPMENT.md.
+- Dependensi: AUTH-REF-005, AUTH-REF-009.
+- Ukuran: Konsolidasi bukti perilaku, API spec dan dokumentasi.
+
+#### Ruang lingkup
+
+Selaraskan Scalar/allowlist/schema native, environment/package/pool ownership, seed/reset/migration maintenance dan cache semantics. Jalankan regression lintas API/web/DB/browser, catat evidence dan commit masing-masing backlog.
+
+#### Acceptance criteria
+
+- [ ] Scalar/spec hanya memuat path/method aktif; operator HTTP tertutup tidak ditampilkan sebagai public API aktif.
+- [ ] Temuan review callback/deadline memiliki regression; race reset dijelaskan sesuai proof/maintenance, tanpa klaim native otomatis menyelesaikannya.
+- [ ] Runbook membedakan cache UI/cookie/HTTP dan authorization authoritative; command/env API/web jelas tanpa secret.
+- [ ] Lint, workspace type-check, build, frozen install bila perlu dan relevant suites lulus dengan evidence aktual.
+- [ ] Browser/network acceptance memiliki hasil nyata; yang belum tersedia tetap pending, bukan Done.
+- [ ] Setiap task selesai memiliki commit/evidence; deployment/domain/TLS/proxy/production smoke terpisah.
+
+#### Validasi
+
+Root lint/check-types/build/diff-check, native Bun API suites, DB proofs serial, web transport/session/guard/browser network proof; audit bundle/Turbo consumer cache invalidation dan dokumentasi links.
+
+#### Hasil dan bukti
+
+Belum diimplementasikan. Catat perintah, hasil, batas bukti dan commit ketika task dikerjakan.
+
+#### Blocker atau tindak lanjut
+
+Tidak menambah GitHub CI. Domain/TLS/trusted proxy dan production smoke menunggu deployment yang belum ditentukan.
