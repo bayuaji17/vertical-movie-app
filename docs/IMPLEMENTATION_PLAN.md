@@ -1,5 +1,7 @@
 # Implementation Plan: Modul Auth Admin Tunggal
 
+> Revisi arah pada 2 Oktober 2026: pengguna meminta lifecycle auth, role, seed, dan recovery menggunakan API/plugin/CLI Better Auth, serta session client yang tidak melakukan request pada setiap navigasi. Implementasi di bawah adalah riwayat desain sebelumnya. Rencana perubahan dan backlog terbaru berada di [AUTH_REFACTOR_PLAN.md](AUTH_REFACTOR_PLAN.md); refactor tersebut belum diimplementasikan.
+
 ## Plan Metadata
 
 - Status: **implementasi dan validasi lokal selesai**; AUTH-001 sampai AUTH-013 dikomit per task. Browser manual dan validasi deployment tetap tindak lanjut yang tercatat di backlog.
