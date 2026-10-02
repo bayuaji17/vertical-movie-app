@@ -3,7 +3,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
 
 import {
-  apiBaseUrlFromOrigin,
+  apiOriginFromOrigin,
   createApiClient,
   getBrowserApiBaseUrl,
   normalizeApiBaseUrl,
@@ -94,13 +94,13 @@ const getAdminSessionOnServer = createServerFn({ method: 'GET' }).handler(
       return { status: 'unavailable', reason: 'configuration' }
     }
 
-    const apiBaseUrl = apiBaseUrlFromOrigin(internalOrigin)
-    if (!apiBaseUrl) {
+    const apiOrigin = apiOriginFromOrigin(internalOrigin)
+    if (!apiOrigin) {
       return { status: 'unavailable', reason: 'configuration' }
     }
 
     return loadAdminSession({
-      apiBaseUrl,
+      apiBaseUrl: apiOrigin,
       cookie: request.headers.get('cookie') ?? undefined,
       signal: request.signal,
     })

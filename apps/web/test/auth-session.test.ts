@@ -3,6 +3,7 @@ import { describe, expect, test } from 'bun:test'
 import { getContext } from '../src/integrations/tanstack-query/root-provider'
 import {
   apiBaseUrlFromOrigin,
+  apiOriginFromOrigin,
   createApiClient,
   normalizeApiBaseUrl,
 } from '../src/lib/auth/api-client'
@@ -44,6 +45,22 @@ describe('admin session client', () => {
     expect(response.data?.session.expiresAt).toBe('2026-10-02T00:00:00.000Z')
     expect(requestInit?.credentials).toBe('include')
     expect(requestInit?.cache).toBe('no-store')
+  })
+
+  test('uses the API origin for direct SSR requests without the browser gateway prefix', async () => {
+    let requestedUrl = ''
+    const apiOrigin = apiOriginFromOrigin('http://api.internal.test')
+    expect(apiOrigin).toBe('http://api.internal.test')
+    expect(apiOrigin).toBeDefined()
+
+    const api = createApiClient(apiOrigin!, async (input) => {
+      requestedUrl = String(input)
+      return sessionResponse(401)
+    })
+
+    const response = await api.admin.session.get()
+    expect(requestedUrl).toBe('http://api.internal.test/admin/session')
+    expect(response.status).toBe(401)
   })
 
   test('isolates cookies and abort signals across concurrent SSR requests', async () => {
@@ -120,9 +137,13 @@ describe('admin session client', () => {
       undefined,
     )
     expect(normalizeApiBaseUrl(apiBaseUrl)).toBe(apiBaseUrl)
+    expect(normalizeApiBaseUrl('http://api.internal.test')).toBe(
+      'http://api.internal.test',
+    )
     expect(normalizeApiBaseUrl('https://api.example.test/other')).toBe(
       undefined,
     )
+    expect(apiOriginFromOrigin('http://api.internal.test/api')).toBe(undefined)
 
     const firstQueryClient = getContext().queryClient
     const secondQueryClient = getContext().queryClient

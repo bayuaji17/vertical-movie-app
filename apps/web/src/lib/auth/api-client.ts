@@ -17,13 +17,32 @@ export function normalizeApiBaseUrl(value: string): string | undefined {
       !['http:', 'https:'].includes(url.protocol) ||
       url.username !== '' ||
       url.password !== '' ||
-      url.pathname !== '/api' ||
+      !['/', '/api'].includes(url.pathname) ||
       url.search !== '' ||
       url.hash !== ''
     ) {
       return undefined
     }
-    return url.toString().replace(/\/$/, '')
+    return url.pathname === '/' ? url.origin : `${url.origin}/api`
+  } catch {
+    return undefined
+  }
+}
+
+export function apiOriginFromOrigin(value: string): string | undefined {
+  try {
+    const url = new URL(value)
+    if (
+      !['http:', 'https:'].includes(url.protocol) ||
+      url.username !== '' ||
+      url.password !== '' ||
+      url.pathname !== '/' ||
+      url.search !== '' ||
+      url.hash !== ''
+    ) {
+      return undefined
+    }
+    return url.origin
   } catch {
     return undefined
   }
