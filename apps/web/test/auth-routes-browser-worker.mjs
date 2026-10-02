@@ -22,34 +22,103 @@ try {
         key.startsWith('__reactFiber'),
       ),
     )
-  const login = async (password = 'BrowserFixture123456') => {
+  const withLoadingToast = async (path, title, action) => {
+    let release
+    const gate = new Promise((resolve) => {
+      release = resolve
+    })
+    let completion
+    const handler = async (route) => {
+      completion = (async () => {
+        await gate
+        await route.continue()
+      })()
+      await completion
+    }
+    await page.route('**' + path, handler)
+    try {
+      await action()
+      const entry = page.locator('[data-slot="toast"]').filter({
+        has: page.getByText(title, { exact: true }),
+      })
+      await entry.waitFor({ state: 'visible' })
+      return await entry.elementHandle()
+    } finally {
+      release()
+      if (completion) await completion
+      await page.unroute('**' + path, handler)
+    }
+  }
+  const expectToastResult = async (element, title) => {
+    await page.waitForFunction(
+      ({ element, title }) =>
+        element.isConnected &&
+        element.querySelector('[data-slot="toast-title"]')?.textContent ===
+          title,
+      { element, title },
+    )
+    assert.ok(
+      await element.isVisible(),
+      'Result stays visible after navigation',
+    )
+  }
+  const login = async (
+    password = 'BrowserFixture123456',
+    title = 'Login gagal',
+  ) => {
     await page.getByLabel('Email', { exact: true }).fill('browser@example.test')
     await page.getByLabel('Password', { exact: true }).fill(password)
-    await page.getByRole('button', { name: 'Masuk', exact: true }).click()
+    const element = await withLoadingToast(
+      '/api/auth/sign-in/email',
+      'Memproses login...',
+      async () => {
+        await page.getByRole('button', { name: 'Masuk', exact: true }).click()
+        assert.ok(
+          await page.getByRole('button', { name: 'Memeriksa...' }).isDisabled(),
+        )
+      },
+    )
+    await expectToastResult(element, title)
   }
   await page.goto(baseURL + '/admin')
   await page.getByRole('heading', { name: 'Masuk ke admin' }).waitFor()
   await hydrate(page)
   assert.ok(page.url().includes('/admin/login'))
+  const invalidBefore = await counts()
+  await page.getByRole('button', { name: 'Masuk', exact: true }).click()
+  await page
+    .locator('[data-slot="toast-title"]')
+    .getByText('Periksa data login', { exact: true })
+    .waitFor()
+  assert.equal((await counts()).signInCalls, invalidBefore.signInCalls)
+  await page.locator('[data-slot="toast"]').hover()
+  await page.getByRole('button', { name: 'Tutup notifikasi' }).click()
   await login('WrongPassword123456')
-  await page.getByText('Email atau password tidak cocok.').waitFor()
+  await page
+    .locator('main')
+    .getByText('Email atau password tidak cocok.')
+    .waitFor()
   await control({ loginLimit: true })
   await login()
   await page
+    .locator('main')
     .getByText(
       'Terlalu banyak percobaan login. Tunggu sebentar, lalu coba lagi.',
     )
     .waitFor()
   await control({ loginLimit: false, role: 'user' })
   await login()
-  await page.getByText('Akun ini tidak memiliki akses admin.').waitFor()
+  await page
+    .locator('main')
+    .getByText('Akun ini tidak memiliki akses admin.')
+    .waitFor()
   assert.equal(
     await page.getByRole('heading', { name: 'Dashboard', exact: true }).count(),
     0,
   )
   await control({ role: 'admin' })
   const before = await counts()
-  await login()
+  await login('BrowserFixture123456', 'Login berhasil')
   await page.getByRole('heading', { name: 'Dashboard', exact: true }).waitFor()
   const after = await counts()
   assert.equal(
@@ -73,8 +142,19 @@ try {
   await page.getByRole('heading', { name: 'Dashboard', exact: true }).waitFor()
   await hydrate(page)
   await control({ logoutFailure: true })
-  await page.getByRole('button', { name: 'Keluar', exact: true }).click()
+  const failedLogout = await withLoadingToast(
+    '/api/auth/sign-out',
+    'Memproses logout...',
+    async () => {
+      await page.getByRole('button', { name: 'Keluar', exact: true }).click()
+      assert.ok(
+        await page.getByRole('button', { name: 'Keluar...' }).isDisabled(),
+      )
+    },
+  )
+  await expectToastResult(failedLogout, 'Logout gagal')
   await page
+    .locator('main')
     .getByText(
       'Layanan autentikasi tidak dapat dihubungi. Sesi belum dapat dipastikan berakhir.',
     )
@@ -83,6 +163,29 @@ try {
     await page.getByRole('heading', { name: 'Dashboard', exact: true }).count(),
     1,
   )
+  await control({ outage: true })
+  await page.evaluate(() =>
+    window.__TSR_ROUTER__.options.context.queryClient.invalidateQueries({
+      queryKey: ['auth', 'session'],
+    }),
+  )
+  await page
+    .getByRole('heading', { name: 'Sesi admin belum dapat diperiksa' })
+    .waitFor()
+  const retry = async (title) => {
+    const element = await withLoadingToast(
+      '/api/auth/get-session**',
+      'Memeriksa sesi...',
+      async () => {
+        await page.getByRole('button', { name: 'Coba lagi' }).click()
+      },
+    )
+    await expectToastResult(element, title)
+  }
+  await retry('Pemeriksaan sesi gagal')
+  await control({ outage: false })
+  await retry('Pemeriksaan sesi selesai')
+  await page.getByRole('heading', { name: 'Dashboard', exact: true }).waitFor()
   await control({ logoutFailure: false, role: 'user' })
   await page.evaluate(() =>
     window.__TSR_ROUTER__.options.context.queryClient.invalidateQueries({
@@ -122,7 +225,14 @@ try {
         'session',
       ]).fetchStatus === 'fetching',
   )
-  await page.getByRole('button', { name: 'Keluar', exact: true }).click()
+  const successfulLogout = await withLoadingToast(
+    '/api/auth/sign-out',
+    'Memproses logout...',
+    async () => {
+      await page.getByRole('button', { name: 'Keluar', exact: true }).click()
+    },
+  )
+  await expectToastResult(successfulLogout, 'Logout berhasil')
   await page.getByRole('heading', { name: 'Masuk ke admin' }).waitFor()
   await control({ held: false })
   await tab.getByRole('heading', { name: 'Masuk ke admin' }).waitFor()
@@ -147,7 +257,7 @@ try {
   await tab.getByRole('heading', { name: 'Masuk ke admin' }).waitFor()
   await context.close()
   console.log(
-    'Browser: native login wrong/429/non-admin/admin, authoritative1, safe cache, refresh, logout failure, role lock, in-flight logout, cross-tab and back denial passed.',
+    'Browser: validation/login/logout/session-retry loading and result toasts, native login wrong/429/non-admin/admin, authoritative1, safe cache, refresh, logout failure, role lock, in-flight logout, cross-tab and back denial passed.',
   )
 } finally {
   await browser.close()

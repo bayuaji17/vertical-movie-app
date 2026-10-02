@@ -1552,3 +1552,37 @@ Backup pg_dump custom-format dengan akses file 600, pg_restore --list exit 0; he
 ### Blocker atau tindak lanjut
 
 Restore penuh dan rollout deployment masih pending. AUTH-FUP-002 menambahkan toast auth pada web.
+
+
+## Task: AUTH-FUP-002 — Feedback toast shadcn untuk aksi auth
+
+- Status: Done
+- Owner: Pengembang/agent pelaksana
+- Prioritas: P1
+- Referensi: AUTH-US-FUP, permintaan toast pengguna 2 Oktober 2026
+- Dependensi: AUTH-FUP-001
+- Ukuran: UI dan acceptance auth terarah
+
+### Ruang lingkup
+
+Komponen toast resmi shadcn Base UI sesuai preset proyek, satu Toaster global, feedback login/logout dan retry sesi manual. Tidak ada toast dari polling atau navigasi otomatis.
+
+### Acceptance criteria
+
+- [x] Loading berubah menjadi sukses/gagal dalam toast yang sama untuk login, logout, dan retry sesi manual.
+- [x] Login sukses hanya setelah verifikasi admin; non-admin, credential salah dan limiter memberikan feedback gagal.
+- [x] Logout gagal mempertahankan sesi; sukses tetap terlihat setelah navigasi dan invalidation lintas tab berjalan.
+- [x] Validasi field gagal memberi feedback tanpa request; alert/form error dan disabled state tetap berfungsi.
+- [x] Frozen install, lint, check-types, build dan browser acceptance hasil build lulus.
+
+### Validasi
+
+Native auth/session/guard unit proofs, browser Chromium 390×844 melalui HTTP fixture yang menahan request untuk membuktikan loading, hasil toast, navigasi, outage/retry dan logout lintas tab. Root lint/type/build serta frozen install.
+
+### Hasil dan bukti
+
+Komponen dipasang melalui bunx --bun shadcn@latest add @shadcn/toast; Button existing dipertahankan. Native toast.promise memproses loading → result dan rethrow error untuk alert inline yang aman. Toaster berada di root sehingga hasil aksi bertahan setelah navigasi. Hasil pemeriksaan retry membaca status Query karena router.invalidate dapat resolve meskipun guard gagal. Validasi final: frozen install tanpa perubahan dependency/lockfile; lint web, check-types API/web/package dan root build dua app lulus. Native auth/login/guard/cache proofs: 19 test, 81 assertions lulus. Browser Chromium 390×844 pada hasil build Bun/Nitro lulus validasi tanpa request, loading → result dalam elemen toast yang sama, login401/429/non-admin/admin, authoritative read sekali, snapshot aman, refresh, logout gagal, retry sesi gagal/pulih, role lock, in-flight cancellation, logout sukses setelah navigasi, dua tab dan Back/direct-link denial. Pesan inline pada browser workers diberi scope main agar tidak ambigu dengan deskripsi toast. SSR smoke hasil build juga lulus admin/null/user403/outage503/stall timeout, cookie isolation, multi Set-Cookie dan whitelist HTML. API lokal root/get-session anonymous 200; halaman login web tersedia setelah canonical redirect. Commit: feat(web): add auth operation toasts.
+
+### Blocker atau tindak lanjut
+
+Rollout deployment mengikuti AUTH-FUP-001; tidak menambah dependensi, endpoint, atau persistence toast.

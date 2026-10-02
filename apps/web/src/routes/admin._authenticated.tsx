@@ -6,9 +6,11 @@ import { AdminSessionContext } from '#/lib/auth/session-context'
 
 import { Alert, AlertDescription, AlertTitle } from '#/components/ui/alert'
 import { Button } from '#/components/ui/button'
+import { toast } from '#/components/ui/toast'
 import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card'
 import { useAdminSession, setAuthFailureStatus } from '#/lib/auth/session'
 import { AuthDependencyError } from '@repo/auth/client'
+import { sessionQueryKey } from '#/lib/auth/session-cache'
 
 export const Route = createFileRoute('/admin/_authenticated')({
   headers: () => ({ 'Cache-Control': 'private, no-store' }),
@@ -87,11 +89,31 @@ function AdminSessionUnavailable() {
   async function retrySessionCheck() {
     setRetrying(true)
     try {
-      await queryClient.invalidateQueries({
-        queryKey: ['auth', 'session'],
-        refetchType: 'none',
-      })
-      await router.invalidate()
+      await toast.promise(
+        (async () => {
+          await queryClient.invalidateQueries({
+            queryKey: sessionQueryKey,
+            refetchType: 'none',
+          })
+          await router.invalidate()
+          // Router invalidation can resolve even when beforeLoad fails.
+          const state = queryClient.getQueryState(sessionQueryKey)
+          if (state?.status !== 'success') {
+            throw state?.error ?? new Error('Session check unavailable')
+          }
+        })(),
+        {
+          loading: { title: 'Memeriksa sesi...' },
+          success: {
+            title: 'Pemeriksaan sesi selesai',
+            description: 'Status sesi berhasil diperbarui.',
+          },
+          error: {
+            title: 'Pemeriksaan sesi gagal',
+            description: 'Layanan autentikasi belum tersedia. Coba lagi.',
+          },
+        },
+      )
     } catch {
       // Keep the locked state visible; the operator can retry this check.
     } finally {

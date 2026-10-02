@@ -22,9 +22,15 @@ try {
   await page.getByRole('heading', { name: 'Masuk ke admin' }).waitFor()
   await hydrate(page)
   await login('admin@native.example.test', 'WrongPassword123456')
-  await page.getByText('Email atau password tidak cocok.').waitFor()
+  await page
+    .locator('main')
+    .getByText('Email atau password tidak cocok.')
+    .waitFor()
   await login('user@native.example.test')
-  await page.getByText('Akun ini tidak memiliki akses admin.').waitFor()
+  await page
+    .locator('main')
+    .getByText('Akun ini tidak memiliki akses admin.')
+    .waitFor()
   await login('admin@native.example.test')
   await page.getByRole('heading', { name: 'Dashboard', exact: true }).waitFor()
   const snapshot = await page.evaluate(() =>

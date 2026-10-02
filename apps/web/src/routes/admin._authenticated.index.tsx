@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query'
 
 import { Alert, AlertDescription, AlertTitle } from '#/components/ui/alert'
 import { Button } from '#/components/ui/button'
+import { toast } from '#/components/ui/toast'
 import {
   Card,
   CardContent,
@@ -47,20 +48,34 @@ function AdminDashboardContent({
     setLoggingOut(true)
     setLogoutError(undefined)
     try {
-      const result = await authClient.signOut(undefined, { retry: 0 })
-      if (result.error) {
-        setLogoutError(logoutErrorMessage(result.error))
-        return
-      }
-
-      await clearAdminPrivateQueries(queryClient)
-      publishAuthChange()
-      await router.invalidate()
-      await router.navigate({
-        to: '/admin/login',
-        search: { redirect: '/admin' },
-        replace: true,
-      })
+      await toast.promise(
+        (async () => {
+          const result = await authClient.signOut(undefined, { retry: 0 })
+          if (result.error) throw result.error
+          await clearAdminPrivateQueries(queryClient)
+          publishAuthChange()
+          await router.invalidate()
+          await router.navigate({
+            to: '/admin/login',
+            search: { redirect: '/admin' },
+            replace: true,
+          })
+        })(),
+        {
+          loading: {
+            title: 'Memproses logout...',
+            description: 'Menutup sesi admin.',
+          },
+          success: {
+            title: 'Logout berhasil',
+            description: 'Sesi admin telah berakhir.',
+          },
+          error: (error: unknown) => ({
+            title: 'Logout gagal',
+            description: logoutErrorMessage(error),
+          }),
+        },
+      )
     } catch (error) {
       setLogoutError(logoutErrorMessage(error))
     } finally {

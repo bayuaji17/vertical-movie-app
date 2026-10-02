@@ -22,6 +22,7 @@ import {
   FieldLabel,
 } from '#/components/ui/field'
 import { Input } from '#/components/ui/input'
+import { toast } from '#/components/ui/toast'
 import { authClient } from '#/lib/auth/client'
 import {
   normalizeLoginEmail,
@@ -35,6 +36,12 @@ type AdminLoginFormProps = {
   redirectTo: string
 }
 
+function loginFailureMessage(error: unknown): string {
+  return error instanceof Error && error.name === 'AdminAccessDeniedError'
+    ? 'Akun ini tidak memiliki akses admin.'
+    : signInErrorMessage(error)
+}
+
 export function AdminLoginForm({ redirectTo }: AdminLoginFormProps) {
   const queryClient = useQueryClient()
   const router = useRouter()
@@ -43,6 +50,11 @@ export function AdminLoginForm({ redirectTo }: AdminLoginFormProps) {
   const form = useForm({
     defaultValues: { email: '', password: '' },
     onSubmitInvalid: ({ formApi }) => {
+      toast.add({
+        title: 'Periksa data login',
+        description: 'Lengkapi email dan password sesuai petunjuk formulir.',
+        type: 'error',
+      })
       const firstInvalid = formApi.state.fieldMeta.email?.errors.length
         ? 'email'
         : 'password'
@@ -54,28 +66,38 @@ export function AdminLoginForm({ redirectTo }: AdminLoginFormProps) {
       setFormError(undefined)
 
       try {
-        const result = await authClient.signIn.email(
+        await toast.promise(
+          (async () => {
+            const result = await authClient.signIn.email(
+              {
+                email: normalizeLoginEmail(value.email),
+                password: value.password,
+              },
+              { retry: 0 },
+            )
+            if (result.error) throw result.error
+            await verifyAdminLogin(queryClient)
+            publishAuthChange()
+            await router.invalidate()
+            await router.navigate({ to: redirectTo as never })
+          })(),
           {
-            email: normalizeLoginEmail(value.email),
-            password: value.password,
+            loading: {
+              title: 'Memproses login...',
+              description: 'Memeriksa akun dan akses admin.',
+            },
+            success: {
+              title: 'Login berhasil',
+              description: 'Anda sudah masuk ke dashboard admin.',
+            },
+            error: (error: unknown) => ({
+              title: 'Login gagal',
+              description: loginFailureMessage(error),
+            }),
           },
-          { retry: 0 },
         )
-
-        if (result.error) {
-          setFormError(signInErrorMessage(result.error))
-          return
-        }
-        await verifyAdminLogin(queryClient)
-        publishAuthChange()
-        await router.invalidate()
-        await router.navigate({ to: redirectTo as never })
       } catch (error) {
-        setFormError(
-          error instanceof Error && error.name === 'AdminAccessDeniedError'
-            ? 'Akun ini tidak memiliki akses admin.'
-            : signInErrorMessage(error),
-        )
+        setFormError(loginFailureMessage(error))
       }
     },
   })
