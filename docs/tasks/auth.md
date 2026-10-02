@@ -549,7 +549,7 @@ Sebagai operator, saya ingin membuat/memulihkan satu admin memakai API/CLI Bette
 
 ### Task: AUTH-REF-001 — Konfigurasi, schema, dan kontrak native pada package auth
 
-- Status: Ready
+- Status: Done
 - Owner: Codex
 - Prioritas: 1 dalam urutan eksekusi refactor.
 - Referensi: AUTH-REF-US01; AUTH_REFACTOR_PLAN.md; AGENTS.md; API_DEVELOPMENT.md.
@@ -581,21 +581,21 @@ Path bertanda baru adalah target yang dibuat saat eksekusi, bukan file yang suda
 
 #### Rencana implementasi terurut
 
-- [ ] **AUTH-REF-001.01 — Audit public surface.** Inventaris seluruh consumer re-export lama, helper crypto, schema dan DTO; tulis pemetaan ekspor lama ke ekspor tujuan. Tidak mengubah native API payload.
-- [ ] **AUTH-REF-001.02 — Pindahkan schema baseline.** Pindahkan tabel/relations tanpa mengganti SQL name/column/model mapping; API menjadi re-export. Kolom plugin ditambahkan pada AUTH-REF-002.
-- [ ] **AUTH-REF-001.03 — Susun factory terkonfigurasi.** Pusatkan appName/basePath/origin/CSRF/password/session/rate-limit/plugin dan mode HTTP versus operator. Mode operator hanya tersedia pada bootstrap server yang dipercaya.
-- [ ] **AUTH-REF-001.04 — Konfigurasi client dan tipe.** Pasang plugin pada factory client; ekspor inferensi type-only dan policy publik. Uji bahwa React SDK tidak menarik server/DB.
-- [ ] **AUTH-REF-001.05 — Definisikan reader/proyeksi.** Sediakan helper proyeksi allowlist dan kontrak reader HTTP native; implementasi transport/SSR lengkap dilanjutkan AUTH-REF-006.
-- [ ] **AUTH-REF-001.06 — Pertahankan jalur kompatibel.** Jangan mengaktifkan admin schema pada bootstrap lama. Compatibility wrapper lama tetap hanya untuk fase migrasi dan diberi lokasi penghapusan AUTH-REF-009.
-- [ ] **AUTH-REF-001.07 — Validasi dan dokumentasikan.** Periksa type/adapter/proyeksi dan perubahan dependency; catat ekspor sementara serta readiness migrasi, lalu commit parent task.
+- [x] **AUTH-REF-001.01 — Audit public surface.** Inventaris seluruh consumer re-export lama, helper crypto, schema dan DTO; tulis pemetaan ekspor lama ke ekspor tujuan. Tidak mengubah native API payload.
+- [x] **AUTH-REF-001.02 — Pindahkan schema baseline.** Pindahkan tabel/relations tanpa mengganti SQL name/column/model mapping; API menjadi re-export. Kolom plugin ditambahkan pada AUTH-REF-002.
+- [x] **AUTH-REF-001.03 — Susun factory terkonfigurasi.** Pusatkan appName/basePath/origin/CSRF/password/session/rate-limit/plugin dan mode HTTP versus operator. Mode operator hanya tersedia pada bootstrap server yang dipercaya.
+- [x] **AUTH-REF-001.04 — Konfigurasi client dan tipe.** Pasang plugin pada factory client; ekspor inferensi type-only dan policy publik. Uji bahwa React SDK tidak menarik server/DB.
+- [x] **AUTH-REF-001.05 — Definisikan reader/proyeksi.** Sediakan helper proyeksi allowlist dan kontrak reader HTTP native; implementasi transport/SSR lengkap dilanjutkan AUTH-REF-006.
+- [x] **AUTH-REF-001.06 — Pertahankan jalur kompatibel.** Jangan mengaktifkan admin schema pada bootstrap lama. Compatibility wrapper lama tetap hanya untuk fase migrasi dan diberi lokasi penghapusan AUTH-REF-009.
+- [x] **AUTH-REF-001.07 — Validasi dan dokumentasikan.** Periksa type/adapter/proyeksi dan perubahan dependency; catat ekspor sementara serta readiness migrasi, lalu commit parent task.
 
 #### Acceptance criteria
 
-- [ ] Semua impor runtime library/plugin/adapter auth ada di package; app menggunakan @repo/auth/client atau /server dan import type /types.
-- [ ] Import package tidak membaca env, membuat pool atau menginisialisasi singleton session user.
-- [ ] Client/types tidak membawa DB, secret, atau runtime server; inferensi role/plugin dan DTO aman bekerja.
-- [ ] Factory server baru menerima instance DB API dan dikonfigurasi dengan plugin admin serta signup publik nonaktif; bootstrap DB lama tetap memakai compatibility wrapper hingga expand migration.
-- [ ] Perubahan schema ownership tidak menghapus tabel/credential atau mengubah migrasi terapan.
+- [x] Semua impor runtime library/plugin/adapter auth ada di package; app menggunakan @repo/auth/client atau /server dan import type /types.
+- [x] Import package tidak membaca env, membuat pool atau menginisialisasi singleton session user.
+- [x] Client/types tidak membawa DB, secret, atau runtime server; inferensi role/plugin dan DTO aman bekerja.
+- [x] Factory server baru menerima instance DB API dan dikonfigurasi dengan plugin admin serta signup publik nonaktif; bootstrap DB lama tetap memakai compatibility wrapper hingga expand migration.
+- [x] Perubahan schema ownership tidak menghapus tabel/credential atau mengubah migrasi terapan.
 
 #### Validasi
 
@@ -630,7 +630,9 @@ Commit setelah acceptance criteria task terpenuhi: `refactor(auth): centralize n
 
 #### Hasil dan bukti
 
-Belum diimplementasikan. Catat perintah, hasil, batas bukti dan commit ketika task dikerjakan.
+- Factory/plugin/policy dan schema baseline dipusatkan di @repo/auth; API masih menggunakan compatibility wrapper sampai expand/cutover. Tidak ada env/pool saat import, client memakai adminClient, types dan proyeksi DTO aman tersedia. Reader contract tersedia; transport SSR di AUTH-REF-006.
+- Frozen install, check-types seluruh workspace, lint web dan build kedua app lulus. Unit package 3 test/14 assertion, API unit 21 test/38 assertion, schema proof PostgreSQL baseline 5 test/19 assertion lulus pada DB khusus lokal.
+- Bundle browser tidak memuat API_INTERNAL_URL, drizzle-orm atau adapter server. Migration baseline tidak berubah; akun development tidak disentuh. Commit khusus task: refactor(auth): centralize native auth configuration.
 
 #### Blocker atau tindak lanjut
 

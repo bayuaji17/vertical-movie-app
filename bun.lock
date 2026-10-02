@@ -63,11 +63,11 @@
         "@tanstack/eslint-config": "latest",
         "@tanstack/intent": "^0.4.0",
         "@tanstack/router-cli": "^1.132.0",
-        "bun-types": "latest",
         "@types/node": "^22.10.2",
         "@types/react": "^19.2.0",
         "@types/react-dom": "^19.2.0",
         "@vitejs/plugin-react": "^6.0.1",
+        "bun-types": "latest",
         "elysia": "1.4.30",
         "eslint": "^9.20.0",
         "prettier": "^3.8.1",
@@ -81,9 +81,11 @@
       "dependencies": {
         "@better-auth/drizzle-adapter": "1.7.7",
         "better-auth": "^1.7.7",
+        "drizzle-orm": "0.45.3",
       },
       "devDependencies": {
         "auth": "1.7.7",
+        "bun-types": "1.4.2",
         "typescript": "7.0.2",
       },
       "peerDependencies": {
