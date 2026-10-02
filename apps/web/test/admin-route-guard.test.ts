@@ -13,6 +13,7 @@ import { AuthDependencyError } from '@repo/auth/client'
 import {
   requireAdminSession,
   AdminAccessDeniedError,
+  redirectActiveAdmin,
 } from '../src/lib/auth/guard'
 import {
   clearAdminPrivateQueries,
@@ -136,6 +137,73 @@ describe('admin beforeLoad and transitions', () => {
       if (status !== 401)
         expect(client.getQueryState(sessionQueryKey)?.status).toBe('error')
     }
+    client.clear()
+  })
+})
+
+describe('active admin login redirect', () => {
+  it('reuses a fresh snapshot and preserves session/private cache while validating destinations', async () => {
+    const client = new QueryClient()
+    client.setQueryData(sessionQueryKey, admin)
+    client.setQueryData(['admin', 'private'], 'keep')
+    for (const [target, destination] of [
+      ['/admin?tab=catalog#videos', '/admin?tab=catalog#videos'],
+      ['//evil.example/admin', '/admin'],
+      ['/admin/login', '/admin'],
+    ]) {
+      try {
+        await redirectActiveAdmin(client, target)
+        throw new Error('Expected an admin redirect')
+      } catch (error) {
+        expect(isRedirect(error)).toBe(true)
+        if (!isRedirect(error)) throw error
+        expect(error.options.href).toBe(destination)
+        expect(error.options.replace).toBe(true)
+      }
+      expect(
+        client.getQueryData<SessionSnapshot | null>(sessionQueryKey),
+      ).toEqual(admin)
+      expect(client.getQueryData<string>(['admin', 'private'])).toBe('keep')
+      expect(client.getQueryState(sessionQueryKey)?.fetchStatus).toBe('idle')
+    }
+    client.clear()
+  })
+
+  for (const [name, snapshot] of [
+    ['anonymous', null],
+    ['user', { ...admin, user: { ...admin.user, role: 'user' } }],
+    ['banned', { ...admin, user: { ...admin.user, banned: true } }],
+    [
+      'expired',
+      { ...admin, session: { expiresAt: new Date(0).toISOString() } },
+    ],
+  ] as const) {
+    it(`keeps login available without clearing the ${name} session`, async () => {
+      const client = new QueryClient()
+      client.setQueryData(sessionQueryKey, snapshot)
+      await redirectActiveAdmin(client, '/admin', async () => snapshot)
+      expect(
+        client.getQueryData<SessionSnapshot | null>(sessionQueryKey),
+      ).toEqual(snapshot)
+      client.clear()
+    })
+  }
+
+  it('does not redirect from stale admin data after a failed check, or swallow unexpected errors', async () => {
+    const client = new QueryClient()
+    client.setQueryData(sessionQueryKey, admin)
+    await redirectActiveAdmin(client, '/admin', async () => {
+      throw new AuthDependencyError('network')
+    })
+    expect(
+      client.getQueryData<SessionSnapshot | null>(sessionQueryKey),
+    ).toEqual(admin)
+    const unexpected = new Error('unexpected')
+    await expect(
+      redirectActiveAdmin(client, '/admin', async () => {
+        throw unexpected
+      }),
+    ).rejects.toBe(unexpected)
     client.clear()
   })
 })

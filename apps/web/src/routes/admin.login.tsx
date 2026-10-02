@@ -2,12 +2,15 @@ import { createFileRoute } from '@tanstack/react-router'
 
 import { AdminLoginForm } from '#/components/auth/login-form'
 import { validateAdminRedirect } from '#/lib/auth/login'
+import { redirectActiveAdmin } from '#/lib/auth/guard'
 
 export const Route = createFileRoute('/admin/login')({
   headers: () => ({ 'Cache-Control': 'private, no-store' }),
   validateSearch: (search: Record<string, unknown>) => ({
     redirect: validateAdminRedirect(search.redirect),
   }),
+  beforeLoad: ({ context, search }) =>
+    redirectActiveAdmin(context.queryClient, search.redirect),
   head: () => ({
     meta: [
       { title: 'Masuk admin · Vertical Movie' },

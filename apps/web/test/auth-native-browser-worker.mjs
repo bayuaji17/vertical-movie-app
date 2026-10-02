@@ -67,6 +67,15 @@ try {
   await page.evaluate(async () => {
     const router = window.__TSR_ROUTER__
     await router.navigate({ to: '/admin/login' })
+  })
+  await page.getByRole('heading', { name: 'Dashboard', exact: true }).waitFor()
+  assert.equal(new URL(page.url()).pathname, '/admin')
+  assert.equal(
+    await page.getByRole('heading', { name: 'Masuk ke admin' }).count(),
+    0,
+  )
+  await page.evaluate(async () => {
+    const router = window.__TSR_ROUTER__
     await router.preloadRoute({ to: '/admin' })
     await router.navigate({ to: '/admin' })
   })
@@ -75,6 +84,44 @@ try {
     before,
     'Fresh native session navigation must add zero reads',
   )
+  const sessionCookie = cookies.find((cookie) =>
+    cookie.name.includes('session_token'),
+  )
+  const assertSessionPreserved = async () => {
+    const current = (await context.cookies()).find(
+      (cookie) => cookie.name === sessionCookie.name,
+    )
+    assert.equal(
+      current?.value,
+      sessionCookie.value,
+      'Visiting login must preserve the native session token',
+    )
+    const currentSnapshot = await page.evaluate(() =>
+      window.__TSR_ROUTER__.options.context.queryClient.getQueryData([
+        'auth',
+        'session',
+      ]),
+    )
+    assert.deepEqual(
+      currentSnapshot,
+      snapshot,
+      'The same admin session remains active',
+    )
+  }
+  await assertSessionPreserved()
+  await page.goto(baseURL + '/admin/login?redirect=%2Fadmin')
+  await page.getByRole('heading', { name: 'Dashboard', exact: true }).waitFor()
+  await hydrate(page)
+  assert.equal(new URL(page.url()).pathname, '/admin')
+  await assertSessionPreserved()
+  await page.reload()
+  await page.getByRole('heading', { name: 'Dashboard', exact: true }).waitFor()
+  await hydrate(page)
+  await assertSessionPreserved()
+  await page.goBack()
+  await page.getByRole('heading', { name: 'Dashboard', exact: true }).waitFor()
+  await hydrate(page)
+  await assertSessionPreserved()
   const second = await context.newPage()
   await second.goto(baseURL + '/admin')
   await second
@@ -96,7 +143,7 @@ try {
   await page.goto(baseURL + '/admin')
   await page.getByRole('heading', { name: 'Masuk ke admin' }).waitFor()
   console.log(
-    'Native browser: real Better Auth + PostgreSQL + Elysia + built Bun/Nitro; wrong password/non-admin denied, admin login/SSR refresh/HttpOnly native cookies/safe snapshot/fresh navigation0/logout/cross-tab/Back passed.',
+    'Native browser: real Better Auth + PostgreSQL + Elysia + built Bun/Nitro; wrong password/non-admin denied, active-admin login URL redirected on client/direct/refresh/Back with native session token and snapshot preserved, fresh navigation0, logout/cross-tab/Back denial passed.',
   )
 } finally {
   await browser.close()

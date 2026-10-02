@@ -1619,3 +1619,39 @@ Root bun run lint, bun run check-types dan bun run build. Prettier check kompone
 ### Blocker atau tindak lanjut
 
 Tidak ada untuk perubahan layout lokal ini.
+
+
+## Task: AUTH-FUP-004 — Redirect sesi admin aktif dari halaman login
+
+- Status: Done
+- Owner: Pengembang/agent pelaksana
+- Prioritas: P1
+- Referensi: AUTH-US-FUP, issue pengguna 3 Oktober 2026
+- Dependensi: AUTH-REF-007–008, AUTH-FUP-002
+- Ukuran: Guard login dan regresi navigasi
+
+### Ruang lingkup
+
+Tambahkan beforeLoad pada /admin/login yang membaca sesi native melalui Query bersama. Admin aktif diarahkan ke tujuan admin internal yang tervalidasi sebelum form muncul. Guard ini tidak logout atau menghapus cache/sesi. Anonymous, user non-admin dan sesi banned/expired tetap dapat mengakses login. Bila service tidak dapat diperiksa, form login tersedia untuk retry native tanpa redirect berdasarkan data stale.
+
+### Acceptance criteria
+
+- [x] Admin aktif membuka login lewat SSR/direct URL atau navigasi client lalu kembali ke dashboard tanpa login ulang.
+- [x] Cache Query fresh dipakai bersama tanpa request tambahan; cookie dan sesi native tetap sama.
+- [x] Anonymous/non-admin/banned/expired tidak dialihkan ke dashboard; return target berbahaya kembali ke /admin.
+- [x] Logout tetap menuju login, tanpa redirect loop atau menghidupkan kembali principal lama.
+- [x] Unit guard, SSR, browser native/fixture, lint, check-types dan build lulus.
+
+### Validasi
+
+Bun guard tests, SSR smoke, browser fixture Vite dan native Better Auth + PostgreSQL dedicated pada hasil build Bun/Nitro. Pemeriksaan root lint/type/build. Tidak memakai credential atau cleanup database development.
+
+### Hasil dan bukti
+
+Sebelum perubahan, route login hanya memvalidasi search dan merender form; tidak ada pemeriksaan sesi aktif. beforeLoad kini memakai redirectActiveAdmin dengan Query/reader isomorphic native yang sama. Hanya admin tidak banned dengan sesi belum expired diarahkan ke target internal tervalidasi memakai replace; tidak ada signOut atau cache cleanup pada guard login. Error dependency tidak memakai data stale untuk redirect dan form tetap tersedia.
+
+3 Oktober 2026: guard/cache 16 test, 55 assertions lulus; lint web, check-types API/web/package, root build dua app dan diff check lulus. SSR smoke membuktikan admin aktif dialihkan sebelum form dirender dengan return target query/hash dan no-store; anonymous/user/outage masih menerima login200. Browser Chromium memakai Better Auth asli + PostgreSQL dedicated + Elysia + hasil build Bun/Nitro: navigasi client ke login, URL langsung, refresh dan Back kembali ke dashboard, native session token serta snapshot sama, navigasi fresh menambah nol read, logout/lintas tab/Back denial tetap lulus. Fixture Vite cache dan routes juga lulus SSR1/hydration0/fresh0/stale dedup1/offline/focus/reconnect/poll/expiry/outage, login401/429/non-admin/admin, toast/loading/retry, logout failure dan race/lintas tab. Tidak ada reset akun/sesi database development. Commit: fix(auth): redirect active admins away from login.
+
+### Blocker atau tindak lanjut
+
+Tidak ada blocker untuk fix lokal ini. Domain/TLS/production tetap mengikuti backlog deployment.

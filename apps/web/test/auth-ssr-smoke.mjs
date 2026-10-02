@@ -106,6 +106,23 @@ try {
   assert.equal(outage.status, 503)
   assert.ok(!(await outage.text()).includes('Sesi admin aktif untuk'))
   assert.ok(!outage.headers.get('location'))
+  const loginURL = `http://127.0.0.1:${port}/admin/login?redirect=%2Fadmin%3Ftab%3Dcatalog%23videos`
+  const activeLogin = await fetch(loginURL, {
+    headers: { cookie: 'fixture=admin' },
+    redirect: 'manual',
+  })
+  assert.ok([302, 307].includes(activeLogin.status))
+  assert.equal(activeLogin.headers.get('location'), '/admin?tab=catalog#videos')
+  assert.match(activeLogin.headers.get('cache-control'), /private.*no-store/)
+  assert.ok(!(await activeLogin.text()).includes('Masuk ke admin'))
+  for (const cookie of ['', 'fixture=user', 'fixture=outage']) {
+    const login = await fetch(loginURL, {
+      headers: cookie ? { cookie } : {},
+      redirect: 'manual',
+    })
+    assert.equal(login.status, 200)
+    assert.ok((await login.text()).includes('Masuk ke admin'))
+  }
   const start = Date.now()
   const stalled = await load('fixture=stall')
   assert.ok(Date.now() - start < 12_000)
@@ -116,7 +133,7 @@ try {
       seen.includes('fixture=user'),
   )
   console.log(
-    'SSR native: admin/null/user/outage/stall, isolated cookies, multi Set-Cookie and safe HTML passed.',
+    'SSR native: admin/null/user/outage/stall, active-admin login redirect, anonymous/user/outage login availability, isolated cookies, multi Set-Cookie and safe HTML passed.',
   )
 } finally {
   child.kill()
