@@ -1586,3 +1586,36 @@ Komponen dipasang melalui bunx --bun shadcn@latest add @shadcn/toast; Button exi
 ### Blocker atau tindak lanjut
 
 Rollout deployment mengikuti AUTH-FUP-001; tidak menambah dependensi, endpoint, atau persistence toast.
+
+
+## Task: AUTH-FUP-003 — Posisikan toast di top center
+
+- Status: Done
+- Owner: Pengembang/agent pelaksana
+- Prioritas: P1
+- Referensi: AUTH-US-FUP, permintaan pengguna 3 Oktober 2026
+- Dependensi: AUTH-FUP-002
+- Ukuran: Penyesuaian layout komponen web
+
+### Ruang lingkup
+
+ToastViewport berada di tengah atas dengan jarak 1rem dan margin horizontal responsif. Root memakai anchor/origin atas, stack berkembang ke bawah, animasi masuk/keluar ke atas, dan swipe dismiss ke atas. Aksi auth tetap menggunakan manager native yang sama.
+
+### Acceptance criteria
+
+- [x] Toast berada di top center pada viewport mobile dan desktop tanpa overflow horizontal.
+- [x] Stack collapsed menunjukkan toast berikutnya di bawah; hover memperluas stack ke bawah dengan gap.
+- [x] Swipe ke atas dan tombol tutup berhasil menghapus toast.
+- [x] Lint, check-types, build dan pemeriksaan formatting lulus.
+
+### Validasi
+
+Root bun run lint, bun run check-types dan bun run build. Prettier check komponen. Pemeriksaan browser sementara melalui Playwright Chromium pada dev web menggunakan validasi field kosong, tanpa login atau request credential.
+
+### Hasil dan bukti
+
+3 Oktober 2026: Chromium 390×844 dan 1280×900 lolos center horizontal (toleransi 1px), posisi atas 16px, batas viewport, stack collapsed/expanded mengarah ke bawah, swipe up dismiss dan tombol tutup. Screenshot mobile diperiksa secara visual. Lint web, check-types kedua app/package, build kedua app serta formatting/diff check lulus. Implementasi mengikuti konsep custom position Base UI pada https://base-ui.com/react/components/toast#custom-position. Commit: fix(web): position toasts at top center.
+
+### Blocker atau tindak lanjut
+
+Tidak ada untuk perubahan layout lokal ini.
