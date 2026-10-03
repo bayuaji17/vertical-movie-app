@@ -1,19 +1,38 @@
 {
   "name": "api",
   "version": "1.0.50",
+  "exports": {
+    "./types": "./src/types.ts"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "bun test ./src",
+    "auth:adapter:proof": "bun test ./test/integration/auth-adapter-proof.test.ts",
+    "auth:schema:proof": "bun test ./test/integration/auth-schema-proof.test.ts",
+    "auth:runtime:proof": "bun test ./test/integration/auth-runtime-proof.test.ts",
+    "auth:admin:proof": "bun test ./test/integration/auth-admin-proof.test.ts",
+    "auth:recovery:proof": "bun test ./test/integration/auth-recovery-proof.test.ts",
+    "auth:authorization:proof": "bun test ./test/integration/auth-authorization-proof.test.ts",
+    "auth:openapi:proof": "bun test ./test/integration/auth-openapi-proof.test.ts",
+    "admin:provision": "bun run src/modules/auth/provision-cli.ts",
+    "admin:reset-password": "bun run src/modules/auth/reset-cli.ts",
+    "db:migrate": "bun run src/db/migrate.ts",
+    "db:studio": "bun run --bun drizzle-kit studio --host=127.0.0.1",
     "dev": "bun run --watch src/index.ts",
     "build": "bun build src/index.ts --target=bun --outdir=dist",
     "start": "bun dist/index.js",
-    "check-types": "bun run --bun tsc --noEmit"
+    "check-types": "bun run --bun tsc --noEmit",
+    "auth:browser:smoke": "bun ./test/integration/auth-browser-smoke.mjs"
   },
   "dependencies": {
+    "@elysia/openapi": "^1.4.16",
     "@repo/auth": "workspace:*",
+    "drizzle-orm": "0.45.3",
     "elysia": "latest"
   },
   "devDependencies": {
-    "bun-types": "latest"
+    "bun-types": "latest",
+    "drizzle-kit": "0.31.11",
+    "postgres": "3.4.9"
   },
   "engines": {
     "bun": ">=1.4.2"

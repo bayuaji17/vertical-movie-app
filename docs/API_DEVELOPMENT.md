@@ -6,7 +6,7 @@
 
 API menggunakan TypeScript strict, Elysia, dan Bun sesuai versi root `package.json`. API memiliki logika domain dan akses data aplikasi. **Eden Treaty dipilih pengguna pada 1 Oktober 2026** untuk konsumsi kontrak Elysia oleh web. Web tidak menjalankan ulang aturan publikasi atau otorisasi sebagai pengganti validasi server.
 
-Saat ini kode API masih satu `src/index.ts` dengan `GET /`. Database lokal `vertical_movie_app` telah dibuat dan koneksi diverifikasi menggunakan Bun SQL, tetapi Eden, Drizzle, migrasi, konfigurasi Better Auth, storage, dan worker belum diimplementasikan. Dependensi Better Auth dimiliki `packages/auth`; API menggunakan `@repo/auth/server`. Panduan ini menyesuaikan pola pengembangan; instalasi Eden dan ekspor kontrak dilakukan bersama task integrasi API–web.
+Fondasi API memiliki factory Elysia tanpa listen, env tervalidasi, satu pool Bun SQL/Drizzle dan shutdown. Route aktif: `GET /`, handler native Better Auth `/api/auth/*`, serta Scalar `/openapi` dan `/openapi/json`. API mengimpor factory/schema dari `@repo/auth/server`, menyuntikkan pool yang sama; package tidak membaca env atau membuat pool global. Schema auth dimiliki package dan diekspor ulang API untuk migrasi. Macro `requireAdmin` memanggil getSession native dengan disableCookieCache setiap rute privat, kemudian mengecek role admin, ban dan expiry; register sebelum rute privat dengan chaining Elysia. Auth publik hanya status/login/logout/session; operator HTTP tertutup. Seed memakai CLI resmi dan recovery memakai reset native selama maintenance. `/admin/session` dan singleton/writer custom sudah dihapus. Guard web tidak menggantikan otorisasi endpoint bisnis. Eden bisnis tetap type-only `api/types`; auth browser/SSR memakai SDK package. Lihat [Auth Operations](AUTH_OPERATIONS.md) untuk konfigurasi, command, failure, migration dan bukti. Storage/worker belum dipasang.
 
 Instruksi agent tetap berada di [AGENTS.md](../AGENTS.md). Ikuti [Global Workflow](GLOBAL_WORKFLOW.md), [Template Task](TASK_TEMPLATE.md), dan [Environment](ENVIRONMENT.md). Kontrak produk yang belum disetujui di [Architecture](ARCHITECTURE.md) tetap berupa rancangan.
 
@@ -18,11 +18,17 @@ apps/api/
 │   ├── index.ts                  # Startup HTTP, listen, dan shutdown
 │   ├── app.ts                    # Factory createApp; komposisi tanpa listen
 │   ├── types.ts                  # Ekspor type-only App untuk Eden
+│   ├── auth.ts                   # Config CLI operator native; tidak listen
 │   ├── config/
 │   │   └── env.ts                # Pembacaan dan validasi konfigurasi server
 │   ├── modules/
 │   │   ├── auth/
-│   │   │   └── index.ts          # Mount handler Better Auth dari @repo/auth/server
+│   │   │   ├── provision-cli.ts  # Orkestrasi CLI resmi create-admin
+│   │   │   ├── reset-cli.ts      # Orkestrasi reset native dalam maintenance
+│   │   │   ├── cli-input.ts      # Input password recovery tersembunyi
+│   │   │   └── admin/
+│   │   │       ├── guard.ts      # Macro requireAdmin untuk route privat
+│   │   │       └── model.ts      # Schema error guard admin
 │   │   ├── videos/
 │   │   │   ├── index.ts          # Komposisi rute publik dan admin
 │   │   │   ├── public.ts         # Baca video terbit tanpa login
@@ -35,14 +41,16 @@ apps/api/
 │   │   ├── media/                # Unggah dan aset; pola file sama sesuai kebutuhan
 │   │   └── settings/             # Pengaturan yang boleh diubah admin
 │   ├── plugins/
-│   │   ├── admin.ts              # Pemeriksaan sesi dan identitas admin
+│   │   ├── admin.ts              # Guard lintas modul bila domain admin memerlukannya
 │   │   ├── errors.ts             # Pemetaan error HTTP dan request ID
 │   │   ├── openapi.ts            # Komposisi dokumentasi Scalar dan schema auth
 │   │   └── logger.ts             # Logging request dengan redaksi rahasia
 │   ├── db/
 │   │   ├── client.ts             # Factory pool Bun SQL dan Drizzle
+│   │   ├── migrate.ts            # Migrator eksplisit, tidak berjalan pada request
 │   │   └── schema/
-│   │       ├── auth.ts           # Schema tabel Better Auth saat adapter dipasang
+│   │       ├── auth.ts           # Re-export schema canonical @repo/auth/server
+│   │       ├── index.ts          # Schema gabungan untuk migrasi/adapter
 │   │       ├── videos.ts
 │   │       ├── media.ts
 │   │       ├── jobs.ts
@@ -58,7 +66,7 @@ apps/api/
 ├── scripts/                      # Provisioning admin atau operasi terkontrol
 ├── test/
 │   └── integration/              # Pengujian PostgreSQL/storage/worker
-├── drizzle.config.ts             # Ditambahkan saat integrasi Drizzle
+├── drizzle.config.ts             # Konfigurasi schema dan output migrasi Drizzle
 ├── .env.example
 ├── package.json
 └── tsconfig.json
@@ -98,12 +106,12 @@ Kode lokal API yang benar-benar dipakai beberapa modul boleh masuk `shared/`; he
 
 ## Eden Treaty dan batas kontrak API–web
 
-Elysia mendefinisikan kontrak server; Eden adalah client bertipe yang mengonsumsinya. Rencana penempatan dependensi mengikuti [instalasi resmi Eden](https://elysiajs.com/eden/installation): SDK di `apps/web` dan Elysia sebagai dependensi pengembangan web untuk inferensi, dengan versi Elysia yang sama dengan API. Dokumentasi resmi saat ini memakai `@elysia/eden`; referensi skill lama masih menyebut `@elysiajs/eden`. Verifikasi nama package, peer dependency, dan versi pada task instalasi.
+Elysia mendefinisikan kontrak server; Eden adalah client bertipe yang mengonsumsinya. `apps/web` menggunakan `@elysia/eden` `1.4.10` dan dependency pengembangan Elysia `1.4.30` untuk menyelesaikan inferensi peer yang kompatibel dengan API. Dokumentasi resmi saat ini memakai `@elysia/eden`; referensi skill lama masih menyebut `@elysiajs/eden`. Versi terpasang dan peer dependency telah diperiksa saat AUTH-010.
 
 1. `app.ts` mengekspor factory `createApp` dan tipe `App = ReturnType<typeof createApp>`. Factory mengembalikan hasil chaining seluruh modul dengan tipe hasil inferensi; jangan menulis return type umum `Elysia` yang menghapus informasi rute.
-2. `types.ts` hanya mengekspor `App` melalui `export type`. Pada task integrasi, deklarasikan entry point `api/types` di package API dan dependensi `api: workspace:*` pada web agar kontrak resolvable melalui package workspace. Browser hanya menggunakan `import type`; jangan impor runtime `app.ts` atau `index.ts` ke web.
+2. `types.ts` hanya mengekspor `App` melalui `export type`; package API sudah menyediakan entry point `api/types`. Tambahkan dependensi `api: workspace:*` pada web saat konsumen kontrak dibuat. Browser hanya menggunakan `import type`; jangan impor runtime `app.ts` atau `index.ts` ke web.
 3. Kontrak tetap dimiliki API; jangan membuat salinan DTO/rute di web atau package baru hanya untuk menduplikasi tipe. TypeScript consumer harus dapat menyelesaikan seluruh impor dalam deklarasi kontrak, termasuk tipe Bun bila diperlukan. Gunakan impor relatif/entry point workspace yang jelas; alias API tidak boleh diselesaikan sebagai alias web.
-4. Client web ditempatkan di `apps/web/src/lib/api/client.ts` ketika integrasi dimulai. Gunakan `treaty<App>(apiUrl)` dan URL publik dari `VITE_API_URL`. Validasi URL sebelum membuat client; jangan menggunakan fallback origin yang menyamarkan konfigurasi salah.
+4. Client web berada di `apps/web/src/lib/auth/api-client.ts`; `treaty` menerima kontrak dari import type-only `api/types`. URL publik dari `VITE_API_URL` divalidasi sebagai origin HTTP(S) sebelum ditambahkan base `/api`; konfigurasi yang hilang/invalid membuat loader mengembalikan state konfigurasi unavailable, bukan fallback ke origin lain.
 5. Tipe Eden tidak menegakkan akses runtime. Schema Elysia, pemeriksaan admin, dan query publik tetap wajib pada server. Endpoint Better Auth menggunakan client `@repo/auth/client`; direct upload ke signed URL dan pemutaran media memakai mekanismenya sendiri.
 
 Contoh berikut adalah pola tujuan; factory, entry point, dan client tersebut belum ada pada starter:
@@ -226,17 +234,17 @@ Return `status(...)` mengirim respons langsung dan tidak melewati `onError`; thr
 
 ## Dokumentasi API — OpenAPI dan Scalar
 
-**Gunakan satu halaman Scalar untuk dokumentasi endpoint aplikasi dan Better Auth.** Keputusan ini ditetapkan pengguna pada 1 Oktober 2026. Plugin OpenAPI dan penggabungan schema belum diimplementasikan; tambahkan bersama task integrasi API/auth. Dokumentasi pengembangan tetap berada di root `docs/`.
+**Gunakan satu halaman Scalar untuk dokumentasi endpoint aplikasi dan Better Auth.** Keputusan ini ditetapkan pengguna pada 1 Oktober 2026. `apps/api` memasang plugin OpenAPI Elysia; bootstrap menggabungkan schema Better Auth dari instance yang sama sebelum server listen. Dokumentasi pengembangan tetap berada di root `docs/`.
 
-| Bagian                   | Fungsi dan kepemilikan                                                         |
-| ------------------------ | ------------------------------------------------------------------------------ |
-| `/openapi`               | UI Scalar utama, disediakan `apps/api` melalui plugin OpenAPI Elysia.          |
-| `/openapi/json`          | Spesifikasi OpenAPI gabungan untuk tooling dan pemeriksaan kontrak.            |
-| Schema endpoint aplikasi | Dihasilkan dari rute dan schema Elysia pada modul API.                         |
-| Schema Better Auth       | Dihasilkan dari instance auth milik `packages/auth`; digabung pada API.        |
-| Root `docs/`             | Aturan kode, keputusan arsitektur, alur domain/auth, dan backlog implementasi. |
+| Bagian                   | Fungsi dan kepemilikan                                                                        |
+| ------------------------ | --------------------------------------------------------------------------------------------- |
+| `/openapi`               | UI Scalar utama, disediakan `apps/api` melalui plugin OpenAPI Elysia.                         |
+| `/openapi/json`          | Spesifikasi OpenAPI gabungan untuk tooling dan pemeriksaan kontrak.                           |
+| Schema endpoint aplikasi | Dihasilkan dari rute dan schema Elysia pada modul API.                                        |
+| Schema Better Auth       | Dihasilkan dari instance auth yang dikonfigurasi API melalui `@repo/auth`; digabung pada API. |
+| Root `docs/`             | Aturan kode, keputusan arsitektur, alur domain/auth, dan backlog implementasi.                |
 
-Path UI dan JSON mengikuti default [plugin OpenAPI Elysia](https://elysiajs.com/plugins/openapi). Gunakan `@elysia/openapi` sesuai dokumentasi resmi saat ini; referensi skill lama menyebut `@elysiajs/openapi`. Verifikasi versi serta kompatibilitas dengan Elysia saat instalasi.
+Path UI dan JSON mengikuti default [plugin OpenAPI Elysia](https://elysiajs.com/plugins/openapi). Paket aktif `@elysia/openapi` harus mengikuti dokumentasi resminya; referensi skill lama menyebut nama package terdahulu `@elysiajs/openapi`.
 
 ### Endpoint aplikasi tampil otomatis
 
@@ -249,20 +257,20 @@ Path UI dan JSON mengikuti default [plugin OpenAPI Elysia](https://elysiajs.com/
 
 ### Penggabungan Better Auth
 
-1. Tambahkan `openAPI({ disableDefaultReference: true })` pada konfigurasi server auth di `packages/auth`. Plugin ini menyediakan `auth.api.generateOpenAPISchema()`; opsi tersebut menonaktifkan UI referensi bawaan auth sehingga Scalar utama menjadi halaman dokumentasi yang digunakan. Endpoint generator schema tetap tersedia; opsi tersebut tidak menonaktifkannya. Lihat [plugin OpenAPI Better Auth](https://better-auth.com/docs/plugins/open-api).
-2. Sediakan helper schema melalui entry point server `@repo/auth/server` ketika konfigurasi auth diimplementasikan. Helper menerima/menggunakan instance auth yang sama dengan handler; jangan membuat instance auth atau pool database kedua untuk dokumentasi.
-3. API menggabungkan `paths` dan `components` schema auth ke konfigurasi OpenAPI Elysia, lalu mengelompokkan operasi auth dengan tag `Better Auth`. Prefix path harus sesuai gabungan mount/basePath yang benar-benar dipakai, misalnya `/api/auth` bila memakai path default; `/auth/api` pada contoh artikel bukan nilai wajib. Periksa pula `servers` agar base path tidak ditambahkan dua kali. Pola dasarnya ada pada [integrasi Better Auth–Elysia](https://elysiajs.com/integrations/better-auth#openapi).
-4. Pertahankan parameter, request body, response, security scheme, dan seluruh referensi `$ref` dari kedua sumber. Merge komponen per kategori dengan pemeriksaan konflik nama; jangan menimpa schema aplikasi dengan objek `components` auth secara keseluruhan. Saat memberi tag, ubah hanya objek operasi metode HTTP yang valid, bukan properti path seperti `parameters`.
-5. Gunakan tipe schema library atau tipe hasil `generateOpenAPISchema()` untuk helper dan transformasi. Hindari `any` serta assertion yang menutupi ketidakcocokan. Jika schema dicache, cache terkait instance/konfigurasi auth dan tidak dimutasi saat memberi prefix/tag.
-6. Better Auth menghasilkan OpenAPI `3.1.1`; verifikasi plugin, spesifikasi gabungan, dan tooling mendukung semantik versi tersebut. Jangan hanya mengganti field versi untuk menyamarkan schema yang tidak kompatibel.
+1. Konfigurasi server auth memasang `openAPI({ disableDefaultReference: true })` dan mengekspor helper `generateAuthOpenAPISchema()` dari entry point server `@repo/auth/server`. Helper menerima instance auth yang sama dengan handler; jangan membuat instance auth atau pool database kedua untuk dokumentasi. Opsi Better Auth menonaktifkan halaman referensi bawaannya. Lihat [plugin OpenAPI Better Auth](https://better-auth.com/docs/plugins/open-api).
+2. Bootstrap memanggil generator satu kali sebelum listen. Fragment auth diinjeksikan ke factory `createApp` yang tetap sinkron; generator tidak berjalan pada request bisnis.
+3. Plugin Elysia menghasilkan path aplikasi. Hook lokal di plugin `api.openapi` dipasang sebelum generator route dan hanya memproses respons `/openapi/json`; ia menggabungkan fragment Better Auth tanpa mengubah kontrak respons rute bisnis. Path auth diberi prefix mount `/api/auth` tepat satu kali; `servers` dari schema Better Auth tidak disalin agar base path tidak terulang.
+4. Hanya operasi yang aktif pada handler yang masuk katalog: `GET /ok`, `GET/POST /get-session`, `POST /sign-in/email`, dan `POST /sign-out`. Path dan metode lain dihapus dari dokumen dan tetap ditolak handler. Operasi diberi tag `Better Auth` serta operation ID yang stabil. Operasi session/logout dan admin memakai security cookie; status/login eksplisit `security: []`, sedangkan root aplikasi tanpa security global.
+5. Schema parameters, request body, response, components, dan `$ref` Better Auth dipertahankan. Komponen digabung per kategori; nama path/operation ID/schema yang bentrok menyebabkan startup atau pembuatan dokumen gagal, bukan overwrite diam-diam. Cookie scheme mengikuti konfigurasi deployment: `better-auth.session_token` untuk HTTP lokal dan `__Secure-better-auth.session_token` untuk HTTPS.
+6. Better Auth dan dokumen gabungan menggunakan OpenAPI `3.1.1`. Integration proof memeriksa references internal, tag, operation ID, security, filter endpoint, dan halaman Scalar; jangan hanya mengganti field versi untuk menyamarkan schema yang tidak kompatibel.
 
-Komposisi plugin berada di `apps/api/src/plugins/openapi.ts` saat task ini dimulai. Generasi schema async dilakukan pada wiring/bootstrap sebelum server menerima request, lalu hasilnya diinjeksi ke factory `createApp` yang tetap mengembalikan instance Elysia bertipe. Jangan menjalankan generator pada setiap request bisnis atau membuat factory kontrak Eden mengembalikan promise tanpa menyesuaikan konsumen tipenya.
+Komposisi OpenAPI berada di `apps/api/src/app.ts` dan transformasi/merge dokumen di `apps/api/src/plugins/openapi.ts`. Hook hanya mengubah response katalog OpenAPI; ia tidak membungkus response bisnis. Jangan menjalankan generator pada setiap request bisnis atau membuat factory kontrak Eden mengembalikan promise tanpa menyesuaikan konsumen tipenya.
 
 Dokumentasi OpenAPI menerangkan kontrak HTTP. Consumer endpoint aplikasi tetap memakai Eden Treaty dan consumer auth memakai `@repo/auth/client`; menggabungkan schema auth ke Scalar tidak otomatis membuat endpoint handler `.mount()` terinferensi pada Eden.
 
 ### Bukti validasi saat implementasi
 
-- Tambahkan test yang memastikan rute aplikasi/modul baru masuk ke `/openapi/json` dan rute yang sengaja disembunyikan mengikuti konfigurasi.
+- Pastikan test memastikan rute aplikasi/modul baru masuk ke `/openapi/json` dan rute yang sengaja disembunyikan mengikuti konfigurasi.
 - Periksa path auth terhadap URL handler sebenarnya, operation ID, tag, response, dan security scheme. Semua `$ref` harus dapat diselesaikan; konflik nama dan prefix ganda harus terdeteksi.
 - Verifikasi Scalar menampilkan endpoint aplikasi serta auth dan dapat mengirim request dengan sesi yang sesuai pada environment development.
 - Pastikan metadata security tidak ikut membuat katalog publik meminta login, dan respons `401`/`403` sesuai pemeriksaan admin sebenarnya.
@@ -270,19 +278,21 @@ Dokumentasi OpenAPI menerangkan kontrak HTTP. Consumer endpoint aplikasi tetap m
 
 ## Autentikasi dan konfigurasi
 
-- Konfigurasi Better Auth dimiliki `packages/auth`; API menyediakan adapter database dan secret melalui `@repo/auth/server`. `modules/auth` memasang handler tersebut, sedangkan `plugins/admin.ts` memverifikasi sesi dan identitas admin pada setiap operasi privat.
+- Konfigurasi Better Auth dimiliki `packages/auth`; API menyediakan adapter database dan secret melalui `@repo/auth/server`. `app.ts` memasang handler tersebut; `modules/auth/admin/guard.ts` menyediakan macro authorization authoritative untuk rute bisnis privat.
 - Sesi valid tidak otomatis berarti admin. Verifikasi identitas admin tunggal yang disediakan melalui provisioning terkontrol; pendaftaran publik dinonaktifkan. Pengunjung katalog/player tidak perlu akun.
+- Session memakai native `/api/auth/get-session`, role/admin plugin, dan projection whitelist sebelum cache/SSR. Web memakai reader isomorphic dan TanStack Query; guard parent menolak sebelum child loaders. Form ada di `/admin/login`; `/admin/session` lama tidak tersedia. Lifecycle operator mengikuti runbook native, tanpa writer SQL aplikasi.
 - Trusted origin, CORS, cookie, dan alur permintaan web ke API ditetapkan bersama task auth. Jangan menggunakan wildcard origin untuk request berkredensial.
-- Pembacaan env dipusatkan di `config/env.ts` ketika integrasi dimulai. Validasi konfigurasi wajib sesuai proses HTTP/worker sebelum proses mulai menerima pekerjaan; jangan membuat client dengan credential kosong.
+- Pembacaan env API dipusatkan di `config/env.ts` dan divalidasi saat startup HTTP. Worker mengikuti konfigurasi prosesnya saat dibuat; jangan membuat client dengan credential kosong.
 - Rahasia tetap di env API yang diabaikan Git. Daftarkan variabel baru tanpa nilai asli di `.env.example`, [Environment](ENVIRONMENT.md), dan konfigurasi env task Turbo yang relevan.
-- Database, storage client, dan instance auth dibuat sekali per proses lalu diberikan ke consumer; jangan membuat pool baru setiap request. Tutup resource pada shutdown.
+- Script database proof auth adalah `auth:adapter:proof`, `auth:schema:proof`, `auth:runtime:proof`, `auth:admin:proof`, `auth:recovery:proof`, `auth:authorization:proof`, dan `auth:openapi:proof`. Masing-masing membatasi localhost/nama database; beberapa mereset schema, jadi jalankan satu per satu. Tidak ada script generik `test:integration`; detail env dan dampak reset ada di [Environment](ENVIRONMENT.md) serta [backlog](tasks/auth.md).
+- Database, storage client, dan instance auth dibuat sekali per proses lalu diberikan ke consumer; jangan membuat pool baru setiap request. Database Bun SQL dibuat oleh bootstrap dan ditutup pada shutdown. Factory tidak membuka port atau koneksi saat diimpor.
 
 ## Database dan migrasi
 
-- Evaluasi `drizzle-orm/bun-sql` dengan Bun SQL serta adapter Better Auth pada versi yang dipasang. Catat proof kompatibilitas sebelum memilih driver alternatif. Database lokal yang sudah dibuat belum membuktikan kompatibilitas Drizzle/adapter.
+- Kompatibilitas Bun SQL, `drizzle-orm/bun-sql`, dan Better Auth Drizzle adapter telah dibuktikan pada versi yang dikunci di [backlog auth](tasks/auth.md). Migrasi dan operasi auth/admin juga diuji terarah pada database test lokal. Proof membatasi operasi yang diuji; expand/contract refactor belum diterapkan pada database development dan proof tidak menyatakan production-ready.
 - Query memakai parameter binding dari Drizzle atau tagged template Bun SQL. Jangan menggabungkan input pengguna menjadi SQL mentah. Identifier dinamis harus berasal dari daftar server yang tetap.
-- Schema tabel berada di `src/db/schema/`. Commit migrasi SQL dan metadata generasinya di `apps/api/drizzle/` ketika tooling dipasang. Schema Better Auth yang dihasilkan harus sesuai versi library/adapter dan ditinjau sebelum migrasi.
-- Jalankan migrasi melalui perintah eksplisit; jangan membuat/mengubah tabel otomatis saat request masuk. Nama dan skrip migrasi ditambahkan bersama task database, lalu didokumentasikan.
+- Schema tabel berada di `src/db/schema/`; migrasi SQL dan metadata generasi berada di `apps/api/drizzle/`. Schema Better Auth dihasilkan dari konfigurasi package auth dan schema admin ditinjau sebelum migrasi.
+- Jalankan `bun run --cwd apps/api db:migrate` secara eksplisit; jangan membuat/mengubah tabel otomatis saat request masuk. Migrator Bun SQL membaca env API `DATABASE_URL`, memakai path migrasi tetap dari source, dan meredaksi error agar URL tidak tercetak.
 - Gunakan constraint, foreign key, unique index, dan transaksi untuk invariant persisten. Pembaruan aset dan enqueue job harus atomik. Transaksi diselesaikan sebelum I/O storage atau FFmpeg.
 - Perubahan schema yang memengaruhi data perlu rencana migrasi/backfill dan bukti pada database pengujian. Jangan mengubah skema atau menghapus data dev melalui test.
 - Operasi berulang seperti enqueue, upload completion, dan publish memakai identitas operasi serta pemeriksaan transisi di database; penanganan idempotensi tidak cukup disimpan pada memori proses.
@@ -309,7 +319,7 @@ bun run check-types --filter=api
 bun run build --filter=api
 ```
 
-Setelah perubahan script/dependensi, jalankan `bun install --frozen-lockfile` dan pemeriksaan yang relevan. Husky tetap menjalankan lint web dan pemeriksaan tipe seluruh workspace sebelum commit. API belum memiliki script lint; jangan melaporkan `bun run lint` sebagai pemeriksaan lint API. Script `test` API saat ini masih placeholder yang gagal dan bukan suite pengujian.
+Setelah perubahan script/dependensi, jalankan `bun install --frozen-lockfile` dan pemeriksaan yang relevan. Husky tetap menjalankan lint web dan pemeriksaan tipe seluruh workspace sebelum commit. API belum memiliki script lint; jangan melaporkan `bun run lint` sebagai pemeriksaan lint API. Script `test` API menjalankan native Bun suite di `src`; test yang membutuhkan PostgreSQL nyata tetap berada di suite integrasi terpisah.
 
 ## Unit test API — Bun native
 
@@ -375,7 +385,7 @@ bun test ./apps/api/src/modules/videos/service.test.ts
 bun test --watch ./apps/api/src
 ```
 
-Perintah pertama mencakup unit/modul HTTP di source API; suite integrasi dijalankan terpisah dengan `bun test ./apps/api/test/integration` setelah environment khusus test disiapkan. Direktori/file contoh belum semuanya ada. `bun run test` API saat ini masih placeholder; gantikan dengan script native Bun saat task pertama menambahkan suite. Task test Turbo, hook commit, dan gate CI belum diaktifkan oleh panduan ini.
+Script `test` API menjalankan suite native Bun di `src`; dari root gunakan `bun run --cwd apps/api test`. Proof PostgreSQL terisolasi dijalankan lewat command `auth:*:proof` yang didaftarkan di `apps/api/package.json`, bukan satu suite `test:integration` umum. Siapkan env khususnya dan periksa guard/nama database sebelum menjalankan. Root Husky menjalankan lint web dan type-check sebelum commit; konfigurasi CI hosted tidak termasuk workflow proyek saat ini.
 
 Perubahan aturan bisnis, validasi, atau lifecycle API menyertakan test perilaku yang relevan pada task implementasinya. Perbaikan bug menyertakan regression test bila perilakunya dapat diuji. Catat command, hasil, dan bukti pada backlog modul; test tidak menggantikan `check-types`, karena Bun menjalankan TypeScript tanpa pemeriksaan tipe penuh.
 

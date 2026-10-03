@@ -4,6 +4,7 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "db:studio": "bun run --cwd apps/api db:studio",
     "start": "turbo run start",
     "lint": "turbo run lint",
     "format": "bun run --bun prettier --write \"**/*.{ts,tsx,md}\"",

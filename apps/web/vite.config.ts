@@ -30,7 +30,12 @@ const config = defineConfig(({ mode }) => {
       devtools(),
       nitro({ preset: 'bun', rollupConfig: { external: [/^@sentry\//] } }),
       tailwindcss(),
-      tanstackStart(),
+      tanstackStart({
+        importProtection: {
+          behavior: 'error',
+          client: { specifiers: ['@repo/auth/server'] },
+        },
+      }),
       viteReact(),
     ],
   }
