@@ -293,7 +293,7 @@ Dokumentasi OpenAPI menerangkan kontrak HTTP. Consumer endpoint aplikasi tetap m
 
 ## Database dan migrasi
 
-- Kompatibilitas Bun SQL, `drizzle-orm/bun-sql`, dan Better Auth Drizzle adapter telah dibuktikan pada versi yang dikunci di [backlog auth](tasks/auth.md). Migrasi dan operasi auth/admin juga diuji terarah pada database test lokal. Proof membatasi operasi yang diuji; expand/contract auth telah diterapkan pada database development (lihat Environment); migrasi konten 0003–0005 belum. Proof tetap lokal dan tidak menyatakan production-ready.
+- Kompatibilitas Bun SQL, `drizzle-orm/bun-sql`, dan Better Auth Drizzle adapter telah dibuktikan pada versi yang dikunci di [backlog auth](tasks/auth.md). Migrasi dan operasi auth/admin juga diuji terarah pada database test lokal. Proof membatasi operasi yang diuji; expand/contract auth telah diterapkan pada database development (lihat Environment); migrasi konten 0003–0005 juga diterapkan pada tindak lanjut 3 Oktober 2026. Proof tetap lokal dan tidak menyatakan production-ready.
 - Query memakai parameter binding dari Drizzle atau tagged template Bun SQL. Jangan menggabungkan input pengguna menjadi SQL mentah. Identifier dinamis harus berasal dari daftar server yang tetap.
 - Schema tabel berada di `src/db/schema/`; migrasi SQL dan metadata generasi berada di `apps/api/drizzle/`. Schema Better Auth dihasilkan dari konfigurasi package auth dan schema admin ditinjau sebelum migrasi.
 - Jalankan `bun run --cwd apps/api db:migrate` secara eksplisit; jangan membuat/mengubah tabel otomatis saat request masuk. Migrator Bun SQL membaca env API `DATABASE_URL`, memakai path migrasi tetap dari source, dan meredaksi error agar URL tidak tercetak.
@@ -324,6 +324,8 @@ bun run build --filter=api
 ```
 
 Setelah perubahan script/dependensi, jalankan `bun install --frozen-lockfile` dan pemeriksaan yang relevan. Husky tetap menjalankan lint web dan pemeriksaan tipe seluruh workspace sebelum commit. API belum memiliki script lint; jangan melaporkan `bun run lint` sebagai pemeriksaan lint API. Script `test` API menjalankan native Bun suite di `src`; test yang membutuhkan PostgreSQL nyata tetap berada di suite integrasi terpisah.
+
+Aturan penyelesaian disetujui pengguna pada 3 Oktober 2026: setelah implementasi jalankan test existing yang relevan, root check-types, lint yang tersedia, dan build. Jika schema backend berubah, apply migration pending pada database development lokal terkonfigurasi melalui `bun run --cwd apps/api db:migrate`; verifikasi journal/schema dan data existing sesudahnya. Proof destruktif tetap terpisah di database test. Catat hasil aktual pada backlog; migration production mengikuti scope rollout tersendiri.
 
 ## Unit test API — Bun native
 

@@ -81,7 +81,7 @@ History auth `0000`–`0002` tetap utuh. Tambahan konten:
 | `0004_content-videos` | videos, kind/episode constraints, rights confirmation    |
 | `0005_content-genres` | genres, series_genres, video_genres                      |
 
-Migrator full sekarang memiliki enam entry. Tahap ini **belum menjalankan migrasi pada database development atau production**. Sebelum rollout, operator memeriksa `DATABASE_URL` pada API tanpa menyalin credential ke log, menyiapkan backup dan prosedur restore, lalu meninjau SQL pending terhadap journal target. Ketika target siap, jalankan dari root:
+Migrator full sekarang memiliki enam entry. Pada tindak lanjut VERIFY-001 tanggal 3 Oktober 2026, **migrasi development lokal telah diterapkan**: journal 3 → 6, keenam tabel/constraints tersedia, dan data auth existing tetap utuh. Backup custom-format di luar repo tervalidasi melalui `pg_restore --list`; restore penuh belum diuji. Production belum dimigrasikan. Sebelum rollout, operator memeriksa `DATABASE_URL` pada API tanpa menyalin credential ke log, menyiapkan backup dan prosedur restore, lalu meninjau SQL pending terhadap journal target. Command dari root:
 
 ```sh
 bun run --cwd apps/api db:migrate

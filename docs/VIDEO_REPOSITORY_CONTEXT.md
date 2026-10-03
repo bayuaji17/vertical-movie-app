@@ -11,7 +11,7 @@
 
 ## Hasil implementasi — 3 Oktober 2026
 
-Pengguna menyetujui metadata D1–D3 dan implementasi dengan branch baru serta commit per task. Branch `feat/video-metadata` menambahkan enam tabel metadata, migrasi additive `0003`–`0005`, module `series`, `genres`, dan `videos`, serta 16 endpoint admin. Bootstrap memakai pool auth yang sama dan native session reader. Eden compile-only dan Scalar gabungan tervalidasi. Schema/HTTP/repository diuji pada PostgreSQL dedicated; data auth lama terjaga pada regression migration proof. Database development tidak dimigrasikan pada iterasi ini. Storage S3, worker, publikasi/katalog, dan gateway bisnis web tetap task berikutnya. Peta evidence aktual dan batas validasi ada pada [plan](VIDEO_IMPLEMENTATION_PLAN.md), [backlog](tasks/videos.md), dan [Video Operations](VIDEO_OPERATIONS.md).
+Pengguna menyetujui metadata D1–D3 dan implementasi dengan branch baru serta commit per task. Branch `feat/video-metadata` menambahkan enam tabel metadata, migrasi additive `0003`–`0005`, module `series`, `genres`, dan `videos`, serta 16 endpoint admin. Bootstrap memakai pool auth yang sama dan native session reader. Eden compile-only dan Scalar gabungan tervalidasi. Schema/HTTP/repository diuji pada PostgreSQL dedicated; data auth lama terjaga pada regression migration proof. Pada penutupan VID-015 database development belum dimigrasikan. Tindak lanjut VERIFY-001 kemudian menerapkan migrasi lokal 0003–0005, journal menjadi enam entry, dan data auth existing tetap sama. Storage S3, worker, publikasi/katalog, dan gateway bisnis web tetap task berikutnya. Peta evidence aktual dan batas validasi ada pada [plan](VIDEO_IMPLEMENTATION_PLAN.md), [backlog](tasks/videos.md), dan [Video Operations](VIDEO_OPERATIONS.md).
 
 ## Product and Users
 

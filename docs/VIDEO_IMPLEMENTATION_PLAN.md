@@ -11,7 +11,7 @@
 - Task backlog: [tasks/videos.md](tasks/videos.md).
 - Baseline planning SHA: `d1d3e0a36a4adf1c7198db7a1d36c49e9f1c93ed`. SHA hasil tiap task dan validasi implementasi ada pada ledger di bawah.
 - Dibuat: 3 Oktober 2026, Asia/Jakarta.
-- Otorisasi 3 Oktober 2026: branch baru, implementasi tahap A, commit per task. Branch `feat/video-metadata`; tidak mencakup push/PR atau migrasi DB development.
+- Otorisasi awal 3 Oktober 2026: branch baru, implementasi tahap A, commit per task. Branch `feat/video-metadata`; tidak mencakup push/PR atau migrasi DB development.
 
 ## Objective
 
@@ -320,7 +320,7 @@ Ikuti AGENTS/API Development/Workflow; injeksi dependency, method chaining dan s
 
 ## Rollback or Recovery
 
-Migrasi metadata additive dan tidak mengubah tabel auth; test memakai database disposable. Migrasi development/deployment belum dijalankan. Sebelum rollout, periksa SQL/backup/target sesuai [Video Operations](VIDEO_OPERATIONS.md). Jika runtime gagal setelah migration additive, rollback binary yang belum memakai schema baru dan pertahankan data; jangan DROP tabel konten terisi untuk rollback otomatis. Koreksi lewat forward migration; hard deletion membutuhkan rencana eksplisit.
+Migrasi metadata additive dan tidak mengubah tabel auth; test memakai database disposable. Migrasi development diterapkan pada tindak lanjut VERIFY-001 atas instruksi pengguna; deployment belum. Sebelum rollout, periksa SQL/backup/target sesuai [Video Operations](VIDEO_OPERATIONS.md). Jika runtime gagal setelah migration additive, rollback binary yang belum memakai schema baru dan pertahankan data; jangan DROP tabel konten terisi untuk rollback otomatis. Koreksi lewat forward migration; hard deletion membutuhkan rencana eksplisit.
 
 ## Evidence
 
@@ -400,3 +400,7 @@ Validasi akhir dokumentasi: 93 tautan lokal/anchor dan 15 task Done lulus; forma
 | VID-015 | Commit yang memuat ledger ini | Dokumentasi, runbook, dan penutupan iterasi; SHA final ditentukan sesudah commit |
 
 - VID-015: Dokumentasi model/status/rute, runbook VIDEO_OPERATIONS, contoh request/response dan migrasi additive diperbarui. Tahap A selesai; 30 units, 19 content proof dan 20 auth regression tests lulus; root lint/type-check/build/frozen install lulus. Ledger commit setiap task dicatat; MEDIA-001 memerlukan keputusan provider/native S3/limits/multipart-resume/source immutable, tanpa dependency speculative. Link/anchor checker, formatter dan git diff --check menjadi gate akhir. DB development/production belum dimigrasi; gateway/UI/media tetap roadmap. Commit dibuat sesudah validasi; commit sebelumnya: 226fc43 test(api): prove content metadata with native auth.
+
+## Tindak lanjut VERIFY-001 — migrasi development dan gerbang penyelesaian
+
+Sesudah VID-015, pengguna menginstruksikan test yang tersedia, check-types, lint yang tersedia, build, dan migrasi development untuk perubahan schema backend. Migrasi 0003–0005 berhasil pada localhost:5433/vertical_movie_app; journal 3 → 6, enam tabel/constraints metadata tersedia, serta snapshot user/account/session/verification/rate_limit tetap sama. Backup PostgreSQL custom-format di luar repo tervalidasi melalui pg_restore --list. API 30, package auth 3, web 35 dan content integration 19 test lulus (87 test, 463 assertions). Root check-types dan lint lulus menggunakan cache valid; root build kedua app lulus dengan eksekusi baru. Aturan dicatat pada AGENTS/Global Workflow/API Development. Deployment production, full backup restore dan storage tetap terpisah. Evidence dan batas operasi ada pada [VERIFY-001](tasks/development-verification.md).

@@ -1,6 +1,6 @@
 # Rancangan Data — Video, Series, dan Movie
 
-> Status: **Tahap A diimplementasikan dan tervalidasi lokal** · 3 Oktober 2026 · Base SHA `d1d3e0a36a4adf1c7198db7a1d36c49e9f1c93ed`. D1–D3 disetujui pengguna. Enam tabel metadata dan migrasi `0003`–`0005` tersedia; proof memakai PostgreSQL dedicated. Database development/production belum menerima migrasi konten. Tabel dan aturan tahap B–D di bawah tetap rancangan lanjutan.
+> Status: **Tahap A diimplementasikan dan tervalidasi lokal** · 3 Oktober 2026 · Base SHA `d1d3e0a36a4adf1c7198db7a1d36c49e9f1c93ed`. D1–D3 disetujui pengguna. Enam tabel metadata dan migrasi `0003`–`0005` tersedia; proof memakai PostgreSQL dedicated. Migrasi konten development diterapkan pada tindak lanjut VERIFY-001; production belum. Tabel dan aturan tahap B–D di bawah tetap rancangan lanjutan.
 
 Referensi: [context](VIDEO_REPOSITORY_CONTEXT.md), [plan](VIDEO_IMPLEMENTATION_PLAN.md), [backlog](tasks/videos.md), PRD-03–07/09 dan GR-03–07. Model mendukung video mandiri, movie panjang, serta episode. Durasi dan rasio aspek adalah metadata teknis file, bukan penentu jenis konten.
 

@@ -41,7 +41,7 @@ Admin masuk dari halaman web `/admin/login`; setelah login, guard membaca snapsh
 
 `CONTENT_TEST_DATABASE_URL` menunjuk hanya ke database lokal `vertical_movie_app_content_test`. `bun run --cwd apps/api content:schema:proof` menguji constraints dan migrasi; `bun run --cwd apps/api content:runtime:proof` menguji repository/service serta HTTP dengan Better Auth native. Kedua script menghapus dan membuat ulang schema `public` dan `drizzle`, lalu membuat fixture sendiri. Guard menolak nama database lain dan host nonlokal. Buat database khusus tersebut sebelum menjalankan proof dan jalankan script serial karena targetnya sama. Konfigurasi test tidak menjadi konfigurasi runtime HTTP; jangan mengganti `DATABASE_URL` development untuk menjalankan proof.
 
-Migrasi konten `0003`–`0005` baru diuji pada database dedicated pada 3 Oktober 2026. Migrasi ini belum dijalankan pada database development atau production; baseline development auth tiga migrasi tetap menjadi catatan terakhir.
+Pada tindak lanjut 3 Oktober 2026, pengguna menginstruksikan migrasi development jika schema backend berubah. Migrasi konten `0003`–`0005` berhasil diterapkan pada `vertical_movie_app` localhost:5433 setelah backup; journal kini enam entry dan enam tabel metadata tersedia. Snapshot user/account/session/verification/rate_limit existing tetap sama. Archive backup tervalidasi; restore penuh dan rollout production belum diuji. Proof tetap memakai database test dedicated. Evidence command berada pada [backlog verifikasi](tasks/development-verification.md).
 
 ### Drizzle Studio
 
