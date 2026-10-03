@@ -65,7 +65,7 @@ Tidak ada blocker task ini. Tahap media dan integrasi web tetap mengikuti roadma
 
 ## Task: VID-002 — Tambahkan schema series dan seasons secara additive
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai DAG dan urutan task
 - Referensi: VID-US-01, PRD-03/06/07/09, GR-03–07, model/plan video
@@ -80,9 +80,9 @@ Buat tabel series/seasons sesuai model §§2–4, actor FK native auth, named CH
 
 ### Acceptance criteria
 
-- [ ] Fresh migration membuat dua tabel dengan title/year-date/status/version checks yang benar.
-- [ ] Database menolak slug duplicate, parent tidak ada, nomor season <=0, nomor season duplicate pada series yang sama; nomor sama beda series sah.
-- [ ] Re-run migrasi aman; migration auth lama tidak berubah dan fixture user/account/session tetap sama.
+- [x] Fresh migration membuat dua tabel dengan title/year-date/status/version checks yang benar.
+- [x] Database menolak slug duplicate, parent tidak ada, nomor season <=0, nomor season duplicate pada series yang sama; nomor sama beda series sah.
+- [x] Re-run migrasi aman; migration auth lama tidak berubah dan fixture user/account/session tetap sama.
 
 ### Validasi
 
@@ -90,11 +90,11 @@ Proof PostgreSQL dedicated: inspect constraints/indexes, fresh/re-run, invalid i
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; belum ada evidence runtime/test, commit atau PR untuk task ini. Catat file/symbol aktual, command/hasil, lingkungan, keputusan, dan SHA bila Git action kemudian diotorisasi.
+Schema series/seasons dan migrasi generated 0003 additive selesai. PostgreSQL dedicated content proof: 2 pass/10 assertions, FK/nomor/title/year-date/slug serta migration re-run dan user preservation. Database development tidak dimigrasikan. Type-check/lint dijalankan hook commit.
 
 ### Blocker atau tindak lanjut
 
-Prerequisite VID-001 belum Done. Task menjadi Ready hanya setelah prerequisite dan kontrak terkait tersedia. Batas media/publikasi tetap mengikuti roadmap; tidak membuat tabel atau endpoint future dari task ini.
+Tidak ada blocker task ini. Tahap media dan integrasi web tetap mengikuti roadmap.
 
 ## Task: VID-003 — Tambahkan schema video untuk episode movie dan standalone
 
