@@ -165,7 +165,7 @@ Tidak ada blocker task ini. Tahap media dan integrasi web tetap mengikuti roadma
 
 ## Task: VID-005 — Definisikan model HTTP error cursor dan dependency contracts
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai DAG dan urutan task
 - Referensi: VID-US-04, PRD-03/06/07/09, GR-03–07, model/plan video
@@ -180,10 +180,10 @@ Buat schema request/response Elysia dan literal kinds/statuses; strict unknown/r
 
 ### Acceptance criteria
 
-- [ ] Create union episode vs movie/standalone, PATCH minimal satu field serta expectedVersion valid; actor/status/media field dari klien ditolak.
-- [ ] Limit default20/max100, cursor panjang/format/sort/filter tervalidasi; input SQL selalu bound parameter.
-- [ ] Envelopes 404/409/422/503/500 redacted dengan requestId, tanpa SQL/credential; error auth existing dipertahankan.
-- [ ] DTO camelCase/time ISO/date-only benar dan tidak mengekspos row database seluruhnya.
+- [x] Create union episode vs movie/standalone, PATCH minimal satu field serta expectedVersion valid; actor/status/media field dari klien ditolak.
+- [x] Limit default20/max100, cursor panjang/format/sort/filter tervalidasi; input SQL selalu bound parameter.
+- [x] Envelopes 404/409/422/503/500 redacted dengan requestId, tanpa SQL/credential; error auth existing dipertahankan.
+- [x] DTO camelCase/time ISO/date-only benar dan tidak mengekspos row database seluruhnya.
 
 ### Validasi
 
@@ -191,11 +191,11 @@ bun:test table-driven untuk boundary nyata, null/empty, unknown fields, discrimi
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; belum ada evidence runtime/test, commit atau PR untuk task ini. Catat file/symbol aktual, command/hasil, lingkungan, keputusan, dan SHA bila Git action kemudian diotorisasi.
+Schema HTTP strict dan DTO/error/cursor/runtime injection contracts selesai. API source unit suite 25 pass/73 assertions; movie union menolak season/status/actor/technical input, cursor menolak query mismatch, date/calendar/language tervalidasi dan error constraint redacted. Type-check/lint hook commit.
 
 ### Blocker atau tindak lanjut
 
-Prerequisite VID-004 belum Done. Task menjadi Ready hanya setelah prerequisite dan kontrak terkait tersedia. Batas media/publikasi tetap mengikuti roadmap; tidak membuat tabel atau endpoint future dari task ini.
+Tidak ada blocker task ini. Tahap media dan integrasi web tetap mengikuti roadmap.
 
 ## Task: VID-006 — Sediakan create read dan edit draf series
 
