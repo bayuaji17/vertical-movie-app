@@ -1,5 +1,11 @@
 import { useState } from 'react'
-import { RiLoader4Line } from '@remixicon/react'
+import {
+  RiArrowRightLine,
+  RiLoader4Line,
+  RiLockLine,
+  RiMailLine,
+  RiShieldCheckLine,
+} from '@remixicon/react'
 import { useForm } from '@tanstack/react-form'
 import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
@@ -7,21 +13,18 @@ import { useRouter } from '@tanstack/react-router'
 import { Alert, AlertDescription, AlertTitle } from '#/components/ui/alert'
 import { Button } from '#/components/ui/button'
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '#/components/ui/card'
-import {
   Field,
   FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
 } from '#/components/ui/field'
-import { Input } from '#/components/ui/input'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from '#/components/ui/input-group'
+import { Separator } from '#/components/ui/separator'
 import { toast } from '#/components/ui/toast'
 import { authClient } from '#/lib/auth/client'
 import {
@@ -103,20 +106,31 @@ export function AdminLoginForm({ redirectTo }: AdminLoginFormProps) {
   })
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader className="gap-2 px-6 pt-7 sm:px-8 sm:pt-8">
-        <p className="text-xs font-semibold tracking-[0.18em] text-primary uppercase">
-          Vertical Movie
-        </p>
-        <CardTitle className="text-2xl tracking-tight">
-          <h1>Masuk ke admin</h1>
-        </CardTitle>
-        <CardDescription>
-          Gunakan akun administrator untuk mengelola katalog video.
-        </CardDescription>
-      </CardHeader>
+    <section
+      className="flex w-full flex-col gap-8"
+      aria-labelledby="admin-login-title"
+    >
+      <div className="flex flex-col gap-5">
+        <span
+          className="flex size-14 items-center justify-center rounded-2xl bg-muted text-muted-foreground"
+          aria-hidden="true"
+        >
+          <RiLockLine className="size-6" />
+        </span>
+        <div className="flex flex-col gap-3">
+          <h1
+            id="admin-login-title"
+            className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl"
+          >
+            Masuk ke admin
+          </h1>
+          <p className="max-w-sm text-base leading-relaxed text-muted-foreground">
+            Gunakan akun administrator untuk mengelola katalog video.
+          </p>
+        </div>
+      </div>
 
-      <CardContent className="px-6 sm:px-8">
+      <div>
         <form.Subscribe selector={(state) => state.isSubmitting}>
           {(isSubmitting) => (
             <form
@@ -148,26 +162,34 @@ export function AdminLoginForm({ redirectTo }: AdminLoginFormProps) {
                     return (
                       <Field data-invalid={invalid}>
                         <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                        <Input
-                          id={field.name}
-                          name={field.name}
-                          type="email"
-                          inputMode="email"
-                          autoComplete="email"
-                          autoCapitalize="none"
-                          spellCheck={false}
-                          placeholder="admin@example.com"
-                          value={field.state.value}
-                          disabled={isSubmitting}
-                          aria-invalid={invalid}
-                          aria-describedby={
-                            invalid ? `${field.name}-error` : undefined
-                          }
-                          onBlur={field.handleBlur}
-                          onChange={(event) =>
-                            field.handleChange(event.target.value)
-                          }
-                        />
+                        <InputGroup
+                          className="h-11"
+                          data-disabled={isSubmitting}
+                        >
+                          <InputGroupInput
+                            id={field.name}
+                            name={field.name}
+                            type="email"
+                            inputMode="email"
+                            autoComplete="email"
+                            autoCapitalize="none"
+                            spellCheck={false}
+                            placeholder="admin@example.com"
+                            value={field.state.value}
+                            disabled={isSubmitting}
+                            aria-invalid={invalid}
+                            aria-describedby={
+                              invalid ? `${field.name}-error` : undefined
+                            }
+                            onBlur={field.handleBlur}
+                            onChange={(event) =>
+                              field.handleChange(event.target.value)
+                            }
+                          />
+                          <InputGroupAddon>
+                            <RiMailLine aria-hidden="true" />
+                          </InputGroupAddon>
+                        </InputGroup>
                         {invalid ? (
                           <FieldError
                             id={`${field.name}-error`}
@@ -175,11 +197,7 @@ export function AdminLoginForm({ redirectTo }: AdminLoginFormProps) {
                               message: String(message),
                             }))}
                           />
-                        ) : (
-                          <FieldDescription>
-                            Masukkan email administrator yang diprovision.
-                          </FieldDescription>
-                        )}
+                        ) : null}
                       </Field>
                     )
                   }}
@@ -197,22 +215,30 @@ export function AdminLoginForm({ redirectTo }: AdminLoginFormProps) {
                     return (
                       <Field data-invalid={invalid}>
                         <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                        <Input
-                          id={field.name}
-                          name={field.name}
-                          type="password"
-                          autoComplete="current-password"
-                          value={field.state.value}
-                          disabled={isSubmitting}
-                          aria-invalid={invalid}
-                          aria-describedby={
-                            invalid ? `${field.name}-error` : undefined
-                          }
-                          onBlur={field.handleBlur}
-                          onChange={(event) =>
-                            field.handleChange(event.target.value)
-                          }
-                        />
+                        <InputGroup
+                          className="h-11"
+                          data-disabled={isSubmitting}
+                        >
+                          <InputGroupInput
+                            id={field.name}
+                            name={field.name}
+                            type="password"
+                            autoComplete="current-password"
+                            value={field.state.value}
+                            disabled={isSubmitting}
+                            aria-invalid={invalid}
+                            aria-describedby={
+                              invalid ? `${field.name}-error` : undefined
+                            }
+                            onBlur={field.handleBlur}
+                            onChange={(event) =>
+                              field.handleChange(event.target.value)
+                            }
+                          />
+                          <InputGroupAddon>
+                            <RiLockLine aria-hidden="true" />
+                          </InputGroupAddon>
+                        </InputGroup>
                         {invalid ? (
                           <FieldError
                             id={`${field.name}-error`}
@@ -222,7 +248,7 @@ export function AdminLoginForm({ redirectTo }: AdminLoginFormProps) {
                           />
                         ) : (
                           <FieldDescription>
-                            Password administrator minimal 12 karakter.
+                            Minimal 12 karakter.
                           </FieldDescription>
                         )}
                       </Field>
@@ -233,7 +259,7 @@ export function AdminLoginForm({ redirectTo }: AdminLoginFormProps) {
                 <Button
                   type="submit"
                   size="lg"
-                  className="mt-1 w-full"
+                  className="mt-1 h-11 w-full justify-between"
                   disabled={isSubmitting}
                   aria-disabled={isSubmitting}
                 >
@@ -247,20 +273,35 @@ export function AdminLoginForm({ redirectTo }: AdminLoginFormProps) {
                       Memeriksa...
                     </>
                   ) : (
-                    'Masuk'
+                    <>
+                      <span className="flex-1">Masuk</span>
+                      <RiArrowRightLine
+                        data-icon="inline-end"
+                        aria-hidden="true"
+                      />
+                    </>
                   )}
                 </Button>
               </FieldGroup>
             </form>
           )}
         </form.Subscribe>
-      </CardContent>
+      </div>
 
-      <CardFooter className="px-6 pb-7 sm:px-8 sm:pb-8">
-        <p className="text-xs leading-relaxed text-muted-foreground">
-          Akses admin hanya tersedia untuk akun yang dibuat operator.
+      <Separator />
+      <div className="flex items-start gap-3">
+        <span
+          className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground"
+          aria-hidden="true"
+        >
+          <RiShieldCheckLine className="size-5" />
+        </span>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          Khusus akun administrator.
+          <br />
+          Akses diberikan oleh pengelola situs.
         </p>
-      </CardFooter>
-    </Card>
+      </div>
+    </section>
   )
 }

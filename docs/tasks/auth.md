@@ -1656,6 +1656,44 @@ Sebelum perubahan, route login hanya memvalidasi search dan merender form; tidak
 
 Tidak ada blocker untuk fix lokal ini. Domain/TLS/production tetap mengikuti backlog deployment.
 
+## User story: AUTH-US-UI — Login yang jelas pada semua ukuran layar
+
+Sebagai administrator, saya ingin halaman login mengikuti identitas produk dan nyaman digunakan pada ponsel maupun desktop, sehingga saya dapat masuk dengan form yang mudah dibaca.
+
+## Task: AUTH-UI-001 — Terapkan redesign login responsif yang disetujui
+
+- Status: Done
+- Owner: Codex
+- Prioritas: P1
+- Referensi: AUTH-US-UI, PRD-01, PRD-08; persetujuan mockup pengguna 3 Oktober 2026
+- Dependensi: AUTH-FUP-004; `docs/design/login-light-shadcn-redesign.png`
+- Ukuran: Tampilan halaman login web
+
+### Ruang lingkup
+
+Terapkan branding, panel visual, form ringkas dan footer dari mockup dengan komponen shadcn base-rhea. Desktop mulai 1024px memakai dua kolom; viewport lebih sempit memusatkan form dan menyembunyikan panel dekoratif. Artwork hasil built-in image generation ada di `apps/web/src/assets/login-artwork.png`. InputGroup, Badge dan dependensi Textarea mengikuti registry resmi tanpa menimpa komponen existing atau menambahkan dependensi package.
+
+Permintaan pengguna membatasi pekerjaan pada tampilan. Handler login, validasi, session/cache, guard, redirect dan toast tetap sama. Password tetap `type="password"`; tombol show/hide pada mockup tidak diterapkan karena memerlukan perilaku baru.
+
+### Acceptance criteria
+
+- [x] Komposisi desktop mengikuti mockup, dengan logo, panel visual dan form email/password.
+- [x] Form dan navigasi beranda dapat digunakan pada 320–1440px, tanpa overflow horizontal; field dan submit memiliki tinggi 44px.
+- [x] Error inline, status loading/disabled, fokus field invalid dan toast tetap tersedia.
+- [x] Konfigurasi route dan logika autentikasi/validasi tidak berubah.
+- [x] Lint, check-types, build, proof login serta pemeriksaan browser lulus.
+
+### Validasi
+
+Root Bun lint, check-types dan build; proof login existing; Chromium responsif dan regresi login memakai API fixture dedicated tanpa akun development. Bandingkan handler dan konfigurasi route terhadap snapshot sebelum redesign.
+
+### Hasil dan bukti
+
+3 Oktober 2026: diterapkan pada route dan form login. Perbandingan exact-match membuktikan fungsi login/handler useForm dan konfigurasi route (guard, headers, validateSearch, head) sama dengan snapshot sebelum perubahan. Semua validator, handler field, disabled/aria dan toast dipertahankan. Lint, check-types semua workspace dan build dua app lulus; proof login 5 test / 22 assertions lulus. Chromium pada 320×640, 390×844, 768×1024, 1024×768, 1440×1000 dan 640×480 lulus tanpa overflow horizontal, posisi field di dalam viewport, field/submit 44px, panel responsif, masking password, error inline, fokus invalid dan link beranda. Screenshot desktop/mobile diperiksa. Regresi browser existing memakai SDK native dengan HTTP fixture lulus login wrong/429/non-admin/admin, toast/loading, session retry, refresh, logout failure/race/lintas tab dan Back denial. Tidak memakai credential development. Tidak ada perubahan API, auth package, manifests/dependensi atau konfigurasi global UI oleh task ini.
+
+### Blocker atau tindak lanjut
+
+Tidak ada.
 
 ## Task: AUTH-FUP-005 — Logout menuju login tanpa halaman error perantara
 
