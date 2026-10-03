@@ -98,7 +98,7 @@ Tidak ada blocker task ini. Tahap media dan integrasi web tetap mengikuti roadma
 
 ## Task: VID-003 — Tambahkan schema video untuk episode movie dan standalone
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai DAG dan urutan task
 - Referensi: VID-US-02, PRD-03/06/07/09, GR-03–07, model/plan video
@@ -113,10 +113,10 @@ Buat videos dan constraints §5: discriminator kind, season/episode pair, timest
 
 ### Acceptance criteria
 
-- [ ] Episode wajib season valid dan episode_number >0; movie/standalone wajib NULL pada kedua field tersebut, termasuk insert yang menghasilkan NULL pada CHECK.
-- [ ] Duplicate season/episode ditolak pada dua transaksi bersamaan; nomor sama berbeda season sah.
-- [ ] Kind invalid, publication timestamp tidak konsisten, rights timestamp/actor setengah terisi ditolak; metadata valid dengan release date/year optional diterima.
-- [ ] Migrasi additive dan auth preservation/re-run proof tetap lulus.
+- [x] Episode wajib season valid dan episode_number >0; movie/standalone wajib NULL pada kedua field tersebut, termasuk insert yang menghasilkan NULL pada CHECK.
+- [x] Duplicate season/episode ditolak pada dua transaksi bersamaan; nomor sama berbeda season sah.
+- [x] Kind invalid, publication timestamp tidak konsisten, rights timestamp/actor setengah terisi ditolak; metadata valid dengan release date/year optional diterima.
+- [x] Migrasi additive dan auth preservation/re-run proof tetap lulus.
 
 ### Validasi
 
@@ -124,11 +124,11 @@ PostgreSQL schema proof dengan insert matrix tiga kind, null combinations, UNIQU
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; belum ada evidence runtime/test, commit atau PR untuk task ini. Catat file/symbol aktual, command/hasil, lingkungan, keputusan, dan SHA bila Git action kemudian diotorisasi.
+Schema videos dan migrasi 0004 selesai; tiga jenis konten, CHECK pair nullable/hak/status, FK dan nomor episode unik. PostgreSQL proof 3 pass; race dua INSERT nomor sama hanya satu berhasil dan nomor sama pada season berbeda diterima. Type-check/lint hook commit.
 
 ### Blocker atau tindak lanjut
 
-Prerequisite VID-002 belum Done. Task menjadi Ready hanya setelah prerequisite dan kontrak terkait tersedia. Batas media/publikasi tetap mengikuti roadmap; tidak membuat tabel atau endpoint future dari task ini.
+Tidak ada blocker task ini. Tahap media dan integrasi web tetap mengikuti roadmap.
 
 ## Task: VID-004 — Tambahkan taxonomy genre dan relasi konten
 
