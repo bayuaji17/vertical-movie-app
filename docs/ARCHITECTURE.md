@@ -74,10 +74,13 @@ Tabel job adalah sumber kebenaran yang persisten. `LISTEN/NOTIFY` boleh dipakai 
 
 ## Model data dan status awal
 
+Pada 3 Oktober 2026 pengguna meminta plan series dengan banyak video dan movie panjang. Rancangan detail konten kini ada pada [VIDEO_DATA_MODEL.md](VIDEO_DATA_MODEL.md), dengan [plan tahap metadata](VIDEO_IMPLEMENTATION_PLAN.md) dan [backlog](tasks/videos.md). Relasi yang diusulkan: series → seasons → videos berjenis episode; movie/standalone memakai tabel videos tanpa season. Metadata editorial dipisahkan dari sumber media, generation transcode, dan rendition. Tabel berikut tetap ringkasan rancangan; schema/rute konten belum diimplementasikan dan detail baru belum menjadi keputusan final.
+
 | Data             | Isi utama yang diusulkan                                     | Akses                                                                     |
 | ---------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------- |
 | Akun/sesi admin  | Identitas dan sesi yang dikelola Better Auth                 | Admin dan layanan autentikasi                                             |
 | Video            | ID, judul, deskripsi, sampul, status publikasi, waktu terbit | Tulis oleh admin; respons publik hanya saat terbit                        |
+| Series/season    | Metadata serial, nomor season, relasi episode melalui season | Tulis oleh admin; episode publik mengikuti visibility parent series |
 | Aset video       | Kunci objek, status unggah/pemrosesan, metadata teknis       | Admin dan pekerja media; kunci objek privat tidak bocor ke respons publik |
 | Job transcode    | ID aset, status, percobaan, jadwal ulang, lease, kesalahan   | API dan worker; status ringkas dapat dibaca admin                         |
 | Pengaturan situs | Kunci dan nilai yang disetujui untuk diubah dari dashboard   | Tulis oleh admin; sebagian nilai dapat dibaca publik                      |

@@ -24,6 +24,10 @@ Catat tanggal persetujuan dan pemilik keputusan di setiap dokumen. Pisahkan peri
 - [Global Workflow](GLOBAL_WORKFLOW.md): keputusan Agile dan pembagian modul → user story → task kecil disetujui pengguna pada 1 Oktober 2026.
 - [Template Task](TASK_TEMPLATE.md): format backlog per modul, acceptance criteria, dependensi, dan bukti validasi.
 - [Backlog Database Tooling](tasks/database-tooling.md): konfigurasi dan validasi Drizzle Studio lokal.
+- [Repository Context — Video](VIDEO_REPOSITORY_CONTEXT.md): snapshot backend setelah auth pada `d1d3e0a36a4adf1c7198db7a1d36c49e9f1c93ed`, batas domain dan gap gateway bisnis.
+- [Rancangan Data Video/Series/Movie](VIDEO_DATA_MODEL.md): usulan tabel, metadata, hierarchy season/episode, aset media, constraint, indeks dan aturan publikasi; belum diimplementasikan.
+- [Implementation Plan — Video](VIDEO_IMPLEMENTATION_PLAN.md): plan draft tahap metadata backend serta roadmap unggah, worker, publikasi dan katalog.
+- [Backlog Video](tasks/videos.md): 15 task tahap metadata mengikuti template Agile; seluruh task masih Backlog sampai keputusan dan prerequisite tersedia.
 - [Environment](ENVIRONMENT.md): setup env API/web, pemisahan konfigurasi publik/server, dan status variabel integrasi.
 - [API Development](API_DEVELOPMENT.md): aturan kode `apps/api`, struktur modul, kontrak Eden Treaty, dokumentasi OpenAPI/Scalar, lifecycle/scope Elysia, database, autentikasi, storage, queue, worker, unit test native Bun, dan validasi perubahan.
 

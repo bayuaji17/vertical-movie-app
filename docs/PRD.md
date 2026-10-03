@@ -6,7 +6,7 @@
 
 Vertical Movie App adalah aplikasi untuk menonton video vertikal. Pengalaman menonton dirancang **mobile first** dan tetap nyaman di desktop. Pengunjung dapat menemukan dan menonton video yang telah diterbitkan **tanpa login**. Hanya ada **satu admin** yang masuk ke dashboard untuk mengatur sistem, mengunggah dan mengelola video, serta menerbitkannya.
 
-Kode saat ini masih berupa starter Elysia dan TanStack Start. Fitur produk di dokumen ini belum diimplementasikan. Istilah _video_ berarti satu item yang dapat diterbitkan; dukungan serial/episode belum diputuskan.
+Fondasi auth admin sudah diimplementasikan; fitur konten masih belum tersedia. Istilah _video_ berarti satu unit yang dapat diputar dan diterbitkan. Pada 3 Oktober 2026 pengguna meminta rancangan yang mengakomodasi series dengan banyak video serta movie panjang. Usulan relasinya adalah series → season → episode, bersama movie dan video mandiri tanpa season; detail model dan aturan masih untuk ditinjau pada [Rancangan Data Video](VIDEO_DATA_MODEL.md).
 
 ## Peran dan akses
 
@@ -15,7 +15,7 @@ Kode saat ini masih berupa starter Elysia dan TanStack Start. Fitur produk di do
 | Pengunjung    | Membuka katalog dan menonton video terbit tanpa akun atau sesi login.                                                       |
 | Admin tunggal | Masuk ke dashboard, mengelola konfigurasi sistem dan video, mengunggah, mempratinjau, menerbitkan, serta menarik publikasi. |
 
-Pendaftaran mandiri dan akun kreator lain tidak termasuk ruang lingkup. Cara membuat dan memulihkan akun admin pertama masih perlu diputuskan; sistem tidak boleh membuka pendaftaran admin publik.
+Pendaftaran mandiri dan akun kreator lain tidak termasuk ruang lingkup. Provisioning dan pemulihan admin menggunakan CLI native yang sudah diimplementasikan; lihat [Auth Operations](AUTH_OPERATIONS.md). Sistem tidak membuka pendaftaran admin publik.
 
 ## Tujuan dan batas MVP yang diusulkan
 
@@ -24,7 +24,7 @@ Pendaftaran mandiri dan akun kreator lain tidak termasuk ruang lingkup. Cara mem
 - Tampilan utama bekerja pada layar ponsel dan tetap memiliki komposisi yang sengaja dirancang untuk desktop.
 - Dashboard menyediakan konfigurasi dasar yang disepakati, seperti identitas situs dan pengaturan publik yang aman untuk diedit. Daftar pengaturan final masih terbuka; rahasia infrastruktur tidak diedit melalui dashboard.
 
-Rekomendasi personal, feed algoritmik, komentar, akun pengunjung, langganan, pembayaran, analitik penonton rinci, serial/episode, dan aplikasi native berada di luar draft MVP ini.
+Rekomendasi personal, feed algoritmik, komentar, akun pengunjung, langganan, pembayaran, analitik penonton rinci, dan aplikasi native berada di luar draft MVP ini. Series/episode dan movie masuk scope rancangan backend atas permintaan pengguna 3 Oktober 2026; urutan delivery dan detail season/publikasinya mengikuti [plan video](VIDEO_IMPLEMENTATION_PLAN.md).
 
 ## Alur pengguna
 
@@ -77,10 +77,11 @@ Rekomendasi personal, feed algoritmik, komentar, akun pengunjung, langganan, pem
 ## Keputusan terbuka
 
 1. Bentuk katalog dan cara berpindah video: daftar biasa, scroll/swipe vertikal, atau pola lain; termasuk aturan urutannya.
-2. Daftar pengaturan yang dapat diubah admin dan cara provisioning/pemulihan akun admin tunggal.
+2. Daftar pengaturan yang dapat diubah admin. Provisioning/pemulihan akun admin sudah tersedia melalui CLI native; lihat [Auth Operations](AUTH_OPERATIONS.md).
 3. Batas durasi, ukuran, format, rasio aspek, serta resolusi video dan sampul.
 4. Provider object storage final (Cloudflare R2 atau layanan kompatibel S3), profil keluaran FFmpeg, distribusi, retensi, dan biaya per unggahan. Queue pemrosesan memakai PostgreSQL.
 5. Apakah caption wajib untuk terbit dan bagaimana admin menyediakannya.
 6. Kebijakan hak cipta, konten terlarang, pelaporan, moderasi, dan pengindeksan halaman publik.
+7. Detail season default, genre/metadata, visibilitas parent series dan episode, serta kebijakan movie landscape pada [model video](VIDEO_DATA_MODEL.md#12-keputusan-untuk-ditinjau).
 
 Lihat [Architecture](ARCHITECTURE.md) untuk batas sistem dan stack, [Global Rules](GLOBAL_RULES.md) untuk aturan lintas fitur, dan [Design System](DESIGN_SYSTEM.md) untuk rancangan antarmuka.
