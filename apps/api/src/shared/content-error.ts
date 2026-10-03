@@ -26,7 +26,8 @@ export function mapContentError(value: unknown): ContentError | undefined {
   if (!value || typeof value !== "object") return;
   const error = "cause" in value && value.cause ? value.cause : value;
   if (!error || typeof error !== "object") return;
-  const code = "code" in error ? error.code : undefined;
+  const code =
+    "errno" in error ? error.errno : "code" in error ? error.code : undefined;
   const constraint =
     "constraint" in error
       ? error.constraint

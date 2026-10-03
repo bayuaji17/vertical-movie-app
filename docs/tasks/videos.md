@@ -199,7 +199,7 @@ Tidak ada blocker task ini. Tahap media dan integrasi web tetap mengikuti roadma
 
 ## Task: VID-006 — Sediakan create read dan edit draf series
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai DAG dan urutan task
 - Referensi: VID-US-01, PRD-03/06/07/09, GR-03–07, model/plan video
@@ -214,10 +214,10 @@ Buat service/factory series serta route POST/GET/PATCH /admin/series dan detail.
 
 ### Acceptance criteria
 
-- [ ] Create sukses mengembalikan series/defaultSeason; gagal season/genre menyebabkan series tidak tersimpan.
-- [ ] GET/list memperlihatkan metadata benar termasuk empty/archived policy; input/title/slug collision memiliki status kontrak.
-- [ ] Dua PATCH versi sama hanya satu berhasil; metadata dan genre set tidak terpisah commit.
-- [ ] Null/non-admin/banned/outage tidak menjalankan service; private response no-store.
+- [x] Create sukses mengembalikan series/defaultSeason; gagal season/genre menyebabkan series tidak tersimpan.
+- [x] GET/list memperlihatkan metadata benar termasuk empty/archived policy; input/title/slug collision memiliki status kontrak.
+- [x] Dua PATCH versi sama hanya satu berhasil; metadata dan genre set tidak terpisah commit.
+- [x] Null/non-admin/banned/outage tidak menjalankan service; private response no-store.
 
 ### Validasi
 
@@ -225,11 +225,11 @@ Unit domain dengan fake dependency failure/clock/ID; HTTP native tanpa port, rep
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; belum ada evidence runtime/test, commit atau PR untuk task ini. Catat file/symbol aktual, command/hasil, lingkungan, keputusan, dan SHA bila Git action kemudian diotorisasi.
+Series create/read/list/edit selesai; default Season1 dan genre atomik. API units 26 pass; PostgreSQL runtime 2 pass membuktikan rollback invalid genre, version conflict dan HTTP duplicate slug409. Mapper disesuaikan terhadap SQLSTATE pada errno native Bun SQL (temuan integration), tanpa raw error exposure. API type-check lulus; root lint/type-check hook commit.
 
 ### Blocker atau tindak lanjut
 
-Prerequisite VID-005 belum Done. Task menjadi Ready hanya setelah prerequisite dan kontrak terkait tersedia. Batas media/publikasi tetap mengikuti roadmap; tidak membuat tabel atau endpoint future dari task ini.
+Tidak ada blocker task ini. Tahap media dan integrasi web tetap mengikuti roadmap.
 
 ## Task: VID-007 — Sediakan pengelolaan season dan nomor season
 
