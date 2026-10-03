@@ -299,7 +299,7 @@ Tidak ada blocker task ini. Tahap media dan integrasi web tetap mengikuti roadma
 
 ## Task: VID-009 — Sediakan pembuatan draf video semua jenis
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai DAG dan urutan task
 - Referensi: VID-US-02, PRD-03/06/07/09, GR-03–07, model/plan video
@@ -314,10 +314,10 @@ POST /admin/videos: movie/standalone tanpa grouping, episode membutuhkan season 
 
 ### Acceptance criteria
 
-- [ ] Movie panjang dan standalone dapat dibuat tanpa season; episode tersimpan pada season benar dengan series derived, tidak duplicate seriesId.
-- [ ] Parent absent404/archived409, nomor/slug conflict409, incompatible union422; tidak ada partial video/genre write.
-- [ ] Status draft dan rowVersion1, audit actor dari sesi; title wajib, genre optional, source/URL/duration belum dibuat dummy.
-- [ ] Create HTTP privat guarded dan input publication/status/actor ditolak.
+- [x] Movie panjang dan standalone dapat dibuat tanpa season; episode tersimpan pada season benar dengan series derived, tidak duplicate seriesId.
+- [x] Parent absent404/archived409, nomor/slug conflict409, incompatible union422; tidak ada partial video/genre write.
+- [x] Status draft dan rowVersion1, audit actor dari sesi; title wajib, genre optional, source/URL/duration belum dibuat dummy.
+- [x] Create HTTP privat guarded dan input publication/status/actor ditolak.
 
 ### Validasi
 
@@ -325,11 +325,11 @@ Unit/service tests tiga branches/failure rollback; HTTP app.handle body/auth; Po
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; belum ada evidence runtime/test, commit atau PR untuk task ini. Catat file/symbol aktual, command/hasil, lingkungan, keputusan, dan SHA bila Git action kemudian diotorisasi.
+Video draft create untuk movie/standalone/episode selesai, parent locks dan rights confirmation server-side. PostgreSQL runtime 5 pass/34 assertions: kind hierarchy, atomic genre rollback, missing parent dan duplicate episode race. API units 28 pass; lint/type-check hook commit.
 
 ### Blocker atau tindak lanjut
 
-Prerequisite VID-007, VID-008 belum Done. Task menjadi Ready hanya setelah prerequisite dan kontrak terkait tersedia. Batas media/publikasi tetap mengikuti roadmap; tidak membuat tabel atau endpoint future dari task ini.
+Tidak ada blocker task ini. Tahap media dan integrasi web tetap mengikuti roadmap.
 
 ## Task: VID-010 — Sediakan detail dan daftar video bertipe
 

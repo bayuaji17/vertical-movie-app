@@ -1,3 +1,5 @@
+import { VideosService } from "../../src/modules/videos/service";
+import { createVideosRepository } from "../../src/modules/videos/repository";
 import { beforeAll, afterAll, test, expect } from "bun:test";
 import { resetContentDatabase } from "./content-fixture";
 import { createSeriesRepository } from "../../src/modules/series/repository";
@@ -177,4 +179,82 @@ test("genre taxonomy persists, paginates and treats search wildcards literally",
   expect((await svc.list({ search: "%" })).items.map((g) => g.slug)).toEqual([
     "tax-percent",
   ]);
+});
+
+test("video drafts persist kinds and atomically verify episode parent and genre", async () => {
+  const svc = new VideosService(createVideosRepository(database.db));
+  const parent = await seriesService.create(
+    { title: "Video series", slug: "video-series" },
+    "content-admin",
+  );
+  const movie = await svc.create(
+    {
+      kind: "movie",
+      title: "Long Movie",
+      slug: "long-movie",
+      rightsConfirmed: true,
+    },
+    "content-admin",
+  );
+  expect(movie.seasonId).toBeNull();
+  expect(movie.rightsConfirmedAt).not.toBeNull();
+  expect(movie.publicationStatus).toBe("draft");
+  const standalone = await svc.create(
+    { kind: "standalone", title: "Solo", slug: "solo-video" },
+    "content-admin",
+  );
+  expect(standalone.episodeNumber).toBeNull();
+  const episode = await svc.create(
+    {
+      kind: "episode",
+      title: "Episode 1",
+      slug: "first-episode",
+      seasonId: parent.defaultSeason.id,
+      episodeNumber: 1,
+    },
+    "content-admin",
+  );
+  expect(episode.seasonId).toBe(parent.defaultSeason.id);
+  await expect(
+    svc.create(
+      {
+        kind: "episode",
+        title: "Missing parent",
+        seasonId: Bun.randomUUIDv7(),
+        episodeNumber: 1,
+      },
+      "content-admin",
+    ),
+  ).rejects.toThrow();
+  await expect(
+    svc.create(
+      {
+        kind: "movie",
+        title: "Bad genres",
+        slug: "bad-video-genres",
+        genreIds: [Bun.randomUUIDv7()],
+      },
+      "content-admin",
+    ),
+  ).rejects.toThrow();
+  expect(
+    await database.db
+      .select()
+      .from(videos)
+      .where(eq(videos.slug, "bad-video-genres")),
+  ).toHaveLength(0);
+  const race = await Promise.allSettled(
+    [1, 2].map(() =>
+      svc.create(
+        {
+          kind: "episode",
+          title: "Duplicate Race",
+          seasonId: parent.defaultSeason.id,
+          episodeNumber: 2,
+        },
+        "content-admin",
+      ),
+    ),
+  );
+  expect(race.filter((r) => r.status === "fulfilled")).toHaveLength(1);
 });
