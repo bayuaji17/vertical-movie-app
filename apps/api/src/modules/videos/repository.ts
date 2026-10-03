@@ -1,5 +1,12 @@
-import { eq, inArray } from "drizzle-orm";
-import { videos, seasons, series, videoGenres, genres } from "../../db/schema";
+import { eq, inArray, and, or, isNull, ilike, desc, sql } from "drizzle-orm";
+import {
+  videos,
+  seasons,
+  series,
+  videoGenres,
+  genres,
+  seriesGenres,
+} from "../../db/schema";
 import type {
   ContentDatabase,
   ContentConnection,
@@ -7,6 +14,57 @@ import type {
 import { assertGenreIds } from "../../shared/content-db";
 export class VideosStore {
   constructor(private readonly db: ContentConnection) {}
+  async get(id: string, lock = false) {
+    const q = this.db.select().from(videos).where(eq(videos.id, id)).limit(1);
+    return (await (lock ? q.for("update") : q))[0];
+  }
+  async list(
+    query: import("../../shared/content-pagination").ParsedList,
+    input: import("./model").VideoListInput,
+  ) {
+    return (
+      await this.db
+        .select({ video: videos })
+        .from(videos)
+        .leftJoin(seasons, eq(videos.seasonId, seasons.id))
+        .leftJoin(series, eq(seasons.seriesId, series.id))
+        .where(
+          and(
+            query.includeArchived ? undefined : isNull(videos.archivedAt),
+            query.includeArchived
+              ? undefined
+              : or(
+                  isNull(videos.seasonId),
+                  and(isNull(seasons.archivedAt), isNull(series.archivedAt)),
+                ),
+            input.kind ? eq(videos.kind, input.kind) : undefined,
+            input.seriesId ? eq(seasons.seriesId, input.seriesId) : undefined,
+            input.seasonId ? eq(videos.seasonId, input.seasonId) : undefined,
+            query.search
+              ? ilike(
+                  videos.title,
+                  `%${query.search.replace(/[\\%_]/g, "\\$&")}%`,
+                )
+              : undefined,
+            query.cursor
+              ? sql`(${videos.createdAt},${videos.id}) < (${query.cursor.createdAt}::timestamptz,${query.cursor.id}::uuid)`
+              : undefined,
+          ),
+        )
+        .orderBy(desc(videos.createdAt), desc(videos.id))
+        .limit(query.limit + 1)
+    ).map((r) => r.video);
+  }
+  async inheritedGenres(id: string) {
+    return (
+      await this.db
+        .select({ genre: genres })
+        .from(seriesGenres)
+        .innerJoin(genres, eq(seriesGenres.genreId, genres.id))
+        .where(eq(seriesGenres.seriesId, id))
+        .orderBy(genres.id)
+    ).map((r) => r.genre);
+  }
   async parents(ids: string[], lock = false) {
     const seasonIds = [...new Set(ids)].sort();
     if (!seasonIds.length) return [];

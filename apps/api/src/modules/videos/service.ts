@@ -8,7 +8,8 @@ import {
   defaultRuntime,
   type RuntimeDependencies,
 } from "../../shared/content-metadata";
-import type { CreateVideoInput } from "./model";
+import type { CreateVideoInput, VideoListInput } from "./model";
+import { parseList, page } from "../../shared/content-pagination";
 import type { VideosStore, VideosRepository } from "./repository";
 type VideoRow = typeof videos.$inferSelect;
 export async function videoDto(row: VideoRow, store: VideosStore) {
@@ -37,6 +38,60 @@ export async function videoDto(row: VideoRow, store: VideosStore) {
   };
 }
 export class VideosService {
+  private async detail(row: VideoRow, store: VideosStore) {
+    const parent = row.seasonId
+      ? (await store.parents([row.seasonId]))[0]
+      : undefined;
+    const own = await store.ownGenres(row.id),
+      effective = own.length
+        ? own
+        : parent
+          ? await store.inheritedGenres(parent.parent.id)
+          : [];
+    return {
+      ...(await videoDto(row, store)),
+      series: parent
+        ? {
+            id: parent.parent.id,
+            title: parent.parent.title,
+            slug: parent.parent.slug,
+          }
+        : null,
+      season: parent
+        ? {
+            id: parent.season.id,
+            seasonNumber: parent.season.seasonNumber,
+            title: parent.season.title,
+          }
+        : null,
+      effectiveGenres: effective.map((g) => ({
+        id: g.id,
+        name: g.name,
+        slug: g.slug,
+      })),
+    };
+  }
+  async get(id: string) {
+    const store = this.repo().store,
+      row = await store.get(id);
+    if (!row) notFound();
+    return this.detail(row, store);
+  }
+  async list(input: VideoListInput) {
+    const query = parseList(input, "videos", {
+        kind: input.kind,
+        seriesId: input.seriesId,
+        seasonId: input.seasonId,
+      }),
+      store = this.repo().store,
+      result = page(await store.list(query, input), query);
+    return {
+      items: await Promise.all(
+        result.items.map((row) => this.detail(row, store)),
+      ),
+      nextCursor: result.nextCursor,
+    };
+  }
   constructor(
     private readonly repository?: VideosRepository,
     private readonly runtime: RuntimeDependencies = defaultRuntime,

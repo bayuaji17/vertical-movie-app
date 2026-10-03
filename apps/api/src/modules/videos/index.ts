@@ -1,3 +1,5 @@
+import { IdParams } from "../../shared/content-model";
+import { VideoListQuery, VideoListDto, VideoDetailDto } from "./model";
 import { Elysia } from "elysia";
 import {
   createRequireAdmin,
@@ -31,5 +33,27 @@ export function createVideosModule({
           security: [{ betterAuthSessionCookie: [] }],
         },
       },
-    );
+    )
+    .get("/admin/videos", ({ query }) => service.list(query), {
+      requireAdmin: true,
+      query: VideoListQuery,
+      response: { 200: VideoListDto, ...ErrorResponses },
+      detail: {
+        tags: ["Videos"],
+        summary: "List video metadata",
+        operationId: "listVideos",
+        security: [{ betterAuthSessionCookie: [] }],
+      },
+    })
+    .get("/admin/videos/:id", ({ params }) => service.get(params.id), {
+      requireAdmin: true,
+      params: IdParams,
+      response: { 200: VideoDetailDto, ...ErrorResponses },
+      detail: {
+        tags: ["Videos"],
+        summary: "Read video metadata and grouping",
+        operationId: "getVideo",
+        security: [{ betterAuthSessionCookie: [] }],
+      },
+    });
 }

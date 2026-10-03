@@ -333,7 +333,7 @@ Tidak ada blocker task ini. Tahap media dan integrasi web tetap mengikuti roadma
 
 ## Task: VID-010 — Sediakan detail dan daftar video bertipe
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai DAG dan urutan task
 - Referensi: VID-US-02, PRD-03/06/07/09, GR-03–07, model/plan video
@@ -348,10 +348,10 @@ GET list/detail metadata dengan kind/seriesId/seasonId/search/archive filters, l
 
 ### Acceptance criteria
 
-- [ ] Detail episode membawa series/season yang benar; movie/standalone tidak mempunyai parent dan tidak membawa private file metadata.
-- [ ] Listing tied timestamps dan beberapa genre tidak menghasilkan duplicate/skip pada dataset stabil; nextCursor benar pada last page.
-- [ ] Episode kosong genre inherit series, override video mengalahkan inherit; kind/series/season filters konsisten.
-- [ ] Search parameterized, cursor tidak cocok filter ditolak; empty list dan includeArchived benar.
+- [x] Detail episode membawa series/season yang benar; movie/standalone tidak mempunyai parent dan tidak membawa private file metadata.
+- [x] Listing tied timestamps dan beberapa genre tidak menghasilkan duplicate/skip pada dataset stabil; nextCursor benar pada last page.
+- [x] Episode kosong genre inherit series, override video mengalahkan inherit; kind/series/season filters konsisten.
+- [x] Search parameterized, cursor tidak cocok filter ditolak; empty list dan includeArchived benar.
 
 ### Validasi
 
@@ -359,11 +359,11 @@ Native query/service/HTTP tests untuk join/filter/cursor mapping; DB fixture mul
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; belum ada evidence runtime/test, commit atau PR untuk task ini. Catat file/symbol aktual, command/hasil, lingkungan, keputusan, dan SHA bila Git action kemudian diotorisasi.
+Video list/detail/filter dan genre inheritance selesai. PostgreSQL runtime 6 pass: series/season grouping, no-parent movie, override/inheritance, cursor query binding dan tiga episode bertimestamp sama tanpa duplicate/skip. Query genre tidak menggandakan paging rows. Root lint/type-check hook commit.
 
 ### Blocker atau tindak lanjut
 
-Prerequisite VID-009 belum Done. Task menjadi Ready hanya setelah prerequisite dan kontrak terkait tersedia. Batas media/publikasi tetap mengikuti roadmap; tidak membuat tabel atau endpoint future dari task ini.
+Tidak ada blocker task ini. Tahap media dan integrasi web tetap mengikuti roadmap.
 
 ## Task: VID-011 — Sediakan edit metadata genre dan relasi episode secara atomik
 

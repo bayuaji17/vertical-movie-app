@@ -258,3 +258,68 @@ test("video drafts persist kinds and atomically verify episode parent and genre"
   );
   expect(race.filter((r) => r.status === "fulfilled")).toHaveLength(1);
 });
+
+test("video list/detail preserve grouping inheritance and cursor on tied timestamps", async () => {
+  const { genres } = await import("../../src/db/schema");
+  const genre = Bun.randomUUIDv7();
+  await database.db
+    .insert(genres)
+    .values({ id: genre, name: "Inherited", slug: "inherited-genre" });
+  const parent = await seriesService.create(
+    { title: "Cursor Series", slug: "cursor-series", genreIds: [genre] },
+    "content-admin",
+  );
+  const svc = new VideosService(createVideosRepository(database.db), {
+    id: () => Bun.randomUUIDv7(),
+    now: () => new Date("2026-10-03T08:00:00Z"),
+  });
+  const created = await Promise.all(
+    [1, 2, 3].map((n) =>
+      svc.create(
+        {
+          kind: "episode",
+          title: "Cursor Episode " + n,
+          seasonId: parent.defaultSeason.id,
+          episodeNumber: n,
+        },
+        "content-admin",
+      ),
+    ),
+  );
+  const firstVideo = created[0];
+  if (!firstVideo) throw new Error("Missing video");
+  const detail = await svc.get(firstVideo.id);
+  expect(detail.series?.id).toBe(parent.series.id);
+  expect(detail.effectiveGenres.map((g) => g.id)).toEqual([genre]);
+  expect(detail.genreIds).toHaveLength(0);
+  let cursor: string | undefined;
+  const seen: string[] = [];
+  do {
+    const result = await svc.list({
+      seriesId: parent.series.id,
+      limit: "1",
+      cursor,
+    });
+    seen.push(...result.items.map((v) => v.id));
+    cursor = result.nextCursor ?? undefined;
+  } while (cursor);
+  expect(new Set(seen).size).toBe(3);
+  expect(seen).toHaveLength(3);
+  expect(
+    (await svc.list({ kind: "movie", seriesId: parent.series.id })).items,
+  ).toHaveLength(0);
+  const first = await svc.list({ seriesId: parent.series.id, limit: "1" });
+  await expect(
+    svc.list({ kind: "movie", cursor: first.nextCursor ?? undefined }),
+  ).rejects.toThrow();
+  const solo = await svc.get(
+    (
+      await svc.create(
+        { kind: "movie", title: "No Parent Movie", genreIds: [genre] },
+        "content-admin",
+      )
+    ).id,
+  );
+  expect(solo.series).toBeNull();
+  expect(solo.effectiveGenres.map((g) => g.id)).toEqual([genre]);
+});
