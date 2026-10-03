@@ -1,3 +1,5 @@
+import { t } from "elysia";
+import { CreateSeasonBody, PatchSeasonBody, SeasonDto } from "./model";
 import { Elysia } from "elysia";
 import {
   createRequireAdmin,
@@ -78,6 +80,69 @@ export function createSeriesModule({
           tags: ["Series"],
           summary: "Edit series metadata with expectedVersion",
           operationId: "updateSeries",
+          security: [{ betterAuthSessionCookie: [] }],
+        },
+      },
+    )
+    .post(
+      "/admin/series/:id/seasons",
+      ({ params, body, adminSession, status }) =>
+        service
+          .createSeason(params.id, body, adminSession.user.id)
+          .then((dto) => status(201, dto)),
+      {
+        requireAdmin: true,
+        params: IdParams,
+        body: CreateSeasonBody,
+        response: { 201: SeasonDto, ...ErrorResponses },
+        detail: {
+          tags: ["Series"],
+          summary: "Create a season",
+          operationId: "createSeason",
+          security: [{ betterAuthSessionCookie: [] }],
+        },
+      },
+    )
+    .get(
+      "/admin/series/:id/seasons",
+      ({ params, query }) =>
+        service.listSeasons(params.id, query.includeArchived === "true"),
+      {
+        requireAdmin: true,
+        params: IdParams,
+        query: t.Object(
+          {
+            includeArchived: t.Optional(
+              t.Union([t.Literal("true"), t.Literal("false")]),
+            ),
+          },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: t.Object({ items: t.Array(SeasonDto) }),
+          ...ErrorResponses,
+        },
+        detail: {
+          tags: ["Series"],
+          summary: "List seasons",
+          operationId: "listSeasons",
+          security: [{ betterAuthSessionCookie: [] }],
+        },
+      },
+    )
+    .patch(
+      "/admin/seasons/:id",
+      ({ params, body, adminSession }) =>
+        service.updateSeason(params.id, body, adminSession.user.id),
+      {
+        requireAdmin: true,
+        params: IdParams,
+        body: PatchSeasonBody,
+        response: { 200: SeasonDto, ...ErrorResponses },
+        detail: {
+          tags: ["Series"],
+          summary: "Edit season metadata",
+          operationId: "updateSeason",
           security: [{ betterAuthSessionCookie: [] }],
         },
       },

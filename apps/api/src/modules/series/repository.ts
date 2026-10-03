@@ -1,5 +1,5 @@
-import { and, eq, isNull, desc, ilike, sql } from "drizzle-orm";
-import { series, seasons, seriesGenres } from "../../db/schema";
+import { and, eq, isNull, isNotNull, desc, ilike, sql } from "drizzle-orm";
+import { series, seasons, seriesGenres, videos } from "../../db/schema";
 import type {
   ContentDatabase,
   ContentConnection,
@@ -8,6 +8,41 @@ import { assertGenreIds } from "../../shared/content-db";
 import type { ParsedList } from "../../shared/content-pagination";
 export class SeriesStore {
   constructor(private readonly db: ContentConnection) {}
+  async getSeason(id: string, lock = false) {
+    const q = this.db.select().from(seasons).where(eq(seasons.id, id)).limit(1);
+    return (await (lock ? q.for("update") : q))[0];
+  }
+  async updateSeason(
+    id: string,
+    version: number,
+    values: Partial<typeof seasons.$inferInsert>,
+  ) {
+    return (
+      await this.db
+        .update(seasons)
+        .set(values)
+        .where(and(eq(seasons.id, id), eq(seasons.rowVersion, version)))
+        .returning()
+    )[0];
+  }
+  async seasonHasPublished(id: string, ever = false) {
+    return (
+      (
+        await this.db
+          .select({ id: videos.id })
+          .from(videos)
+          .where(
+            and(
+              eq(videos.seasonId, id),
+              ever
+                ? isNotNull(videos.firstPublishedAt)
+                : eq(videos.publicationStatus, "published"),
+            ),
+          )
+          .limit(1)
+      ).length > 0
+    );
+  }
   async get(id: string, lock = false) {
     const q = this.db.select().from(series).where(eq(series.id, id)).limit(1);
     return (await (lock ? q.for("update") : q))[0];

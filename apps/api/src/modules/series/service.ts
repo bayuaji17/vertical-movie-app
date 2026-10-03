@@ -19,7 +19,12 @@ import {
   page,
   type ListInput,
 } from "../../shared/content-pagination";
-import type { CreateSeriesInput, PatchSeriesInput } from "./model";
+import type {
+  CreateSeriesInput,
+  PatchSeriesInput,
+  CreateSeasonInput,
+  PatchSeasonInput,
+} from "./model";
 import type { SeriesRepository, SeriesStore } from "./repository";
 type SeriesRow = typeof series.$inferSelect;
 export function seasonDto(row: typeof seasons.$inferSelect) {
@@ -66,6 +71,84 @@ export class SeriesService {
   ) {}
   private repo() {
     return this.repository ?? unavailable();
+  }
+  async createSeason(
+    seriesId: string,
+    input: CreateSeasonInput,
+    actor: string,
+  ) {
+    validateRelease(input.releaseYear, input.releaseDate);
+    return this.repo().transact(async (store) => {
+      const parent = await store.get(seriesId, true);
+      if (!parent) notFound();
+      editable(parent);
+      const now = this.runtime.now();
+      const row = await store.insertSeason({
+        ...input,
+        title: cleanText(input.title),
+        description: cleanText(input.description),
+        id: this.runtime.id(),
+        seriesId,
+        createdBy: actor,
+        updatedBy: actor,
+        createdAt: now,
+        updatedAt: now,
+      });
+      return seasonDto(row);
+    });
+  }
+  async listSeasons(seriesId: string, includeArchived = false) {
+    const store = this.repo().store;
+    if (!(await store.get(seriesId))) notFound();
+    return {
+      items: (await store.listSeasons(seriesId, includeArchived)).map(
+        seasonDto,
+      ),
+    };
+  }
+  async updateSeason(id: string, input: PatchSeasonInput, actor: string) {
+    requireChanges(input);
+    const repo = this.repo(),
+      initial = await repo.store.getSeason(id);
+    if (!initial) notFound();
+    return repo.transact(async (store) => {
+      const parent = await store.get(initial.seriesId, true);
+      if (!parent) notFound();
+      editable(parent);
+      const old = await store.getSeason(id, true);
+      if (!old) notFound();
+      editable(old, input.expectedVersion);
+      validateRelease(
+        input.releaseYear === undefined ? old.releaseYear : input.releaseYear,
+        input.releaseDate === undefined ? old.releaseDate : input.releaseDate,
+      );
+      if (
+        input.seasonNumber !== undefined &&
+        input.seasonNumber !== old.seasonNumber &&
+        (await store.seasonHasPublished(id, true))
+      )
+        throw new ContentError(
+          "CONTENT_STATE_CONFLICT",
+          "Season number cannot change after an episode has been published.",
+        );
+      const { expectedVersion, ...values } = input;
+      const row = await store.updateSeason(id, expectedVersion, {
+        ...values,
+        ...(input.title !== undefined ? { title: cleanText(input.title) } : {}),
+        ...(input.description !== undefined
+          ? { description: cleanText(input.description) }
+          : {}),
+        updatedAt: this.runtime.now(),
+        updatedBy: actor,
+        rowVersion: expectedVersion + 1,
+      });
+      if (!row)
+        throw new ContentError(
+          "CONTENT_VERSION_CONFLICT",
+          "Content has changed.",
+        );
+      return seasonDto(row);
+    });
   }
   async create(input: CreateSeriesInput, actor: string) {
     const normalized = cleanMetadata(input),

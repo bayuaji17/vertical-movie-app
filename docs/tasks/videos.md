@@ -233,7 +233,7 @@ Tidak ada blocker task ini. Tahap media dan integrasi web tetap mengikuti roadma
 
 ## Task: VID-007 — Sediakan pengelolaan season dan nomor season
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai DAG dan urutan task
 - Referensi: VID-US-01, PRD-03/06/07/09, GR-03–07, model/plan video
@@ -248,9 +248,9 @@ Tambahkan create/list season per series dan PATCH season. Nomor positif unik per
 
 ### Acceptance criteria
 
-- [ ] Series sederhana memiliki Season1 dan dapat menambah Season2; season list urut nomor, tidak memakai createdAt sebagai urutan episode.
-- [ ] Parent absent404/archived409, nomor duplicate409, invalid input422; episode tidak orphan.
-- [ ] PATCH version conflict serta renumber season dengan pernah-published child409; mutasi tanpa child published sah.
+- [x] Series sederhana memiliki Season1 dan dapat menambah Season2; season list urut nomor, tidak memakai createdAt sebagai urutan episode.
+- [x] Parent absent404/archived409, nomor duplicate409, invalid input422; episode tidak orphan.
+- [x] PATCH version conflict serta renumber season dengan pernah-published child409; mutasi tanpa child published sah.
 
 ### Validasi
 
@@ -258,11 +258,11 @@ Domain/HTTP native tests untuk parent states/number/version; PostgreSQL UNIQUE/r
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; belum ada evidence runtime/test, commit atau PR untuk task ini. Catat file/symbol aktual, command/hasil, lingkungan, keputusan, dan SHA bila Git action kemudian diotorisasi.
+Season create/list/edit selesai dengan parent-first lock, nomor unik per series dan optimistic version. PostgreSQL runtime 3 pass/17 assertions termasuk archived parent dan larangan renumber season dengan episode pernah terbit. API module HTTP tests dan root lint/type-check hook commit.
 
 ### Blocker atau tindak lanjut
 
-Prerequisite VID-006 belum Done. Task menjadi Ready hanya setelah prerequisite dan kontrak terkait tersedia. Batas media/publikasi tetap mengikuti roadmap; tidak membuat tabel atau endpoint future dari task ini.
+Tidak ada blocker task ini. Tahap media dan integrasi web tetap mengikuti roadmap.
 
 ## Task: VID-008 — Sediakan create dan list taxonomy genre
 

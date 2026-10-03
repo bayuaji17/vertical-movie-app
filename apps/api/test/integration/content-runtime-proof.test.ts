@@ -2,7 +2,7 @@ import { beforeAll, afterAll, test, expect } from "bun:test";
 import { resetContentDatabase } from "./content-fixture";
 import { createSeriesRepository } from "../../src/modules/series/repository";
 import { SeriesService } from "../../src/modules/series/service";
-import { series } from "../../src/db/schema";
+import { series, videos } from "../../src/db/schema";
 import { eq } from "drizzle-orm";
 let database: Awaited<ReturnType<typeof resetContentDatabase>>,
   seriesService: SeriesService;
@@ -79,4 +79,74 @@ test("series HTTP success and duplicate slug map to safe errors", async () => {
   const duplicate = await send();
   expect(duplicate.status).toBe(409);
   expect((await duplicate.json()).error.code).toBe("SLUG_CONFLICT");
+});
+
+test("seasons have ordered unique numbers and reject stale updates", async () => {
+  const created = await seriesService.create(
+    { title: "Seasons", slug: "runtime-seasons" },
+    "content-admin",
+  );
+  const second = await seriesService.createSeason(
+    created.series.id,
+    { seasonNumber: 2, title: "  New Chapter  " },
+    "content-admin",
+  );
+  expect(second.title).toBe("New Chapter");
+  expect(
+    (await seriesService.listSeasons(created.series.id)).items.map(
+      (s) => s.seasonNumber,
+    ),
+  ).toEqual([1, 2]);
+  await expect(
+    seriesService.createSeason(
+      created.series.id,
+      { seasonNumber: 2 },
+      "content-admin",
+    ),
+  ).rejects.toThrow();
+  const updated = await seriesService.updateSeason(
+    second.id,
+    { expectedVersion: 1, title: null },
+    "content-admin",
+  );
+  expect(updated.title).toBeNull();
+  await expect(
+    seriesService.updateSeason(
+      second.id,
+      { expectedVersion: 1, seasonNumber: 3 },
+      "content-admin",
+    ),
+  ).rejects.toThrow();
+  await database.db
+    .insert(videos)
+    .values({
+      id: Bun.randomUUIDv7(),
+      kind: "episode",
+      seasonId: second.id,
+      episodeNumber: 1,
+      title: "Previously live",
+      slug: "ever-published-episode",
+      createdBy: "content-admin",
+      updatedBy: "content-admin",
+      firstPublishedAt: new Date(),
+      publicationStatus: "unpublished",
+    });
+  await expect(
+    seriesService.updateSeason(
+      second.id,
+      { expectedVersion: 2, seasonNumber: 3 },
+      "content-admin",
+    ),
+  ).rejects.toThrow();
+  await database.db
+    .update(series)
+    .set({ archivedAt: new Date() })
+    .where(eq(series.id, created.series.id));
+  await expect(
+    seriesService.createSeason(
+      created.series.id,
+      { seasonNumber: 3 },
+      "content-admin",
+    ),
+  ).rejects.toThrow();
 });
