@@ -435,7 +435,7 @@ Tidak ada blocker task ini. Tahap media dan integrasi web tetap mengikuti roadma
 
 ## Task: VID-013 — Pasang modul ke factory bootstrap kontrak Eden dan Scalar
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai DAG dan urutan task
 - Referensi: VID-US-04, PRD-03/06/07/09, GR-03–07, model/plan video
@@ -450,10 +450,10 @@ Inject repository/services/getSession/clock/ID dari composition root memakai poo
 
 ### Acceptance criteria
 
-- [ ] Semua endpoints tahap A mounted dan unauthorized tidak menyentuh service; guard tidak bocor ke root/auth publik.
-- [ ] Type App/Eden menangkap response dan create union tanpa broad Elysia type/as-any; invalid body fixture ditolak compiler.
-- [ ] Scalar memuat business schemas/security/errors bersama auth fragment tanpa broken refs atau auth disabled routes terbuka.
-- [ ] Import factory/types tanpa env/live DB/port; bootstrap satu pool dan shutdown unchanged.
+- [x] Semua endpoints tahap A mounted dan unauthorized tidak menyentuh service; guard tidak bocor ke root/auth publik.
+- [x] Type App/Eden menangkap response dan create union tanpa broad Elysia type/as-any; invalid body fixture ditolak compiler.
+- [x] Scalar memuat business schemas/security/errors bersama auth fragment tanpa broken refs atau auth disabled routes terbuka.
+- [x] Import factory/types tanpa env/live DB/port; bootstrap satu pool dan shutdown unchanged.
 
 ### Validasi
 
@@ -461,11 +461,11 @@ API native route matrix + OpenAPI regression; compile-only contract positif/@ts-
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; belum ada evidence runtime/test, commit atau PR untuk task ini. Catat file/symbol aktual, command/hasil, lingkungan, keputusan, dan SHA bila Git action kemudian diotorisasi.
+16 endpoint bisnis dipasang statis sebelum Scalar; bootstrap menyuntikkan satu pool/repositories/services dan native session reader. API units 30 pass/120 assertions, semua endpoint anonymous401/no-store, strict payload422, absent dependency503, cookie security dan operation ID unik. Root check-types lulus termasuk Eden compile-only positive/negative; build dua app lulus (warning bundler Base UI existing). Root lint/type-check hook commit.
 
 ### Blocker atau tindak lanjut
 
-Prerequisite VID-008, VID-010, VID-012 belum Done. Task menjadi Ready hanya setelah prerequisite dan kontrak terkait tersedia. Batas media/publikasi tetap mengikuti roadmap; tidak membuat tabel atau endpoint future dari task ini.
+Tidak ada blocker task ini. Tahap media dan integrasi web tetap mengikuti roadmap.
 
 ## Task: VID-014 — Buktikan alur metadata pada PostgreSQL dedicated
 
