@@ -2,14 +2,14 @@
 
 ## Plan Metadata
 
-- Status: **executing** — draft metadata disetujui pengguna 3 Oktober 2026.
+- Status: **completed — tahap A, validasi lokal**. Draft metadata disetujui pengguna 3 Oktober 2026; tahap media B–D belum diimplementasikan.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `main`.
 - Base SHA: `d1d3e0a36a4adf1c7198db7a1d36c49e9f1c93ed`.
 - Context: [VIDEO_REPOSITORY_CONTEXT.md](VIDEO_REPOSITORY_CONTEXT.md).
 - Data model: [VIDEO_DATA_MODEL.md](VIDEO_DATA_MODEL.md).
 - Task backlog: [tasks/videos.md](tasks/videos.md).
-- Last validated SHA: `d1d3e0a36a4adf1c7198db7a1d36c49e9f1c93ed` untuk evidence kode planning; SQL/schema/runtime belum diimplementasikan.
+- Baseline planning SHA: `d1d3e0a36a4adf1c7198db7a1d36c49e9f1c93ed`. SHA hasil tiap task dan validasi implementasi ada pada ledger di bawah.
 - Dibuat: 3 Oktober 2026, Asia/Jakarta.
 - Otorisasi 3 Oktober 2026: branch baru, implementasi tahap A, commit per task. Branch `feat/video-metadata`; tidak mencakup push/PR atau migrasi DB development.
 
@@ -23,11 +23,11 @@ Membangun backend konten yang dapat menyimpan video mandiri, movie panjang, sert
 
 **Tahap B–D:** storage/upload, queue/worker, publication/catalog/playback. Model relasinya dirancang sekarang, kode dan tabelnya dibuat saat task media relevan. Tidak menambah package bersama, frontend dashboard, player, dependency storage, analytics, billing, akun pengunjung, scheduled publication, franchise, dubbing, credits atau GitHub CI pada tahap A.
 
-## Current Behavior
+## Baseline Behavior — sebelum implementasi
 
 Factory Elysia melayani root, native `/api/auth/*` dan Scalar. Guard admin reusable dan Bun SQL/Drizzle sudah tersedia; tidak ada schema/rute konten. `schema/index.ts` hanya auth; history tiga migrasi auth harus utuh. Web memiliki Eden base `/api` tetapi gateway hanya auth. Evidence auth lokal ada pada backlog auth; bukan bukti domain video/produksi.
 
-## Desired Behavior
+## Implemented Behavior — tahap A
 
 Admin membuat series (sekaligus Season 1 secara atomik), menambah season, membuat episode di season yang sah, atau membuat movie/standalone tanpa season. Admin dapat mengisi metadata/genre, melihat daftar/detail, mengedit dengan expectedVersion, dan archive draf. Episode tidak dapat kehilangan parent; movie tidak dapat membawa nomor episode. Tahap A menyimpan publication status draft dan tidak membuka katalog/playback publik.
 
@@ -51,8 +51,8 @@ Path yang belum ada adalah target; penamaan final diperiksa sebelum implementasi
 | `apps/api/src/db/schema/series.ts`, `seasons.ts`, `videos.ts`, `genres.ts`                | create                         | Tabel, CHECK, FK, indexes                   | Model §§3–6; schema saat ini auth saja.                                                     |
 | `apps/api/src/db/schema/index.ts`                                                         | modify                         | Ekspor konten bersama auth                  | `createDatabase`, Drizzle Kit resolve schema index.                                         |
 | `apps/api/drizzle/<next>_*.sql`, `drizzle/meta/*`                                         | create/modify                  | SQL, snapshots, journal generator           | Tambahan setelah 0002; bukan mengubah SQL auth lama.                                        |
-| `apps/api/src/modules/series/{index,admin,model,service,repository}.ts`                   | create                         | `createSeriesModule`, service series/season | Pemilik grouping; create Season 1 dalam transaksi.                                          |
-| `apps/api/src/modules/videos/{index,admin,model,service,repository}.ts`                   | create                         | `createVideosModule`, service video         | Unit playable, validation dan query episode.                                                |
+| `apps/api/src/modules/series/{index,model,service,repository}.ts`                         | create                         | `createSeriesModule`, service series/season | Pemilik grouping; create Season 1 dalam transaksi.                                          |
+| `apps/api/src/modules/videos/{index,model,service,repository}.ts`                         | create                         | `createVideosModule`, service video         | Unit playable, validation dan query episode.                                                |
 | `apps/api/src/modules/genres/{index,model,service,repository}.ts`                         | create                         | `createGenresModule`                        | Taxonomy create/list; validasi relasi.                                                      |
 | `apps/api/src/modules/*/*.test.ts`                                                        | create                         | Test domain/HTTP                            | Bun native; injeksi DB/clock/ID/admin reader.                                               |
 | `apps/api/src/shared/content-error.ts`, `plugins/errors.ts`                               | create                         | Error domain dan mapper HTTP                | Respons deterministik/redacted, requestId.                                                  |
@@ -302,12 +302,12 @@ Ikuti AGENTS/API Development/Workflow; injeksi dependency, method chaining dan s
 
 ## Acceptance Criteria
 
-- [ ] D1–D3 disepakati dan seluruh task tahap A yang diperlukan Done dengan bukti.
-- [ ] Admin dapat membuat series/season/episode/movie/standalone, mengedit metadata/genre, list/detail/filter, dan archive sesuai kontrak.
-- [ ] Hierarchy/uniqueness/version constraints tetap benar pada request bersamaan dan transaction rollback.
-- [ ] Semua business routes privat, typed di Eden, terdokumentasi Scalar; auth existing tetap berjalan.
-- [ ] Migrasi additive lulus fresh/re-run/existing auth fixture; root relevant gates dan proof PostgreSQL lulus.
-- [ ] Tidak ada katalog/playback/upload semu; integrasi gateway/UI dan media jelas belum diimplementasikan.
+- [x] D1–D3 disepakati dan seluruh task tahap A yang diperlukan Done dengan bukti.
+- [x] Admin dapat membuat series/season/episode/movie/standalone, mengedit metadata/genre, list/detail/filter, dan archive sesuai kontrak.
+- [x] Hierarchy/uniqueness/version constraints tetap benar pada request bersamaan dan transaction rollback.
+- [x] Semua business routes privat, typed di Eden, terdokumentasi Scalar; auth existing tetap berjalan.
+- [x] Migrasi additive lulus fresh/re-run/existing auth fixture; root relevant gates dan proof PostgreSQL lulus.
+- [x] Tidak ada katalog/playback/upload semu; integrasi gateway/UI dan media jelas belum diimplementasikan.
 
 ## Risks and Mitigations
 
@@ -320,7 +320,7 @@ Ikuti AGENTS/API Development/Workflow; injeksi dependency, method chaining dan s
 
 ## Rollback or Recovery
 
-Planning hanya dokumen, dapat direvisi sebelum implementasi. Migrasi metadata akan additive dan tidak mengubah tabel auth; test memakai database disposable. Sebelum migrasi development/deployment, review SQL/backup/target serta persetujuan operasi sesuai scope sesi saat itu. Jika runtime gagal setelah migration additive, rollback binary yang belum memakai schema baru dan pertahankan data; jangan DROP tabel konten terisi untuk rollback otomatis. Koreksi lewat forward migration; hard deletion membutuhkan rencana eksplisit.
+Migrasi metadata additive dan tidak mengubah tabel auth; test memakai database disposable. Migrasi development/deployment belum dijalankan. Sebelum rollout, periksa SQL/backup/target sesuai [Video Operations](VIDEO_OPERATIONS.md). Jika runtime gagal setelah migration additive, rollback binary yang belum memakai schema baru dan pertahankan data; jangan DROP tabel konten terisi untuk rollback otomatis. Koreksi lewat forward migration; hard deletion membutuhkan rencana eksplisit.
 
 ## Evidence
 
@@ -328,7 +328,7 @@ Base SHA dan evidence simbol/path ada di [context](VIDEO_REPOSITORY_CONTEXT.md#e
 
 ## Open Decisions
 
-D1–D3 pada model adalah gerbang tahap A. D4 publication parent/hak/poster/subtitle dan D5 provider/limits/movie upload/profiles/delivery adalah gerbang tahap media. Umur/retensi dedup operation key dan kebijakan archive/restore/GC lanjutan perlu refinement sebelum publikasi/cleanup. Tidak ada estimasi kalender atau asumsi produksi sudah siap.
+D1–D3 disetujui dan diimplementasikan. D4 publication parent/hak/poster/subtitle dan D5 provider/limits/movie upload/profiles/delivery tetap gerbang tahap media. MEDIA-001 berikutnya harus menetapkan provider, kompatibilitas native S3, limits, multipart/resume browser, serta identitas source immutable. Umur/retensi dedup operation key dan kebijakan archive/restore/GC lanjutan perlu refinement sebelum publikasi/cleanup. Tidak ada estimasi kalender atau asumsi produksi sudah siap.
 
 ## Validation History
 
@@ -371,4 +371,32 @@ D1–D3 pada model adalah gerbang tahap A. D4 publication parent/hak/poster/subt
 
 - VID-013: 16 endpoint bisnis dipasang statis sebelum Scalar; bootstrap menyuntikkan satu pool/repositories/services dan native session reader. API units 30 pass/120 assertions, semua endpoint anonymous401/no-store, strict payload422, absent dependency503, cookie security dan operation ID unik. Root check-types lulus termasuk Eden compile-only positive/negative; build dua app lulus (warning bundler Base UI existing). Root lint/type-check hook commit. Commit dibuat sesudah validasi; commit sebelumnya: a5d7bbe feat(api): add safe content archive operations.
 
-- VID-014: Proof PostgreSQL dedicated lulus: 18 test/177 assertions pada schema, runtime dan HTTP native; races expectedVersion/episode/parent archive serta rollback genre terbukti. Regression auth schema/runtime/authorization/OpenAPI 20 test/160 assertions lulus, termasuk ID/hash/session existing melalui enam migrasi. API unit 30 test/120 assertions dan root check-types lulus; frozen install tidak mengubah lockfile. Scripts proof dan sample CONTENT_TEST_DATABASE_URL tersedia; seluruh reset hanya database test localhost, DB development tidak dimigrasi. Commit dibuat sesudah validasi; commit sebelumnya: 1ea6982 feat(api): compose typed content modules.
+- VID-014: Proof PostgreSQL dedicated lulus: 19 test/183 assertions pada schema, runtime dan HTTP native; races expectedVersion/episode/parent archive serta rollback genre terbukti. Regression auth schema/runtime/authorization/OpenAPI 20 test/160 assertions lulus, termasuk ID/hash/session existing melalui enam migrasi. API unit 30 test/120 assertions dan root check-types lulus; frozen install tidak mengubah lockfile. Scripts proof dan sample CONTENT_TEST_DATABASE_URL tersedia; seluruh reset hanya database test localhost, DB development tidak dimigrasi. Commit dibuat sesudah validasi; commit sebelumnya: 1ea6982 feat(api): compose typed content modules.
+
+## Validation History — tahap A selesai lokal
+
+Pada 3 Oktober 2026: 30 source tests/120 assertions, 19 content integration tests/183 assertions, dan 20 auth regression tests/160 assertions lulus. Root lint (web), check-types (API/web/auth/Eden), build kedua app, dan frozen install lulus. Bukti migrasi memakai database dedicated; DB development/production belum dimigrasi. Tidak ada perubahan dependency/lockfile, CI, player atau storage. Docs link/format dan diff diperiksa pada VID-015. Runbook serta batas smoke/load/browser ada pada [Video Operations](VIDEO_OPERATIONS.md).
+
+## Commit ledger tahap A
+
+Validasi akhir dokumentasi: 93 tautan lokal/anchor dan 15 task Done lulus; formatter dan `git diff --check` lulus. Pemeriksaan read-only journal development masih menunjukkan tiga migrasi auth; migrasi konten tidak diterapkan pada target tersebut.
+
+| Task    | Commit                        | Hasil                                                                            |
+| ------- | ----------------------------- | -------------------------------------------------------------------------------- |
+| VID-001 | ea3c891                       | docs(video): approve metadata implementation plan                                |
+| VID-002 | 339049f                       | feat(api): add series and seasons schema                                         |
+| VID-003 | 38f3ba9                       | feat(api): add video metadata schema                                             |
+| VID-004 | 9b69b36                       | feat(api): add content genre taxonomy                                            |
+| VID-005 | b990ff3                       | feat(api): define content validation contracts                                   |
+| VID-006 | 7c829a2                       | feat(api): implement series draft management                                     |
+| VID-007 | c3bb65b                       | feat(api): implement season management                                           |
+| VID-008 | 09c48f8                       | feat(api): implement genre taxonomy endpoints                                    |
+| VID-009 | 0dd90c5                       | feat(api): implement video draft creation                                        |
+| VID-010 | ae05dad                       | feat(api): add video metadata queries                                            |
+| VID-011 | 22b7505                       | feat(api): implement atomic video metadata edits                                 |
+| VID-012 | a5d7bbe                       | feat(api): add safe content archive operations                                   |
+| VID-013 | 1ea6982                       | feat(api): compose typed content modules                                         |
+| VID-014 | 226fc43                       | test(api): prove content metadata with native auth                               |
+| VID-015 | Commit yang memuat ledger ini | Dokumentasi, runbook, dan penutupan iterasi; SHA final ditentukan sesudah commit |
+
+- VID-015: Dokumentasi model/status/rute, runbook VIDEO_OPERATIONS, contoh request/response dan migrasi additive diperbarui. Tahap A selesai; 30 units, 19 content proof dan 20 auth regression tests lulus; root lint/type-check/build/frozen install lulus. Ledger commit setiap task dicatat; MEDIA-001 memerlukan keputusan provider/native S3/limits/multipart-resume/source immutable, tanpa dependency speculative. Link/anchor checker, formatter dan git diff --check menjadi gate akhir. DB development/production belum dimigrasi; gateway/UI/media tetap roadmap. Commit dibuat sesudah validasi; commit sebelumnya: 226fc43 test(api): prove content metadata with native auth.

@@ -6,8 +6,12 @@
 - Base ref: `main`.
 - Base SHA: `d1d3e0a36a4adf1c7198db7a1d36c49e9f1c93ed`.
 - Analyzed at: 2026-10-03, Asia/Jakarta.
-- Context status: current pada snapshot ini; periksa freshness sebelum implementasi.
-- Scope sesi: inspeksi dan penulisan dokumen. Tidak mengubah runtime, database, dependency, atau Git ref.
+- Context status: snapshot historis sebelum implementasi; peta di bawah menjelaskan base SHA, bukan keadaan branch hasil.
+- Scope snapshot: inspeksi dan penulisan dokumen sebelum persetujuan implementasi.
+
+## Hasil implementasi — 3 Oktober 2026
+
+Pengguna menyetujui metadata D1–D3 dan implementasi dengan branch baru serta commit per task. Branch `feat/video-metadata` menambahkan enam tabel metadata, migrasi additive `0003`–`0005`, module `series`, `genres`, dan `videos`, serta 16 endpoint admin. Bootstrap memakai pool auth yang sama dan native session reader. Eden compile-only dan Scalar gabungan tervalidasi. Schema/HTTP/repository diuji pada PostgreSQL dedicated; data auth lama terjaga pada regression migration proof. Database development tidak dimigrasikan pada iterasi ini. Storage S3, worker, publikasi/katalog, dan gateway bisnis web tetap task berikutnya. Peta evidence aktual dan batas validasi ada pada [plan](VIDEO_IMPLEMENTATION_PLAN.md), [backlog](tasks/videos.md), dan [Video Operations](VIDEO_OPERATIONS.md).
 
 ## Product and Users
 

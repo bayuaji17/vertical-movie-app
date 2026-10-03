@@ -496,7 +496,7 @@ bun run --cwd apps/api content:schema:proof dan content:runtime:proof sesudah sc
 
 ### Hasil dan bukti
 
-Proof PostgreSQL dedicated lulus: 18 test/177 assertions pada schema, runtime dan HTTP native; races expectedVersion/episode/parent archive serta rollback genre terbukti. Regression auth schema/runtime/authorization/OpenAPI 20 test/160 assertions lulus, termasuk ID/hash/session existing melalui enam migrasi. API unit 30 test/120 assertions dan root check-types lulus; frozen install tidak mengubah lockfile. Scripts proof dan sample CONTENT_TEST_DATABASE_URL tersedia; seluruh reset hanya database test localhost, DB development tidak dimigrasi.
+Proof PostgreSQL dedicated lulus: 19 test/183 assertions pada schema, runtime dan HTTP native; races expectedVersion/episode/parent archive serta rollback genre terbukti. Regression auth schema/runtime/authorization/OpenAPI 20 test/160 assertions lulus, termasuk ID/hash/session existing melalui enam migrasi. API unit 30 test/120 assertions dan root check-types lulus; frozen install tidak mengubah lockfile. Scripts proof dan sample CONTENT_TEST_DATABASE_URL tersedia; seluruh reset hanya database test localhost, DB development tidak dimigrasi.
 
 ### Blocker atau tindak lanjut
 
@@ -504,7 +504,7 @@ Tidak ada blocker task ini. Tahap media dan integrasi web tetap mengikuti roadma
 
 ## Task: VID-015 — Dokumentasikan hasil dan tutup iterasi metadata
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai DAG dan urutan task
 - Referensi: VID-US-05, PRD-03/06/07/09, GR-03–07, model/plan video
@@ -519,10 +519,10 @@ Perbarui active route/schema status, command test/migration, examples request/re
 
 ### Acceptance criteria
 
-- [ ] Model/endpoint/examples sesuai kode, seluruh prerequisite/AC tahap A lulus sebelum plan completed; proof yang belum berjalan tidak ditandai pass.
-- [ ] Catatan gate lint/type-check/build/unit/integration dan diff nyata tersimpan dengan batas lingkungan.
-- [ ] Docs internal links valid; secrets/generated artifacts tidak masuk diff; history auth tetap utuh.
-- [ ] Next task MEDIA-001 mempunyai daftar open decisions provider/limits/upload resume/immutable source, tanpa instalasi speculative.
+- [x] Model/endpoint/examples sesuai kode, seluruh prerequisite/AC tahap A lulus sebelum plan completed; proof yang belum berjalan tidak ditandai pass.
+- [x] Catatan gate lint/type-check/build/unit/integration dan diff nyata tersimpan dengan batas lingkungan.
+- [x] Docs internal links valid; secrets/generated artifacts tidak masuk diff; history auth tetap utuh.
+- [x] Next task MEDIA-001 mempunyai daftar open decisions provider/limits/upload resume/immutable source, tanpa instalasi speculative.
 
 ### Validasi
 
@@ -530,8 +530,8 @@ Root bun run lint/check-types/build, API units dan proof hanya diulang bila sour
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; belum ada evidence runtime/test, commit atau PR untuk task ini. Catat file/symbol aktual, command/hasil, lingkungan, keputusan, dan SHA bila Git action kemudian diotorisasi.
+Dokumentasi model/status/rute, runbook VIDEO_OPERATIONS, contoh request/response dan migrasi additive diperbarui. Tahap A selesai; 30 units, 19 content proof dan 20 auth regression tests lulus; root lint/type-check/build/frozen install lulus. Ledger commit setiap task dicatat; MEDIA-001 memerlukan keputusan provider/native S3/limits/multipart-resume/source immutable, tanpa dependency speculative. Link/anchor checker, formatter dan git diff --check menjadi gate akhir. DB development/production belum dimigrasi; gateway/UI/media tetap roadmap.
 
 ### Blocker atau tindak lanjut
 
-Prerequisite VID-014 belum Done. Task menjadi Ready hanya setelah prerequisite dan kontrak terkait tersedia. Tahap berikutnya MEDIA-001; transport web bisnis belum otomatis tersedia.
+Tidak ada blocker task ini. Tahap media dan integrasi web tetap mengikuti roadmap.

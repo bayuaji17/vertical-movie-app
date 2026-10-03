@@ -1,6 +1,6 @@
 # Rancangan Data — Video, Series, dan Movie
 
-> Status: **Disetujui untuk tahap metadata** · 3 Oktober 2026 · Base SHA `d1d3e0a36a4adf1c7198db7a1d36c49e9f1c93ed`. Pengguna meminta dukungan series dan movie dalam rancangan; rancangan metadata D1–D3 disetujui pada 3 Oktober 2026. Belum ada tabel atau migrasi konten yang dibuat/dijalankan.
+> Status: **Tahap A diimplementasikan dan tervalidasi lokal** · 3 Oktober 2026 · Base SHA `d1d3e0a36a4adf1c7198db7a1d36c49e9f1c93ed`. D1–D3 disetujui pengguna. Enam tabel metadata dan migrasi `0003`–`0005` tersedia; proof memakai PostgreSQL dedicated. Database development/production belum menerima migrasi konten. Tabel dan aturan tahap B–D di bawah tetap rancangan lanjutan.
 
 Referensi: [context](VIDEO_REPOSITORY_CONTEXT.md), [plan](VIDEO_IMPLEMENTATION_PLAN.md), [backlog](tasks/videos.md), PRD-03–07/09 dan GR-03–07. Model mendukung video mandiri, movie panjang, serta episode. Durasi dan rasio aspek adalah metadata teknis file, bukan penentu jenis konten.
 
@@ -23,12 +23,12 @@ erDiagram
 
 `media_assets` mempunyai tepat satu pemilik: video ATAU series. Relasi nullable pada diagram tidak berarti aset boleh tanpa pemilik. Movie/standalone tidak mempunyai season. Setiap episode mempunyai satu season; series sederhana menggunakan Season 1, yang dibuat dalam transaksi saat series dibuat. Ini menyiapkan multi-season tanpa migrasi relasi episode di kemudian hari.
 
-| Tahap                         | Tabel/migrasi                                                            | Hasil                                                          |
-| ----------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------- |
-| A — metadata, task berikutnya | `series`, `seasons`, `videos`, `genres`, `series_genres`, `video_genres` | CRUD admin untuk semua jenis konten; semua konten masih draft. |
-| B — unggah                    | `media_assets`, `upload_sessions`; pointer sumber/poster pada konten     | Aset privat dan unggah terverifikasi.                          |
-| C — pemrosesan                | `media_jobs`, `media_renditions`                                         | Queue persisten, hasil transcode versi tertentu, retry.        |
-| D — publikasi                 | service publish/unpublish, query publik, delivery policy                 | Katalog dan playback hanya untuk konten efektif terbit.        |
+| Tahap                       | Tabel/migrasi                                                            | Hasil                                                             |
+| --------------------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| A — metadata, selesai lokal | `series`, `seasons`, `videos`, `genres`, `series_genres`, `video_genres` | CRUD admin untuk semua jenis konten; konten dibuat sebagai draft. |
+| B — unggah                  | `media_assets`, `upload_sessions`; pointer sumber/poster pada konten     | Aset privat dan unggah terverifikasi.                             |
+| C — pemrosesan              | `media_jobs`, `media_renditions`                                         | Queue persisten, hasil transcode versi tertentu, retry.           |
+| D — publikasi               | service publish/unpublish, query publik, delivery policy                 | Katalog dan playback hanya untuk konten efektif terbit.           |
 
 Tahap A bukan perintah membuat seluruh tabel media. Tabel masa depan adalah kontrak rancangan yang divalidasi kembali saat modulnya dimulai. Seluruh tabel domain dimiliki `apps/api`; tidak mengubah schema auth.
 

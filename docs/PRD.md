@@ -6,7 +6,7 @@
 
 Vertical Movie App adalah aplikasi untuk menonton video vertikal. Pengalaman menonton dirancang **mobile first** dan tetap nyaman di desktop. Pengunjung dapat menemukan dan menonton video yang telah diterbitkan **tanpa login**. Hanya ada **satu admin** yang masuk ke dashboard untuk mengatur sistem, mengunggah dan mengelola video, serta menerbitkannya.
 
-Fondasi auth admin sudah diimplementasikan; fitur konten masih belum tersedia. Istilah _video_ berarti satu unit yang dapat diputar dan diterbitkan. Pada 3 Oktober 2026 pengguna meminta rancangan yang mengakomodasi series dengan banyak video serta movie panjang. Usulan relasinya adalah series → season → episode, bersama movie dan video mandiri tanpa season; detail model dan aturan masih untuk ditinjau pada [Rancangan Data Video](VIDEO_DATA_MODEL.md).
+Fondasi auth dan backend metadata sudah diimplementasikan. Metadata series → season → episode, movie panjang, dan standalone disetujui pada 3 Oktober 2026 dan diuji lokal; UI konten, upload/sampul, pemrosesan, publikasi dan katalog tetap lanjutan. Istilah _video_ berarti satu unit yang dapat diputar dan diterbitkan setelah tahap media siap. Detail model ada pada [Rancangan Data Video](VIDEO_DATA_MODEL.md); endpoint dan batas implementasi ada pada [Video Operations](VIDEO_OPERATIONS.md).
 
 ## Peran dan akses
 
@@ -82,6 +82,6 @@ Rekomendasi personal, feed algoritmik, komentar, akun pengunjung, langganan, pem
 4. Provider object storage final (Cloudflare R2 atau layanan kompatibel S3), profil keluaran FFmpeg, distribusi, retensi, dan biaya per unggahan. Queue pemrosesan memakai PostgreSQL.
 5. Apakah caption wajib untuk terbit dan bagaimana admin menyediakannya.
 6. Kebijakan hak cipta, konten terlarang, pelaporan, moderasi, dan pengindeksan halaman publik.
-7. Detail season default, genre/metadata, visibilitas parent series dan episode, serta kebijakan movie landscape pada [model video](VIDEO_DATA_MODEL.md#12-keputusan-untuk-ditinjau).
+7. Season default dan metadata/genre D1–D3 sudah disetujui; visibilitas parent series/episode dan kebijakan media movie D4–D5 masih perlu refinement pada [model video](VIDEO_DATA_MODEL.md#12-keputusan-untuk-ditinjau).
 
 Lihat [Architecture](ARCHITECTURE.md) untuk batas sistem dan stack, [Global Rules](GLOBAL_RULES.md) untuk aturan lintas fitur, dan [Design System](DESIGN_SYSTEM.md) untuk rancangan antarmuka.
