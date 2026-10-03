@@ -54,12 +54,13 @@ function AdminDashboardContent({
           if (result.error) throw result.error
           await clearAdminPrivateQueries(queryClient)
           publishAuthChange()
-          await router.invalidate()
           await router.navigate({
             to: '/admin/login',
             search: { redirect: '/admin' },
             replace: true,
           })
+          // Refresh cached route matches after leaving the protected layout.
+          await router.invalidate()
         })(),
         {
           loading: {

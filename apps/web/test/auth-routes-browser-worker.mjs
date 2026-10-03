@@ -225,6 +225,26 @@ try {
         'session',
       ]).fetchStatus === 'fetching',
   )
+  for (const target of [page, tab]) {
+    await target.evaluate(() => {
+      window.__logoutErrorScreens = []
+      const record = () => {
+        for (const heading of document.querySelectorAll('main h1')) {
+          if (
+            heading.textContent === 'Sesi admin belum dapat diperiksa' ||
+            heading.textContent === 'Akses admin ditolak'
+          )
+            window.__logoutErrorScreens.push(heading.textContent)
+        }
+      }
+      window.__logoutObserver = new MutationObserver(record)
+      window.__logoutObserver.observe(document.body, {
+        childList: true,
+        subtree: true,
+      })
+      record()
+    })
+  }
   const successfulLogout = await withLoadingToast(
     '/api/auth/sign-out',
     'Memproses logout...',
@@ -236,6 +256,16 @@ try {
   await page.getByRole('heading', { name: 'Masuk ke admin' }).waitFor()
   await control({ held: false })
   await tab.getByRole('heading', { name: 'Masuk ke admin' }).waitFor()
+  for (const target of [page, tab]) {
+    assert.deepEqual(
+      await target.evaluate(() => {
+        window.__logoutObserver.disconnect()
+        return window.__logoutErrorScreens
+      }),
+      [],
+      'Logout must reach login without rendering a session/access error screen',
+    )
+  }
   await page.waitForTimeout(300)
   assert.equal(
     await page.evaluate(() =>

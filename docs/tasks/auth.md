@@ -1655,3 +1655,36 @@ Sebelum perubahan, route login hanya memvalidasi search dan merender form; tidak
 ### Blocker atau tindak lanjut
 
 Tidak ada blocker untuk fix lokal ini. Domain/TLS/production tetap mengikuti backlog deployment.
+
+
+## Task: AUTH-FUP-005 — Logout menuju login tanpa halaman error perantara
+
+- Status: Done
+- Owner: Codex
+- Prioritas: P2
+- Referensi: AUTH-US-FUP; laporan dan screenshot pengguna 3 Oktober 2026
+- Dependensi: AUTH-REF-008, AUTH-FUP-002, AUTH-FUP-004
+- Ukuran: Transisi logout dan regresi browser
+
+### Ruang lingkup
+
+Perbaiki layout protected agar status tanpa sesi tidak merender error layanan selama redirect. Setelah signOut SDK native berhasil, bersihkan Query privat dan kirim notifikasi lintas tab, navigasi replace ke login, lalu invalidasi route yang tersimpan. Pertahankan error layanan sebenarnya, penolakan role, toast dan perilaku logout gagal.
+
+### Acceptance criteria
+
+- [x] Logout berhasil menuju login tanpa menampilkan halaman sesi unavailable atau akses ditolak.
+- [x] Tab lain mengikuti logout; request sesi tertunda tidak mengembalikan principal lama dan Back tetap terkunci.
+- [x] Logout gagal mempertahankan dashboard serta toast/error; outage dan role non-admin tetap memiliki halaman error yang sesuai.
+- [x] Regresi browser development/build, guard/cache/login tests, lint, check-types, build dan formatting lulus.
+
+### Validasi
+
+Observer DOM pada dua tab merekam setiap heading error selama logout dengan request sesi tertunda. Runner browser memakai SDK Better Auth native dengan HTTP fixture dedicated pada Vite dan hasil build Bun/Nitro. Gunakan proof guard/cache/login existing dan quality gates root.
+
+### Hasil dan bukti
+
+3 Oktober 2026: sebelum fix, assertion browser gagal karena heading "Sesi admin belum dapat diperiksa" sempat muncul. Setelah fix, kedua tab lolos dengan daftar heading error kosong hingga login muncul. Uji browser development dan build lolos toast loading/hasil, logout gagal, outage/retry, role lock, race, lintas tab dan Back denial. Guard/cache/login: 21 test dan 77 assertions lulus. Lint, check-types, build kedua app, formatting tiga file kode dan diff check lulus. Tidak memakai akun atau mengubah database development. Commit: fix(auth): skip session error screen during logout.
+
+### Blocker atau tindak lanjut
+
+Tidak ada untuk perbaikan transisi ini.

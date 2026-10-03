@@ -56,6 +56,8 @@ function ProtectedAdminLayout() {
       </AdminSessionContext>
     )
   if (adminSessionState.status === 'forbidden') return <AdminAccessDenied />
+  // A cleared/expired session is a redirect transition, not a service failure.
+  if (adminSessionState.status === 'unauthenticated') return null
   return <AdminSessionUnavailable />
 }
 
