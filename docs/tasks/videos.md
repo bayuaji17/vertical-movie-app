@@ -266,7 +266,7 @@ Tidak ada blocker task ini. Tahap media dan integrasi web tetap mengikuti roadma
 
 ## Task: VID-008 — Sediakan create dan list taxonomy genre
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai DAG dan urutan task
 - Referensi: VID-US-03, PRD-03/06/07/09, GR-03–07, model/plan video
@@ -281,9 +281,9 @@ POST/GET /admin/genres dengan guard, slug/name validation, query search/cursor b
 
 ### Acceptance criteria
 
-- [ ] Genre create/list bekerja dan empty results konsisten; name nonempty, slug duplicate409.
-- [ ] Cursor/limit/search tervalidasi dan query bound; filter mismatch cursor ditolak422.
-- [ ] Unauthorized atau auth outage tidak melakukan query/write; DTO tanpa infrastructure fields.
+- [x] Genre create/list bekerja dan empty results konsisten; name nonempty, slug duplicate409.
+- [x] Cursor/limit/search tervalidasi dan query bound; filter mismatch cursor ditolak422.
+- [x] Unauthorized atau auth outage tidak melakukan query/write; DTO tanpa infrastructure fields.
 
 ### Validasi
 
@@ -291,11 +291,11 @@ bun:test domain/HTTP native; PostgreSQL race duplicate slug dalam proof akhir; E
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; belum ada evidence runtime/test, commit atau PR untuk task ini. Catat file/symbol aktual, command/hasil, lingkungan, keputusan, dan SHA bila Git action kemudian diotorisasi.
+Genre create/list API selesai. PostgreSQL runtime 4 pass/25 assertions: trimming, duplicate slug, pagination, search wildcard literal. API source unit suite 27 pass, termasuk denial tanpa service call. Root lint/type-check hook commit.
 
 ### Blocker atau tindak lanjut
 
-Prerequisite VID-005 belum Done. Task menjadi Ready hanya setelah prerequisite dan kontrak terkait tersedia. Batas media/publikasi tetap mengikuti roadmap; tidak membuat tabel atau endpoint future dari task ini.
+Tidak ada blocker task ini. Tahap media dan integrasi web tetap mengikuti roadmap.
 
 ## Task: VID-009 — Sediakan pembuatan draf video semua jenis
 

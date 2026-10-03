@@ -117,20 +117,18 @@ test("seasons have ordered unique numbers and reject stale updates", async () =>
       "content-admin",
     ),
   ).rejects.toThrow();
-  await database.db
-    .insert(videos)
-    .values({
-      id: Bun.randomUUIDv7(),
-      kind: "episode",
-      seasonId: second.id,
-      episodeNumber: 1,
-      title: "Previously live",
-      slug: "ever-published-episode",
-      createdBy: "content-admin",
-      updatedBy: "content-admin",
-      firstPublishedAt: new Date(),
-      publicationStatus: "unpublished",
-    });
+  await database.db.insert(videos).values({
+    id: Bun.randomUUIDv7(),
+    kind: "episode",
+    seasonId: second.id,
+    episodeNumber: 1,
+    title: "Previously live",
+    slug: "ever-published-episode",
+    createdBy: "content-admin",
+    updatedBy: "content-admin",
+    firstPublishedAt: new Date(),
+    publicationStatus: "unpublished",
+  });
   await expect(
     seriesService.updateSeason(
       second.id,
@@ -149,4 +147,34 @@ test("seasons have ordered unique numbers and reject stale updates", async () =>
       "content-admin",
     ),
   ).rejects.toThrow();
+});
+
+test("genre taxonomy persists, paginates and treats search wildcards literally", async () => {
+  const { GenresService } = await import("../../src/modules/genres/service");
+  const { createGenresRepository } =
+    await import("../../src/modules/genres/repository");
+  const svc = new GenresService(createGenresRepository(database.db));
+  const created = await svc.create({
+    name: "  Tax Drama  ",
+    slug: "tax-drama",
+  });
+  expect(created.name).toBe("Tax Drama");
+  await svc.create({ name: "Tax 100%", slug: "tax-percent" });
+  await expect(
+    svc.create({ name: "Duplicate", slug: "tax-drama" }),
+  ).rejects.toThrow();
+  const first = await svc.list({ limit: "1", search: "Tax" });
+  expect(first.items).toHaveLength(1);
+  expect(first.nextCursor).not.toBeNull();
+  const second = await svc.list({
+    limit: "1",
+    search: "Tax",
+    cursor: first.nextCursor ?? undefined,
+  });
+  expect(second.items).toHaveLength(1);
+  expect(second.items[0]?.id).not.toBe(first.items[0]?.id);
+  expect(second.nextCursor).toBeNull();
+  expect((await svc.list({ search: "%" })).items.map((g) => g.slug)).toEqual([
+    "tax-percent",
+  ]);
 });
