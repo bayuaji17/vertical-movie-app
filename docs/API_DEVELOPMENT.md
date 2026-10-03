@@ -6,9 +6,11 @@
 
 API menggunakan TypeScript strict, Elysia, dan Bun sesuai versi root `package.json`. API memiliki logika domain dan akses data aplikasi. **Eden Treaty dipilih pengguna pada 1 Oktober 2026** untuk konsumsi kontrak Elysia oleh web. Web tidak menjalankan ulang aturan publikasi atau otorisasi sebagai pengganti validasi server.
 
-Fondasi API memiliki factory Elysia tanpa listen, env tervalidasi, satu pool Bun SQL/Drizzle dan shutdown. Route aktif: `GET /`, handler native Better Auth `/api/auth/*`, serta Scalar `/openapi` dan `/openapi/json`. API mengimpor factory/schema dari `@repo/auth/server`, menyuntikkan pool yang sama; package tidak membaca env atau membuat pool global. Schema auth dimiliki package dan diekspor ulang API untuk migrasi. Macro `requireAdmin` memanggil getSession native dengan disableCookieCache setiap rute privat, kemudian mengecek role admin, ban dan expiry; register sebelum rute privat dengan chaining Elysia. Auth publik hanya status/login/logout/session; operator HTTP tertutup. Seed memakai CLI resmi dan recovery memakai reset native selama maintenance. `/admin/session` dan singleton/writer custom sudah dihapus. Guard web tidak menggantikan otorisasi endpoint bisnis. Eden bisnis tetap type-only `api/types`; auth browser/SSR memakai SDK package. Lihat [Auth Operations](AUTH_OPERATIONS.md) untuk konfigurasi, command, failure, migration dan bukti. Storage/worker belum dipasang.
+Fondasi API memiliki factory Elysia tanpa listen, env tervalidasi, satu pool Bun SQL/Drizzle dan shutdown. Route aktif: `GET /`, handler native Better Auth `/api/auth/*`, 16 endpoint metadata privat `/admin/series`, `/admin/seasons`, `/admin/genres`, `/admin/videos`, serta Scalar `/openapi` dan `/openapi/json`. API mengimpor factory/schema dari `@repo/auth/server`, menyuntikkan pool yang sama; package tidak membaca env atau membuat pool global. Schema auth dimiliki package dan diekspor ulang API untuk migrasi. Macro `requireAdmin` memanggil getSession native dengan disableCookieCache setiap rute privat, kemudian mengecek role admin, ban dan expiry; register sebelum rute privat dengan chaining Elysia. Auth publik hanya status/login/logout/session; operator HTTP tertutup. Seed memakai CLI resmi dan recovery memakai reset native selama maintenance. `/admin/session` dan singleton/writer custom sudah dihapus. Guard web tidak menggantikan otorisasi endpoint bisnis. Eden bisnis tetap type-only `api/types`; auth browser/SSR memakai SDK package. Lihat [Auth Operations](AUTH_OPERATIONS.md) untuk konfigurasi, command, failure, migration dan bukti. Storage/worker belum dipasang.
 
 Instruksi agent tetap berada di [AGENTS.md](../AGENTS.md). Ikuti [Global Workflow](GLOBAL_WORKFLOW.md), [Template Task](TASK_TEMPLATE.md), dan [Environment](ENVIRONMENT.md). Kontrak produk yang belum disetujui di [Architecture](ARCHITECTURE.md) tetap berupa rancangan.
+
+Kontrak aktif metadata, runbook migrasi dan proof ada pada [Video Operations](VIDEO_OPERATIONS.md). Module series/genres/videos mempunyai `index.ts`, `model.ts`, `service.ts`, `repository.ts`, dan test HTTP; series memiliki season. `createApp` memasang modul secara statis sebelum OpenAPI; bootstrap menyuntikkan dependency DB/service/auth eksplisit. Body konten memakai `normalize:false` dan schema strict untuk menolak field tak dikenal.
 
 ## Struktur folder tujuan
 
@@ -29,10 +31,12 @@ apps/api/
 │   │   │   └── admin/
 │   │   │       ├── guard.ts      # Macro requireAdmin untuk route privat
 │   │   │       └── model.ts      # Schema error guard admin
+│   │   ├── series/               # Metadata series/season; index/model/service/repository/tests
+│   │   ├── genres/               # Taxonomy; index/model/service/repository/tests
 │   │   ├── videos/
-│   │   │   ├── index.ts          # Komposisi rute publik dan admin
-│   │   │   ├── public.ts         # Baca video terbit tanpa login
-│   │   │   ├── admin.ts          # Operasi video yang memerlukan admin
+│   │   │   ├── index.ts          # Metadata admin aktif; rute publik belum dibuat
+│   │   │   ├── public.ts         # Rencana tahap publikasi: baca video terbit
+│   │   │   ├── admin.ts          # Pisahkan jika diperlukan; saat ini index.ts memuat admin
 │   │   │   ├── model.ts          # Schema request/response, tipe, error domain
 │   │   │   ├── service.ts        # Aturan bisnis dan transisi publikasi
 │   │   │   ├── repository.ts     # Query modul jika perlu dipisahkan
@@ -289,7 +293,7 @@ Dokumentasi OpenAPI menerangkan kontrak HTTP. Consumer endpoint aplikasi tetap m
 
 ## Database dan migrasi
 
-- Kompatibilitas Bun SQL, `drizzle-orm/bun-sql`, dan Better Auth Drizzle adapter telah dibuktikan pada versi yang dikunci di [backlog auth](tasks/auth.md). Migrasi dan operasi auth/admin juga diuji terarah pada database test lokal. Proof membatasi operasi yang diuji; expand/contract refactor belum diterapkan pada database development dan proof tidak menyatakan production-ready.
+- Kompatibilitas Bun SQL, `drizzle-orm/bun-sql`, dan Better Auth Drizzle adapter telah dibuktikan pada versi yang dikunci di [backlog auth](tasks/auth.md). Migrasi dan operasi auth/admin juga diuji terarah pada database test lokal. Proof membatasi operasi yang diuji; expand/contract auth telah diterapkan pada database development (lihat Environment); migrasi konten 0003–0005 juga diterapkan pada tindak lanjut 3 Oktober 2026. Proof tetap lokal dan tidak menyatakan production-ready.
 - Query memakai parameter binding dari Drizzle atau tagged template Bun SQL. Jangan menggabungkan input pengguna menjadi SQL mentah. Identifier dinamis harus berasal dari daftar server yang tetap.
 - Schema tabel berada di `src/db/schema/`; migrasi SQL dan metadata generasi berada di `apps/api/drizzle/`. Schema Better Auth dihasilkan dari konfigurasi package auth dan schema admin ditinjau sebelum migrasi.
 - Jalankan `bun run --cwd apps/api db:migrate` secara eksplisit; jangan membuat/mengubah tabel otomatis saat request masuk. Migrator Bun SQL membaca env API `DATABASE_URL`, memakai path migrasi tetap dari source, dan meredaksi error agar URL tidak tercetak.
@@ -320,6 +324,8 @@ bun run build --filter=api
 ```
 
 Setelah perubahan script/dependensi, jalankan `bun install --frozen-lockfile` dan pemeriksaan yang relevan. Husky tetap menjalankan lint web dan pemeriksaan tipe seluruh workspace sebelum commit. API belum memiliki script lint; jangan melaporkan `bun run lint` sebagai pemeriksaan lint API. Script `test` API menjalankan native Bun suite di `src`; test yang membutuhkan PostgreSQL nyata tetap berada di suite integrasi terpisah.
+
+Aturan penyelesaian disetujui pengguna pada 3 Oktober 2026: setelah implementasi jalankan test existing yang relevan, root check-types, lint yang tersedia, dan build. Jika schema backend berubah, apply migration pending pada database development lokal terkonfigurasi melalui `bun run --cwd apps/api db:migrate`; verifikasi journal/schema dan data existing sesudahnya. Proof destruktif tetap terpisah di database test. Catat hasil aktual pada backlog; migration production mengikuti scope rollout tersendiri.
 
 ## Unit test API — Bun native
 
@@ -385,7 +391,7 @@ bun test ./apps/api/src/modules/videos/service.test.ts
 bun test --watch ./apps/api/src
 ```
 
-Script `test` API menjalankan suite native Bun di `src`; dari root gunakan `bun run --cwd apps/api test`. Proof PostgreSQL terisolasi dijalankan lewat command `auth:*:proof` yang didaftarkan di `apps/api/package.json`, bukan satu suite `test:integration` umum. Siapkan env khususnya dan periksa guard/nama database sebelum menjalankan. Root Husky menjalankan lint web dan type-check sebelum commit; konfigurasi CI hosted tidak termasuk workflow proyek saat ini.
+Script `test` API menjalankan suite native Bun di `src`; dari root gunakan `bun run --cwd apps/api test`. Proof PostgreSQL terisolasi dijalankan lewat command `auth:*:proof` atau `content:schema:proof`/`content:runtime:proof` yang didaftarkan di `apps/api/package.json`, bukan satu suite `test:integration` umum. Siapkan env khususnya dan periksa guard/nama database sebelum menjalankan. Root Husky menjalankan lint web dan type-check sebelum commit; konfigurasi CI hosted tidak termasuk workflow proyek saat ini.
 
 Perubahan aturan bisnis, validasi, atau lifecycle API menyertakan test perilaku yang relevan pada task implementasinya. Perbaikan bug menyertakan regression test bila perilakunya dapat diuji. Catat command, hasil, dan bukti pada backlog modul; test tidak menggantikan `check-types`, karena Bun menjalankan TypeScript tanpa pemeriksaan tipe penuh.
 

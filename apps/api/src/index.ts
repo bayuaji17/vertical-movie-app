@@ -1,6 +1,12 @@
 import { loadApiEnv } from "./config/env";
 import { createApp } from "./app";
 import { createDatabase } from "./db/client";
+import { SeriesService } from "./modules/series/service";
+import { createSeriesRepository } from "./modules/series/repository";
+import { VideosService } from "./modules/videos/service";
+import { createVideosRepository } from "./modules/videos/repository";
+import { GenresService } from "./modules/genres/service";
+import { createGenresRepository } from "./modules/genres/repository";
 import {
   createAdminAuthServer,
   generateAuthOpenAPISchema,
@@ -20,6 +26,10 @@ const app = createApp({
   auth,
   authOpenApiSchema,
   secureCookies: env.betterAuthUrl.startsWith("https://"),
+  getSession: (options) => auth.api.getSession(options),
+  seriesService: new SeriesService(createSeriesRepository(database.db)),
+  videosService: new VideosService(createVideosRepository(database.db)),
+  genresService: new GenresService(createGenresRepository(database.db)),
 }).listen(env.port);
 
 let isShuttingDown = false;

@@ -8,12 +8,23 @@ import {
   createAuthOpenApiFragment,
   mergeOpenApiResponse,
 } from "./plugins/openapi";
+import { createSeriesModule } from "./modules/series";
+import { createVideosModule } from "./modules/videos";
+import { createGenresModule } from "./modules/genres";
+import type { SeriesService } from "./modules/series/service";
+import type { VideosService } from "./modules/videos/service";
+import type { GenresService } from "./modules/genres/service";
+import type { RequireAdminDependencies } from "./modules/auth/admin/guard";
 
 type AppDependencies = {
   database?: Pick<ReturnType<typeof createDatabase>, "client">;
   auth?: Pick<AuthServer, "handler">;
   authOpenApiSchema?: AuthOpenAPISchema;
   secureCookies?: boolean;
+  getSession?: RequireAdminDependencies["getSession"];
+  seriesService?: SeriesService;
+  videosService?: VideosService;
+  genresService?: GenresService;
 };
 
 function createAuthRoutes(auth?: AppDependencies["auth"]) {
@@ -38,8 +49,14 @@ export function createApp({
   auth,
   authOpenApiSchema,
   secureCookies = false,
+  getSession = async () => {
+    throw new Error("Authorization service unavailable");
+  },
+  seriesService,
+  videosService,
+  genresService,
 }: AppDependencies = {}) {
-  const app = new Elysia()
+  const app = new Elysia({ normalize: false })
     .get("/", () => "Hello Elysia", {
       detail: {
         tags: ["System"],
@@ -47,7 +64,10 @@ export function createApp({
         summary: "Check API availability",
       },
     })
-    .use(createAuthRoutes(auth));
+    .use(createAuthRoutes(auth))
+    .use(createSeriesModule({ service: seriesService, getSession }))
+    .use(createVideosModule({ service: videosService, getSession }))
+    .use(createGenresModule({ service: genresService, getSession }));
 
   const applicationSchema = toOpenAPISchema(
     app,
@@ -79,6 +99,21 @@ export function createApp({
         provider: "scalar",
         openapiVersion: "3.1.1",
         documentation: {
+          ...(!authFragment
+            ? {
+                components: {
+                  securitySchemes: {
+                    betterAuthSessionCookie: {
+                      type: "apiKey" as const,
+                      in: "cookie" as const,
+                      name: secureCookies
+                        ? "__Secure-better-auth.session_token"
+                        : "better-auth.session_token",
+                    },
+                  },
+                },
+              }
+            : {}),
           info: {
             title: "Vertical Movie API",
             description:

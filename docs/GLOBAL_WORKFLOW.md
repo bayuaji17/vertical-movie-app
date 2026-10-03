@@ -1,6 +1,6 @@
 # Global Workflow — Vertical Movie App
 
-> Diperbarui 1 Oktober 2026. **Keputusan disetujui pengguna:** gunakan Agile dan pecah setiap modul menjadi task kecil. Rincian alur produk/rilis yang belum disetujui tetap berupa draft.
+> Diperbarui 3 Oktober 2026. **Keputusan disetujui pengguna:** gunakan Agile dan pecah setiap modul menjadi task kecil; setelah implementasi jalankan test yang tersedia, check-types, lint yang tersedia, build, serta migrasi development jika schema backend berubah. Rincian alur produk/rilis yang belum disetujui tetap berupa draft.
 
 ## Agile dan pembagian pekerjaan
 
@@ -61,6 +61,8 @@ Salin env sekali ketika setup lokal; jika file sudah ada, lengkapi nilai yang di
 Husky menjalankan lint dan pemeriksaan tipe sebelum commit. Commitlint memvalidasi pesan Conventional Commits pada hook `commit-msg`, misalnya `feat(api): add video drafts` atau `docs: update admin workflow`. Pemeriksaan hook tidak menggantikan tinjauan perilaku. Pertahankan perubahan worktree yang sudah ada dan periksa isi commit sebelum membuatnya.
 
 ## Kriteria selesai per perubahan
+
+Sebelum melaporkan implementasi selesai, jalankan test yang sudah tersedia dan relevan, `bun run check-types`, lint yang tersedia melalui `bun run lint`, lalu `bun run build`. Catat command, scope, dan hasil; perbaiki failure sebelum task Done. Jika backend mengubah schema database, buat/tinjau migration dan jalankan `bun run --cwd apps/api db:migrate` pada database development lokal yang dikonfigurasi, lalu periksa journal, tabel/constraints, dan preservation data existing. Target harus dipastikan; proof integrasi tetap memakai database test dedicated. Aturan ini disetujui pengguna pada 3 Oktober 2026 dan tidak menggantikan otorisasi rollout production. Hook commit tidak menjalankan seluruh gate ini.
 
 - Kebutuhan `PRD-xx` dan aturan `GR-xx` yang terkait jelas pada deskripsi perubahan.
 - API memeriksa identitas admin pada operasi privat, input, dan status yang relevan; akses katalog/tonton publik tidak meminta login. Web menampilkan hasil berhasil dan gagal.

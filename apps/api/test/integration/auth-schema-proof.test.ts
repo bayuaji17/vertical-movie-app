@@ -188,7 +188,13 @@ describe("native schema expand/cutover/contract", () => {
       (
         await client`SELECT count(*)::int AS count FROM drizzle.__drizzle_migrations`
       )[0].count,
-    ).toBe(3);
+    ).toBe(
+      (
+        await Bun.file(
+          resolve(import.meta.dir, "../../drizzle/meta/_journal.json"),
+        ).json()
+      ).entries.length,
+    );
     expect(
       (
         await native.api.signInEmail({
