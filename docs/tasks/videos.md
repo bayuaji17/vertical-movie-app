@@ -132,7 +132,7 @@ Tidak ada blocker task ini. Tahap media dan integrasi web tetap mengikuti roadma
 
 ## Task: VID-004 — Tambahkan taxonomy genre dan relasi konten
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai DAG dan urutan task
 - Referensi: VID-US-03, PRD-03/06/07/09, GR-03–07, model/plan video
@@ -147,9 +147,9 @@ Buat genres/series_genres/video_genres, composite PK dan FK RESTRICT, reverse ge
 
 ### Acceptance criteria
 
-- [ ] Duplicate slug/join dan referensi genre/video/series yang tidak ada ditolak.
-- [ ] Relasi genre tidak bisa orphan; valid many-to-many series maupun video diterima.
-- [ ] Kegagalan transaksi set relasi tidak menyisakan sebagian perubahan; SQL/journal additive tanpa menyentuh auth.
+- [x] Duplicate slug/join dan referensi genre/video/series yang tidak ada ditolak.
+- [x] Relasi genre tidak bisa orphan; valid many-to-many series maupun video diterima.
+- [x] Kegagalan transaksi set relasi tidak menyisakan sebagian perubahan; SQL/journal additive tanpa menyentuh auth.
 
 ### Validasi
 
@@ -157,11 +157,11 @@ Proof FK/UNIQUE/transaction rollback pada database test explicit. Type-check dan
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; belum ada evidence runtime/test, commit atau PR untuk task ini. Catat file/symbol aktual, command/hasil, lingkungan, keputusan, dan SHA bila Git action kemudian diotorisasi.
+Enam tabel metadata lengkap melalui migrasi 0005 genres/relasi. PostgreSQL proof 4 pass: composite PK, FK, slug unique dan rollback replacement genre tanpa partial write. Index reverse genre tersedia. Type-check/lint hook commit.
 
 ### Blocker atau tindak lanjut
 
-Prerequisite VID-003 belum Done. Task menjadi Ready hanya setelah prerequisite dan kontrak terkait tersedia. Batas media/publikasi tetap mengikuti roadmap; tidak membuat tabel atau endpoint future dari task ini.
+Tidak ada blocker task ini. Tahap media dan integrasi web tetap mengikuti roadmap.
 
 ## Task: VID-005 — Definisikan model HTTP error cursor dan dependency contracts
 
