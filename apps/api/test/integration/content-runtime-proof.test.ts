@@ -4,7 +4,7 @@ import { beforeAll, afterAll, test, expect } from "bun:test";
 import { resetContentDatabase } from "./content-fixture";
 import { createSeriesRepository } from "../../src/modules/series/repository";
 import { SeriesService } from "../../src/modules/series/service";
-import { series, videos } from "../../src/db/schema";
+import { series, videos, seasons } from "../../src/db/schema";
 import { eq } from "drizzle-orm";
 let database: Awaited<ReturnType<typeof resetContentDatabase>>,
   seriesService: SeriesService;
@@ -14,6 +14,102 @@ beforeAll(async () => {
 });
 afterAll(async () => {
   await database?.client.close();
+});
+test("concurrent parent archive and child creation serialize without deadlock", async () => {
+  const parent = await seriesService.create(
+    { title: "Archive Race" },
+    "content-admin",
+  );
+  const svc = new VideosService(createVideosRepository(database.db));
+  const results = await Promise.allSettled([
+    seriesService.archiveSeason(parent.defaultSeason.id, 1, "content-admin"),
+    svc.create(
+      {
+        kind: "episode",
+        title: "Racing Child",
+        seasonId: parent.defaultSeason.id,
+        episodeNumber: 1,
+      },
+      "content-admin",
+    ),
+  ]);
+  expect(results[0]?.status).toBe("fulfilled");
+  const [row] = await database.db
+    .select()
+    .from(seasons)
+    .where(eq(seasons.id, parent.defaultSeason.id));
+  expect(row?.archivedAt).not.toBeNull();
+  const persisted = await svc.list({
+    seasonId: parent.defaultSeason.id,
+    includeArchived: "true",
+  });
+  expect(persisted.items).toHaveLength(
+    results[1]?.status === "fulfilled" ? 1 : 0,
+  );
+  expect(
+    (await svc.list({ seasonId: parent.defaultSeason.id })).items,
+  ).toHaveLength(0);
+  await expect(
+    svc.create(
+      {
+        kind: "episode",
+        title: "After Archive",
+        seasonId: parent.defaultSeason.id,
+        episodeNumber: 2,
+      },
+      "content-admin",
+    ),
+  ).rejects.toThrow();
+}, 10000);
+test("slug races have one winner and conflicting episode edits roll back metadata", async () => {
+  const svc = new VideosService(createVideosRepository(database.db));
+  const results = await Promise.allSettled(
+    [1, 2].map(() =>
+      svc.create(
+        { kind: "movie", title: "Slug Race", slug: "slug-race" },
+        "content-admin",
+      ),
+    ),
+  );
+  expect(
+    results.filter((result) => result.status === "fulfilled"),
+  ).toHaveLength(1);
+  expect(results.filter((result) => result.status === "rejected")).toHaveLength(
+    1,
+  );
+  const parent = await seriesService.create(
+    { title: "Episode Edit Conflict" },
+    "content-admin",
+  );
+  await svc.create(
+    {
+      kind: "episode",
+      title: "First",
+      seasonId: parent.defaultSeason.id,
+      episodeNumber: 1,
+    },
+    "content-admin",
+  );
+  const second = await svc.create(
+    {
+      kind: "episode",
+      title: "Second",
+      seasonId: parent.defaultSeason.id,
+      episodeNumber: 2,
+    },
+    "content-admin",
+  );
+  await expect(
+    svc.update(
+      second.id,
+      { expectedVersion: 1, title: "Must Roll Back", episodeNumber: 1 },
+      "content-admin",
+    ),
+  ).rejects.toThrow();
+  const persisted = await svc.get(second.id);
+  expect(persisted.title).toBe("Second");
+  expect(persisted.episodeNumber).toBe(2);
+  expect(persisted.rowVersion).toBe(1);
 });
 test("series draft and default season are atomic; edit uses optimistic version", async () => {
   const created = await seriesService.create(

@@ -6,6 +6,8 @@
   },
   "scripts": {
     "test": "bun test ./src",
+    "content:schema:proof": "bun test ./test/integration/content-schema-proof.test.ts",
+    "content:runtime:proof": "bun test ./test/integration/content-runtime-proof.test.ts ./test/integration/content-http-proof.test.ts",
     "auth:adapter:proof": "bun test ./test/integration/auth-adapter-proof.test.ts",
     "auth:schema:proof": "bun test ./test/integration/auth-schema-proof.test.ts",
     "auth:runtime:proof": "bun test ./test/integration/auth-runtime-proof.test.ts",

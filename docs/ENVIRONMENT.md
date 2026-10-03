@@ -37,6 +37,12 @@ Setelah database aplikasi dimigrasikan dan operator siap membuat admin, jalankan
 
 Admin masuk dari halaman web `/admin/login`; setelah login, guard membaca snapshot native lewat TanStack Query sebelum menampilkan dashboard `/admin`. Browser mengakses `/api/auth/*` pada origin web; server TanStack Start meneruskan request ke `API_INTERNAL_URL` yang tetap. Untuk setup lokal, `VITE_API_URL`, `BETTER_AUTH_URL`, dan `WEB_ORIGIN` memakai origin web yang sama. Password dan sesi tidak disimpan pada `VITE_*` atau browser storage.
 
+### Proof metadata konten
+
+`CONTENT_TEST_DATABASE_URL` menunjuk hanya ke database lokal `vertical_movie_app_content_test`. `bun run --cwd apps/api content:schema:proof` menguji constraints dan migrasi; `bun run --cwd apps/api content:runtime:proof` menguji repository/service serta HTTP dengan Better Auth native. Kedua script menghapus dan membuat ulang schema `public` dan `drizzle`, lalu membuat fixture sendiri. Guard menolak nama database lain dan host nonlokal. Buat database khusus tersebut sebelum menjalankan proof dan jalankan script serial karena targetnya sama. Konfigurasi test tidak menjadi konfigurasi runtime HTTP; jangan mengganti `DATABASE_URL` development untuk menjalankan proof.
+
+Migrasi konten `0003`–`0005` baru diuji pada database dedicated pada 3 Oktober 2026. Migrasi ini belum dijalankan pada database development atau production; baseline development auth tiga migrasi tetap menjadi catatan terakhir.
+
 ### Drizzle Studio
 
 Jalankan dari root:
