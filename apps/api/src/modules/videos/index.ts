@@ -1,3 +1,4 @@
+import { PatchVideoBody } from "./model";
 import { IdParams } from "../../shared/content-model";
 import { VideoListQuery, VideoListDto, VideoDetailDto } from "./model";
 import { Elysia } from "elysia";
@@ -55,5 +56,22 @@ export function createVideosModule({
         operationId: "getVideo",
         security: [{ betterAuthSessionCookie: [] }],
       },
-    });
+    })
+    .patch(
+      "/admin/videos/:id",
+      ({ params, body, adminSession }) =>
+        service.update(params.id, body, adminSession.user.id),
+      {
+        requireAdmin: true,
+        params: IdParams,
+        body: PatchVideoBody,
+        response: { 200: VideoDto, ...ErrorResponses },
+        detail: {
+          tags: ["Videos"],
+          summary: "Edit video metadata with expectedVersion",
+          operationId: "updateVideo",
+          security: [{ betterAuthSessionCookie: [] }],
+        },
+      },
+    );
 }

@@ -1,14 +1,24 @@
 import type { videos } from "../../db/schema";
-import { notFound, unavailable } from "../../shared/content-error";
+import {
+  notFound,
+  unavailable,
+  ContentError,
+  invalid,
+} from "../../shared/content-error";
 import {
   cleanMetadata,
   validateRelease,
   slugFor,
   editable,
+  requireChanges,
   defaultRuntime,
   type RuntimeDependencies,
 } from "../../shared/content-metadata";
-import type { CreateVideoInput, VideoListInput } from "./model";
+import type {
+  CreateVideoInput,
+  VideoListInput,
+  PatchVideoInput,
+} from "./model";
 import { parseList, page } from "../../shared/content-pagination";
 import type { VideosStore, VideosRepository } from "./repository";
 type VideoRow = typeof videos.$inferSelect;
@@ -38,6 +48,81 @@ export async function videoDto(row: VideoRow, store: VideosStore) {
   };
 }
 export class VideosService {
+  async update(id: string, input: PatchVideoInput, actor: string) {
+    requireChanges(input);
+    const repo = this.repo(),
+      initial = await repo.store.get(id);
+    if (!initial) notFound();
+    return repo.transact(async (store) => {
+      const parentIds = [initial.seasonId, input.seasonId].filter(
+        (v): v is string => typeof v === "string",
+      );
+      const parents = await store.parents(parentIds, true);
+      if (parents.length !== new Set(parentIds).size) notFound();
+      for (const parent of parents) {
+        editable(parent.parent);
+        editable(parent.season);
+      }
+      const old = await store.get(id, true);
+      if (!old) notFound();
+      editable(old, input.expectedVersion);
+      if (old.seasonId !== initial.seasonId)
+        throw new ContentError(
+          "CONTENT_VERSION_CONFLICT",
+          "Grouping has changed.",
+        );
+      if (
+        old.kind !== "episode" &&
+        (input.seasonId !== undefined || input.episodeNumber !== undefined)
+      )
+        invalid("Only episodes have season and episode numbers.");
+      if (
+        old.firstPublishedAt &&
+        ((input.seasonId !== undefined && input.seasonId !== old.seasonId) ||
+          (input.episodeNumber !== undefined &&
+            input.episodeNumber !== old.episodeNumber) ||
+          (input.slug !== undefined && input.slug !== old.slug))
+      )
+        throw new ContentError(
+          "CONTENT_STATE_CONFLICT",
+          "Grouping and slug cannot change after first publication.",
+        );
+      if (
+        old.publicationStatus === "published" &&
+        input.rightsConfirmed === false
+      )
+        throw new ContentError(
+          "CONTENT_STATE_CONFLICT",
+          "Unpublish before revoking rights confirmation.",
+        );
+      const { expectedVersion, genreIds, rightsConfirmed, ...values } =
+        cleanMetadata(input);
+      validateRelease(
+        values.releaseYear === undefined ? old.releaseYear : values.releaseYear,
+        values.releaseDate === undefined ? old.releaseDate : values.releaseDate,
+      );
+      const now = this.runtime.now();
+      const row = await store.update(id, expectedVersion, {
+        ...values,
+        ...(rightsConfirmed !== undefined
+          ? {
+              rightsConfirmedAt: rightsConfirmed ? now : null,
+              rightsConfirmedBy: rightsConfirmed ? actor : null,
+            }
+          : {}),
+        updatedBy: actor,
+        updatedAt: now,
+        rowVersion: expectedVersion + 1,
+      });
+      if (!row)
+        throw new ContentError(
+          "CONTENT_VERSION_CONFLICT",
+          "Content has changed.",
+        );
+      if (genreIds !== undefined) await store.setGenres(id, genreIds);
+      return videoDto(row, store);
+    });
+  }
   private async detail(row: VideoRow, store: VideosStore) {
     const parent = row.seasonId
       ? (await store.parents([row.seasonId]))[0]

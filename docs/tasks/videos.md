@@ -367,7 +367,7 @@ Tidak ada blocker task ini. Tahap media dan integrasi web tetap mengikuti roadma
 
 ## Task: VID-011 — Sediakan edit metadata genre dan relasi episode secara atomik
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai DAG dan urutan task
 - Referensi: VID-US-02, PRD-03/06/07/09, GR-03–07, model/plan video
@@ -382,10 +382,10 @@ PATCH expectedVersion untuk metadata, rightsConfirmed, genreIds replace, dan epi
 
 ### Acceptance criteria
 
-- [ ] Dua update versi sama hanya satu sukses; stale request409 tidak mengganti metadata/genre.
-- [ ] Unknown genre422/parent404/archived409/conflicting episode409 rollback seluruh mutation.
-- [ ] Reassignment prepublication valid mempertahankan ID, menolak movie grouping/kind conversion/ever-published reassignment.
-- [ ] Genre [] mengembalikan inheritance episode; rights pair/audit/version konsisten; unknown/read-only fields422.
+- [x] Dua update versi sama hanya satu sukses; stale request409 tidak mengganti metadata/genre.
+- [x] Unknown genre422/parent404/archived409/conflicting episode409 rollback seluruh mutation.
+- [x] Reassignment prepublication valid mempertahankan ID, menolak movie grouping/kind conversion/ever-published reassignment.
+- [x] Genre [] mengembalikan inheritance episode; rights pair/audit/version konsisten; unknown/read-only fields422.
 
 ### Validasi
 
@@ -393,11 +393,11 @@ Native domain/HTTP failure cases dan meaningful PATCH race PostgreSQL pada VID-0
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; belum ada evidence runtime/test, commit atau PR untuk task ini. Catat file/symbol aktual, command/hasil, lingkungan, keputusan, dan SHA bila Git action kemudian diotorisasi.
+Video PATCH atomik selesai: expectedVersion, metadata/genre, rights confirmation dan episode reassignment prepublication. PostgreSQL runtime 7 pass membuktikan dua update versi sama hanya satu berhasil, genre invalid rollback metadata/version, movie grouping rejection, dan first-publication grouping lock. Parent locks diurutkan untuk perpindahan lintas series. Root lint/type-check hook commit.
 
 ### Blocker atau tindak lanjut
 
-Prerequisite VID-010 belum Done. Task menjadi Ready hanya setelah prerequisite dan kontrak terkait tersedia. Batas media/publikasi tetap mengikuti roadmap; tidak membuat tabel atau endpoint future dari task ini.
+Tidak ada blocker task ini. Tahap media dan integrasi web tetap mengikuti roadmap.
 
 ## Task: VID-012 — Sediakan soft archive konten dan hierarchy
 

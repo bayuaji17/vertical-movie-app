@@ -14,6 +14,19 @@ import type {
 import { assertGenreIds } from "../../shared/content-db";
 export class VideosStore {
   constructor(private readonly db: ContentConnection) {}
+  async update(
+    id: string,
+    version: number,
+    values: Partial<typeof videos.$inferInsert>,
+  ) {
+    return (
+      await this.db
+        .update(videos)
+        .set(values)
+        .where(and(eq(videos.id, id), eq(videos.rowVersion, version)))
+        .returning()
+    )[0];
+  }
   async get(id: string, lock = false) {
     const q = this.db.select().from(videos).where(eq(videos.id, id)).limit(1);
     return (await (lock ? q.for("update") : q))[0];

@@ -323,3 +323,85 @@ test("video list/detail preserve grouping inheritance and cursor on tied timesta
   expect(solo.series).toBeNull();
   expect(solo.effectiveGenres.map((g) => g.id)).toEqual([genre]);
 });
+
+test("video update is atomic under concurrency and validates hierarchy and genre inheritance", async () => {
+  const svc = new VideosService(createVideosRepository(database.db)),
+    parent = await seriesService.create(
+      { title: "Edit Series", slug: "edit-series" },
+      "content-admin",
+    );
+  const first = await svc.create(
+    {
+      kind: "episode",
+      title: "Edit Episode",
+      seasonId: parent.defaultSeason.id,
+      episodeNumber: 1,
+    },
+    "content-admin",
+  );
+  const race = await Promise.allSettled(
+    ["A", "B"].map((title) =>
+      svc.update(first.id, { expectedVersion: 1, title }, "content-admin"),
+    ),
+  );
+  expect(race.filter((r) => r.status === "fulfilled")).toHaveLength(1);
+  expect((await svc.get(first.id)).rowVersion).toBe(2);
+  await expect(
+    svc.update(
+      first.id,
+      {
+        expectedVersion: 2,
+        title: "Must rollback",
+        genreIds: [Bun.randomUUIDv7()],
+      },
+      "content-admin",
+    ),
+  ).rejects.toThrow();
+  expect((await svc.get(first.id)).rowVersion).toBe(2);
+  expect((await svc.get(first.id)).title).not.toBe("Must rollback");
+  const second = await seriesService.createSeason(
+    parent.series.id,
+    { seasonNumber: 2 },
+    "content-admin",
+  );
+  const moved = await svc.update(
+    first.id,
+    {
+      expectedVersion: 2,
+      seasonId: second.id,
+      episodeNumber: 2,
+      rightsConfirmed: true,
+    },
+    "content-admin",
+  );
+  expect(moved.seasonId).toBe(second.id);
+  expect(moved.rightsConfirmedAt).not.toBeNull();
+  const cleared = await svc.update(
+    first.id,
+    { expectedVersion: 3, rightsConfirmed: false, genreIds: [] },
+    "content-admin",
+  );
+  expect(cleared.rightsConfirmedAt).toBeNull();
+  await database.db
+    .update(videos)
+    .set({ firstPublishedAt: new Date(), publicationStatus: "unpublished" })
+    .where(eq(videos.id, first.id));
+  await expect(
+    svc.update(
+      first.id,
+      { expectedVersion: 4, episodeNumber: 3 },
+      "content-admin",
+    ),
+  ).rejects.toThrow();
+  const movie = await svc.create(
+    { kind: "movie", title: "Edit Movie" },
+    "content-admin",
+  );
+  await expect(
+    svc.update(
+      movie.id,
+      { expectedVersion: 1, seasonId: second.id },
+      "content-admin",
+    ),
+  ).rejects.toThrow();
+});
