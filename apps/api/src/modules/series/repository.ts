@@ -8,6 +8,23 @@ import { assertGenreIds } from "../../shared/content-db";
 import type { ParsedList } from "../../shared/content-pagination";
 export class SeriesStore {
   constructor(private readonly db: ContentConnection) {}
+  async hasPublishedChild(id: string) {
+    return (
+      (
+        await this.db
+          .select({ id: videos.id })
+          .from(videos)
+          .innerJoin(seasons, eq(videos.seasonId, seasons.id))
+          .where(
+            and(
+              eq(seasons.seriesId, id),
+              eq(videos.publicationStatus, "published"),
+            ),
+          )
+          .limit(1)
+      ).length > 0
+    );
+  }
   async getSeason(id: string, lock = false) {
     const q = this.db.select().from(seasons).where(eq(seasons.id, id)).limit(1);
     return (await (lock ? q.for("update") : q))[0];

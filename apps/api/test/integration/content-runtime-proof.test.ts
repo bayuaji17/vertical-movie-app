@@ -405,3 +405,85 @@ test("video update is atomic under concurrency and validates hierarchy and genre
     ),
   ).rejects.toThrow();
 });
+
+test("archive preserves metadata, prevents writes and protects published children", async () => {
+  const svc = new VideosService(createVideosRepository(database.db));
+  const movie = await svc.create(
+    { kind: "movie", title: "Archive Movie", slug: "archive-movie" },
+    "content-admin",
+  );
+  const archived = await svc.archive(movie.id, 1, "content-admin");
+  expect(archived.archivedAt).not.toBeNull();
+  expect((await svc.list({ search: "Archive Movie" })).items).toHaveLength(0);
+  expect(
+    (await svc.list({ search: "Archive Movie", includeArchived: "true" }))
+      .items,
+  ).toHaveLength(1);
+  expect((await svc.get(movie.id)).title).toBe("Archive Movie");
+  await expect(
+    svc.update(
+      movie.id,
+      { expectedVersion: 2, title: "Changed" },
+      "content-admin",
+    ),
+  ).rejects.toThrow();
+  expect((await svc.archive(movie.id, 2, "content-admin")).rowVersion).toBe(2);
+  await expect(svc.archive(movie.id, 1, "content-admin")).rejects.toThrow();
+  const parent = await seriesService.create(
+    { title: "Archive Series", slug: "archive-series" },
+    "content-admin",
+  );
+  const ep = await svc.create(
+    {
+      kind: "episode",
+      title: "Archive Child",
+      seasonId: parent.defaultSeason.id,
+      episodeNumber: 1,
+    },
+    "content-admin",
+  );
+  await database.db
+    .update(videos)
+    .set({
+      publicationStatus: "published",
+      firstPublishedAt: new Date(),
+      publishedAt: new Date(),
+    })
+    .where(eq(videos.id, ep.id));
+  await expect(svc.archive(ep.id, 1, "content-admin")).rejects.toThrow();
+  await expect(
+    seriesService.archive(parent.series.id, 1, "content-admin"),
+  ).rejects.toThrow();
+  await expect(
+    seriesService.archiveSeason(parent.defaultSeason.id, 1, "content-admin"),
+  ).rejects.toThrow();
+  await database.db
+    .update(videos)
+    .set({ publicationStatus: "unpublished", publishedAt: null })
+    .where(eq(videos.id, ep.id));
+  await seriesService.archiveSeason(
+    parent.defaultSeason.id,
+    1,
+    "content-admin",
+  );
+  expect((await svc.list({ seriesId: parent.series.id })).items).toHaveLength(
+    0,
+  );
+  expect(
+    (await svc.list({ seriesId: parent.series.id, includeArchived: "true" }))
+      .items,
+  ).toHaveLength(1);
+  await expect(
+    svc.create(
+      {
+        kind: "episode",
+        title: "Blocked",
+        seasonId: parent.defaultSeason.id,
+        episodeNumber: 2,
+      },
+      "content-admin",
+    ),
+  ).rejects.toThrow();
+  await seriesService.archive(parent.series.id, 1, "content-admin");
+  expect((await seriesService.get(parent.series.id)).archivedAt).not.toBeNull();
+});

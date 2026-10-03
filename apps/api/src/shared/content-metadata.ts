@@ -80,6 +80,26 @@ export function requireChanges(input: object) {
   if (Object.keys(input).filter((k) => k !== "expectedVersion").length === 0)
     invalid("At least one editable field is required.");
 }
+export function archiveState(
+  row: {
+    rowVersion: number;
+    archivedAt: Date | null;
+    publicationStatus?: string;
+  },
+  expectedVersion: number,
+) {
+  if (row.rowVersion !== expectedVersion)
+    throw new ContentError(
+      "CONTENT_VERSION_CONFLICT",
+      "Content has changed; reload before archiving.",
+    );
+  if (row.publicationStatus === "published")
+    throw new ContentError(
+      "CONTENT_STATE_CONFLICT",
+      "Unpublish before archiving.",
+    );
+  return row.archivedAt !== null;
+}
 export function cleanMetadata<
   T extends {
     title?: string | null;

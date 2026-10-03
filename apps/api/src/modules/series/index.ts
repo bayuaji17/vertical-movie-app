@@ -1,3 +1,4 @@
+import { ArchiveBody } from "../../shared/content-model";
 import { t } from "elysia";
 import { CreateSeasonBody, PatchSeasonBody, SeasonDto } from "./model";
 import { Elysia } from "elysia";
@@ -143,6 +144,44 @@ export function createSeriesModule({
           tags: ["Series"],
           summary: "Edit season metadata",
           operationId: "updateSeason",
+          security: [{ betterAuthSessionCookie: [] }],
+        },
+      },
+    )
+    .post(
+      "/admin/series/:id/archive",
+      ({ params, body, adminSession }) =>
+        service.archive(params.id, body.expectedVersion, adminSession.user.id),
+      {
+        requireAdmin: true,
+        params: IdParams,
+        body: ArchiveBody,
+        response: { 200: SeriesDto, ...ErrorResponses },
+        detail: {
+          tags: ["Series"],
+          summary: "Archive draft content",
+          operationId: "archiveSeries",
+          security: [{ betterAuthSessionCookie: [] }],
+        },
+      },
+    )
+    .post(
+      "/admin/seasons/:id/archive",
+      ({ params, body, adminSession }) =>
+        service.archiveSeason(
+          params.id,
+          body.expectedVersion,
+          adminSession.user.id,
+        ),
+      {
+        requireAdmin: true,
+        params: IdParams,
+        body: ArchiveBody,
+        response: { 200: SeasonDto, ...ErrorResponses },
+        detail: {
+          tags: ["Series"],
+          summary: "Archive season",
+          operationId: "archiveSeason",
           security: [{ betterAuthSessionCookie: [] }],
         },
       },

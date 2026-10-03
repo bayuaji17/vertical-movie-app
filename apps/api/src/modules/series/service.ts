@@ -10,6 +10,7 @@ import {
   validateRelease,
   slugFor,
   editable,
+  archiveState,
   requireChanges,
   defaultRuntime,
   type RuntimeDependencies,
@@ -65,6 +66,62 @@ export async function seriesDto(row: SeriesRow, store: SeriesStore) {
   };
 }
 export class SeriesService {
+  async archive(id: string, version: number, actor: string) {
+    return this.repo().transact(async (store) => {
+      const old = await store.get(id, true);
+      if (!old) notFound();
+      if (archiveState(old, version)) return seriesDto(old, store);
+      if (await store.hasPublishedChild(id))
+        throw new ContentError(
+          "CONTENT_STATE_CONFLICT",
+          "Unpublish child episodes before archiving.",
+        );
+      const now = this.runtime.now(),
+        row = await store.update(id, version, {
+          archivedAt: now,
+          updatedAt: now,
+          updatedBy: actor,
+          rowVersion: version + 1,
+        });
+      if (!row)
+        throw new ContentError(
+          "CONTENT_VERSION_CONFLICT",
+          "Content has changed.",
+        );
+      return seriesDto(row, store);
+    });
+  }
+  async archiveSeason(id: string, version: number, actor: string) {
+    const repo = this.repo(),
+      initial = await repo.store.getSeason(id);
+    if (!initial) notFound();
+    return repo.transact(async (store) => {
+      const parent = await store.get(initial.seriesId, true);
+      if (!parent) notFound();
+      editable(parent);
+      const old = await store.getSeason(id, true);
+      if (!old) notFound();
+      if (archiveState(old, version)) return seasonDto(old);
+      if (await store.seasonHasPublished(id))
+        throw new ContentError(
+          "CONTENT_STATE_CONFLICT",
+          "Unpublish child episodes before archiving.",
+        );
+      const now = this.runtime.now(),
+        row = await store.updateSeason(id, version, {
+          archivedAt: now,
+          updatedAt: now,
+          updatedBy: actor,
+          rowVersion: version + 1,
+        });
+      if (!row)
+        throw new ContentError(
+          "CONTENT_VERSION_CONFLICT",
+          "Content has changed.",
+        );
+      return seasonDto(row);
+    });
+  }
   constructor(
     private readonly repository?: SeriesRepository,
     private readonly runtime: RuntimeDependencies = defaultRuntime,

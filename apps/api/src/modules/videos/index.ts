@@ -1,3 +1,4 @@
+import { ArchiveBody } from "../../shared/content-model";
 import { PatchVideoBody } from "./model";
 import { IdParams } from "../../shared/content-model";
 import { VideoListQuery, VideoListDto, VideoDetailDto } from "./model";
@@ -70,6 +71,23 @@ export function createVideosModule({
           tags: ["Videos"],
           summary: "Edit video metadata with expectedVersion",
           operationId: "updateVideo",
+          security: [{ betterAuthSessionCookie: [] }],
+        },
+      },
+    )
+    .post(
+      "/admin/videos/:id/archive",
+      ({ params, body, adminSession }) =>
+        service.archive(params.id, body.expectedVersion, adminSession.user.id),
+      {
+        requireAdmin: true,
+        params: IdParams,
+        body: ArchiveBody,
+        response: { 200: VideoDto, ...ErrorResponses },
+        detail: {
+          tags: ["Videos"],
+          summary: "Archive draft content",
+          operationId: "archiveVideo",
           security: [{ betterAuthSessionCookie: [] }],
         },
       },

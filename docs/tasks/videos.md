@@ -401,7 +401,7 @@ Tidak ada blocker task ini. Tahap media dan integrasi web tetap mengikuti roadma
 
 ## Task: VID-012 — Sediakan soft archive konten dan hierarchy
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai DAG dan urutan task
 - Referensi: VID-US-05, PRD-03/06/07/09, GR-03–07, model/plan video
@@ -416,10 +416,10 @@ POST archive series/season/video dengan expectedVersion; reject published conten
 
 ### Acceptance criteria
 
-- [ ] Archive draft mengisi archivedAt/version tanpa menghapus data atau genre; slug/nomor reserved.
-- [ ] Published atau parent dengan published child ditolak409; tidak terjadi orphan/cascade content.
-- [ ] Default list hidden, explicit detail/archive listing readable; mutation konten/parent archived ditolak.
-- [ ] Race create child vs archive parent konsisten melalui parent lock; repeat archive semantics terdokumentasi.
+- [x] Archive draft mengisi archivedAt/version tanpa menghapus data atau genre; slug/nomor reserved.
+- [x] Published atau parent dengan published child ditolak409; tidak terjadi orphan/cascade content.
+- [x] Default list hidden, explicit detail/archive listing readable; mutation konten/parent archived ditolak.
+- [x] Race create child vs archive parent konsisten melalui parent lock; repeat archive semantics terdokumentasi.
 
 ### Validasi
 
@@ -427,11 +427,11 @@ Native domain/HTTP states dan DB race/metadata retention pada VID-014; no storag
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; belum ada evidence runtime/test, commit atau PR untuk task ini. Catat file/symbol aktual, command/hasil, lingkungan, keputusan, dan SHA bila Git action kemudian diotorisasi.
+Archive series/season/video selesai tanpa cascade/hard delete. PostgreSQL runtime 8 pass: data retained, list visibility, repeat/stale version, mutation denial, published child protection dan archived-parent episode creation denial. Media-job checks tetap extension tahap queue; belum ada tabel media. Root lint/type-check hook commit.
 
 ### Blocker atau tindak lanjut
 
-Prerequisite VID-006, VID-007, VID-011 belum Done. Task menjadi Ready hanya setelah prerequisite dan kontrak terkait tersedia. Batas media/publikasi tetap mengikuti roadmap; tidak membuat tabel atau endpoint future dari task ini.
+Tidak ada blocker task ini. Tahap media dan integrasi web tetap mengikuti roadmap.
 
 ## Task: VID-013 — Pasang modul ke factory bootstrap kontrak Eden dan Scalar
 

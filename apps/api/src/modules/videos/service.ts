@@ -11,6 +11,7 @@ import {
   slugFor,
   editable,
   requireChanges,
+  archiveState,
   defaultRuntime,
   type RuntimeDependencies,
 } from "../../shared/content-metadata";
@@ -48,6 +49,40 @@ export async function videoDto(row: VideoRow, store: VideosStore) {
   };
 }
 export class VideosService {
+  async archive(id: string, version: number, actor: string) {
+    const repo = this.repo(),
+      initial = await repo.store.get(id);
+    if (!initial) notFound();
+    return repo.transact(async (store) => {
+      if (initial.seasonId) {
+        const [parent] = await store.parents([initial.seasonId], true);
+        if (!parent) notFound();
+        editable(parent.parent);
+        editable(parent.season);
+      }
+      const old = await store.get(id, true);
+      if (!old) notFound();
+      if (old.seasonId !== initial.seasonId)
+        throw new ContentError(
+          "CONTENT_VERSION_CONFLICT",
+          "Grouping has changed.",
+        );
+      if (archiveState(old, version)) return videoDto(old, store);
+      const now = this.runtime.now(),
+        row = await store.update(id, version, {
+          archivedAt: now,
+          updatedAt: now,
+          updatedBy: actor,
+          rowVersion: version + 1,
+        });
+      if (!row)
+        throw new ContentError(
+          "CONTENT_VERSION_CONFLICT",
+          "Content has changed.",
+        );
+      return videoDto(row, store);
+    });
+  }
   async update(id: string, input: PatchVideoInput, actor: string) {
     requireChanges(input);
     const repo = this.repo(),
