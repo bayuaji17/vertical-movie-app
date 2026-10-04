@@ -4,6 +4,8 @@
 
 ## Scope dan acuan
 
+Pasangan [desain mobile light/dark](admin-content-mobile.md) tersedia untuk lima halaman yang sama.
+
 Acuan: [design system](design-system.md), [plan](../plans/admin-content/implementation-plan.md) dan [backlog](../tasks/admin-content.md). Revisi menggunakan light neutral/lime, Base UI Rhea, Inter/Space Grotesk dan Remixicon. Semua copy UI berbahasa Inggris; dokumentasi developer tetap Bahasa Indonesia. Contoh metadata dan jumlah baris adalah data fiktif. Teks/warna raster diselaraskan kembali dengan semantic source tokens saat implementasi.
 
 ## Halaman v2

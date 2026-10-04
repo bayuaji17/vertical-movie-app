@@ -123,3 +123,7 @@ Source yang diperiksa ulang: `apps/api/src/modules/videos/model.ts`, `apps/api/s
 ## Desktop dark dan legacy cleanup — 5 Oktober 2026
 
 Freshness HEAD 71a9dfb67f379afcd6b7411d2788587f284f7ed3; source sama dengan base, commit sejak itu hanya planning/desain. Pengguna menyetujui v2 lalu meminta menghapus file sebelumnya dan membuat desktop dark. Scope cleanup: lima admin desktop light-v1 PNG superseded; light v2 tetap reference/pasangan terbaru. Dark memakai design system worktree approved #1E201E; source tokens tetap tidak diubah/di-stage. Prompt v1 dan tautan ke PNG retired dihapus dari canonical; sejarah task/commit Git tetap ada. ADMC-DES-003 hanya assets/docs, tanpa runtime/UI/backend changes.
+
+## Mobile design — 5 Oktober 2026
+
+Snapshot 0ef62913b98d85517fc663319830d3247263e1d9; source tetap identik base, HEAD hanya penambahan aset/docs. Pengguna menyetujui desktop dark lalu meminta mobile. Scope ADMC-DES-004: lima halaman × light/dark, full-page portrait, hamburger/drawer/header/avatar, list cards/custom pagination dan single-column form/detail. Mobile raster tidak berarti route responsif atau drawer/theme browser behavior sudah implemented. Source/token/dependency/desktop existing dipertahankan.

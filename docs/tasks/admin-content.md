@@ -2,9 +2,49 @@
 
 > Status: planning · 5 Oktober 2026 · Permintaan pengguna: plan tahap pertama frontend. Requirement v2 disetujui pengguna; hasil visual/rincian teknis masih untuk review, runtime belum diminta. Hasil pemeriksaan hanya dicatat setelah teramati.
 
-## Task: ADMC-DES-003 — Desktop dark v2 dan cleanup aset lama
+## Task: ADMC-DES-004 — Desain mobile light/dark v2
 
 - Status: Review
+- Owner: Codex
+- Prioritas: P1
+- Referensi: ADMC-US-06; permintaan pengguna 5 Oktober 2026.
+- Diperbarui: 2026-10-05
+- Dependensi: ADMC-DES-002/003 dan desktop v2.
+- Ukuran: Sepuluh PNG — lima halaman × light/dark; responsive design proposal, tanpa source runtime.
+
+### Ruang lingkup
+
+Mobile dashboard/list/create/detail/edit English, hamburger/drawer navigation, avatar/Appearance kanan atas, Log out pada footer drawer. List cards/pagination/custom; form/detail satu kolom. Light dibuat lebih dahulu, dark mengikuti mobile light. Desktop tetap utuh; canonical mobile prompt/evidence dan plan/context/backlog/index diperbarui.
+
+### Acceptance criteria
+
+- [x] Sepuluh aset mobile portrait tersedia, shared header/avatar/menu dan kedua palet konsisten dengan desktop v2.
+- [x] Semua metadata/actions/create tiga jenis/edit immutable/rights/genre/state tersedia pada single-column flow; list cards/custom3/range1–3of42/page1of14 konsisten.
+- [x] Dashboard dropdown menunjukkan theme aktif; navigasi drawer/log out, safe touch/scroll dan batas screenshot vs runtime dicatat.
+- [ ] Prompt/path/tool/PNG/visual proof, preservation/docs/format/whitespace/staged snapshot serta commit task lulus.
+
+### Validasi
+
+Native image inspection semua output, PNG dimensions/mode, theme pair/layout/fields/copy invariants, desktop/source/unrelated hash preservation; docs:check, targeted Prettier, diff/scoped index dan existing hooks. Full-page raster bukan hasil browser responsiveness/keyboard/runtime.
+
+### Hasil dan bukti
+
+Built-in image_gen: sepuluh panggilan utama, tanpa koreksi tambahan. Sepuluh final native previews inspected; English/fields/actions/dropdown aktif/list cards dan custom3/range1–3of42/page1of14 tersedia. Header PNG: kelima light 836×1881, kelima dark 836×1882, mode100644; perbedaan tinggi generator dicatat tanpa resize. Canonical memuat exact prompts dan batas raster/header/touch vs runtime. Hash preservation 33 file (23 unrelated selain indeks +10 desktop v2) lulus; source runtime task tidak diubah. `bun run docs:check` worktree lulus 52 Markdown/391 tautan, staged snapshot 45 Markdown/372 tautan. Targeted Prettier dan whitespace lulus; index hanya 16 file assets/docs milik task, perubahan indeks existing tetap terpisah. Hasil hooks/commit menyusul receipt pascacommit.
+
+### Commit task
+
+- Pesan: docs(design): add admin mobile mockups (ADMC-DES-004).
+- SHA: Belum dibuat.
+- Hook/checks: Menunggu hasil aktual.
+- Ledger: Receipt pascacommit untuk task berikutnya.
+
+### Blocker atau tindak lanjut
+
+Mobile visual untuk review; source runtime belum diimplementasikan.
+
+## Task: ADMC-DES-003 — Desktop dark v2 dan cleanup aset lama
+
+- Status: Done
 - Owner: Codex
 - Prioritas: P1
 - Referensi: ADMC-US-06; permintaan pengguna 5 Oktober 2026.
@@ -21,7 +61,7 @@ Built-in image_gen dark recolor dashboard/list/create/detail/edit. Preserve Engl
 - [x] Lima dark mockup memakai charcoal #1E201E dan semantic palette dark; layout/data/controls sesuai light v2.
 - [x] Dashboard dropdown memilih Dark; empat halaman lain closed; semua teks dan controls tetap terbaca serta form/pagination utuh.
 - [x] Lima PNG v1 dihapus dan semua link aktif diperbarui; light v2 dan pekerjaan existing tetap utuh, prompt/tool/path tercatat.
-- [ ] Inspeksi visual/PNG, docs/format/whitespace/scoped preservation dan commit task lulus.
+- [x] Inspeksi visual/PNG, docs/format/whitespace/scoped preservation dan commit task lulus.
 
 ### Validasi
 
@@ -34,8 +74,8 @@ Built-in image_gen: lima edit + satu koreksi badge Draft detail. Kelima final na
 ### Commit task
 
 - Pesan: docs(design): add admin dark mockups (ADMC-DES-003).
-- SHA: Belum dibuat.
-- Hook/checks: Menunggu hasil aktual.
+- SHA: `0ef62913b98d85517fc663319830d3247263e1d9`.
+- Hook/checks: docs:check 51/374, lint 1 task/types 3 task (cache valid) dan Commitlint lulus tanpa bypass. Commit 15 file, termasuk lima penghapusan v1/lima dark baru; belum push/PR/merge.
 - Ledger: Receipt pascacommit untuk task berikutnya.
 
 ### Blocker atau tindak lanjut
