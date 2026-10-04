@@ -1,0 +1,179 @@
+# Implementation plan: warning build TanStack
+
+## Plan metadata
+
+- Status: completed; follow-up WEB-BUILD-004 terverifikasi lokal dan di-commit.
+- Diperbarui: 2026-10-05.
+- Repository: `bayuaji17/vertical-movie-app`.
+- Base ref: `main`; base SHA: `b60f7676101d94c8725528dbef02b92c28eeee32`.
+- Last validated SHA: `e1037a24dc0a8f27e45768c943afc886c5d25eef` (config dengan import `.ts` telah diuji).
+- Branch: `fix/tanstack-build-warnings`.
+- Context: [repository-context.md](repository-context.md), disimpan sebelum plan ini.
+- Backlog: [web-build](../../tasks/web-build.md).
+- Otorisasi saat ini: pengguna menyetujui implementasi plan pada 5 Oktober 2026; commit per task mengikuti workflow root. Pada 5 Oktober 2026 pengguna mengotorisasi push, PR dan merge dengan squash khusus branch ini.
+
+## Objective
+
+Build TanStack tetap berhasil dengan batas SSR/auth yang sama, sambil menghilangkan warning directive dependency yang dikenali pada pipeline saat ini. Developer tetap melihat diagnostik lain.
+
+## Goals and non-goals
+
+Tangani warning `MODULE_LEVEL_DIRECTIVE` untuk pasangan package/directive pada baseline. Optimasi chunk >500 kB, upgrade package, aktivasi RSC/compiler, perubahan UI/player/API/database dan konfigurasi Turbo di luar scope.
+
+## Current behavior
+
+Baseline build berhasil dengan 135 warning: client satu `use no memo`; SSR nol; Nitro 133 `use client` dan satu `use no memo`. Semua berasal dari dependency. Lampiran pengguna adalah subset 70 warning. Vite dan Nitro memiliki jalur konfigurasi tersendiri; fix client saja tidak menangani mayoritas warning.
+
+Rolldown 1.2.11 menyediakan `onLog`, code/ID/location dan pesan ANSI. Nitro mempunyai `onwarn` dengan ignore rules existing; Vite menyediakan default handler yang meneruskan mekanisme tersebut. API legacy `onwarn` dan alias deprecated Vite `build.rollupOptions` tidak dipilih untuk konfigurasi baru.
+
+## Desired behavior
+
+Satu handler build bertipe sesuai Vite/Rolldown terpasang menghentikan log hanya bila semuanya cocok:
+
+1. Level warn dan code `MODULE_LEVEL_DIRECTIVE`.
+2. ID diagnostic terstruktur berada dalam `node_modules`; normalisasi separator Windows/Bun nested paths dan identifikasi package pada segmen node_modules terakhir. ID hilang/tidak jelas diteruskan.
+3. Directive pada header pesan setelah normalisasi ANSI cocok dengan allowlist pasangan package/directive.
+4. `use client` hanya untuk `@base-ui/react`, `@base-ui/utils`, `@tanstack/react-router`, `@tanstack/react-query`, `@tanstack/react-form`, `@videojs/react`; `use no memo` hanya untuk `react-compiler-runtime`.
+
+Log lain diteruskan melalui `defaultHandler(level, log)` dengan log/level asli. Filter mengatur diagnostik tanpa transform directive atau bundle. Review allowlist jika package atau pipeline RSC/compiler berubah.
+
+## Impact analysis
+
+Hubungkan handler ke Vite `build.rolldownOptions.onLog` dan Nitro `rolldownConfig.onLog`. Pertahankan Nitro preset Bun, external Sentry existing, plugin order, PORT/HOST dan import protection. Efektivitas serta composition Nitro harus dibuktikan pada build nyata; sesuaikan lokasi wiring berdasarkan resolved environment bila diperlukan, tanpa memperluas filter.
+
+## Affected files and symbols
+
+| Path                                                        | Action | Symbols                          | Reason / evidence                                                             |
+| ----------------------------------------------------------- | ------ | -------------------------------- | ----------------------------------------------------------------------------- |
+| `apps/web/tooling/log-filter.ts`                            | create | Handler dan allowlist            | Tooling web di luar source bundle; types melalui Vite, tanpa dependency baru. |
+| `apps/web/vite.config.ts`                                   | modify | build options dan opsi nitro     | Jalur Vite/Nitro ditelusuri pada context.                                     |
+| `apps/web/test/build-log-filter.test.ts`                    | create | Bun diagnostic regression tests  | Buktikan batas suppression dan default forwarding.                            |
+| `docs/tasks/web-build.md`                                   | modify | WEB-BUILD-001–003                | Status, AC, command/results dan SHA aktual.                                   |
+| `docs/plans/tanstack-build-warnings/implementation-plan.md` | modify | Freshness/execution log          | Bukti eksekusi dan penyesuaian wiring.                                        |
+| `docs/plans/tanstack-build-warnings/repository-context.md`  | modify | Snapshot bila stale              | Refresh hanya jika perubahan relevan membatalkan bukti.                       |
+| `docs/README.md`                                            | modify | Navigasi/status plan dan backlog | Stage hanya hunk task; desain lokal terpisah.                                 |
+
+Manifest/lockfile, stylesheet, komponen dan route tree generated tetap di luar scope. Tsconfig web mencakup semua TypeScript; helper/test harus lolos konfigurasi types/lint existing.
+
+## Implementation DAG
+
+`WEB-BUILD-001 / STEP-001 → WEB-BUILD-002 / STEP-002 → WEB-BUILD-003 / STEP-003`.
+
+## Implementation steps
+
+### STEP-001 — Reproduksi, context dan plan
+
+- Outcome: branch fix, baseline, diagnosis dan proposal terdokumentasi.
+- Depends on: none.
+- Files: context, plan, backlog, indeks docs.
+- Symbols: config/plugin graph dan diagnostic metadata.
+- Requirements: snapshot SHA, versi, baseline per environment, source/vendor evidence dan batas scope.
+- Validation: baseline build tanpa cache, probe in-memory, docs:check, Prettier, whitespace/scoped staging/preservation.
+- Acceptance criteria: plan ready berdasarkan evidence; source fix belum berubah; commit planning lokal setelah checks lulus.
+
+### STEP-002 — Filter spesifik dan wiring
+
+- Outcome: warning allowlist hilang; diagnostic lain diteruskan.
+- Depends on: STEP-001 dan permintaan implementasi.
+- Files: helper, vite.config.ts, regression test dan evidence backlog/plan.
+- Symbols: onLog, build.rolldownOptions, nitro.rolldownConfig.
+- Requirements: kondisi filter lengkap di atas dan default handler existing. Jangan memakai silent logging, blanket checks, menghapus directive atau menambah dependency.
+- Validation: test diagnostic nyata dari probe, build web tanpa cache, existing tests dan root types/lint/build.
+- Acceptance criteria: semua warning baseline dalam allowlist hilang di client/SSR/Nitro, diagnostic non-target tetap actionable, gate lulus dan commit task terpisah.
+
+### STEP-003 — Verifikasi build, SSR dan closure
+
+- Outcome: artefak dan batas import tetap valid dengan evidence akhir.
+- Depends on: STEP-002.
+- Files: backlog/plan/index; konfigurasi hanya bila pemeriksaan menemukan failure.
+- Symbols: production entry Bun, import protection, SSR smoke existing.
+- Requirements: log build baru, routes/client asset graph valid, warning chunk tetap terlihat. Metadata output nondeterministic bukan failure otomatis.
+- Validation: negative import proof dengan fixture dipulihkan, lalu build production final yang sukses dan SSR smoke existing pada backend/port terisolasi. Catat browser/hydration belum terverifikasi jika tidak menjalankan smoke browser yang sesuai. Root gates/docs/preservation; tidak mengulang gate yang masih valid tanpa perubahan/failure baru.
+- Acceptance criteria: import server tetap menggagalkan client build, SSR smoke lulus, entry .output/server/index.mjs tersedia, diagnostic target bersih, evidence lengkap dan commit closure terpisah. Remote delivery hanya saat diminta.
+
+## Test requirements
+
+Test perilaku mencakup pasangan allowlist aktual; scoped package/Bun nested ID; separator Windows; package mirip tetapi bukan target; source aplikasi; ID kosong; directive asing/use server; use no memo pada package lain; code warning berbeda; info/debug; pesan ANSI dan format tak dikenal. Kasus di luar allowlist harus meneruskan log asli tepat ke default handler. Fixture merepresentasikan metadata probe terpasang; bukan test yang hanya mencocokkan isi konfigurasi.
+
+Command implementasi: `bun test apps/web/test`, `bun run --cwd apps/web auth:import:proof`, `bun run check-types`, `bun run lint`, `bun run build --force`, `bun run --cwd apps/web auth:ssr:smoke`, `bun run docs:check`, targeted Prettier dan `git diff --check`. Import proof dijalankan sebelum build sukses terakhir karena failure proof disengaja. Jika script/dependency berubah, tambahkan frozen install.
+
+## Constraints
+
+Tidak menyaring berdasarkan substring directive saja, node_modules saja atau seluruh code MODULE_LEVEL_DIRECTIVE. Pertahankan protection/env/private boundaries dan desain existing. Tidak menjalankan migrasi, integration DB/storage/FFmpeg atau production rollout.
+
+## Acceptance criteria
+
+- [x] Target warning dependency hilang dari build baru client/SSR/Nitro.
+- [x] Source/unknown directives dan diagnostic lain tetap dilaporkan; build error tetap gagal.
+- [x] Regression/existing tests, negative import proof, SSR smoke dan quality gates lulus.
+- [x] Artefak Bun/routes tetap valid; browser yang belum diuji tidak diklaim lulus.
+- [x] Docs/receipt konsisten, satu commit per task dan pekerjaan lokal lain terjaga.
+
+## Risks and mitigations
+
+Filter luas berisiko menyembunyikan masalah: batasi pasangan package/directive dan forward default. Nitro bisa mengganti konfigurasi top-level: wire opsi Nitro dan periksa environment nyata. Format warning dapat berubah: format yang tak dikenali diteruskan. Aktivasi RSC/compiler nanti memerlukan review semantik baru; plan ini tidak menjanjikan suppression selalu aman pada pipeline lain.
+
+## Rollback or recovery
+
+Revert commit filter/helper/wiring melalui commit biasa bila terjadi regresi. Kembali ke konfigurasi baseline dengan warning terlihat; tidak ada data/schema/media yang perlu dipulihkan. Jangan reset/stash seluruh pekerjaan desain pengguna.
+
+## Evidence
+
+[Context dan evidence index](repository-context.md#evidence-index) merekam snapshot, source/vendor terpasang dan referensi resmi. [Backlog](../../tasks/web-build.md) memiliki results terperinci. Keberhasilan baseline bukan bukti fix sudah bekerja.
+
+## Open decisions
+
+Tidak ada keputusan produk yang menghalangi scope directive. Optimasi chunk/upgrade/RSC/compiler merupakan pekerjaan terpisah bila diminta. Wiring client/SSR/Nitro dan SSR/import protection telah terverifikasi; browser/hydration/device playback smoke tidak dijalankan pada fix logging ini.
+
+## Validation history
+
+### 2026-10-05 — Freshness planning
+
+- Result: valid.
+- Plan base SHA/current target SHA: `b60f7676101d94c8725528dbef02b92c28eeee32`.
+- Checked paths: config/manifests/lockfile, tests, context dan vendor Vite/Rolldown/Nitro.
+- Changed relevant paths: belum ada source/config/dependency task berubah; desain existing terpisah.
+- Decision: ready. Recheck SHA/affected paths sebelum implementasi; commit dokumen saja tidak otomatis membatalkan baseline.
+
+## Execution log
+
+- Branch fix dibuat dari base SHA; lampiran dan vendor ditelusuri.
+- Baseline `bun run build --filter=web --force` lulus: 2 task tanpa cache, 10.651 detik, 135 warning directive dan warning chunk terpisah. Probe in-memory memastikan metadata tersedia tanpa mengubah source/config.
+- Context disimpan sebelum plan/backlog. Source fix, proof pascaperubahan dan remote delivery belum dijalankan; hasil docs checks/commit planning dicatat setelah teramati.
+- Docs:check worktree 47 Markdown/336 tautan dan snapshot index 40 Markdown/317 tautan lulus; targeted Prettier dan whitespace lulus. Preservation 21 file existing selain indeks lulus; indeks hanya men-stage navigasi task. Source/config/lockfile unchanged pada freshness sebelum commit.
+- Receipt WEB-BUILD-001: commit lokal `cff4096feed95018ac756f593bf7c1a9863db70f`, `docs(web): plan TanStack build warning fix (WEB-BUILD-001)`. Hooks docs:check 47/336, lint 1 task dan check-types 3 task (cache valid), Commitlint lulus tanpa bypass. Receipt dicatat setelah commit untuk task berikutnya. Plan ready; source fix belum diimplementasikan dan branch belum dipush.
+
+### 2026-10-05 — Freshness implementasi
+
+- Result: valid.
+- Base SHA: b60f7676101d94c8725528dbef02b92c28eeee32; target SHA: cff4096feed95018ac756f593bf7c1a9863db70f.
+- Diff affected config/manifests/lockfile/tests tidak berubah dari baseline; perubahan HEAD hanya dokumentasi planning. Pengguna menyetujui eksekusi.
+- Penyesuaian path: helper memakai apps/web/tooling/log-filter.ts karena folder build di-ignore Git/formatter; tidak mengubah ignore rules. Aturan filter tetap sesuai proposal, memakai Bun.stripANSI native dan type-only BuildOptions dari Vite.
+
+### WEB-BUILD-002 — Hasil implementasi
+
+- Helper tooling, native ANSI stripping, allowlist dan forwarding sesuai plan; Vite dan Nitro memakai onLog. Penyesuaian folder di atas menjaga helper tracked tanpa perubahan ignore/dependency.
+- 59 web tests/197 assertions lulus; 22 test diagnostic baru. Probe nyata membuktikan source use server diteruskan. Types 3 task, lint 1 task dan build 2 task tanpa cache lulus setelah satu optional chain yang ditolak lint diperbaiki.
+- Log build client/SSR/Nitro: 0 directive warning dari baseline 135; warning chunk tetap visible. Import negative proof/SSR smoke mengikuti WEB-BUILD-003 setelah commit implementasi.
+
+- Receipt WEB-BUILD-002: 2a6a8ee590964aea6244dfb27c74caa3bf26efba; docs:check 47/336, scoped index 40/317, format/whitespace dan hooks lint/types/Commitlint lulus tanpa bypass. WEB-BUILD-003 dimulai setelah commit berhasil; source fix sesuai affected paths dan tidak ada perubahan dependency/config lain.
+
+### WEB-BUILD-003 — Verifikasi akhir
+
+- Negative auth import proof lulus dan fixture dipulihkan; build --force sukses setelah proof: 2 task, 0 cached, 5.671 detik. Directive warning client/SSR/Nitro 0; warning chunk tetap terlihat.
+- 36 public assets/path/SHA-256 identik baseline; production entry tersedia dan generated route tree tidak berubah. SSR native fixture lulus seluruh case existing; tidak mengklaim browser/hydration/device playback atau production rollout.
+- Source tidak berubah setelah WEB-BUILD-002 sehingga tests/types/lint tetap valid; receipt task implementasi masuk commit closure. Hasil docs checker/preservation/hook closure dicatat setelah pemeriksaan.
+
+- Receipt WEB-BUILD-003: 604acedefc342d4ae40b9e1718bba877fc3c36a7; docs:check 47/336, scoped index 40/317, Prettier/whitespace/preservation serta hooks lint/types/Commitlint lulus tanpa bypass. Source tetap identik WEB-BUILD-002. Plan completed dan task Done dicatat sesudah commit untuk pembaruan berikutnya. Remote delivery belum diminta/dijalankan.
+
+### WEB-BUILD-004 — Import config eksplisit
+
+- Freshness 5 Oktober 2026 pada SHA `604acedefc342d4ae40b9e1718bba877fc3c36a7`: import helper di `apps/web/vite.config.ts` masih tanpa ekstensi; source task tidak berubah. Vite terpasang mendeteksi extensionless import sebagai incompatibility native config loader. Pengguna melaporkan diagnostik ini dari replay cache.
+- Refinement: setelah STEP-003, tambahkan ekstensi `.ts` pada import relatif helper; tsconfig existing mengizinkan import ekstensi TypeScript. Tidak memakai env suppression atau memperluas filter log. Affected files follow-up hanya config, plan dan backlog existing; struktur/status indeks akhir tetap sama.
+- Validation: existing web tests, root types/lint/build --force, inspeksi diagnostik log baru, docs/format/whitespace dan preservation. Receipt/verifikasi dicatat setelah hasil aktual.
+- Hasil: 59 web tests/197 assertions, types 3 task, lint 1 task dan build 2 task tanpa cache lulus. Log build 7.603 detik tidak memiliki warning native config loader/extensionless import atau directive; warning chunk tetap terlihat. Docs:check 47/336, targeted Prettier dan whitespace lulus. Perubahan config hanya ekstensi import; proof native loader penuh/browser tidak dijalankan.
+- Receipt WEB-BUILD-004: `e1037a24dc0a8f27e45768c943afc886c5d25eef`; scoped index docs 40/317 dan preservation 21 file existing lulus; hooks docs:check 47/336, lint/types cache valid dan Commitlint lulus tanpa bypass. Receipt/status akhir dicatat sesudah commit untuk pembaruan task berikutnya.
+
+### Remote delivery — 2026-10-05
+
+Pengguna meminta push, buka PR dan merge; squash diizinkan khusus `fix/tanstack-build-warnings`. Receipt WEB-BUILD-004 disertakan sebelum push. Pemeriksaan freshness remote tidak menunjukkan commit baru pada `origin/main`; perubahan source tetap sama dengan hasil quality gates WEB-BUILD-004. Pekerjaan desain lokal tidak masuk delivery. Hasil PR/merge dicatat setelah operasi berhasil.

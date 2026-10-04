@@ -7,6 +7,8 @@ import viteReact from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { nitro } from 'nitro/vite'
 
+import { filterBuildLog } from './tooling/log-filter.ts'
+
 const config = defineConfig(({ mode }) => {
   const env: Partial<Record<'PORT' | 'HOST', string>> = loadEnv(
     mode,
@@ -21,6 +23,7 @@ const config = defineConfig(({ mode }) => {
 
   return {
     resolve: { tsconfigPaths: true },
+    build: { rolldownOptions: { onLog: filterBuildLog } },
     server: {
       port,
       host: process.env.HOST ?? env.HOST ?? 'localhost',
@@ -28,7 +31,11 @@ const config = defineConfig(({ mode }) => {
     },
     plugins: [
       devtools(),
-      nitro({ preset: 'bun', rollupConfig: { external: [/^@sentry\//] } }),
+      nitro({
+        preset: 'bun',
+        rollupConfig: { external: [/^@sentry\//] },
+        rolldownConfig: { onLog: filterBuildLog },
+      }),
       tailwindcss(),
       tanstackStart({
         importProtection: {
