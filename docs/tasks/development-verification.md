@@ -1,6 +1,6 @@
 # Modul: Verifikasi penyelesaian dan migrasi development
 
-> Diperbarui 5 Oktober 2026. VERIFY-001 selesai; VERIFY-002 telah lulus validasi lokal dan menunggu commit task.
+> Diperbarui 5 Oktober 2026. VERIFY-001 dan VERIFY-002 selesai; bukti lokal serta receipt commit dicatat di bawah.
 
 ## Tujuan modul
 
@@ -49,7 +49,7 @@ Sebagai pengembang, saya ingin tooling workspace mengikuti rilis stabil terbaru 
 
 ## Task: VERIFY-002 — Update Turborepo ke 2.11.7
 
-- Status: Review
+- Status: Done
 - Owner: Codex
 - Prioritas: P1
 - Referensi: VERIFY-US-02; permintaan pengguna 5 Oktober 2026; [workflow](../guides/development-workflow.md).
@@ -68,7 +68,7 @@ Pengguna mengotorisasi update ke versi terbaru. Registry npm `dist-tags.latest` 
 - [x] Root dependency dan seluruh paket platform Turbo di lockfile memakai 2.11.7; dependency lainnya tidak berubah.
 - [x] Frozen install, binary version dan dry-run task dev API/web berhasil dengan konfigurasi existing.
 - [x] Test API/auth/web, check-types, lint, build, docs:check, formatter dan whitespace check lulus.
-- [ ] Commit lokal VERIFY-002 dibuat dengan hook normal dan hanya perubahan task.
+- [x] Commit lokal VERIFY-002 dibuat dengan hook normal dan hanya perubahan task.
 
 ### Validasi
 
@@ -87,9 +87,9 @@ Update memakai `bun add --dev 'turbo@^2.11.7'`; baca kembali bundled docs versi 
 ### Commit task
 
 - Pesan: `chore(deps): update turborepo to 2.11.7 (VERIFY-002)`
-- SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan.
-- Ledger: SHA aktual dicatat setelah commit, untuk pembaruan dokumentasi berikutnya.
+- SHA: `15ca1071bf3e96167820f1302354aa9e652aee30`.
+- Hook/checks: docs:check 44/319, lint 1 task dan check-types 3 task (cache valid), Commitlint lulus tanpa bypass.
+- Ledger: Receipt/status Done dicatat setelah commit dan masuk pembaruan dokumentasi task berikutnya, sesuai workflow root. Commit lokal pada `chore/docs-organization`; tidak ada push/PR/merge.
 
 ### Blocker atau tindak lanjut
 

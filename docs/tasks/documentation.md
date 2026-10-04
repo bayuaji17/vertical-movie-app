@@ -120,8 +120,9 @@ Tidak ada blocker.
 | DOCS-003 | 790e174a9fef748564450244d05038fce8e9bdbd | Snapshot index 37 Markdown/263 tautan dan hook docs/lint/check-types/Commitlint lulus tanpa bypass |
 | DOCS-004 | 846929a82b1b9c6c1ae5516afa29f5004d01597c | Snapshot index 37 Markdown/271 tautan dan hook docs/lint/check-types/Commitlint lulus tanpa bypass |
 | DOCS-005 | 1f45728d5a0aeeecae48149ae538997c04f122f2 | Snapshot index 37 Markdown/284 tautan dan hook docs/lint/check-types/Commitlint lulus tanpa bypass |
+| DOCS-006 | 7c943981ee96a8c94f4ed15960042e5a927e51c1 | Snapshot index 37 Markdown/299 tautan dan hook docs/lint/check-types/Commitlint lulus tanpa bypass |
 
-SHA dicatat sesudah commit berhasil. Push/PR/merge tidak dilakukan. Commit task terakhir dicatat pada pembaruan ledger berikutnya.
+SHA dicatat sesudah commit berhasil. Pada saat task di atas ditutup, push/PR/merge belum dilakukan. Pengguna mengotorisasi delivery branch pada 5 Oktober 2026, termasuk squash merge khusus `chore/docs-organization`; keputusan ini tidak mengubah metode merge untuk branch lainnya. Eksekusi delivery dicatat pada [plan dokumentasi](../plans/documentation/implementation-plan.md).
 
 ## User story: DOCS-STORY-002
 

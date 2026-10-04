@@ -306,3 +306,15 @@ Receipt DOCS-003 dicatat setelah commit berhasil dan disertakan pada pembaruan d
 - PRD/Global Rules hanya memperbarui referensi status overview; index dan backlog selaras, receipt DOCS-005 dicatat pada update berikutnya. Tidak mengubah keputusan produk/proposal atau menyerap desain existing.
 - 5 Oktober 2026: checker worktree 44 Markdown/318 tautan dan scoped index 37 Markdown/299 tautan lulus; targeted Prettier/whitespace lulus. 28 path route unik cocok module, referensi teknis/keputusan PRD/GR/13 file desain protected terjaga dan HEAD freshness valid. Review statis, tidak mengulang proof runtime/production.
 - Commit lokal DOCS-006 setelah gates; SHA/hook aktual dicatat sesudah commit. Tidak ada push/PR/merge/deployment.
+
+- Receipt post-commit DOCS-006: `7c943981ee96a8c94f4ed15960042e5a927e51c1`, `docs(architecture): align overview with current implementation (DOCS-006)`; hooks docs:check 44/318, lint 1 task dan check-types 3 task (cache valid), Commitlint lulus tanpa bypass. Receipt ini masuk pembaruan dokumentasi task berikutnya sesuai aturan root; tidak ada push/PR/merge.
+
+## Delivery branch — 5 Oktober 2026
+
+- Status: diotorisasi pengguna; eksekusi push/PR/merge menyusul commit ledger.
+- Branch: `chore/docs-organization`; target: `main`.
+- Pengguna meminta commit, push, PR dan merge. Squash diizinkan khusus branch ini; otorisasi ini tidak menjadi aturan untuk branch berikutnya. Branch sumber dipertahankan.
+- Scope delivery: DOCS-001–006, checker/hook/aturan dokumentasi dan commit per task, serta upgrade Turbo [VERIFY-002](../../tasks/development-verification.md#task-verify-002--update-turborepo-ke-2117). Receipt DOCS-006 dan VERIFY-002 difinalisasi sebelum push. Pekerjaan desain lokal tetap di luar commit/PR.
+- Base remote diperiksa melalui `git fetch origin`; repository mengizinkan squash dan tidak menghapus branch setelah merge. Belum ada PR untuk branch ini pada pemeriksaan awal.
+- Bukti terbaru VERIFY-002: 112 test lulus, frozen install, dev dry-run, check-types/lint/build dijalankan ulang tanpa cache dan lulus; runtime aplikasi/schema tidak diubah. Validasi dokumentasi/scoped staging diulang untuk ledger delivery, bukan proof production baru.
+- Validasi ledger delivery: docs:check worktree 44 Markdown/321 tautan dan snapshot index 37 Markdown/302 tautan lulus; targeted Prettier dan whitespace lulus. Staging hanya plan dokumentasi dan backlog dokumentasi/development-verification.
