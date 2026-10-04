@@ -1,6 +1,6 @@
 # Modul: Build web
 
-> Diperbarui 5 Oktober 2026. Branch dan planning diminta pengguna; source filter merupakan proposal teknis.
+> Diperbarui 5 Oktober 2026. Implementasi disetujui pengguna 5 Oktober 2026; hasil dan status task dicatat setelah verifikasi.
 
 ## Tujuan modul
 
@@ -12,7 +12,7 @@ Sebagai pengembang, saya ingin warning dependency yang dikenali ditangani secara
 
 ## Task: WEB-BUILD-001 — Reproduksi warning dan susun plan
 
-- Status: Review
+- Status: Done
 - Owner: Codex
 - Prioritas: P1
 - Referensi: WEB-BUILD-US-01, plan STEP-001, permintaan pengguna 5 Oktober 2026.
@@ -29,7 +29,7 @@ Analisis lampiran/config/vendor/test pada SHA `b60f7676101d94c8725528dbef02b92c2
 - [x] Branch prefix fix dibuat dari main dan scope warning diidentifikasi.
 - [x] Baseline direproduksi; versi, environment dan metadata ditelusuri.
 - [x] Context/plan/backlog memuat affected files, dependency, AC, validation dan rollback.
-- [ ] Docs/format/whitespace/scoped staging lulus; commit planning tanpa source fix/desain existing.
+- [x] Docs/format/whitespace/scoped staging lulus; commit planning tanpa source fix/desain existing.
 
 ### Validasi
 
@@ -44,9 +44,9 @@ Dokumentasi 5 Oktober 2026: docs:check worktree 47 Markdown/336 tautan dan snaps
 ### Commit task
 
 - Pesan: `docs(web): plan TanStack build warning fix (WEB-BUILD-001)`.
-- SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan untuk commit planning.
-- Ledger: SHA/status Done dicatat sesudah commit untuk pembaruan dokumen berikutnya.
+- SHA: `cff4096feed95018ac756f593bf7c1a9863db70f`.
+- Hook/checks: docs:check 47/336, lint 1 task dan check-types 3 task (cache valid), Commitlint lulus tanpa bypass.
+- Ledger: Receipt/status Done dicatat setelah commit untuk pembaruan dokumen task berikutnya; branch lokal belum dipush.
 
 ### Blocker atau tindak lanjut
 
@@ -54,12 +54,12 @@ Planning tidak terblokir; implementasi menunggu permintaan eksekusi.
 
 ## Task: WEB-BUILD-002 — Filter warning dan wiring
 
-- Status: Ready
-- Owner: Pengembang/agent saat implementasi diminta
+- Status: Review
+- Owner: Codex
 - Prioritas: P1
 - Referensi: WEB-BUILD-US-01, plan STEP-002.
 - Diperbarui: 2026-10-05
-- Dependensi: WEB-BUILD-001 dan permintaan implementasi.
+- Dependensi: WEB-BUILD-001; implementasi disetujui pengguna.
 - Ukuran: Helper, wiring konfigurasi dan regression test.
 
 ### Ruang lingkup
@@ -68,9 +68,9 @@ Helper build logging, Vite/Nitro onLog dan native Bun diagnostic regression test
 
 ### Acceptance criteria
 
-- [ ] Hanya pasangan package/directive target dengan ID dependency valid disaring.
-- [ ] Unknown/source/missing ID, Windows/Bun path, ANSI dan code log lain diuji; default forwarding benar.
-- [ ] Build semua environment tanpa cache serta test/types/lint/build/docs lulus.
+- [x] Hanya pasangan package/directive target dengan ID dependency valid disaring.
+- [x] Unknown/source/missing ID, Windows/Bun path, ANSI dan code log lain diuji; default forwarding benar.
+- [x] Build semua environment tanpa cache serta test/types/lint/build/docs lulus.
 - [ ] Commit task terpisah; source/desain/dependency di luar scope terjaga.
 
 ### Validasi
@@ -79,15 +79,17 @@ Test diagnostic forwarding dan existing web tests; build tanpa cache, root quali
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau divalidasi; baseline dimiliki WEB-BUILD-001/context.
+5 Oktober 2026: helper apps/web/tooling/log-filter.ts memakai type-only Vite BuildOptions dan Bun.stripANSI native. Vite build.rolldownOptions.onLog dan Nitro rolldownConfig.onLog memakai handler yang sama; opsi preset/external/plugin/env/import protection existing tetap. Folder tooling dipilih karena build di-ignore Git/formatter; tidak menambah dependency atau mengubah ignore rules.
+
+Native Bun web tests: 59 pass, 0 fail, 197 assertions; 22 test baru memeriksa batas suppression/default forwarding. Probe Rolldown nyata in-memory lulus: known dependency disaring, source use server diteruskan. Root check-types 3 task lulus (web dieksekusi ulang, API/auth cache valid), lint web 1 task lulus setelah unnecessary optional chain diperbaiki, build --force 2 task lulus tanpa cache dalam 9.79 detik. Log client/SSR/Nitro menunjukkan 0 MODULE_LEVEL_DIRECTIVE; warning ukuran chunk tetap terlihat. Hash 22 file existing tetap sama sebelum index status diperbarui; manifests/lockfile/generated route tree tidak berubah.
 
 ### Commit task
 
-Belum dibuat; gunakan Conventional Commit ber-ID WEB-BUILD-002 dan catat SHA sesudah berhasil.
+Pesan: fix(web): filter known build directive warnings (WEB-BUILD-002). SHA/hook aktual dicatat sesudah commit; docs/format/whitespace dan scoped index diperiksa sebelum commit.
 
 ### Blocker atau tindak lanjut
 
-Permintaan implementasi belum diterima. Optimasi chunk terpisah.
+Implementasi disetujui pengguna. Optimasi chunk terpisah.
 
 ## Task: WEB-BUILD-003 — Verifikasi production build dan closure
 

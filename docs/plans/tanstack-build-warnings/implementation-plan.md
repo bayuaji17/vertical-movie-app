@@ -2,14 +2,14 @@
 
 ## Plan metadata
 
-- Status: ready; proposal teknis, source fix belum diimplementasikan.
+- Status: executing; implementasi disetujui pengguna 5 Oktober 2026.
 - Diperbarui: 2026-10-05.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `main`; base SHA / last validated SHA: `b60f7676101d94c8725528dbef02b92c28eeee32`.
 - Branch: `fix/tanstack-build-warnings`.
 - Context: [repository-context.md](repository-context.md), disimpan sebelum plan ini.
 - Backlog: [web-build](../../tasks/web-build.md).
-- Otorisasi saat ini: branch dan plan, beserta commit lokal planning menurut workflow root. Implementasi/remote delivery belum diminta.
+- Otorisasi saat ini: pengguna menyetujui implementasi plan pada 5 Oktober 2026; commit per task mengikuti workflow root. Remote delivery belum diminta.
 
 ## Objective
 
@@ -44,7 +44,7 @@ Hubungkan handler ke Vite `build.rolldownOptions.onLog` dan Nitro `rolldownConfi
 
 | Path                                                        | Action | Symbols                          | Reason / evidence                                                             |
 | ----------------------------------------------------------- | ------ | -------------------------------- | ----------------------------------------------------------------------------- |
-| `apps/web/build/log-filter.ts`                              | create | Handler dan allowlist            | Tooling web di luar source bundle; types melalui Vite, tanpa dependency baru. |
+| `apps/web/tooling/log-filter.ts`                            | create | Handler dan allowlist            | Tooling web di luar source bundle; types melalui Vite, tanpa dependency baru. |
 | `apps/web/vite.config.ts`                                   | modify | build options dan opsi nitro     | Jalur Vite/Nitro ditelusuri pada context.                                     |
 | `apps/web/test/build-log-filter.test.ts`                    | create | Bun diagnostic regression tests  | Buktikan batas suppression dan default forwarding.                            |
 | `docs/tasks/web-build.md`                                   | modify | WEB-BUILD-001–003                | Status, AC, command/results dan SHA aktual.                                   |
@@ -140,3 +140,17 @@ Tidak ada keputusan produk yang menghalangi scope directive. Optimasi chunk/upgr
 - Baseline `bun run build --filter=web --force` lulus: 2 task tanpa cache, 10.651 detik, 135 warning directive dan warning chunk terpisah. Probe in-memory memastikan metadata tersedia tanpa mengubah source/config.
 - Context disimpan sebelum plan/backlog. Source fix, proof pascaperubahan dan remote delivery belum dijalankan; hasil docs checks/commit planning dicatat setelah teramati.
 - Docs:check worktree 47 Markdown/336 tautan dan snapshot index 40 Markdown/317 tautan lulus; targeted Prettier dan whitespace lulus. Preservation 21 file existing selain indeks lulus; indeks hanya men-stage navigasi task. Source/config/lockfile unchanged pada freshness sebelum commit.
+- Receipt WEB-BUILD-001: commit lokal `cff4096feed95018ac756f593bf7c1a9863db70f`, `docs(web): plan TanStack build warning fix (WEB-BUILD-001)`. Hooks docs:check 47/336, lint 1 task dan check-types 3 task (cache valid), Commitlint lulus tanpa bypass. Receipt dicatat setelah commit untuk task berikutnya. Plan ready; source fix belum diimplementasikan dan branch belum dipush.
+
+### 2026-10-05 — Freshness implementasi
+
+- Result: valid.
+- Base SHA: b60f7676101d94c8725528dbef02b92c28eeee32; target SHA: cff4096feed95018ac756f593bf7c1a9863db70f.
+- Diff affected config/manifests/lockfile/tests tidak berubah dari baseline; perubahan HEAD hanya dokumentasi planning. Pengguna menyetujui eksekusi.
+- Penyesuaian path: helper memakai apps/web/tooling/log-filter.ts karena folder build di-ignore Git/formatter; tidak mengubah ignore rules. Aturan filter tetap sesuai proposal, memakai Bun.stripANSI native dan type-only BuildOptions dari Vite.
+
+### WEB-BUILD-002 — Hasil implementasi
+
+- Helper tooling, native ANSI stripping, allowlist dan forwarding sesuai plan; Vite dan Nitro memakai onLog. Penyesuaian folder di atas menjaga helper tracked tanpa perubahan ignore/dependency.
+- 59 web tests/197 assertions lulus; 22 test diagnostic baru. Probe nyata membuktikan source use server diteruskan. Types 3 task, lint 1 task dan build 2 task tanpa cache lulus setelah satu optional chain yang ditolak lint diperbaiki.
+- Log build client/SSR/Nitro: 0 directive warning dari baseline 135; warning chunk tetap visible. Import negative proof/SSR smoke mengikuti WEB-BUILD-003 setelah commit implementasi.
