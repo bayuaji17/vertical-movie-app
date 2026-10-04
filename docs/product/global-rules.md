@@ -1,44 +1,65 @@
-# Draft Global Rules — Vertical Movie App
+# Global Rules — Vertical Movie App
 
-> Status: **Draft untuk ditinjau** · 30 September 2026 · Aturan produk dan teknik di bawah perlu disetujui sebelum dianggap kebijakan tetap. Instruksi kerja repo yang berlaku saat ini ada di [`AGENTS.md`](../../AGENTS.md).
+> Status: **Aturan inti selaras keputusan yang disetujui; proposal UI/kebijakan tersisa ditandai** · Review 5 Oktober 2026 · Pemilik keputusan produk: pengguna. Snapshot repository `846929a82b1b9c6c1ae5516afa29f5004d01597c`. Persetujuan auth/metadata/media tercatat pada 1–4 Oktober 2026; review ini tidak memberi persetujuan baru untuk keputusan PRD yang dilewati atau menyatakan MVP/production selesai.
+
+Dokumen ini memiliki aturan produk lintas fitur. Kebutuhan dan parameter media dimiliki [PRD](prd.md), kontrak teknis dimiliki dokumen architecture dan runbook. Instruksi proses development berada pada [AGENTS.md root](../../AGENTS.md) dan [workflow development](../guides/development-workflow.md); tidak disalin sebagai kebijakan proses baru di sini.
 
 ## Aturan produk lintas fitur
 
-| ID    | Aturan yang diusulkan                                                                                                      | Dampak pada implementasi                                                                    |
-| ----- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| GR-01 | Hanya satu akun admin yang disediakan secara terkendali dapat mengelola sistem; pendaftaran mandiri publik tidak tersedia. | Better Auth digunakan untuk sesi admin; API memeriksa hak admin pada tiap operasi privat.   |
-| GR-02 | Pengunjung dapat melihat katalog dan menonton video terbit tanpa login.                                                    | Endpoint baca publik tidak mensyaratkan sesi atau akun pengunjung.                          |
-| GR-03 | Draf, aset yang belum siap, dan video yang ditarik tidak dapat ditonton publik.                                            | Respons API dan akses media mengikuti status publikasi yang tersimpan.                      |
-| GR-04 | Penerbitan memerlukan metadata wajib, video siap, dan pernyataan hak konten oleh admin.                                    | API menolak transisi yang tidak memenuhi syarat dengan alasan yang dapat ditindaklanjuti.   |
-| GR-05 | Gangguan jaringan atau pemrosesan tidak boleh menghapus metadata yang sudah disimpan.                                      | Simpan draf lebih awal; status gagal dan jalur ulang terlihat jelas.                        |
-| GR-06 | Pengulangan permintaan unggah, callback pemrosesan, atau terbit tidak boleh membuat hasil ganda.                           | Rancang identitas operasi dan transisi status yang aman diulang.                            |
-| GR-07 | Informasi publik hanya memuat video terbit dan pengaturan yang memang dimaksudkan untuk publik.                            | Respons publik dipisahkan dari data admin, autentikasi, dan infrastruktur.                  |
-| GR-08 | Admin dan pengunjung menerima pesan status yang jelas dan dapat diakses.                                                   | Teks status tidak hanya bergantung pada warna; kontrol utama dapat dipakai dengan keyboard. |
-| GR-09 | Aturan hak cipta, pelaporan, dan moderasi harus disetujui sebelum publikasi untuk pengguna nyata.                          | Rilis publik menunggu kebijakan dan alur penanganan konten.                                 |
+ID GR-01–09 dipertahankan. Kolom kondisi memisahkan keputusan inti, implementasi saat ini dan proposal yang belum selesai; status dokumen tidak berarti semua UI atau gerbang rilis telah terpenuhi.
 
-## Aturan implementasi
+| ID    | Aturan                                                                                                                                                     | Kondisi dan batas                                                                                                                                                                                                                                                        |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GR-01 | Hanya satu akun admin terprovision secara terkendali dapat mengelola sistem; signup publik tidak tersedia.                                                 | Keputusan inti disetujui; email/password, provisioning/recovery CLI dan guard authoritative tersedia. Pengelolaan konten lengkap di dashboard masih lanjutan.                                                                                                            |
+| GR-02 | Pengunjung dapat menemukan katalog dan menonton konten efektif published tanpa login.                                                                      | Keputusan inti disetujui; API katalog/watch HLS tersedia. Homepage katalog/navigasi UI lengkap belum tersedia.                                                                                                                                                           |
+| GR-03 | Draft, aset belum siap dan konten archived tidak memperoleh akses playback publik baru; preview yang memenuhi readiness hanya untuk admin.                 | Published juga harus memenuhi visibility/readiness parent. Signed URL yang sudah diterbitkan sebelum archive tetap berlaku sampai expiry; buffer/cache yang sudah diterima tidak dapat ditarik kembali.                                                                  |
+| GR-04 | Publish manual memerlukan metadata wajib, konfirmasi hak konten dan source/HLS/poster terverifikasi siap.                                                  | Readiness/rights/idempotency API tersedia; upload selesai atau transcode siap tidak autopublish. Preview adalah alur admin, bukan bukti melihat video yang direkam API. Subtitle opsional dan belum diimplementasikan.                                                   |
+| GR-05 | Kegagalan jaringan/storage/pemrosesan tidak menghapus metadata editorial yang tersimpan; status dan jalur pemulihan mengikuti kondisi aktual.              | Persistensi, resume/retry/lease/cleanup tersedia. Setelah failure terminal, koreksi source draft memakai session upload baru; manual reprocess endpoint belum tersedia. Retensi file asli terpisah dari metadata.                                                        |
+| GR-06 | Permintaan upload/publish yang diulang dan eksekusi worker duplikat tidak mengaktifkan hasil ganda atau pointer output dari attempt yang kehilangan claim. | Idempotency/request hash, owner/version lock, freeze/enqueue dan lease/attempt tersedia. Retry dapat menerima konflik untuk dicoba lagi; bukan janji bahwa setiap request duplikat langsung sukses. Tidak ada callback transcode eksternal sebagai alur sistem saat ini. |
+| GR-07 | Respons konten publik hanya memuat metadata/output yang diizinkan; data admin, sesi, credential dan source asli tidak ikut menjadi katalog publik.         | DTO katalog whitelisted. Playback resmi dapat membawa signed URL output temporer setelah pemeriksaan visibility; pengaturan situs publik belum ditetapkan/diimplementasikan.                                                                                             |
+| GR-08 | Admin dan pengunjung memperoleh status serta kontrol yang jelas dan dapat diakses, termasuk kondisi menunggu/gagal.                                        | Kebutuhan UX pada PRD; login/player/status API mempunyai fondasi, dashboard upload/recovery dan acceptance seluruh layar/perangkat belum lengkap. Target audit aksesibilitas rinci masih proposal di bawah.                                                              |
+| GR-09 | Kebijakan hak cipta, konten terlarang, pelaporan dan penanganan konten perlu dirinci/disetujui sebelum rilis untuk pengguna nyata.                         | Kebijakan masih terbuka; rights confirmation yang sudah tersedia tidak berarti alur laporan/moderasi telah ada. Pembahasan dilewati pada sesi ini, bukan persetujuan atau penghapusan kebutuhan.                                                                         |
 
-- API Elysia adalah sumber kebenaran untuk validasi domain, otorisasi admin, status video, dan penerbitan. Web TanStack Start menyajikan interaksi dan tidak dapat mengesahkan transisi hanya dari state klien.
-- Eden Treaty dipilih pengguna pada 1 Oktober 2026 untuk kontrak API–web. API mengekspor tipe hasil komposisi Elysia; web mengimpor tipe saja dan memakai client Eden bersama TanStack Query. Ikuti [API Development](../guides/api-development.md) untuk lifecycle, scope plugin, dan kontrak error. Pemeriksaan akses tetap dilakukan server.
-- PostgreSQL menyimpan data terstruktur melalui Drizzle. Better Auth hanya melayani login admin; pengunjung tidak memerlukan akun. Pengaturan yang dapat diedit admin dipisahkan dari rahasia server.
-- Validasi berkas dilakukan sejak pemilihan file untuk memberi umpan balik cepat, lalu ditegakkan lagi oleh layanan yang menerima unggahan dan memproses media.
-- Simpan berkas video pada Cloudflare R2 atau layanan kompatibel S3, bukan di PostgreSQL. Database hanya menyimpan referensi objek, metadata, dan status. Provider final masih terbuka.
-- Simpan job transcode secara persisten di PostgreSQL. Jalankan FFmpeg dari worker Bun di luar proses permintaan HTTP dan di luar transaksi database; perubahan status harus tahan terhadap job duplikat, worker berhenti, dan percobaan ulang.
-- Prioritaskan API native Bun untuk operasi yang cocok, terutama `Bun.S3Client` dan driver Drizzle berbasis `Bun.SQL`. Verifikasi dukungan operasi dan kompatibilitas dengan library terpilih; catat alasan bila memakai alternatif.
-- Batasi izin unggah pada admin, objek, operasi, dan masa berlaku yang diperlukan. Jangan anggap URL bertanda tangan langsung tidak dapat dipakai setelah video ditarik; kebijakan akses dan cache media harus ditetapkan sebelum rilis publik.
-- Rahasia, token, dan URL bertanda tangan tidak masuk log, dokumen, atau respons publik. Konfigurasi lingkungan perlu didaftarkan tanpa nilai rahasia ketika diimplementasikan.
-- Kontrak API dan perubahan status harus dapat ditelusuri ke kebutuhan `PRD-xx`; perubahan perilaku memperbarui dokumen yang terkait.
-- Gunakan Bun untuk instalasi, skrip, build, dan runtime; pertahankan batas `apps/api` dan `apps/web`. Paket bersama hanya dibuat bila kedua app benar-benar memerlukan kode yang sama.
-- Jangan mengedit `apps/web/src/routeTree.gen.ts` secara manual. Jangan memasukkan `dist/`, `.output/`, atau `.turbo/` ke commit.
+## Validasi, status dan integritas konten
 
-## Aturan antarmuka yang diusulkan
+API menjadi sumber kebenaran untuk validasi domain, otorisasi, readiness, versioning dan transisi publikasi. UI memberikan umpan balik dan tidak mengesahkan transisi hanya dari state lokal. Validasi file saat pemilihan merupakan kebutuhan frontend yang belum tersedia lengkap; pemeriksaan server/worker tetap wajib walaupun klien menyatakan file valid.
 
-- Aksi destruktif atau yang mengubah visibilitas video memerlukan label dan konsekuensi yang jelas.
-- Pengalaman tonton diutamakan untuk ponsel, sementara desktop memiliki tata letak yang dirancang khusus; video vertikal tidak diregangkan atau dipotong tanpa pemberitahuan.
-- Status unggah/pemrosesan harus terlihat sebagai teks, termasuk ketika gagal atau membutuhkan aksi ulang.
-- Pemutaran video tidak dimulai dengan suara tanpa tindakan pengguna. Sediakan kontrol putar/jeda, indikator fokus, dan jalur caption sesuai keputusan aksesibilitas.
-- Target aksesibilitas awal adalah WCAG 2.2 AA; audit dan keputusan penerapan caption dicatat sebelum rilis publik. Lihat [Design System](../design/design-system.md).
+Model konten adalah series → season → episode serta movie/standalone tanpa season. Lifecycle **video** draft → published → archived terpisah dari upload, aset dan job. Lifecycle series/season mengikuti model parent saat ini; jangan menyamakan enum atau menganggap archive parent otomatis menghapus/mengubah status seluruh child.
 
-## Urutan sumber keputusan
+Episode published belum efektif publik jika series masih draft atau parent archived. Series publish memerlukan metadata/poster dan minimal satu episode published-ready; series tanpa child playable tidak ditampilkan. Restore/republish, penggantian source published dan perubahan grouping setelah first publish belum tersedia. Detail readiness dan batas sumber/sampul mengikuti [keputusan inti PRD](prd.md#keputusan-inti-yang-disetujui) serta [model data video](../architecture/video-data-model.md).
 
-Kode dan skrip saat ini menjelaskan **apa yang sudah berjalan**; [`AGENTS.md`](../../AGENTS.md) menjelaskan **cara bekerja di repo**. [PRD](prd.md), [Architecture](../architecture/overview.md), dokumen ini, [Global Workflow](../guides/development-workflow.md), dan [Design System](../design/design-system.md) masih berstatus draft. Ketika disetujui, catat tanggal, pemilik keputusan, dan perubahan ruang lingkup di dokumen terkait agar usulan tidak keliru dianggap implementasi.
+Completion membekukan identitas source dan enqueue job sebelum media dapat diaktifkan sebagai hasil siap. Network storage dan FFmpeg berada di luar transaksi database. Job PostgreSQL, claim/lease dan aktivasi output memisahkan usaha pemrosesan dari hasil yang resmi dipakai playback. Kontrak request/retry/ownership dimiliki [kontrak upload](../architecture/media-upload-contract.md) dan [runbook media](../operations/media.md).
+
+## Storage, playback, cache dan retensi
+
+Provider sudah ditetapkan: **MinIO development / Cloudflare R2 production melalui S3-compatible**, dipilih lewat env server. Satu bucket aplikasi privat per environment menyimpan source dan output pada prefix terpisah. Prefix adalah organisasi objek; publish/archive tidak menjadikan folder publik atau memindahkan segment. Pemutaran memakai **HLS hasil transcoding**, bukan file source asli. Env baru tidak memigrasikan objek lama; proof MinIO lokal tidak membuktikan R2 production.
+
+Playlist master/variant melalui API dengan pemeriksaan akses. Init/segment serta poster siap dapat diakses melalui signed GET output yang diterbitkan secara terbatas. Signed URL merupakan kapabilitas temporer: diperbolehkan pada respons playback/playlist yang memerlukannya, tetapi tidak dicatat sebagai metadata permanen, log atau contoh dokumentasi berisi signature aktif. Credential S3/auth/database dan token sesi bukan data respons konten publik. Objek source, staging, key arbitrer dan output yang tidak diverifikasi tidak memperoleh izin playback.
+
+URL baru/renewal harus memeriksa ulang akses. TTL, header cache dan invalidation mengikuti [kontrak akses PRD](prd.md#publikasi-akses-dan-cache): URL lama berakhir sesuai expiry, cache signed tidak memperpanjang kapabilitas dan archive tidak menjanjikan revocation instan. Cache katalog memiliki TTL/invalidation terpisah dari playlist dan izin akses payload.
+
+Retensi mengikuti [PRD](prd.md#retensi-dan-pemulihan): source non-archived eligible paling cepat tujuh hari setelah HLS verified-ready tanpa job aktif; konten archived mempertahankan file valid yang masih ada. Source yang sudah terhapus tidak dipulihkan oleh archive dan deletion claim yang sudah diambil mempunyai batas race tersendiri. Metadata/provenance/tombstone tetap memungkinkan HLS dipublikasikan/diputar. Cleanup hanya menangani session/attempt/source tercatat dengan claim/recovery; tidak memakai lifecycle bucket tujuh hari tanpa pengecualian archived.
+
+Rahasia server dimiliki env API; hanya konfigurasi publik boleh menjadi env web. Pemisahan entry auth/server/client/types, kontrak Eden type-only, PostgreSQL/Drizzle dan penggunaan native Bun yang kompatibel mengikuti [API development](../guides/api-development.md), [environment](../guides/environment.md) dan root AGENTS. SDK multipart yang tersedia merupakan pilihan implementasi setelah gap native Bun dibuktikan, bukan perubahan keputusan provider atau metode upload.
+
+## Antarmuka dan proposal yang tersisa
+
+PRD sudah menetapkan mobile first, rasio 9:16, pengalaman desktop dan kontrol keyboard. Status upload/pemrosesan/gagal harus dipresentasikan sebagai teks yang dapat dimengerti; spec/mockup pada [Design System](../design/design-system.md) tidak membuktikan layar tersebut sudah diimplementasikan.
+
+Usulan antarmuka dari dokumen sebelumnya berikut dipertahankan sebagai **proposal**, belum dianggap persetujuan baru atau hasil audit:
+
+- Aksi destruktif/perubahan visibility memiliki label dan konsekuensi yang jelas.
+- Pemutaran dengan suara memerlukan tindakan pengguna; default autoplay/audio final belum ditetapkan oleh review ini.
+- Target audit aksesibilitas menyeluruh WCAG 2.2 AA dan rincian caption/assistive technology ditinjau bersama fitur yang dikerjakan. Tidak ada klaim audit kepatuhan aplikasi lengkap.
+
+UX katalog/navigasi, field konfigurasi situs dan rincian subtitle opsional tetap mengikuti [keputusan terbuka PRD](prd.md#keputusan-produk-yang-masih-terbuka). User melewati pembahasannya untuk melanjutkan review dokumen; status kebutuhan tersebut tetap dipertahankan.
+
+## Sumber keputusan dan status evidence
+
+- Keputusan produk disetujui pengguna dan [PRD](prd.md) menentukan target behavior. Review ini mempertahankan tanggal/pemilik keputusan historis, tanpa mengesahkan proposal baru.
+- Source/schema saat ini dan runbook menjelaskan implementasi serta batas operasional. Konflik antara kode dan keputusan produk dicatat/diperbaiki, bukan otomatis mengubah keputusan.
+- [AGENTS.md](../../AGENTS.md) dan guides menentukan proses kerja. Workflow sudah disetujui, termasuk commit per task; bukan dokumen yang seluruhnya draft.
+- Design system lokal memiliki fondasi final, sedangkan implementasi UI dan status Git artefaknya terpisah. PRD mendekati final; [Architecture](../architecture/overview.md) masih memerlukan review claim/status lama.
+- Plan/backlog menyimpan keputusan, evidence dan riwayat pada SHA/tanggalnya. Historical plan tidak mengalahkan keputusan terkini, root instructions atau kontrak aktif.
+
+Review source pada snapshot di atas mencakup auth guard, katalog/DTO, publish/idempotency, upload/worker, storage config dan playback signed URL. Trace ada pada [context DOCS-005](../plans/documentation/repository-context.md#review-global-rules--5-oktober-2026). Evidence runtime historis dan gerbang R2/Safari/benchmark/full restore/stress berada pada [runbook media](../operations/media.md) serta backlog pemiliknya. Perubahan dokumentasi ini tidak mengulang proof runtime/production atau menaikkan semua task media menjadi Done.

@@ -118,6 +118,7 @@ Tidak ada blocker.
 | DOCS-001 | bbd34602dcdbaca30e51c5ce95668a41c9b3223c | Snapshot index dan hook docs/lint/check-types/Commitlint lulus tanpa bypass                        |
 | DOCS-002 | 29dd9325a2d9a01ae7fa0ae10cd001c1355eada0 | Snapshot index dan hook docs/lint/check-types/Commitlint lulus tanpa bypass                        |
 | DOCS-003 | 790e174a9fef748564450244d05038fce8e9bdbd | Snapshot index 37 Markdown/263 tautan dan hook docs/lint/check-types/Commitlint lulus tanpa bypass |
+| DOCS-004 | 846929a82b1b9c6c1ae5516afa29f5004d01597c | Snapshot index 37 Markdown/271 tautan dan hook docs/lint/check-types/Commitlint lulus tanpa bypass |
 
 SHA dicatat sesudah commit berhasil. Push/PR/merge tidak dilakukan. Commit task terakhir dicatat pada pembaruan ledger berikutnya.
 
@@ -164,3 +165,43 @@ Review menemukan PRD sudah tertinggal: backend media dan watch/preview tersedia 
 ### Blocker atau tindak lanjut
 
 Tidak ada blocker review. Global Rules dan Architecture memerlukan review terpisah; keputusan produk terbuka dan proof production tidak dianggap diselesaikan oleh task ini.
+
+## Task: DOCS-005 — Review dan selaraskan Global Rules
+
+- Status: Done
+- Owner: pengembang/agent
+- Prioritas: 5
+- Referensi: DOCS-STORY-002, GR-01–09, [context review](../plans/documentation/repository-context.md#review-global-rules--5-oktober-2026), [plan STEP-005](../plans/documentation/implementation-plan.md#step-005--review-dan-selaraskan-global-rules)
+- Diperbarui: 2026-10-05
+- Dependensi: DOCS-004
+- Ukuran: satu review canonical aturan lintas fitur
+
+### Ruang lingkup
+
+Global Rules, referensi status pada PRD/index dan canonical context/plan/backlog pada snapshot `846929a82b1b9c6c1ae5516afa29f5004d01597c`. Receipt DOCS-004 masuk pembaruan ledger berikutnya. Pertanyaan PRD yang dilewati pengguna dan proposal UI/kebijakan tidak dianggap disetujui; runtime/source/schema/desain tidak diubah.
+
+### Acceptance criteria
+
+- [x] ID GR-01–09 dan subject rule dipertahankan; ketentuan inti/implementasi/proposal tersisa dibedakan.
+- [x] Provider, visibility/expiry/cache dan signed URL respons playback selaras source/PRD; credential tetap privat.
+- [x] Instruksi proses merujuk root/guides; klaim semua dokumen draft diperbaiki dan PRD/index status selaras.
+- [x] Checker/formatter/whitespace/index snapshot serta preservation lulus; commit scoped tanpa bypass.
+
+### Validasi
+
+Review statis auth/catalog/publication/media/playback/config/worker dan PRD/runbook. `bun run docs:check`, targeted Prettier, `git diff --check`, index snapshot/checker, GR ID/PRD preservation serta staging audit. Hooks docs/lint/types/Commitlint. Tidak menjalankan ulang integrasi atau migration/production untuk task docs ini.
+
+### Hasil dan bukti
+
+Review mengoreksi provider final terbuka, signed URL dilarang seluruh respons publik, akses/cache belum ditetapkan dan klaim semua dokumen draft. Preview admin, old URL expiry, HLS/source dan batas retensi dijelaskan; parameter rinci dimiliki PRD/kontrak/runbook. Verifikasi 5 Oktober 2026: `bun run docs:check` lulus 44 Markdown/303 tautan; targeted Prettier dan whitespace lulus. Snapshot index enam file scoped lulus 37 Markdown/284 tautan. GR-01–09, keputusan/open questions PRD dan 13 file desain protected tetap terjaga; HEAD freshness valid. Ini review statis/dokumentasi, bukan proof runtime/production baru.
+
+### Commit task
+
+- Pesan: `docs(product): align global rules with approved decisions (DOCS-005)`
+- SHA: receipt aktual dicatat pada execution log setelah commit berhasil dan dapat masuk pembaruan task berikutnya.
+- Hook/checks: docs/Prettier/whitespace/index lulus; hooks docs/lint/types/Commitlint dijalankan oleh commit dan hasil aktual dicatat pada receipt.
+- Ledger: receipt DOCS-004 dicatat dari hasil aktual; receipt DOCS-005 sesudah commit berhasil.
+
+### Blocker atau tindak lanjut
+
+Tidak ada blocker review. Architecture masih memerlukan review terpisah; proposal PRD/UI/kebijakan dan proof production tidak diselesaikan oleh task ini.

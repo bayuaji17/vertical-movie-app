@@ -153,11 +153,10 @@ Pengguna mengotorisasi commit lokal untuk setiap task yang selesai. DOCS-002 dip
 
 Verifikasi penutupan 5 Oktober 2026: checker worktree lulus 44 Markdown/282 tautan dan smoke terisolasi 10 kasus; snapshot index DOCS-001 lulus 37 Markdown/259 tautan dan DOCS-002 lulus 37/263. Frozen install 770/947 tanpa perubahan serta root build 2 task lulus menggunakan cache valid. Setiap commit menjalankan docs/lint/check-types/Commitlint tanpa bypass. Root source tidak berubah; 13 file desain protected tetap identik.
 
-| Task     | Commit                                   | Evidence                                                                    |
-| -------- | ---------------------------------------- | --------------------------------------------------------------------------- |
-| DOCS-001 | bbd34602dcdbaca30e51c5ce95668a41c9b3223c | Snapshot index dan hook docs/lint/check-types/Commitlint lulus tanpa bypass |
-| DOCS-002 | 29dd9325a2d9a01ae7fa0ae10cd001c1355eada0 | Snapshot index dan hook docs/lint/check-types/Commitlint lulus tanpa bypass |
-
+| Task     | Commit                                   | Evidence                                                                                           |
+| -------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| DOCS-001 | bbd34602dcdbaca30e51c5ce95668a41c9b3223c | Snapshot index dan hook docs/lint/check-types/Commitlint lulus tanpa bypass                        |
+| DOCS-002 | 29dd9325a2d9a01ae7fa0ae10cd001c1355eada0 | Snapshot index dan hook docs/lint/check-types/Commitlint lulus tanpa bypass                        |
 | DOCS-003 | 790e174a9fef748564450244d05038fce8e9bdbd | Snapshot index 37 Markdown/263 tautan dan hook docs/lint/check-types/Commitlint lulus tanpa bypass |
 
 SHA dicatat sesudah commit berhasil. Push/PR/merge tidak dilakukan. Commit task terakhir dicatat pada pembaruan ledger berikutnya.
@@ -209,3 +208,52 @@ Receipt DOCS-003 dicatat setelah commit berhasil dan disertakan pada pembaruan d
 - PRD diselaraskan menjadi mendekati final, 10 ID dipertahankan, keputusan inti/implementasi/UI gap/open decisions/rollout dipisahkan; index dan backlog diperbarui. Receipt DOCS-003 dimasukkan dan status DOCS-002 diselaraskan dengan commit aktualnya.
 - 5 Oktober 2026: `bun run docs:check` 44 Markdown/290 tautan lulus; targeted Prettier dan `git diff --check` lulus; snapshot index scoped 37 Markdown/271 tautan lulus; 13 file desain protected identik. Tidak mengulang proof runtime/production.
 - Delivery lokal task memakai Conventional Commit DOCS-004 setelah gates; SHA/hook aktual dicatat sesudah commit. Push/PR/merge/deployment tidak diminta.
+
+- Receipt post-commit DOCS-004: `846929a82b1b9c6c1ae5516afa29f5004d01597c`, `docs(product): align PRD with current repository (DOCS-004)`; hooks docs:check 44/290, lint 1 task dan check-types 3 task (cache valid), Commitlint lulus tanpa bypass. Receipt ini masuk pembaruan dokumentasi task berikutnya sesuai aturan root; tidak ada push/PR/merge.
+
+## Review Global Rules — DOCS-005
+
+- Status: completed
+- Diperbarui: 2026-10-05
+- Base ref: chore/docs-organization
+- Base SHA / last validated SHA: `846929a82b1b9c6c1ae5516afa29f5004d01597c`
+- Context: [Review Global Rules](repository-context.md#review-global-rules--5-oktober-2026), ditulis sebelum plan task ini.
+- Objective: selaraskan aturan lintas fitur dengan PRD/keputusan/kode tanpa menyetujui proposal yang dilewati pengguna.
+- Current behavior: provider disebut terbuka, akses/cache belum ditetapkan, semua signed URL dilarang di respons publik, semua dokumen dianggap draft dan instruksi proses disalin.
+- Desired behavior: GR-01–09 stabil dengan ketentuan inti, status implementasi, batas signed URL/expiry dan proposal tersisa yang jelas; instruksi proses tetap di pemilik canonical.
+- Constraints: dokumentasi saja; preserve desain existing dan pertanyaan PRD; commit lokal per task tanpa remote/rollout.
+
+### Impact dan affected files DOCS-005
+
+| Path                                                                       | Action | Subject                                  | Reason / evidence                                                                    |
+| -------------------------------------------------------------------------- | ------ | ---------------------------------------- | ------------------------------------------------------------------------------------ |
+| `docs/product/global-rules.md`                                             | modify | GR-01–09, status/policy/access/ownership | Source dan keputusan pada context review.                                            |
+| `docs/product/prd.md`                                                      | modify | Referensi status Global Rules            | Hapus klaim global rules usang setelah review, tanpa mengubah keputusan terbuka PRD. |
+| `docs/README.md`                                                           | modify | Entry Global Rules                       | Navigasi status canonical; exclude bagian desain lokal.                              |
+| `docs/tasks/documentation.md`                                              | modify | DOCS-005 dan receipt DOCS-004            | AC/evidence dan ledger aktual.                                                       |
+| `docs/plans/documentation/repository-context.md`, `implementation-plan.md` | modify | Context, STEP-005, hasil review          | Riwayat canonical; receipt DOCS-004/format ledger diperbaiki pada update berikutnya. |
+
+### STEP-005 — Review dan selaraskan Global Rules
+
+- Outcome: aturan inti selaras implementasi/PRD dan proposal tersisa tidak dianggap disetujui.
+- Depends on: STEP-004.
+- Files: enam path affected di atas.
+- Symbols: GR-01–09, signed playback capabilities, visibility/retensi, sumber keputusan.
+- Requirements: pertahankan ID dan subject rule; koreksi provider/access/status; izinkan signed URL temporer pada playback resmi tanpa mengekspos credential; pisahkan target UI/kebijakan yang belum lengkap; link ke pemilik parameter media dan instruksi proses.
+- Validation: cross-check source auth/catalog/publication/media/playback/config/worker dengan PRD/runbook; `bun run docs:check`, targeted Prettier, whitespace, snapshot index dan preservation; hooks tanpa bypass.
+- Acceptance criteria: seluruh GR ID dipertahankan, semua konflik utama diperbaiki, PRD/index selaras dan hanya task docs masuk commit; tidak mengklaim proof runtime/production baru.
+
+### Freshness DOCS-005 — 5 Oktober 2026
+
+- Result: valid.
+- Previous review SHA: `790e174a9fef748564450244d05038fce8e9bdbd`; current target SHA: `846929a82b1b9c6c1ae5516afa29f5004d01597c`.
+- Checked paths: source/API/auth/catalog/media/playback/worker, manifests, PRD/Global Rules/index, runbook dan scope ledger.
+- Changed relevant paths: hanya review PRD DOCS-004; source runtime tetap sama. Local design/receipt dipisahkan.
+- Decision: refresh context dan STEP-005, gunakan PRD terbaru, preserve keputusan terbuka yang dilewati.
+
+### Execution Log — DOCS-005
+
+- Context ditulis sebelum STEP-005 pada snapshot `846929a82b1b9c6c1ae5516afa29f5004d01597c`; perubahan hanya dokumentasi. GR-01–09 tetap, provider/access/signed URL/status dokumen diselaraskan dan instruksi proses merujuk root/guides. Pertanyaan PRD yang dilewati tidak disetujui/dihapus.
+- PRD hanya mengubah referensi status Global Rules, index memperbarui entry canonical; receipt DOCS-004 masuk ledger berikutnya dan format baris DOCS-003 diselaraskan. Tidak ada source/schema/env/dependency/design/rollout berubah.
+- 5 Oktober 2026: checker worktree 44 Markdown/303 tautan dan scoped index 37 Markdown/284 tautan lulus; targeted Prettier/whitespace lulus; preservation GR/PRD/13 file desain serta HEAD freshness lulus. Tidak mengulang runtime/production proof.
+- Commit lokal DOCS-005 dijalankan sesudah gates; SHA/hook aktual dicatat sesudah commit untuk ledger berikutnya. Tidak ada push/PR/merge.
