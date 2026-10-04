@@ -2,12 +2,12 @@
 
 ## Plan Metadata
 
-- Status: executing
+- Status: completed
 - Repository: bayuaji17/vertical-movie-app
 - Base ref: main
 - Base SHA: 68604daf3abe208f7f57c3b72b0a75d4467dfbc6
 - Context: [Repository context](repository-context.md)
-- Last validated SHA: bbd34602dcdbaca30e51c5ce95668a41c9b3223c
+- Last validated SHA: 29dd9325a2d9a01ae7fa0ae10cd001c1355eada0
 
 ## Objective
 
@@ -151,8 +151,11 @@ Pengguna mengotorisasi commit lokal untuk setiap task yang selesai. DOCS-002 dip
 
 ## Ledger commit task — 5 Oktober 2026
 
+Verifikasi penutupan 5 Oktober 2026: checker worktree lulus 44 Markdown/282 tautan dan smoke terisolasi 10 kasus; snapshot index DOCS-001 lulus 37 Markdown/259 tautan dan DOCS-002 lulus 37/263. Frozen install 770/947 tanpa perubahan serta root build 2 task lulus menggunakan cache valid. Setiap commit menjalankan docs/lint/check-types/Commitlint tanpa bypass. Root source tidak berubah; 13 file desain protected tetap identik.
+
 | Task     | Commit                                   | Evidence                                                                    |
 | -------- | ---------------------------------------- | --------------------------------------------------------------------------- |
 | DOCS-001 | bbd34602dcdbaca30e51c5ce95668a41c9b3223c | Snapshot index dan hook docs/lint/check-types/Commitlint lulus tanpa bypass |
+| DOCS-002 | 29dd9325a2d9a01ae7fa0ae10cd001c1355eada0 | Snapshot index dan hook docs/lint/check-types/Commitlint lulus tanpa bypass |
 
 SHA dicatat sesudah commit berhasil. Push/PR/merge tidak dilakukan. Commit task terakhir dicatat pada pembaruan ledger berikutnya.

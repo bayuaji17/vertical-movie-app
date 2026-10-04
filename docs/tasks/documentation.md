@@ -81,7 +81,7 @@ Tidak ada blocker.
 
 ## Task: DOCS-003 — Verifikasi dan handoff
 
-- Status: Review
+- Status: Done
 - Owner: pengembang/agent
 - Prioritas: 3
 - Referensi: DOCS-STORY-001, plan STEP-003
@@ -105,7 +105,7 @@ Pemeriksaan dokumentasi, frozen install, root types/lint/build karena script/hoo
 
 ### Hasil dan bukti
 
-4 Oktober 2026: frozen install (770 installs/947 packages), check-types (3 task), lint (1 task) dan build (2 task) lulus. Targeted formatter, docs checker, smoke dan preservation juga lulus. Request ini tidak mencakup commit/push/PR; runtime integration/production proof tidak dijalankan ulang untuk perubahan dokumentasi.
+4 Oktober 2026: frozen install (770 installs/947 packages), check-types (3 task), lint (1 task) dan build (2 task) lulus. Targeted formatter, docs checker, smoke dan preservation juga lulus. Otorisasi 5 Oktober 2026 menambahkan commit lokal per task: snapshot index setiap commit diverifikasi, hook lulus, smoke 10 kasus dan frozen/build diulang dengan hasil lulus. Runtime integration/production proof tidak dijalankan ulang untuk perubahan dokumentasi. Push/PR/merge tidak diminta.
 
 ### Blocker atau tindak lanjut
 
@@ -116,5 +116,6 @@ Tidak ada blocker.
 | Task     | Commit                                   | Evidence                                                                    |
 | -------- | ---------------------------------------- | --------------------------------------------------------------------------- |
 | DOCS-001 | bbd34602dcdbaca30e51c5ce95668a41c9b3223c | Snapshot index dan hook docs/lint/check-types/Commitlint lulus tanpa bypass |
+| DOCS-002 | 29dd9325a2d9a01ae7fa0ae10cd001c1355eada0 | Snapshot index dan hook docs/lint/check-types/Commitlint lulus tanpa bypass |
 
 SHA dicatat sesudah commit berhasil. Push/PR/merge tidak dilakukan. Commit task terakhir dicatat pada pembaruan ledger berikutnya.

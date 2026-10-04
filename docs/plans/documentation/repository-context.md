@@ -68,8 +68,11 @@ Pengguna menambahkan aturan commit lokal setelah setiap task selesai. Keputusan 
 
 ## Ledger commit task — 5 Oktober 2026
 
+DOCS-001 dan DOCS-002 telah diserahkan sebagai commit lokal terpisah. Context/plan tetap valid: perubahan HEAD hanya menjalankan mapping dokumentasi dan aturan/checker dalam scope plan. Source runtime, credential dan aset desain tidak berubah. DOCS-003 mencatat hasil penutupan dan ledger sesudah pemeriksaan snapshot index serta quality gate lulus; tidak ada operasi remote.
+
 | Task     | Commit                                   | Evidence                                                                    |
 | -------- | ---------------------------------------- | --------------------------------------------------------------------------- |
 | DOCS-001 | bbd34602dcdbaca30e51c5ce95668a41c9b3223c | Snapshot index dan hook docs/lint/check-types/Commitlint lulus tanpa bypass |
+| DOCS-002 | 29dd9325a2d9a01ae7fa0ae10cd001c1355eada0 | Snapshot index dan hook docs/lint/check-types/Commitlint lulus tanpa bypass |
 
 SHA dicatat sesudah commit berhasil. Push/PR/merge tidak dilakukan. Commit task terakhir dicatat pada pembaruan ledger berikutnya.
