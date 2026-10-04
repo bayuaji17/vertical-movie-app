@@ -58,7 +58,7 @@ bun run build
 
 Salin env sekali ketika setup lokal; jika file sudah ada, lengkapi nilai yang diperlukan tanpa menimpanya. Lihat [Environment](environment.md) untuk variabel aktif dan placeholder integrasi. `bun run dev` menjalankan kedua app. Filter task dengan `--filter=api` atau `--filter=web` jika pekerjaan terbatas pada satu app. Saat ini `lint` hanya menjalankan lint web; `check-types` mencakup kedua app dan `@repo/auth`, sedangkan `build` mencakup kedua app. Setelah skrip atau dependensi berubah, jalankan instalasi frozen dan pemeriksaan yang relevan.
 
-Husky menjalankan lint dan pemeriksaan tipe sebelum commit. Commitlint memvalidasi pesan Conventional Commits pada hook `commit-msg`, misalnya `feat(api): add video drafts` atau `docs: update admin workflow`. Pemeriksaan hook tidak menggantikan tinjauan perilaku. Pertahankan perubahan worktree yang sudah ada dan periksa isi commit sebelum membuatnya.
+Husky menjalankan pemeriksaan dokumentasi, lint dan pemeriksaan tipe sebelum commit. Commitlint memvalidasi pesan Conventional Commits pada hook `commit-msg`, misalnya `feat(api): add video drafts` atau `docs: update admin workflow`. Pemeriksaan hook tidak menggantikan tinjauan perilaku. Pertahankan perubahan worktree yang sudah ada dan periksa isi commit sebelum membuatnya.
 
 ## Kriteria selesai per perubahan
 
@@ -74,6 +74,24 @@ Sebelum melaporkan implementasi selesai, jalankan test yang sudah tersedia dan r
 - Perintah kualitas yang relevan berhasil, dan hasilnya dilaporkan sesuai yang benar-benar dijalankan. Verifikasi produksi/perangkat nyata dicatat terpisah bila belum dilakukan.
 - Dokumentasi di root `docs/` diperbarui ketika kontrak, perintah, atau keputusan berubah. Perubahan struktur, runtime, atau kepemilikan dokumen juga memperbarui [indeks docs](../README.md).
 
+## Dokumentasi selama development
+
+Ikuti [Documentation rules pada root AGENTS](../../AGENTS.md#documentation-rules) dan [indeks docs](../README.md). Sebelum implementasi, baca spesifikasi, panduan dan backlog terkait. Pekerjaan yang membutuhkan plan memakai context dan implementation plan di `docs/plans/<feature>/`; catat snapshot SHA dan periksa freshness sebelum eksekusi.
+
+Saat kontrak, command atau keputusan berubah, perbarui dokumen canonical dalam perubahan yang sama. Pertahankan ID task dan catat evidence pada backlog/plan pemiliknya. Pisahkan proposal, keputusan disetujui, implementasi lokal dan proof production. Rename dokumen juga memperbarui link masuk/keluar, komentar referensi dan indeks.
+
+Perubahan dokumentasi saja diperiksa dengan `bun run docs:check`, Prettier dan `git diff --check`; perubahan tooling/script menjalankan quality gate terkait. Hasil verifikasi menyebut command, scope, tanggal, hasil dan batas yang belum terbukti.
+
+## Commit setelah task selesai
+
+> Disetujui pengguna 5 Oktober 2026: setiap task yang selesai dibuatkan commit tersendiri.
+
+Setelah acceptance criteria dan pemeriksaan yang relevan lulus, periksa diff, stage hanya perubahan task beserta dokumentasi yang diperlukan, lalu buat commit lokal Conventional Commits dengan ID task, misalnya `feat(api): add upload status endpoint (MEDIA-UP-003)`. Kerjakan commit ini sebelum beralih ke task berikutnya; tidak perlu meminta izin commit ulang atau menunggu seluruh modul selesai.
+
+Jika pemeriksaan atau hook gagal, perbaiki kegagalannya dan ulangi tanpa bypass. Pertahankan perubahan lokal milik pekerjaan lain. Catat SHA aktual dan hasil pemeriksaan pada ledger task/plan sesudah commit; pembaruan ini dapat masuk commit task berikutnya. Jangan menebak SHA commit yang sedang dibuat. Status `Done` memerlukan acceptance criteria, validasi dan commit task berhasil; commit sendiri tidak membuktikan seluruh kriteria terpenuhi.
+
+Aturan ini mengotorisasi commit lokal. Push, PR, merge dan deployment tetap mengikuti instruksi pengguna untuk operasi tersebut. Riwayat task lama tetap dipertahankan; task dokumentasi yang sudah selesai tetapi belum di-commit diserahkan sebagai commit terpisah sesuai aturan baru.
+
 ## Perubahan keputusan
 
-Keputusan Agile dan pembagian modul menjadi task kecil disetujui pengguna pada 1 Oktober 2026. Gunakan status `Draft` untuk keputusan produk/teknis lain sampai disetujui, lalu tulis tanggal dan keputusan pada dokumen terkait. Jika implementasi menyimpang dari keputusan yang disetujui, perbarui dokumen serta alasan perubahan dalam pekerjaan yang sama. Workflow ini belum menetapkan CI, strategi branching, durasi sprint, atau kebijakan deploy. MinIO development, R2 production, selector env dan HLS VOD disetujui pengguna pada 3 Oktober 2026; detail/proof mengikuti [backlog media](../tasks/media.md).
+Keputusan Agile dan pembagian modul menjadi task kecil disetujui pengguna pada 1 Oktober 2026. Gunakan status `Draft` untuk keputusan produk/teknis lain sampai disetujui, lalu tulis tanggal dan keputusan pada dokumen terkait. Jika implementasi menyimpang dari keputusan yang disetujui, perbarui dokumen serta alasan perubahan dalam pekerjaan yang sama. Prefix penamaan branch mengikuti root AGENTS; workflow ini belum menetapkan CI, model integrasi branch, durasi sprint, atau kebijakan deploy. MinIO development, R2 production, selector env dan HLS VOD disetujui pengguna pada 3 Oktober 2026; detail/proof mengikuti [backlog media](../tasks/media.md).

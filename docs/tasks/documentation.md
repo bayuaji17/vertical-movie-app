@@ -45,7 +45,7 @@ Tidak ada blocker.
 
 ## Task: DOCS-002 — Terapkan aturan root dan gate dokumentasi
 
-- Status: Ready
+- Status: Review
 - Owner: pengembang/agent
 - Prioritas: 2
 - Referensi: DOCS-STORY-001, root AGENTS
@@ -61,11 +61,11 @@ Tambahan keputusan 5 Oktober 2026: commit setiap task setelah acceptance criteri
 
 ### Acceptance criteria
 
-- [ ] Aturan jelas dan tidak disalin sebagai instruksi terpisah pada apps.
-- [ ] Checker lulus untuk dokumentasi repo yang telah dirapikan.
-- [ ] Fixture terisolasi membuktikan penolakan lokasi/nama/path/link/anchor yang salah.
-- [ ] Hook menjalankan gate docs sebelum lint/check-types.
-- [ ] Aturan commit per task konsisten pada root, workflow dan template; tidak ada bypass hook.
+- [x] Aturan jelas dan tidak disalin sebagai instruksi terpisah pada apps.
+- [x] Checker lulus untuk dokumentasi repo yang telah dirapikan.
+- [x] Fixture terisolasi membuktikan penolakan lokasi/nama/path/link/anchor yang salah.
+- [x] Hook menjalankan gate docs sebelum lint/check-types.
+- [x] Aturan commit per task konsisten pada root, workflow dan template; tidak ada bypass hook.
 
 ### Validasi
 
@@ -81,7 +81,7 @@ Tidak ada blocker.
 
 ## Task: DOCS-003 — Verifikasi dan handoff
 
-- Status: Backlog
+- Status: Review
 - Owner: pengembang/agent
 - Prioritas: 3
 - Referensi: DOCS-STORY-001, plan STEP-003
@@ -95,9 +95,9 @@ Pemeriksaan dokumentasi, frozen install, root types/lint/build karena script/hoo
 
 ### Acceptance criteria
 
-- [ ] Checker, formatter, whitespace dan quality gate relevan lulus.
-- [ ] Tidak ada perubahan runtime aplikasi, kredensial, database atau artefak desain.
-- [ ] Plan/evidence dan indeks mencerminkan hasil aktual.
+- [x] Checker, formatter, whitespace dan quality gate relevan lulus.
+- [x] Tidak ada perubahan runtime aplikasi, kredensial, database atau artefak desain.
+- [x] Plan/evidence dan indeks mencerminkan hasil aktual.
 
 ### Validasi
 
@@ -110,3 +110,11 @@ Pemeriksaan dokumentasi, frozen install, root types/lint/build karena script/hoo
 ### Blocker atau tindak lanjut
 
 Tidak ada blocker.
+
+## Ledger commit task — 5 Oktober 2026
+
+| Task     | Commit                                   | Evidence                                                                    |
+| -------- | ---------------------------------------- | --------------------------------------------------------------------------- |
+| DOCS-001 | bbd34602dcdbaca30e51c5ce95668a41c9b3223c | Snapshot index dan hook docs/lint/check-types/Commitlint lulus tanpa bypass |
+
+SHA dicatat sesudah commit berhasil. Push/PR/merge tidak dilakukan. Commit task terakhir dicatat pada pembaruan ledger berikutnya.

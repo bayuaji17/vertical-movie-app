@@ -7,7 +7,7 @@
 - Base ref: main
 - Base SHA: 68604daf3abe208f7f57c3b72b0a75d4467dfbc6
 - Context: [Repository context](repository-context.md)
-- Last validated SHA: 68604daf3abe208f7f57c3b72b0a75d4467dfbc6
+- Last validated SHA: bbd34602dcdbaca30e51c5ce95668a41c9b3223c
 
 ## Objective
 
@@ -102,11 +102,11 @@ Satu root AGENTS.md; preserve managed block, credential, binary assets dan runti
 
 ## Acceptance Criteria
 
-- [ ] Semua dokumen canonical ada di kategori yang tepat dan terindeks.
-- [ ] AGENTS.md root memuat aturan konsisten dan path aktif.
-- [ ] Seluruh tautan/anchor lokal dan referensi path tervalidasi.
-- [ ] Gate docs berjalan dari root dan hook commit.
-- [ ] Isi historis/desain existing terjaga; hasil quality gate dicatat.
+- [x] Semua dokumen canonical ada di kategori yang tepat dan terindeks.
+- [x] AGENTS.md root memuat aturan konsisten dan path aktif.
+- [x] Seluruh tautan/anchor lokal dan referensi path tervalidasi.
+- [x] Gate docs berjalan dari root dan hook commit.
+- [x] Isi historis/desain existing terjaga; hasil quality gate dicatat.
 
 ## Risks and Mitigations
 
@@ -137,6 +137,22 @@ Tidak ada keputusan yang menghalangi pekerjaan; kategori merupakan pilihan imple
 
 ## Execution Log
 
-- Branch chore/docs-organization dari 68604daf3abe208f7f57c3b72b0a75d4467dfbc6.
-- DOCS-001: 18 dokumen dipindahkan dan incoming/outgoing references serta indeks diselaraskan. Snapshot index diperiksa sebelum commit; perubahan desain lokal tidak termasuk.
-- Pengguna mengotorisasi commit lokal per task pada 5 Oktober 2026; task berikutnya menambahkan aturan/checker dan ledger hasil akhir.
+- Branch chore/docs-organization dibuat dari 68604daf3abe208f7f57c3b72b0a75d4467dfbc6; konteks ditulis sebelum plan.
+- Snapshot konten dan hash file protected disimpan di temporary workspace di luar Git.
+- STEP-001 selesai: 18 dokumen dipindahkan, referensi relatif/tekstual diperbarui, indeks diringkas berdasarkan ownership dan anchor storage/HLS yang lama diperbaiki. Sumber pada SHA awal dipertahankan sebagai tautan GitHub immutable pada mapping di atas.
+- STEP-002 selesai: root AGENTS mengatur kategori, kebab-case, canonical ownership, context/plan per fitur, status/evidence, maintenance dan validation. Checker, script package, hook, workflow dan template selaras. Skenario smoke terisolasi lulus 10 kasus, termasuk dokumen valid, history URL, root/category/name/folder, index coverage, target/anchor dan repository boundary.
+- STEP-003 selesai pada 4 Oktober 2026: `bun run docs:check` lulus 44 Markdown/280 tautan lokal; formatter targeted dan `git diff --check` lulus. `bun install --frozen-lockfile` memeriksa 770 installs/947 packages tanpa perubahan; `bun run check-types` 3 task, `bun run lint` 1 task dan `bun run build` 2 task lulus.
+- Preservation lulus: 13 file stylesheet/aset/script/JSON desain protected identik; sequence ID PRD/GR/task pada seluruh 18 dokumen tetap sama; managed block Turborepo tidak berubah. `.env.example` hanya mengubah komentar path; runtime aplikasi/dependency/database/storage tidak berubah.
+- Handoff berupa perubahan lokal pada branch baru. Tidak ada commit/push/PR tambahan yang dilakukan untuk pekerjaan ini.
+
+## Tindak lanjut commit per task — 5 Oktober 2026
+
+Pengguna mengotorisasi commit lokal untuk setiap task yang selesai. DOCS-002 diperluas untuk menyelaraskan aturan tersebut pada root AGENTS, workflow dan template. DOCS-001, DOCS-002 dan DOCS-003 akan dibuat sebagai commit terpisah; staging mempertahankan baseline desain yang sudah committed dan mengecualikan perubahan/aset desain lokal existing. Snapshot index tiap commit diperiksa dengan checker dan hook tanpa bypass. SHA aktual dicatat setelah commit; operasi remote tidak diminta.
+
+## Ledger commit task — 5 Oktober 2026
+
+| Task     | Commit                                   | Evidence                                                                    |
+| -------- | ---------------------------------------- | --------------------------------------------------------------------------- |
+| DOCS-001 | bbd34602dcdbaca30e51c5ce95668a41c9b3223c | Snapshot index dan hook docs/lint/check-types/Commitlint lulus tanpa bypass |
+
+SHA dicatat sesudah commit berhasil. Push/PR/merge tidak dilakukan. Commit task terakhir dicatat pada pembaruan ledger berikutnya.

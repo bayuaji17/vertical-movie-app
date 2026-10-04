@@ -58,6 +58,18 @@ Path dalam teks menunjuk lokasi dokumen sesudah reorganisasi pada worktree. Sumb
 
 Baseline analisis adalah SHA 68604daf3abe208f7f57c3b72b0a75d4467dfbc6, dengan perubahan worktree desain dibedakan: AGENTS.md (ownership/gates), docs/README.md (indeks semula), workflow/template (status/AC/evidence), package.json dan .husky/pre-commit (task/hook), README.md/.env.example (reverse links), docs/design/build-design-system.mjs dan export-design-system.mjs (aset tetap).
 
-## Delivery bertahap — 5 Oktober 2026
+## Hasil verifikasi reorganisasi — 4 Oktober 2026
 
-Pengguna mengotorisasi commit lokal per task. Snapshot ini menyediakan struktur dan referensi DOCS-001; implementasi aturan/checker serta evidence penutupan diserahkan pada commit task berikutnya. Aset dan perubahan desain existing tetap terpisah.
+Branch `chore/docs-organization` tetap pada base SHA; 18 dokumen dipindahkan tanpa mengubah ID keputusan/task. Struktur kini memiliki kategori dan indeks canonical, root documentation rules serta gate `docs:check` pada package/hook. Verifikasi lulus: 44 Markdown/280 tautan, 10 smoke cases, frozen install, check-types, lint, build, formatter dan whitespace. 13 file protected dan managed block agent tetap identik. Evidence rinci berada pada [execution log](implementation-plan.md#execution-log); tidak ada Git delivery atau rollout tambahan.
+
+## Otorisasi commit per task — 5 Oktober 2026
+
+Pengguna menambahkan aturan commit lokal setelah setiap task selesai. Keputusan ini berlaku pada pekerjaan berikutnya dan tiga task dokumentasi yang telah selesai tetapi belum di-commit. Branch tetap `chore/docs-organization`; pre-write HEAD `68604daf3abe208f7f57c3b72b0a75d4467dfbc6`. Dokumen/stylesheet/aset desain existing dipertahankan sebagai perubahan lokal terpisah; index commit memakai baseline desain yang sudah berada di Git dengan path baru. Commit task tidak mengotorisasi push/PR/merge atau rollout.
+
+## Ledger commit task — 5 Oktober 2026
+
+| Task     | Commit                                   | Evidence                                                                    |
+| -------- | ---------------------------------------- | --------------------------------------------------------------------------- |
+| DOCS-001 | bbd34602dcdbaca30e51c5ce95668a41c9b3223c | Snapshot index dan hook docs/lint/check-types/Commitlint lulus tanpa bypass |
+
+SHA dicatat sesudah commit berhasil. Push/PR/merge tidak dilakukan. Commit task terakhir dicatat pada pembaruan ledger berikutnya.

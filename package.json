@@ -10,7 +10,8 @@
     "format": "bun run --bun prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
     "lint:commit": "bun run --bun ./node_modules/.bin/commitlint",
-    "prepare": "bun run --bun husky"
+    "prepare": "bun run --bun husky",
+    "docs:check": "bun scripts/check-docs.mjs"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.3",

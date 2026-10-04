@@ -44,6 +44,7 @@ Run these commands from the repository root:
 bun run build
 bun run check-types
 bun run lint
+bun run docs:check
 ```
 
 Build covers both apps; type checking also covers `packages/auth`. Lint currently covers `web`, which provides the only lint script. Turborepo caches the API's `dist` and the web app's `.output` build directories.
@@ -67,10 +68,14 @@ bun run build --filter=web
 
 ## Git hooks and commit messages
 
-`bun install` activates Husky. Before each commit, the `pre-commit` hook runs `bun run lint` and `bun run check-types`. The `commit-msg` hook checks the message with Commitlint and the Conventional Commits rules.
+`bun install` activates Husky. Before each commit, the `pre-commit` hook runs `bun run docs:check`, `bun run lint` and `bun run check-types`. The `commit-msg` hook checks the message with Commitlint and the Conventional Commits rules.
 
 Use a message such as `feat(api): add movie endpoint`, `fix(web): correct navigation`, or `chore: configure git hooks`. To check a message without creating a commit:
 
 ```sh
 echo 'feat(api): add movie endpoint' | bun run lint:commit
 ```
+
+## Documentation maintenance
+
+Start from [the documentation index](docs/README.md) and follow [root documentation rules](AGENTS.md#documentation-rules). Update canonical category documents and their links in the same change. Run `bun run docs:check` before committing.

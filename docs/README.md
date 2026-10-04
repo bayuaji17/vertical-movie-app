@@ -15,7 +15,7 @@ Indeks utama dokumentasi Vertical Movie App. Mulai dari [AGENTS.md root](../AGEN
 | `templates/`       | Template dokumentasi reusable.                                             |
 | `design/`          | Design system, prompt dan artefak visual.                                  |
 
-Aturan penamaan, ownership dan maintenance berada pada [Documentation rules](../AGENTS.md#documentation-rules).
+Aturan penamaan, ownership dan maintenance berada pada [Documentation rules](../AGENTS.md#documentation-rules). Jalankan `bun run docs:check` setelah perubahan dokumentasi; hook commit memeriksanya sebelum lint dan check-types.
 
 ## Produk, arsitektur dan desain
 
