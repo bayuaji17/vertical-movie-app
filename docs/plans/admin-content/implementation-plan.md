@@ -9,7 +9,7 @@
 - Context: [repository-context.md](repository-context.md), disimpan sebelum plan ini.
 - Backlog: [admin-content](../../tasks/admin-content.md).
 - Branch planning: `chore/admin-content-plan`; branch implementasi yang diusulkan: `feat/admin-content-dashboard`.
-- Otorisasi: pengguna meminta plan detail tahap pertama frontend pada 5 Oktober 2026. Root workflow mengotorisasi commit task planning; source runtime, instalasi komponen, push/PR/merge fitur ini belum diminta.
+- Otorisasi: pengguna meminta plan detail tahap pertama frontend, kemudian desain desktop light untuk lima halaman dengan theme switcher pada 5 Oktober 2026. Root workflow mengotorisasi commit task planning/desain; source runtime, instalasi komponen, push/PR/merge fitur ini belum diminta.
 
 ## Objective
 
@@ -17,7 +17,7 @@ Admin dapat menemukan movie/standalone, membuat draft dan menyimpan perubahan me
 
 ## Goals and non-goals
 
-Iterasi 1 mencakup shell dashboard, list/search/kind/includeArchived/cursor, taxonomy selector, form create/detail/edit, safe mutation dan unsaved-change protection. Draft dapat disimpan sebelum video/sampul diunggah atau sinopsis/hak lengkap untuk publish.
+Iterasi 1 mencakup shell dashboard dengan theme switcher, list/search/kind/includeArchived/cursor, taxonomy selector, form create/detail/edit, safe mutation dan unsaved-change protection. Draft dapat disimpan sebelum video/sampul diunggah atau sinopsis/hak lengkap untuk publish.
 
 Upload video/sampul, progres/resume, processing/readiness, aksi publish/archive, pengelolaan series/season/episode, genre CRUD, pengaturan situs dan katalog publik berada pada iterasi berikutnya. Tidak menambah analytics, metrik global palsu, rich text editor, auto-save, akun atau schema baru.
 
@@ -43,6 +43,12 @@ Context membedakan snapshot committed dan perubahan desain lokal yang sudah dise
 Route index baru harus menjadi leaf; jangan memakai detail `$id.tsx` tanpa Outlet yang menghalangi preview/edit. Gunakan generator untuk routeTree.gen.ts dan pastikan trailing slash/canonical routing serta direct refresh berjalan.
 
 Sidebar desktop memakai Dashboard/Konten; mobile memakai trigger/panel dengan focus management. Navigasi hanya menautkan halaman yang berfungsi. Logout ditempatkan pada shell agar tersedia di semua halaman tanpa menggandakan workflow auth. Gunakan Bahasa Indonesia dan landmark/lang pada shell sesuai bahasa konten.
+
+### Desain desktop dan theme switcher
+
+Pengguna meminta mockup desktop light seluruh lima halaman sebelum implementasi. Referensi dan prompt berada pada [desain desktop light](../../design/admin-content-desktop-light.md), task ADMC-DES-001. Dua penggunaan modal konfirmasi (dirty navigation dan reload saat conflict) disetujui pengguna; screenshot halaman normal tidak menutupi form dengan overlay.
+
+Theme switcher merupakan requirement shared shell pada setiap halaman: Light/Dark/System dengan nama aksesibel, Light aktif pada mockup sekarang. Task ADMC-012 menangani runtime preference non-rahasia, System/media change, bootstrap tanpa flash/hydration mismatch dan form state tetap utuh saat tema berubah. Default aplikasi yang diusulkan adalah System jika belum ada preferensi; desain tahap ini tetap Light. Preferensi tema boleh dipersist, private metadata/cache/form tidak dipersist. Dark/mobile mockup menjadi review visual berikutnya, bukan scope desain desktop light ini.
 
 ### Daftar konten
 
@@ -96,29 +102,36 @@ Generated shadcn primitives dapat menyentuh CSS, hooks dan dependency transitif.
 
 Path baru merupakan target yang diusulkan; buat bersama task, bukan placeholder sekarang. Evidence pada [context](repository-context.md#evidence-index).
 
-| Path                                                                                                                                                                                             | Action | Symbols / alasan                                                                                   | Evidence                                                        |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ | -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| `apps/web/src/components/admin/admin-shell.tsx`, `admin-navigation.tsx`, `admin-logout.tsx`                                                                                                      | create | Shell/sidebar dan reuse logout existing.                                                           | Protected layout dan AdminDashboardContent.                     |
-| `apps/web/src/routes/admin._authenticated.tsx`, `admin._authenticated.index.tsx`                                                                                                                 | modify | Bungkus Outlet dengan shell; pertahankan guard/context dan heading/sesi.                           | requireAdminSession, ProtectedAdminLayout.                      |
-| Route videos index/new/detail-index/edit pada tabel URL                                                                                                                                          | create | Loader/search/state dan halaman metadata.                                                          | API videos index/model.                                         |
-| `apps/web/src/components/admin/content-list.tsx`, `content-filters.tsx`, `content-detail.tsx`, `content-form.tsx`, `genre-picker.tsx`                                                            | create | Table/cards, read-only detail dan reusable form.                                                   | Metadata DTO, UI primitives dan login form existing.            |
-| `apps/web/src/lib/admin/content-client.ts`, `content-queries.ts`, `content-form.ts`, `content-errors.ts`, `use-unsaved-changes.ts`                                                               | create | Typed operations, keys, mapper/diff/errors/blocker; nama final diperiksa saat task.                | Private Eden, pagination, server metadata/errors, auth cleanup. |
-| `apps/web/src/components/ui/sidebar.tsx`, `table.tsx`, `checkbox.tsx`, `toggle-group.tsx`, `empty.tsx`, `skeleton.tsx`, `alert-dialog.tsx` dan dependency source yang benar-benar diperlukan CLI | create | Primitives belum installed; review import/transitive hooks/Sheet/Dialog/Tooltip/Toggle sesuai CLI. | Shadcn info dan docs resmi.                                     |
-| `apps/web/test/admin-content-client.test.ts`, `admin-content-form.test.ts`                                                                                                                       | create | Meaningful request/error/diff/cancellation/version behavior.                                       | bun:test existing; server tidak diimpor runtime.                |
-| `apps/web/test/content-eden-contract.ts`, `session-cache.test.ts`                                                                                                                                | modify | Tambah contract/cleanup cases bila behavior baru membutuhkan.                                      | Existing compile-only contract/predicate.                       |
-| `apps/web/test/admin-content-browser-smoke.mjs`, `admin-content-browser-worker.mjs`                                                                                                              | create | Browser flow/fixture; jangan mengganti auth proof dengan snapshot palsu.                           | Existing auth browser harness pattern.                          |
-| `apps/web/test/auth-browser-worker.mjs`, `auth-routes-browser-worker.mjs`, `auth-native-browser-worker.mjs`, `auth-ssr-smoke.mjs`                                                                | modify | Sesuaikan selector hanya bila shell berubah; tujuan assertion auth tetap.                          | Existing dashboard/logout selectors.                            |
-| `apps/web/src/routeTree.gen.ts`                                                                                                                                                                  | modify | Hanya output generator, tidak hand-edit.                                                           | generate-routes script/TanStack plugin.                         |
-| `apps/web/package.json`, `bun.lock`                                                                                                                                                              | modify | Conditional: dependency transitif primitive atau script smoke bila dibutuhkan.                     | Resolved deps; tidak upgrade paket unrelated.                   |
-| `apps/web/src/styles.css`                                                                                                                                                                        | modify | Conditional hasil CLI saja; preserve token/font/media existing dan pekerjaan desain lokal.         | Worktree design vs HEAD.                                        |
-| `docs/plans/admin-content/*`, `docs/tasks/admin-content.md`                                                                                                                                      | create | Context/plan/evidence.                                                                             | Root documentation rules.                                       |
-| `docs/README.md`                                                                                                                                                                                 | modify | Navigasi dan status proposal.                                                                      | Root documentation rules.                                       |
+| Path                                                                                                                                                                                             | Action | Symbols / alasan                                                                                   | Evidence                                                           |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `apps/web/src/components/admin/admin-shell.tsx`, `admin-navigation.tsx`, `admin-logout.tsx`                                                                                                      | create | Shell/sidebar dan reuse logout existing.                                                           | Protected layout dan AdminDashboardContent.                        |
+| `apps/web/src/routes/admin._authenticated.tsx`, `admin._authenticated.index.tsx`                                                                                                                 | modify | Bungkus Outlet dengan shell; pertahankan guard/context dan heading/sesi.                           | requireAdminSession, ProtectedAdminLayout.                         |
+| Route videos index/new/detail-index/edit pada tabel URL                                                                                                                                          | create | Loader/search/state dan halaman metadata.                                                          | API videos index/model.                                            |
+| `apps/web/src/components/admin/content-list.tsx`, `content-filters.tsx`, `content-detail.tsx`, `content-form.tsx`, `genre-picker.tsx`                                                            | create | Table/cards, read-only detail dan reusable form.                                                   | Metadata DTO, UI primitives dan login form existing.               |
+| `apps/web/src/lib/admin/content-client.ts`, `content-queries.ts`, `content-form.ts`, `content-errors.ts`, `use-unsaved-changes.ts`                                                               | create | Typed operations, keys, mapper/diff/errors/blocker; nama final diperiksa saat task.                | Private Eden, pagination, server metadata/errors, auth cleanup.    |
+| `apps/web/src/components/ui/sidebar.tsx`, `table.tsx`, `checkbox.tsx`, `toggle-group.tsx`, `empty.tsx`, `skeleton.tsx`, `alert-dialog.tsx` dan dependency source yang benar-benar diperlukan CLI | create | Primitives belum installed; review import/transitive hooks/Sheet/Dialog/Tooltip/Toggle sesuai CLI. | Shadcn info dan docs resmi.                                        |
+| `apps/web/test/admin-content-client.test.ts`, `admin-content-form.test.ts`                                                                                                                       | create | Meaningful request/error/diff/cancellation/version behavior.                                       | bun:test existing; server tidak diimpor runtime.                   |
+| `apps/web/test/content-eden-contract.ts`, `session-cache.test.ts`                                                                                                                                | modify | Tambah contract/cleanup cases bila behavior baru membutuhkan.                                      | Existing compile-only contract/predicate.                          |
+| `apps/web/test/admin-content-browser-smoke.mjs`, `admin-content-browser-worker.mjs`                                                                                                              | create | Browser flow/fixture; jangan mengganti auth proof dengan snapshot palsu.                           | Existing auth browser harness pattern.                             |
+| `apps/web/test/auth-browser-worker.mjs`, `auth-routes-browser-worker.mjs`, `auth-native-browser-worker.mjs`, `auth-ssr-smoke.mjs`                                                                | modify | Sesuaikan selector hanya bila shell berubah; tujuan assertion auth tetap.                          | Existing dashboard/logout selectors.                               |
+| `apps/web/src/routeTree.gen.ts`                                                                                                                                                                  | modify | Hanya output generator, tidak hand-edit.                                                           | generate-routes script/TanStack plugin.                            |
+| `apps/web/package.json`, `bun.lock`                                                                                                                                                              | modify | Conditional: dependency transitif primitive atau script smoke bila dibutuhkan.                     | Resolved deps; tidak upgrade paket unrelated.                      |
+| `apps/web/src/styles.css`                                                                                                                                                                        | modify | Conditional hasil CLI saja; preserve token/font/media existing dan pekerjaan desain lokal.         | Worktree design vs HEAD.                                           |
+| `docs/plans/admin-content/*`, `docs/tasks/admin-content.md`                                                                                                                                      | create | Context/plan/evidence.                                                                             | Root documentation rules.                                          |
+| `docs/README.md`                                                                                                                                                                                 | modify | Navigasi dan status proposal.                                                                      | Root documentation rules.                                          |
+| `apps/web/src/components/admin/theme-switcher.tsx`, `apps/web/src/lib/theme/preferences.ts`, `apps/web/src/lib/theme/bootstrap.ts`                                                               | create | Preferensi Light/Dark/System, accessible control dan bootstrap.                                    | Requirement pengguna 5 Oktober 2026; shared shell/tokens existing. |
+| `apps/web/src/routes/__root.tsx`                                                                                                                                                                 | modify | Conditional bootstrap tema sebelum hydration, tanpa global preference user.                        | Root shell existing; ADMC-012.                                     |
+| `docs/design/admin-content-desktop-light.md` dan lima PNG desktop light                                                                                                                          | create | Proposal visual dan prompt; ADMC-DES-001.                                                          | Request pengguna sebelum implementasi.                             |
 
 API/shared/auth/Turbo/env/player source tidak ditargetkan untuk iterasi metadata ini. Tidak ada env publik baru diperlukan.
 
 ## Implementation DAG
 
 `ADMC-001 planning → ADMC-002 primitives → ADMC-004 shell → ADMC-005 list`.
+
+`ADMC-001 → ADMC-DES-001 desktop light → ADMC-002`; request implementasi dan review visual tetap diperlukan sebelum runtime tasks.
+
+`ADMC-002 + ADMC-004 → ADMC-012 theme switcher → ADMC-011 acceptance/closure`.
 
 `ADMC-001 → ADMC-003 typed data → ADMC-005`.
 
@@ -147,7 +160,7 @@ ADMC-011 juga bergantung pada semua task runtime. Eksekusi default satu task uta
 ### STEP-002 / ADMC-002 — Fondasi komponen
 
 - Outcome: primitives yang dibutuhkan dapat dipakai tanpa mengganti preset/token.
-- Depends on: STEP-001 dan permintaan implementasi; recheck integrasi desain lokal.
+- Depends on: STEP-001, ADMC-DES-001 dan permintaan implementasi; recheck integrasi desain lokal.
 - Files: ui primitives/transitive hooks; manifest/lock/CSS hanya jika diperlukan.
 - Symbols: Sidebar/Table/Checkbox/ToggleGroup/Empty/Skeleton/AlertDialog.
 - Requirements: read docs installed/config, CLI dry-run/diff dari web; audit source imports dan preserve existing components/tema. Pisahkan pekerjaan integrasi token/assets desain agar scope Git jelas.
@@ -237,23 +250,34 @@ ADMC-011 juga bergantung pada semua task runtime. Eksekusi default satu task uta
 ### STEP-011 / ADMC-011 — Acceptance dan closure
 
 - Outcome: hasil iterasi dibuktikan lintas UI/API/persistensi dan docs diperbarui.
-- Depends on: STEP-002–010.
+- Depends on: STEP-002–010, STEP-012.
 - Files: browser smoke fixture/worker, evidence/backlog/plan/index; scripts hanya bila diperlukan.
 - Symbols: metadata end-to-end, auth/cache/isolation/responsiveness.
 - Requirements: fixture untuk fault deterministic; satu alur persistence pada dedicated test DB melalui API existing. Jangan mutasi DB development tanpa task/otorisasi. Screenshot light/dark mobile/desktop, keyboard, loading/empty/error, actual API requests.
 - Validation: existing tests + meaningful new tests, root types/lint/build, production Bun browser/SSR smoke, dedicated content proof, docs/format/whitespace; scripts/deps frozen install bila berubah.
 - Acceptance criteria: seluruh iterasi-1 AC lulus dan setiap task committed; evidence jujur terhadap fixture/browser/DB. Upload/media/publish/Katalog dan production readiness tetap roadmap.
 
+### STEP-012 / ADMC-012 — Theme switcher shared shell
+
+- Outcome: Light/Dark/System dapat dipilih dari seluruh halaman admin tanpa kehilangan input.
+- Depends on: STEP-002, STEP-004 dan requirement pengguna pada desain.
+- Files: `apps/web/src/components/admin/theme-switcher.tsx`, `apps/web/src/lib/theme/preferences.ts`, `apps/web/src/lib/theme/bootstrap.ts`, shared shell; `apps/web/src/routes/__root.tsx` hanya untuk bootstrap yang benar-benar diperlukan. Theme behavior tests/browser case dan conditional primitives sesuai hasil registry review.
+- Symbols: validated theme mode, storage fallback, media listener, bootstrap dan accessible theme control.
+- Requirements: non-rahasia preference persisted, System mengikuti prefers-color-scheme, no server global preference/cookie leakage, bootstrap before hydration tanpa flash, icon accessible names/focus/active state. Cache/form tetap utuh; jangan memakai dark overrides per halaman atau merombak palet source existing.
+- Validation: tiga mode, reload/persist, System media change, invalid preference/storage unavailable, keyboard, no hydration warning/flash pada browser dan unsaved form tetap utuh; root tests/types/lint/build serta auth SSR regression bila root shell berubah.
+- Acceptance criteria: shared switcher bekerja pada semua lima halaman, preference tidak memuat data admin/private form, source tokens light/dark existing digunakan dan fresh-checkout design dependency tercatat.
+
 ## Test requirements
 
-| Area              | Bukti yang diperlukan                                                                                                                         |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| API client/cache  | Status failures thrown, identity/private key cleanup, abort, unchanged public clients, no mutation replay.                                    |
-| Mapper/validation | Title/slug limits, blank/null/year/calendar/language, optional metadata, unique genre IDs, explicit rights, changed-fields/version.           |
-| Listing           | 20+ cursor rows, filter reset, request race, archived-inclusive, empty/retry, back/refresh without mixed data.                                |
-| Persistensi       | Movie dan standalone create/read/edit, minimal metadata, canonical DTO, version increment dan two-tab conflict di dedicated DB.               |
-| Security          | Anonymous/non-admin/session expiry, gateway cookie scope, private cache removed, server import proof jika boundary berubah.                   |
-| Browser           | 320/390/768/1024/1440 px; light/dark, no overflow, keyboard/focus/labels/44px, contrast rendered, unsaved/logout, no console hydration error. |
+| Area              | Bukti yang diperlukan                                                                                                                                        |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| API client/cache  | Status failures thrown, identity/private key cleanup, abort, unchanged public clients, no mutation replay.                                                   |
+| Mapper/validation | Title/slug limits, blank/null/year/calendar/language, optional metadata, unique genre IDs, explicit rights, changed-fields/version.                          |
+| Listing           | 20+ cursor rows, filter reset, request race, archived-inclusive, empty/retry, back/refresh without mixed data.                                               |
+| Persistensi       | Movie dan standalone create/read/edit, minimal metadata, canonical DTO, version increment dan two-tab conflict di dedicated DB.                              |
+| Security          | Anonymous/non-admin/session expiry, gateway cookie scope, private cache removed, server import proof jika boundary berubah.                                  |
+| Browser           | 320/390/768/1024/1440 px; light/dark, no overflow, keyboard/focus/labels/44px, contrast rendered, unsaved/logout, no console hydration error.                |
+| Theme             | Light/Dark/System, persistence preference non-rahasia, System media change, storage fallback, keyboard/labels, no flash/hydration error dan dirty form utuh. |
 
 Gunakan Bun native tests untuk mapper/client behavior, bukan snapshot yang hanya mencocokkan markup atau test setiap komponen reversible. Browser scripts mengikuti harness existing dan adapter host Playwright; tidak otomatis menambah dependency besar. Fixture HTTP tidak membuktikan PostgreSQL persistence; kedua evidence dibedakan.
 
@@ -272,7 +296,7 @@ Bun workspace; API tetap owns business rules, client type-only; no server secret
 - [ ] Published/archived serta episode di luar scope tidak dapat diedit melalui form iterasi ini.
 - [ ] Version/slug/state/network/validation conflicts tidak menimpa input atau memicu replay tulis otomatis.
 - [ ] Logout/expiry membersihkan cache private; UI dan endpoint tetap terlindungi.
-- [ ] Semua halaman responsif/keyboard/light/dark; route preview existing tetap berfungsi.
+- [ ] Semua halaman responsif/keyboard/light/dark; shared theme switcher bekerja tanpa kehilangan input dan route preview existing tetap berfungsi.
 - [ ] Test/gates/DB/browser evidence sesuai scope, docs/status dan commit per task selesai.
 
 ## Risks and mitigations
@@ -319,3 +343,11 @@ Roadmap bukan daftar task Ready atau perluasan acceptance iterasi 1. Jangan mene
 - Branch planning `chore/admin-content-plan` dibuat pada base SHA sesuai root purpose prefix dan workflow commit task lokal.
 - Status/bukti pemeriksaan dokumen dan receipt ADMC-001 dicatat setelah benar-benar teramati pada backlog.
 - Checks planning 5 Oktober 2026: docs:check worktree 50 Markdown/355 tautan, staged snapshot 43 Markdown/336 tautan, targeted Prettier dan whitespace lulus. Preservation 23 file existing selain indeks lulus; index staging memuat navigasi planning saja. Source/manifest/lock/route tree task tidak berubah; hasil hook/commit planning mengikuti receipt ADMC-001.
+- Receipt ADMC-001: `74a894ff51060edaaf4bf57bbbb881670244e2e9`, docs(web): plan admin content dashboard (ADMC-001). Hooks docs:check 50/355, lint 1 task/types 3 task cache valid dan Commitlint lulus tanpa bypass. Commit hanya context/plan/backlog/navigasi; status Done/receipt dicatat sesudah commit untuk pembaruan task berikutnya. Plan tetap proposal ready untuk review, bukan implementasi completed; branch belum dipush.
+
+### 2026-10-05 — Refinement desain sebelum implementasi
+
+- Freshness: valid pada HEAD `74a894ff51060edaaf4bf57bbbb881670244e2e9`; perubahan HEAD sejak base hanya dokumentasi planning. Source kontrak/frontend tidak berubah.
+- Pengguna meminta lima halaman desktop light dan theme switcher. Modal dirty-navigation/reload-conflict telah disetujui pada percakapan setelah plan.
+- Tambahkan ADMC-DES-001 untuk proposal gambar dan ADMC-012 untuk shared theme behavior; closure ADMC-011 bergantung pada ADMC-012. Image design menggunakan fondasi worktree yang disetujui, tanpa memasukkannya otomatis ke commit task ini.
+- Hasil generate/visual/docs/commit dicatat pada [backlog](../../tasks/admin-content.md) dan [referensi desain](../../design/admin-content-desktop-light.md) setelah teramati. Source runtime belum diimplementasikan.

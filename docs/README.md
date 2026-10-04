@@ -25,6 +25,7 @@ Aturan penamaan, ownership dan maintenance berada pada [Documentation rules](../
 - [Model data video](architecture/video-data-model.md): series/season/video/genre dan aset/upload/job/attempt/rendition/operation.
 - [Kontrak upload](architecture/media-upload-contract.md): S3 multipart, idempotency, freeze dan completion.
 - [Design system](design/design-system.md): baseline spesifikasi desain dari Git, dipindahkan tanpa memasukkan perubahan desain lokal.
+- [Dashboard desktop light](design/admin-content-desktop-light.md): proposal lima halaman dan shared theme switcher; belum implementasi app.
 
 Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dashboard dark](design/dashboard-dark-shadcn.prompt.md) dan [login](design/login-light-shadcn-redesign.prompt.md). Screenshot login: [desktop](design/login-implemented-desktop.png) dan [mobile](design/login-implemented-mobile.png). Data mockup bukan bukti fitur selesai.
 
@@ -48,7 +49,7 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 | Video/media      | [Snapshot](plans/video/repository-context.md)                   | [Plan](plans/video/implementation-plan.md)                                                     | Keputusan, refinement, proof dan ledger; batas production tetap dicatat.                  |
 | Dokumentasi      | [Snapshot](plans/documentation/repository-context.md)           | [Plan](plans/documentation/implementation-plan.md)                                             | Organisasi kategori, aturan root, validasi dan review produk/arsitektur.                  |
 | Build web        | [Snapshot](plans/tanstack-build-warnings/repository-context.md) | [Plan](plans/tanstack-build-warnings/implementation-plan.md)                                   | Implemented/verified lokal: warning directive, batas import dan SSR; browser belum diuji. |
-| Dashboard konten | [Snapshot](plans/admin-content/repository-context.md)           | [Plan](plans/admin-content/implementation-plan.md)                                             | Proposal iterasi metadata movie/standalone siap review; implementasi belum diminta.       |
+| Dashboard konten | [Snapshot](plans/admin-content/repository-context.md)           | [Plan](plans/admin-content/implementation-plan.md)                                             | Proposal metadata dan desktop light 5 halaman/theme switcher; implementasi belum diminta. |
 
 ## Backlog dan evidence
 
@@ -60,7 +61,7 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 - [Database tooling](tasks/database-tooling.md): Drizzle Studio development.
 - [Development verification](tasks/development-verification.md): quality gate, preservation migrasi dan upgrade Turbo 2.11.7 terverifikasi lokal.
 - [Build web](tasks/web-build.md): baseline warning directive, plan filter logging dan verifikasi build/SSR.
-- [Dashboard konten](tasks/admin-content.md): ADMC-001–011; shell, list, create/read/edit draft dan verifikasi UI/persistensi.
+- [Dashboard konten](tasks/admin-content.md): ADMC-001–012 dan ADMC-DES-001; metadata UI, theme switcher, desain serta verifikasi.
 - [Dokumentasi](tasks/documentation.md): organisasi folder, aturan dan validasi.
 
 ## Gambaran implementasi saat ini

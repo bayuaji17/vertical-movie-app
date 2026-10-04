@@ -32,7 +32,7 @@ Sebagai pengembang, saya ingin acceptance UI/API/persistensi dibuktikan sebelum 
 
 ## Task: ADMC-001 — Context dan plan frontend
 
-- Status: Review
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — planning
 - Referensi: ADMC-US-00; PRD-01/02/03/08/09; GR-01/05/08; plan STEP-001.
@@ -48,7 +48,7 @@ Analisis snapshot, context sebelum plan, backlog dan navigasi docs; preserve des
 
 - [x] Context/plan memuat snapshot, kontrak API, affected files, task/dependensi, error states dan validation nyata.
 - [x] Plan membedakan proposal UX, runtime existing, desain worktree dan scope iterasi berikutnya.
-- [ ] Docs/format/whitespace/scoped index/preservation lulus; commit lokal planning terpisah.
+- [x] Docs/format/whitespace/scoped index/preservation lulus; commit lokal planning terpisah.
 
 ### Validasi
 
@@ -61,8 +61,8 @@ Context disimpan sebelum plan pada base SHA c5406282f8f3c86563ba7112ec43d2aa17f9
 ### Commit task
 
 - Pesan: `docs(web): plan admin content dashboard (ADMC-001)`
-- SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan untuk task ini.
+- SHA: `74a894ff51060edaaf4bf57bbbb881670244e2e9`.
+- Hook/checks: docs:check 50/355, lint 1 task dan check-types 3 task (cache valid), Commitlint lulus tanpa bypass.
 - Ledger: Receipt aktual dicatat setelah commit berhasil untuk update task berikutnya.
 
 ### Blocker atau tindak lanjut
@@ -76,7 +76,7 @@ Tidak ada blocker penulisan plan; source runtime dan remote delivery belum dimin
 - Prioritas: P1 — sesuai dependency
 - Referensi: ADMC-US-01; PRD-02/08; GR-01/05/08; plan STEP-002.
 - Diperbarui: 2026-10-05
-- Dependensi: ADMC-001, permintaan implementasi dan recheck integrasi desain lokal.
+- Dependensi: ADMC-001, ADMC-DES-001, permintaan implementasi dan recheck integrasi desain lokal.
 - Ukuran: Satu hasil review; target files/symbols mengikuti STEP-002. Pecah jika refinement menemukan scope lebih besar.
 
 ### Ruang lingkup
@@ -428,7 +428,7 @@ Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready ha
 - Prioritas: P1 — sesuai dependency
 - Referensi: ADMC-US-05; PRD-01/02/03/08/09; GR-01/05/08; plan STEP-011.
 - Diperbarui: 2026-10-05
-- Dependensi: ADMC-002 sampai ADMC-010.
+- Dependensi: ADMC-002 sampai ADMC-010 serta ADMC-012.
 - Ukuran: Satu hasil review; target files/symbols mengikuti STEP-011. Pecah jika refinement menemukan scope lebih besar.
 
 ### Ruang lingkup
@@ -460,3 +460,89 @@ Belum diimplementasikan atau diuji. Hasil runtime tidak disimpulkan dari plan.
 ### Blocker atau tindak lanjut
 
 Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready hanya karena source API tersedia.
+
+## Task: ADMC-012 — Theme switcher shared shell
+
+- Status: Backlog
+- Owner: Pengembang/agent pelaksana
+- Prioritas: P1
+- Referensi: ADMC-US-01; PRD-02/08; plan STEP-012; permintaan pengguna 5 Oktober 2026.
+- Diperbarui: 2026-10-05
+- Dependensi: ADMC-002, ADMC-004; permintaan implementasi.
+- Ukuran: Shared control/preference/bootstrap dan meaningful theme verification.
+
+### Ruang lingkup
+
+Light/Dark/System di seluruh halaman admin, accessible names/active state, browser preference non-rahasia, media listener dan root bootstrap jika diperlukan. Target source mengikuti STEP-012; tidak mengubah media player atau menyimpan private form/cache.
+
+### Acceptance criteria
+
+- [ ] Semua lima halaman memiliki switcher yang sama dengan Light/Dark/System berfungsi melalui semantic tokens.
+- [ ] Preference persisted, System mengikuti media change, storage unavailable/invalid preference punya fallback; default System merupakan proposal untuk review.
+- [ ] Initial render/hydration tidak flash/mismatch; pergantian tema mempertahankan form dirty dan tidak memblokir auth expiry/logout.
+- [ ] Keyboard/nama aksesibel/active state dan tests/browser/root gates lulus.
+
+### Validasi
+
+Mode/reload/persistence/system change/storage failure tests, browser keyboard/dirty form/SSR hydration; root tests/types/lint/build dan auth regression bila root berubah.
+
+### Hasil dan bukti
+
+Belum diimplementasikan. Mockup Light hanya menunjukkan posisi/appearance kontrol, bukan bukti theme switching runtime.
+
+### Commit task
+
+- Pesan: Conventional Commit dengan ID ADMC-012 sesuai implementasi.
+- SHA: Belum dibuat.
+- Hook/checks: Belum dijalankan untuk task runtime ini.
+- Ledger: Receipt setelah commit berhasil.
+
+### Blocker atau tindak lanjut
+
+Menunggu review visual/permintaan implementasi dan dependency.
+
+## User story: ADMC-US-06
+
+Sebagai admin, saya ingin meninjau desain desktop light seluruh halaman dengan layout dan theme switcher yang konsisten sebelum implementasi.
+
+## Task: ADMC-DES-001 — Desain desktop light lima halaman
+
+- Status: Review
+- Owner: Codex
+- Prioritas: P1 — sebelum runtime tasks
+- Referensi: ADMC-US-06; PRD-02/03/08; permintaan pengguna 5 Oktober 2026.
+- Diperbarui: 2026-10-05
+- Dependensi: ADMC-001 dan design system yang disetujui.
+- Ukuran: Satu proposal visual konsisten untuk lima halaman dan refinement theme requirement.
+
+### Ruang lingkup
+
+Dashboard/list/create/detail/edit desktop light dalam lima PNG baru, shared Light/Dark/System control, prompt/referensi canonical di [desain desktop light](../design/admin-content-desktop-light.md), update context/plan/backlog/index. Preserve aset/CSS/desain lokal lain; tanpa implementasi app.
+
+### Acceptance criteria
+
+- [x] Lima halaman desktop light tersedia dengan brand/sidebar/header/theme switcher yang konsisten.
+- [x] Form lengkap sesuai kontrak, jenis edit readonly, rights unchecked, status editorial/source terpisah; tanpa aksi/features di luar iterasi metadata.
+- [x] Prompt, path, metode built-in, data contoh dan batas mockup dicatat; proposal belum dianggap approval visual atau runtime proof.
+- [ ] Docs/format/whitespace, staged snapshot/preservation dan commit task terpisah lulus.
+
+### Validasi
+
+Inspeksi semua hasil image_gen, invariants/layout/copy/theme switcher, file PNG/dimensi, docs:check, targeted Prettier, diff --check, scoped staging dan preservation. Tidak menjalankan browser screenshot atau runtime app untuk mockup raster.
+
+### Hasil dan bukti
+
+Lima PNG final tersimpan di `docs/design/`, masing-masing 1536 × 1024 piksel. Built-in image_gen digunakan lima call utama dan tiga koreksi terarah; prompt persis serta referensi tersedia pada dokumen desain. Inspeksi visual semua output final lulus untuk shared shell/Light aktif, field metadata/genre/rights, jenis edit readonly, status editorial/source dan batas scope. Koreksi terakhir: badge Terbit netral, badge Draf berbahasa Indonesia dan helper sumber video tanpa istilah implementasi. Ini proposal visual dengan data contoh, bukan hasil browser atau theme switching runtime.
+
+Pemeriksaan 5 Oktober 2026: `bun run docs:check` worktree lulus 51 Markdown/368 tautan; staged snapshot melalui checker yang sama lulus 44 Markdown/349 tautan. Targeted Prettier, `git diff --check` dan `git diff --cached --check` lulus. SHA-256 preservation 23 file existing selain indeks lulus; staged index hanya tiga perubahan navigasi milik task. Scope commit 10 file desain/dokumentasi; source/manifest/lock tidak berubah oleh task. Receipt hook/commit dicatat sesudah commit berhasil.
+
+### Commit task
+
+- Pesan: `docs(design): add admin desktop light mockups (ADMC-DES-001)`.
+- SHA: Belum dibuat.
+- Hook/checks: Menunggu hasil aktual.
+- Ledger: Receipt dicatat setelah commit untuk update task berikutnya.
+
+### Blocker atau tindak lanjut
+
+Desain dark/mobile dan implementasi menjadi langkah setelah review; request ini hanya desktop light.
