@@ -1,3 +1,5 @@
+import { mediaAssets } from "./media";
+import { foreignKey, type PgTableExtraConfigValue } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import {
   pgTable,
@@ -17,7 +19,6 @@ import {
   auditColumns,
   publicationColumns,
   metadataChecks,
-  publicationChecks,
 } from "./content-columns";
 export const videos = pgTable(
   "videos",
@@ -32,16 +33,39 @@ export const videos = pgTable(
       .notNull()
       .unique("videos_slug_unique"),
     ...editorialColumns(),
+    posterAssetId: uuid("poster_asset_id"),
+    sourceAssetId: uuid("source_asset_id"),
     rightsConfirmedAt: timestamp("rights_confirmed_at", { withTimezone: true }),
     rightsConfirmedBy: text("rights_confirmed_by").references(() => user.id, {
       onDelete: "restrict",
     }),
     ...publicationColumns(),
+    publicationStatus: text("publication_status")
+      .$type<"draft" | "published" | "archived">()
+      .notNull()
+      .default("draft"),
     ...auditColumns(),
   },
-  (t) => [
+  (t): PgTableExtraConfigValue[] => [
+    foreignKey({
+      name: "videos_poster_owner_fk",
+      columns: [t.posterAssetId, t.id],
+      foreignColumns: [mediaAssets.id, mediaAssets.videoId],
+    }),
+    foreignKey({
+      name: "videos_source_owner_fk",
+      columns: [t.sourceAssetId, t.id],
+      foreignColumns: [mediaAssets.id, mediaAssets.videoId],
+    }),
     ...metadataChecks("videos", t),
-    ...publicationChecks("videos", t),
+    check(
+      "videos_status_check",
+      sql`${t.publicationStatus} IN ('draft','published','archived')`,
+    ),
+    check(
+      "videos_publication_check",
+      sql`(${t.publicationStatus}='published' AND ${t.publishedAt} IS NOT NULL AND ${t.firstPublishedAt} IS NOT NULL AND ${t.archivedAt} IS NULL) OR (${t.publicationStatus}='draft' AND ${t.publishedAt} IS NULL AND ${t.archivedAt} IS NULL) OR (${t.publicationStatus}='archived' AND ${t.publishedAt} IS NULL AND ${t.archivedAt} IS NOT NULL)`,
+    ),
     check(
       "videos_kind_check",
       sql`${t.kind} IN ('standalone','movie','episode')`,

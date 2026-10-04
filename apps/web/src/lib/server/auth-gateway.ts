@@ -1,6 +1,6 @@
 import { isDisabledAuthPath } from '@repo/auth/server'
 
-type GatewayTarget = 'auth'
+type GatewayTarget = 'auth' | 'business'
 
 type GatewayDependencies = {
   getApiInternalUrl?: () => string | undefined
@@ -14,6 +14,10 @@ type RequestBodyRead =
   { ok: true; body: ArrayBuffer | null } | { ok: false; tooLarge: boolean }
 
 const targetPaths: Record<GatewayTarget, (pathname: string) => boolean> = {
+  business: (pathname) =>
+    /^\/api\/(?:admin\/(?:videos|series|seasons|genres|media)(?:\/|$)|videos(?:\/|$)|series(?:\/|$)|playback\/videos\/)/.test(
+      pathname,
+    ) && !/%|\\/.test(pathname),
   auth: (pathname) =>
     pathname === '/api/auth' || pathname.startsWith('/api/auth/'),
 }
@@ -118,10 +122,17 @@ async function readLimitedBody(
   return { ok: true, body: body.buffer }
 }
 
-function forwardedRequestHeaders(request: Request): Headers {
+function forwardedRequestHeaders(
+  request: Request,
+  includePrivate = true,
+): Headers {
   const headers = new Headers()
   for (const [name, value] of request.headers) {
-    if (requestHeaderAllowlist.has(name.toLowerCase())) {
+    if (
+      requestHeaderAllowlist.has(name.toLowerCase()) &&
+      (includePrivate ||
+        !['cookie', 'authorization'].includes(name.toLowerCase()))
+    ) {
       headers.append(name, value)
     }
   }
@@ -191,6 +202,7 @@ export function createAuthGateway(
     }
 
     if (
+      target === 'auth' &&
       isDisabledAuthPath(
         incomingUrl.pathname.replace(/^\/api\/auth/, ''),
         request.method,
@@ -208,7 +220,23 @@ export function createAuthGateway(
       )
     }
 
-    const upstreamPath = incomingUrl.pathname
+    const privateBusiness =
+      target === 'business' && incomingUrl.pathname.startsWith('/api/admin/')
+    if (
+      privateBusiness &&
+      !['GET', 'HEAD'].includes(request.method) &&
+      request.headers.get('origin') &&
+      request.headers.get('origin') !== publicOrigin
+    )
+      return errorResponse(
+        403,
+        'ORIGIN_FORBIDDEN',
+        'Request origin is not allowed.',
+      )
+    const upstreamPath =
+      target === 'business'
+        ? incomingUrl.pathname.slice(4)
+        : incomingUrl.pathname
     const upstreamUrl = new URL(
       `${upstreamPath}${incomingUrl.search}`,
       apiOrigin,
@@ -251,7 +279,10 @@ export function createAuthGateway(
 
       const requestInit: RequestInit = {
         method: request.method,
-        headers: forwardedRequestHeaders(request),
+        headers: forwardedRequestHeaders(
+          request,
+          target === 'auth' || privateBusiness,
+        ),
         redirect: 'manual',
         signal: abortController.signal,
       }
@@ -271,6 +302,21 @@ export function createAuthGateway(
           'AUTH_GATEWAY_INVALID_RESPONSE',
           'The authentication service returned an invalid redirect.',
         )
+      }
+      if (target === 'business') {
+        headers.delete('set-cookie')
+        if (headers.has('location')) {
+          await upstreamResponse.body?.cancel().catch(() => undefined)
+          cleanup()
+          return errorResponse(
+            502,
+            'BUSINESS_GATEWAY_INVALID_RESPONSE',
+            'Unexpected redirect.',
+          )
+        }
+        const cache = upstreamResponse.headers.get('cache-control')
+        if (!privateBusiness && cache === 'private, max-age=60')
+          headers.set('cache-control', cache)
       }
       const noBodyStatus = [204, 205, 304].includes(upstreamResponse.status)
       let responseBody: ArrayBuffer | null = null

@@ -40,7 +40,7 @@ Susun pekerjaan dengan urutan **modul → user story → task kecil**. Modul mem
 5. **Validasi dan tinjau.** Buktikan kriteria penerimaan, jalankan pemeriksaan repo yang relevan, lalu tinjau keamanan akses video privat dan perubahan dokumentasi.
 6. **Rilis dan amati.** Tentukan migrasi, konfigurasi, pemantauan, serta rencana pemulihan sesuai infrastruktur yang nantinya dipilih. Alur rilis produksi belum ditetapkan.
 
-Urutan potongan awal yang disarankan: skema PostgreSQL/Drizzle dan provisioning admin → sesi Better Auth serta perlindungan API/dashboard → draf dan konfigurasi admin → unggah ke R2/layanan kompatibel S3 → queue PostgreSQL dan worker FFmpeg → pratinjau dan terbit → katalog serta pemutaran publik tanpa login → tarik publikasi dan pemulihan kegagalan. Setiap potongan harus menghasilkan perilaku yang dapat diperiksa sebelum lanjut.
+Urutan potongan awal yang disarankan: skema PostgreSQL/Drizzle dan provisioning admin → sesi Better Auth serta perlindungan API/dashboard → draf dan konfigurasi admin → unggah MinIO development/R2 production via env → queue PostgreSQL dan worker FFmpeg HLS → pratinjau dan terbit → katalog serta pemutaran publik tanpa login → archive video published dan pemulihan kegagalan. Keputusan provider/env/HLS disetujui 3 Oktober 2026; setiap potongan harus menghasilkan perilaku yang dapat diperiksa sebelum lanjut.
 
 ## Alur kerja repo saat ini
 
@@ -76,4 +76,4 @@ Sebelum melaporkan implementasi selesai, jalankan test yang sudah tersedia dan r
 
 ## Perubahan keputusan
 
-Keputusan Agile dan pembagian modul menjadi task kecil disetujui pengguna pada 1 Oktober 2026. Gunakan status `Draft` untuk keputusan produk/teknis lain sampai disetujui, lalu tulis tanggal dan keputusan pada dokumen terkait. Jika implementasi menyimpang dari keputusan yang disetujui, perbarui dokumen serta alasan perubahan dalam pekerjaan yang sama. Workflow ini belum menetapkan CI, strategi branching, durasi sprint, atau kebijakan deploy. HLS akan disiapkan bersama development modul pemutaran sesuai keputusan pengguna.
+Keputusan Agile dan pembagian modul menjadi task kecil disetujui pengguna pada 1 Oktober 2026. Gunakan status `Draft` untuk keputusan produk/teknis lain sampai disetujui, lalu tulis tanggal dan keputusan pada dokumen terkait. Jika implementasi menyimpang dari keputusan yang disetujui, perbarui dokumen serta alasan perubahan dalam pekerjaan yang sama. Workflow ini belum menetapkan CI, strategi branching, durasi sprint, atau kebijakan deploy. MinIO development, R2 production, selector env dan HLS VOD disetujui pengguna pada 3 Oktober 2026; detail/proof mengikuti [backlog media](tasks/media.md).

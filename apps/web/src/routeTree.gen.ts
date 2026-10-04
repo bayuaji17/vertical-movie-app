@@ -13,8 +13,11 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AdminAuthenticatedRouteImport } from './routes/admin._authenticated'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as ApiSplatRouteImport } from './routes/api/$'
+import { Route as WatchSlugRouteImport } from './routes/watch.$slug'
 import { Route as AdminAuthenticatedIndexRouteImport } from './routes/admin._authenticated.index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as AdminAuthenticatedVideosIdPreviewRouteImport } from './routes/admin._authenticated.videos.$id.preview'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -35,6 +38,16 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => AdminRoute,
 } as any)
+const ApiSplatRoute = ApiSplatRouteImport.update({
+  id: '/api/$',
+  path: '/api/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WatchSlugRoute = WatchSlugRouteImport.update({
+  id: '/watch/$slug',
+  path: '/watch/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminAuthenticatedIndexRoute = AdminAuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -45,19 +58,31 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAuthenticatedVideosIdPreviewRoute =
+  AdminAuthenticatedVideosIdPreviewRouteImport.update({
+    id: '/videos/$id/preview',
+    path: '/videos/$id/preview',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/api/$': typeof ApiSplatRoute
+  '/watch/$slug': typeof WatchSlugRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/': typeof AdminAuthenticatedIndexRoute
+  '/admin/videos/$id/preview': typeof AdminAuthenticatedVideosIdPreviewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminAuthenticatedIndexRoute
   '/admin/login': typeof AdminLoginRoute
+  '/api/$': typeof ApiSplatRoute
+  '/watch/$slug': typeof WatchSlugRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/admin/videos/$id/preview': typeof AdminAuthenticatedVideosIdPreviewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -65,27 +90,50 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/admin/_authenticated': typeof AdminAuthenticatedRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/api/$': typeof ApiSplatRoute
+  '/watch/$slug': typeof WatchSlugRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/_authenticated/': typeof AdminAuthenticatedIndexRoute
+  '/admin/_authenticated/videos/$id/preview': typeof AdminAuthenticatedVideosIdPreviewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/admin/login' | '/api/auth/$' | '/admin/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/admin/login'
+    | '/api/$'
+    | '/watch/$slug'
+    | '/api/auth/$'
+    | '/admin/'
+    | '/admin/videos/$id/preview'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/admin/login' | '/api/auth/$'
+  to:
+    | '/'
+    | '/admin'
+    | '/admin/login'
+    | '/api/$'
+    | '/watch/$slug'
+    | '/api/auth/$'
+    | '/admin/videos/$id/preview'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/admin/_authenticated'
     | '/admin/login'
+    | '/api/$'
+    | '/watch/$slug'
     | '/api/auth/$'
     | '/admin/_authenticated/'
+    | '/admin/_authenticated/videos/$id/preview'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  ApiSplatRoute: typeof ApiSplatRoute
+  WatchSlugRoute: typeof WatchSlugRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -119,6 +167,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/api/$': {
+      id: '/api/$'
+      path: '/api/$'
+      fullPath: '/api/$'
+      preLoaderRoute: typeof ApiSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/watch/$slug': {
+      id: '/watch/$slug'
+      path: '/watch/$slug'
+      fullPath: '/watch/$slug'
+      preLoaderRoute: typeof WatchSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/_authenticated/': {
       id: '/admin/_authenticated/'
       path: '/'
@@ -133,15 +195,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/_authenticated/videos/$id/preview': {
+      id: '/admin/_authenticated/videos/$id/preview'
+      path: '/videos/$id/preview'
+      fullPath: '/admin/videos/$id/preview'
+      preLoaderRoute: typeof AdminAuthenticatedVideosIdPreviewRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
   }
 }
 
 interface AdminAuthenticatedRouteChildren {
   AdminAuthenticatedIndexRoute: typeof AdminAuthenticatedIndexRoute
+  AdminAuthenticatedVideosIdPreviewRoute: typeof AdminAuthenticatedVideosIdPreviewRoute
 }
 
 const AdminAuthenticatedRouteChildren: AdminAuthenticatedRouteChildren = {
   AdminAuthenticatedIndexRoute: AdminAuthenticatedIndexRoute,
+  AdminAuthenticatedVideosIdPreviewRoute:
+    AdminAuthenticatedVideosIdPreviewRoute,
 }
 
 const AdminAuthenticatedRouteWithChildren =
@@ -162,6 +234,8 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  ApiSplatRoute: ApiSplatRoute,
+  WatchSlugRoute: WatchSlugRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

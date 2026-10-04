@@ -268,7 +268,21 @@ test("merged Scalar documents auth and every business operation with resolvable 
       }
     }
   }
-  expect(count).toBe(16);
+  expect(count).toBe(26);
+  for (const id of [
+    "initiateMediaUpload",
+    "getMediaUpload",
+    "signMediaUploadPart",
+    "completeMediaUpload",
+    "abortMediaUpload",
+    "publishVideo",
+    "publishSeries",
+    "getVideoPreview",
+    "getVideoPreviewMaster",
+    "getVideoPreviewVariant",
+    "getVideoMasterPlaylist",
+  ])
+    expect(operationIds).toContain(id);
   expect(new Set(operationIds).size).toBe(operationIds.length);
   const visit = (node: unknown) => {
     if (Array.isArray(node)) {

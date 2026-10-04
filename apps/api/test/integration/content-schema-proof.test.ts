@@ -12,7 +12,7 @@ import {
 let database: Awaited<ReturnType<typeof resetContentDatabase>>;
 beforeAll(async () => {
   database = await resetContentDatabase();
-});
+}, 30000);
 test("video kinds enforce nullable pairs, rights, publication and concurrent episode uniqueness", async () => {
   const seriesId = Bun.randomUUIDv7();
   await database.db.insert(series).values({
@@ -201,15 +201,13 @@ test("genre relations enforce FK uniqueness and atomic rollback", async () => {
   await database.db
     .insert(series)
     .values({ id: parentId, title: "Genres", slug: "genres-parent", ...actor });
-  await database.db
-    .insert(videos)
-    .values({
-      id: videoId,
-      kind: "movie",
-      title: "Genres",
-      slug: "genres-movie",
-      ...actor,
-    });
+  await database.db.insert(videos).values({
+    id: videoId,
+    kind: "movie",
+    title: "Genres",
+    slug: "genres-movie",
+    ...actor,
+  });
   await database.db
     .insert(genres)
     .values({ id: genreId, name: "Drama", slug: "drama" });

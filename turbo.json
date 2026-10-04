@@ -47,7 +47,12 @@
         "S3_SECRET_ACCESS_KEY",
         "S3_SESSION_TOKEN",
         "FFMPEG_PATH",
-        "FFPROBE_PATH"
+        "FFPROBE_PATH",
+        "STORAGE_PROVIDER",
+        "MEDIA_PLAYBACK_BASE_URL",
+        "MEDIA_UPLOAD_PART_CONCURRENCY",
+        "MEDIA_UPLOAD_SESSION_TTL_SECONDS",
+        "MEDIA_UPLOAD_PART_URL_TTL_SECONDS"
       ]
     },
     "api#start": {
@@ -67,7 +72,12 @@
         "S3_SECRET_ACCESS_KEY",
         "S3_SESSION_TOKEN",
         "FFMPEG_PATH",
-        "FFPROBE_PATH"
+        "FFPROBE_PATH",
+        "STORAGE_PROVIDER",
+        "MEDIA_PLAYBACK_BASE_URL",
+        "MEDIA_UPLOAD_PART_CONCURRENCY",
+        "MEDIA_UPLOAD_SESSION_TTL_SECONDS",
+        "MEDIA_UPLOAD_PART_URL_TTL_SECONDS"
       ]
     }
   }

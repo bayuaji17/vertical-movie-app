@@ -1,3 +1,11 @@
+import { createCatalogModule } from "./modules/catalog";
+import { createPublicationModule } from "./modules/publication";
+import { createPlaybackModule } from "./modules/playback";
+import type { CatalogService } from "./modules/catalog/service";
+import type { PublicationService } from "./modules/publication/service";
+import type { PlaybackService } from "./modules/playback/service";
+import { createMediaModule } from "./modules/media";
+import type { MediaService } from "./modules/media/service";
 import { Elysia } from "elysia";
 import { openapi, toOpenAPISchema } from "@elysia/openapi";
 import type { AuthOpenAPISchema } from "@repo/auth/server";
@@ -16,7 +24,14 @@ import type { VideosService } from "./modules/videos/service";
 import type { GenresService } from "./modules/genres/service";
 import type { RequireAdminDependencies } from "./modules/auth/admin/guard";
 
+import type { S3Client } from "bun";
+
 type AppDependencies = {
+  storage?: S3Client;
+  mediaService?: MediaService;
+  catalogService?: CatalogService;
+  publicationService?: PublicationService;
+  playbackService?: PlaybackService;
   database?: Pick<ReturnType<typeof createDatabase>, "client">;
   auth?: Pick<AuthServer, "handler">;
   authOpenApiSchema?: AuthOpenAPISchema;
@@ -45,6 +60,11 @@ function createAuthRoutes(auth?: AppDependencies["auth"]) {
 }
 
 export function createApp({
+  storage,
+  mediaService,
+  catalogService,
+  publicationService,
+  playbackService,
   database,
   auth,
   authOpenApiSchema,
@@ -57,6 +77,7 @@ export function createApp({
   genresService,
 }: AppDependencies = {}) {
   const app = new Elysia({ normalize: false })
+    .decorate("storage", storage)
     .get("/", () => "Hello Elysia", {
       detail: {
         tags: ["System"],
@@ -67,7 +88,11 @@ export function createApp({
     .use(createAuthRoutes(auth))
     .use(createSeriesModule({ service: seriesService, getSession }))
     .use(createVideosModule({ service: videosService, getSession }))
-    .use(createGenresModule({ service: genresService, getSession }));
+    .use(createGenresModule({ service: genresService, getSession }))
+    .use(createMediaModule({ service: mediaService, getSession }))
+    .use(createCatalogModule(catalogService))
+    .use(createPublicationModule({ service: publicationService, getSession }))
+    .use(createPlaybackModule({ service: playbackService, getSession }));
 
   const applicationSchema = toOpenAPISchema(
     app,
@@ -97,6 +122,7 @@ export function createApp({
     openApiPlugin.use(
       openapi({
         provider: "scalar",
+        exclude: { staticFile: false },
         openapiVersion: "3.1.1",
         documentation: {
           ...(!authFragment

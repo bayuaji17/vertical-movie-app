@@ -2,7 +2,7 @@
 
 ## Tujuan modul
 
-Menyediakan draf dan metadata backend untuk series multi-season, episode, movie panjang dan standalone. Referensi PRD-03/06/07/09, GR-03–07, [model](../VIDEO_DATA_MODEL.md), [plan](../VIDEO_IMPLEMENTATION_PLAN.md), [context](../VIDEO_REPOSITORY_CONTEXT.md). Ini backlog **tahap A**; media/upload/worker/publikasi ada pada roadmap plan dan belum Ready.
+Menyediakan draf dan metadata backend untuk series multi-season, episode, movie panjang dan standalone. Referensi PRD-03/06/07/09, GR-03–07, [model](../VIDEO_DATA_MODEL.md), [plan](../VIDEO_IMPLEMENTATION_PLAN.md), [context](../VIDEO_REPOSITORY_CONTEXT.md). Ini backlog **tahap A**. Lanjutan MinIO development/R2 production via env dan HLS disetujui 3 Oktober 2026; task kecil konfigurasi/proof/upload/refinement HLS ada pada [backlog media](media.md). Worker/publikasi tetap roadmap yang dipecah sebelum implementasi.
 
 > Status per 3 Oktober 2026: implementasi tahap A disetujui pengguna; status setiap task diperbarui sesuai evidence. Base SHA `d1d3e0a36a4adf1c7198db7a1d36c49e9f1c93ed`. D1–D3 disetujui; status bergerak berdasarkan prerequisite. Tidak menetapkan sprint/estimasi kalender dan branch baru dan commit per task diotorisasi; migrasi development tetap terpisah.
 
@@ -535,3 +535,39 @@ Dokumentasi model/status/rute, runbook VIDEO_OPERATIONS, contoh request/response
 ### Blocker atau tindak lanjut
 
 Tidak ada blocker task ini. Tahap media dan integrasi web tetap mengikuti roadmap.
+
+## User story: VID-US-06 — Lifecycle video
+
+Sebagai admin, saya ingin video mengikuti draft → published → archived, sehingga hanya published muncul pada katalog dan archive tidak membutuhkan status unpublished. Keputusan 4 Oktober 2026; kontrak metadata tahap A tetap evidence historis sampai task berikut diimplementasikan.
+
+## Task: VID-016 — Sesuaikan kontrak lifecycle video dan schema compatibility
+
+- Status: Review
+- Owner: Pengembang/agent pelaksana
+- Prioritas: P1 — prerequisite publication
+- Referensi: VID-US-06, PRD-06, keputusan lifecycle model/plan 4 Oktober 2026
+- Dependensi: VID-015 (Done). Sinkronisasi kontrak dengan PUBLISH-001/HLS-DELIVERY-001 bukan prerequisite implementasi lifecycle.
+- Ukuran: Satu review kontrak dan compatibility; pecah migration/service/proof sebelum implementasi bila diperlukan.
+
+### Ruang lingkup
+
+Tetapkan kontrak domain/DTO target draft/published/archived untuk video, allowed transition serta timestamps. Periksa publicationColumns yang saat ini dipakai video/series agar keputusan lifecycle video tidak otomatis mengubah lifecycle series. Review schema/CHECK/migration additive dan mapping archived/unpublished existing, domain archive serta future publikasi; jangan mengubah migration lama. Restore/republish, shortcut draft archive dan efek parent tetap refinement tersendiri.
+
+### Acceptance criteria
+
+- [x] Kontrak video menggunakan draft → published → archived tanpa status produk unpublished; archive video published tidak lagi ditolak hanya karena published.
+- [x] rowVersion/actor/first-published/archive timestamps dan race publish/archive mempertahankan audit/visibility; archive bukan hard delete.
+- [x] Review compatibility memisahkan enum schema saat ini dari target; mapping data existing termasuk unpublished bila ada ditetapkan sebelum migration. Lifecycle series tidak berubah tanpa keputusan.
+- [x] Generate/review migration dan dedicated PostgreSQL proof bila schema berubah; pada implementasi jalankan migration development sesuai instruksi repository dan verifikasi data auth/content tetap utuh. Production tetap rollout terpisah.
+
+### Validasi
+
+Proof domain/API dan PostgreSQL dedicated untuk transition/invalid transition/version race serta persistence; relevant tests, check-types, lint dan build pada implementasi. Delivery membuktikan kebijakan URL lama setelah archive secara terpisah; update metadata bukan bukti pencabutan media.
+
+### Hasil dan bukti
+
+4 Oktober2026: video-only schema/status/DTO/archive dan migration0008 tersedia; content regression19/204, legacy mapping1/10 dan worker publication/archive E2E lulus. Development journal9/data auth+metadata existing utuh setelah backup. Series lifecycle tetap terpisah. Root gates pada [Media Operations](../MEDIA_OPERATIONS.md); implementasi belum commit.
+
+### Blocker atau tindak lanjut
+
+Bekukan mapping legacy serta shortcut/restore/parent yang dibutuhkan scope implementasi; archive-link policy nomor 4 sudah disetujui; proof seluruh objek/expiry berada pada HLS-DELIVERY-001. PUBLISH-001 bergantung pada kontrak lifecycle ini.

@@ -1,8 +1,22 @@
 # Rancangan Data — Video, Series, dan Movie
 
-> Status: **Tahap A diimplementasikan dan tervalidasi lokal** · 3 Oktober 2026 · Base SHA `d1d3e0a36a4adf1c7198db7a1d36c49e9f1c93ed`. D1–D3 disetujui pengguna. Enam tabel metadata dan migrasi `0003`–`0005` tersedia; proof memakai PostgreSQL dedicated. Migrasi konten development diterapkan pada tindak lanjut VERIFY-001; production belum. Tabel dan aturan tahap B–D di bawah tetap rancangan lanjutan.
+> Status: **Tahap A diimplementasikan dan tervalidasi lokal** · 3 Oktober 2026 · Base SHA `d1d3e0a36a4adf1c7198db7a1d36c49e9f1c93ed`. D1–D3 disetujui pengguna. Enam tabel metadata dan migrasi `0003`–`0005` tersedia; proof memakai PostgreSQL dedicated. Migrasi konten development diterapkan pada tindak lanjut VERIFY-001; production belum. Implementasi media tahap B–D kini tersedia untuk review lokal (4 Oktober); bagian schema lama tetap evidence historis, kontrak aktif ada pada Media Operations.
+
+Keputusan lanjutan 3 Oktober 2026 pada snapshot `0d3bef87f6d2f9b0a2873078f9b560f092f13c53`: MinIO development dengan bucket `vertical-movie-app`, Cloudflare R2 production melalui S3-compatible, selector env dan HLS VOD. Detail konfigurasi/segmentation/delivery ada pada [plan](VIDEO_IMPLEMENTATION_PLAN.md) dan [backlog media](tasks/media.md); schema media/upload/job/attempt/rendition/operation tersedia pada migrasi 0006–0008.
+
+Resolusi sumber/keluaran HLS disetujui 480p–1080p pada tindak lanjut tanggal yang sama: sumber di atas 1080p termasuk 4K ditolak; tanpa upscale/crop otomatis. Dimensi tampilan mempertimbangkan rotasi/SAR, sisi pendek minimal 480 dan maksimum 1080, sisi panjang maksimum 1920. Semua video wajib portrait 9:16; landscape/square/rasio lain ditolak. Lebar tampilan 480–1080 dan tinggi maksimum 1920 berlaku seragam antarjenis konten; detail contoh/boundary pada plan. Format sumber yang disetujui: MP4/MOV/MKV dengan H.264 atau H.265/HEVC, WebM dengan VP8 atau VP9; container/codec aktual dan kemampuan decode wajib diverifikasi.
+
+Target kualitas ekspor sumber kemudian disetujui: acuan H.264 SDR/AAC 128 kbps, acuan 1080p24–30 pada 4–6 Mbps (default 6 Mbps); sumber 60 fps tetap mengikuti size limit aktual, dengan batas terbaru berdasarkan kind: movie/standalone maksimal 1.800 detik dan 1,5 GB (1.500.000.000 byte), episode maksimal 600 detik dan 512 MB (512.000.000 byte). Limit berlaku juga untuk file yang lebih pendek. Batas file mencakup audio/container dan diutamakan atas acuan bitrate; movie/standalone penuh 30 menit harus muat dalam budget total sekitar 6,67 Mbps. Size bigint diverifikasi terhadap objek aktual, durasi/fps melalui probe, tanpa mempercayai deklarasi klien. Target ekspor sumber terpisah dari ladder hls-v1 yang sudah disetujui; kebijakan audio/HDR/VFR/fps di luar acuan masih refinement.
+
+Poster/sampul wajib portrait 9:16 dengan standar format file/dimensi seragam untuk semua jenis konten. Sumber gambar diam JPG/JPEG/PNG/WebP maksimal 5 MB (5.000.000 byte), dimensi setelah orientasi minimal 1080 × 1920 dan wajib 9:16; hasil WebP tepat 1080 × 1920. Sumber lebih besar diperkecil tanpa crop/upscale; sumber di bawah minimum, rasio lain dan animasi ditolak. Decode aktual dan hasil konversi wajib diverifikasi sebelum siap; pixel sampul tidak mengikuti setiap file video. Semua video juga wajib portrait 9:16. Standalone adalah video mandiri di luar series; movie juga mandiri tetapi berkategori editorial film. Kind tidak ditentukan oleh durasi. Detail persetujuan dan proof boundary ada pada [plan](VIDEO_IMPLEMENTATION_PLAN.md#format-sumber-durasi-dan-poster--disetujui-3-oktober-2026).
 
 Referensi: [context](VIDEO_REPOSITORY_CONTEXT.md), [plan](VIDEO_IMPLEMENTATION_PLAN.md), [backlog](tasks/videos.md), PRD-03–07/09 dan GR-03–07. Model mendukung video mandiri, movie panjang, serta episode. Durasi dan rasio aspek adalah metadata teknis file, bukan penentu jenis konten.
+
+## Lifecycle video — keputusan terbaru 4 Oktober 2026
+
+Lifecycle video disetujui 4 Oktober 2026: **draft → published → archived**, tanpa status produk unpublished. Status upload/processing tetap terpisah. Schema/service video aktif memakai draft/published/archived pada migration 0008; series tetap menggunakan lifecycle sebelumnya. Detail mapping dan proof pada [Media Operations](MEDIA_OPERATIONS.md).
+
+Keputusan ini mengutamakan target video pada bagian 9 atas rancangan unpublished sebelumnya. Tabel/CHECK tahap A pada bagian 3–6 mendeskripsikan schema yang sudah berjalan, bukan enum lifecycle target. VID-016 menyiapkan perubahan additive/compatibility, mapping row archived existing serta penanganan row unpublished jika ada sebelum migration development yang diotorisasi pada implementasi. Lifecycle series/season, restore/republish dan shortcut archive draft memerlukan refinement terpisah; tidak otomatis disetujui dari alur utama video.
 
 ## 1. Relasi utama dan tahap implementasi
 
@@ -28,7 +42,7 @@ erDiagram
 | A — metadata, selesai lokal | `series`, `seasons`, `videos`, `genres`, `series_genres`, `video_genres` | CRUD admin untuk semua jenis konten; konten dibuat sebagai draft. |
 | B — unggah                  | `media_assets`, `upload_sessions`; pointer sumber/poster pada konten     | Aset privat dan unggah terverifikasi.                             |
 | C — pemrosesan              | `media_jobs`, `media_renditions`                                         | Queue persisten, hasil transcode versi tertentu, retry.           |
-| D — publikasi               | service publish/unpublish, query publik, delivery policy                 | Katalog dan playback hanya untuk konten efektif terbit.           |
+| D — publikasi               | service publish/archive video, query publik, delivery policy             | Katalog dan playback hanya untuk konten efektif terbit.           |
 
 Tahap A bukan perintah membuat seluruh tabel media. Tabel masa depan adalah kontrak rancangan yang divalidasi kembali saat modulnya dimulai. Seluruh tabel domain dimiliki `apps/api`; tidak mengubah schema auth.
 
@@ -46,26 +60,26 @@ Tahap A bukan perintah membuat seluruh tabel media. Tabel masa depan adalah kont
 
 ## 3. `series` — metadata tingkat serial
 
-| Kolom                                  | Tipe / null / default          | Makna dan validasi                                          |
-| -------------------------------------- | ------------------------------ | ----------------------------------------------------------- |
-| `id`                                   | uuid PK                        | Identitas stabil.                                           |
-| `slug`                                 | varchar(180), NOT NULL, UNIQUE | Tautan series.                                              |
-| `title`                                | varchar(200), NOT NULL         | Nama series; trim nonempty.                                 |
-| `original_title`                       | varchar(200), NULL             | Judul asli bila berbeda.                                    |
-| `synopsis`                             | varchar(500), NULL             | Ringkasan kartu katalog.                                    |
-| `description`                          | text, NULL                     | Deskripsi panjang plain text, maks. 10.000.                 |
-| `original_language`                    | varchar(35), NULL              | Tag bahasa BCP 47 tervalidasi service, misalnya `id`, `en`. |
-| `release_year`                         | smallint, NULL                 | Tahun 1800–9999; bukan tahun publish situs.                 |
-| `release_date`                         | date, NULL                     | Tanggal rilis asli; bila year juga diisi harus cocok.       |
-| `completion_status`                    | text, NOT NULL, `ongoing`      | CHECK `ongoing/completed`; independent dari publikasi.      |
-| `publication_status`                   | text, NOT NULL, `draft`        | CHECK `draft/published/unpublished`.                        |
-| `first_published_at`                   | timestamptz, NULL              | Pertama kali publish, tidak direset saat unpublish.         |
-| `published_at`                         | timestamptz, NULL              | Publish aktif terakhir; NULL saat draft/unpublished.        |
-| `archived_at`                          | timestamptz, NULL              | Tidak muncul pada listing default.                          |
-| `row_version`                          | integer, NOT NULL, 1           | Konflik update editorial.                                   |
-| `created_by`, `updated_by`             | text, NOT NULL, FK user        | Actor admin.                                                |
-| `created_at`, `updated_at`             | timestamptz, NOT NULL          | Audit waktu.                                                |
-| `poster_asset_id`, `backdrop_asset_id` | uuid, NULL, **tahap B**        | Gambar vertikal dan landscape; owned by series ini.         |
+| Kolom                                  | Tipe / null / default          | Makna dan validasi                                                |
+| -------------------------------------- | ------------------------------ | ----------------------------------------------------------------- |
+| `id`                                   | uuid PK                        | Identitas stabil.                                                 |
+| `slug`                                 | varchar(180), NOT NULL, UNIQUE | Tautan series.                                                    |
+| `title`                                | varchar(200), NOT NULL         | Nama series; trim nonempty.                                       |
+| `original_title`                       | varchar(200), NULL             | Judul asli bila berbeda.                                          |
+| `synopsis`                             | varchar(500), NULL             | Ringkasan kartu katalog.                                          |
+| `description`                          | text, NULL                     | Deskripsi panjang plain text, maks. 10.000.                       |
+| `original_language`                    | varchar(35), NULL              | Tag bahasa BCP 47 tervalidasi service, misalnya `id`, `en`.       |
+| `release_year`                         | smallint, NULL                 | Tahun 1800–9999; bukan tahun publish situs.                       |
+| `release_date`                         | date, NULL                     | Tanggal rilis asli; bila year juga diisi harus cocok.             |
+| `completion_status`                    | text, NOT NULL, `ongoing`      | CHECK `ongoing/completed`; independent dari publikasi.            |
+| `publication_status`                   | text, NOT NULL, `draft`        | CHECK `draft/published/unpublished`.                              |
+| `first_published_at`                   | timestamptz, NULL              | Pertama kali publish, tidak direset saat unpublish.               |
+| `published_at`                         | timestamptz, NULL              | Publish aktif terakhir; NULL saat draft/unpublished.              |
+| `archived_at`                          | timestamptz, NULL              | Tidak muncul pada listing default.                                |
+| `row_version`                          | integer, NOT NULL, 1           | Konflik update editorial.                                         |
+| `created_by`, `updated_by`             | text, NOT NULL, FK user        | Actor admin.                                                      |
+| `created_at`, `updated_at`             | timestamptz, NOT NULL          | Audit waktu.                                                      |
+| `poster_asset_id`, `backdrop_asset_id` | uuid, NULL, **tahap B**        | Poster 9:16 owned by series; kebutuhan backdrop belum disepakati. |
 
 Tidak menyimpan `episode_count`, `season_count`, atau total durasi sebagai sumber kebenaran; dihitung dari query. DTO publik menghitung hanya episode efektif terlihat. Completion status tidak menentukan apakah semua episode sudah diunggah atau boleh dipublikasikan.
 
@@ -113,9 +127,9 @@ Tidak ada publication status season pada scope awal; visibility mengikuti series
 | `poster_asset_id`, `backdrop_asset_id` | uuid, NULL, **tahap B**         | Gambar milik video ini.                                                      |
 | `playback_job_id`                      | uuid, NULL, **tahap C**         | Generation hasil yang dipilih; bukan “hasil terbaru” implisit.               |
 
-Tidak ada `series_id` duplikat pada video; diperoleh dari `season_id → seasons.series_id`. Ini menghindari pasangan series/season yang bertentangan. Movie dan standalone sama-sama dapat pendek/panjang; `movie` adalah pilihan editorial, tidak otomatis berdasarkan menit.
+Tidak ada `series_id` duplikat pada video; diperoleh dari `season_id → seasons.series_id`. Ini menghindari pasangan series/season yang bertentangan. Movie dan standalone dibedakan berdasarkan pilihan editorial, tidak otomatis berdasarkan menit. Policy sumber terbaru membatasi movie/standalone maksimal 30 menit dan 1,5 GB; episode maksimal 10 menit dan 512 MB.
 
-Tidak menyimpan URL file, signed URL, ukuran file, codec, atau durasi pada tabel `videos`. Durasi yang ditampilkan berasal dari source/job playback terpilih yang telah diprobe dan divalidasi. Rasio landscape/portrait/square diturunkan dari display dimensions/rotation, bukan diasumsikan 9:16 untuk semua konten.
+Tidak menyimpan URL file, signed URL, ukuran file, codec, atau durasi pada tabel `videos`. Durasi yang ditampilkan berasal dari source/job playback terpilih yang telah diprobe dan divalidasi. Rasio wajib 9:16 diverifikasi dari display dimensions/rotation/SAR; deklarasi klien saja tidak cukup.
 
 ### Constraint inti (bentuk SQL rancangan)
 
@@ -158,6 +172,8 @@ Cast/crew/credits, tag bebas, rating usia resmi, negara, translation metadata, a
 
 ### `media_assets`
 
+Untuk scope provider saat ini, `provider` memakai identitas `minio|r2` yang dipersistenkan bersama bucket/key. Adapter protocol tetap S3-compatible. Mengganti env tidak mengganti identitas row lama atau menyalin objek. Validasi pointer memastikan sumber/aset yang dituju benar-benar tersedia pada provider asal; perpindahan data perlu proses eksplisit.
+
 | Kolom                                                            | Tipe / aturan                                                                                                              |
 | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | `id`                                                             | uuid PK.                                                                                                                   |
@@ -177,13 +193,13 @@ Cast/crew/credits, tag bebas, rating usia resmi, negara, translation metadata, a
 
 Beri UNIQUE `(id,video_id)` dan `(id,series_id)` untuk ownership FK pointer. Misalnya `videos(active_source_asset_id,id) → media_assets(id,video_id)`; poster/backdrop video sama, dan pointer series → `(id,series_id)`. Pointer nullable dengan MATCH SIMPLE; `kind=image/source_video`, ready dan subtype dipastikan service. CHECK `(video_id IS NOT NULL) <> (series_id IS NOT NULL)` memastikan satu owner; CHECK `(kind = 'image' OR video_id IS NOT NULL)` membatasi source/subtitle ke video. Tabel dibuat dulu tanpa pointer konten, lalu ALTER menambahkan FK untuk mengatasi siklus DDL. Drizzle relations bukan pengganti FK database.
 
-Sumber yang dipakai upload-complete diverifikasi memakai ukuran/checksum/metadata storage, lalu dibekukan: URL lama yang masih berlaku tidak boleh mengubah input yang diproses. Spike menentukan copy ke key final immutable atau versi objek yang didukung provider; worker memverifikasi identitas/checksum sumber. Presigned PUT sendiri bukan jaminan file tidak berubah. Tidak menyimpan signed URL pada database; URL dibuat saat dibutuhkan.
+Sumber yang dipakai upload-complete diverifikasi memakai ukuran/checksum/metadata storage, lalu dibekukan: URL lama yang masih berlaku tidak boleh mengubah input yang diproses. Spike menentukan copy ke key final immutable atau versi objek yang didukung provider; worker memverifikasi identitas/checksum sumber. URL upload part sendiri bukan pengganti verifikasi identitas final sumber yang immutable. Tidak menyimpan signed URL pada database; URL dibuat saat dibutuhkan.
 
 ### `upload_sessions`
 
-`id uuid PK`, `asset_id uuid FK RESTRICT`, `mode text CHECK single_put/multipart`, `provider_upload_id text NULL`, `idempotency_key uuid NOT NULL UNIQUE`, `request_hash text NOT NULL`, `status text CHECK pending/completed/aborted/expired DEFAULT pending`, `expected_size_bytes bigint NOT NULL > 0`, `expected_mime_type text NOT NULL`, `expires_at timestamptz NOT NULL`, `completed_at timestamptz NULL`, `created_by text FK user`, `created_at/updated_at timestamptz`.
+`id uuid PK`, `asset_id uuid FK RESTRICT`, `mode text CHECK (mode = 'multipart')`, `provider_upload_id text NULL`, `idempotency_key uuid NOT NULL UNIQUE`, `request_hash text NOT NULL`, `status text CHECK pending/completed/aborted/expired DEFAULT pending`, `expected_size_bytes bigint NOT NULL > 0`, `expected_mime_type text NOT NULL`, `expires_at timestamptz NOT NULL`, `completed_at timestamptz NULL`, `created_by text FK user`, `created_at/updated_at timestamptz`.
 
-Partial unique index pada `asset_id WHERE status='pending'` membatasi satu session aktif; sesi kedaluwarsa harus ditandai expired sebelum membuat pengganti. Request identik mengembalikan session yang sama, key sama dengan payload berbeda menjadi 409. Multipart membutuhkan provider upload ID; method/part list/checksum dan finalization kontraknya ditentukan pada spike movie upload. Jangan menganggap multipart server `S3Client` otomatis menyediakan resume browser. Size bigint dikirim DTO sebagai decimal string; hindari kehilangan presisi/JSON BigInt error. `durationMs` API number hanya setelah batas safe integer tervalidasi.
+Partial unique index pada `asset_id WHERE status='pending'` membatasi satu session aktif; sesi kedaluwarsa harus ditandai expired sebelum membuat pengganti. Request identik mengembalikan session yang sama, key sama dengan payload berbeda menjadi 409. S3 multipart dipilih pengguna untuk seluruh upload media, termasuk sampul kecil satu part; multipart membutuhkan provider upload ID sebelum URL part diterbitkan. Daftar part/ETag disimpan server-side untuk rekonsiliasi/resume; bentuk persistence/checksum/finalization diperinci pada MEDIA-DESIGN-001. Ukuran part disetujui berdasarkan target 2% ukuran file aktual, dihitung sekali menjadi byte dengan minimum 5 MiB selain part terakhir. Geometry part size/count harus disimpan per session agar retry/resume konsisten dan dicek terhadap size aktual pada complete. Session 24 jam sejak initiate disetujui pada nomor 6; maksimal 3 part paralel per file dan URL part 15 menit dibatasi sisa session disetujui 4 Oktober 2026. Jangan menganggap multipart server `S3Client` otomatis menyediakan resume browser. Size bigint dikirim DTO sebagai decimal string; hindari kehilangan presisi/JSON BigInt error. `durationMs` API number hanya setelah batas safe integer tervalidasi.
 
 ## 8. Media tahap C — `media_jobs` dan `media_renditions`
 
@@ -193,28 +209,36 @@ Partial unique index pada `asset_id WHERE status='pending'` membatasi satu sessi
 
 Partial unique index `asset_id WHERE status IN ('queued','running')` membatasi satu job aktif per sumber. Running mensyaratkan lease token/expiry terisi; non-running harus mengosongkannya. Retry otomatis mengulang job yang sama dengan attempts naik; reprocess manual setelah terminal membuat generation baru. Klaim memakai transaksi singkat `FOR UPDATE SKIP LOCKED`; FFmpeg di luar transaksi. Heartbeat/finish hanya berhasil bila token masih cocok dan lease belum kedaluwarsa. Hasil stale worker memakai namespace job/attempt sendiri dan tidak dapat menjadi playback aktif. Semua output wajib terverifikasi sebelum job succeeded; enqueue dan source status dibuat atomik setelah verifikasi storage selesai di luar transaksi.
 
+[Kebijakan worker nomor 7](VIDEO_IMPLEMENTATION_PLAN.md#nomor-7--kebijakan-worker-disetujui-4-oktober-2026) mencatat persetujuan parameter melalui env server dan MEDIA_WORKER_CONCURRENCY default 1 pada 4 Oktober 2026. Retry/deadline/lease/recovery juga disetujui; satu instance awal masih rekomendasi deployment. Kebijakan: tiga attempt total (pertama + dua retry, backoff 60/300 detik), heartbeat 15 detik/lease 120 detik/recovery 30 detik; timeout encode max(15 menit,3×durasi), watchdog 5 menit. Penentuan thread/RAM/disk lewat benchmark disetujui; angka kandidat resource serta attempt total 2 jam/probe/poll/shutdown tetap rekomendasi teknis. Klasifikasi error dan fencing/cleanup memerlukan proof. Persetujuan env/concurrency belum menjadi implementasi; schema/runner masih pending.
+
 ### `media_renditions`
+
+Format playback utama yang disetujui adalah HLS VOD: row master/variant dan manifest menunjuk namespace segment immutable per attempt. MP4 pada daftar kind di bawah hanya kemungkinan derivative future, bukan pilihan streaming produk atau kewajiban MVP. **hls-v1 disetujui 4 Oktober 2026**: H.264 SDR, AAC 128 kbps bila audio tersedia, target video 480p/720p/1080p 1,2/2,5/4,5 Mbps, output maksimal 30 fps, segment fMP4 dengan target 6 detik dan pemilihan kualitas adaptif; tanpa crop/upscale, hanya kualitas yang dapat dibuat dari sumber. Detail encoder/GOP/SAR/VFR/MIME serta kualitas visual dan compatibility tetap memerlukan proof HLS-PROFILE-001.
 
 `id uuid PK`, `asset_id uuid NOT NULL`, `job_id uuid NOT NULL`, `name text NOT NULL`, `kind text CHECK hls_master/hls_variant/mp4/poster/thumbnail/subtitle`, `provider/bucket/object_key text NOT NULL`, `mime_type text NOT NULL`, `size_bytes bigint NULL`, `display_width/display_height integer NULL`, `bitrate_bps bigint NULL`, `duration_ms bigint NULL`, `language varchar(35) NULL`, `verified_at timestamptz NOT NULL`, `created_at timestamptz NOT NULL`.
 
-UNIQUE `(job_id,name)`; UNIQUE `(provider,bucket,object_key)`. Composite FK `(job_id,asset_id) → media_jobs(id,asset_id)` dengan UNIQUE target memastikan output berasal dari sumber yang benar. Hasil disisipkan setelah upload/verify; output transient tidak terlihat sebagai rendition siap. HLS master/variant dapat merujuk banyak segment dalam prefix immutable milik job; tidak membuat row per segment. Master menunjuk playlist, varian menyimpan karakteristik kualitas. MIME/codec/resolusi/profil tepat ditentukan saat worker dikembangkan. Namespace keluaran `outputs/<asset>/<job>/<attempt>/...` berbeda dari sumber untuk menghindari overwrite lintas tabel.
+UNIQUE `(job_id,name)`; UNIQUE `(provider,bucket,object_key)`. Composite FK `(job_id,asset_id) → media_jobs(id,asset_id)` dengan UNIQUE target memastikan output berasal dari sumber yang benar. Hasil disisipkan setelah upload/verify; output transient tidak terlihat sebagai rendition siap. HLS master/variant dapat merujuk banyak segment dalam prefix immutable milik job; tidak membuat row per segment. Master menunjuk playlist, varian menyimpan karakteristik kualitas. MIME, codec parameters, dimensi/SAR dan detail profil tepat dibuktikan saat worker dikembangkan mengikuti hls-v1. Namespace keluaran `outputs/<asset>/<job>/<attempt>/...` berbeda dari sumber untuk menghindari overwrite lintas tabel.
 
 Pointer `videos(playback_job_id,active_source_asset_id) → media_jobs(id,asset_id)` dibuat tahap C. CHECK `(playback_job_id IS NULL OR active_source_asset_id IS NOT NULL)` wajib; source boleh ada sebelum hasil siap. Job siap/sumber aktif/kind dan semua rendition wajib dicek service. Subtitle upload manual tetap berupa asset kind subtitle; derivative caption hasil worker dapat berupa rendition.
 
 ## 9. Publikasi, archive, dan concurrency
 
-1. Tahap A hanya expose create draft, read, edit, archive. `publicationStatus`, actor/timestamp, asset pointers, kind conversion, serta field teknis tidak dapat ditulis melalui PATCH metadata. Payload unknown field ditolak.
-2. Tahap D publish video memerlukan metadata wajib lengkap, source terverifikasi, playback job succeeded yang sesuai sumber, semua hasil wajib siap, poster terverifikasi, dan rights confirmation. Subtitle wajib atau optional ditentukan sebelum task publish Ready.
-3. Episode boleh diberi status published ketika series masih draft; episode baru efektif publik ketika series juga published dan seluruh parent tidak archived. Publish series mensyaratkan metadata/poster serta minimal satu episode lokal published dan siap. Ini memungkinkan menyiapkan episode sebelum membuka katalog series.
-4. Predicate tunggal `isPubliclyPlayable`: video published + tidak archived + sumber/job siap; episode juga membutuhkan season dan series tidak archived serta series published. Dipakai daftar/detail/playback/next-episode, bukan hanya listing. Parent unpublished tidak mengubah status child; republish series mengembalikan episode published. Admin mendapat penjelasan efektif visibility ini.
-5. Query publik mengembalikan 404 yang sama untuk draft/hidden/absent, dan hanya DTO whitelisted. Jumlah episode/genre/next-episode tidak boleh membocorkan child tersembunyi. Series otomatis hilang dari katalog publik bila tidak mempunyai episode efektif playable; status editorialnya tidak diubah otomatis.
-6. Kind tetap immutable. Pindah season/nomor episode setelah first publish ditolak pada scope awal; nomor season juga terkunci bila mempunyai episode yang pernah terbit. Perubahan grouping membutuhkan task migration terpisah. Penggantian source pada konten draft/unpublished diperbolehkan dan mengosongkan playback pointer sampai generation baru siap; source/playback selection pada konten published ditolak sampai unpublish. File portrait/landscape diterima sesuai policy, tanpa crop otomatis.
-7. Publish mengunci parent series → season → video → source → job dalam urutan tetap; mutation/worker yang menyentuh row sama mengikuti urutan kompatibel. Parent unpublish memegang lock series, sehingga race parent-child konsisten. Filter baca tetap authoritative, tidak mengandalkan cache UI.
-8. Archive konten published ditolak 409; series/season yang masih punya child published atau job queued/running ditolak sampai child ditangani. Soft archive draft tidak menghapus file/child. Hard delete, restore dan garbage collection mempunyai task terpisah dan belum menjadi endpoint.
-9. `expectedVersion` salah menghasilkan 409 `CONTENT_VERSION_CONFLICT`; PATCH menulis `WHERE row_version=expectedVersion`, bukan read-then-write tanpa proteksi. Genre set dan metadata berubah dalam satu transaksi. Episode reassign hanya sebelum first publish dan pada draft/unpublished, dengan parent lock dan UNIQUE nomor tujuan.
-10. Publish/upload/reprocess memerlukan dedup persisten. Upload memakai upload_sessions; job memakai identity asset/profile/generation. Sebelum tahap D, tambahkan tabel `content_operations(id uuid PK, video_id uuid FK, operation text, idempotency_key uuid, request_hash text, result_version integer, created_at timestamptz, UNIQUE(video_id,operation,idempotency_key))` dalam transaksi perubahan publish/unpublish; key sama payload berbeda 409, replay tidak mengganti timestamp. Series publication memakai tabel `series_operations` setara dengan FK series, bukan owner polymorphic tanpa FK. Retensi key dan batas request wajib disepakati saat task publikasi.
+Syarat produk publish D4 pada bagian ini disetujui 4 Oktober 2026. [Keputusan nomor 5](VIDEO_IMPLEMENTATION_PLAN.md#nomor-5--syarat-publikasi-disetujui-4-oktober-2026) menetapkan judul/sinopsis, source/HLS/poster siap dan rights confirmation wajib, subtitle optional, publish manual serta visibility episode mengikuti series. Implementasi publish, visibility dan concurrency tahap D masih pending; persetujuan produk tidak berarti endpoint atau proof runtime sudah tersedia.
 
-Policy CDN/signed URL menentukan kapan akses file berhenti setelah unpublish. Query DB saja tidak mencabut URL/cache yang telah beredar. Source dan hasil preview tidak diletakkan pada bucket publik. Tahap D harus menetapkan batas pencabutan akses yang teruji untuk movie MP4 maupun seluruh playlist/segment HLS.
+1. Tahap A hanya expose create draft, read, edit, archive. `publicationStatus`, actor/timestamp, asset pointers, kind conversion, serta field teknis tidak dapat ditulis melalui PATCH metadata. Payload unknown field ditolak.
+2. Tahap D publish video memerlukan metadata wajib lengkap, source terverifikasi, playback job succeeded yang sesuai sumber, semua hasil wajib siap, poster terverifikasi, dan rights confirmation. Subtitle opsional untuk MVP; jika dilampirkan, aset harus siap dengan format/bahasa/timing/akses valid. Publish dilakukan manual setelah pratinjau, bukan otomatis setelah transcode.
+3. Episode boleh diberi status published ketika series masih draft; episode baru efektif publik ketika series juga published dan seluruh parent tidak archived. Publish series mensyaratkan metadata/poster serta minimal satu episode lokal published dan siap. Ini memungkinkan menyiapkan episode sebelum membuka katalog series.
+4. Predicate tunggal `isPubliclyPlayable`: video published + tidak archived + fakta sumber terverifikasi dan job/hasil HLS siap; keberadaan objek asli tidak menjadi syarat setelah retensi menghapusnya; episode juga membutuhkan season dan series tidak archived serta series published. Dipakai daftar/detail/playback/next-episode, bukan hanya listing. Parent yang tidak efektif published menghalangi akses publik child; lifecycle series/season serta restore/republish tetap refinement. Admin mendapat penjelasan efektif visibility ini.
+5. Query publik mengembalikan 404 yang sama untuk draft/hidden/absent, dan hanya DTO whitelisted. Jumlah episode/genre/next-episode tidak boleh membocorkan child tersembunyi. Series otomatis hilang dari katalog publik bila tidak mempunyai episode efektif playable; status editorialnya tidak diubah otomatis.
+6. Kind tetap immutable. Pindah season/nomor episode setelah first publish ditolak pada scope awal; nomor season juga terkunci bila mempunyai episode yang pernah terbit. Perubahan grouping membutuhkan task migration terpisah. Penggantian source pada video draft diperbolehkan dan mengosongkan playback pointer sampai generation baru siap. Published/archived tidak mengganti source/playback pada lifecycle utama; kebutuhan revisi/restore/republish dibahas terpisah. Hanya sumber portrait 9:16 diterima sesuai policy, tanpa crop otomatis.
+7. Publish mengunci parent series → season → video → source → job dalam urutan tetap; mutation/worker yang menyentuh row sama mengikuti urutan kompatibel. Mutation visibility parent memegang lock series, sehingga race parent-child konsisten tanpa menetapkan lifecycle series baru. Filter baca tetap authoritative, tidak mengandalkan cache UI.
+8. Target terbaru mengizinkan video published → archived secara atomik dengan version/actor/timestamp dan menghilangkan visibility katalog; tidak memerlukan transisi unpublished. API berhenti menerbitkan URL baru; URL lama berlaku sampai expiry dan buffer/cache yang sudah diterima tidak dapat ditarik kembali, sesuai keputusan nomor 4. Aturan archive series/season serta shortcut archive draft diperinci terpisah; archive bukan hard delete file/child. Hard delete, restore dan garbage collection mempunyai task terpisah dan belum menjadi endpoint.
+9. `expectedVersion` salah menghasilkan 409 `CONTENT_VERSION_CONFLICT`; PATCH menulis `WHERE row_version=expectedVersion`, bukan read-then-write tanpa proteksi. Genre set dan metadata berubah dalam satu transaksi. Episode reassign hanya sebelum first publish dan pada draft, dengan parent lock dan UNIQUE nomor tujuan.
+10. Publish/upload/reprocess memerlukan dedup persisten. Upload memakai upload_sessions; job memakai identity asset/profile/generation. Sebelum tahap D, tambahkan tabel `content_operations(id uuid PK, video_id uuid FK, operation text, idempotency_key uuid, request_hash text, result_version integer, created_at timestamptz, UNIQUE(video_id,operation,idempotency_key))` dalam transaksi perubahan publish/archive video; key sama payload berbeda 409, replay tidak mengganti timestamp. Series publication memakai tabel `series_operations` setara dengan FK series, bukan owner polymorphic tanpa FK. Retensi key dan batas request wajib disepakati saat task publikasi.
+
+Kontrak nomor 4 menetapkan satu bucket privat, playlist API dan direct signed GET dengan TTL 2× durasi video terverifikasi. Setelah archive, API menolak URL baru; URL lama dapat dipakai sampai expiry dan data buffer/cache yang sudah diterima tidak ditarik kembali. Query DB saja tidak mencabut URL/cache yang telah beredar. Tahap D harus membuktikan perilaku ini untuk seluruh playlist/segment HLS.
+
+Retensi disepakati 4 Oktober 2026: video asli 7 hari dan file konten archived disimpan permanen. Pengecualian archived mencakup semua aset konten, termasuk video asli; Titik awal retensi sejak HLS verified-ready, upload session 24 jam dan cleanup gagal disetujui 4 Oktober 2026; proof implementasi masih pending. Detail pada [nomor 6](VIDEO_IMPLEMENTATION_PLAN.md#nomor-6--retensi-dan-cleanup-disetujui-4-oktober-2026). Implementasi perlu source deletion tombstone agar HLS siap tetap dapat dipublikasikan/diputar setelah objek sumber dihapus; reprocess membutuhkan unggah ulang. Tidak ada cleanup runtime atau lifecycle bucket yang diaktifkan.
 
 ## 10. Index dan query yang direncanakan
 
@@ -234,22 +258,26 @@ Index tambahan dibuat ketika query terkait diimplementasikan dan diperiksa EXPLA
 
 ## 11. Contoh konten
 
-| Konten              | kind       | Hubungan                      | Media                                       |
-| ------------------- | ---------- | ----------------------------- | ------------------------------------------- |
-| “Kisah Kota”        | series     | Season 1 dan Season 2         | Poster/backdrop series.                     |
-| “Pertemuan Pertama” | episode    | Season 1, episode 1           | Sumber portrait, hasil HLS, poster episode. |
-| “Babak Baru”        | episode    | Season 2, episode 1           | Nomor sama sah pada season berbeda.         |
-| “Perjalanan Pulang” | movie      | season_id/episode_number NULL | Sumber landscape 120 menit; job terpisah.   |
-| “Cerita Singkat”    | standalone | season_id/episode_number NULL | Video mandiri portrait 3 menit.             |
+| Konten              | kind       | Hubungan                      | Media                                         |
+| ------------------- | ---------- | ----------------------------- | --------------------------------------------- |
+| “Kisah Kota”        | series     | Season 1 dan Season 2         | Poster/backdrop series.                       |
+| “Pertemuan Pertama” | episode    | Season 1, episode 1           | Sumber portrait, hasil HLS, poster episode.   |
+| “Babak Baru”        | episode    | Season 2, episode 1           | Nomor sama sah pada season berbeda.           |
+| “Perjalanan Pulang” | movie      | season_id/episode_number NULL | Sumber portrait 9:16, 30 menit; job terpisah. |
+| “Cerita Singkat”    | standalone | season_id/episode_number NULL | Video mandiri portrait 3 menit.               |
 
-Contoh durasi bukan batas produk. Movie 120 menit tidak dipotong menjadi episode dan tidak membutuhkan schema khusus movie.
+Contoh mematuhi batas produk terbaru: movie/standalone maksimal 30 menit dan 1,5 GB; episode maksimal 10 menit dan 512 MB. Movie mandiri tidak membutuhkan schema khusus movie; semua video wajib portrait 9:16.
 
 ## 12. Keputusan untuk ditinjau
 
 - D1: jenis `standalone/movie/episode`, season wajib bagi episode dan default Season 1.
 - D2: enam tabel metadata tahap A, field opsional/year-date/language/genre, plain text, batas input dan UUIDv7.
 - D3: immutable kind, slug locked setelah first publish, nomor unik per season, soft archive/nomor reserved, optimistic concurrency dan genre inheritance.
-- D4: parent series publication gate, episode boleh disiapkan published sebelum series live, requirement poster/hak/subtitle saat publish.
-- D5: movie dapat landscape; batas ukuran/durasi/provider/upload-resume/profil HLS/distribution ditentukan sebelum tahap media.
+- D4: lifecycle video draft → published → archived disetujui 4 Oktober 2026; target mengizinkan archive video published. Syarat publikasi nomor 5 juga disetujui 4 Oktober 2026: judul/sinopsis/source/HLS/poster/hak wajib siap, subtitle opsional, publish manual; episode boleh disiapkan published sebelum series live dan series publish memerlukan minimal satu episode siap. Implementasi masih pending; lifecycle series/season serta cascade archive/restore perlu refinement terpisah.
+- D5: semua video dan sampul portrait 9:16 dengan standar sampul seragam; provider MinIO development/R2 production, selector env, HLS VOD, resolusi sumber/keluaran 480p–1080p (1440p/4K ditolak, tanpa upscale), format sumber dan batas durasi per kind sudah disetujui 3 Oktober 2026. Standar sampul gambar diam JPG/PNG/WebP <=5 MB, sumber minimal 1080 × 1920 dan hasil WebP 1080 × 1920 disetujui. Batas sumber terbaru per kind disetujui: movie/standalone maksimal 30 menit dan 1,5 GB, episode maksimal 10 menit dan 512 MB; kelompok batas produk nomor 1 selesai. Metode S3 multipart disetujui dengan part kecil; ukuran part 2% dengan minimum 5 MiB selain part terakhir disetujui; paralelisme 3 part per file/session 24 jam/URL part 15 menit dibatasi sisa session disetujui; detail identity resume dan proof expiry masih refinement. Kebijakan audio/HDR/VFR/fps di luar acuan serta detail encoder/GOP/SAR/MIME masih refinement. Profil hls-v1 serta kontrak distribusi/cache nomor 4 sudah disetujui 4 Oktober 2026; proof implementasi tetap diperlukan.
 
-D1–D3 disetujui pengguna pada 3 Oktober 2026. D4–D5 boleh diselesaikan saat refinement media/publikasi; tidak menghalangi metadata draft bila field/status future tetap read-only.
+D1–D3 disetujui pengguna pada 3 Oktober 2026. D5 sebagian disetujui seperti di atas; D4 syarat publikasi produk sudah disetujui 4 Oktober 2026, tetapi belum diimplementasikan. Rincian D5 tersisa, implementasi retensi/cleanup nomor 6 dan lifecycle/cascade archive/restore parent masih lanjutan. Streaming URL dibentuk oleh delivery untuk seluruh playlist/segment, bukan disimpan sebagai signed URL pada schema. Hal ini tidak menghalangi metadata draft bila field/status future tetap read-only.
+
+## Schema media aktif — 4 Oktober 2026
+
+media_assets menyimpan owner, role, provider/bucket/key, size bigint, etag/sha256/facts JSONB, generation/current ready job, verifiedReady/failed serta deletion claim/tombstone. upload_sessions menyimpan actor/idempotency/hash/staging/multipart ID, geometry/status/TTL/claim. media_jobs dan media_job_attempts menyimpan retry/lease/progress/output namespace dan stop/cleanup timestamps; media_renditions menyimpan ladder. content_operations menyimpan hasil replay publish video/series. FK pointer asset+owner mencegah cross-owner, role dicek service. Semua bigint upload DTO decimal string. Jsonb parameter eksplisit text::jsonb menghindari double-encoding Bun SQL. [Kontrak upload](MEDIA_UPLOAD_CONTRACT.md) dan [runbook aktif](MEDIA_OPERATIONS.md).
