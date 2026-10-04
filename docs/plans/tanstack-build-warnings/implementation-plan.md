@@ -2,10 +2,11 @@
 
 ## Plan metadata
 
-- Status: executing; implementasi dan verifikasi lokal lulus, menunggu commit closure.
+- Status: executing; follow-up WEB-BUILD-004 terverifikasi lokal, menunggu commit task.
 - Diperbarui: 2026-10-05.
 - Repository: `bayuaji17/vertical-movie-app`.
-- Base ref: `main`; base SHA / last validated SHA: `b60f7676101d94c8725528dbef02b92c28eeee32`.
+- Base ref: `main`; base SHA: `b60f7676101d94c8725528dbef02b92c28eeee32`.
+- Last validated SHA: `604acedefc342d4ae40b9e1718bba877fc3c36a7` (source identik commit implementasi yang diuji; closure hanya dokumentasi).
 - Branch: `fix/tanstack-build-warnings`.
 - Context: [repository-context.md](repository-context.md), disimpan sebelum plan ini.
 - Backlog: [web-build](../../tasks/web-build.md).
@@ -162,3 +163,12 @@ Tidak ada keputusan produk yang menghalangi scope directive. Optimasi chunk/upgr
 - Negative auth import proof lulus dan fixture dipulihkan; build --force sukses setelah proof: 2 task, 0 cached, 5.671 detik. Directive warning client/SSR/Nitro 0; warning chunk tetap terlihat.
 - 36 public assets/path/SHA-256 identik baseline; production entry tersedia dan generated route tree tidak berubah. SSR native fixture lulus seluruh case existing; tidak mengklaim browser/hydration/device playback atau production rollout.
 - Source tidak berubah setelah WEB-BUILD-002 sehingga tests/types/lint tetap valid; receipt task implementasi masuk commit closure. Hasil docs checker/preservation/hook closure dicatat setelah pemeriksaan.
+
+- Receipt WEB-BUILD-003: 604acedefc342d4ae40b9e1718bba877fc3c36a7; docs:check 47/336, scoped index 40/317, Prettier/whitespace/preservation serta hooks lint/types/Commitlint lulus tanpa bypass. Source tetap identik WEB-BUILD-002. Plan completed dan task Done dicatat sesudah commit untuk pembaruan berikutnya. Remote delivery belum diminta/dijalankan.
+
+### WEB-BUILD-004 — Import config eksplisit
+
+- Freshness 5 Oktober 2026 pada SHA `604acedefc342d4ae40b9e1718bba877fc3c36a7`: import helper di `apps/web/vite.config.ts` masih tanpa ekstensi; source task tidak berubah. Vite terpasang mendeteksi extensionless import sebagai incompatibility native config loader. Pengguna melaporkan diagnostik ini dari replay cache.
+- Refinement: setelah STEP-003, tambahkan ekstensi `.ts` pada import relatif helper; tsconfig existing mengizinkan import ekstensi TypeScript. Tidak memakai env suppression atau memperluas filter log. Affected files follow-up hanya config, plan dan backlog existing; struktur/status indeks akhir tetap sama.
+- Validation: existing web tests, root types/lint/build --force, inspeksi diagnostik log baru, docs/format/whitespace dan preservation. Receipt/verifikasi dicatat setelah hasil aktual.
+- Hasil: 59 web tests/197 assertions, types 3 task, lint 1 task dan build 2 task tanpa cache lulus. Log build 7.603 detik tidak memiliki warning native config loader/extensionless import atau directive; warning chunk tetap terlihat. Docs:check 47/336, targeted Prettier dan whitespace lulus. Perubahan config hanya ekstensi import; proof native loader penuh/browser tidak dijalankan.

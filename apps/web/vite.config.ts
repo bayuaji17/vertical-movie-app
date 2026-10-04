@@ -7,7 +7,7 @@ import viteReact from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { nitro } from 'nitro/vite'
 
-import { filterBuildLog } from './tooling/log-filter'
+import { filterBuildLog } from './tooling/log-filter.ts'
 
 const config = defineConfig(({ mode }) => {
   const env: Partial<Record<'PORT' | 'HOST', string>> = loadEnv(

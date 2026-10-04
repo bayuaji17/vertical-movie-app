@@ -93,7 +93,7 @@ Implementasi disetujui pengguna. Optimasi chunk terpisah.
 
 ## Task: WEB-BUILD-003 — Verifikasi production build dan closure
 
-- Status: Review
+- Status: Done
 - Owner: Codex
 - Prioritas: P1
 - Referensi: WEB-BUILD-US-01, plan STEP-003.
@@ -111,7 +111,7 @@ Negative import proof, build sukses final, SSR smoke existing pada fixture/port 
 - [x] Import server terlarang tetap menggagalkan client build; fixture dipulihkan.
 - [x] Build final/SSR smoke lulus, entry Bun dan route/client asset graph valid.
 - [x] Gates/docs/preservation lulus; browser/hydration yang belum diuji dicatat.
-- [ ] Evidence/receipt dan commit closure selesai.
+- [x] Evidence/receipt dan commit closure selesai.
 
 ### Validasi
 
@@ -125,8 +125,52 @@ Bun run --cwd apps/web auth:ssr:smoke lulus pada production entry dengan API fix
 
 ### Commit task
 
-Pesan: docs(web): record build warning verification (WEB-BUILD-003). SHA dan hook aktual dicatat setelah commit berhasil untuk pembaruan task berikutnya.
+Commit: 604acedefc342d4ae40b9e1718bba877fc3c36a7, docs(web): record build warning verification (WEB-BUILD-003). Docs:check 47/336, scoped index 40/317, Prettier/whitespace/preservation dan hooks lint/types/Commitlint lulus tanpa bypass. Receipt/status Done dicatat sesudah commit untuk task berikutnya; branch belum dipush.
 
 ### Blocker atau tindak lanjut
 
 Tidak ada blocker fix. Push/PR/merge belum diminta; squash branch sebelumnya bukan default branch ini.
+
+## Task: WEB-BUILD-004 — Import config Vite dengan ekstensi eksplisit
+
+- Status: Review
+- Owner: Codex
+- Prioritas: P1
+- Referensi: WEB-BUILD-US-01, laporan warning Vite pengguna 5 Oktober 2026.
+- Diperbarui: 2026-10-05
+- Dependensi: WEB-BUILD-003
+- Ukuran: Satu import config dan evidence pada plan/backlog existing.
+
+### Ruang lingkup
+
+Tambahkan `.ts` pada import `./tooling/log-filter` di `apps/web/vite.config.ts` agar diagnostik compatibility native config loader selesai pada sumbernya. Log pengguna berasal dari replay cache; gunakan build tanpa cache untuk pemeriksaan.
+
+### Acceptance criteria
+
+- [x] Import relatif config eksplisit; tanpa env suppression atau perubahan filter.
+- [x] Build baru tidak mengeluarkan warning native config loader atau MODULE_LEVEL_DIRECTIVE; warning chunk tetap terlihat.
+- [x] Existing web tests, root types/lint/build dan docs/format/whitespace lulus.
+- [ ] Commit task terpisah; pekerjaan desain lokal terjaga.
+
+### Validasi
+
+`bun test apps/web/test`, `bun run check-types`, `bun run lint`, `bun run build --force`, inspeksi log baru, `bun run docs:check`, targeted Prettier dan `git diff --check`.
+
+### Hasil dan bukti
+
+Freshness pada SHA `604acedefc342d4ae40b9e1718bba877fc3c36a7`; config import tanpa ekstensi terkonfirmasi dan tsconfig mengizinkan import `.ts`. Import sekarang `./tooling/log-filter.ts`.
+
+5 Oktober 2026: `bun test apps/web/test` lulus 59 test, 0 fail, 197 assertions; `bun run check-types` lulus 3 task (web dieksekusi, 2 cache valid); `bun run lint` lulus 1 task web tanpa cache. `bun run build --force` lulus 2 task, 0 cache, 7.603 detik. Log baru tidak memuat warning native config loader/extensionless import atau MODULE_LEVEL_DIRECTIVE; warning ukuran chunk tetap terlihat. Env suppression tidak ditambahkan.
+
+`bun run docs:check` lulus 47 Markdown/336 tautan; targeted Prettier dan `git diff --check` lulus. Bukti import protection/SSR WEB-BUILD-003 merupakan hasil historis sebelum perubahan satu import ini; tidak mengklaim proof native config loader penuh atau smoke browser baru. Receipt dan preservation diperiksa pada commit task.
+
+### Commit task
+
+- Pesan: `fix(web): add extension to Vite config import (WEB-BUILD-004)`.
+- SHA: Belum dibuat.
+- Hook/checks: Menunggu hasil aktual.
+- Ledger: Receipt dicatat setelah commit berhasil.
+
+### Blocker atau tindak lanjut
+
+Tidak ada blocker; remote delivery belum diminta.
