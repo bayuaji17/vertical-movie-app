@@ -19,7 +19,7 @@ Aturan penamaan, ownership dan maintenance berada pada [Documentation rules](../
 
 ## Produk, arsitektur dan desain
 
-- [PRD](product/prd.md): kebutuhan aplikasi vertikal, admin tunggal, penonton publik dan MVP; perhatikan keputusan/draft.
+- [PRD](product/prd.md): mendekati final; keputusan inti, matriks implementasi PRD-01–10, keputusan produk tersisa dan gerbang rilis. Review repository 5 Oktober 2026; MVP lengkap belum selesai.
 - [Aturan produk](product/global-rules.md): aturan lintas fitur; usulan tidak otomatis menjadi implementasi.
 - [Arsitektur](architecture/overview.md): Bun/Elysia/TanStack, PostgreSQL, MinIO/R2, queue dan FFmpeg; rancangan dibedakan dari runtime.
 - [Model data video](architecture/video-data-model.md): series/season/video/genre dan aset/upload/job/attempt/rendition/operation.
@@ -46,7 +46,7 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 | ----------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
 | Auth        | [Snapshot](plans/auth/repository-context.md)          | [Plan awal](plans/auth/implementation-plan.md), [refactor native](plans/auth/refactor-plan.md) | Riwayat; command aktif berada di runbook auth.                           |
 | Video/media | [Snapshot](plans/video/repository-context.md)         | [Plan](plans/video/implementation-plan.md)                                                     | Keputusan, refinement, proof dan ledger; batas production tetap dicatat. |
-| Dokumentasi | [Snapshot](plans/documentation/repository-context.md) | [Plan](plans/documentation/implementation-plan.md)                                             | Organisasi kategori, aturan root dan validasi.                           |
+| Dokumentasi | [Snapshot](plans/documentation/repository-context.md) | [Plan](plans/documentation/implementation-plan.md)                                             | Organisasi kategori, aturan root, validasi dan review PRD terhadap kode. |
 
 ## Backlog dan evidence
 

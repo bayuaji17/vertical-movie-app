@@ -158,4 +158,54 @@ Verifikasi penutupan 5 Oktober 2026: checker worktree lulus 44 Markdown/282 taut
 | DOCS-001 | bbd34602dcdbaca30e51c5ce95668a41c9b3223c | Snapshot index dan hook docs/lint/check-types/Commitlint lulus tanpa bypass |
 | DOCS-002 | 29dd9325a2d9a01ae7fa0ae10cd001c1355eada0 | Snapshot index dan hook docs/lint/check-types/Commitlint lulus tanpa bypass |
 
+| DOCS-003 | 790e174a9fef748564450244d05038fce8e9bdbd | Snapshot index 37 Markdown/263 tautan dan hook docs/lint/check-types/Commitlint lulus tanpa bypass |
+
 SHA dicatat sesudah commit berhasil. Push/PR/merge tidak dilakukan. Commit task terakhir dicatat pada pembaruan ledger berikutnya.
+
+Receipt DOCS-003 dicatat setelah commit berhasil dan disertakan pada pembaruan dokumentasi DOCS-004 sesuai aturan root AGENTS.
+
+## Review PRD — DOCS-004
+
+- Status: completed
+- Diperbarui: 2026-10-05
+- Base ref: chore/docs-organization
+- Base SHA / last validated SHA: `790e174a9fef748564450244d05038fce8e9bdbd`
+- Context: [Review PRD](repository-context.md#review-prd--5-oktober-2026), ditulis sebelum perluasan plan ini.
+- Objective: selaraskan PRD dengan keputusan pengguna dan kode saat ini; status mendekati final tanpa mengklaim MVP atau production selesai.
+- Current behavior: PRD masih menyatakan media/lifecycle/publikasi/retensi belum tersedia dan mencampur keputusan selesai dengan pertanyaan terbuka.
+- Desired behavior: kebutuhan PRD-01–10 tetap stabil, keputusan inti dan status implementasi per kebutuhan dipisahkan dari keputusan produk tersisa serta gerbang rilis.
+- Constraints: scope dokumentasi saja; branch existing, source/schema/env/dependency dan desain existing dipertahankan. Commit lokal diminta per task; remote/deployment tidak diotorisasi.
+
+### Impact dan affected files
+
+| Path                                                                       | Action | Subject                                                     | Reason / evidence                                                           |
+| -------------------------------------------------------------------------- | ------ | ----------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `docs/product/prd.md`                                                      | modify | Status, PRD-01–10, media/visibility/retensi, open decisions | Evidence code/UI/runbook pada context review.                               |
+| `docs/README.md`                                                           | modify | Entry PRD dan scope plan dokumentasi                        | Navigasi mengikuti status canonical; bagian desain existing tidak di-stage. |
+| `docs/tasks/documentation.md`                                              | modify | DOCS-004, receipt DOCS-003, closure DOCS-002                | AC/evidence dan ledger aktual; bukan menaikkan backlog media.               |
+| `docs/plans/documentation/repository-context.md`, `implementation-plan.md` | modify | Context/snapshot, STEP-004, hasil review                    | Canonical review history, tanpa file laporan/session baru.                  |
+
+### STEP-004 — Review dan selaraskan PRD
+
+- Outcome: PRD mendekati final dengan requirement traceability dan batas status yang akurat.
+- Depends on: STEP-003.
+- Files: lima path affected di atas.
+- Symbols: PRD-01–10, keputusan inti, matriks implementasi, keputusan terbuka/gerbang rilis.
+- Requirements: pertahankan keputusan produk/ID; koreksi klaim belum implemented; jelaskan UI yang belum lengkap; jangan menganggap default query sebagai keputusan UX final atau proof production.
+- Validation: cross-check module/schema/routes/UI/runbook dan backlog; `bun run docs:check`, targeted Prettier, `git diff --check`, review snapshot index; hooks commit tanpa bypass. Dokumentasi saja tidak memerlukan integrasi/migration/build ulang.
+- Acceptance criteria: seluruh PRD ID dipertahankan, angka/policy selaras kode dan keputusan yang tercatat, open decisions hanya yang tersisa, index diperbarui dan hanya file task yang di-commit.
+
+### Freshness — 5 Oktober 2026
+
+- Result: valid.
+- Plan base SHA reorganisasi: `68604daf3abe208f7f57c3b72b0a75d4467dfbc6`; target review baru: `790e174a9fef748564450244d05038fce8e9bdbd`.
+- Checked paths: PRD, modules/schema/worker/UI source, package scripts, media/auth runbooks/backlog, root rules dan index.
+- Changed relevant paths: commit DOCS-001–003 mengorganisasi docs dan gate; kode aplikasi tetap baseline media merged. Local design/receipt dipisahkan.
+- Decision: context di-refresh untuk review PRD; STEP-001–003 tetap sejarah selesai dan STEP-004 valid terhadap snapshot baru.
+
+### Execution Log — DOCS-004
+
+- Review source/API/auth/schema/worker/UI pada SHA `790e174a9fef748564450244d05038fce8e9bdbd`; context ditulis sebelum STEP-004. Tidak ada perubahan source/runtime/schema/env/dependency.
+- PRD diselaraskan menjadi mendekati final, 10 ID dipertahankan, keputusan inti/implementasi/UI gap/open decisions/rollout dipisahkan; index dan backlog diperbarui. Receipt DOCS-003 dimasukkan dan status DOCS-002 diselaraskan dengan commit aktualnya.
+- 5 Oktober 2026: `bun run docs:check` 44 Markdown/290 tautan lulus; targeted Prettier dan `git diff --check` lulus; snapshot index scoped 37 Markdown/271 tautan lulus; 13 file desain protected identik. Tidak mengulang proof runtime/production.
+- Delivery lokal task memakai Conventional Commit DOCS-004 setelah gates; SHA/hook aktual dicatat sesudah commit. Push/PR/merge/deployment tidak diminta.

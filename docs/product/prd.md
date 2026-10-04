@@ -1,97 +1,149 @@
-# Draft PRD — Vertical Movie App
+# PRD — Vertical Movie App
 
-> Status: **Draft rincian MVP** · Diperbarui 4 Oktober 2026 · Deskripsi produk dan pilihan stack dari pemilik proyek sudah dicatat. MinIO development, Cloudflare R2 production melalui S3-compatible, selector env, HLS VOD dan resolusi sumber/keluaran 480p–1080p disetujui; batas sumber/sampul, multipart 2%, profil hls-v1, kontrak akses/cache dan syarat publikasi disetujui. Implementasi media/publikasi, retensi dan rincian teknis masih lanjutan.
+> Status: **Mendekati final — keputusan inti disetujui, rincian produk tersisa terbuka** · Review 5 Oktober 2026 · Pemilik keputusan produk: pengguna. Review repository pada commit `790e174a9fef748564450244d05038fce8e9bdbd`. Keputusan metadata/auth/media berasal dari persetujuan pengguna yang tercatat pada 1–4 Oktober 2026; review ini menyelaraskan dokumentasi tanpa menetapkan keputusan produk baru. Implementasi MVP lengkap dan kesiapan production belum dinyatakan selesai.
 
 ## Gambaran produk
 
-Vertical Movie App adalah aplikasi untuk menonton video vertikal. Pengalaman menonton dirancang **mobile first** dan tetap nyaman di desktop. Pengunjung dapat menemukan dan menonton video yang telah diterbitkan **tanpa login**. Hanya ada **satu admin** yang masuk ke dashboard untuk mengatur sistem, mengunggah dan mengelola video, serta menerbitkannya.
+Vertical Movie App menyediakan katalog dan pemutaran **video vertikal 9:16**, mengutamakan ponsel dengan tata letak desktop yang tetap nyaman. Pengunjung menemukan dan menonton konten published **tanpa login**. **Satu admin** masuk menggunakan email/password untuk mengelola konten, unggahan, pratinjau dan publikasi. Tidak ada pendaftaran publik atau akun kreator tambahan; provisioning dan pemulihan admin melalui CLI.
 
-Fondasi auth dan backend metadata sudah diimplementasikan. Metadata series → season → episode, movie panjang, dan standalone disetujui pada 3 Oktober 2026 dan diuji lokal; UI konten, upload/sampul, pemrosesan, publikasi dan katalog tetap lanjutan. Istilah _video_ berarti satu unit yang dapat diputar dan diterbitkan setelah tahap media siap. Detail model ada pada [Rancangan Data Video](../architecture/video-data-model.md); endpoint dan batas implementasi ada pada [Video Operations](../operations/video-metadata.md).
+Konten terdiri dari **movie**, **standalone** (video mandiri tanpa series), serta **series → season → episode**. Movie/standalone dapat berdurasi sampai 30 menit; episode sampai 10 menit. Semua jenis memakai aturan sumber dan sampul seragam, dengan batas ukuran sumber menurut jenis konten. Model/kontrak teknis dimiliki [model data video](../architecture/video-data-model.md) dan [kontrak upload](../architecture/media-upload-contract.md).
 
-Pengguna memilih satu bucket aplikasi per environment pada 4 Oktober 2026. Kontrak nomor 4 disepakati 4 Oktober 2026: seluruh bucket privat, sources/ untuk input dan outputs/ untuk hasil immutable, master/variant playlist melalui API dan init/segment/caption langsung dari storage melalui signed GET URL. TTL playback disetujui 4 Oktober 2026: 2× durasi video aktual terverifikasi sejak URL diterbitkan; cache bila diaktifkan wajib memiliki expiry/invalidation, dengan cache terkait signed URL tidak melewati expiry URL. Cache metadata TTL 60 detik, playlist no-store dan cache segment privat maksimal min(300 detik, sisa umur URL) disetujui 4 Oktober 2026; proof response headers/invalidation masih diperlukan; archive menghentikan URL baru sementara URL lama berlaku sampai expiry. Kontrak akses memakai expiry URL lama, bukan pencabutan instan; tidak menjanjikan revocation instan atau CDN/custom-domain presign.
-
-Lifecycle video disetujui 4 Oktober 2026: **draft → published → archived**, tanpa status produk unpublished. Status upload/processing tetap terpisah. Schema/layanan metadata saat ini masih memakai draft/published/unpublished plus archived_at; perubahan lifecycle adalah pekerjaan lanjutan, belum implementasi atau migrasi pada sesi ini.
-
-Keputusan [syarat publikasi nomor 5](../plans/video/implementation-plan.md#nomor-5--syarat-publikasi-disetujui-4-oktober-2026) disetujui 4 Oktober 2026: judul/sinopsis/source/HLS/poster siap serta rights confirmation, subtitle opsional dan publish manual setelah pratinjau; visibility episode mengikuti series. Series publish memerlukan metadata/poster dan minimal satu episode published yang siap. Implementasi belum tersedia.
-
-Retensi disepakati 4 Oktober 2026: video asli 7 hari dan file konten archived disimpan permanen. Pengecualian archived mencakup semua aset konten, termasuk video asli; Titik awal retensi sejak HLS verified-ready, upload session 24 jam dan cleanup gagal disetujui 4 Oktober 2026; proof implementasi masih pending. Detail pada [nomor 6](../plans/video/implementation-plan.md#nomor-6--retensi-dan-cleanup-disetujui-4-oktober-2026). Implementasi perlu source deletion tombstone agar HLS siap tetap dapat dipublikasikan/diputar setelah objek sumber dihapus; reprocess membutuhkan unggah ulang. Tidak ada cleanup runtime atau lifecycle bucket yang diaktifkan.
-
-[Rekomendasi deployment nomor 8](../plans/video/implementation-plan.md#nomor-8--rekomendasi-deployment-production-dan-r2-belum-disetujui) dicatat sebagai belum disetujui: satu server Linux dengan proses web/API/worker/PostgreSQL terpisah via Docker Compose, reverse proxy HTTPS, bucket R2 privat/token scoped/CORS, volume DB/workspace serta backup/restore proof. Target uji pengguna 4 core/RAM 4 GB; provider/domain/disk belum ditentukan. Kandidat worker 1,5 GiB/2 vCPU/thread 1 serta kapasitas keseluruhan menunggu benchmark; same-origin dan signed S3 delivery mengikuti keputusan yang sudah ada. Tidak ada Dockerfile/Compose/provisioning/deployment/migration baru.
+Auth, backend metadata, upload, worker HLS, publikasi, katalog API dan playback sudah tersedia. Web mempunyai login/dashboard sesi admin serta halaman tonton dan preview minimal. Homepage masih starter; dashboard pengelolaan konten/upload/publish, katalog web lengkap dan pengaturan situs belum tersedia. Keberadaan API atau mockup belum memenuhi seluruh alur MVP.
 
 ## Peran dan akses
 
-| Peran         | Akses                                                                                                                                  |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| Pengunjung    | Membuka katalog dan menonton video terbit tanpa akun atau sesi login.                                                                  |
-| Admin tunggal | Masuk ke dashboard, mengelola konfigurasi sistem dan video, mengunggah, mempratinjau, menerbitkan, serta mengarsipkan video published. |
+| Peran         | Akses                                                                                                                                                                          |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Pengunjung    | Membuka katalog dan menonton konten yang efektif published tanpa akun.                                                                                                         |
+| Admin tunggal | Mengelola series/season/video dan sampul, mengunggah, mempratinjau hasil siap, menerbitkan dan mengarsipkan konten; konfigurasi situs hanya untuk field yang nanti disepakati. |
 
-Pendaftaran mandiri dan akun kreator lain tidak termasuk ruang lingkup. Provisioning dan pemulihan admin menggunakan CLI native yang sudah diimplementasikan; lihat [Auth Operations](../operations/auth.md). Sistem tidak membuka pendaftaran admin publik.
+API memeriksa sesi dan otorisasi setiap operasi privat. Preview konten yang belum publik memerlukan admin. Rahasia database/auth/storage berada pada konfigurasi server dan tidak dikelola melalui dashboard. Detail auth/provisioning ada pada [runbook auth](../operations/auth.md).
 
-## Tujuan dan batas MVP yang diusulkan
+## Tujuan dan batas MVP
 
-- Admin dapat menyelesaikan alur draf → unggah → proses → pratinjau → terbit, lalu mengelola video yang sudah diterbitkan.
-- Pengunjung dapat membuka daftar video terbit sederhana dan menonton video vertikal tanpa login. Urutan daftar dan navigasi antarvideo perlu diputuskan.
-- Tampilan utama bekerja pada layar ponsel dan tetap memiliki komposisi yang sengaja dirancang untuk desktop.
-- Dashboard menyediakan konfigurasi dasar yang disepakati, seperti identitas situs dan pengaturan publik yang aman untuk diedit. Daftar pengaturan final masih terbuka; rahasia infrastruktur tidak diedit melalui dashboard.
+- Admin menyelesaikan alur **draft → unggah → proses → preview → published → archived** melalui aplikasi, termasuk status dan pemulihan kegagalan.
+- Pengunjung menemukan konten published dan menonton HLS tanpa login; pola katalog/navigasi final tetap keputusan terbuka.
+- Layar ponsel dan desktop mempertahankan proporsi 9:16 serta menyediakan kontrol yang dapat dioperasikan lewat keyboard.
+- Dashboard menyediakan pengelolaan konten dan konfigurasi situs yang aman; field konfigurasi belum ditetapkan.
+- Subtitle merupakan fitur opsional dan tidak menjadi syarat wajib MVP. Format/alur penyediaannya belum ditetapkan atau diimplementasikan.
 
-Rekomendasi personal, feed algoritmik, komentar, akun pengunjung, langganan, pembayaran, analitik penonton rinci, dan aplikasi native berada di luar draft MVP ini. Series/episode dan movie masuk scope rancangan backend atas permintaan pengguna 3 Oktober 2026; urutan delivery dan detail season/publikasinya mengikuti [plan video](../plans/video/implementation-plan.md).
+Rekomendasi personal/feed algoritmik, komentar, akun pengunjung, langganan/pembayaran, analitik penonton rinci dan aplikasi native berada di luar MVP. Restore/republish konten archived, penggantian source konten published dan perubahan grouping setelah first publish belum tersedia; jangan menjadikannya bagian alur yang dijanjikan tanpa keputusan dan task tersendiri.
 
-## Alur pengguna
+## Keputusan inti yang disetujui
+
+### Sumber video dan sampul
+
+| Parameter        | Ketentuan                                                                                                                                                             |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Rasio            | Video dan sampul portrait 9:16; sumber tidak sesuai ditolak tanpa crop/upscale. Rotasi dan pixel aspect ratio diperhitungkan pada validasi.                           |
+| Resolusi video   | Sisi pendek tampilan 480–1080 piksel dan sisi panjang maksimal 1920; sumber 1440p/4K ditolak. Hasil tidak melebihi sumber.                                            |
+| Format sumber    | MP4/MOV/MKV dengan H.264/H.265; WebM dengan VP8/VP9. Ekstensi/MIME merupakan validasi awal; container, codec, dimensi, durasi dan decode diperiksa worker.            |
+| Episode          | Maksimal 600 detik dan 512 MB (512.000.000 byte).                                                                                                                     |
+| Movie/standalone | Maksimal 1.800 detik dan 1,5 GB (1.500.000.000 byte), menggantikan batas 512 MB sebelumnya sesuai persetujuan 3 Oktober 2026.                                         |
+| Acuan ekspor     | H.264 SDR 1080p24–30, video 4–6 Mbps (default 6 Mbps), audio AAC 128 kbps; batas ukuran mencakup audio/container dan diutamakan atas acuan bitrate.                   |
+| Sampul           | Gambar diam JPG/JPEG/PNG/WebP maksimal 5 MB, sumber minimal 1080 × 1920 portrait 9:16; hasil WebP 1080 × 1920, sumber lebih besar diperkecil. Animasi tidak diterima. |
+
+### Upload, storage dan pemrosesan
+
+Development memakai **MinIO**, production dirancang memakai **Cloudflare R2 melalui S3-compatible**, dipilih melalui env server. Satu bucket aplikasi privat per environment menyimpan sumber dan output pada prefix terpisah. Source asli tidak digunakan untuk streaming. Pergantian env tidak memindahkan objek yang sudah ada; konfigurasi aktif dimiliki [environment guide](../guides/environment.md).
+
+Upload memakai **S3 multipart**, termasuk sampul kecil satu part. Target part 2% ukuran aktual dengan minimum 5 MiB selain part terakhir, maksimal 3 part paralel per file, session 24 jam sejak dibuat dan URL part maksimal 15 menit dibatasi sisa session. Resume merekonsiliasi part sukses; completion membekukan source dan enqueue secara atomik. Status upload completed belum berarti media siap atau published. UI penjadwalan/progres/resume browser masih perlu diimplementasikan.
+
+Job disimpan pada PostgreSQL; worker Bun menjalankan FFmpeg di luar request HTTP dan transaksi database. Parameter worker melalui env, **concurrency default 1**. Retry/lease/timeout/recovery mengikuti keputusan dan implementasi yang dicatat pada [runbook media](../operations/media.md) serta [backlog worker](../tasks/media-worker.md); kapasitas production menunggu benchmark.
+
+Profil **hls-v1** menghasilkan H.264 SDR, AAC 128 kbps bila audio tersedia, output maksimal 30 fps, fMP4 dengan target segment 6 detik dan kualitas adaptif. Target bitrate video 480p/720p/1080p adalah 1,2/2,5/4,5 Mbps; hanya rendition yang dapat dibuat tanpa upscale tersedia. Sumber tanpa audio tetap dapat diputar tanpa track audio. Kode saat ini menormalisasi frame rate dan melakukan tone mapping HDR ke SDR; fixture HDR/VFR sudah mempunyai evidence lokal, sedangkan kompatibilitas/visual/perangkat nyata tetap bagian verifikasi.
+
+### Publikasi, akses dan cache
+
+Lifecycle **video** adalah **draft → published → archived**; upload, aset dan job mempunyai status terpisah. Model lifecycle series/season tidak otomatis mengikuti enum video; archive parent menyembunyikan child dari akses publik sesuai pemeriksaan parent. Restore/cascade fisik dan republish belum tersedia.
+
+Publish dilakukan manual setelah admin mempratinjau hasil. API mensyaratkan judul/sinopsis, konfirmasi hak konten, source terverifikasi, HLS aktif lengkap serta sampul terverifikasi. Source yang sudah dihapus oleh retensi tetap mempunyai metadata/provenance sehingga HLS siap masih dapat dipublikasikan dan diputar. Completion atau transcode tidak melakukan autopublish; API tidak mencatat bukti bahwa admin sudah melihat preview sebagai gate tersendiri.
+
+Episode boleh disiapkan published saat series masih draft, tetapi hanya efektif publik ketika series published, parent aktif dan seluruh syarat playable terpenuhi. Publish series mensyaratkan metadata/poster siap dan minimal satu episode published-ready. Series tanpa episode efektif playable disembunyikan dari katalog tanpa otomatis mengubah status editorial.
+
+Master/variant playlist melalui API yang memeriksa akses; init/segment langsung dari bucket melalui signed GET URL. **TTL playback = 2× durasi aktual terverifikasi** sejak URL diterbitkan, dibulatkan ke detik. Player meminta ulang playback saat expiry/play/seek/pergantian kualitas dengan pemeriksaan akses baru dan mempertahankan posisi/pause.
+
+Metadata/katalog memakai TTL 60 detik dan invalidation setelah perubahan terkait berhasil commit; lintas instance atau cache browser mengikuti TTL/refetch. DTO playback dan playlist memakai `private, no-store`. Jika cache payload signed diaktifkan, freshness privat maksimal min(300 detik, sisa umur URL), tidak melewati expiry; implementasi MinIO memakai fallback `private, no-store`. Archive menghentikan penerbitan URL baru. URL lama berlaku sampai expiry dan buffer/data yang sudah diterima tidak dapat ditarik kembali; tidak menjanjikan pencabutan instan.
+
+### Retensi dan pemulihan
+
+Video asli non-archived eligible dihapus paling cepat **7 hari setelah HLS lengkap verified-ready**, tanpa job aktif. Konten archived mempertahankan semua file valid yang masih ada, termasuk source, selamanya. Source yang sudah dihapus tidak muncul kembali ketika konten diarsipkan; archive setelah deletion claim tidak membatalkan penghapusan yang telah diklaim. HLS/sampul siap tetap tersedia dan metadata/provenance dipertahankan.
+
+Upload dapat dilanjutkan selama session 24 jam; abort eksplisit segera. Upload lengkap yang gagal validasi dan output attempt gagal dikarantina 24 jam lalu dibersihkan melalui sweep terkontrol; source terminal gagal eligible setelah 7 hari sejak gagal tanpa job aktif. Cleanup berjalan pada namespace/claim yang tercatat dan dapat dipulihkan, bukan lifecycle bucket tujuh hari tanpa pengecualian. Worker tersedia tetapi harus dijalankan sebagai proses terpisah agar job dan cleanup diproses.
+
+Transient processing failure dapat retry otomatis. Setelah failure terminal, koreksi source pada draft dilakukan melalui upload session baru; belum ada endpoint manual reprocess. Mengunggah ulang diperlukan ketika source untuk pemrosesan ulang sudah tidak ada.
+
+## Alur pengguna yang ditargetkan
 
 ### Admin
 
-1. Admin masuk ke dashboard melalui autentikasi yang dibatasi untuk akun admin tunggal.
-2. Admin membuat draf, mengisi judul, deskripsi singkat, dan sampul, lalu memilih video vertikal.
-3. Sistem memvalidasi berkas, menampilkan progres unggah, dan memproses video agar dapat diputar.
-4. Admin melihat status serta pratinjau; kegagalan menampilkan sebab dan tindakan untuk mencoba kembali.
-5. Admin menerbitkan video yang siap. Video muncul di halaman publik dan dapat dibuka melalui tautan.
-6. Admin dapat memperbarui pengaturan yang diizinkan dan mengarsipkan video published. Video archived hilang dari katalog; aturan penutupan URL media lama ditetapkan pada refinement delivery.
+1. Login sebagai admin tunggal, pilih movie/standalone atau kelola series/season/episode.
+2. Buat draft, isi metadata dan konfirmasi hak konten, lalu unggah source dan sampul.
+3. Lihat validasi/progres upload dan status pemrosesan; resume/retry mengikuti state yang masih diizinkan.
+4. Preview HLS yang siap, kemudian publish manual. Episode yang parent series belum published tetap tidak terlihat publik.
+5. Kelola metadata yang masih dapat diedit atau archive konten. Katalog/URL baru mengikuti visibility; URL lama mengikuti expiry.
+
+Ini alur produk target. Saat ini API dan watch/preview minimal tersedia; form/dashboard konten untuk menyelesaikan alur tersebut masih pekerjaan frontend.
 
 ### Pengunjung
 
-1. Pengunjung membuka aplikasi tanpa login dan melihat video yang telah diterbitkan.
-2. Pengunjung membuka video, menonton dengan kontrol pemutaran, lalu berpindah ke video lain melalui navigasi publik yang disepakati.
-3. Pada desktop, pemutar vertikal tetap terbaca dan tidak diregangkan mengikuti lebar layar; ruang tambahan dapat dipakai untuk informasi dan navigasi.
+1. Buka katalog tanpa login dan pilih konten efektif published.
+2. Tonton HLS 9:16 dengan kontrol playback dan kualitas adaptif; renewal URL berlangsung selama akses masih sah.
+3. Berpindah konten melalui UX yang disepakati. API next episode sudah tersedia, tetapi UI navigasi belum terintegrasi.
 
-## Kebutuhan produk
+## Kebutuhan produk dan kondisi implementasi
 
-| ID     | Prioritas | Kebutuhan                      | Kriteria penerimaan awal                                                                                                                                                                                       |
-| ------ | --------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| PRD-01 | Wajib     | Akses admin tunggal            | Hanya akun admin yang disediakan secara terkendali dapat masuk; dashboard dan semua operasi tulis ditolak bagi pengunjung; tidak ada pendaftaran admin publik.                                                 |
-| PRD-02 | Wajib     | Dashboard dan konfigurasi      | Admin dapat melihat ringkasan video dan mengubah pengaturan sistem yang telah ditentukan; nilai rahasia tidak ditampilkan atau diubah di dashboard.                                                            |
-| PRD-03 | Wajib     | Draf dan metadata video        | Admin dapat menyimpan judul, deskripsi, dan sampul sebagai draf; kesalahan input terlihat dekat field.                                                                                                         |
-| PRD-04 | Wajib     | Unggah video                   | Admin melihat validasi format/ukuran, progres, serta hasil unggah; kegagalan tidak menerbitkan video. Batas sumber dan sampul mengikuti keputusan media yang disetujui.                                        |
-| PRD-05 | Wajib     | Pemrosesan dan pratinjau       | Admin dapat melihat status menunggu, diproses, siap, atau gagal dan mempratinjau hasil yang siap.                                                                                                              |
-| PRD-06 | Wajib     | Terbit dan archive             | Terbit hanya berhasil saat metadata wajib lengkap dan video siap; video terbit terlihat publik, sedangkan draft dan video archived tidak muncul di katalog.                                                    |
-| PRD-07 | Wajib     | Katalog dan tonton tanpa login | Pengunjung dapat melihat daftar video terbit dan memutar video tanpa autentikasi; kontrol pemutar dapat digunakan lewat keyboard.                                                                              |
-| PRD-08 | Wajib     | Tata letak responsif           | Layar ponsel mengutamakan video vertikal; desktop memiliki tata letak yang nyaman tanpa meregangkan atau memotong video secara diam-diam.                                                                      |
-| PRD-09 | Wajib     | Pemulihan kegagalan            | Gangguan unggah, pemrosesan, dan publikasi menampilkan status yang jelas; percobaan ulang tidak membuat publikasi ganda atau menghapus metadata yang tersimpan.                                                |
-| PRD-10 | Usulan    | Teks pendamping video          | Admin dapat menambahkan caption/subtitle dan pengunjung dapat mengaktifkannya saat tersedia. Subtitle opsional untuk MVP; jika dilampirkan, format/bahasa/timing/akses harus valid dan aset siap saat publish. |
+Status di bawah adalah hasil review kode pada snapshot di atas dan evidence historis yang dirujuk, bukan pengulangan pengujian runtime pada 5 Oktober 2026. ID kebutuhan tetap dipertahankan. Status backlog media Review/In Progress/Blocked tidak otomatis dinaikkan oleh review PRD.
 
-## Aturan publikasi awal
+| ID     | Prioritas | Kebutuhan / acceptance criteria                                                                                                      | Kondisi saat review                                                                                                                                                      |
+| ------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| PRD-01 | Wajib     | Satu admin terprovision dapat login; dashboard dan operasi tulis terlindungi; signup publik tidak tersedia.                          | Implementasi auth/guard/CLI dan UI login/dashboard sesi tersedia; evidence lokal pada runbook auth.                                                                      |
+| PRD-02 | Wajib     | Dashboard menampilkan pengelolaan/ringkasan konten dan konfigurasi situs yang ditentukan tanpa nilai rahasia.                        | Baru dashboard sesi/logout; ringkasan konten dan konfigurasi API/UI belum tersedia. Field pengaturan masih terbuka.                                                      |
+| PRD-03 | Wajib     | Admin menyimpan draft metadata untuk movie/standalone/episode dan sampul terkait; input salah ditampilkan jelas.                     | CRUD metadata, hierarchy/genre/versioning dan aset poster tersedia di backend; form konten/error per field belum tersedia.                                               |
+| PRD-04 | Wajib     | Validasi format/ukuran, progres, resume dan hasil upload terlihat; kegagalan tidak mempublikasikan konten.                           | API multipart/status/freeze dan proof MinIO tersedia; UI upload browser lengkap belum tersedia.                                                                          |
+| PRD-05 | Wajib     | Admin melihat status menunggu/diproses/siap/gagal dan mempratinjau output siap.                                                      | Worker/status API dan halaman preview HLS minimal tersedia; dashboard monitoring/progres belum lengkap.                                                                  |
+| PRD-06 | Wajib     | Publish hanya untuk konten siap dengan metadata/hak lengkap; archive menutup katalog/playback baru sesuai kontrak expiry.            | Service publish/archive/parent visibility tersedia dengan evidence lokal; aksi/form pengelolaan di dashboard belum tersedia.                                             |
+| PRD-07 | Wajib     | Pengunjung menemukan katalog dan menonton tanpa login dengan kontrol keyboard.                                                       | API katalog/detail/next dan halaman watch/player tersedia; homepage katalog/navigasi masih belum diimplementasikan.                                                      |
+| PRD-08 | Wajib     | Ponsel/desktop mempertahankan rasio 9:16 dan alur yang dapat digunakan tanpa crop/stretch tersembunyi.                               | Player/login mempunyai fondasi responsif; layout katalog/dashboard lengkap dan acceptance perangkat sasaran belum selesai.                                               |
+| PRD-09 | Wajib     | Status kegagalan jelas, retry aman tanpa publikasi ganda atau kehilangan metadata.                                                   | Idempotency, resume, retry/lease/recovery/cleanup dan renewal tersedia di backend/player; UI recovery lengkap serta sebagian stress proof masih tersisa.                 |
+| PRD-10 | Opsional  | Bila subtitle disediakan, admin dapat menambahkan aset valid dan pengunjung memilih track; tanpa subtitle tidak menghalangi publish. | Opsional disetujui 4 Oktober 2026; format/language/timing/unggah/persistensi/delivery subtitle belum tersedia. Kontrol caption player saja bukan fitur subtitle selesai. |
 
-- Draf dan hasil unggah yang belum siap hanya tersedia bagi admin.
-- Pemutaran publik hanya menggunakan video berstatus terbit; akses ke berkas media perlu mengikuti status tersebut.
-- Tindakan unggah atau terbit harus aman jika permintaannya dikirim ulang.
-- Admin menyatakan memiliki hak untuk menerbitkan video. Kebijakan konten dan penanganan laporan perlu diputuskan sebelum peluncuran publik.
+Evidence implementation ada pada [runbook auth](../operations/auth.md), [metadata](../operations/video-metadata.md), [media](../operations/media.md), [backlog media](../tasks/media.md), [worker](../tasks/media-worker.md) dan [publication/playback](../tasks/media-publication.md). Trace source dan batas review ada pada [context review PRD](../plans/documentation/repository-context.md#review-prd--5-oktober-2026).
 
-## Ukuran keberhasilan yang diusulkan
+## Kriteria keberhasilan MVP
 
-| Ukuran                 | Cara membaca                                                                         | Target                                 |
-| ---------------------- | ------------------------------------------------------------------------------------ | -------------------------------------- |
-| Keberhasilan publikasi | Admin dapat menyelesaikan draf sampai video terbit dan memulihkan kegagalan          | Kriteria uji sebelum rilis             |
-| Keberhasilan media     | Proporsi unggah/pemrosesan yang mencapai status siap, dipisah menurut penyebab gagal | Ditentukan setelah batas media dipilih |
-| Pemutaran publik       | Video terbit dapat ditemukan dan diputar tanpa login pada perangkat sasaran          | Kriteria uji sebelum rilis             |
-| Responsivitas          | Alur tonton dan dashboard dapat digunakan di ponsel serta desktop                    | Kriteria uji sebelum rilis             |
+MVP diterima ketika admin menyelesaikan alur konten melalui UI dan pengunjung menemukan serta menonton hasilnya pada perangkat sasaran, termasuk kondisi gagal, akses privat/publik dan expiry. Kesiapan backend saja belum cukup untuk menerima MVP.
 
-## Keputusan terbuka
+| Ukuran                      | Kriteria sebelum penerimaan/rilis                                                                 | Kondisi                                                                                              |
+| --------------------------- | ------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Pengelolaan/publikasi       | Alur draft sampai publish/archive dapat dijalankan admin melalui UI; kegagalan bisa ditangani.    | Backend tersedia; UI konten dan acceptance alur lengkap tersisa.                                     |
+| Media                       | Format/limit/9:16, rendition HLS dan ketahanan upload/worker dibuktikan sesuai batas produk.      | Evidence lokal MinIO/FFmpeg/fixture tersedia; visual/stress/resource/platform masih mempunyai batas. |
+| Tonton publik               | Published dapat ditemukan dan diputar tanpa login; konten tersembunyi tidak memberi akses baru.   | API/watch tersedia; katalog UI dan acceptance perangkat tersisa.                                     |
+| Responsivitas/aksesibilitas | Login, dashboard, katalog dan player dapat digunakan di ponsel/desktop dengan kontrol yang jelas. | Belum acceptance seluruh layar/perangkat.                                                            |
 
-1. Bentuk katalog dan cara berpindah video: daftar biasa, scroll/swipe vertikal, atau pola lain; termasuk aturan urutannya.
-2. Daftar pengaturan yang dapat diubah admin. Provisioning/pemulihan akun admin sudah tersedia melalui CLI native; lihat [Auth Operations](../operations/auth.md).
-3. Kebijakan audio/HDR/VFR/fps di luar acuan. Yang disetujui: resolusi sumber/keluaran 480p–1080p, sumber 1440p/4K ditolak; target ekspor H.264 SDR/AAC 128 kbps, acuan 1080p24–30 pada 4–6 Mbps (default 6 Mbps); sumber 60 fps tetap mengikuti size limit aktual, dengan batas terbaru per kind: movie/standalone maksimal 30 menit dan 1,5 GB (1.500.000.000 byte), episode maksimal 10 menit dan 512 MB. Batas file diutamakan atas acuan bitrate; budget total movie/standalone penuh 30 menit sekitar 6,67 Mbps. Sumber MP4/MOV/MKV dengan H.264/H.265 serta WebM dengan VP8/VP9 diterima setelah validasi aktual/decode. Semua video dan poster/sampul wajib portrait 9:16; rasio lain ditolak tanpa upscale/crop. Standar sampul seragam antarjenis konten: gambar diam JPG/JPEG/PNG/WebP maksimal 5 MB, sumber minimal 1080 × 1920 portrait 9:16, hasil WebP 1080 × 1920; sumber lebih besar diperkecil. Detail pada [plan video](../plans/video/implementation-plan.md#format-sumber-durasi-dan-poster--disetujui-3-oktober-2026).
-4. Profil keluaran HLS FFmpeg, distribusi semua playlist/segment, retensi, pencabutan akses dan biaya per unggahan. Provider disetujui 3 Oktober 2026: MinIO development, Cloudflare R2 production melalui S3-compatible, dipilih melalui env. Queue memakai PostgreSQL. S3 multipart dengan part kecil disetujui untuk upload media; sampul kecil dapat memakai satu part. Part target 2% ukuran aktual dengan minimum 5 MiB selain part terakhir disetujui. **hls-v1 disetujui 4 Oktober 2026**: H.264 SDR, AAC 128 kbps bila audio tersedia, target video 480p/720p/1080p 1,2/2,5/4,5 Mbps, output maksimal 30 fps, segment fMP4 dengan target 6 detik dan pemilihan kualitas adaptif; tanpa crop/upscale, hanya kualitas yang dapat dibuat dari sumber. Detail encoder/GOP/SAR/VFR/MIME serta kualitas visual dan compatibility tetap memerlukan proof HLS-PROFILE-001. Session upload 24 jam serta retensi/cleanup nomor 6 sudah disetujui; maksimal 3 part paralel per file/URL part 15 menit dibatasi sisa session juga disetujui; identity resume dan proof implementasi masih refinement. Distribusi/TTL/cache serta batas akses sesudah archive mengikuti kontrak nomor 4 yang sudah disepakati.
-5. Format subtitle, alur unggah/validasi dan cara admin menyediakannya. Subtitle opsional untuk MVP sudah disetujui 4 Oktober 2026; kewajiban subtitle saat publish tidak lagi menjadi pertanyaan terbuka.
-6. Kebijakan hak cipta, konten terlarang, pelaporan, moderasi, dan pengindeksan halaman publik.
-7. Season default dan metadata/genre D1–D3 sudah disetujui; syarat publikasi serta visibilitas parent series/episode D4 disetujui 4 Oktober 2026. Lifecycle/cascade archive/restore series/season dan rincian teknis media D5 masih perlu refinement; retensi/cleanup nomor 6 disetujui dan proof implementasi masih pending pada [model video](../architecture/video-data-model.md#12-keputusan-untuk-ditinjau).
+Tidak menetapkan angka SLO, persentase keberhasilan atau biaya sebagai keputusan final tanpa baseline pengukuran.
 
-Lihat [Architecture](../architecture/overview.md) untuk batas sistem dan stack, [Global Rules](global-rules.md) untuk aturan lintas fitur, dan [Design System](../design/design-system.md) untuk rancangan antarmuka.
+## Keputusan produk yang masih terbuka
+
+1. **UX katalog/navigasi:** daftar/grid atau scroll/swipe, filter/pencarian dan aturan urutan final. API saat ini memakai createdAt/id descending serta next episode berdasarkan season/episode ascending; ini perilaku kode, belum persetujuan UX produk.
+2. **Konfigurasi situs:** field yang boleh diedit admin, validasi dan tampilan publiknya. Rahasia infrastruktur tetap konfigurasi server.
+3. **Kebijakan konten:** hak cipta, konten terlarang, pelaporan/penanganan laporan serta pengindeksan halaman publik.
+4. **Subtitle opsional:** format, bahasa, timing dan alur penyediaan/validasi. Ketidakadaan subtitle tidak menghalangi MVP atau publish.
+5. **Fitur lanjutan lifecycle:** kebutuhan/prioritas restore/republish, perubahan source published serta cascade parent. MVP tidak menjanjikan fitur yang belum diputuskan ini.
+
+Provider/env/HLS, batas sumber/sampul, multipart, readiness, TTL/cache, retensi dan kebijakan worker yang sudah disetujui bukan lagi pertanyaan produk terbuka. Kebutuhan bukti teknis dicatat sebagai gerbang verifikasi berikut.
+
+## Gerbang verifikasi dan rollout yang belum selesai
+
+- R2 staging/end-to-end, CORS/signing/freeze/cleanup dan compatibility provider production belum dibuktikan; MinIO lokal tidak menggantikannya.
+- Safari/native HLS, perangkat sasaran, kualitas visual serta matriks stress/resource/timeout/supervisor yang belum lengkap tetap verifikasi tersendiri.
+- Target awal 4 core/RAM 4 GB perlu benchmark worker bersama beban aplikasi/database; spesifikasi target bukan bukti kapasitas.
+- Provider server/domain/disk, konfigurasi deployment/TLS, migrasi production dan backup/full restore belum dituntaskan. Docker Compose/reverse proxy pada [proposal deployment](../plans/video/implementation-plan.md#nomor-8--rekomendasi-deployment-production-dan-r2-belum-disetujui) merupakan rancangan yang belum dijalankan, bukan bukti rollout.
+
+Tanggal/command/hasil historis dan batas fixture dimiliki runbook/backlog, tidak diulang sebagai hasil test baru di PRD ini. Kelengkapan spesifikasi, kelengkapan fitur dan readiness production merupakan status yang berbeda.
+
+## Acuan dan riwayat review
+
+Keputusan produk disetujui pengguna pada 1–4 Oktober 2026 tercatat pada [plan video](../plans/video/implementation-plan.md) dan runbook/backlog terkait. Review 5 Oktober 2026 memperbaiki klaim media belum tersedia, enum lifecycle lama, retensi tanpa runtime dan open questions yang sudah diputuskan; tidak memberikan persetujuan menyeluruh untuk semua rincian MVP yang tersisa.
+
+[Global Rules](global-rules.md) dan [Architecture](../architecture/overview.md) masih mempunyai label/claim historis yang perlu direview pada task dokumentasi berikutnya. Untuk status implemented gunakan kode saat ini dan runbook aktif; historical plan tidak mengalahkan keputusan pengguna atau instruksi root. [Design System](../design/design-system.md) menjadi acuan visual; spesifikasi/mockup bukan bukti implementasi layar produk.
