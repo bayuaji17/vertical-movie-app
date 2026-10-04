@@ -1,10 +1,10 @@
 # Modul: Dashboard metadata konten
 
-> Status: planning · 5 Oktober 2026 · Permintaan pengguna: plan tahap pertama frontend. Usulan UX dan implementasi belum disetujui. Hasil pemeriksaan hanya dicatat setelah teramati.
+> Status: planning · 5 Oktober 2026 · Permintaan pengguna: plan tahap pertama frontend. Requirement v2 disetujui pengguna; hasil visual/rincian teknis masih untuk review, runtime belum diminta. Hasil pemeriksaan hanya dicatat setelah teramati.
 
 ## Tujuan modul
 
-Admin dapat list/create/read/edit metadata movie/standalone melalui UI terlindungi dan responsif. Acuan: [context](../plans/admin-content/repository-context.md), [plan](../plans/admin-content/implementation-plan.md), [PRD](../product/prd.md), [workflow](../guides/development-workflow.md) dan [template task](../templates/task.md). Upload/sampul, worker status, preview/publish/archive actions dan hierarchy menjadi refinement berikutnya.
+Admin dapat list/create/read/edit metadata Film/Standalone/Series melalui UI terlindungi dan responsif. Acuan: [context](../plans/admin-content/repository-context.md), [plan](../plans/admin-content/implementation-plan.md), [PRD](../product/prd.md), [workflow](../guides/development-workflow.md) dan [template task](../templates/task.md). Upload/sampul, worker status, preview/publish/archive actions dan hierarchy menjadi refinement berikutnya.
 
 ## User story: ADMC-US-00
 
@@ -16,7 +16,7 @@ Sebagai admin, saya ingin navigasi dashboard responsif serta logout yang tersedi
 
 ## User story: ADMC-US-02
 
-Sebagai admin, saya ingin mencari dan membuka movie/standalone yang tersimpan dengan pagination yang benar.
+Sebagai admin, saya ingin mencari dan membuka Film/Standalone/Series yang tersimpan dengan pagination yang benar.
 
 ## User story: ADMC-US-03
 
@@ -76,7 +76,7 @@ Tidak ada blocker penulisan plan; source runtime dan remote delivery belum dimin
 - Prioritas: P1 — sesuai dependency
 - Referensi: ADMC-US-01; PRD-02/08; GR-01/05/08; plan STEP-002.
 - Diperbarui: 2026-10-05
-- Dependensi: ADMC-001, ADMC-DES-001, permintaan implementasi dan recheck integrasi desain lokal.
+- Dependensi: ADMC-001, ADMC-DES-002, permintaan implementasi dan recheck integrasi desain lokal.
 - Ukuran: Satu hasil review; target files/symbols mengikuti STEP-002. Pecah jika refinement menemukan scope lebih besar.
 
 ### Ruang lingkup
@@ -115,7 +115,7 @@ Menunggu review/permintaan implementasi dan dependency. Integrasi token/assets d
 - Prioritas: P1 — sesuai dependency
 - Referensi: ADMC-US-02; PRD-01/03/09; GR-01/05/08; plan STEP-003.
 - Diperbarui: 2026-10-05
-- Dependensi: ADMC-001 dan permintaan implementasi.
+- Dependensi: ADMC-001 dan permintaan implementasi. Tambahan refinement v2: ADMC-013.
 - Ukuran: Satu hasil review; target files/symbols mengikuti STEP-003. Pecah jika refinement menemukan scope lebih besar.
 
 ### Ruang lingkup
@@ -186,14 +186,14 @@ Belum diimplementasikan atau diuji. Hasil runtime tidak disimpulkan dari plan.
 
 Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready hanya karena source API tersedia.
 
-## Task: ADMC-005 — Daftar metadata dengan search dan cursor
+## Task: ADMC-005 — Daftar metadata dengan search dan pagination
 
 - Status: Backlog
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai dependency
 - Referensi: ADMC-US-02; PRD-02/03/08/09; GR-01/05/08; plan STEP-005.
 - Diperbarui: 2026-10-05
-- Dependensi: ADMC-003, ADMC-004.
+- Dependensi: ADMC-003, ADMC-004. Tambahan refinement v2: ADMC-013.
 - Ukuran: Satu hasil review; target files/symbols mengikuti STEP-005. Pecah jika refinement menemukan scope lebih besar.
 
 ### Ruang lingkup
@@ -202,9 +202,9 @@ Route videos index, list table/mobile cards, kind/search/includeArchived URL sta
 
 ### Acceptance criteria
 
-- [ ] Movie/standalone, search max 200/debounce dan includeArchived sesuai API; tidak ada status filter/total count/global sort palsu.
-- [ ] Cursor opaque, page size 20; filter berubah membuang pages lama dan request race tidak mencampur hasil.
-- [ ] Initial/loading/empty/error/load-more retry accessible; load-more failure mempertahankan hasil yang sudah ada.
+- [ ] Film/Standalone/Series, search/debounce dan Include archived; total filter dari ADMC-013, tanpa status filter/sort palsu.
+- [ ] Numbered pages, default 10/preset 10/25/50/100 dan Custom 1–100; filter/size reset page 1 dan request race tidak mencampur hasil.
+- [ ] Loading/empty/error/page retry accessible; page error mempertahankan hasil lama bertanda stale, range/boundaries benar.
 
 ### Validasi
 
@@ -272,7 +272,7 @@ Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready ha
 - Prioritas: P1 — sesuai dependency
 - Referensi: ADMC-US-03; PRD-03/09; GR-01/05/08; plan STEP-007.
 - Diperbarui: 2026-10-05
-- Dependensi: ADMC-006.
+- Dependensi: ADMC-006. Tambahan refinement v2: ADMC-014.
 - Ukuran: Satu hasil review; target files/symbols mengikuti STEP-007. Pecah jika refinement menemukan scope lebih besar.
 
 ### Ruang lingkup
@@ -281,7 +281,7 @@ Route videos/new dan create mutation; sukses navigate detail dari ID server sert
 
 ### Acceptance criteria
 
-- [ ] Satu submit pending satu POST, movie/standalone metadata minimal dan lengkap didukung.
+- [ ] Satu submit pending satu POST, Film/Standalone/Series metadata didukung melalui resource benar (ADMC-014).
 - [ ] Hanya confirmed success menavigasi; slug/422/network/503 gagal mempertahankan input.
 - [ ] Ambiguous POST outcome tidak otomatis diulang; UI menjelaskan cek daftar sebelum submit lagi.
 
@@ -311,7 +311,7 @@ Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready ha
 - Prioritas: P1 — sesuai dependency
 - Referensi: ADMC-US-04; PRD-03/08/09; GR-01/05/08; plan STEP-008.
 - Diperbarui: 2026-10-05
-- Dependensi: ADMC-004, ADMC-005.
+- Dependensi: ADMC-004, ADMC-005. Tambahan refinement v2: ADMC-014.
 - Ukuran: Satu hasil review; target files/symbols mengikuti STEP-008. Pecah jika refinement menemukan scope lebih besar.
 
 ### Ruang lingkup
@@ -321,7 +321,7 @@ Route detail index leaf dan content-detail; statuses/timestamps/genre serta edit
 ### Acceptance criteria
 
 - [ ] Direct link/refresh bekerja; invalid/missing ID punya state jelas tanpa membocorkan private data.
-- [ ] Edit ditawarkan hanya draft movie/standalone; published/archived/episode unsupported readonly.
+- [ ] Edit hanya draft Film/Standalone/Series; published/archived/episode readonly dan Series tidak membawa rights/source video.
 - [ ] Source availability tidak dilabeli sebagai readiness HLS; preview sibling routing tidak terganggu.
 
 ### Validasi
@@ -350,7 +350,7 @@ Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready ha
 - Prioritas: P1 — sesuai dependency
 - Referensi: ADMC-US-04; PRD-03/09; GR-01/05/08; plan STEP-009.
 - Diperbarui: 2026-10-05
-- Dependensi: ADMC-006, ADMC-008.
+- Dependensi: ADMC-006, ADMC-008. Tambahan refinement v2: ADMC-014.
 - Ukuran: Satu hasil review; target files/symbols mengikuti STEP-009. Pecah jika refinement menemukan scope lebih besar.
 
 ### Ruang lingkup
@@ -428,7 +428,7 @@ Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready ha
 - Prioritas: P1 — sesuai dependency
 - Referensi: ADMC-US-05; PRD-01/02/03/08/09; GR-01/05/08; plan STEP-011.
 - Diperbarui: 2026-10-05
-- Dependensi: ADMC-002 sampai ADMC-010 serta ADMC-012.
+- Dependensi: ADMC-002 sampai ADMC-010 serta ADMC-012–014.
 - Ukuran: Satu hasil review; target files/symbols mengikuti STEP-011. Pecah jika refinement menemukan scope lebih besar.
 
 ### Ruang lingkup
@@ -473,7 +473,7 @@ Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready ha
 
 ### Ruang lingkup
 
-Light/Dark/System di seluruh halaman admin, accessible names/active state, browser preference non-rahasia, media listener dan root bootstrap jika diperlukan. Target source mengikuti STEP-012; tidak mengubah media player atau menyimpan private form/cache.
+Avatar dropdown kanan atas berisi identity/Appearance Light/Dark/System; English UI, Log out kiri bawah; accessible names/expanded/focus return/active state, browser preference non-rahasia, media listener dan root bootstrap jika diperlukan. Target source mengikuti STEP-012; tidak mengubah media player atau menyimpan private form/cache.
 
 ### Acceptance criteria
 
@@ -507,7 +507,7 @@ Sebagai admin, saya ingin meninjau desain desktop light seluruh halaman dengan l
 
 ## Task: ADMC-DES-001 — Desain desktop light lima halaman
 
-- Status: Review
+- Status: Done
 - Owner: Codex
 - Prioritas: P1 — sebelum runtime tasks
 - Referensi: ADMC-US-06; PRD-02/03/08; permintaan pengguna 5 Oktober 2026.
@@ -524,7 +524,7 @@ Dashboard/list/create/detail/edit desktop light dalam lima PNG baru, shared Ligh
 - [x] Lima halaman desktop light tersedia dengan brand/sidebar/header/theme switcher yang konsisten.
 - [x] Form lengkap sesuai kontrak, jenis edit readonly, rights unchecked, status editorial/source terpisah; tanpa aksi/features di luar iterasi metadata.
 - [x] Prompt, path, metode built-in, data contoh dan batas mockup dicatat; proposal belum dianggap approval visual atau runtime proof.
-- [ ] Docs/format/whitespace, staged snapshot/preservation dan commit task terpisah lulus.
+- [x] Docs/format/whitespace, staged snapshot/preservation dan commit task terpisah lulus.
 
 ### Validasi
 
@@ -539,10 +539,126 @@ Pemeriksaan 5 Oktober 2026: `bun run docs:check` worktree lulus 51 Markdown/368 
 ### Commit task
 
 - Pesan: `docs(design): add admin desktop light mockups (ADMC-DES-001)`.
-- SHA: Belum dibuat.
-- Hook/checks: Menunggu hasil aktual.
+- SHA: `ace666f4a4a6d1971df42e12763ec9871e808e8b`.
+- Hook/checks: docs:check 51/368, lint 1 task/types 3 task (cache valid) dan Commitlint lulus tanpa bypass. Sepuluh file desain/dokumentasi committed; PNG memakai mode 100644. Belum push/PR/merge.
 - Ledger: Receipt dicatat setelah commit untuk update task berikutnya.
 
 ### Blocker atau tindak lanjut
 
 Desain dark/mobile dan implementasi menjadi langkah setelah review; request ini hanya desktop light.
+
+## Task: ADMC-013 — Kontrak pagination server
+
+- Status: Backlog
+- Owner: Codex/pengembang pelaksana
+- Prioritas: P1
+- Referensi: plan; revisi pengguna 5 Oktober 2026.
+- Diperbarui: 2026-10-05
+- Dependensi: Requirement v2 dan permintaan implementasi.
+- Ukuran: Satu hasil review menurut scope berikut.
+
+### Ruang lingkup
+
+Proposal GET /admin/content type/page/pageSize/search/includeArchived dengan typed items/total/page/pageSize/totalPages. Dispatch videos/series, requireAdmin, order createdAt/id deterministic, count/data memakai filter dan snapshot sama. Cursor endpoints existing tetap kompatibel; gateway allowlist ditinjau. Lihat STEP-013.
+
+### Acceptance criteria
+
+- [ ] Tiga jenis, total filter, numbered boundaries dan custom 1–100 akurat; invalid/empty/out-of-range behavior terdokumentasi.
+- [ ] HTTP authorization/query/DTO tests serta dedicated PostgreSQL filter/count/snapshot/performance proof dan root gates lulus; existing consumers tidak rusak.
+
+### Validasi
+
+bun:test HTTP; dedicated DB pagination/filter parity/last page/concurrent writes; root types/lint/build/docs. Bila schema berubah ikuti migration gate.
+
+### Hasil dan bukti
+
+Belum implemented. Current DTO hanya items/nextCursor; angka 42 pada mockup merupakan contoh.
+
+### Commit task
+
+- Pesan: Conventional Commit dengan ID ADMC-013.
+- SHA: Belum dibuat.
+- Hook/checks: Menunggu hasil aktual.
+- Ledger: Receipt pascacommit untuk task berikutnya.
+
+### Blocker atau tindak lanjut
+
+Visual v2 untuk review; runtime belum diminta/diimplementasikan.
+
+## Task: ADMC-014 — Metadata Series dan resource dispatch
+
+- Status: Backlog
+- Owner: Codex/pengembang pelaksana
+- Prioritas: P1
+- Referensi: plan; revisi pengguna 5 Oktober 2026.
+- Diperbarui: 2026-10-05
+- Dependensi: ADMC-003, ADMC-006, ADMC-DES-002 dan permintaan implementasi.
+- Ukuran: Satu hasil review menurut scope berikut.
+
+### Ruang lingkup
+
+Lima template content melayani Film/Standalone/Series, conditional fields/cards dan typed routes/client/forms. Film→movie/Standalone→standalone, Series resource terpisah dengan completionStatus/nested create response/defaultSeason. Season 1 readonly; hierarchy editor tetap roadmap. Lihat STEP-014.
+
+### Acceptance criteria
+
+- [ ] Tidak mengirim kind series/rights/source video pada Series; create/read/edit editorial/completionStatus dan expectedVersion sesuai kontrak.
+- [ ] Resource immutable, payload isolation, nested response, errors/dirty input, browser dan dedicated persistence/root gates dibuktikan.
+
+### Validasi
+
+Mapper/resource/contract behavior, tiga jenis create/read/edit, invalid type/ID/conflict dan dedicated persistence/browser/root gates.
+
+### Hasil dan bukti
+
+Belum implemented. Screenshot Film adalah acuan layout; template Series conditional menjadi pekerjaan task ini.
+
+### Commit task
+
+- Pesan: Conventional Commit dengan ID ADMC-014.
+- SHA: Belum dibuat.
+- Hook/checks: Menunggu hasil aktual.
+- Ledger: Receipt pascacommit untuk task berikutnya.
+
+### Blocker atau tindak lanjut
+
+Visual v2 untuk review; runtime belum diminta/diimplementasikan.
+
+## Task: ADMC-DES-002 — Revisi desktop light v2
+
+- Status: Review
+- Owner: Codex/pengembang pelaksana
+- Prioritas: P1
+- Referensi: plan; revisi pengguna 5 Oktober 2026.
+- Diperbarui: 2026-10-05
+- Dependensi: ADMC-DES-001 dan screenshot pengguna.
+- Ukuran: Satu hasil review menurut scope berikut.
+
+### Ruang lingkup
+
+Lima PNG v2: avatar/dropdown kanan atas dan Appearance; Log out kiri bawah; English UI; Film/Standalone/Series; numbered pagination/custom page size. Canonical prompt/desain/context/plan/backlog/index diperbarui. Preserve v1 dan pekerjaan existing.
+
+### Acceptance criteria
+
+- [x] Lima mockup English light memiliki avatar kanan atas/Log out kiri bawah; dashboard menunjukkan dropdown Light/Dark/System terbuka, lainnya closed.
+- [x] List/create memiliki tiga jenis; list tepat 10 baris/page/range/total/custom, form lengkap/edit type readonly.
+- [x] Prompt/tool/path/data contoh dan kebutuhan API/Series dicatat; semua final visual/invariants diperiksa.
+- [ ] Docs/format/whitespace/staged snapshot/preservation dan commit task lokal lulus.
+
+### Validasi
+
+Native image inspection, PNG dimensions/mode, read-only kontrak Video/Series/list, docs:check/Prettier/diff/scoped staging. Tanpa browser/runtime proof.
+
+### Hasil dan bukti
+
+Built-in image_gen: lima edit utama dan dua koreksi avatar. Semua final inspected; kelima PNG 1536×1024/mode100644 disimpan di docs/design. v1/source/runtime tetap utuh. `bun run docs:check` worktree lulus 51 Markdown/373 tautan; staged snapshot checker lulus 44 Markdown/354 tautan. Targeted Prettier, `git diff --check` dan `git diff --cached --check` lulus; hash preservation 23 file existing selain indeks lulus. Staging 10 file milik task; index hanya navigasi/format terkait tanpa aset desain lokal unrelated. Hook/receipt commit dicatat sesudah berhasil.
+
+### Commit task
+
+- Pesan: docs(design): revise admin desktop mockups (ADMC-DES-002).
+- SHA: Belum dibuat.
+- Hook/checks: Menunggu hasil aktual.
+- Ledger: Receipt pascacommit untuk task berikutnya.
+
+### Blocker atau tindak lanjut
+
+Visual v2 untuk review; runtime belum diminta/diimplementasikan.
