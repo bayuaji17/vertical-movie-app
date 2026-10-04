@@ -896,3 +896,13 @@ Gerbang final lulus: API72/267, root check-types3 task, lint1 task, build2 task 
 ## Delivery Git implementasi — 4 Oktober 2026
 
 Commit/push/PR/merge diotorisasi pengguna. Plan tetap valid terhadap HEAD4ce185d dan origin/main0d3bef87 setelah fetch; source tidak berubah sejak proof penutupan. Stage hanya implementasi media dan dokumentasinya. SHA commit implementasi dan hasil hook akan dicatat pada ledger setelah commit; merge normal menjaga riwayat dan branch sumber. R2/Safari/kapasitas4GB/restore serta matriks stress yang belum dibuktikan tetap merupakan gate rollout, bukan dianggap lulus oleh merge.
+
+### Ledger delivery implementasi
+
+| Commit                                   | Perubahan dan evidence                                                                                      |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| 038c80000c1e0e6841425596eb30ce9301675cd0 | feat(media): implement multipart upload and HLS backend; 102 file scoped, lint/check-types/Commitlint lulus |
+
+Commit lanjutan mencatat ledger ini dan menyelaraskan URL pada proof browser dengan port fixture yang dapat dikonfigurasi. Source runtime tidak berubah pada perbaikan fixture. Pengulangan proof pada port alternatif membutuhkan VITE_API_URL saat build dan port server/URL manifest yang sama; port3000 sudah dipakai server development, yang dipertahankan berjalan. Root build untuk isi index lulus; escape tekstual control characters pada validasi filename tetap lolos policy4/17. SHA final branch dilaporkan sesudah commit lanjutan. Merge dilakukan dengan merge commit dan branch sumber dipertahankan; tidak ada rollout production.
+
+Verifikasi delivery: built Bun/Nitro Chromium tiga-tier12s pada port3008 dengan stylesheet index lulus1test/70assertions, termasuk manual quality, expiry renewal, paused seek dan terminal404 tanpa retry loop. Dua pengulangan awal terhenti karena port3000 dipakai lalu origin manifest fixture belum diselaraskan; keduanya terselesaikan pada hasil ini. Server development existing tetap berjalan.

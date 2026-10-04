@@ -89,3 +89,9 @@ Full episode10menit dengan source1080p24 tanpa audio lulus1/66:307 objek HLS, ep
 Penutupan tambahan: series/retensi/partial cleanup3/26, upload4/32 dan legacy migration1/10 lulus ulang. Built Bun/Nitro tiga-tier12s1/70 lulus setelah perubahan player terakhir. Eden compile-only membuktikan kontrak upload/publish/public catalog/preview melalui type-only App dan penolakan private storage field pada DTO publik. Unit lifetime4/15 membuktikan TTL1200/3600s untuk600/1800s dan pembulatan durasi pecahan; renewal tidak menandatangani URL lagi setelah visibility dicabut.
 
 Gerbang final lulus: API72/267, root check-types3 task, lint1 task, build2 task (web dibangun ulang setelah fixture import-protection dipulihkan), frozen install770/947 tanpa perubahan, git diff --check serta173 local links/anchors pada12 dokumen. Auth import-protection menolak @repo/auth/server pada client build dan memulihkan fixture; build positif selesai sesudahnya. Branch feat/media-backend masih belum commit/push; file desain existing dipertahankan.
+
+## Delivery dan port proof
+
+Commit implementasi 038c80000c1e0e6841425596eb30ce9301675cd0 pada feat/media-backend; lint/check-types/Commitlint lulus. Stage mengecualikan pekerjaan desain existing. Fixture Chromium dapat memakai MEDIA_PLAYBACK_BROWSER_PORT (default3000, integer1–65535). Untuk hasil build, set VITE_API_URL ke origin dengan port proof pada saat build; PORT fixture, URL manifest playback dan origin browser harus sama. Ini konfigurasi test harness, bukan selector storage produksi.
+
+Verifikasi delivery: built Bun/Nitro Chromium tiga-tier12s pada port3008 dengan stylesheet index lulus1test/70assertions, termasuk manual quality, expiry renewal, paused seek dan terminal404 tanpa retry loop. Dua pengulangan awal terhenti karena port3000 dipakai lalu origin manifest fixture belum diselaraskan; keduanya terselesaikan pada hasil ini. Server development existing tetap berjalan.

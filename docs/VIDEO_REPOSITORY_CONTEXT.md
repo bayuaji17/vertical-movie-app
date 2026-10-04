@@ -171,3 +171,9 @@ Gerbang final lulus: API72/267, root check-types3 task, lint1 task, build2 task 
 ## Otorisasi delivery Git — 4 Oktober 2026
 
 Pengguna meminta commit, push, PR dan merge untuk implementasi media. Preflight: HEAD4ce185d45e4d2c7ff5654cb24f7fc3175dbdb8c5, origin/main0d3bef87f6d2f9b0a2873078f9b560f092f13c53 sesudah fetch; tidak ada perubahan remote yang membatalkan evidence. Branch feat/media-backend, target main pada bayuaji17/vertical-movie-app. Merge commit diizinkan dan deleteBranchOnMerge=false. Scope hanya apps/api, gateway/player/route/test web, env/dependency/Turbo dan docs media; stylesheet/design-system/aset desain existing serta bagian desain README dipertahankan di worktree. Delivery tidak mencakup rollout production.
+
+## Snapshot delivery Git
+
+Commit implementasi 038c80000c1e0e6841425596eb30ce9301675cd0 dibuat pada feat/media-backend. Husky lint (1 task), check-types (3 task) dan Commitlint lulus tanpa bypass. 102 file media ditulis; 21 file desain existing dan perubahan desain docs/README.md dipertahankan di worktree. Audit staged credential/private-key dan whitespace lulus. Build memakai stylesheet pada index agar evidence tidak bergantung pada perubahan desain yang dikecualikan. Fixture browser kini mendukung MEDIA_PLAYBACK_BROWSER_PORT (default3000); origin build, server fixture dan URL manifest harus memakai port yang sama. Push/PR/merge merupakan langkah berikutnya yang telah diotorisasi.
+
+Verifikasi delivery: built Bun/Nitro Chromium tiga-tier12s pada port3008 dengan stylesheet index lulus1test/70assertions, termasuk manual quality, expiry renewal, paused seek dan terminal404 tanpa retry loop. Dua pengulangan awal terhenti karena port3000 dipakai lalu origin manifest fixture belum diselaraskan; keduanya terselesaikan pada hasil ini. Server development existing tetap berjalan.

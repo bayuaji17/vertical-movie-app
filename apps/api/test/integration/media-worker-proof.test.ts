@@ -241,7 +241,9 @@ test(
         playback = new PlaybackService(
           catalogStore,
           native,
-          "http://localhost:3000/api",
+          "http://localhost:" +
+            Number(Bun.env.MEDIA_PLAYBACK_BROWSER_PORT ?? 3000) +
+            "/api",
           config,
         ),
         videoService = new VideosService(
