@@ -25,10 +25,13 @@ Catat tanggal persetujuan dan pemilik keputusan di setiap dokumen. Pisahkan peri
 - [Template Task](TASK_TEMPLATE.md): format backlog per modul, acceptance criteria, dependensi, dan bukti validasi.
 - [Backlog Database Tooling](tasks/database-tooling.md): konfigurasi dan validasi Drizzle Studio lokal.
 - [Backlog Verifikasi Development](tasks/development-verification.md): aturan penyelesaian test/types/lint/build dan bukti migrasi metadata development lokal.
-- [Repository Context — Video](VIDEO_REPOSITORY_CONTEXT.md): snapshot backend setelah auth pada `d1d3e0a36a4adf1c7198db7a1d36c49e9f1c93ed`, batas domain dan gap gateway bisnis.
+- [Repository Context — Video](VIDEO_REPOSITORY_CONTEXT.md): snapshot historis tahap A dan snapshot refinement media pada `0d3bef87f6d2f9b0a2873078f9b560f092f13c53`; batas domain, env/storage/HLS dan gap gateway bisnis.
 - [Rancangan Data Video/Series/Movie](VIDEO_DATA_MODEL.md): enam tabel metadata tahap A sudah tersedia; aset, worker, dan aturan publikasi tahap B–D tetap rancangan.
-- [Implementation Plan — Video](VIDEO_IMPLEMENTATION_PLAN.md): tahap A selesai pada branch feat/video-metadata dengan commit per task; roadmap unggah, worker, publikasi dan katalog masih lanjutan.
-- [Backlog Video](tasks/videos.md): 15 task tahap metadata Done dengan acceptance criteria, evidence lokal, serta ledger commit pada plan.
+- [Implementation Plan — Video](VIDEO_IMPLEMENTATION_PLAN.md): tahap A selesai; MinIO development, R2 production melalui S3-compatible, selector env dan HLS VOD disetujui 3 Oktober 2026. Plan media B–D difinalisasi 4 Oktober 2026; keputusan 1–7, urutan task dan gerbang proof tercatat, runtime media belum diimplementasikan.
+- [Backlog Video](tasks/videos.md): 15 task tahap metadata Done dengan acceptance criteria, evidence lokal, serta ledger commit pada plan; VID-016 Backlog untuk keputusan lifecycle video draft → published → archived.
+- [Backlog Media](tasks/media.md): 10 task konfigurasi/proof/upload/cleanup dan refinement HLS, dengan dependency/acceptance serta proof MinIO dan R2 terpisah. MEDIA-CFG-001 Ready; task turunannya Backlog.
+- [Backlog Worker Media](tasks/media-worker.md): enam task queue/enqueue, claim/lease, runner, runtime, retensi dan benchmark 4 GB; seluruhnya Backlog.
+- [Backlog Publication/Playback](tasks/media-publication.md): tujuh task publish/archive/series, catalog/delivery dan gateway/player; seluruhnya Backlog.
 - [Video Operations](VIDEO_OPERATIONS.md): endpoint aktif, contoh metadata, migrasi additive, recovery, proof dedicated, dan refinement MEDIA-001.
 - [Environment](ENVIRONMENT.md): setup env API/web, pemisahan konfigurasi publik/server, dan status variabel integrasi.
 - [API Development](API_DEVELOPMENT.md): aturan kode `apps/api`, struktur modul, kontrak Eden Treaty, dokumentasi OpenAPI/Scalar, lifecycle/scope Elysia, database, autentikasi, storage, queue, worker, unit test native Bun, dan validasi perubahan.

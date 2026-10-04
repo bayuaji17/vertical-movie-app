@@ -303,14 +303,14 @@ Dokumentasi OpenAPI menerangkan kontrak HTTP. Consumer endpoint aplikasi tetap m
 
 ## Storage, queue, dan worker
 
-- Object storage memakai R2 atau S3 compatible. Evaluasi `Bun.S3Client` untuk operasi yang dibutuhkan; credential hanya di API. Database menyimpan metadata/key objek, bukan berkas video.
+- Object storage disetujui 3 Oktober 2026: MinIO development dan Cloudflare R2 production melalui S3-compatible; selector `STORAGE_PROVIDER=minio|r2` serta profil `S3_*` server pada [Environment](ENVIRONMENT.md). Evaluasi `Bun.S3Client` dan buktikan operasi pada kedua provider; credential hanya di API/worker. Database menyimpan provider/bucket/key, bukan berkas atau signed URL. Ganti env bukan migrasi objek.
 - Server menentukan key objek. URL unggah dibatasi ke admin, objek, metode, dan waktu berlaku. Sebelum enqueue, verifikasi objek yang benar, ukuran/format yang diizinkan, serta hubungan aset dengan video.
 - Queue persisten berada di PostgreSQL. Klaim menggunakan transaksi singkat yang aman terhadap worker bersamaan, misalnya `FOR UPDATE SKIP LOCKED`, disertai identitas claim/lease dan retry yang terbatas.
 - Heartbeat memperpanjang lease untuk pekerjaan panjang. Penyelesaian job bersyarat pada claim yang masih dimiliki; worker lama yang kehilangan lease tidak boleh menimpa hasil worker baru.
 - Asumsikan job dapat diproses lebih dari sekali. Pisahkan key hasil tiap percobaan, validasi seluruh keluaran sebelum status `ready`, dan cegah publish dari hasil parsial. `LISTEN/NOTIFY` hanya sinyal tambahan; tabel tetap sumber kebenaran.
 - Jalankan FFprobe/FFmpeg melalui `Bun.spawn` dengan argumen array; jangan menyisipkan judul/path pengguna ke shell command. Periksa exit code, batasi resource/waktu, dan gunakan direktori sementara milik job dengan cleanup pada sukses/gagal.
 - Saat shutdown worker, hentikan klaim baru, selesaikan atau hentikan subprocess secara terkontrol, dan biarkan mekanisme lease/retry memulihkan pekerjaan yang belum selesai.
-- Profil transcode, kebijakan media publik/cache, batas unggah, dan HLS disiapkan pada task development terkait. Status `published` tidak menggantikan kontrol akses object storage.
+- Format streaming produk adalah HLS VOD; hls-v1 H.264 SDR/AAC optional, ladder 480p/720p/1080p, fMP4 target 6 detik serta kontrak upload/delivery/cache sudah disetujui. Detail encoder dan proof provider/browser berada pada HLS-PROFILE/DELIVERY pada [backlog media](tasks/media.md). Verifikasi master/variant dan seluruh segment/init sebelum ready; signing master saja tidak melindungi/memberi akses URI turunan. R2 tidak memakai ACL public-read; S3 presign bukan custom domain delivery. Status `published` tidak menggantikan kontrol akses object storage.
 
 ## Logging dan validasi perubahan
 

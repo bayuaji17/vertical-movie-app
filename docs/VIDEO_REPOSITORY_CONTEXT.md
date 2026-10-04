@@ -1,11 +1,52 @@
 # Repository Context — Video, Series, dan Movie
 
-## Snapshot
+## Snapshot lanjutan — storage dan HLS
+
+- Repository: `bayuaji17/vertical-movie-app`.
+- Base ref lokal: `codex/design-system-final`.
+- Base SHA diperiksa: `0d3bef87f6d2f9b0a2873078f9b560f092f13c53`.
+- Analyzed at: 2026-10-04, Asia/Jakarta; snapshot kode tetap pada SHA di atas.
+- Context status: **current untuk finalisasi plan media**; snapshot tahap A di bawah dipertahankan sebagai riwayat.
+- Keputusan pengguna: MinIO untuk development, Cloudflare R2 melalui API S3-compatible untuk production, pemilihan melalui env, streaming HLS.
+- Keputusan resolusi lanjutan 3 Oktober 2026: sumber dan keluaran HLS minimum 480p, maksimum 1080p; sumber di atas 1080p termasuk 1440p/4K ditolak, bukan otomatis diturunkan. Semua video/sampul wajib portrait 9:16, standar sampul gambar diam JPG/JPEG/PNG/WebP <=5 MB, sumber minimal 1080 × 1920 dan hasil WebP 1080 × 1920 seragam antarjenis konten; keputusan ini menggantikan izin landscape pada snapshot historis di bawah. Batas sumber terbaru per kind disetujui: movie/standalone maksimal 30 menit dan 1,5 GB (1.500.000.000 byte), episode maksimal 10 menit dan 512 MB. Limit berlaku juga untuk file yang lebih pendek. Acuan ekspor sumber H.264 SDR 1080p24–30 pada 4–6 Mbps (default 6 Mbps), audio AAC 128 kbps; default memberi estimasi sekitar 459,6 MB untuk 10 menit dan 1.378,8 MB untuk 30 menit sebelum overhead. Profil hls-v1 disetujui terpisah pada 4 Oktober 2026; proof teknis tetap pending. Acuan bitrate ekspor tunduk pada size limit. Aturan dimensi dan proof boundary ada pada plan/backlog media; runtime media belum diimplementasikan.
+- Bucket development `vertical-movie-app` telah dibuat oleh pengguna. URL `http://localhost:9001/browser/vertical-movie-app` adalah Console; endpoint S3 lokal adalah `http://localhost:9000`. Keberadaan bucket dilaporkan pengguna; operasi objek/izin bucket belum diuji pada sesi planning ini.
+
+### Evidence kode dan batas implementasi lanjutan
+
+| Evidence pada SHA lanjutan                                                                                                                      | Hasil inspeksi                                                                                                                                        |
+| ----------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/api/src/app.ts:createApp`, `src/index.ts`                                                                                                 | Auth dan 16 endpoint metadata terpasang; service series/videos/genres menerima dependency DB; belum ada module media, queue, delivery atau publikasi. |
+| `apps/api/src/db/schema/index.ts`, `apps/api/drizzle/meta/_journal.json`                                                                        | Enam tabel metadata bersama auth; enam entry migration. Tidak ada schema aset/upload/job/rendition.                                                   |
+| `apps/api/src/config/env.ts:loadApiEnv`, `apps/api/.env.example`                                                                                | Loader runtime hanya memvalidasi port/database/auth/origin. Sampel `S3_*`/FFmpeg adalah placeholder, belum dipakai storage.                           |
+| `turbo.json:api#dev,api#start`                                                                                                                  | Variabel `S3_*`/FFmpeg diteruskan; selector storage belum tersedia. Perubahan Turbo kelak mengikuti bundled docs versi terpasang.                     |
+| `apps/web/src/routes/api/auth/$.ts`, `src/lib/api/client.ts`                                                                                    | Gateway hanya auth; client Eden bisnis bertipe sudah ada.                                                                                             |
+| `apps/web/src/components/vertical-video-player.tsx`, `apps/web/package.json`                                                                    | Demo memakai `Video` untuk MP4 dan Video.js React/core `10.0.0-rc.4`; integrasi HLS belum aktif.                                                      |
+| `apps/web/node_modules/@videojs/react/docs/guides/media-sources.md`, `reference/components/hlsjs-video.md`, `reference/components/hls-video.md` | Bundled docs menjelaskan media HLS dan adapter hls.js; keputusan adapter final memerlukan proof browser, bukan asumsi MP4 component langsung cukup.   |
+
+### Integrasi dan keputusan yang tersisa
+
+Lifecycle video terbaru disetujui 4 Oktober 2026: **draft → published → archived**, tanpa status produk unpublished. Ini target lanjutan, bukan schema/runtime yang sudah berubah. VID-016 menyiapkan compatibility; Pengguna memilih satu bucket aplikasi per environment pada 4 Oktober 2026. Kontrak nomor 4 disepakati 4 Oktober 2026: seluruh bucket privat, sources/ untuk input dan outputs/ untuk hasil immutable, master/variant playlist melalui API dan init/segment/caption langsung dari storage melalui signed GET URL. TTL playback disetujui 4 Oktober 2026: 2× durasi video aktual terverifikasi sejak URL diterbitkan; cache bila diaktifkan wajib memiliki expiry/invalidation, dengan cache terkait signed URL tidak melewati expiry URL. Cache metadata TTL 60 detik, playlist no-store dan cache segment privat maksimal min(300 detik, sisa umur URL) disetujui 4 Oktober 2026; proof response headers/invalidation masih diperlukan; archive menghentikan URL baru sementara URL lama berlaku sampai expiry. Kontrak akses memakai expiry URL lama, bukan pencabutan instan; tidak menjanjikan revocation instan atau CDN/custom-domain presign. Playlist disajikan API; data video langsung dari storage. Gateway yang memproksi seluruh segment bukan kontrak yang dipilih. Detail pada [plan nomor 4](VIDEO_IMPLEMENTATION_PLAN.md#nomor-4--akses-video-distribusi-hls-dan-cache-disepakati-4-oktober-2026).
+
+`STORAGE_PROVIDER=minio|r2` dan satu kontrak adapter S3 direncanakan untuk API/worker. Endpoint, region, bucket dan credential berasal dari env server. Provider disimpan bersama identitas aset agar perubahan env tidak menafsirkan objek lama sebagai objek provider baru. Mengganti env bukan migrasi/copy data.
+
+HLS untuk video on-demand dipilih; FFmpeg akan menghasilkan master/variant playlist beserta seluruh segment dan init file bila memakai fMP4. R2 menyimpan hasil, bukan menjalankan transcoding. **hls-v1 disetujui 4 Oktober 2026**: H.264 SDR, AAC 128 kbps bila audio tersedia, target video 480p/720p/1080p 1,2/2,5/4,5 Mbps, output maksimal 30 fps, segment fMP4 dengan target 6 detik dan pemilihan kualitas adaptif; tanpa crop/upscale, hanya kualitas yang dapat dibuat dari sumber. Detail encoder/GOP/SAR/VFR/MIME serta kualitas visual dan compatibility tetap memerlukan proof HLS-PROFILE-001. Paralelisme, expiry, distribusi seluruh objek HLS dan batas akses setelah archive sudah disepakati; identity resume, header provider dan implementasinya memerlukan proof. Metode upload S3 multipart dengan pembagian file menjadi part kecil telah dipilih, termasuk sampul kecil satu part; ukuran part target 2% ukuran file aktual (minimum 5 MiB selain part terakhir) disetujui pada 4 Oktober 2026. Session 24 jam disetujui pada nomor 6; maksimal 3 part paralel per file dan URL part 15 menit dibatasi sisa session disetujui 4 Oktober 2026. Presigned URL master saja tidak memberi izin pada playlist/segment turunannya.
+
+Perubahan worktree desain yang sudah ada (`apps/web/src/styles.css`, `docs/DESIGN_SYSTEM.md`, indeks docs dan artefak desain) milik pekerjaan aktif lain dipertahankan. Otorisasi finalisasi 4 Oktober 2026 mencakup dokumen, sampel env, branch codex/media-backend-plan dan commit planning. Runtime, akun/bucket, migrasi dan deployment belum dikerjakan. Push tidak termasuk otorisasi; credential tidak dibaca untuk planning. Evidence pengujian metadata sebelumnya tetap merujuk backlog; tidak dijalankan ulang sebagai proof media.
+
+Referensi resmi diperiksa 3 Oktober 2026: [Bun S3](https://bun.com/docs/runtime/s3), [R2 S3 compatibility](https://developers.cloudflare.com/r2/api/s3/api/), [R2 presigned URLs](https://developers.cloudflare.com/r2/api/s3/presigned-urls/), [R2 CORS](https://developers.cloudflare.com/r2/buckets/cors/), [FFmpeg HLS muxer](https://ffmpeg.org/ffmpeg-formats.html#hls-2). Bukti dokumentasi vendor tidak menggantikan proof operasional MinIO/R2.
+
+[Rekomendasi deployment nomor 8](VIDEO_IMPLEMENTATION_PLAN.md#nomor-8--rekomendasi-deployment-production-dan-r2-belum-disetujui) dicatat sebagai belum disetujui: satu server Linux dengan proses web/API/worker/PostgreSQL terpisah via Docker Compose, reverse proxy HTTPS, bucket R2 privat/token scoped/CORS, volume DB/workspace serta backup/restore proof. Target uji pengguna 4 core/RAM 4 GB; provider/domain/disk belum ditentukan. Kandidat worker 1,5 GiB/2 vCPU/thread 1 serta kapasitas keseluruhan menunggu benchmark; same-origin dan signed S3 delivery mengikuti keputusan yang sudah ada. Tidak ada Dockerfile/Compose/provisioning/deployment/migration baru.
+
+### Observasi untuk rekomendasi worker — 4 Oktober 2026
+
+Read-only pada mesin development: 12 CPU logis, RAM sekitar 7,4 GiB; /tmp adalah tmpfs sekitar 3,8 GiB, sedangkan /var/tmp berada pada disk root dengan sekitar 945 GiB tersedia saat pemeriksaan. command -v tidak menemukan ffmpeg/ffprobe pada PATH; ini bukan proof executable tidak ada di lokasi lain. Source API hanya memiliki config env; belum ada worker/queue/storage module atau script worker pada apps/api/package.json. Pengguna menyetujui parameter worker melalui env dan concurrency default 1 pada 4 Oktober 2026; sample API memuat MEDIA_WORKER_CONCURRENCY=1. Pengguna kemudian menyetujui retry/deadline/lease/recovery dan penentuan thread/RAM/disk melalui benchmark. Angka kandidat resource serta detail teknis tambahan belum dibekukan/benchmark. Loader dan worker belum diimplementasikan. Detail [rekomendasi nomor 7](VIDEO_IMPLEMENTATION_PLAN.md#nomor-7--kebijakan-worker-disetujui-4-oktober-2026).
+
+## Snapshot historis tahap A
 
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `main`.
 - Base SHA: `d1d3e0a36a4adf1c7198db7a1d36c49e9f1c93ed`.
-- Analyzed at: 2026-10-03, Asia/Jakarta.
+- Analyzed at: 2026-10-04, Asia/Jakarta; snapshot kode tetap pada SHA di atas.
 - Context status: snapshot historis sebelum implementasi; peta di bawah menjelaskan base SHA, bukan keadaan branch hasil.
 - Scope snapshot: inspeksi dan penulisan dokumen sebelum persetujuan implementasi.
 
