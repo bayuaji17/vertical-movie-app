@@ -542,7 +542,7 @@ Sebagai admin, saya ingin video mengikuti draft → published → archived, sehi
 
 ## Task: VID-016 — Sesuaikan kontrak lifecycle video dan schema compatibility
 
-- Status: Backlog
+- Status: Review
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — prerequisite publication
 - Referensi: VID-US-06, PRD-06, keputusan lifecycle model/plan 4 Oktober 2026
@@ -555,10 +555,10 @@ Tetapkan kontrak domain/DTO target draft/published/archived untuk video, allowed
 
 ### Acceptance criteria
 
-- [ ] Kontrak video menggunakan draft → published → archived tanpa status produk unpublished; archive video published tidak lagi ditolak hanya karena published.
-- [ ] rowVersion/actor/first-published/archive timestamps dan race publish/archive mempertahankan audit/visibility; archive bukan hard delete.
-- [ ] Review compatibility memisahkan enum schema saat ini dari target; mapping data existing termasuk unpublished bila ada ditetapkan sebelum migration. Lifecycle series tidak berubah tanpa keputusan.
-- [ ] Generate/review migration dan dedicated PostgreSQL proof bila schema berubah; pada implementasi jalankan migration development sesuai instruksi repository dan verifikasi data auth/content tetap utuh. Production tetap rollout terpisah.
+- [x] Kontrak video menggunakan draft → published → archived tanpa status produk unpublished; archive video published tidak lagi ditolak hanya karena published.
+- [x] rowVersion/actor/first-published/archive timestamps dan race publish/archive mempertahankan audit/visibility; archive bukan hard delete.
+- [x] Review compatibility memisahkan enum schema saat ini dari target; mapping data existing termasuk unpublished bila ada ditetapkan sebelum migration. Lifecycle series tidak berubah tanpa keputusan.
+- [x] Generate/review migration dan dedicated PostgreSQL proof bila schema berubah; pada implementasi jalankan migration development sesuai instruksi repository dan verifikasi data auth/content tetap utuh. Production tetap rollout terpisah.
 
 ### Validasi
 
@@ -566,7 +566,7 @@ Proof domain/API dan PostgreSQL dedicated untuk transition/invalid transition/ve
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; keputusan dan backlog saja pada 4 Oktober 2026. Schema/runtime/migration tidak diubah.
+4 Oktober2026: video-only schema/status/DTO/archive dan migration0008 tersedia; content regression19/204, legacy mapping1/10 dan worker publication/archive E2E lulus. Development journal9/data auth+metadata existing utuh setelah backup. Series lifecycle tetap terpisah. Root gates pada [Media Operations](../MEDIA_OPERATIONS.md); implementasi belum commit.
 
 ### Blocker atau tindak lanjut
 

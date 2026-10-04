@@ -50,6 +50,17 @@ export const VideoListQuery = t.Object(
 );
 export const VideoDto = t.Object({
   ...EditorialDto,
+  publicationStatus: t.Union([
+    t.Literal("draft"),
+    t.Literal("published"),
+    t.Literal("archived"),
+  ]),
+  sourceAvailability: t.Union([
+    t.Literal("not_uploaded"),
+    t.Literal("available"),
+    t.Literal("deleting"),
+    t.Literal("deleted"),
+  ]),
   kind: VideoKind,
   seasonId: t.Nullable(Uuid),
   episodeNumber: t.Nullable(t.Integer()),

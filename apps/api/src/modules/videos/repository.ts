@@ -1,6 +1,7 @@
 import { eq, inArray, and, or, isNull, ilike, desc, sql } from "drizzle-orm";
 import {
   videos,
+  mediaAssets,
   seasons,
   series,
   videoGenres,
@@ -14,6 +15,25 @@ import type {
 import { assertGenreIds } from "../../shared/content-db";
 export class VideosStore {
   constructor(private readonly db: ContentConnection) {}
+  async sourceAvailability(
+    id: string | null,
+  ): Promise<"not_uploaded" | "available" | "deleting" | "deleted"> {
+    if (!id) return "not_uploaded";
+    const [a] = await this.db
+      .select({
+        deletedAt: mediaAssets.deletedAt,
+        deletionToken: mediaAssets.deletionToken,
+      })
+      .from(mediaAssets)
+      .where(eq(mediaAssets.id, id));
+    return !a
+      ? "not_uploaded"
+      : a.deletedAt
+        ? "deleted"
+        : a.deletionToken
+          ? "deleting"
+          : "available";
+  }
   async update(
     id: string,
     version: number,

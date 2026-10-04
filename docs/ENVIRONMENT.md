@@ -1,6 +1,6 @@
 # Environment aplikasi
 
-> Diperbarui 3 Oktober 2026. MinIO development, Cloudflare R2 production melalui S3-compatible, selector env dan HLS disetujui pengguna. Sampel media tetap **direncanakan**, belum dikonsumsi loader runtime.
+> Diperbarui 4 Oktober 2026. API media/worker/HLS aktif pada development MinIO; production R2 melalui selector env tersedia tetapi proof staging belum dijalankan. Kontrak/command/batas evidence: [Media Operations](MEDIA_OPERATIONS.md).
 
 ## Mulai dari root repo
 
@@ -15,22 +15,22 @@ Perintah `cp` cukup dijalankan sekali; jika `.env` sudah ada, tambahkan variabel
 
 ## API — `apps/api/.env`
 
-| Variabel                                   | Kegunaan                                                                                         | Status                                                                            |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
-| `PORT`                                     | Port API; default starter 3001.                                                                  | Aktif pada dev dan start.                                                         |
-| `DATABASE_URL`                             | Koneksi PostgreSQL untuk Drizzle, data auth, dan queue persisten.                                | URL divalidasi saat API start; koneksi saat dipakai.                              |
-| `BETTER_AUTH_URL`                          | Origin publik web untuk Better Auth, misalnya `http://localhost:3000`; tanpa suffix `/api/auth`. | Dipakai saat startup API.                                                         |
-| `BETTER_AUTH_SECRET`                       | Secret autentikasi acak dengan entropi tinggi, minimal 32 karakter.                              | Wajib diisi saat API start.                                                       |
-| `WEB_ORIGIN`                               | Origin web yang harus sama dengan `BETTER_AUTH_URL` untuk login same-origin.                     | Dipakai saat startup API.                                                         |
-| `STORAGE_PROVIDER`                         | Selector `minio` untuk development atau `r2` untuk production.                                   | Direncanakan; belum dibaca `loadApiEnv`.                                          |
-| `S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET`    | Endpoint API S3, region dan bucket sesuai profil provider.                                       | Direncanakan; sampel MinIO lokal tersedia.                                        |
-| `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | Kredensial storage khusus server.                                                                | Wajib diisi saat integrasi storage.                                               |
-| `S3_SESSION_TOKEN`                         | Token tambahan bila memakai kredensial storage sementara.                                        | Opsional.                                                                         |
-| `FFMPEG_PATH`, `FFPROBE_PATH`              | Lokasi executable transcode dan pemeriksaan media; nilai contoh mengandalkan `PATH`.             | Disiapkan untuk worker media.                                                     |
-| `MEDIA_PLAYBACK_BASE_URL`                  | Origin/path delivery seluruh objek HLS setelah mekanisme akses ditetapkan.                       | Direncanakan; kosong, belum ada delivery runtime.                                 |
-| `MEDIA_WORKER_CONCURRENCY`                 | Maksimal job video aktif per instance worker; default 1, dapat diatur melalui env server.        | Disetujui 4 Oktober 2026; sample tersedia, loader/worker belum diimplementasikan. |
+| Variabel                                   | Kegunaan                                                                                         | Status                                               |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------- |
+| `PORT`                                     | Port API; default starter 3001.                                                                  | Aktif pada dev dan start.                            |
+| `DATABASE_URL`                             | Koneksi PostgreSQL untuk Drizzle, data auth, dan queue persisten.                                | URL divalidasi saat API start; koneksi saat dipakai. |
+| `BETTER_AUTH_URL`                          | Origin publik web untuk Better Auth, misalnya `http://localhost:3000`; tanpa suffix `/api/auth`. | Dipakai saat startup API.                            |
+| `BETTER_AUTH_SECRET`                       | Secret autentikasi acak dengan entropi tinggi, minimal 32 karakter.                              | Wajib diisi saat API start.                          |
+| `WEB_ORIGIN`                               | Origin web yang harus sama dengan `BETTER_AUTH_URL` untuk login same-origin.                     | Dipakai saat startup API.                            |
+| `STORAGE_PROVIDER`                         | Selector `minio` untuk development atau `r2` untuk production.                                   | Aktif jika selector diisi; profile divalidasi.       |
+| `S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET`    | Endpoint API S3, region dan bucket sesuai profil provider.                                       | Aktif pada API/worker; wajib saat media aktif.       |
+| `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | Kredensial storage khusus server.                                                                | Wajib diisi saat integrasi storage.                  |
+| `S3_SESSION_TOKEN`                         | Token tambahan bila memakai kredensial storage sementara.                                        | Opsional.                                            |
+| `FFMPEG_PATH`, `FFPROBE_PATH`              | Lokasi executable transcode dan pemeriksaan media; nilai contoh mengandalkan `PATH`.             | Aktif pada worker terpisah.                          |
+| `MEDIA_PLAYBACK_BASE_URL`                  | Origin/path delivery seluruh objek HLS setelah mekanisme akses ditetapkan.                       | Aktif; kosong = WEB_ORIGIN/api, wajib same origin.   |
+| `MEDIA_WORKER_CONCURRENCY`                 | Maksimal job video aktif per instance worker; default 1, dapat diatur melalui env server.        | Aktif pada worker, default1; command terpisah.       |
 
-Nilai database dalam sampel hanya contoh lokal. Menyalin env belum membuat database, tabel, bucket, akun admin, atau worker. Queue menggunakan PostgreSQL yang sama; tidak memerlukan Redis. Konfigurasi melalui env dan concurrency default 1 disetujui pada nomor 7 di bawah; angka retry 3 attempt/jeda 60–300 detik, encoding max(900 detik,3×durasi), stall 300 detik, heartbeat 15/lease 120/recovery 30 detik juga sudah disetujui. Runtime belum menerapkannya.
+Nilai database dalam sampel hanya contoh lokal. Menyalin env belum membuat database, tabel, bucket, akun admin, atau worker. Queue menggunakan PostgreSQL yang sama; tidak memerlukan Redis. Konfigurasi melalui env dan concurrency default 1 disetujui pada nomor 7 di bawah; angka retry 3 attempt/jeda 60–300 detik, encoding max(900 detik,3×durasi), stall 300 detik, heartbeat 15/lease 120/recovery 30 detik juga sudah disetujui. Worker runtime menerapkan parameter tersebut.
 
 `TEST_DATABASE_URL` hanya untuk proof adapter (proof mereset schema `public` dan `drizzle`) `bun run --cwd apps/api auth:adapter:proof` dan harus menunjuk ke `vertical_movie_app_auth_test` di localhost. `AUTH_SCHEMA_TEST_DATABASE_URL` hanya untuk `bun run --cwd apps/api auth:schema:proof`; test akan menghapus dan membuat ulang schema `public` dan `drizzle` pada `vertical_movie_app_auth_schema_test`. `AUTH_RUNTIME_TEST_DATABASE_URL` hanya untuk `bun run --cwd apps/api auth:runtime:proof` dan mereset dua schema pada `vertical_movie_app_auth_runtime_test`. `AUTH_ADMIN_TEST_DATABASE_URL` hanya untuk proof admin, recovery, authorization, dan OpenAPI pada `vertical_movie_app_auth_admin_test`; proof provisioning/recovery mereset schema, authorization juga mereset schema sebelum menerapkan migrasi. Script menolak host/nama database lain. Proof yang berbagi database admin harus dijalankan serial. Arahkan semua variabel test hanya ke database localhost khusus yang boleh di-reset. Tidak ada script umum `test:integration`; jalankan proof satu per satu dengan command yang tercantum pada backlog auth. Script migrasi aplikasi hanya memerlukan `DATABASE_URL`; target harus diperiksa operator. Gunakan `db:migrate -- --stage=expand`, verifikasi cutover native, lalu `db:migrate -- --stage=contract`; tanpa flag semua migration pending diterapkan. Lihat [Auth Operations](AUTH_OPERATIONS.md).
 
@@ -62,53 +62,13 @@ Drizzle Kit `0.31.11` membutuhkan driver yang didukung untuk Studio dan belum me
 
 Hentikan seluruh instance API penerima login dan selesaikan/batalkan request in-flight. Jalankan `bun run --cwd apps/api admin:reset-password -- admin@example.com --maintenance-confirmed`, lalu masukkan password baru melalui prompt tersembunyi. Operator memakai `requestPasswordReset/resetPassword` native dengan callback token di memori, tanpa email/sesi admin. Revoke sessions aktif dan diverifikasi sebelum sukses. Reset native tidak atomic: failure dapat terjadi setelah password berubah; tetap maintenance dan ulangi native reset sampai pencabutan terverifikasi sebelum restart. Detail recovery, seed parsial, concurrency, rollback, dan migrasi ada pada [Auth Operations](AUTH_OPERATIONS.md).
 
-### Storage dan HLS — konfigurasi yang direncanakan
+### Storage dan HLS — runtime aktif
 
-Keputusan pengguna 3 Oktober 2026: development memakai MinIO existing; production memakai Cloudflare R2 melalui API S3-compatible; streaming produk memakai HLS VOD. Pilihan ditentukan eksplisit oleh `STORAGE_PROVIDER`, bukan otomatis dari `NODE_ENV`. Seluruh profil berikut adalah kontrak target MEDIA-CFG-001, bukan konfigurasi runtime aktif.
+Development: STORAGE_PROVIDER=minio, S3_ENDPOINT=http://localhost:9000, S3_REGION=us-east-1, S3_BUCKET=vertical-movie-app. Credential aplikasi scoped bucket disimpan hanya pada env ignored. Port9001 adalah Console, bukan endpoint S3. Production: NODE_ENV=production, STORAGE_PROVIDER=r2, S3_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com, S3_REGION=auto dan bucket/credential R2 milik environment. Loader menolak provider/endpoint/credential invalid serta MinIO production, tanpa fallback credential. Mengganti profil tidak memindahkan objek persisted. R2 belum diuji staging.
 
-Development pada host saat ini:
+MEDIA_PLAYBACK_BASE_URL kosong berarti WEB_ORIGIN/api dan harus sama origin/path. Master/variant melalui gateway API, init/segment langsung signed S3 GET. TTL2×durasi verified, signed DTO/playlist private,no-store; payload private,no-store sebagai fallback MinIO. Metadata TTL60s dengan after-commit invalidation. Archive memblokir URL baru; yang lama/buffer bertahan sampai expiry. Bucket tunggal seluruhnya private, tanpa public-read atau bucket lifecycle unconditional yang melanggar retensi archived.
 
-```dotenv
-NODE_ENV=development
-STORAGE_PROVIDER=minio
-S3_ENDPOINT=http://localhost:9000
-S3_REGION=us-east-1
-S3_BUCKET=vertical-movie-app
-S3_ACCESS_KEY_ID=
-S3_SECRET_ACCESS_KEY=
-S3_SESSION_TOKEN=
-FFMPEG_PATH=ffmpeg
-FFPROBE_PATH=ffprobe
-MEDIA_PLAYBACK_BASE_URL=
-```
-
-Pengguna telah membuat bucket `vertical-movie-app`. `http://localhost:9001/browser/vertical-movie-app` adalah URL Console, bukan endpoint S3. Credential aplikasi diisi pada env lokal/API/worker dan dibatasi pada bucket proyek. Root credential tidak dimasukkan ke dokumen atau sample. Proof operasi/izin/CORS bucket belum dijalankan pada sesi planning; region `us-east-1` adalah profil awal untuk dibuktikan.
-
-Production R2 (placeholder; bucket/credential belum diprovision):
-
-```dotenv
-NODE_ENV=production
-STORAGE_PROVIDER=r2
-S3_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
-S3_REGION=auto
-S3_BUCKET=<bucket-production>
-S3_ACCESS_KEY_ID=
-S3_SECRET_ACCESS_KEY=
-S3_SESSION_TOKEN=
-FFMPEG_PATH=ffmpeg
-FFPROBE_PATH=ffprobe
-MEDIA_PLAYBACK_BASE_URL=
-```
-
-Pengguna memilih satu bucket aplikasi per environment pada 4 Oktober 2026. Kontrak nomor 4 disepakati 4 Oktober 2026: seluruh bucket privat, sources/ untuk input dan outputs/ untuk hasil immutable, master/variant playlist melalui API dan init/segment/caption langsung dari storage melalui signed GET URL. TTL playback disetujui 4 Oktober 2026: 2× durasi video aktual terverifikasi sejak URL diterbitkan; cache bila diaktifkan wajib memiliki expiry/invalidation, dengan cache terkait signed URL tidak melewati expiry URL. Cache metadata TTL 60 detik, playlist no-store dan cache segment privat maksimal min(300 detik, sisa umur URL) disetujui 4 Oktober 2026; proof response headers/invalidation masih diperlukan; archive menghentikan URL baru sementara URL lama berlaku sampai expiry. Kontrak akses memakai expiry URL lama, bukan pencabutan instan; tidak menjanjikan revocation instan atau CDN/custom-domain presign. S3_BUCKET tetap satu bucket per profil; MEDIA_PLAYBACK_BASE_URL menunjuk origin/path API playlist pada usulan ini, sedangkan signed segment menggunakan endpoint S3 yang dapat dijangkau browser. Sample/loader/runtime tidak diubah pada rekomendasi ini.
-
-API dan worker harus memakai satu profil yang sama; adapter menerima nilai yang divalidasi secara eksplisit. Native Bun mendukung custom endpoint MinIO/R2; kemampuan operasi yang diperlukan tetap diuji pada kedua provider. Loader media kelak menolak provider unknown, credential kosong, endpoint Console, R2 non-HTTPS/region bukan auto serta MinIO pada runtime production proyek ini. Tidak fallback ke credential provider lain. Restart proses ketika env berubah. Pergantian env tidak menyalin/memigrasikan objek existing; aset menyimpan provider/bucket/key asal dan membutuhkan prosedur perpindahan data terpisah.
-
-Browser upload memakai signed endpoint yang reachable tanpa rewrite hostname setelah signing. Jika API/worker kemudian memakai Docker hostname, refine konfigurasi endpoint browser/internal dan proof signature/CORS sebelum mengaktifkan upload. Bucket test khusus digunakan integrasi; bucket aplikasi `vertical-movie-app` dan storage SynergoHQ tidak digunakan untuk cleanup destruktif.
-
-HLS ditetapkan pada pipeline VOD: FFmpeg menghasilkan master/variant `.m3u8`, segment fMP4 dan init file sesuai hls-v1. `MEDIA_PLAYBACK_BASE_URL` kelak menunjuk origin/path delivery, bukan endpoint API S3. Nilainya tetap kosong sampai HLS-DELIVERY-001 membuktikan API playlist/direct signed payload, CORS, cache, expiry dan archive untuk seluruh objek sesuai kontrak nomor 4. Signed master saja tidak mencakup URI turunan; R2 presigned URL memakai domain S3 API dan tidak dapat dipindahkan ke custom domain. Bucket draft/source tetap privat, tanpa ACL `public-read` yang tidak didukung R2. Tidak ada env storage/secret `VITE_*`; player menerima URL playback/type dari DTO API.
-
-Task konfigurasi kelak meneruskan `STORAGE_PROVIDER` dan `MEDIA_PLAYBACK_BASE_URL` pada `api#dev`/`api#start` serta task worker saat dibuat. `turbo.json` sesi ini belum diubah; selector belum dijamin diteruskan dari env deployment melalui strict mode. Nama `S3_*` existing tetap dipertahankan. Detail dependency/validasi ada pada [plan video](VIDEO_IMPLEMENTATION_PLAN.md) dan [backlog media](tasks/media.md).
+Native Bun S3 dipakai untuk file/GET/presign. SDK S3 multipart/copy/control ditambahkan setelah native1.4.2 tidak mempunyai kontrak browser initiate/list/complete/abort. Browser harus menjangkau endpoint persign tanpa rewrite hostname; CORS GET/PUT/HEAD/Range dan ETag perlu diverifikasi per environment. Rincian dan proof pada [Media Operations](MEDIA_OPERATIONS.md). Turbo api dev/start meneruskan selector/upload/playback; worker dijalankan app-local, sehingga env worker langsung dibaca Bun.
 
 Generate secret baru di terminal sendiri dengan Bun, lalu masukkan hasilnya ke `apps/api/.env`:
 
@@ -118,9 +78,9 @@ bun -e 'console.log(Array.from(crypto.getRandomValues(new Uint8Array(32)), byte 
 
 ## Upload multipart — parameter disetujui
 
-Parameter berikut disetujui 4 Oktober 2026. Sample API tersedia; loader/session/browser scheduler belum diimplementasikan. Kontrak lengkap pada [parameter upload](VIDEO_IMPLEMENTATION_PLAN.md#nomor-2--parameter-upload-disetujui-4-oktober-2026).
+Parameter berikut disetujui 4 Oktober 2026. Loader dan session API aktif; scheduler dashboard upload lengkap belum dibuat. Kontrak lengkap pada [parameter upload](VIDEO_IMPLEMENTATION_PLAN.md#nomor-2--parameter-upload-disetujui-4-oktober-2026).
 
-| Variabel server rencana           | Default | Arti                                                                                 |
+| Variabel server aktif             | Default | Arti                                                                                 |
 | --------------------------------- | ------- | ------------------------------------------------------------------------------------ |
 | MEDIA_UPLOAD_PART_CONCURRENCY     | 3       | Maksimal UploadPart bersamaan per file pada browser scheduler; bukan job transcoding |
 | MEDIA_UPLOAD_SESSION_TTL_SECONDS  | 86400   | Session 24 jam sejak initiate, tidak diperpanjang oleh retry                         |
@@ -128,30 +88,25 @@ Parameter berikut disetujui 4 Oktober 2026. Sample API tersedia; loader/session/
 
 Runtime kelak menghitung partUrlTtlSeconds = min(900, floor((sessionExpiresAt - now)/1000)); sisa kurang dari 1 detik atau session non-pending ditolak. Renewal memeriksa admin/session/part dan tidak mengulang part yang sudah terverifikasi. MEDIA-CFG-001 menguji default/validasi positive integer tanpa storage I/O; MEDIA-PROOF/DESIGN/UPLOAD membuktikan native signing, expiry dan browser concurrency. Konfigurasi milik API, disampaikan sebagai nilai aman kepada browser tanpa VITE_ secret atau signed URL persisten.
 
-## Worker media — konfigurasi nomor 7
+## Worker — env aktif dan kandidat resource
 
-Pengguna menyetujui parameter worker melalui env server dan MEDIA_WORKER_CONCURRENCY default 1 pada 4 Oktober 2026. Pengguna kemudian menyetujui retry/deadline/lease/recovery dan penentuan resource melalui benchmark. Sample API memuat nilai kebijakan yang disepakati; loader worker belum tersedia. Nilai teknis tambahan masih rekomendasi; target uji 4 core/RAM 4 GB memakai kandidat 1 thread/worker 1,5 GiB/guard disk 10 GiB dari nomor 8 untuk benchmark. API config dan worker di apps/api memvalidasi server env; tidak memakai VITE_*. Queue PostgreSQL/FFmpeg tetap keputusan repositori. Kontrak lengkap pada [nomor 7](VIDEO_IMPLEMENTATION_PLAN.md#nomor-7--kebijakan-worker-disetujui-4-oktober-2026).
+Jalankan bun run --cwd apps/api worker atau worker:start setelah build. API tidak menjalankan worker. Parameter yang digunakan loadWorkerEnv:
 
-| Variabel rencana                                                          | Nilai awal                                | Arti                                                                                                  |
-| ------------------------------------------------------------------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| MEDIA_WORKER_CONCURRENCY                                                  | 1                                         | Disetujui: default 1 job video per instance; satu instance awal adalah rekomendasi deployment         |
-| MEDIA_WORKER_POLL_SECONDS                                                 | 5                                         | Poll saat idle, dengan backoff koneksi DB                                                             |
-| MEDIA_JOB_MAX_ATTEMPTS                                                    | 3                                         | Total attempt termasuk pertama/crash; retry hanya error eligible                                      |
-| MEDIA_JOB_RETRY_DELAYS_SECONDS                                            | 60,300                                    | Delay retry pertama/kedua ditambah jitter ±20%                                                        |
-| MEDIA_JOB_HEARTBEAT_SECONDS / MEDIA_JOB_LEASE_SECONDS                     | 15 / 120                                  | Renew lease dengan DB clock/token; heartbeat harus lebih pendek dari lease                            |
-| MEDIA_JOB_RECOVERY_POLL_SECONDS                                           | 30                                        | Scan lease expired                                                                                    |
-| MEDIA_TRANSCODE_TIMEOUT_FACTOR / MEDIA_TRANSCODE_MIN_TIMEOUT_SECONDS      | 3 / 900                                   | Timeout encoding max(900 detik,3×durasi terverifikasi); exclude transfer/antrean                      |
-| MEDIA_JOB_MAX_RUNTIME_SECONDS / MEDIA_JOB_STALL_TIMEOUT_SECONDS           | 7200 / 300                                | Total waktu attempt sejak claim / watchdog tanpa progress nyata per stage                             |
-| MEDIA_FFPROBE_TIMEOUT_SECONDS                                             | 60                                        | Batas probe                                                                                           |
-| MEDIA_ENCODER_THREADS / MEDIA_DECODER_THREADS / MEDIA_FILTER_THREADS      | 1 / 1 / 1                                 | Encoder video per rendition; total proses dapat memakai lebih dari 1 CPU, limit OS/container terpisah |
-| MEDIA_WORK_DIR / MEDIA_WORK_MIN_FREE_BYTES                                | /var/tmp/vertical-movie-app / 10737418240 | Disk kerja dan guard 10 GiB per job, dengan reservation/admission; bukan output size cap              |
-| MEDIA_WORKER_SHUTDOWN_GRACE_SECONDS / MEDIA_SUBPROCESS_KILL_GRACE_SECONDS | 60 / 10                                   | Grace worker lalu terminate child dengan kill escalation dan await exit                               |
+| Variabel                                                             | Default                        | Fungsi                                                                     |
+| -------------------------------------------------------------------- | ------------------------------ | -------------------------------------------------------------------------- |
+| MEDIA_WORKER_CONCURRENCY                                             | 1                              | Job per instance; integer1–8                                               |
+| MEDIA_JOB_MAX_ATTEMPTS / MEDIA_JOB_RETRY_DELAYS_SECONDS              | 3 / 60,300                     | Budget failure dan delay retry detik; pause resource tidak membakar budget |
+| MEDIA_JOB_HEARTBEAT_SECONDS / MEDIA_JOB_LEASE_SECONDS                | 15 / 120                       | Renew dengan token/DB clock; lease>2×heartbeat                             |
+| MEDIA_JOB_RECOVERY_POLL_SECONDS / MEDIA_JOB_POLL_SECONDS             | 30 / 5                         | Recovery lease / idle poll                                                 |
+| MEDIA_TRANSCODE_TIMEOUT_FACTOR / MEDIA_TRANSCODE_MIN_TIMEOUT_SECONDS | 3 / 900                        | max(900s,3×duration) encoding                                              |
+| MEDIA_JOB_STALL_TIMEOUT_SECONDS / MEDIA_JOB_HARD_TIMEOUT_SECONDS     | 300 / 7200                     | No encode progress / seluruh job                                           |
+| MEDIA_WORKER_SHUTDOWN_SECONDS                                        | 60                             | Grace sebelum abort; subprocess escalation10s fixed                        |
+| MEDIA_FFMPEG_THREADS                                                 | 1                              | Decode/filter/encoder; bukan pembatas CPU OS                               |
+| MEDIA_WORKER_WORKDIR                                                 | /var/tmp/vertical-movie-worker | Dedicated absolute directory                                               |
+| MEDIA_WORKER_MIN_FREE_BYTES                                          | 10737418240                    | Guard disk10GiB                                                            |
+| FFMPEG_PATH / FFPROBE_PATH                                           | ffmpeg / ffprobe               | Executable, probe60s fixed                                                 |
 
-Worker loader kelak memakai default concurrency 1 bila env tidak diisi, menolak nilai non-integer/nonpositif dan menerima override integer positif sesuai kapasitas. Restart worker untuk menerapkan perubahan; tidak menambah instance secara otomatis.
-
-Untuk target uji 4 core/RAM 4 GB, proposal nomor 8 memakai budget worker 1,5 GiB beserta child dan 2 vCPU melalui supervisor/container/OS dengan proof RSS/CPU. Budget sebelumnya 3 GiB bukan kandidat untuk target 4 GB ini; env sendiri tidak membatasi resource. Konfigurasi memeriksa positive integers, max attempts sesuai jumlah retry delay, interval heartbeat/recovery/deadline kompatibel, direktori writable di disk, kapasitas dan readiness executable/encoder. Nilai production ditetapkan berdasarkan kapasitas server dan benchmark; opsi Bun/FFmpeg diteliti dari versi executable/runtime yang benar saat implementasi. Tidak ada script worker/task Turbo baru pada sesi proposal.
-
-Nilai disetujui: MEDIA_WORKER_CONCURRENCY, MEDIA_JOB_MAX_ATTEMPTS, MEDIA_JOB_RETRY_DELAYS_SECONDS, MEDIA_JOB_HEARTBEAT_SECONDS, MEDIA_JOB_LEASE_SECONDS, MEDIA_JOB_RECOVERY_POLL_SECONDS, MEDIA_TRANSCODE_TIMEOUT_FACTOR, MEDIA_TRANSCODE_MIN_TIMEOUT_SECONDS dan MEDIA_JOB_STALL_TIMEOUT_SECONDS. Var lain pada tabel merupakan default teknis rekomendasi, belum dibekukan.
+Hard deadline/shutdown/thread/disk merupakan kandidat teknis aktif yang dapat dituning setelah benchmark target4core4GB; env tidak membatasi RAM/CPU OS. Tidak ada memory reservation/admission lintas worker atau resource limit deployment otomatis. Poll/probe/kill values eksplisit; nama variabel rekomendasi lama yang tidak ada pada tabel bukan API env aktif. Restart worker setelah mengganti env. Worker Linux memerlukan GNU timeout untuk membatasi child orphan setelah death.
 
 ## Web — `apps/web/.env`
 

@@ -1,4 +1,8 @@
+import { loadStorageEnv, type StorageEnv } from "./storage-env";
+export { loadStorageEnv } from "./storage-env";
+
 export interface ApiEnv {
+  storage?: StorageEnv;
   port: number;
   databaseUrl: string;
   betterAuthUrl: string;
@@ -91,6 +95,9 @@ export function loadApiEnv(
   }
 
   return {
+    ...(source.STORAGE_PROVIDER !== undefined
+      ? { storage: loadStorageEnv(source) }
+      : {}),
     port,
     databaseUrl,
     betterAuthUrl,

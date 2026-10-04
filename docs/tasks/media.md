@@ -4,11 +4,11 @@
 
 Admin dapat mengunggah sumber video/poster dengan aman dan pengembang dapat memakai kontrak storage yang sama pada MinIO lokal dan Cloudflare R2 production. Worker kemudian menghasilkan HLS VOD untuk preview/publikasi. Referensi PRD-04/05/07/09, [plan video](../VIDEO_IMPLEMENTATION_PLAN.md), [model data](../VIDEO_DATA_MODEL.md), [context](../VIDEO_REPOSITORY_CONTEXT.md), [Environment](../ENVIRONMENT.md), [workflow](../GLOBAL_WORKFLOW.md).
 
-> Keputusan pengguna disetujui 3 Oktober 2026: MinIO development, bucket `vertical-movie-app` dibuat pengguna, Cloudflare R2 S3-compatible production, selector env, HLS. Base SHA refinement `0d3bef87f6d2f9b0a2873078f9b560f092f13c53`. Dokumen ini adalah backlog; tidak ada implementasi/proof media Done dari sesi planning.
+> Keputusan pengguna disetujui 3 Oktober 2026: MinIO development, bucket `vertical-movie-app` dibuat pengguna, Cloudflare R2 S3-compatible production, selector env, HLS. Base SHA refinement `0d3bef87f6d2f9b0a2873078f9b560f092f13c53`. Dokumen ini menyimpan keputusan planning dan status eksekusi. Implementasi inti pada feat/media-backend serta evidence lokal terkini tersedia pada [Media Operations](../MEDIA_OPERATIONS.md); belum ada commit implementasi.
 
 Keputusan resolusi lanjutan: sumber dan HLS 480p–1080p; sumber 1440p/4K ditolak, keluaran tidak boleh di-upscale. Semua video wajib portrait 9:16; landscape/square/cinematic/rasio lain ditolak. Bounds dimensi tampilan setelah rotasi/SAR dan contoh portrait mengikuti plan. Format sumber disetujui: MP4/MOV/MKV dengan H.264/H.265, WebM dengan VP8/VP9; wajib validasi container/codec aktual serta decode FFmpeg.
 
-Keputusan target sumber berikutnya: H.264 SDR/AAC 128 kbps sebagai acuan, acuan 1080p24–30 pada 4–6 Mbps (default 6 Mbps); sumber 60 fps tetap mengikuti size limit aktual, dengan batas terbaru per kind: movie/standalone maksimal 30 menit dan 1,5 GB (1.500.000.000 byte), episode maksimal 10 menit dan 512 MB. Semua video/sampul portrait 9:16 disetujui. Standar sampul seragam antarjenis konten: gambar diam JPG/JPEG/PNG/WebP <=5 MB (5.000.000 byte), sumber setelah orientasi minimal 1080 × 1920 portrait 9:16, hasil WebP 1080 × 1920; pixel sampul tidak mengikuti tiap video. Sumber lebih besar diperkecil, sumber di bawah minimum/rasio lain/animasi ditolak. Limit per kind berlaku juga untuk file yang lebih pendek; movie/standalone <=10 menit juga memakai limit per kind 1,5 GB. Kelompok batas produk nomor 1 selesai. Acuan bitrate tunduk pada limit sumber; budget total movie/standalone 30 menit sekitar 6,67 Mbps, sehingga acuan standar 4–6 Mbps memiliki ruang untuk audio/container; profil tinggi/60 fps tetap memerlukan ukuran aktual yang memenuhi cap. Target bitrate ekspor bukan ladder HLS final; kebijakan audio/HDR/VFR/fps di luar acuan masih refinement.
+Keputusan target sumber berikutnya: H.264 SDR/AAC 128 kbps sebagai acuan, acuan 1080p24–30 pada 4–6 Mbps (default 6 Mbps); sumber 60 fps tetap mengikuti size limit aktual, dengan batas terbaru per kind: movie/standalone maksimal 30 menit dan 1,5 GB (1.500.000.000 byte), episode maksimal 10 menit dan 512 MB. Semua video/sampul portrait 9:16 disetujui. Standar sampul seragam antarjenis konten: gambar diam JPG/JPEG/PNG/WebP <=5 MB (5.000.000 byte), sumber setelah orientasi minimal 1080 × 1920 portrait 9:16, hasil WebP 1080 × 1920; pixel sampul tidak mengikuti tiap video. Sumber lebih besar diperkecil, sumber di bawah minimum/rasio lain/animasi ditolak. Limit per kind berlaku juga untuk file yang lebih pendek; movie/standalone <=10 menit juga memakai limit per kind 1,5 GB. Kelompok batas produk nomor 1 selesai. Acuan bitrate tunduk pada limit sumber; budget total movie/standalone 30 menit sekitar 6,67 Mbps, sehingga acuan standar 4–6 Mbps memiliki ruang untuk audio/container; profil tinggi/60 fps tetap memerlukan ukuran aktual yang memenuhi cap. Target bitrate ekspor bukan ladder HLS final; kebijakan audio/HDR/VFR/fps mengikuti hls-v1; fixture sintetis membuktikan AAC optional, HDR→SDR dan fps≤30.
 
 Keputusan upload berikutnya: S3 multipart saja dengan file dipecah menjadi part kecil, termasuk sampul kecil satu part. Part upload digabung storage menjadi sumber lengkap; segment HLS dibuat terpisah oleh FFmpeg. Ukuran part disetujui 4 Oktober 2026: target 2% ukuran file aktual, minimal 5 MiB selain part terakhir; geometry byte/count dihitung sekali dan disimpan per session. Session 24 jam disetujui pada nomor 6; maksimal 3 part paralel per file dan URL part 15 menit dibatasi sisa session disetujui 4 Oktober 2026. Referensi kontrak ada pada [plan multipart](../VIDEO_IMPLEMENTATION_PLAN.md#nomor-2--s3-multipart-upload-disetujui-3-oktober-2026).
 
@@ -36,7 +36,7 @@ Semua task mengikuti template dan workflow root. Owner: pengembang/agent pelaksa
 
 ## Task: MEDIA-CFG-001 — Konfigurasi provider storage melalui env
 
-- Status: Ready
+- Status: Review
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P0 — urutan mengikuti dependency
 - Referensi: MEDIA-US-01, PRD-04/05/07/09, plan video tahap B–D
@@ -49,10 +49,10 @@ Tambahkan config/storage profile pada `apps/api/src/config/env.ts`, `env.test.ts
 
 ### Acceptance criteria
 
-- [ ] Loader menerima `minio|r2`, menolak enum/credential kosong/URL Console/region salah; deployment production proyek memakai R2 HTTPS/auto tanpa fallback tersembunyi.
-- [ ] Loader parameter upload menerima default concurrency 3/session 86400 detik/URL part 900 detik, memvalidasi integer positif dan tidak melakukan storage I/O saat import atau expose credential.
-- [ ] Profil lokal memakai S3 `http://localhost:9000`, region `us-east-1`, bucket existing `vertical-movie-app`; credential aplikasi hanya server dan tidak tercetak.
-- [ ] API/worker dapat memakai kontrak client yang sama; app factory tetap tanpa env/pool/I/O saat import. Selector dan delivery env kelak diteruskan Turbo sesuai bundled docs versi terpasang.
+- [x] Loader menerima `minio|r2`, menolak enum/credential kosong/URL Console/region salah; deployment production proyek memakai R2 HTTPS/auto tanpa fallback tersembunyi.
+- [x] Loader parameter upload menerima default concurrency 3/session 86400 detik/URL part 900 detik, memvalidasi integer positif dan tidak melakukan storage I/O saat import atau expose credential.
+- [x] Profil lokal memakai S3 `http://localhost:9000`, region `us-east-1`, bucket existing `vertical-movie-app`; credential aplikasi hanya server dan tidak tercetak.
+- [x] API/worker dapat memakai kontrak client yang sama; app factory tetap tanpa env/pool/I/O saat import. Selector dan delivery env kelak diteruskan Turbo sesuai bundled docs versi terpasang.
 
 ### Validasi
 
@@ -60,7 +60,7 @@ Native bun:test untuk profile valid/invalid dan error redaction; check-types/bui
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; tidak ada command proof, hasil operasi storage/FFmpeg, atau commit task pada sesi planning ini.
+4 Oktober2026, feat/media-backend (belum commit): Loader/config tests dan native factory, profile server, env sample/Turbo/DI tersedia. Local credential aplikasi scoped bucket di env ignored; raw secret tidak dicatat. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -68,7 +68,7 @@ MEDIA-PROOF-001 membuktikan operasi, dan MEDIA-DESIGN-001 memfinalkan identity/f
 
 ## Task: MEDIA-PROOF-001 — Proof operasi native S3 pada MinIO
 
-- Status: Backlog
+- Status: Review
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: MEDIA-US-01, PRD-04/05/07/09, plan video tahap B–D
@@ -91,7 +91,7 @@ Proof terpisah dengan guard endpoint/bucket test, fixture kecil yang aman, dan e
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; tidak ada command proof, hasil operasi storage/FFmpeg, atau commit task pada sesi planning ini.
+4 Oktober2026, feat/media-backend (belum commit): MinIO+Chromium storage1 test/17 assertions lulus. Native gap browser multipart dibuktikan; AWS SDK digunakan hanya untuk multipart/copy/control. Fresh dedicated bucket dibersihkan. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -99,7 +99,7 @@ MEDIA-DESIGN-001 memilih metode final dari evidence; MEDIA-R2-001 mengulang oper
 
 ## Task: MEDIA-DESIGN-001 — Tetapkan kontrak movie upload dan sumber immutable
 
-- Status: Backlog
+- Status: In Progress
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: MEDIA-US-02, PRD-04/05/07/09, plan video tahap B–D
@@ -122,7 +122,7 @@ Review kontrak dan matriks skenario terputus/resume/expiry/duplikasi/overwrite. 
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; tidak ada command proof, hasil operasi storage/FFmpeg, atau commit task pada sesi planning ini.
+4 Oktober2026, feat/media-backend (belum commit): Kontrak upload/freeze/status pada MEDIA_UPLOAD_CONTRACT.md dan MEDIA_OPERATIONS.md; policy/probe unit serta FFmpeg still/EXIF tersedia. Seluruh format/HDR/VFR/animasi/corrupt fixture matrix tetap terbuka. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -130,7 +130,7 @@ Resolusi 480p–1080p, target bitrate/fps sumber, batas terbaru per kind movie/s
 
 ## Task: MEDIA-SCHEMA-001 — Schema aset dan upload session
 
-- Status: Backlog
+- Status: Review
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: MEDIA-US-02, PRD-04/05/07/09, plan video tahap B–D
@@ -153,7 +153,7 @@ Dedicated PostgreSQL migration/constraint/rollback proof; generate/review SQL; `
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; tidak ada command proof, hasil operasi storage/FFmpeg, atau commit task pada sesi planning ini.
+4 Oktober2026, feat/media-backend (belum commit): Migrasi0006 generated/reviewed/applied development. Composite owner FK/geometry/identity/state constraints dibuktikan pada dedicated upload suite4/32, journal rerun dan data lama utuh. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -161,7 +161,7 @@ Enqueue job konkret menyusul WORKER-001; jangan membuat FK ke job table yang bel
 
 ## Task: MEDIA-UPLOAD-001 — Endpoint membuat upload session admin
 
-- Status: Backlog
+- Status: Review
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: MEDIA-US-02, PRD-04/05/07/09, plan video tahap B–D
@@ -185,7 +185,7 @@ bun:test app.handle dengan injected I/O dan clock; dedicated DB race/idempotency
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; tidak ada command proof, hasil operasi storage/FFmpeg, atau commit task pada sesi planning ini.
+4 Oktober2026, feat/media-backend (belum commit): Endpoint initiate/status/part dengan authoritative admin, request hash/idempotency/one-active-session/immutable geometry/TTL/actual-byte progress tersedia. Unit HTTP dan DB proof4/32 lulus. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -193,7 +193,7 @@ Jika WEB-CONTENT-001 belum tersedia, proof HTTP backend direct tetap sah dan acc
 
 ## Task: MEDIA-COMPLETE-001 — Finalisasi upload dan status aset aman saat diulang
 
-- Status: Backlog
+- Status: Review
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: MEDIA-US-02, PRD-04/05/07/09, plan video tahap B–D
@@ -216,7 +216,7 @@ Unit failure injection dan app.handle; dedicated DB races serta MinIO object ide
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; tidak ada command proof, hasil operasi storage/FFmpeg, atau commit task pada sesi planning ini.
+4 Oktober2026, feat/media-backend (belum commit): ListParts→Complete→HEAD→conditional freeze→HEAD→pointer/enqueue atomik tersedia. Dedicated DB freeze failure/replay/abort race4/32 dan real MinIO→worker E2E lulus. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -224,7 +224,7 @@ WORKER-001 menambahkan durable enqueue dalam transaksi perubahan status setelah 
 
 ## Task: MEDIA-CLEANUP-001 — Abort, expiry dan pembersihan upload terkontrol
 
-- Status: Backlog
+- Status: In Progress
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: MEDIA-US-02, PRD-04/05/07/09, plan video tahap B–D
@@ -247,7 +247,7 @@ Injected clock/storage failure tests; PostgreSQL concurrent transition proof dan
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; tidak ada command proof, hasil operasi storage/FFmpeg, atau commit task pada sesi planning ini.
+4 Oktober2026, feat/media-backend (belum commit): Explicit abort, session24h expiry, quarantine24h/hourly sweep dengan persisted key dan claim tersedia. DB expiry/abort race lulus; crash/fault matrix sweeper lengkap masih terbuka. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -255,7 +255,7 @@ Retensi source 7 hari dan file konten archived permanen disepakati 4 Oktober 202
 
 ## Task: HLS-PROFILE-001 — Tetapkan profil HLS VOD dan proof FFmpeg
 
-- Status: Backlog
+- Status: In Progress
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: HLS-US-01, PRD-04/05/07/09, plan video tahap B–D
@@ -279,7 +279,7 @@ FFmpeg/FFprobe nyata pada fixtures test bounded; parse/verify playlist dan semua
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; tidak ada command proof, hasil operasi storage/FFmpeg, atau commit task pada sesi planning ini.
+4 Oktober2026, feat/media-backend (belum commit): Real FFmpeg4/12 lulus: three tiers1080p60→30/AAC, video-only/native480, larger poster/downscale/minimum dan JPEG EXIF orientation. hls-v1 libx264/veryfast/GOP2s/fMP4 target6s/WebP85 aktif. Full10/30min, HDR/VFR/codecs/keyframe/peak/visual matrix belum dibuktikan. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -287,7 +287,7 @@ Profil produk hls-v1 disetujui pada 4 Oktober 2026; proof kualitas/compatibility
 
 ## Task: HLS-DELIVERY-001 — Kontrak akses seluruh objek HLS dan proof delivery
 
-- Status: Backlog
+- Status: Review
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: HLS-US-01, PRD-04/05/07/09, plan video tahap B–D
@@ -313,7 +313,7 @@ Fixture HLS proof untuk seluruh objek, expiry/refresh, URL stale, preview denial
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; tidak ada command proof, hasil operasi storage/FFmpeg, atau commit task pada sesi planning ini.
+4 Oktober2026, feat/media-backend (belum commit): Rewriter hanya verified output; manifest/traversal units, realMinIO private/Range/no-store dan signed2×duration E2E lulus. Chromium Vite dan built Bun/Nitro masing-masing1/60; archive menolak URL baru, URL lama sampai expiry. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -321,7 +321,7 @@ Kontrak ini menjadi gerbang PUBLISH-001; [syarat publikasi nomor 5](../VIDEO_IMP
 
 ## Task: MEDIA-R2-001 — Ulangi proof storage pada R2 staging
 
-- Status: Backlog
+- Status: Blocked
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: MEDIA-US-01, PRD-04/05/07/09, plan video tahap B–D
@@ -344,7 +344,7 @@ Dedicated bucket staging proof dengan env proses server, redacted logs, per-oper
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; tidak ada command proof, hasil operasi storage/FFmpeg, atau commit task pada sesi planning ini.
+4 Oktober2026, feat/media-backend (belum commit): Belum dijalankan: bucket/credential R2 staging tidak tersedia pada environment sesi. MinIO tidak menjadi evidence R2. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 

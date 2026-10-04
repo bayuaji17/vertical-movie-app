@@ -31,6 +31,36 @@ it("keeps private business routes fail-closed and strict while public root remai
     ["POST", "/admin/videos/" + id + "/archive", { expectedVersion: 1 }],
     ["POST", "/admin/series/" + id + "/archive", { expectedVersion: 1 }],
     ["POST", "/admin/seasons/" + id + "/archive", { expectedVersion: 1 }],
+    [
+      "POST",
+      "/admin/media/uploads",
+      {
+        ownerType: "video",
+        ownerId: id,
+        kind: "source",
+        filename: "movie.mp4",
+        contentType: "video/mp4",
+        sizeBytes: "100",
+        idempotencyKey: id,
+      },
+    ],
+    ["GET", "/admin/media/uploads/" + id],
+    ["POST", "/admin/media/uploads/" + id + "/parts", { partNumber: 1 }],
+    ["POST", "/admin/media/uploads/" + id + "/complete"],
+    ["POST", "/admin/media/uploads/" + id + "/abort"],
+    [
+      "POST",
+      "/admin/videos/" + id + "/publish",
+      { expectedVersion: 1, idempotencyKey: id },
+    ],
+    [
+      "POST",
+      "/admin/series/" + id + "/publish",
+      { expectedVersion: 1, idempotencyKey: id },
+    ],
+    ["GET", "/admin/videos/" + id + "/playback"],
+    ["GET", "/admin/videos/" + id + "/hls/master.m3u8"],
+    ["GET", "/admin/videos/" + id + "/hls/variants/0"],
   ];
   for (const [method, path, body] of routes) {
     const r = await app.handle(

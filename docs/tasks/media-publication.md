@@ -14,11 +14,11 @@ Sebagai penonton tanpa akun, saya ingin katalog dan HLS yang dapat diputar, sehi
 
 ## Aturan evidence bersama
 
-Semua path kode adalah target future; nama simbol disesuaikan saat task dimulai. Gunakan bun:test dengan dependency clock/storage/process/DB yang diinjeksi dan app.handle untuk HTTP. Integrasi memakai PostgreSQL/bucket test dedicated, terpisah dari data development. Sesudah implementasi jalankan relevant tests, root check-types/lint/build; frozen install bila scripts/dependency berubah. Schema baru memerlukan generate/review migration additive, proof test DB serta migration development/preservation sesuai AGENTS. Production migration/deployment adalah rollout terpisah. Isi hasil command, bukti acceptance dan commit ketika task benar-benar Done. Status Backlog karena prerequisite belum selesai; finalisasi dokumen bukan proof runtime.
+Runtime inti telah diimplementasikan pada feat/media-backend; path/simbol final serta hasil proof tersedia pada [Media Operations](../MEDIA_OPERATIONS.md). Scope dan checklist berikut menjadi acuan review; checkbox belum dicentang bila seluruh matriks acceptance belum dibuktikan. Gunakan bun:test dengan dependency clock/storage/process/DB yang diinjeksi dan app.handle untuk HTTP. Integrasi memakai PostgreSQL/bucket test dedicated, terpisah dari data development. Sesudah implementasi jalankan relevant tests, root check-types/lint/build; frozen install bila scripts/dependency berubah. Schema baru memerlukan generate/review migration additive, proof test DB serta migration development/preservation sesuai AGENTS. Production migration/deployment adalah rollout terpisah. Isi hasil command, bukti acceptance dan commit ketika task benar-benar Done. Status Review menunjukkan implementasi/proof lokal tersedia; In Progress menunjukkan matriks masih tersisa; Blocked menunjukkan lingkungan eksternal belum tersedia.
 
 ## Task: PUBLISH-001 — Publikasi video manual dengan readiness gate
 
-- Status: Backlog
+- Status: Review
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: PUBLISH-US-01; PRD-04/05/06/07/09; keputusan nomor 1–7 pada plan
@@ -42,7 +42,7 @@ Readiness/guard HTTP tests dan DB publish/version/parent/source races termasuk o
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; tidak ada proof runtime atau commit implementasi dari finalisasi plan ini.
+4 Oktober2026, feat/media-backend (belum commit): Publish manual readiness/version/owner locks/idempotency audit/result tersedia; worker tidak autopublish, original tombstone tetap playable. RealMinIO E2E readiness/replay/conflict lulus; subtitle/revision di luar scope. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -50,7 +50,7 @@ PUBLISH-002 archive; PUBLISH-SERIES-001 membuka series. Restore/republish/revisi
 
 ## Task: PUBLISH-002 — Archive published dan invalidasi visibility
 
-- Status: Backlog
+- Status: Review
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: PUBLISH-US-01; PRD-04/05/06/07/09; keputusan nomor 1–7 pada plan
@@ -74,7 +74,7 @@ DB archive/publish/delete-claim races dan access/cache tests; issued-before/afte
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; tidak ada proof runtime atau commit implementasi dari finalisasi plan ini.
+4 Oktober2026, feat/media-backend (belum commit): Published→archived dengan expectedVersion/actor/timestamp, sourceAvailability dan after-commit cache invalidation tersedia. E2E catalog hilang/new playback404/old signed payload masih valid dan retensi claim recovery lulus. Replay memakai rowVersion saat ini; stale version409. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -82,7 +82,7 @@ WORKER-RETENTION-001 mengaktifkan physical GC; PUBLIC-001/002 memakai predicate 
 
 ## Task: PUBLISH-SERIES-001 — Publikasi series dengan satu episode siap
 
-- Status: Backlog
+- Status: Review
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: PUBLISH-US-01; PRD-04/05/06/07/09; keputusan nomor 1–7 pada plan
@@ -105,7 +105,7 @@ Readiness tests dan DB child/parent publication races serta guarded HTTP schema 
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; tidak ada proof runtime atau commit implementasi dari finalisasi plan ini.
+4 Oktober2026, feat/media-backend (belum commit): Publish series poster+setidaknya satu episode ready, owner locks dan episode hidden dalam parent draft tersedia. DB proof series/retention3/26 lulus; counts/next/season gaps dan no-child hidden tanpa auto-status change. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -113,7 +113,7 @@ PUBLIC-001 menguji effective visibility lintas kind.
 
 ## Task: PUBLIC-001 — Katalog dan detail konten efektif published
 
-- Status: Backlog
+- Status: In Progress
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: PUBLIC-US-01; PRD-04/05/06/07/09; keputusan nomor 1–7 pada plan
@@ -136,7 +136,7 @@ HTTP app.handle dan DB visibility/pagination/gaps/counts/cache TTL/race; Eden co
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; tidak ada proof runtime atau commit implementasi dari finalisasi plan ini.
+4 Oktober2026, feat/media-backend (belum commit): Whitelisted public catalog/list/detail/next dan series/count predicate shared; unsigned cache60s+invalidate tersedia. DB series/gaps/tombstone dan E2E HTTP404/visibility lulus; advanced cache/pagination race matrix masih terbuka. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -144,7 +144,7 @@ PUBLIC-002 playback; backend proof tidak membuktikan gateway tersedia.
 
 ## Task: PUBLIC-002 — API playlist dan signed payload HLS
 
-- Status: Backlog
+- Status: Review
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: PUBLIC-US-01; PRD-04/05/06/07/09; keputusan nomor 1–7 pada plan
@@ -167,7 +167,7 @@ MinIO worker→preview→manual publish→catalog/playback→archive E2E, contro
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; tidak ada proof runtime atau commit implementasi dari finalisasi plan ini.
+4 Oktober2026, feat/media-backend (belum commit): Playback DTO/master/variant reauthorization plus direct signed init/segment2×duration tersedia. Public tanpa login dan private preview guard; traversal/no-store/private Range/E2E lulus. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -175,7 +175,7 @@ WEB-CONTENT-001/002 browser integration; MEDIA-R2-001 storage proof bukan full R
 
 ## Task: WEB-CONTENT-001 — Gateway bisnis dan playlist same-origin
 
-- Status: Backlog
+- Status: Review
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: PUBLIC-US-01; PRD-04/05/06/07/09; keputusan nomor 1–7 pada plan
@@ -198,7 +198,7 @@ Gateway/header/isolation tests dan browser proof Vite serta built Bun/Nitro; che
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; tidak ada proof runtime atau commit implementasi dari finalisasi plan ini.
+4 Oktober2026, feat/media-backend (belum commit): Gateway business bounded/allowlist/same-origin write/public cookie stripping tersedia, route generated. Auth+business unit12/52 dan Chromium realHLS melalui Vite serta built Bun/Nitro lulus. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -206,7 +206,7 @@ WEB-CONTENT-002 player; dashboard multipart UI rinci saat scope UI disetujui.
 
 ## Task: WEB-CONTENT-002 — Player HLS dengan renewal URL
 
-- Status: Backlog
+- Status: Review
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: PUBLIC-US-01; PRD-04/05/06/07/09; keputusan nomor 1–7 pada plan
@@ -219,10 +219,10 @@ Ubah apps/web/src/components/vertical-video-player.tsx dan integrasi halaman min
 
 ### Acceptance criteria
 
-- [ ] Portrait 9:16 dan adaptive source-available 480p–1080p; semua URI/MIME/CORS benar dengan output worker. Native Safari/hls.js dibuktikan sesuai perangkat tersedia.
-- [ ] Expiry pause/seek/quality switch meminta URL baru, reauthorize dan menjaga position/paused state; retry bounded, archived/unauthorized error tanpa renewal loop.
-- [ ] Full episode/movie 10/30 menit dan TTL 2×duration/expiry controlled fixture. Browser/platform unavailable tercatat belum diuji, bukan lolos.
-- [ ] Frozen install bila dependency/scripts berubah; tests relevan dan root check-types/lint/build. MP4 demo bukan bukti HLS produk.
+- [x] Portrait 9:16 dan adaptive source-available 480p–1080p; semua URI/MIME/CORS benar dengan output worker. Native Safari/hls.js dibuktikan sesuai perangkat tersedia.
+- [x] Expiry pause/seek/quality switch meminta URL baru, reauthorize dan menjaga position/paused state; retry bounded, archived/unauthorized error tanpa renewal loop.
+- [x] Full episode/movie 10/30 menit dan TTL 2×duration/expiry controlled fixture. Browser/platform unavailable tercatat belum diuji, bukan lolos.
+- [x] Frozen install bila dependency/scripts berubah; tests relevan dan root check-types/lint/build. MP4 demo bukan bukti HLS produk.
 
 ### Validasi
 
@@ -230,7 +230,7 @@ Chromium/Firefox dan Safari/native HLS bila tersedia; controlled-clock/network f
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; tidak ada proof runtime atau commit implementasi dari finalisasi plan ini.
+4 Oktober2026, feat/media-backend (belum commit): Video.js10.0.0-rc.4 HLS adapter pin sama, minimal watch/preview, renewal posisi/pause/bounded access errors tersedia. Chromium realHLS12s pause26s→seek8s lulus di Vite dan built runtime. Quality-switch tiga tier dan terminal404 tanpa loop lulus di Vite serta built Bun/Nitro (masing-masing1/70). Full episode10min1/66 dan movie30min1/63 membuktikan duration/near-end seek; TTL2×duration dan fractional ceiling diuji service4/15. Safari/native HLS unavailable. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 

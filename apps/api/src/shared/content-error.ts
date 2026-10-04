@@ -35,6 +35,19 @@ export function mapContentError(value: unknown): ContentError | undefined {
         ? error.constraint_name
         : undefined;
   if (code === "23505") {
+    if (constraint === "content_operations_idempotency_unique")
+      return new ContentError(
+        "PUBLICATION_IDEMPOTENCY_CONFLICT",
+        "Idempotency key is already in use.",
+      );
+    if (
+      typeof constraint === "string" &&
+      constraint.startsWith("upload_sessions_")
+    )
+      return new ContentError(
+        "UPLOAD_STATE_CONFLICT",
+        "An upload already exists or the idempotency key is in use.",
+      );
     if (constraint === "videos_episode_number_unique")
       return new ContentError(
         "EPISODE_NUMBER_CONFLICT",

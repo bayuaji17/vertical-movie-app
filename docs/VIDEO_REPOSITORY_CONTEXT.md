@@ -135,3 +135,39 @@ Semua evidence kode berikut merujuk Base SHA di atas.
 | `docs/PRD.md:PRD-03–07,09`, `ARCHITECTURE.md`                                       | Alur draf/media/publikasi; rancangan data lama belum mencakup series/movie. |
 
 Referensi resmi yang diperiksa pada 3 Oktober 2026: [PostgreSQL constraints](https://www.postgresql.org/docs/current/ddl-constraints.html), [date/time](https://www.postgresql.org/docs/current/datatype-datetime.html), [Drizzle constraints](https://orm.drizzle.team/docs/indexes-constraints), [Eden Treaty](https://elysiajs.com/eden/treaty/overview), [Bun UUIDv7](https://bun.com/docs/runtime/utils#bun-randomuuidv7), [Bun S3](https://bun.com/docs/runtime/s3), [PostgreSQL queue locking](https://www.postgresql.org/docs/current/sql-select.html), dan [FFprobe](https://ffmpeg.org/ffprobe.html). Dokumen vendor melandasi mekanisme teknis; model produk adalah rancangan aplikasi.
+
+## Eksekusi media — 4 Oktober 2026
+
+Plan valid pada commit 4ce185d; perubahan kode dibanding snapshot refinement hanya finalisasi dokumen/sampel env. Branch codex/media-backend-implementation dibuat dari commit tersebut atas instruksi pengguna. Perubahan desain existing dipertahankan. Implementasi dimulai MEDIA-CFG-001; commit/push/PR bukan bagian instruksi implementasi ini.
+
+- Koreksi pengguna 4 Oktober 2026: implementasi dihentikan; branch implementasi di-rename dari codex/media-backend-implementation menjadi feat/media-backend mengikuti pola branch fitur existing feat/auth-admin-module dan feat/video-metadata. Perubahan worktree dipertahankan; tidak ada commit/push pada koreksi ini.
+
+## Snapshot implementasi terkini — 4 Oktober 2026
+
+Base commit 4ce185d, branch feat/media-backend; perubahan implementasi belum di-commit. Source live diperiksa kembali sebelum memperbarui plan. Runtime kini memiliki config/storage, aset/upload/job/attempt/rendition/operation schema, queue PostgreSQL, worker Bun/FFmpeg, cleanup, publikasi manual, katalog publik, delivery HLS, gateway bisnis dan halaman preview/watch minimal. Perubahan desain existing dipertahankan.
+
+Evidence aktual: API unit 65/227 sebelum tambahan process tests; content regression 19/204; upload PostgreSQL 4/32; FFmpeg HLS/poster 4/12; worker MinIO E2E termasuk Chromium melalui Vite dan built Bun/Nitro masing-masing 1/60; series/retensi 2/16; legacy migration 1/10. Root lint/build lulus; root check-types dan frozen install diulang pada penutupan. Journal development 9 setelah migrasi 0006–0008 dengan snapshot 11 tabel lama utuh. Backup terakhir /home/bandev/backups/vertical-movie-app/media-before-0007-0008-1791116342579.sql.
+
+Bun S3 dipertahankan untuk native file/GET/presign; operasi multipart browser/copy/list kontrol memakai SDK setelah gap native terbukti. Drizzle/Bun SQL JSONB membutuhkan explicit text-to-jsonb cast pada parameter serialisasi, dibuktikan jsonb_typeof(facts)=object dan output_files=array. Private signed payload memakai no-store yang terbukti pada MinIO.
+
+R2 staging belum tersedia; proof production tidak disimpulkan dari MinIO. Benchmark mesin 4 core/4 GB, fixture penuh 10/30 menit/HDR/VFR/seluruh format dan Safari/native HLS belum dibuktikan. Deployment nomor 8 tetap proposal. Dashboard upload lengkap, subtitle, restore/republish/revisi published dan production rollout di luar implementasi inti ini. Detail operasional pada MEDIA_OPERATIONS.md.
+
+## Verifikasi tambahan implementasi — 4 Oktober 2026
+
+API unit terkini 67/230, web 37/157, auth 3/14 dan content regression 19/204 lulus. Root check-types (3 task), lint (web), build (API dan web) serta frozen install lulus setelah perubahan worker/player/gateway. FFmpeg matrix 3/41 membuktikan MP4/MOV/MKV H.264/HEVC, WebM VP8/VP9, HDR sintetis→SDR bt709, VFR→CFR, SAR/rotasi, corrupt source dan penolakan poster animasi. Chromium tiga tier 12s 1/70 membuktikan label480p/720p/1080p, manual quality/expiry/seek dan terminal404 tanpa loop. Actual bootstrap API+worker development lulus health/catalog200, admin anonymous401, worker concurrency1 dan shutdown kedua process exit0. Long10/30min dan partial cleanup fault proof masih berjalan; belum masuk evidence selesai.
+
+Profil output kini menyertakan tag bt709 melalui filter setparams dan flags stream; BANDWIDTH master dihitung dari peak segment terukur secara konservatif, AVERAGE-BANDWIDTH dari durasi dan bytes seluruh segment. Series metadata update existing dipertahankan; perubahan parent menginvalidasi catalog setelah commit dan parent published dengan synopsis kosong disembunyikan oleh predicate shared. Batas resource production/R2/Safari/restore belum terbukti.
+
+Verifikasi penutupan lanjutan: API68/252 lulus, termasuk denial401/no-store pada seluruh26 operation admin dan cancellation child yang mengabaikan TERM (process group berhenti setelah grace10s). Root check-types/lint/build lulus ulang setelah hardening. Full episode600s tiga tier MinIO→worker→publish parent+child→Chromium seek596s→archive lulus1/66 (fixture1080p24, video tanpa audio); full movie1800s masih berjalan. Hasil ini proof fungsi, bukan benchmark VPS4GB atau visual quality.
+
+## Hasil penutupan proof media development
+
+Full episode600s tiga tier lulus1/66 dan full movie1800s lulus1/63 pada bucket/database dedicated. Keduanya memverifikasi durasi encode/manifest dan Chromium playback/manual quality/paused near-end seek (596s/1796s), bukan continuous viewing wall-clock atau capacity benchmark. Built Bun/Nitro tiga-tier12s lulus1/70 pada artifact terbaru, termasuk expired quality switch/seek dan terminal404 tanpa renewal loop. Series/retention/partial fault3/26, upload4/32, legacy migration1/10 dan matrix format3/41 lulus pada penutupan. Playback lifetime/reauthorization4/15 menegaskan600s→1200s,1800s→3600s serta fractional ceiling, signing dihentikan setelah visibility dicabut. Total suite unit API kini72/267 setelah proof tersebut; gerbang terakhir dicatat pada runbook.
+
+Remaining evidence: R2 staging, Safari/native HLS, benchmark/limits VPS4core4GB, full restore dan supervisor crash/OOM/disk/keyframe/visual stress matrix. Integrasi UI upload dashboard rinci dan subtitle merupakan scope berikutnya. Tidak ada implementasi commit/push/PR atau rollout production.
+
+Gerbang final lulus: API72/267, root check-types3 task, lint1 task, build2 task (web dibangun ulang setelah fixture import-protection dipulihkan), frozen install770/947 tanpa perubahan, git diff --check serta173 local links/anchors pada12 dokumen. Auth import-protection menolak @repo/auth/server pada client build dan memulihkan fixture; build positif selesai sesudahnya. Branch feat/media-backend masih belum commit/push; file desain existing dipertahankan.
+
+## Otorisasi delivery Git — 4 Oktober 2026
+
+Pengguna meminta commit, push, PR dan merge untuk implementasi media. Preflight: HEAD4ce185d45e4d2c7ff5654cb24f7fc3175dbdb8c5, origin/main0d3bef87f6d2f9b0a2873078f9b560f092f13c53 sesudah fetch; tidak ada perubahan remote yang membatalkan evidence. Branch feat/media-backend, target main pada bayuaji17/vertical-movie-app. Merge commit diizinkan dan deleteBranchOnMerge=false. Scope hanya apps/api, gateway/player/route/test web, env/dependency/Turbo dan docs media; stylesheet/design-system/aset desain existing serta bagian desain README dipertahankan di worktree. Delivery tidak mencakup rollout production.

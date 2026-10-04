@@ -413,3 +413,7 @@ Pada task Eden/lifecycle, buktikan juga bahwa:
 5. Gunakan Conventional Commits seperti `feat(api): add video drafts` dan catat bukti validasi pada task.
 
 Perubahan standar ini harus memperbarui dokumen yang sama dan tautan pada root AGENTS/indeks docs. Keputusan produk atau operasional yang masih terbuka dituntaskan pada backlog modul sebelum digunakan sebagai kontrak tetap.
+
+## Media runtime — 4 Oktober 2026
+
+Modules media/catalog/publication/playback tersedia, diekspor lewat factory typed dan bootstrap DI. Runtime worker terpisah pada src/workers/index.ts; command dan proof dedicated pada [Media Operations](MEDIA_OPERATIONS.md). API build menghasilkan kedua entry. GET status upload membedakan completed dari ready job. Scalar mencakup route playlist .m3u8 dengan exclude.staticFile=false. JSONB writes memakai serialized parameter ::text::jsonb karena Bun SQL/Drizzle dapat double-encode parameter JSON OID; type data DB diperiksa proof. FFmpeg/subprocess/network tetap di luar transaksi.

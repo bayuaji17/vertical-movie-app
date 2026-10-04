@@ -388,7 +388,7 @@ Saat ini factory memasang auth dan 16 endpoint metadata; loader env belum mengon
 - `config/env.ts` kelak memvalidasi kombinasi provider/endpoint/region/bucket/credential serta URL tanpa userinfo, query atau fragment. Nilai/error sensitif dan signed URL tidak dicetak. `turbo.json` harus meneruskan selector/base delivery ke `api#dev`/`api#start` dan task worker saat tersedia; perubahan mengikuti bundled docs Turbo. Sampel env pada sesi ini belum mengaktifkan loader tersebut.
 - `media_assets`/`media_renditions` menyimpan provider, bucket dan key, bukan signed URL. Ganti env tidak memindahkan data lama; perubahan provider pada dataset berisi aset memerlukan copy/verifikasi dan pembaruan pointer yang direncanakan terpisah.
 
-Contoh profil lengkap dan status variabel berada pada [Environment](ENVIRONMENT.md#storage-dan-hls--konfigurasi-yang-direncanakan). Scope env sample adalah dokumentasi, bukan konfigurasi live atau bukti akses bucket.
+Contoh profil lengkap dan status variabel berada pada [Environment](ENVIRONMENT.md#storage-dan-hls--runtime-aktif). Scope env sample adalah dokumentasi, bukan konfigurasi live atau bukti akses bucket.
 
 ### Nomor 3 — profil HLS disetujui 4 Oktober 2026
 
@@ -527,7 +527,7 @@ Finish succeeded membutuhkan identitas source/profile/generation yang cocok, lea
 
 **Proof sebelum WORKER-001/002 Done:** durable enqueue/crash setelah commit, dua claimer dan batas per-host, fake clock/backoff/attempt limit, expiry serta stale finish setelah takeover, lease loss dan subprocess terminate/orphan, shutdown/restart, input rusak versus gangguan storage, resource admission/disk/memory, watchdog walaupun heartbeat sehat, semua hasil terverifikasi sebelum ready, cleanup/retensi/source tombstone/archived race. Benchmark real FFmpeg portrait sumber 480p/720p/1080p, H.264/HEVC/VP9, 60 fps, episode 10 menit dan movie 30 menit mencatat wall time/RSS/CPU/disk serta dampak latency API; target thread/preset/deadline dituning bila gagal. Unit melalui bun:test, PostgreSQL/bucket test dedicated/FFmpeg untuk integrasi; fixture benchmark production tetap diperlukan sebelum scale.
 
-Konfigurasi melalui env, concurrency/retry/deadline/lease/recovery disetujui; resource ditetapkan melalui benchmark dan detail teknis tambahan dijelaskan pada [Environment](ENVIRONMENT.md#worker-media--konfigurasi-nomor-7). Sample apps/api/.env.example memuat concurrency/retry/deadline/lease/recovery sebagai konfigurasi rencana yang disetujui. Loader/env aktif/script worker, migration dan dependency belum diubah. WORKER-001/002 tetap roadmap; backlog kecil worker/retensi harus dipecah sebelum implementasi.
+Konfigurasi melalui env, concurrency/retry/deadline/lease/recovery disetujui; resource ditetapkan melalui benchmark dan detail teknis tambahan dijelaskan pada [Environment](ENVIRONMENT.md#worker--env-aktif-dan-kandidat-resource). Sample apps/api/.env.example memuat concurrency/retry/deadline/lease/recovery sebagai konfigurasi rencana yang disetujui. Loader/env aktif/script worker, migration dan dependency belum diubah. WORKER-001/002 tetap roadmap; backlog kecil worker/retensi harus dipecah sebelum implementasi.
 
 Referensi: [PostgreSQL locking SELECT](https://www.postgresql.org/docs/current/sql-select.html) menjelaskan SKIP LOCKED untuk consumer queue; schema/provider proyek tetap perlu integration proof. [Bun subprocess](https://bun.com/docs/runtime/child-process) menyediakan spawn/kill/timeout, dan [FFmpeg](https://www.ffmpeg.org/ffmpeg.html) mendokumentasikan progress, thread decoder/encoder serta filter pool. Angka retry/lease/concurrency/deadline di atas adalah rekomendasi aplikasi, bukan default yang diwajibkan referensi tersebut.
 
@@ -872,3 +872,27 @@ Sesudah VID-015, pengguna menginstruksikan test yang tersedia, check-types, lint
 - Desain existing dipertahankan dan tidak masuk commit media; indeks docs hanya men-stage bagian media. Tidak ada push/PR/rollout.
 - Validator Bun dokumen lulus: 14 dokumen pada index commit, 170 tautan lokal/anchor, 39 ID task unik (15 metadata Done, VID-016 Backlog, 23 task media), dependency dikenal/DAG tanpa siklus dan prerequisite Ready terpenuhi; default env/credential kosong serta geometry multipart/TTL terverifikasi secara statis. Ini evidence plan, bukan proof storage/FFmpeg/HLS.
 - Gerbang commit: Prettier targeted dan git diff whitespace diperiksa; Husky menjalankan lint/check-types dan Commitlint tanpa bypass. SHA dan hasil hook final dilaporkan sesudah commit.
+
+## Eksekusi implementasi media — 4 Oktober 2026
+
+- Base commit: 4ce185d; branch codex/media-backend-implementation. Plan freshness valid: source/storage/queue/gateway belum berubah dari snapshot; hanya finalisasi planning.
+- MEDIA-CFG-001: loader storage server, native client factory, bootstrap DI tanpa network saat import serta env Turbo dibuat. Metadata-only tetap berjalan bila STORAGE_PROVIDER absent; jika selector diisi seluruh profile wajib valid tanpa fallback. API unit 51 pass/151 assertions dan root check-types 3 task sukses; lint/build serta review akhir masih pending.
+- MEDIA-PROOF-001: probe Bun 1.4.2 menunjukkan S3Client mengekspos delete/exists/file/list/presign/size/stat/unlink/write; tidak mengekspos createMultipartUpload/uploadPart/listParts/completeMultipartUpload/abortMultipartUpload. Native writer multipart otomatis bukan kontrak resume browser. SDK S3 khusus operasi multipart/copy/control dipilih setelah gap ini ditemukan; native dipertahankan untuk operasi yang terbukti cocok. MinIO health reachable; credential storage aplikasi belum diisi. Bukti operasi objek dedicated dan browser masih pending.
+
+- Koreksi pengguna 4 Oktober 2026: implementasi dihentikan; branch implementasi di-rename dari codex/media-backend-implementation menjadi feat/media-backend mengikuti pola branch fitur existing feat/auth-admin-module dan feat/video-metadata. Perubahan worktree dipertahankan; tidak ada commit/push pada koreksi ini.
+
+## Hasil implementasi development — 4 Oktober 2026
+
+Branch feat/media-backend dari 4ce185d. Implementasi inti tahap B–D tersedia untuk review lokal; status per task dan batas proof kini dicatat pada backlog media/worker/publication, bukan diasumsikan Done dari persetujuan plan. Storage aplikasi MinIO memakai credential aplikasi scoped bucket pada env ignored. SDK hanya menutup gap browser multipart/copy/control yang tidak tersedia pada Bun 1.4.2.
+
+Upload selesai secara atomik memasang pointer immutable dan enqueue; GET status upload menyertakan state pemrosesan, progress, attempt/failure dan verified-ready. Worker terpisah menghasilkan HLS hls-v1 dan WebP tanpa autopublish. Publish/series visibility, catalog/next, preview/playback, archive serta retention/deletion claim telah mempunyai proof PostgreSQL/MinIO. Player Video.js 10 RC memakai adapter HLS versi sama; Chromium membuktikan pause/seek setelah expiry di Vite dan hasil build Bun/Nitro.
+
+Migrasi 0006–0008 development diterapkan melalui command resmi setelah backup; journal 9 dan data auth/metadata lama dipertahankan. Compatibility migration diuji dengan row legacy draft/published/unpublished/archived pada database khusus. Kontrak aktif dan command/evidence berada pada [Media Operations](MEDIA_OPERATIONS.md) serta [Upload Contract](MEDIA_UPLOAD_CONTRACT.md).
+
+Root frozen install/check-types/lint/build lulus, API72/267, web37/157, auth3/14 dan content19/204. Matrix codec/container/HDR/VFR/rotasi/invalid/animasi 3/41 serta Chromium manual quality/expiry/terminal404 1/70 lulus. Gerbang eksternal tersisa: R2 staging, benchmark target 4 core/4 GB dan Safari/native HLS; proof episode10menit1/66 dan movie30menit1/63 lulus, termasuk paused near-end seek. Built Bun/Nitro tiga-tier12s1/70 dan cleanup fault3/26 juga lulus. Ini proof fungsi pada fixture sintetis; full restore serta stress supervisor/resource/visual/keyframe masih terpisah. Proposal deployment belum dijalankan. Implementasi belum di-commit/push; desain existing tidak termasuk scope.
+
+Gerbang final lulus: API72/267, root check-types3 task, lint1 task, build2 task (web dibangun ulang setelah fixture import-protection dipulihkan), frozen install770/947 tanpa perubahan, git diff --check serta173 local links/anchors pada12 dokumen. Auth import-protection menolak @repo/auth/server pada client build dan memulihkan fixture; build positif selesai sesudahnya. Branch feat/media-backend masih belum commit/push; file desain existing dipertahankan.
+
+## Delivery Git implementasi — 4 Oktober 2026
+
+Commit/push/PR/merge diotorisasi pengguna. Plan tetap valid terhadap HEAD4ce185d dan origin/main0d3bef87 setelah fetch; source tidak berubah sejak proof penutupan. Stage hanya implementasi media dan dokumentasinya. SHA commit implementasi dan hasil hook akan dicatat pada ledger setelah commit; merge normal menjaga riwayat dan branch sumber. R2/Safari/kapasitas4GB/restore serta matriks stress yang belum dibuktikan tetap merupakan gate rollout, bukan dianggap lulus oleh merge.

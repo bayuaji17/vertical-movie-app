@@ -11,7 +11,6 @@ import {
   slugFor,
   editable,
   requireChanges,
-  archiveState,
   defaultRuntime,
   type RuntimeDependencies,
 } from "../../shared/content-metadata";
@@ -27,6 +26,7 @@ export async function videoDto(row: VideoRow, store: VideosStore) {
   return {
     id: row.id,
     kind: row.kind,
+    sourceAvailability: await store.sourceAvailability(row.sourceAssetId),
     seasonId: row.seasonId,
     episodeNumber: row.episodeNumber,
     slug: row.slug,
@@ -53,7 +53,7 @@ export class VideosService {
     const repo = this.repo(),
       initial = await repo.store.get(id);
     if (!initial) notFound();
-    return repo.transact(async (store) => {
+    const result = await repo.transact(async (store) => {
       if (initial.seasonId) {
         const [parent] = await store.parents([initial.seasonId], true);
         if (!parent) notFound();
@@ -67,9 +67,16 @@ export class VideosService {
           "CONTENT_VERSION_CONFLICT",
           "Grouping has changed.",
         );
-      if (archiveState(old, version)) return videoDto(old, store);
+      if (old.rowVersion !== version)
+        throw new ContentError(
+          "CONTENT_VERSION_CONFLICT",
+          "Content has changed; reload before archiving.",
+        );
+      if (old.archivedAt) return videoDto(old, store);
       const now = this.runtime.now(),
         row = await store.update(id, version, {
+          publicationStatus: "archived",
+          publishedAt: null,
           archivedAt: now,
           updatedAt: now,
           updatedBy: actor,
@@ -82,6 +89,8 @@ export class VideosService {
         );
       return videoDto(row, store);
     });
+    this.invalidate();
+    return result;
   }
   async update(id: string, input: PatchVideoInput, actor: string) {
     requireChanges(input);
@@ -101,6 +110,11 @@ export class VideosService {
       const old = await store.get(id, true);
       if (!old) notFound();
       editable(old, input.expectedVersion);
+      if (old.publicationStatus !== "draft")
+        throw new ContentError(
+          "CONTENT_STATE_CONFLICT",
+          "Published content cannot be revised in this workflow.",
+        );
       if (old.seasonId !== initial.seasonId)
         throw new ContentError(
           "CONTENT_VERSION_CONFLICT",
@@ -121,14 +135,6 @@ export class VideosService {
         throw new ContentError(
           "CONTENT_STATE_CONFLICT",
           "Grouping and slug cannot change after first publication.",
-        );
-      if (
-        old.publicationStatus === "published" &&
-        input.rightsConfirmed === false
-      )
-        throw new ContentError(
-          "CONTENT_STATE_CONFLICT",
-          "Unpublish before revoking rights confirmation.",
         );
       const { expectedVersion, genreIds, rightsConfirmed, ...values } =
         cleanMetadata(input);
@@ -215,6 +221,7 @@ export class VideosService {
   constructor(
     private readonly repository?: VideosRepository,
     private readonly runtime: RuntimeDependencies = defaultRuntime,
+    private readonly invalidate = () => {},
   ) {}
   private repo() {
     return this.repository ?? unavailable();

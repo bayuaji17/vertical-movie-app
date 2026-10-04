@@ -225,7 +225,7 @@ test("seasons have ordered unique numbers and reject stale updates", async () =>
     createdBy: "content-admin",
     updatedBy: "content-admin",
     firstPublishedAt: new Date(),
-    publicationStatus: "unpublished",
+    publicationStatus: "draft",
   });
   await expect(
     seriesService.updateSeason(
@@ -480,7 +480,7 @@ test("video update is atomic under concurrency and validates hierarchy and genre
   expect(cleared.rightsConfirmedAt).toBeNull();
   await database.db
     .update(videos)
-    .set({ firstPublishedAt: new Date(), publicationStatus: "unpublished" })
+    .set({ firstPublishedAt: new Date(), publicationStatus: "draft" })
     .where(eq(videos.id, first.id));
   await expect(
     svc.update(
@@ -546,17 +546,15 @@ test("archive preserves metadata, prevents writes and protects published childre
       publishedAt: new Date(),
     })
     .where(eq(videos.id, ep.id));
-  await expect(svc.archive(ep.id, 1, "content-admin")).rejects.toThrow();
+
   await expect(
     seriesService.archive(parent.series.id, 1, "content-admin"),
   ).rejects.toThrow();
   await expect(
     seriesService.archiveSeason(parent.defaultSeason.id, 1, "content-admin"),
   ).rejects.toThrow();
-  await database.db
-    .update(videos)
-    .set({ publicationStatus: "unpublished", publishedAt: null })
-    .where(eq(videos.id, ep.id));
+  const archivedPublished = await svc.archive(ep.id, 1, "content-admin");
+  expect(archivedPublished.publicationStatus).toBe("archived");
   await seriesService.archiveSeason(
     parent.defaultSeason.id,
     1,

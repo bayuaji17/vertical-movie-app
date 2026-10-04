@@ -1,3 +1,5 @@
+import { mediaAssets } from "./media";
+import { foreignKey, type PgTableExtraConfigValue } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import {
   pgTable,
@@ -22,6 +24,7 @@ export const series = pgTable(
       .notNull()
       .unique("series_slug_unique"),
     ...editorialColumns(),
+    posterAssetId: uuid("poster_asset_id"),
     completionStatus: text("completion_status")
       .$type<"ongoing" | "completed">()
       .notNull()
@@ -29,7 +32,12 @@ export const series = pgTable(
     ...publicationColumns(),
     ...auditColumns(),
   },
-  (t) => [
+  (t): PgTableExtraConfigValue[] => [
+    foreignKey({
+      name: "series_poster_owner_fk",
+      columns: [t.posterAssetId, t.id],
+      foreignColumns: [mediaAssets.id, mediaAssets.seriesId],
+    }),
     ...metadataChecks("series", t),
     ...publicationChecks("series", t),
     check("series_slug_check", sql`${t.slug} ~ '^[a-z0-9]+(-[a-z0-9]+)*$'`),

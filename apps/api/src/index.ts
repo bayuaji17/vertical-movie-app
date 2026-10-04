@@ -1,4 +1,13 @@
+import { CatalogService } from "./modules/catalog/service";
+import { CatalogStore } from "./modules/catalog/repository";
+import { PublicationService } from "./modules/publication/service";
+import { PlaybackService } from "./modules/playback/service";
+import { loadPlaybackBaseUrl } from "./config/playback-env";
+import { createMultipartStorage } from "./storage/multipart";
+import { createMediaRepository } from "./modules/media/repository";
+import { MediaService } from "./modules/media/service";
 import { loadApiEnv } from "./config/env";
+import { createStorageClient } from "./storage/s3";
 import { createApp } from "./app";
 import { createDatabase } from "./db/client";
 import { SeriesService } from "./modules/series/service";
@@ -13,7 +22,11 @@ import {
 } from "@repo/auth/server";
 
 const env = loadApiEnv();
+const storage = env.storage ? createStorageClient(env.storage) : undefined;
 const database = createDatabase(env.databaseUrl);
+const catalogStore = new CatalogStore(database.db),
+  catalogService = new CatalogService(catalogStore);
+const multipart = env.storage ? createMultipartStorage(env.storage) : undefined;
 const auth = createAdminAuthServer({
   database: database.db,
   origin: env.betterAuthUrl,
@@ -22,15 +35,47 @@ const auth = createAdminAuthServer({
 });
 const authOpenApiSchema = await generateAuthOpenAPISchema(auth);
 const app = createApp({
+  storage,
+  catalogService,
+  publicationService: new PublicationService(
+    database.db,
+    catalogService.invalidate,
+  ),
+  playbackService:
+    env.storage && storage
+      ? new PlaybackService(
+          catalogStore,
+          storage,
+          loadPlaybackBaseUrl(Bun.env.MEDIA_PLAYBACK_BASE_URL, env.webOrigin),
+          env.storage,
+        )
+      : undefined,
+  mediaService: env.storage
+    ? new MediaService(
+        createMediaRepository(database.db),
+        multipart,
+        env.storage,
+      )
+    : undefined,
   database,
   auth,
   authOpenApiSchema,
   secureCookies: env.betterAuthUrl.startsWith("https://"),
   getSession: (options) => auth.api.getSession(options),
-  seriesService: new SeriesService(createSeriesRepository(database.db)),
-  videosService: new VideosService(createVideosRepository(database.db)),
+  seriesService: new SeriesService(
+    createSeriesRepository(database.db),
+    undefined,
+    catalogService.invalidate,
+  ),
+  videosService: new VideosService(
+    createVideosRepository(database.db),
+    undefined,
+    catalogService.invalidate,
+  ),
   genresService: new GenresService(createGenresRepository(database.db)),
-}).listen(env.port);
+})
+  .onStop(() => multipart?.close())
+  .listen(env.port);
 
 let isShuttingDown = false;
 const shutdown = () => {

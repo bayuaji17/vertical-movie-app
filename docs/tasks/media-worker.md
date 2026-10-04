@@ -14,11 +14,11 @@ Sebagai operator, saya ingin file sementara dibersihkan dan arsip dipertahankan,
 
 ## Aturan evidence bersama
 
-Semua path kode adalah target future; nama simbol disesuaikan saat task dimulai. Gunakan bun:test dengan dependency clock/storage/process/DB yang diinjeksi dan app.handle untuk HTTP. Integrasi memakai PostgreSQL/bucket test dedicated, terpisah dari data development. Sesudah implementasi jalankan relevant tests, root check-types/lint/build; frozen install bila scripts/dependency berubah. Schema baru memerlukan generate/review migration additive, proof test DB serta migration development/preservation sesuai AGENTS. Production migration/deployment adalah rollout terpisah. Isi hasil command, bukti acceptance dan commit ketika task benar-benar Done. Status Backlog karena prerequisite belum selesai; finalisasi dokumen bukan proof runtime.
+Runtime inti telah diimplementasikan pada feat/media-backend; path/simbol final serta hasil proof tersedia pada [Media Operations](../MEDIA_OPERATIONS.md). Scope dan checklist berikut menjadi acuan review; checkbox belum dicentang bila seluruh matriks acceptance belum dibuktikan. Gunakan bun:test dengan dependency clock/storage/process/DB yang diinjeksi dan app.handle untuk HTTP. Integrasi memakai PostgreSQL/bucket test dedicated, terpisah dari data development. Sesudah implementasi jalankan relevant tests, root check-types/lint/build; frozen install bila scripts/dependency berubah. Schema baru memerlukan generate/review migration additive, proof test DB serta migration development/preservation sesuai AGENTS. Production migration/deployment adalah rollout terpisah. Isi hasil command, bukti acceptance dan commit ketika task benar-benar Done. Status Review menunjukkan implementasi/proof lokal tersedia; In Progress menunjukkan matriks masih tersisa; Blocked menunjukkan lingkungan eksternal belum tersedia.
 
 ## Task: WORKER-001 — Schema job dan enqueue durable
 
-- Status: Backlog
+- Status: Review
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: WORKER-US-01; PRD-04/05/06/07/09; keputusan nomor 1–7 pada plan
@@ -31,8 +31,8 @@ Buat apps/api/src/db/schema/jobs.ts, src/workers/queue.ts dan migration/schema e
 
 ### Acceptance criteria
 
-- [ ] Completion/enqueue atomik di PostgreSQL setelah source freeze; replay/identity yang sama tidak menggandakan job. I/O storage di luar transaksi.
-- [ ] FK/constraints menjaga owner/source; nullable pointer additive mempertahankan metadata/auth. Status queued tidak berarti ready/published.
+- [x] Completion/enqueue atomik di PostgreSQL setelah source freeze; replay/identity yang sama tidak menggandakan job. I/O storage di luar transaksi.
+- [x] FK/constraints menjaga owner/source; nullable pointer additive mempertahankan metadata/auth. Status queued tidak berarti ready/published.
 - [ ] Job lama tidak aktif kembali setelah generation berubah; enqueue dapat ditemukan setelah restart API.
 
 ### Validasi
@@ -41,15 +41,15 @@ Dedicated DB race/rollback/restart proof, review SQL dan preservation data. Jala
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; tidak ada proof runtime atau commit implementasi dari finalisasi plan ini.
+4 Oktober2026, feat/media-backend (belum commit): Job/attempt/rendition schema0007 dan enqueue atomik tersedia/applied development; duplicate completion satu job, PostgreSQL durable claim dibuktikan E2E. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
-WORKER-CLAIM-001 menggunakan schema ini; belum menjalankan FFmpeg.
+WORKER-CLAIM-001 dan worker FFmpeg sudah menggunakan schema ini; benchmark deployment tetap terpisah.
 
 ## Task: WORKER-CLAIM-001 — Claim, heartbeat dan recovery lease
 
-- Status: Backlog
+- Status: Review
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: WORKER-US-01; PRD-04/05/06/07/09; keputusan nomor 1–7 pada plan
@@ -62,8 +62,8 @@ Implement apps/api/src/workers/queue.ts, queue.test.ts dan integration proof. Cl
 
 ### Acceptance criteria
 
-- [ ] Dua worker tidak memiliki claim aktif yang sama; lease 120 detik, heartbeat 15 detik, recovery poll 30 detik melalui env tervalidasi.
-- [ ] Expired lease dapat dipulihkan; stale token tidak menulis progress/readiness atau mengaktifkan output. Retry transient maksimal 3 total attempt dengan delay 60/300 detik.
+- [x] Dua worker tidak memiliki claim aktif yang sama; lease 120 detik, heartbeat 15 detik, recovery poll 30 detik melalui env tervalidasi.
+- [x] Expired lease dapat dipulihkan; stale token tidak menulis progress/readiness atau mengaktifkan output. Retry transient maksimal 3 total attempt dengan delay 60/300 detik.
 - [ ] Invalid input terminal tanpa retry; konfigurasi/resource tidak memadai menghasilkan health/error jelas dan tidak menghabiskan retry dengan busy loop.
 
 ### Validasi
@@ -72,7 +72,7 @@ Clock boundary dan DB parallel claim/death/stale finish tests. Jalankan gate imp
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; tidak ada proof runtime atau commit implementasi dari finalisasi plan ini.
+4 Oktober2026, feat/media-backend (belum commit): SKIP LOCKED claim, token/lease heartbeat, expired recovery dan failure budget3 tersedia; concurrent claim/stale token/retry60/300/terminal3 dibuktikan E2E. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -80,7 +80,7 @@ WORKER-002 memakai fencing token; WORKER-RUNTIME-001 menjalankan loop.
 
 ## Task: WORKER-002 — Runner transcode dan aktivasi HLS atomik
 
-- Status: Backlog
+- Status: In Progress
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: WORKER-US-01; PRD-04/05/06/07/09; keputusan nomor 1–7 pada plan
@@ -93,9 +93,9 @@ Buat apps/api/src/workers/{probe,transcode}.ts, schema renditions dan migration;
 
 ### Acceptance criteria
 
-- [ ] FFprobe/decode menolak duration/byte/codec/display ratio/resolution invalid sebelum output siap; rendition tidak upscale/crop/melebihi source. Poster WebP 1080×1920 sesuai standar.
+- [x] FFprobe/decode menolak duration/byte/codec/display ratio/resolution invalid sebelum output siap; rendition tidak upscale/crop/melebihi source. Poster WebP 1080×1920 sesuai standar.
 - [ ] FFmpeg di luar HTTP/transaksi; encoding timeout max(900 detik,3×verified duration), stall 300 detik berdasarkan progress nyata, bukan heartbeat/log.
-- [ ] Master/variant/init/semua segment lengkap di outputs/<asset>/<job>/<attempt>/; hasil uploaded/verifikasi sebelum transaksi mengaktifkan pointer dengan token/generation sah.
+- [x] Master/variant/init/semua segment lengkap di outputs/<asset>/<job>/<attempt>/; hasil uploaded/verifikasi sebelum transaksi mengaktifkan pointer dengan token/generation sah.
 - [ ] Failure/cancellation/stale finish/retry tidak menjadikan partial output siap. Fakta sumber, HLS verified-ready dan tombstone object dipisahkan; penghapusan original tidak menghalangi playback.
 
 ### Validasi
@@ -104,7 +104,7 @@ Subprocess failures/timeouts/stall, DB + MinIO/FFmpeg integration no-audio/10 me
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; tidak ada proof runtime atau commit implementasi dari finalisasi plan ini.
+4 Oktober2026, feat/media-backend (belum commit): Runner stream/download/hash→probe→FFmpeg→verify outputs→immutable attempt upload→fenced atomic ready tersedia. RealMinIO E2E/source tombstone lulus; complete media/death/resource matrix masih terbuka. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -112,7 +112,7 @@ WORKER-RUNTIME-001 supervisi; WORKER-BENCH-001 menentukan resource sebelum rollo
 
 ## Task: WORKER-RUNTIME-001 — Entry worker dan shutdown terkontrol
 
-- Status: Backlog
+- Status: In Progress
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: WORKER-US-01; PRD-04/05/06/07/09; keputusan nomor 1–7 pada plan
@@ -125,7 +125,7 @@ Buat apps/api/src/workers/index.ts, worker env loader/test serta script worker d
 
 ### Acceptance criteria
 
-- [ ] Default MEDIA_WORKER_CONCURRENCY=1 per instance, integer invalid ditolak; berbeda dari concurrency upload 3 part per file. Multi-instance memakai claim DB.
+- [x] Default MEDIA_WORKER_CONCURRENCY=1 per instance, integer invalid ditolak; berbeda dari concurrency upload 3 part per file. Multi-instance memakai claim DB.
 - [ ] Retry/deadline/lease/recovery melalui env menjaga heartbeat < lease; thread/resource/workdir tervalidasi berdasarkan proof, tanpa asumsi /tmp disk.
 - [ ] Shutdown berhenti claim baru dan menghentikan subprocess/child terkontrol; cleanup setelah process berhenti. Restart/death recovery bekerja. Health/progress aman tanpa signature/credential.
 - [ ] Detail polling/probe/hard deadline/shutdown grace pada plan dibekukan dan dibuktikan sebelum Done; worker tidak menambah endpoint publik.
@@ -136,7 +136,7 @@ Restart/shutdown/dead-worker integration, env/process tests serta script/frozen-
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; tidak ada proof runtime atau commit implementasi dari finalisasi plan ini.
+4 Oktober2026, feat/media-backend (belum commit): Entry worker/build script/env/poll/lease/recovery/stop-claim/grace/TERM-KILL dan Linux orphan timeout tersedia. Process tests3/5 memeriksa missing binary/deadline/cancel serta TERM-ignoring child process group. API+worker bootstrap development/start/stop lulus. Full supervisor crash/OOM/disk/shutdown matrix masih terbuka. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -144,7 +144,7 @@ Runtime lokal belum membuktikan kapasitas server 4 GB.
 
 ## Task: WORKER-RETENTION-001 — Retensi sumber dan cleanup output gagal
 
-- Status: Backlog
+- Status: In Progress
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: WORKER-US-02; PRD-04/05/06/07/09; keputusan nomor 1–7 pada plan
@@ -168,7 +168,7 @@ Clock boundaries, DB archive/claim/reprocess races, storage fail/crash/recovery 
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; tidak ada proof runtime atau commit implementasi dari finalisasi plan ini.
+4 Oktober2026, feat/media-backend (belum commit): Original7days sejak verifiedReady/terminal failure, archived preservation dan persistent deletion claim/tombstone; partial stopped attempt24h serta local orphan recovery tersedia. Dedicated original boundary/archive/recovery3/26 lulus; Partial24h/active/success skip/mid-delete retry sudah lulus; supervisor death/OOM/disk/orphan matrix tetap terbuka. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -176,7 +176,7 @@ Restore/republish di luar scope; tidak hard-delete metadata konten.
 
 ## Task: WORKER-BENCH-001 — Benchmark target 4 core dan RAM 4 GB
 
-- Status: Backlog
+- Status: Blocked
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: WORKER-US-01; PRD-04/05/06/07/09; keputusan nomor 1–7 pada plan
@@ -199,7 +199,7 @@ Reproducible report versi FFmpeg/Bun, input/profile/limits dan hasil berhasil/ga
 
 ### Hasil dan bukti
 
-Belum diimplementasikan; tidak ada proof runtime atau commit implementasi dari finalisasi plan ini.
+4 Oktober2026, feat/media-backend (belum commit): Belum dijalankan pada mesin target4core4GB dengan workload10/30min; kandidat thread1/disk10GiB dipertahankan. Tidak mengklaim kapasitas/production default proven. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 

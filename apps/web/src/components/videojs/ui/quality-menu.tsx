@@ -18,7 +18,18 @@ export type QualityMenuProps = Omit<Menu.RootProps, 'children'>
 export function QualityMenu({ ...props }: QualityMenuProps = {}) {
   return (
     <Menu.Root {...props}>
-      <QualityRadioGroup.Root>
+      <QualityRadioGroup.Root
+        formatRendition={(rendition) => {
+          const edge = Math.min(rendition.width ?? 0, rendition.height ?? 0)
+          return edge >= 1080
+            ? '1080p'
+            : edge >= 720
+              ? '720p'
+              : edge >= 480
+                ? '480p'
+                : edge + 'p'
+        }}
+      >
         <Menu.Trigger
           className={cn(
             'group/menu-trigger-item',
