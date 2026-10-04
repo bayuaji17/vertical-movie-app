@@ -1,6 +1,6 @@
 # Implementation Plan: Modul Auth Admin Tunggal
 
-> Revisi arah pada 2 Oktober 2026: seluruh auth melalui entry client/server `@repo/auth`, memakai API/plugin/CLI Better Auth, dependency injection database, serta protected routes TanStack isomorphic dengan cache TanStack Query. Implementasi di bawah adalah riwayat desain sebelumnya. Rencana detail dan 10 backlog refactor terbaru berada di [AUTH_REFACTOR_PLAN.md](AUTH_REFACTOR_PLAN.md); AUTH-REF-001–010 sudah diimplementasikan dan diverifikasi lokal pada 2 Oktober 2026. Lihat [Auth Operations](AUTH_OPERATIONS.md) untuk kontrak native dan rollout; isi berikut dipertahankan sebagai riwayat, bukan command/kontrak aktif.
+> Revisi arah pada 2 Oktober 2026: seluruh auth melalui entry client/server `@repo/auth`, memakai API/plugin/CLI Better Auth, dependency injection database, serta protected routes TanStack isomorphic dengan cache TanStack Query. Implementasi di bawah adalah riwayat desain sebelumnya. Rencana detail dan 10 backlog refactor terbaru berada di [AUTH_REFACTOR_PLAN.md](refactor-plan.md); AUTH-REF-001–010 sudah diimplementasikan dan diverifikasi lokal pada 2 Oktober 2026. Lihat [Auth Operations](../../operations/auth.md) untuk kontrak native dan rollout; isi berikut dipertahankan sebagai riwayat, bukan command/kontrak aktif.
 
 ## Plan Metadata
 
@@ -8,8 +8,8 @@
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `main`.
 - Base SHA: `bff1ced88f7ade37d454370ccf7d95a47cbf3aea`.
-- Context: [REPOSITORY_CONTEXT.md](REPOSITORY_CONTEXT.md).
-- Backlog kanonis: [tasks/auth.md](tasks/auth.md).
+- Context: [REPOSITORY_CONTEXT.md](repository-context.md).
+- Backlog kanonis: [tasks/auth.md](../../tasks/auth.md).
 - Last code validated SHA: `ad0abe6` (AUTH-012); validasi backlog akhir dilakukan 2 Oktober 2026, Asia/Jakarta.
 - Tanggal persetujuan scope: 1 Oktober 2026, Asia/Jakarta.
 - Scope yang disetujui pengguna: email/password, satu admin melalui CLI, recovery melalui CLI tanpa layanan email, dan satu origin web/API.
@@ -27,7 +27,7 @@ Tidak termasuk: registrasi publik, akun penonton/kreator, OAuth, MFA/passkey, la
 
 ## Current Behavior
 
-Pada planning base SHA, API hanya `GET /` dan langsung membuka port; belum ada Drizzle, auth route, provisioning, atau test API. Implementasi branch memisahkan app/bootstrap, memvalidasi env dan membuat Bun SQL/Drizzle client, serta menutupnya saat shutdown. Schema auth/admin dan migrasi eksplisit dibuat AUTH-003 dan diuji pada database PostgreSQL test. Setelah validasi AUTH-013, migrasi auth diterapkan ke database development lokal dan singleton admin diprovision pada 2 Oktober 2026; deployment tetap belum diverifikasi. AUTH-004 memasang login/logout/session Better Auth dengan kebijakan satu admin, AUTH-005 menyediakan provisioning CLI transaksi tunggal, AUTH-006 menyediakan recovery yang mencabut sesi secara atomik, AUTH-007 menambah guard serta DTO endpoint sesi admin, AUTH-009 menambah gateway same-origin, AUTH-010 menambah Eden dan sesi SSR/browser, AUTH-011 form login, serta AUTH-012 dashboard dengan guard dan logout. Lihat [context](REPOSITORY_CONTEXT.md) untuk baseline source dan batas pemeriksaan.
+Pada planning base SHA, API hanya `GET /` dan langsung membuka port; belum ada Drizzle, auth route, provisioning, atau test API. Implementasi branch memisahkan app/bootstrap, memvalidasi env dan membuat Bun SQL/Drizzle client, serta menutupnya saat shutdown. Schema auth/admin dan migrasi eksplisit dibuat AUTH-003 dan diuji pada database PostgreSQL test. Setelah validasi AUTH-013, migrasi auth diterapkan ke database development lokal dan singleton admin diprovision pada 2 Oktober 2026; deployment tetap belum diverifikasi. AUTH-004 memasang login/logout/session Better Auth dengan kebijakan satu admin, AUTH-005 menyediakan provisioning CLI transaksi tunggal, AUTH-006 menyediakan recovery yang mencabut sesi secara atomik, AUTH-007 menambah guard serta DTO endpoint sesi admin, AUTH-009 menambah gateway same-origin, AUTH-010 menambah Eden dan sesi SSR/browser, AUTH-011 form login, serta AUTH-012 dashboard dengan guard dan logout. Lihat [context](repository-context.md) untuk baseline source dan batas pemeriksaan.
 
 ## Desired Behavior
 
@@ -93,7 +93,7 @@ Tidak ada data produk lama yang diketahui dari source. Keadaan database aktual h
 
 ## Affected Files and Symbols
 
-Path berikut adalah set target; file dibuat hanya pada task yang membutuhkan. Test perilaku mengikuti task pemilik. Bukti source mengacu SHA metadata; path baru adalah desain yang diturunkan dari `API_DEVELOPMENT.md` dan entry point aktual.
+Path berikut adalah set target; file dibuat hanya pada task yang membutuhkan. Test perilaku mengikuti task pemilik. Bukti source mengacu SHA metadata; path baru adalah desain yang diturunkan dari `docs/guides/api-development.md` dan entry point aktual.
 
 | Path                                                                                          | Action | Symbols                                                  | Reason                                                       | Evidence                                  |
 | --------------------------------------------------------------------------------------------- | ------ | -------------------------------------------------------- | ------------------------------------------------------------ | ----------------------------------------- |
@@ -126,7 +126,7 @@ Path berikut adalah set target; file dibuat hanya pada task yang membutuhkan. Te
 
 ## Implementation DAG
 
-Setiap AUTH-ID di [backlog](tasks/auth.md) juga ID step stabil di plan ini. Cabang DAG menunjukkan dependensi teknis, bukan instruksi menjalankan multi-agent.
+Setiap AUTH-ID di [backlog](../../tasks/auth.md) juga ID step stabil di plan ini. Cabang DAG menunjukkan dependensi teknis, bukan instruksi menjalankan multi-agent.
 
 ```text
 AUTH-001 → AUTH-002 → AUTH-003 → AUTH-004
@@ -140,7 +140,7 @@ AUTH-001..AUTH-012 → AUTH-013
 
 ## Implementation Steps
 
-Detail scope, acceptance criteria, validasi, owner, status dan bukti setiap step berada pada [backlog kanonis](tasks/auth.md). Ringkasan file/symbol di sini mengikat backlog ke impact map.
+Detail scope, acceptance criteria, validasi, owner, status dan bukti setiap step berada pada [backlog kanonis](../../tasks/auth.md). Ringkasan file/symbol di sini mengikat backlog ke impact map.
 
 | Step     | Outcome                                                 | Depends on         | Files / symbols                                                         | Requirements                                                             | Validation / completion                                                                                              |
 | -------- | ------------------------------------------------------- | ------------------ | ----------------------------------------------------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
@@ -237,7 +237,7 @@ Migrasi dijalankan eksplisit sesudah review SQL dan pemeriksaan schema yang ada.
 
 ## Evidence
 
-Snapshot repo dan indeks bukti: [Repository Context](REPOSITORY_CONTEXT.md#evidence-index), SHA metadata. Keputusan pengguna pada chat 1 Oktober 2026 menetapkan metode login, recovery CLI, dan same-origin. Ketentuan satu admin/publik/Scalar/Eden/native test berasal dari dokumen repo yang ditinjau, bukan asumsi dari proyek lain.
+Snapshot repo dan indeks bukti: [Repository Context](repository-context.md#evidence-index), SHA metadata. Keputusan pengguna pada chat 1 Oktober 2026 menetapkan metode login, recovery CLI, dan same-origin. Ketentuan satu admin/publik/Scalar/Eden/native test berasal dari dokumen repo yang ditinjau, bukan asumsi dari proyek lain.
 
 Referensi primer diperiksa pada 1 Oktober 2026:
 

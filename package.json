@@ -10,14 +10,15 @@
     "format": "bun run --bun prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
     "lint:commit": "bun run --bun ./node_modules/.bin/commitlint",
-    "prepare": "bun run --bun husky"
+    "prepare": "bun run --bun husky",
+    "docs:check": "bun scripts/check-docs.mjs"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.3",
     "@commitlint/config-conventional": "^21.2.3",
     "husky": "^9.1.7",
     "prettier": "3.9.6",
-    "turbo": "^2.11.5",
+    "turbo": "^2.11.7",
     "typescript": "7.0.2"
   },
   "engines": {

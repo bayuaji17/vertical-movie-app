@@ -1,6 +1,6 @@
 # Dashboard admin — konsep light mode
 
-Mockup desktop berdasarkan `docs/PRD.md` (PRD-02 hingga PRD-06 dan PRD-09) dan `docs/DESIGN_SYSTEM.md`. Data video dan angka pada gambar adalah contoh. Gambar merupakan konsep desain, bukan fitur yang telah diimplementasikan.
+Mockup desktop berdasarkan `docs/product/prd.md` (PRD-02 hingga PRD-06 dan PRD-09) dan `docs/design/design-system.md`. Data video dan angka pada gambar adalah contoh. Gambar merupakan konsep desain, bukan fitur yang telah diimplementasikan.
 
 Dibuat memakai built-in image generation. Hasil akhir: `dashboard-light.png`.
 

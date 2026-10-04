@@ -48,7 +48,7 @@ Token preset kini didefinisikan melalui CSS `@theme inline` Tailwind v4. Kompone
 
 ## Aksesibilitas dan penerimaan desain
 
-Target yang diusulkan adalah [WCAG 2.2 AA](https://www.w3.org/TR/WCAG22/). Uji kontras token yang dipilih, urutan fokus, label formulir, pesan kesalahan, ukuran target sentuh, dan penggunaan tanpa mouse. Siapkan caption untuk video prarekaman; keputusan apakah caption menjadi syarat wajib terbit harus diselesaikan di [PRD](PRD.md). Hindari autoplay bersuara. Uji player dengan keyboard dan teknologi bantu sebelum rilis publik.
+Target yang diusulkan adalah [WCAG 2.2 AA](https://www.w3.org/TR/WCAG22/). Uji kontras token yang dipilih, urutan fokus, label formulir, pesan kesalahan, ukuran target sentuh, dan penggunaan tanpa mouse. Siapkan caption untuk video prarekaman; keputusan apakah caption menjadi syarat wajib terbit harus diselesaikan di [PRD](../product/prd.md). Hindari autoplay bersuara. Uji player dengan keyboard dan teknologi bantu sebelum rilis publik.
 
 Desain belum selesai sampai alur publik tanpa login dan alur admin mencakup keadaan normal, kosong, menunggu, gagal, serta terbit pada ponsel dan desktop. Preset lime, Inter, Space Grotesk, dan Remixicon adalah fondasi yang sudah dikonfigurasi, tetapi keputusan merek akhir, kebijakan caption, pola katalog, dan versi/integrasi Video.js tetap terbuka.
 

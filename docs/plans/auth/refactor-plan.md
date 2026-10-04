@@ -5,7 +5,7 @@
 - Persetujuan: 2 Oktober 2026, melalui arahan pengguna untuk melanjutkan perincian rencana pada setiap task.
 - Baseline: `feat/auth-admin-module`, commit `34f8ec59b125bbabaae87b3939de38874afb3a58`.
 - Scope tetap: satu admin, email/password, tanpa signup publik/email service, seed/recovery CLI lokal, satu origin publik; penonton anonim.
-- Dokumen ini menggantikan usulan cache `useSession` saja sebelumnya. AUTH-001–013 adalah riwayat; AUTH-REF-001–010 pada [backlog auth](tasks/auth.md) sudah selesai.
+- Dokumen ini menggantikan usulan cache `useSession` saja sebelumnya. AUTH-001–013 adalah riwayat; AUTH-REF-001–010 pada [backlog auth](../../tasks/auth.md) sudah selesai.
 
 ## 1. Temuan baseline dan keputusan
 
@@ -234,7 +234,7 @@ Scalar `/openapi` dan spec `/openapi/json` tetap ada. Gabungkan schema native da
 
 ## 9. Backlog, dependensi, dan commit
 
-ID 001–005 dipertahankan dan diperinci; 006–010 memecah web/cleanup/acceptance. Detail AC dan evidence terdapat pada [tasks/auth.md](tasks/auth.md).
+ID 001–005 dipertahankan dan diperinci; 006–010 memecah web/cleanup/acceptance. Detail AC dan evidence terdapat pada [tasks/auth.md](../../tasks/auth.md).
 
 Setiap task kini mempunyai peta file, kontrak/input-output, checklist implementasi ber-ID, matriks skenario uji, perintah validasi, gerbang cutover dan pesan commit. Total 72 langkah implementasi dan 57 skenario proof; checklist belum dikerjakan. `Ready` menunjukkan kesiapan task pertama, bukan implementasi aktif atau selesai.
 
@@ -281,7 +281,7 @@ Browser/network proof diperlukan untuk menutup AC cache/route; bila runner tidak
 - [Elysia Better Auth handler/macro](https://elysiajs.com/integrations/better-auth).
 - Turbo 2.11.5 bundled docs: `node_modules/turbo/docs/README.md`, `core-concepts/internal-packages.mdx`, `crafting-your-repository/using-environment-variables.mdx`.
 
-Saat perencanaan, hasil baseline tidak dianggap sebagai evidence refactor. Implementasi berikutnya membuktikan migrasi, cache counts, guard, native recovery, import boundary, SSR/gateway deadline, browser dan native end-to-end lokal; rincian aktual pada [backlog auth](tasks/auth.md) serta [Auth Operations](AUTH_OPERATIONS.md).
+Saat perencanaan, hasil baseline tidak dianggap sebagai evidence refactor. Implementasi berikutnya membuktikan migrasi, cache counts, guard, native recovery, import boundary, SSR/gateway deadline, browser dan native end-to-end lokal; rincian aktual pada [backlog auth](../../tasks/auth.md) serta [Auth Operations](../../operations/auth.md).
 
 # Penerapan expand migration
 
