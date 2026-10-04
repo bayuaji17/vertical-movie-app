@@ -2,6 +2,46 @@
 
 > Status: planning · 5 Oktober 2026 · Permintaan pengguna: plan tahap pertama frontend. Requirement v2 disetujui pengguna; hasil visual/rincian teknis masih untuk review, runtime belum diminta. Hasil pemeriksaan hanya dicatat setelah teramati.
 
+## Task: ADMC-DES-003 — Desktop dark v2 dan cleanup aset lama
+
+- Status: Review
+- Owner: Codex
+- Prioritas: P1
+- Referensi: ADMC-US-06; permintaan pengguna 5 Oktober 2026.
+- Diperbarui: 2026-10-05
+- Dependensi: ADMC-DES-002 dan design system dark approved.
+- Ukuran: Lima pasangan dark dari mockup v2 + penghapusan lima PNG v1 yang superseded.
+
+### Ruang lingkup
+
+Built-in image_gen dark recolor dashboard/list/create/detail/edit. Preserve English/avatar/Appearance/Log out/three types/pagination/forms, Dark selected pada dropdown dashboard terbuka. Hapus lima admin desktop light-v1 PNG dari worktree (history Git tetap ada), tetap simpan light v2 sebagai pasangan desain terbaru. Update canonical desain/prompt/context/plan/backlog/index dan semua link legacy aktif; preserve source/aset desain unrelated.
+
+### Acceptance criteria
+
+- [x] Lima dark mockup memakai charcoal #1E201E dan semantic palette dark; layout/data/controls sesuai light v2.
+- [x] Dashboard dropdown memilih Dark; empat halaman lain closed; semua teks dan controls tetap terbaca serta form/pagination utuh.
+- [x] Lima PNG v1 dihapus dan semua link aktif diperbarui; light v2 dan pekerjaan existing tetap utuh, prompt/tool/path tercatat.
+- [ ] Inspeksi visual/PNG, docs/format/whitespace/scoped preservation dan commit task lulus.
+
+### Validasi
+
+Native inspection lima output, PNG dimensi/mode, hash preservation source/light v2/unrelated, docs:check dan staged snapshot, targeted Prettier/diff; hook commit existing. Mockup bukan browser runtime atau audit contrast numerik.
+
+### Hasil dan bukti
+
+Built-in image_gen: lima edit + satu koreksi badge Draft detail. Kelima final native output inspected; dark palette/English/fields/avatar/dropdown/Log out/pagination/custom sesuai light v2, dashboard memilih Dark. PNG 1536×1024/mode100644. Lima v1 PNG dan prompt/links legacy retired; light-v2 serta 23 existing unrelated file hash preservation lulus (28 total). Prompt/dark evidence disimpan di canonical desain. `bun run docs:check` worktree lulus 51 Markdown/374 tautan; staged snapshot lulus 44 Markdown/355 tautan setelah link anchor ke design-system worktree diganti link dokumen tracked. Targeted Prettier, diff/check cached lulus; scope staging 15 file termasuk 5 penghapusan v1, index hanya perubahan navigasi/format task. Hook/commit dicatat setelah teramati.
+
+### Commit task
+
+- Pesan: docs(design): add admin dark mockups (ADMC-DES-003).
+- SHA: Belum dibuat.
+- Hook/checks: Menunggu hasil aktual.
+- Ledger: Receipt pascacommit untuk task berikutnya.
+
+### Blocker atau tindak lanjut
+
+Source runtime/mobile tetap belum dikerjakan; request ini desktop dark dari desain v2.
+
 ## Tujuan modul
 
 Admin dapat list/create/read/edit metadata Film/Standalone/Series melalui UI terlindungi dan responsif. Acuan: [context](../plans/admin-content/repository-context.md), [plan](../plans/admin-content/implementation-plan.md), [PRD](../product/prd.md), [workflow](../guides/development-workflow.md) dan [template task](../templates/task.md). Upload/sampul, worker status, preview/publish/archive actions dan hierarchy menjadi refinement berikutnya.
@@ -625,7 +665,7 @@ Visual v2 untuk review; runtime belum diminta/diimplementasikan.
 
 ## Task: ADMC-DES-002 — Revisi desktop light v2
 
-- Status: Review
+- Status: Done
 - Owner: Codex/pengembang pelaksana
 - Prioritas: P1
 - Referensi: plan; revisi pengguna 5 Oktober 2026.
@@ -642,7 +682,7 @@ Lima PNG v2: avatar/dropdown kanan atas dan Appearance; Log out kiri bawah; Engl
 - [x] Lima mockup English light memiliki avatar kanan atas/Log out kiri bawah; dashboard menunjukkan dropdown Light/Dark/System terbuka, lainnya closed.
 - [x] List/create memiliki tiga jenis; list tepat 10 baris/page/range/total/custom, form lengkap/edit type readonly.
 - [x] Prompt/tool/path/data contoh dan kebutuhan API/Series dicatat; semua final visual/invariants diperiksa.
-- [ ] Docs/format/whitespace/staged snapshot/preservation dan commit task lokal lulus.
+- [x] Docs/format/whitespace/staged snapshot/preservation dan commit task lokal lulus.
 
 ### Validasi
 
@@ -655,8 +695,8 @@ Built-in image_gen: lima edit utama dan dua koreksi avatar. Semua final inspecte
 ### Commit task
 
 - Pesan: docs(design): revise admin desktop mockups (ADMC-DES-002).
-- SHA: Belum dibuat.
-- Hook/checks: Menunggu hasil aktual.
+- SHA: `71a9dfb67f379afcd6b7411d2788587f284f7ed3`.
+- Hook/checks: docs:check 51/373, lint 1 task/types 3 task (cache valid) dan Commitlint lulus tanpa bypass. Sepuluh file desain/dokumentasi committed; source runtime tidak diubah; belum push/PR/merge.
 - Ledger: Receipt pascacommit untuk task berikutnya.
 
 ### Blocker atau tindak lanjut

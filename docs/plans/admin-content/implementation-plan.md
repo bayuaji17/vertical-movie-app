@@ -49,7 +49,7 @@ Sidebar desktop memakai Dashboard/Content; mobile memakai trigger/panel dengan f
 
 Pengguna meminta mockup desktop light seluruh lima halaman sebelum implementasi. Referensi dan prompt berada pada [desain desktop light](../../design/admin-content-desktop-light.md), task ADMC-DES-001 (history) dan ADMC-DES-002 (v2). Dua penggunaan modal konfirmasi (dirty navigation dan reload saat conflict) disetujui pengguna; screenshot halaman normal tidak menutupi form dengan overlay.
 
-Theme switcher merupakan requirement shared shell pada setiap halaman: Light/Dark/System di dalam avatar dropdown, dengan nama aksesibel/expanded state/focus return, Light aktif pada mockup sekarang. Dashboard menunjukkan dropdown terbuka; halaman lain menunjukkan trigger tertutup. Task ADMC-012 menangani runtime preference non-rahasia, System/media change, bootstrap tanpa flash/hydration mismatch dan form state tetap utuh saat tema berubah. Default aplikasi yang diusulkan adalah System jika belum ada preferensi; desain tahap ini tetap Light. Preferensi tema boleh dipersist, private metadata/cache/form tidak dipersist. Dark/mobile mockup menjadi review visual berikutnya, bukan scope desain desktop light ini.
+Theme switcher merupakan requirement shared shell pada setiap halaman: Light/Dark/System di dalam avatar dropdown, dengan nama aksesibel/expanded state/focus return, Light aktif pada mockup sekarang. Dashboard menunjukkan dropdown terbuka; halaman lain menunjukkan trigger tertutup. Task ADMC-012 menangani runtime preference non-rahasia, System/media change, bootstrap tanpa flash/hydration mismatch dan form state tetap utuh saat tema berubah. Default aplikasi yang diusulkan adalah System jika belum ada preferensi; desain tahap ini tetap Light. Preferensi tema boleh dipersist, private metadata/cache/form tidak dipersist. Desktop dark v2 diminta pengguna pada ADMC-DES-003 sebagai pasangan light; mobile tetap tahap berikutnya. Mockup kedua tema tidak membuktikan theme switching runtime.
 
 ### Daftar konten
 
@@ -382,3 +382,11 @@ Roadmap bukan daftar task Ready atau perluasan acceptance iterasi 1. Jangan mene
 - User meminta avatar/dropdown kanan atas, tema di menu, logout sidebar, English UI, Film/Standalone/Series dan pagination/custom page size; requirement v1 dua jenis/load-more/Bahasa Indonesia diganti.
 - ADMC-DES-002 menghasilkan lima mockup v2; ADMC-013/014 menambah dependency kontrak listing dan Series. Scope visual tidak berarti implementasi API/route disetujui atau verified. Namespace generic content adalah proposal teknis; preview existing dipertahankan.
 - Prompt dan evidence gambar berada pada desain canonical; checks/commit aktual mengikuti backlog.
+- Receipt ADMC-DES-002: `71a9dfb67f379afcd6b7411d2788587f284f7ed3`. Lima PNG v2 dan canonical refinement committed lokal; docs worktree 51/373/staged 44/354, format/whitespace/preservation serta hooks docs/lint/types/Commitlint lulus. Done berarti aset revisi selesai; approval hasil visual dan source runtime tetap terpisah. Receipt pascacommit dicatat untuk task berikutnya.
+
+### 2026-10-05 — Desktop dark v2 dan cleanup
+
+- Pengguna menyetujui desain light v2 dan meminta dark mode serta penghapusan file lama; lima PNG v1 superseded dihapus, light v2 tetap pasangan reference.
+- Snapshot 71a9dfb67f379afcd6b7411d2788587f284f7ed3; source tidak berubah. ADMC-DES-003 memakai built-in image_gen recolor kelima halaman, Dark selected pada dashboard dropdown.
+- Canonical desain mencakup light/dark, palette/prompt dan current links; legacy prompts/links retired, receipt historis tetap disimpan di Git/backlog.
+- Runtime/backlog ADMC-002–014 belum diimplementasikan; hasil pemeriksaan/commit dark dicatat setelah teramati pada task desain.

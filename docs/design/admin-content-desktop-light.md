@@ -1,6 +1,6 @@
-# Dashboard content — desktop light
+# Dashboard content — desktop light dan dark
 
-> Status: proposal visual v2 untuk review pengguna · 5 Oktober 2026 · Avatar/dropdown, English UI, Film/Standalone/Series dan pagination disetujui sebagai requirement oleh pengguna. Mockup dibuat oleh Codex melalui built-in image_gen; bukan implementasi atau browser screenshot.
+> Status: light v2 disetujui pengguna; dark v2 dibuat untuk review · 5 Oktober 2026 · Avatar/dropdown, English UI, Film/Standalone/Series dan pagination disetujui sebagai requirement oleh pengguna. Mockup dibuat oleh Codex melalui built-in image_gen; bukan implementasi atau browser screenshot.
 
 ## Scope dan acuan
 
@@ -26,7 +26,7 @@ Sidebar berisi Dashboard/Content. Footer hanya Log out di kiri bawah. Trigger ak
 
 Dashboard menampilkan dropdown terbuka; empat halaman lain menampilkan dropdown tertutup dengan trigger yang sama. Theme switcher hanya di dalam dropdown; tidak ada switcher terpisah di top bar. Akses keyboard, focus return/Escape, accessible name/expanded state dan pilihan tema diperlukan saat implementasi. Header/palette/form tetap konsisten.
 
-Preferensi tema non-rahasia dapat dipersist; default System masih proposal. System mengikuti prefers-color-scheme; bootstrap mencegah flash/hydration mismatch dan perubahan tema tidak membuang form dirty. Metadata/cache/form privat tidak dipersist. Aset ini tidak membuktikan switching runtime, dark atau mobile.
+Preferensi tema non-rahasia dapat dipersist; default System masih proposal. System mengikuti prefers-color-scheme; bootstrap mencegah flash/hydration mismatch dan perubahan tema tidak membuang form dirty. Metadata/cache/form privat tidak dipersist. Dark tersedia sebagai pasangan raster pada bagian di bawah; aset tidak membuktikan switching runtime atau mobile.
 
 ## Content type dan conditional metadata
 
@@ -42,7 +42,7 @@ Mockup menampilkan 10 baris, `Showing 1–10 of 42`, page 1 dari 5. Angka hanya 
 
 ## Evidence v2
 
-Built-in image_gen dipakai untuk lima edit utama dan dua koreksi avatar. Dashboard memakai v1 + screenshot dropdown dari pengguna; empat halaman memakai aset v1 masing-masing. Screenshot referensi hanya acuan bentuk dropdown; tidak menyalin fitur billing/upgrade. Semua output final diperiksa: English UI, avatar kanan atas, menu tema, Log out kiri bawah, pilihan tiga jenis, 10 baris/pagination/custom serta form jenis readonly saat edit. Kelima PNG 1536 × 1024 piksel, mode 100644; original generator dan lima v1 tetap disimpan. Source aplikasi, API/database dan dependency tidak diubah.
+Built-in image_gen dipakai untuk lima edit utama dan dua koreksi avatar. Dashboard memakai v1 + screenshot dropdown dari pengguna; empat halaman memakai aset v1 masing-masing. Screenshot referensi hanya acuan bentuk dropdown; tidak menyalin fitur billing/upgrade. Semua output final diperiksa: English UI, avatar kanan atas, menu tema, Log out kiri bawah, pilihan tiga jenis, 10 baris/pagination/custom serta form jenis readonly saat edit. Kelima light-v2 PNG 1536 × 1024 piksel, mode 100644; pada saat ADMC-DES-002, original generator dan lima v1 masih disimpan. V1 dihapus pada ADMC-DES-003 sesuai permintaan pengguna. Source aplikasi, API/database dan dependency tidak diubah.
 
 ## Prompt set v2
 
@@ -114,130 +114,78 @@ Use case: ui-mockup / precise-object-edit. Input image1 is edit target. Change O
 Use case: ui-mockup / precise-object-edit. Input image1 is edit target. Change ONLY the AD circle avatar background in the upper-right account trigger from pale lime to pale neutral gray. Keep dark AD text, Admin, chevron and the thin-bordered rounded account trigger unchanged. Preserve every form field, English text, Film/Standalone/Series selector, selected Film, unchecked rights, sidebar, Log out button, canvas and light palette exactly. No other changes.
 ```
 
-## Riwayat v1
+## Desktop dark v2
 
-V1 berbahasa Indonesia, dua jenis dan Load more; requirement tersebut diganti v2 di atas. Aset dipertahankan sebagai sejarah: [dashboard](admin-dashboard-desktop-light-v1.png), [list](admin-content-list-desktop-light-v1.png), [create](admin-content-create-desktop-light-v1.png), [detail](admin-content-detail-desktop-light-v1.png), [edit](admin-content-edit-desktop-light-v1.png). Evidence pembuatan v1 ada pada ADMC-DES-001.
+Permintaan pengguna 5 Oktober 2026: hapus versi lama lalu buat dark mode dari desain v2. Lima light-v1 PNG dan prompt v1 dihapus dari worktree; riwayat tetap tersedia di Git commit ADMC-DES-001/002. Light v2 dipertahankan sebagai desain terbaru/pasangan dark, bukan aset superseded. Canonical ini mencakup kedua tema.
 
-### Historical prompt set v1
+| Halaman         | Referensi dark                                                   |
+| --------------- | ---------------------------------------------------------------- |
+| Dashboard       | [Dark + dropdown terbuka](admin-dashboard-desktop-dark-v2.png)   |
+| Content list    | [Dark list + pagination](admin-content-list-desktop-dark-v2.png) |
+| Create draft    | [Dark create](admin-content-create-desktop-dark-v2.png)          |
+| Content details | [Dark details](admin-content-detail-desktop-dark-v2.png)         |
+| Edit draft      | [Dark edit](admin-content-edit-desktop-dark-v2.png)              |
 
-Prompt disimpan verbatim agar arah visual dapat diulang. image_gen transparent_background=false; empat turunan memakai dashboard desktop sebagai referenced_image_paths. Output built-in disalin ke docs/design; original generator tetap disimpan.
+Palet mengikuti [design system dark](design-system.md): background/sidebar #1E201E, card/popover #272A27, muted/input #303430, border #424842, foreground #F3F5F3 dan supporting text #A8B0A8; primary lime dari token dark. Welcome/selected states memakai dark olive tint; badge Draft/Published tetap netral. Dashboard memilih Dark di dalam Appearance, sementara empat halaman lainnya mempertahankan dropdown closed. English, Film/Standalone/Series, Log out kiri bawah, pagination/custom dan seluruh metadata mengikuti light v2. Mockup raster tidak membuktikan nilai piksel token persis, contrast audit numerik, switching runtime atau mobile.
 
-### Dashboard
+Built-in image_gen memakai lima edit utama dengan light v2 sebagai referenced_image_paths, ditambah satu koreksi badge Draft pada detail; transparent_background=false. Kelima final output diinspeksi: semua field/copy English, layout/menu/avatar, logout, pagination/10 rows/custom, conditional badges/checkbox dan dark surfaces sesuai scope. Kelima PNG 1536 × 1024 piksel/mode100644 tersimpan di docs/design. Hasil dokumen/commit mengikuti receipt ADMC-DES-003. Ini inspeksi mockup, bukan browser runtime/contrast audit.
+
+## Prompt set dark v2
+
+### Dark dashboard
 
 ```text
-Use case: ui-mockup.
-Asset type: high-fidelity desktop web app design screenshot for Vertical Movie admin, light theme first.
-Canvas: one flat straight-on full desktop screen, landscape approximately 1536x1024 pixels. Render clean crisp readable real Indonesian UI, not a wireframe, no device mockup, no browser chrome, no collage or explanatory annotations outside UI.
-Shared visual system: polished shadcn Base UI Rhea, white/neutral surfaces, faint gray page background #FAFAFA, subtle #E5E5E5 hairline borders, charcoal text, bright lime primary oklch(0.841 0.238 128.85) with dark olive button text. Inter UI text and Space Grotesk headings. Restrained 14/18/24px corners, spacious 4px grid, thin Remixicon outline icons, minimal shadows. A mature product interface with excellent hierarchy and readable typography, no decorative gradients.
-Shared shell: fixed full-height 232px left sidebar, small lime rounded square play logo and brand "Vertical Movie", small "ADMIN" section label, only navigation "Dashboard" with home icon and "Konten" with film icon; footer "Admin" and "admin@example.test", outlined "Keluar" with logout icon. Main top bar 72px with contextual breadcrumb left. Theme switcher at upper right as a compact clearly visible rounded segmented control with SUN / MOON / MONITOR icons corresponding to Light / Dark / System. Sun is selected and visibly labelled "Light"; moon and monitor have clear line icons. The same switcher and shell must appear on every page. Do not add team switchers, notifications, search-command bar, analytics, public site settings or navigation items not specified.
-Typography: natural Indonesian text, exact important labels supplied below, no lorem ipsum. Use generous space, balanced density and realistic form/control dimensions. All values are fictional examples. Keep controls and page content fully inside the frame.
-Page: Dashboard, path /admin. Sidebar Dashboard active in a pale lime row; Konten inactive. Top bar breadcrumb "Admin / Dashboard".
-Content: page heading "Dashboard", supporting text "Kelola metadata konten Anda dari satu tempat."
-A large understated pale lime welcome panel, LEFT headline "Selamat datang, Admin", subtitle "Mulai dari draf yang rapi.", short copy "Buat dan kelola movie serta video standalone sebelum proses unggah.", small outlined film icon motif on right, no photos.
-Below welcome, two equal elegant white action cards. Card 1 film-plus outline icon, title "Buat draft baru", description "Simpan judul dan metadata awal konten.", lime button "+ Buat draft". Card 2 stacked-film outline icon, title "Kelola konten", description "Temukan konten dan perbarui metadata draft.", outlined button "Lihat konten →".
-Lower white bordered card "Akun administrator", two-column key/value rows: "Nama" / "Admin", "Email" / "admin@example.test", "Peran" / "Administrator", "Sesi" / "Aktif" with a neutral subtle badge. Enough natural white space below; no database IDs or session secrets.
-Crucial exclusions: no numeric totals, no stats cards, no charts, no revenue/watchers, no video posters, no upload/transcode progress, no publish/archive action buttons. This iteration is metadata-only.
+Use case: ui-mockup / precise-object-edit.
+Input image1 is the exact English desktop light v2 page EDIT TARGET. Convert ONLY its colors into the approved Vertical Movie DARK THEME. Preserve identical 1536x1024 canvas, layout, geometry, gutters, sidebar/header width/height, account avatar trigger at upper right, bottom-left Log out, every English label/example/field/button, typography, icons, page controls and selected states. Flat high-fidelity screenshot; no browser chrome, no device frame.
+Dark semantic palette: background and sidebar #1E201E charcoal; card/popover/header elevated #272A27; muted/secondary/input #303430; hairline borders #424842; foreground #F3F5F3; supporting text #A8B0A8. Primary lime oklch(0.768 0.233 130.85), with dark olive/dark readable text on solid lime buttons. Selected navigation/tabs/chips use subtle dark olive lime tint, readable light/lime foreground, NOT glaring white/pale-light backgrounds. Inputs use dark gray fill, dark borders, white values and readable muted placeholder. All status badges use neutral dark surfaces and white text; Published remains neutral outlined, not green. Avatar circle neutral dark gray with light AD text. Transparent/outline buttons dark surfaces, light text, visible borders. NO white cards, light-background fields or light gray panels.
+No redesign, no new fields/actions, no deleted content, no light switcher in header, no change in metadata/rights/state, no extra controls. Ensure comfortable dark contrast throughout. Retain english spelling and all exact copy. This is recoloring of the provided page, not a different design.
+Dashboard: dropdown REMAINS OPEN at top right. Identity Admin/admin@example.test, Appearance options Light/Dark/System. Change selected theme from Light to DARK: Dark row uses subtle dark lime selection and checkmark; Light row unselected; System unselected. Welcome panel becomes understated dark olive tint #303C24 with light heading and muted light body, NOT bright pale lime. Preserve all dashboard action/account cards and exact content. No change in layout.
 ```
 
-### Daftar konten
+### Dark list
 
 ```text
-Use case: ui-mockup.
-Asset type: high-fidelity desktop web app design screenshot for Vertical Movie admin, light theme first.
-Canvas: one flat straight-on full desktop screen, landscape approximately 1536x1024 pixels. Render clean crisp readable real Indonesian UI, not a wireframe, no device mockup, no browser chrome, no collage or explanatory annotations outside UI.
-Shared visual system: polished shadcn Base UI Rhea, white/neutral surfaces, faint gray page background #FAFAFA, subtle #E5E5E5 hairline borders, charcoal text, bright lime primary oklch(0.841 0.238 128.85) with dark olive button text. Inter UI text and Space Grotesk headings. Restrained 14/18/24px corners, spacious 4px grid, thin Remixicon outline icons, minimal shadows. A mature product interface with excellent hierarchy and readable typography, no decorative gradients.
-Shared shell: fixed full-height 232px left sidebar, small lime rounded square play logo and brand "Vertical Movie", small "ADMIN" section label, only navigation "Dashboard" with home icon and "Konten" with film icon; footer "Admin" and "admin@example.test", outlined "Keluar" with logout icon. Main top bar 72px with contextual breadcrumb left. Theme switcher at upper right as a compact clearly visible rounded segmented control with SUN / MOON / MONITOR icons corresponding to Light / Dark / System. Sun is selected and visibly labelled "Light"; moon and monitor have clear line icons. The same switcher and shell must appear on every page. Do not add team switchers, notifications, search-command bar, analytics, public site settings or navigation items not specified.
-Typography: natural Indonesian text, exact important labels supplied below, no lorem ipsum. Use generous space, balanced density and realistic form/control dimensions. All values are fictional examples. Keep controls and page content fully inside the frame.
-Input image 1: edit target and exact shell/style reference. Transform this dashboard screenshot into the page below. Preserve exact canvas proportions, same left sidebar width, header height, brand, sidebar footer account/logout, neutral/lime palette, font treatment, borders and upper-right Light/Dark/System segmented theme switcher with Light selected. Change only active navigation, breadcrumb and main page content. Konten is active and Dashboard inactive. One complete desktop screenshot; no collage.
-Page: Konten, path /admin/videos. Breadcrumb "Admin / Konten". Main heading "Konten", subtitle "Temukan dan kelola metadata movie serta standalone." Header right lime "+ Buat draft".
-Below heading, a full-width white bordered card with filter toolbar: left segmented "Film" selected, "Standalone" unselected; a wide search input with magnifier and placeholder "Cari judul konten..."; right unchecked checkbox "Sertakan arsip". Clear deliberate spacing. A simple clean shadcn data table, NOT thumbnail grid. Columns "Judul", "Jenis", "Status", "Diperbarui", "Aksi". Six fictional film rows with readable titles and optionally tiny genre line below:
-"Langit Setelah Hujan" / "Film" / "Draf" / "5 Okt 2026" / "Detail" and "Edit";
-"Satu Hari di Bandung" / "Film" / "Terbit" / "4 Okt 2026" / "Detail";
-"Pulang Sebelum Pagi" / "Film" / "Draf" / "4 Okt 2026" / "Detail" and "Edit";
-"Ruang yang Sama" / "Film" / "Terbit" / "3 Okt 2026" / "Detail";
-"Menunggu Senja" / "Film" / "Draf" / "3 Okt 2026" / "Detail" and "Edit";
-"Jalan Kembali" / "Film" / "Draf" / "2 Okt 2026" / "Detail" and "Edit".
-Quiet neutral badges for editorial states, subtle separators and aligned compact actions. Footer a centered outlined "Muat lagi" button. No numbered pages, no total count, no sorting arrows, no status filter or archive-only tab. No fabricated HLS "Siap" badges or source thumbnails, no delete action. Keep bottom whitespace intentional.
+Use case: ui-mockup / precise-object-edit.
+Input image1 is the exact English desktop light v2 page EDIT TARGET. Convert ONLY its colors into the approved Vertical Movie DARK THEME. Preserve identical 1536x1024 canvas, layout, geometry, gutters, sidebar/header width/height, account avatar trigger at upper right, bottom-left Log out, every English label/example/field/button, typography, icons, page controls and selected states. Flat high-fidelity screenshot; no browser chrome, no device frame.
+Dark semantic palette: background and sidebar #1E201E charcoal; card/popover/header elevated #272A27; muted/secondary/input #303430; hairline borders #424842; foreground #F3F5F3; supporting text #A8B0A8. Primary lime oklch(0.768 0.233 130.85), with dark olive/dark readable text on solid lime buttons. Selected navigation/tabs/chips use subtle dark olive lime tint, readable light/lime foreground, NOT glaring white/pale-light backgrounds. Inputs use dark gray fill, dark borders, white values and readable muted placeholder. All status badges use neutral dark surfaces and white text; Published remains neutral outlined, not green. Avatar circle neutral dark gray with light AD text. Transparent/outline buttons dark surfaces, light text, visible borders. NO white cards, light-background fields or light gray panels.
+No redesign, no new fields/actions, no deleted content, no light switcher in header, no change in metadata/rights/state, no extra controls. Ensure comfortable dark contrast throughout. Retain english spelling and all exact copy. This is recoloring of the provided page, not a different design.
+Content list: exactly ten rows, Film/Standalone/Series tabs with Film selected; Include archived unchecked. Preserve row titles/actions/status, ten rows and pagination footer: Rows per page10, Custom1–100, Showing1–10 of42, numbered1..5 with page1active and disabled previous arrow. Avatar dropdown stays CLOSED; theme is Dark but no visible standalone theme control.
 ```
 
-### Buat draft
+### Dark create
 
 ```text
-Use case: ui-mockup.
-Asset type: high-fidelity desktop web app design screenshot for Vertical Movie admin, light theme first.
-Canvas: one flat straight-on full desktop screen, landscape approximately 1536x1024 pixels. Render clean crisp readable real Indonesian UI, not a wireframe, no device mockup, no browser chrome, no collage or explanatory annotations outside UI.
-Shared visual system: polished shadcn Base UI Rhea, white/neutral surfaces, faint gray page background #FAFAFA, subtle #E5E5E5 hairline borders, charcoal text, bright lime primary oklch(0.841 0.238 128.85) with dark olive button text. Inter UI text and Space Grotesk headings. Restrained 14/18/24px corners, spacious 4px grid, thin Remixicon outline icons, minimal shadows. A mature product interface with excellent hierarchy and readable typography, no decorative gradients.
-Shared shell: fixed full-height 232px left sidebar, small lime rounded square play logo and brand "Vertical Movie", small "ADMIN" section label, only navigation "Dashboard" with home icon and "Konten" with film icon; footer "Admin" and "admin@example.test", outlined "Keluar" with logout icon. Main top bar 72px with contextual breadcrumb left. Theme switcher at upper right as a compact clearly visible rounded segmented control with SUN / MOON / MONITOR icons corresponding to Light / Dark / System. Sun is selected and visibly labelled "Light"; moon and monitor have clear line icons. The same switcher and shell must appear on every page. Do not add team switchers, notifications, search-command bar, analytics, public site settings or navigation items not specified.
-Typography: natural Indonesian text, exact important labels supplied below, no lorem ipsum. Use generous space, balanced density and realistic form/control dimensions. All values are fictional examples. Keep controls and page content fully inside the frame.
-Input image 1: edit target and exact shell/style reference. Transform this dashboard screenshot into the page below. Preserve exact canvas proportions, same left sidebar width, header height, brand, sidebar footer account/logout, neutral/lime palette, font treatment, borders and upper-right Light/Dark/System segmented theme switcher with Light selected. Change only active navigation, breadcrumb and main page content. Konten is active and Dashboard inactive. One complete desktop screenshot; no collage.
-Page: Buat draft, path /admin/videos/new. Breadcrumb "Admin / Konten / Buat draft". Top content small back link "← Kembali ke konten", heading "Buat draft", supporting text "Simpan metadata awal. Video dan sampul dapat ditambahkan nanti."
-Main content uses a wide left form card (around two thirds) and a narrow right guidance/status card. Fit all fields and bottom actions visibly inside the desktop canvas with compact 40px inputs and tidy two-column rows. Field sections: "Informasi utama" and "Metadata tambahan", medium readable labels, white subtle-bordered rounded inputs and pale optional helper text. Include title/slug two-column row, original title/language two-column row, synopsis textarea about 64px high, description textarea about 72px high, release year/date two-column row, genre selection and rights checkbox. Do not include upload pickers, posters, a video player, publication buttons, JSON, database IDs or backend version/debug information.
-At top of main form "Jenis konten" with Film selected / Standalone unselected pill toggle.
-Use exact fields and example values: "Judul *" / "Langit Setelah Hujan"; "Slug" / empty placeholder "Otomatis jika dikosongkan"; "Judul asli" / "After the Rain"; "Bahasa asli" / "id"; "Sinopsis" / "Pertemuan tak terduga setelah hujan mengubah perjalanan dua orang."; "Deskripsi" / empty with placeholder "Tambahkan deskripsi konten"; "Tahun rilis" / "2026"; "Tanggal rilis" / "01/10/2026"; "Genre" checkbox chips Drama and Romansa checked, Komedi and Thriller unchecked; rights checkbox UNCHECKED with label "Saya memiliki hak untuk menggunakan konten ini".
-Right guidance white card title "Tentang draft", text "Judul wajib diisi.", then "Metadata lainnya dapat dilengkapi nanti.", divider, simple neutral Draft badge and helper "Konten belum tampil di katalog publik." Pale inset note "Unggah video dan sampul pada tahap berikutnya." Do not create actual upload buttons.
-Bottom actions aligned right below form: outlined "Batalkan", bright lime "Simpan draft". No validation-error overlay or modal in this normal screen.
+Use case: ui-mockup / precise-object-edit.
+Input image1 is the exact English desktop light v2 page EDIT TARGET. Convert ONLY its colors into the approved Vertical Movie DARK THEME. Preserve identical 1536x1024 canvas, layout, geometry, gutters, sidebar/header width/height, account avatar trigger at upper right, bottom-left Log out, every English label/example/field/button, typography, icons, page controls and selected states. Flat high-fidelity screenshot; no browser chrome, no device frame.
+Dark semantic palette: background and sidebar #1E201E charcoal; card/popover/header elevated #272A27; muted/secondary/input #303430; hairline borders #424842; foreground #F3F5F3; supporting text #A8B0A8. Primary lime oklch(0.768 0.233 130.85), with dark olive/dark readable text on solid lime buttons. Selected navigation/tabs/chips use subtle dark olive lime tint, readable light/lime foreground, NOT glaring white/pale-light backgrounds. Inputs use dark gray fill, dark borders, white values and readable muted placeholder. All status badges use neutral dark surfaces and white text; Published remains neutral outlined, not green. Avatar circle neutral dark gray with light AD text. Transparent/outline buttons dark surfaces, light text, visible borders. NO white cards, light-background fields or light gray panels.
+No redesign, no new fields/actions, no deleted content, no light switcher in header, no change in metadata/rights/state, no extra controls. Ensure comfortable dark contrast throughout. Retain english spelling and all exact copy. This is recoloring of the provided page, not a different design.
+Create draft: Film/Standalone/Series radio choices with Film selected; every metadata field/genre remains, Drama/Romance selected, rights checkbox UNCHECKED. Preserve About drafts card and all text, Cancel/Save draft. Dropdown CLOSED.
 ```
 
-### Detail konten
+### Dark detail
 
 ```text
-Use case: ui-mockup.
-Asset type: high-fidelity desktop web app design screenshot for Vertical Movie admin, light theme first.
-Canvas: one flat straight-on full desktop screen, landscape approximately 1536x1024 pixels. Render clean crisp readable real Indonesian UI, not a wireframe, no device mockup, no browser chrome, no collage or explanatory annotations outside UI.
-Shared visual system: polished shadcn Base UI Rhea, white/neutral surfaces, faint gray page background #FAFAFA, subtle #E5E5E5 hairline borders, charcoal text, bright lime primary oklch(0.841 0.238 128.85) with dark olive button text. Inter UI text and Space Grotesk headings. Restrained 14/18/24px corners, spacious 4px grid, thin Remixicon outline icons, minimal shadows. A mature product interface with excellent hierarchy and readable typography, no decorative gradients.
-Shared shell: fixed full-height 232px left sidebar, small lime rounded square play logo and brand "Vertical Movie", small "ADMIN" section label, only navigation "Dashboard" with home icon and "Konten" with film icon; footer "Admin" and "admin@example.test", outlined "Keluar" with logout icon. Main top bar 72px with contextual breadcrumb left. Theme switcher at upper right as a compact clearly visible rounded segmented control with SUN / MOON / MONITOR icons corresponding to Light / Dark / System. Sun is selected and visibly labelled "Light"; moon and monitor have clear line icons. The same switcher and shell must appear on every page. Do not add team switchers, notifications, search-command bar, analytics, public site settings or navigation items not specified.
-Typography: natural Indonesian text, exact important labels supplied below, no lorem ipsum. Use generous space, balanced density and realistic form/control dimensions. All values are fictional examples. Keep controls and page content fully inside the frame.
-Input image 1: edit target and exact shell/style reference. Transform this dashboard screenshot into the page below. Preserve exact canvas proportions, same left sidebar width, header height, brand, sidebar footer account/logout, neutral/lime palette, font treatment, borders and upper-right Light/Dark/System segmented theme switcher with Light selected. Change only active navigation, breadcrumb and main page content. Konten is active and Dashboard inactive. One complete desktop screenshot; no collage.
-Page: Detail konten, path /admin/videos/:id. Breadcrumb "Admin / Konten / Langit Setelah Hujan". Small back link "← Kembali ke konten". Main heading "Langit Setelah Hujan", secondary text "Detail metadata konten", neutral badges "Film" and "Draf", right prominent lime pencil-icon button "Edit metadata".
-Main two-column layout: wide left white bordered "Informasi konten" read-only card, narrow right stacked status cards. Main metadata fields neatly grouped with subtle separators, no form inputs:
-"Judul" = "Langit Setelah Hujan";
-"Slug" = "langit-setelah-hujan";
-"Judul asli" = "After the Rain";
-"Sinopsis" = "Pertemuan tak terduga setelah hujan mengubah perjalanan dua orang.";
-"Deskripsi" = "Belum ditambahkan";
-"Bahasa asli" = "Indonesia (id)";
-"Tahun rilis" = "2026";
-"Tanggal rilis" = "1 Oktober 2026";
-"Genre" = two small chips "Drama", "Romansa".
-Right top card "Status konten", badge "Draf", helper "Belum tampil di katalog publik." Second card "Sumber video", neutral simple file icon, label "Belum diunggah", helper "Ketersediaan sumber berbeda dari kesiapan HLS." No video/poster imagery or controls. Third card "Hak konten", plain label "Belum dikonfirmasi", helper "Diperlukan sebelum publikasi." At bottom quiet audit text "Dibuat 5 Oktober 2026" and "Diperbarui 5 Oktober 2026". No publish/archive/delete/preview button on source-not-uploaded draft.
+Use case: ui-mockup / precise-object-edit.
+Input image1 is the exact English desktop light v2 page EDIT TARGET. Convert ONLY its colors into the approved Vertical Movie DARK THEME. Preserve identical 1536x1024 canvas, layout, geometry, gutters, sidebar/header width/height, account avatar trigger at upper right, bottom-left Log out, every English label/example/field/button, typography, icons, page controls and selected states. Flat high-fidelity screenshot; no browser chrome, no device frame.
+Dark semantic palette: background and sidebar #1E201E charcoal; card/popover/header elevated #272A27; muted/secondary/input #303430; hairline borders #424842; foreground #F3F5F3; supporting text #A8B0A8. Primary lime oklch(0.768 0.233 130.85), with dark olive/dark readable text on solid lime buttons. Selected navigation/tabs/chips use subtle dark olive lime tint, readable light/lime foreground, NOT glaring white/pale-light backgrounds. Inputs use dark gray fill, dark borders, white values and readable muted placeholder. All status badges use neutral dark surfaces and white text; Published remains neutral outlined, not green. Avatar circle neutral dark gray with light AD text. Transparent/outline buttons dark surfaces, light text, visible borders. NO white cards, light-background fields or light gray panels.
+No redesign, no new fields/actions, no deleted content, no light switcher in header, no change in metadata/rights/state, no extra controls. Ensure comfortable dark contrast throughout. Retain english spelling and all exact copy. This is recoloring of the provided page, not a different design.
+Details: preserve all metadata and three right cards Content status/Source video/Content rights, badges Film/Draft, Not uploaded/Not confirmed, audit text, Edit metadata button. Dropdown CLOSED. No new source preview or publication action.
 ```
 
-### Edit draft
+### Dark edit
 
 ```text
-Use case: ui-mockup.
-Asset type: high-fidelity desktop web app design screenshot for Vertical Movie admin, light theme first.
-Canvas: one flat straight-on full desktop screen, landscape approximately 1536x1024 pixels. Render clean crisp readable real Indonesian UI, not a wireframe, no device mockup, no browser chrome, no collage or explanatory annotations outside UI.
-Shared visual system: polished shadcn Base UI Rhea, white/neutral surfaces, faint gray page background #FAFAFA, subtle #E5E5E5 hairline borders, charcoal text, bright lime primary oklch(0.841 0.238 128.85) with dark olive button text. Inter UI text and Space Grotesk headings. Restrained 14/18/24px corners, spacious 4px grid, thin Remixicon outline icons, minimal shadows. A mature product interface with excellent hierarchy and readable typography, no decorative gradients.
-Shared shell: fixed full-height 232px left sidebar, small lime rounded square play logo and brand "Vertical Movie", small "ADMIN" section label, only navigation "Dashboard" with home icon and "Konten" with film icon; footer "Admin" and "admin@example.test", outlined "Keluar" with logout icon. Main top bar 72px with contextual breadcrumb left. Theme switcher at upper right as a compact clearly visible rounded segmented control with SUN / MOON / MONITOR icons corresponding to Light / Dark / System. Sun is selected and visibly labelled "Light"; moon and monitor have clear line icons. The same switcher and shell must appear on every page. Do not add team switchers, notifications, search-command bar, analytics, public site settings or navigation items not specified.
-Typography: natural Indonesian text, exact important labels supplied below, no lorem ipsum. Use generous space, balanced density and realistic form/control dimensions. All values are fictional examples. Keep controls and page content fully inside the frame.
-Input image 1: edit target and exact shell/style reference. Transform this dashboard screenshot into the page below. Preserve exact canvas proportions, same left sidebar width, header height, brand, sidebar footer account/logout, neutral/lime palette, font treatment, borders and upper-right Light/Dark/System segmented theme switcher with Light selected. Change only active navigation, breadcrumb and main page content. Konten is active and Dashboard inactive. One complete desktop screenshot; no collage.
-Page: Edit draft, path /admin/videos/:id/edit. Breadcrumb "Admin / Konten / Edit draft". Small back link "← Kembali ke detail". Heading "Edit draft", supporting text "Perbarui metadata Langit Setelah Hujan.", small neutral indicator "Perubahan belum disimpan".
-Main content uses a wide left form card (around two thirds) and a narrow right guidance/status card. Fit all fields and bottom actions visibly inside the desktop canvas with compact 40px inputs and tidy two-column rows. Field sections: "Informasi utama" and "Metadata tambahan", medium readable labels, white subtle-bordered rounded inputs and pale optional helper text. Include title/slug two-column row, original title/language two-column row, synopsis textarea about 64px high, description textarea about 72px high, release year/date two-column row, genre selection and rights checkbox. Do not include upload pickers, posters, a video player, publication buttons, JSON, database IDs or backend version/debug information.
-Use same structure as create page for continuity. "Jenis konten" read-only badge "Film" with helper "Jenis konten tidak dapat diubah."; do NOT show a mutable Film/Standalone toggle. Exact field labels: "Judul *", "Slug", "Judul asli", "Bahasa asli", "Sinopsis", "Deskripsi", "Tahun rilis", "Tanggal rilis", "Genre".
-Values: title "Langit Setelah Hujan"; slug "langit-setelah-hujan"; original title "After the Rain"; language "id"; synopsis edited value "Di tengah hujan kota, dua orang menemukan alasan untuk memulai kembali."; description empty placeholder "Tambahkan deskripsi konten"; release year "2026"; date "01/10/2026"; selected genre chips Drama and Romansa with Komedi/Thriller unselected. UNCHECKED rights checkbox "Saya memiliki hak untuk menggunakan konten ini".
-Right white guidance card "Mengedit draft", neutral Draf badge, short text "Perubahan tersimpan setelah Anda memilih Simpan perubahan."; divider, helper "Judul tidak otomatis mengubah slug.", then inset subtle note "Saat terjadi konflik, input Anda tetap dipertahankan." No raw version numbers/expectedVersion/debug fields or conflict modal in this normal screen.
-Footer outlined "Batalkan perubahan" and lime "Simpan perubahan". Preserve source not-uploaded state and do not introduce upload/publish/archive actions.
+Use case: ui-mockup / precise-object-edit.
+Input image1 is the exact English desktop light v2 page EDIT TARGET. Convert ONLY its colors into the approved Vertical Movie DARK THEME. Preserve identical 1536x1024 canvas, layout, geometry, gutters, sidebar/header width/height, account avatar trigger at upper right, bottom-left Log out, every English label/example/field/button, typography, icons, page controls and selected states. Flat high-fidelity screenshot; no browser chrome, no device frame.
+Dark semantic palette: background and sidebar #1E201E charcoal; card/popover/header elevated #272A27; muted/secondary/input #303430; hairline borders #424842; foreground #F3F5F3; supporting text #A8B0A8. Primary lime oklch(0.768 0.233 130.85), with dark olive/dark readable text on solid lime buttons. Selected navigation/tabs/chips use subtle dark olive lime tint, readable light/lime foreground, NOT glaring white/pale-light backgrounds. Inputs use dark gray fill, dark borders, white values and readable muted placeholder. All status badges use neutral dark surfaces and white text; Published remains neutral outlined, not green. Avatar circle neutral dark gray with light AD text. Transparent/outline buttons dark surfaces, light text, visible borders. NO white cards, light-background fields or light gray panels.
+No redesign, no new fields/actions, no deleted content, no light switcher in header, no change in metadata/rights/state, no extra controls. Ensure comfortable dark contrast throughout. Retain english spelling and all exact copy. This is recoloring of the provided page, not a different design.
+Edit draft: preserve Unsaved changes and immutable Film content type, every field/genre/date/rights checkbox UNCHECKED, Editing a draft guidance and Discard changes/Save changes. Dropdown CLOSED. All fields and bottom buttons fit the original canvas.
 ```
 
-### Historical corrections v1
+## Prompt koreksi dark
 
-Tiga koreksi memakai screenshot halaman terkait sebagai referenced_image_paths; dashboard dan edit memakai output awal sebagai aset final.
-
-### Koreksi akhir — list
+Koreksi status detail menggunakan output dark detail awal sebagai referenced_image_paths.
 
 ```text
-Use case: ui-mockup / precise-object-edit. Input image 1 is the edit target. Change ONLY the two "Terbit" status badges: use a white/translucent card background with thin light-gray border and charcoal text/dot, a quiet neutral published badge consistent with the existing design system. Keep "Draf" badges gray, all text/table rows/controls/layout/theme switcher/sidebar/canvas unchanged. Do not alter data or add controls. Keep complete desktop light screen and all five-page shared design invariants intact. This is a tiny correction, not a redesign.
-```
-
-### Koreksi akhir — create
-
-```text
-Use case: ui-mockup / precise-object-edit. Input image 1 is the edit target. Change ONLY the right guidance card status badge text from "Draft" to the exact Indonesian word "Draf" (D-r-a-f). Preserve all other text, fields, checkbox states, positions, buttons, full screenshot, shared sidebar, theme switcher and light palette exactly. Keep complete desktop light screen and all five-page shared design invariants intact. This is a tiny correction, not a redesign.
-```
-
-### Koreksi akhir — detail
-
-```text
-Use case: ui-mockup / precise-object-edit. Input image 1 is the edit target. Change ONLY the helper copy beneath "Belum diunggah" in the Sumber video card to two readable lines: "Video sumber belum tersedia." and "Unggah pada tahap berikutnya." Remove the technical HLS helper sentence. Keep all other content/cards/data/layout/theme switcher/sidebar/canvas exactly unchanged. Keep complete desktop light screen and all five-page shared design invariants intact. This is a tiny correction, not a redesign.
+Use case: ui-mockup / precise-object-edit. Input image1 is the edit target, the completed Vertical Movie DARK detail screenshot. Change ONLY the small "Draft" badge immediately below the main title next to the "Film" badge. Its background is currently olive green; replace with neutral dark gray #303430 and white #F3F5F3 text, matching the neutral Draft badge in the right Content status card. Leave the right status badge unchanged. Preserve every other color, text, geometry, cards, metadata, controls, avatar, sidebar, Log out, full 1536x1024 canvas and dark palette exactly. No redesign, no other changes.
 ```
