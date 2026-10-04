@@ -56,7 +56,7 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 - [Worker](tasks/media-worker.md): queue, lease/retry, FFmpeg, retensi dan benchmark.
 - [Publication/playback](tasks/media-publication.md): readiness, visibility, katalog, HLS dan player.
 - [Database tooling](tasks/database-tooling.md): Drizzle Studio development.
-- [Development verification](tasks/development-verification.md): quality gate dan preservation migrasi.
+- [Development verification](tasks/development-verification.md): quality gate, preservation migrasi dan upgrade Turbo 2.11.7 terverifikasi lokal.
 - [Dokumentasi](tasks/documentation.md): organisasi folder, aturan dan validasi.
 
 ## Gambaran implementasi saat ini
