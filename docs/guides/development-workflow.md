@@ -18,7 +18,7 @@ Susun pekerjaan dengan urutan **modul → user story → task kecil**. Modul mem
 - Cantumkan ID, owner, prioritas, dependensi, acceptance criteria, dan cara validasi sebelum task berstatus `Ready`.
 - Bila task belum dapat diperkirakan karena pilihan teknis belum jelas, buat task investigasi dengan keluaran keputusan/proof yang konkret.
 - Pecah implementasi per batas yang diperlukan, misalnya konfigurasi → skema/migrasi → endpoint → UI → pemeriksaan alur. Tetap rencanakan pemeriksaan integrasi untuk hasil pengguna lintas task.
-- Catat hasil dan bukti validasi. Gunakan [template task](TASK_TEMPLATE.md) pada `docs/tasks/<module>.md` saat menyusun backlog modul.
+- Catat hasil dan bukti validasi. Gunakan [template task](../templates/task.md) pada `docs/tasks/<module>.md` saat menyusun backlog modul.
 
 ### Status pekerjaan
 
@@ -34,8 +34,8 @@ Susun pekerjaan dengan urutan **modul → user story → task kecil**. Modul mem
 ## Dari kebutuhan ke rilis
 
 1. **Tetapkan kebutuhan.** Pilih butir `PRD-xx`, perjelas kriteria penerimaan dan keputusan terbuka yang memengaruhinya.
-2. **Rancang batas.** Perbarui [Architecture](ARCHITECTURE.md) dan kontrak API jika menyentuh data, otorisasi, unggah, atau publikasi. Rekam pilihan vendor dan alasan setelah disetujui.
-3. **Rancang pengalaman.** Tentukan alur, keadaan kosong/progres/gagal, dan pemeriksaan aksesibilitas menurut [Design System](DESIGN_SYSTEM.md).
+2. **Rancang batas.** Perbarui [Architecture](../architecture/overview.md) dan kontrak API jika menyentuh data, otorisasi, unggah, atau publikasi. Rekam pilihan vendor dan alasan setelah disetujui.
+3. **Rancang pengalaman.** Tentukan alur, keadaan kosong/progres/gagal, dan pemeriksaan aksesibilitas menurut [Design System](../design/design-system.md).
 4. **Implementasikan potongan vertikal.** Kerjakan web dan API yang diperlukan oleh satu hasil pengguna; jangan menganggap halaman mock sebagai fitur selesai.
 5. **Validasi dan tinjau.** Buktikan kriteria penerimaan, jalankan pemeriksaan repo yang relevan, lalu tinjau keamanan akses video privat dan perubahan dokumentasi.
 6. **Rilis dan amati.** Tentukan migrasi, konfigurasi, pemantauan, serta rencana pemulihan sesuai infrastruktur yang nantinya dipilih. Alur rilis produksi belum ditetapkan.
@@ -56,7 +56,7 @@ bun run check-types
 bun run build
 ```
 
-Salin env sekali ketika setup lokal; jika file sudah ada, lengkapi nilai yang diperlukan tanpa menimpanya. Lihat [Environment](ENVIRONMENT.md) untuk variabel aktif dan placeholder integrasi. `bun run dev` menjalankan kedua app. Filter task dengan `--filter=api` atau `--filter=web` jika pekerjaan terbatas pada satu app. Saat ini `lint` hanya menjalankan lint web; `check-types` mencakup kedua app dan `@repo/auth`, sedangkan `build` mencakup kedua app. Setelah skrip atau dependensi berubah, jalankan instalasi frozen dan pemeriksaan yang relevan.
+Salin env sekali ketika setup lokal; jika file sudah ada, lengkapi nilai yang diperlukan tanpa menimpanya. Lihat [Environment](environment.md) untuk variabel aktif dan placeholder integrasi. `bun run dev` menjalankan kedua app. Filter task dengan `--filter=api` atau `--filter=web` jika pekerjaan terbatas pada satu app. Saat ini `lint` hanya menjalankan lint web; `check-types` mencakup kedua app dan `@repo/auth`, sedangkan `build` mencakup kedua app. Setelah skrip atau dependensi berubah, jalankan instalasi frozen dan pemeriksaan yang relevan.
 
 Husky menjalankan lint dan pemeriksaan tipe sebelum commit. Commitlint memvalidasi pesan Conventional Commits pada hook `commit-msg`, misalnya `feat(api): add video drafts` atau `docs: update admin workflow`. Pemeriksaan hook tidak menggantikan tinjauan perilaku. Pertahankan perubahan worktree yang sudah ada dan periksa isi commit sebelum membuatnya.
 
@@ -66,14 +66,14 @@ Sebelum melaporkan implementasi selesai, jalankan test yang sudah tersedia dan r
 
 - Kebutuhan `PRD-xx` dan aturan `GR-xx` yang terkait jelas pada deskripsi perubahan.
 - API memeriksa identitas admin pada operasi privat, input, dan status yang relevan; akses katalog/tonton publik tidak meminta login. Web menampilkan hasil berhasil dan gagal.
-- Perubahan aturan bisnis/validasi/lifecycle API menyertakan test perilaku yang relevan memakai native `bun:test`; jalankan suite yang terdampak dan catat hasil pada task. Ikuti [standar unit test API](API_DEVELOPMENT.md#unit-test-api--bun-native); suite integrasi menggunakan environment test terpisah.
+- Perubahan aturan bisnis/validasi/lifecycle API menyertakan test perilaku yang relevan memakai native `bun:test`; jalankan suite yang terdampak dan catat hasil pada task. Ikuti [standar unit test API](api-development.md#unit-test-api--bun-native); suite integrasi menggunakan environment test terpisah.
 - Bila mengubah data, periksa skema dan migrasi Drizzle, termasuk dampak pada data autentikasi Better Auth dan pengaturan situs.
 - Untuk perubahan database atau storage, coba API native Bun yang relevan pada versi repo dan uji kompatibilitasnya dengan Drizzle, Better Auth, serta provider S3 yang dipilih.
 - Untuk perubahan media, uji alur berkas tidak valid, izin unggah kedaluwarsa, unggah terputus, job ganda, worker mati saat FFmpeg berjalan, lease kedaluwarsa, retry, keluaran gagal diunggah, dan syarat terbit yang tidak terpenuhi sesuai ruang lingkupnya. Periksa juga akses video setelah publikasi ditarik sesuai kebijakan distribusi yang disetujui.
 - Untuk perubahan player atau tata letak, periksa pemutaran di ponsel dan desktop, kontrol keyboard, serta keadaan loading/error Video.js.
 - Perintah kualitas yang relevan berhasil, dan hasilnya dilaporkan sesuai yang benar-benar dijalankan. Verifikasi produksi/perangkat nyata dicatat terpisah bila belum dilakukan.
-- Dokumentasi di root `docs/` diperbarui ketika kontrak, perintah, atau keputusan berubah. Perubahan struktur, runtime, atau kepemilikan dokumen juga memperbarui [indeks docs](README.md).
+- Dokumentasi di root `docs/` diperbarui ketika kontrak, perintah, atau keputusan berubah. Perubahan struktur, runtime, atau kepemilikan dokumen juga memperbarui [indeks docs](../README.md).
 
 ## Perubahan keputusan
 
-Keputusan Agile dan pembagian modul menjadi task kecil disetujui pengguna pada 1 Oktober 2026. Gunakan status `Draft` untuk keputusan produk/teknis lain sampai disetujui, lalu tulis tanggal dan keputusan pada dokumen terkait. Jika implementasi menyimpang dari keputusan yang disetujui, perbarui dokumen serta alasan perubahan dalam pekerjaan yang sama. Workflow ini belum menetapkan CI, strategi branching, durasi sprint, atau kebijakan deploy. MinIO development, R2 production, selector env dan HLS VOD disetujui pengguna pada 3 Oktober 2026; detail/proof mengikuti [backlog media](tasks/media.md).
+Keputusan Agile dan pembagian modul menjadi task kecil disetujui pengguna pada 1 Oktober 2026. Gunakan status `Draft` untuk keputusan produk/teknis lain sampai disetujui, lalu tulis tanggal dan keputusan pada dokumen terkait. Jika implementasi menyimpang dari keputusan yang disetujui, perbarui dokumen serta alasan perubahan dalam pekerjaan yang sama. Workflow ini belum menetapkan CI, strategi branching, durasi sprint, atau kebijakan deploy. MinIO development, R2 production, selector env dan HLS VOD disetujui pengguna pada 3 Oktober 2026; detail/proof mengikuti [backlog media](../tasks/media.md).

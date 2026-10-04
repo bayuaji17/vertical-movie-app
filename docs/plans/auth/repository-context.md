@@ -1,4 +1,5 @@
-> Snapshot historis sebelum refactor native. AUTH-REF-001–010 telah selesai; kondisi aktif dan bukti lokal ada pada [Auth Operations](AUTH_OPERATIONS.md) dan [backlog auth](tasks/auth.md). Database development kemudian menerima expand/contract pada tindak lanjut 2 Oktober 2026; snapshot di bawah tetap historis.
+> Snapshot historis sebelum refactor native. AUTH-REF-001–010 telah selesai; kondisi aktif dan bukti lokal ada pada [Auth Operations](../../operations/auth.md) dan [backlog auth](../../tasks/auth.md). Database development kemudian menerima expand/contract pada tindak lanjut 2 Oktober 2026; snapshot di bawah tetap historis.
+
 # Repository Context — Auth
 
 ## Snapshot
@@ -77,7 +78,7 @@ Standar API menetapkan `bun:test`, test di dekat modul, dan HTTP test melalui `a
 - Pertahankan chaining Elysia, inferensi `App`, lifecycle/scope eksplisit, dan macro `requireAdmin` hanya pada rute privat.
 - Rahasia hanya di API; tambahan URL upstream web adalah konfigurasi server, bukan `VITE_*`. Tidak ada password pada argumen CLI/log/artifact.
 - `apps/web/src/routeTree.gen.ts` hanya diperbarui generator.
-- Gunakan task kecil sesuai `docs/TASK_TEMPLATE.md`; keputusan produk lain tetap draft.
+- Gunakan task kecil sesuai `docs/templates/task.md`; keputusan produk lain tetap draft.
 - Dokumentasi Turbo bundled telah dibaca untuk aturan env/hash; konfigurasi task saat ini belum diubah.
 - Runtime auth/session/gateway harus diuji tanpa bocornya server auth/database ke bundle browser.
 
@@ -105,16 +106,16 @@ Semua path repo berikut terikat pada SHA snapshot di atas; path usulan pada renc
 
 | Bukti                                                                                                       | Klaim                                                                           |
 | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `docs/PRD.md`, PRD-01/PRD-07; `docs/GLOBAL_RULES.md`, GR-01/GR-02                                           | Satu admin, tanpa registrasi publik, penonton tanpa login.                      |
+| `docs/product/prd.md`, PRD-01/PRD-07; `docs/product/global-rules.md`, GR-01/GR-02                           | Satu admin, tanpa registrasi publik, penonton tanpa login.                      |
 | `apps/api/src/index.ts`, `apps/api/package.json`                                                            | Starter membuka port langsung; auth/database/test belum ada.                    |
 | `packages/auth/src/{server,client,types}.ts`, `packages/auth/package.json`                                  | Ekspor dasar dan ownership Better Auth; belum ada instance.                     |
 | `apps/web/src/{router.tsx,routes/__root.tsx,routes/index.tsx}`                                              | Source router dan halaman saat ini belum melakukan auth.                        |
 | `apps/web/src/integrations/tanstack-query/root-provider.tsx`                                                | QueryClient dibuat oleh factory; jangan menyimpan cookie global.                |
 | `apps/web/vite.config.ts`, `apps/web/components.json`                                                       | Bun/Nitro, alias dan preset UI web.                                             |
-| `docs/API_DEVELOPMENT.md`, bagian Auth/Lifecycle/Eden/OpenAPI/Unit test                                     | Boundary package, guard admin, raw handler, Scalar gabungan, test native Bun.   |
-| `docs/ENVIRONMENT.md`, `.env.example` kedua app, `turbo.json`                                               | Env aktif/planned dan origin awal dua port.                                     |
-| `docs/GLOBAL_WORKFLOW.md`, `docs/TASK_TEMPLATE.md`                                                          | Modul → story → task kecil; status dan bukti validasi.                          |
+| `docs/guides/api-development.md`, bagian Auth/Lifecycle/Eden/OpenAPI/Unit test                              | Boundary package, guard admin, raw handler, Scalar gabungan, test native Bun.   |
+| `docs/guides/environment.md`, `.env.example` kedua app, `turbo.json`                                        | Env aktif/planned dan origin awal dua port.                                     |
+| `docs/guides/development-workflow.md`, `docs/templates/task.md`                                             | Modul → story → task kecil; status dan bukti validasi.                          |
 | `package.json`, `.husky/`, `.gitignore`                                                                     | Toolchain, gate commit, env lokal tidak dilacak.                                |
 | Better Auth terpasang: `dist/api/routes/sign-up.mjs`, `dist/crypto/index.d.mts`; adapter `dist/index.d.mts` | Credential mapping, public hasher, opsi transaksi adapter dengan default false. |
 
-Referensi primer dan versi kandidat tercatat pada [rencana](IMPLEMENTATION_PLAN.md#evidence). Backlog eksekusi ada pada [modul auth](tasks/auth.md).
+Referensi primer dan versi kandidat tercatat pada [rencana](implementation-plan.md#evidence). Backlog eksekusi ada pada [modul auth](../../tasks/auth.md).

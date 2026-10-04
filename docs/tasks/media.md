@@ -2,17 +2,17 @@
 
 ## Tujuan modul
 
-Admin dapat mengunggah sumber video/poster dengan aman dan pengembang dapat memakai kontrak storage yang sama pada MinIO lokal dan Cloudflare R2 production. Worker kemudian menghasilkan HLS VOD untuk preview/publikasi. Referensi PRD-04/05/07/09, [plan video](../VIDEO_IMPLEMENTATION_PLAN.md), [model data](../VIDEO_DATA_MODEL.md), [context](../VIDEO_REPOSITORY_CONTEXT.md), [Environment](../ENVIRONMENT.md), [workflow](../GLOBAL_WORKFLOW.md).
+Admin dapat mengunggah sumber video/poster dengan aman dan pengembang dapat memakai kontrak storage yang sama pada MinIO lokal dan Cloudflare R2 production. Worker kemudian menghasilkan HLS VOD untuk preview/publikasi. Referensi PRD-04/05/07/09, [plan video](../plans/video/implementation-plan.md), [model data](../architecture/video-data-model.md), [context](../plans/video/repository-context.md), [Environment](../guides/environment.md), [workflow](../guides/development-workflow.md).
 
-> Keputusan pengguna disetujui 3 Oktober 2026: MinIO development, bucket `vertical-movie-app` dibuat pengguna, Cloudflare R2 S3-compatible production, selector env, HLS. Base SHA refinement `0d3bef87f6d2f9b0a2873078f9b560f092f13c53`. Dokumen ini menyimpan keputusan planning dan status eksekusi. Implementasi inti pada feat/media-backend serta evidence lokal terkini tersedia pada [Media Operations](../MEDIA_OPERATIONS.md); belum ada commit implementasi.
+> Keputusan pengguna disetujui 3 Oktober 2026: MinIO development, bucket `vertical-movie-app` dibuat pengguna, Cloudflare R2 S3-compatible production, selector env, HLS. Base SHA refinement `0d3bef87f6d2f9b0a2873078f9b560f092f13c53`. Dokumen ini menyimpan keputusan planning dan status eksekusi. Implementasi inti pada feat/media-backend serta evidence lokal terkini tersedia pada [Media Operations](../operations/media.md); belum ada commit implementasi.
 
 Keputusan resolusi lanjutan: sumber dan HLS 480p–1080p; sumber 1440p/4K ditolak, keluaran tidak boleh di-upscale. Semua video wajib portrait 9:16; landscape/square/cinematic/rasio lain ditolak. Bounds dimensi tampilan setelah rotasi/SAR dan contoh portrait mengikuti plan. Format sumber disetujui: MP4/MOV/MKV dengan H.264/H.265, WebM dengan VP8/VP9; wajib validasi container/codec aktual serta decode FFmpeg.
 
 Keputusan target sumber berikutnya: H.264 SDR/AAC 128 kbps sebagai acuan, acuan 1080p24–30 pada 4–6 Mbps (default 6 Mbps); sumber 60 fps tetap mengikuti size limit aktual, dengan batas terbaru per kind: movie/standalone maksimal 30 menit dan 1,5 GB (1.500.000.000 byte), episode maksimal 10 menit dan 512 MB. Semua video/sampul portrait 9:16 disetujui. Standar sampul seragam antarjenis konten: gambar diam JPG/JPEG/PNG/WebP <=5 MB (5.000.000 byte), sumber setelah orientasi minimal 1080 × 1920 portrait 9:16, hasil WebP 1080 × 1920; pixel sampul tidak mengikuti tiap video. Sumber lebih besar diperkecil, sumber di bawah minimum/rasio lain/animasi ditolak. Limit per kind berlaku juga untuk file yang lebih pendek; movie/standalone <=10 menit juga memakai limit per kind 1,5 GB. Kelompok batas produk nomor 1 selesai. Acuan bitrate tunduk pada limit sumber; budget total movie/standalone 30 menit sekitar 6,67 Mbps, sehingga acuan standar 4–6 Mbps memiliki ruang untuk audio/container; profil tinggi/60 fps tetap memerlukan ukuran aktual yang memenuhi cap. Target bitrate ekspor bukan ladder HLS final; kebijakan audio/HDR/VFR/fps mengikuti hls-v1; fixture sintetis membuktikan AAC optional, HDR→SDR dan fps≤30.
 
-Keputusan upload berikutnya: S3 multipart saja dengan file dipecah menjadi part kecil, termasuk sampul kecil satu part. Part upload digabung storage menjadi sumber lengkap; segment HLS dibuat terpisah oleh FFmpeg. Ukuran part disetujui 4 Oktober 2026: target 2% ukuran file aktual, minimal 5 MiB selain part terakhir; geometry byte/count dihitung sekali dan disimpan per session. Session 24 jam disetujui pada nomor 6; maksimal 3 part paralel per file dan URL part 15 menit dibatasi sisa session disetujui 4 Oktober 2026. Referensi kontrak ada pada [plan multipart](../VIDEO_IMPLEMENTATION_PLAN.md#nomor-2--s3-multipart-upload-disetujui-3-oktober-2026).
+Keputusan upload berikutnya: S3 multipart saja dengan file dipecah menjadi part kecil, termasuk sampul kecil satu part. Part upload digabung storage menjadi sumber lengkap; segment HLS dibuat terpisah oleh FFmpeg. Ukuran part disetujui 4 Oktober 2026: target 2% ukuran file aktual, minimal 5 MiB selain part terakhir; geometry byte/count dihitung sekali dan disimpan per session. Session 24 jam disetujui pada nomor 6; maksimal 3 part paralel per file dan URL part 15 menit dibatasi sisa session disetujui 4 Oktober 2026. Referensi kontrak ada pada [plan multipart](../plans/video/implementation-plan.md#nomor-2--s3-multipart-upload-disetujui-3-oktober-2026).
 
-**hls-v1 disetujui 4 Oktober 2026**: H.264 SDR, AAC 128 kbps bila audio tersedia, target video 480p/720p/1080p 1,2/2,5/4,5 Mbps, output maksimal 30 fps, segment fMP4 dengan target 6 detik dan pemilihan kualitas adaptif; tanpa crop/upscale, hanya kualitas yang dapat dibuat dari sumber. Detail encoder/GOP/SAR/VFR/MIME serta kualitas visual dan compatibility tetap memerlukan proof HLS-PROFILE-001. Referensi: [profil HLS](../VIDEO_IMPLEMENTATION_PLAN.md#nomor-3--profil-hls-disetujui-4-oktober-2026).
+**hls-v1 disetujui 4 Oktober 2026**: H.264 SDR, AAC 128 kbps bila audio tersedia, target video 480p/720p/1080p 1,2/2,5/4,5 Mbps, output maksimal 30 fps, segment fMP4 dengan target 6 detik dan pemilihan kualitas adaptif; tanpa crop/upscale, hanya kualitas yang dapat dibuat dari sumber. Detail encoder/GOP/SAR/VFR/MIME serta kualitas visual dan compatibility tetap memerlukan proof HLS-PROFILE-001. Referensi: [profil HLS](../plans/video/implementation-plan.md#nomor-3--profil-hls-disetujui-4-oktober-2026).
 
 ## Evidence validasi dokumen — 3 Oktober 2026
 
@@ -60,7 +60,7 @@ Native bun:test untuk profile valid/invalid dan error redaction; check-types/bui
 
 ### Hasil dan bukti
 
-4 Oktober2026, feat/media-backend (belum commit): Loader/config tests dan native factory, profile server, env sample/Turbo/DI tersedia. Local credential aplikasi scoped bucket di env ignored; raw secret tidak dicatat. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
+4 Oktober2026, feat/media-backend (belum commit): Loader/config tests dan native factory, profile server, env sample/Turbo/DI tersedia. Local credential aplikasi scoped bucket di env ignored; raw secret tidak dicatat. Gate root dan batas lingkungan pada [Media Operations](../operations/media.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -91,7 +91,7 @@ Proof terpisah dengan guard endpoint/bucket test, fixture kecil yang aman, dan e
 
 ### Hasil dan bukti
 
-4 Oktober2026, feat/media-backend (belum commit): MinIO+Chromium storage1 test/17 assertions lulus. Native gap browser multipart dibuktikan; AWS SDK digunakan hanya untuk multipart/copy/control. Fresh dedicated bucket dibersihkan. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
+4 Oktober2026, feat/media-backend (belum commit): MinIO+Chromium storage1 test/17 assertions lulus. Native gap browser multipart dibuktikan; AWS SDK digunakan hanya untuk multipart/copy/control. Fresh dedicated bucket dibersihkan. Gate root dan batas lingkungan pada [Media Operations](../operations/media.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -108,7 +108,7 @@ MEDIA-DESIGN-001 memilih metode final dari evidence; MEDIA-R2-001 mengulang oper
 
 ### Ruang lingkup
 
-Refine `docs/VIDEO_DATA_MODEL.md`, `VIDEO_IMPLEMENTATION_PLAN.md`, runbook media dan request/response yang akan dipakai module media. S3 multipart telah dipilih. Parameter part 2%/minimum 5 MiB, concurrency 3/session 24 jam/URL part 15 menit dibatasi sisa session sudah disetujui. Refine resume state/identity, abort/cleanup, checksum dan final key/freeze berdasarkan proof serta batas sumber yang disetujui.
+Refine `docs/architecture/video-data-model.md`, `docs/plans/video/implementation-plan.md`, runbook media dan request/response yang akan dipakai module media. S3 multipart telah dipilih. Parameter part 2%/minimum 5 MiB, concurrency 3/session 24 jam/URL part 15 menit dibatasi sisa session sudah disetujui. Refine resume state/identity, abort/cleanup, checksum dan final key/freeze berdasarkan proof serta batas sumber yang disetujui.
 
 ### Acceptance criteria
 
@@ -122,7 +122,7 @@ Review kontrak dan matriks skenario terputus/resume/expiry/duplikasi/overwrite. 
 
 ### Hasil dan bukti
 
-4 Oktober2026, feat/media-backend (belum commit): Kontrak upload/freeze/status pada MEDIA_UPLOAD_CONTRACT.md dan MEDIA_OPERATIONS.md; policy/probe unit serta FFmpeg still/EXIF tersedia. Seluruh format/HDR/VFR/animasi/corrupt fixture matrix tetap terbuka. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
+4 Oktober2026, feat/media-backend (belum commit): Kontrak upload/freeze/status pada docs/architecture/media-upload-contract.md dan docs/operations/media.md; policy/probe unit serta FFmpeg still/EXIF tersedia. Seluruh format/HDR/VFR/animasi/corrupt fixture matrix tetap terbuka. Gate root dan batas lingkungan pada [Media Operations](../operations/media.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -153,7 +153,7 @@ Dedicated PostgreSQL migration/constraint/rollback proof; generate/review SQL; `
 
 ### Hasil dan bukti
 
-4 Oktober2026, feat/media-backend (belum commit): Migrasi0006 generated/reviewed/applied development. Composite owner FK/geometry/identity/state constraints dibuktikan pada dedicated upload suite4/32, journal rerun dan data lama utuh. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
+4 Oktober2026, feat/media-backend (belum commit): Migrasi0006 generated/reviewed/applied development. Composite owner FK/geometry/identity/state constraints dibuktikan pada dedicated upload suite4/32, journal rerun dan data lama utuh. Gate root dan batas lingkungan pada [Media Operations](../operations/media.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -185,7 +185,7 @@ bun:test app.handle dengan injected I/O dan clock; dedicated DB race/idempotency
 
 ### Hasil dan bukti
 
-4 Oktober2026, feat/media-backend (belum commit): Endpoint initiate/status/part dengan authoritative admin, request hash/idempotency/one-active-session/immutable geometry/TTL/actual-byte progress tersedia. Unit HTTP dan DB proof4/32 lulus. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
+4 Oktober2026, feat/media-backend (belum commit): Endpoint initiate/status/part dengan authoritative admin, request hash/idempotency/one-active-session/immutable geometry/TTL/actual-byte progress tersedia. Unit HTTP dan DB proof4/32 lulus. Gate root dan batas lingkungan pada [Media Operations](../operations/media.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -216,7 +216,7 @@ Unit failure injection dan app.handle; dedicated DB races serta MinIO object ide
 
 ### Hasil dan bukti
 
-4 Oktober2026, feat/media-backend (belum commit): ListParts→Complete→HEAD→conditional freeze→HEAD→pointer/enqueue atomik tersedia. Dedicated DB freeze failure/replay/abort race4/32 dan real MinIO→worker E2E lulus. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
+4 Oktober2026, feat/media-backend (belum commit): ListParts→Complete→HEAD→conditional freeze→HEAD→pointer/enqueue atomik tersedia. Dedicated DB freeze failure/replay/abort race4/32 dan real MinIO→worker E2E lulus. Gate root dan batas lingkungan pada [Media Operations](../operations/media.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -247,11 +247,11 @@ Injected clock/storage failure tests; PostgreSQL concurrent transition proof dan
 
 ### Hasil dan bukti
 
-4 Oktober2026, feat/media-backend (belum commit): Explicit abort, session24h expiry, quarantine24h/hourly sweep dengan persisted key dan claim tersedia. DB expiry/abort race lulus; crash/fault matrix sweeper lengkap masih terbuka. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
+4 Oktober2026, feat/media-backend (belum commit): Explicit abort, session24h expiry, quarantine24h/hourly sweep dengan persisted key dan claim tersedia. DB expiry/abort race lulus; crash/fault matrix sweeper lengkap masih terbuka. Gate root dan batas lingkungan pada [Media Operations](../operations/media.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
-Retensi source 7 hari dan file konten archived permanen disepakati 4 Oktober 2026. Pengecualian archived mencakup video asli; titik awal retensi serta [aturan cleanup nomor 6](../VIDEO_IMPLEMENTATION_PLAN.md#nomor-6--retensi-dan-cleanup-disetujui-4-oktober-2026) disetujui 4 Oktober 2026: session resume 24 jam, abort explicit segera, objek invalid/partial gagal karantina 24 jam dan sweep per jam. Implementasi/proof masih pending. Source retention/tombstone serta cleanup worker dirinci pada WORKER-RETENTION-001; task ini tidak menghapus output sukses/arsip atau source final aktif. Restore konten tetap refinement.
+Retensi source 7 hari dan file konten archived permanen disepakati 4 Oktober 2026. Pengecualian archived mencakup video asli; titik awal retensi serta [aturan cleanup nomor 6](../plans/video/implementation-plan.md#nomor-6--retensi-dan-cleanup-disetujui-4-oktober-2026) disetujui 4 Oktober 2026: session resume 24 jam, abort explicit segera, objek invalid/partial gagal karantina 24 jam dan sweep per jam. Implementasi/proof masih pending. Source retention/tombstone serta cleanup worker dirinci pada WORKER-RETENTION-001; task ini tidak menghapus output sukses/arsip atau source final aktif. Restore konten tetap refinement.
 
 ## Task: HLS-PROFILE-001 — Tetapkan profil HLS VOD dan proof FFmpeg
 
@@ -264,7 +264,7 @@ Retensi source 7 hari dan file konten archived permanen disepakati 4 Oktober 202
 
 ### Ruang lingkup
 
-Dokumen profil/runbook dan fixture proof FFprobe/FFmpeg dalam `apps/api/test/integration/`. Buktikan [hls-v1 yang disetujui nomor 3](../VIDEO_IMPLEMENTATION_PLAN.md#nomor-3--profil-hls-disetujui-4-oktober-2026): H.264 SDR/AAC-LC 128 kbps, target video 480p/720p/1080p 1,2/2,5/4,5 Mbps, output hingga 30 fps, fMP4 target segment 6 detik dan keyframe 2 detik. Ladder/bitrate/codec/output hingga 30 fps/fMP4 target 6 detik disetujui pada 4 Oktober 2026; interval keyframe 2 detik masih rekomendasi teknis. Bekukan detail encoder/GOP/MIME/audio optional dan resource/timeouts dari proof sebelum WORKER-002.
+Dokumen profil/runbook dan fixture proof FFprobe/FFmpeg dalam `apps/api/test/integration/`. Buktikan [hls-v1 yang disetujui nomor 3](../plans/video/implementation-plan.md#nomor-3--profil-hls-disetujui-4-oktober-2026): H.264 SDR/AAC-LC 128 kbps, target video 480p/720p/1080p 1,2/2,5/4,5 Mbps, output hingga 30 fps, fMP4 target segment 6 detik dan keyframe 2 detik. Ladder/bitrate/codec/output hingga 30 fps/fMP4 target 6 detik disetujui pada 4 Oktober 2026; interval keyframe 2 detik masih rekomendasi teknis. Bekukan detail encoder/GOP/MIME/audio optional dan resource/timeouts dari proof sebelum WORKER-002.
 
 ### Acceptance criteria
 
@@ -279,11 +279,11 @@ FFmpeg/FFprobe nyata pada fixtures test bounded; parse/verify playlist dan semua
 
 ### Hasil dan bukti
 
-4 Oktober2026, feat/media-backend (belum commit): Real FFmpeg4/12 lulus: three tiers1080p60→30/AAC, video-only/native480, larger poster/downscale/minimum dan JPEG EXIF orientation. hls-v1 libx264/veryfast/GOP2s/fMP4 target6s/WebP85 aktif. Full10/30min, HDR/VFR/codecs/keyframe/peak/visual matrix belum dibuktikan. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
+4 Oktober2026, feat/media-backend (belum commit): Real FFmpeg4/12 lulus: three tiers1080p60→30/AAC, video-only/native480, larger poster/downscale/minimum dan JPEG EXIF orientation. hls-v1 libx264/veryfast/GOP2s/fMP4 target6s/WebP85 aktif. Full10/30min, HDR/VFR/codecs/keyframe/peak/visual matrix belum dibuktikan. Gate root dan batas lingkungan pada [Media Operations](../operations/media.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
-Profil produk hls-v1 disetujui pada 4 Oktober 2026; proof kualitas/compatibility serta pembekuan detail encoder masih diperlukan. WORKER-002 membawa profil ke queue/lease/retry production code. [Rekomendasi worker nomor 7](../VIDEO_IMPLEMENTATION_PLAN.md#nomor-7--kebijakan-worker-disetujui-4-oktober-2026) menyetujui parameter melalui env dan concurrency default 1; retry 3 attempt/jeda 60–300 detik, timeout encoding max(15 menit,3×durasi), stall 5 menit, heartbeat 15/lease 120/recovery 30 detik juga disetujui. Penentuan thread/RAM/disk melalui benchmark disetujui, sementara angka kandidat resource/detail teknis tambahan tetap refinement. Benchmark per-thread/RSS/disk serta timeout pada episode 10 menit/movie 30 menit harus dibuktikan sebelum scale. Task queue/claim/runner/runtime/benchmark dirinci pada backlog worker.
+Profil produk hls-v1 disetujui pada 4 Oktober 2026; proof kualitas/compatibility serta pembekuan detail encoder masih diperlukan. WORKER-002 membawa profil ke queue/lease/retry production code. [Rekomendasi worker nomor 7](../plans/video/implementation-plan.md#nomor-7--kebijakan-worker-disetujui-4-oktober-2026) menyetujui parameter melalui env dan concurrency default 1; retry 3 attempt/jeda 60–300 detik, timeout encoding max(15 menit,3×durasi), stall 5 menit, heartbeat 15/lease 120/recovery 30 detik juga disetujui. Penentuan thread/RAM/disk melalui benchmark disetujui, sementara angka kandidat resource/detail teknis tambahan tetap refinement. Benchmark per-thread/RSS/disk serta timeout pada episode 10 menit/movie 30 menit harus dibuktikan sebelum scale. Task queue/claim/runner/runtime/benchmark dirinci pada backlog worker.
 
 ## Task: HLS-DELIVERY-001 — Kontrak akses seluruh objek HLS dan proof delivery
 
@@ -296,7 +296,7 @@ Profil produk hls-v1 disetujui pada 4 Oktober 2026; proof kualitas/compatibility
 
 ### Ruang lingkup
 
-Rancang delivery lokal/production mengikuti lifecycle draft → published → archived yang disetujui dan satu bucket aplikasi per environment yang dipilih. Buktikan [kontrak nomor 4](../VIDEO_IMPLEMENTATION_PLAN.md#nomor-4--akses-video-distribusi-hls-dan-cache-disepakati-4-oktober-2026): seluruh bucket privat, master/variant playlist melalui API dengan pemeriksaan akses dan rewrite, init/segment/caption langsung dari storage memakai signed GET URL. Source asli tidak menjadi playback viewer. TTL playback 2× durasi video aktual terverifikasi disetujui 4 Oktober 2026, menggantikan usulan tetap 60 menit. Cache bila diterapkan wajib memiliki expiry/invalidation. Cache metadata TTL 60 detik, signed playlist no-store dan private segment freshness maksimal min(300 detik, sisa URL) disetujui 4 Oktober 2026; URL lama mengikuti expiry setelah archive. Proof header/cache/provider/refresh tetap diperlukan. Jangan menganggap folder output publik, menambah bucket publication, full proxy video atau Worker/CDN runtime sebagai keputusan. Buktikan manifest no-store, validasi namespace, poster URL, CORS/Range/GET/HEAD/seek, native signing dan refresh setelah pause/seek/quality switch melewati TTL pada film 30 menit.
+Rancang delivery lokal/production mengikuti lifecycle draft → published → archived yang disetujui dan satu bucket aplikasi per environment yang dipilih. Buktikan [kontrak nomor 4](../plans/video/implementation-plan.md#nomor-4--akses-video-distribusi-hls-dan-cache-disepakati-4-oktober-2026): seluruh bucket privat, master/variant playlist melalui API dengan pemeriksaan akses dan rewrite, init/segment/caption langsung dari storage memakai signed GET URL. Source asli tidak menjadi playback viewer. TTL playback 2× durasi video aktual terverifikasi disetujui 4 Oktober 2026, menggantikan usulan tetap 60 menit. Cache bila diterapkan wajib memiliki expiry/invalidation. Cache metadata TTL 60 detik, signed playlist no-store dan private segment freshness maksimal min(300 detik, sisa URL) disetujui 4 Oktober 2026; URL lama mengikuti expiry setelah archive. Proof header/cache/provider/refresh tetap diperlukan. Jangan menganggap folder output publik, menambah bucket publication, full proxy video atau Worker/CDN runtime sebagai keputusan. Buktikan manifest no-store, validasi namespace, poster URL, CORS/Range/GET/HEAD/seek, native signing dan refresh setelah pause/seek/quality switch melewati TTL pada film 30 menit.
 
 ### Acceptance criteria
 
@@ -313,11 +313,11 @@ Fixture HLS proof untuk seluruh objek, expiry/refresh, URL stale, preview denial
 
 ### Hasil dan bukti
 
-4 Oktober2026, feat/media-backend (belum commit): Rewriter hanya verified output; manifest/traversal units, realMinIO private/Range/no-store dan signed2×duration E2E lulus. Chromium Vite dan built Bun/Nitro masing-masing1/60; archive menolak URL baru, URL lama sampai expiry. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
+4 Oktober2026, feat/media-backend (belum commit): Rewriter hanya verified output; manifest/traversal units, realMinIO private/Range/no-store dan signed2×duration E2E lulus. Chromium Vite dan built Bun/Nitro masing-masing1/60; archive menolak URL baru, URL lama sampai expiry. Gate root dan batas lingkungan pada [Media Operations](../operations/media.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
-Kontrak ini menjadi gerbang PUBLISH-001; [syarat publikasi nomor 5](../VIDEO_IMPLEMENTATION_PLAN.md#nomor-5--syarat-publikasi-disetujui-4-oktober-2026) disetujui 4 Oktober 2026 sebagai kontrak produk D4. Implementasi publish bergantung VID-016 + WORKER-002 + HLS-DELIVERY-001; real delivery implementation dan full E2E HLS dari worker tetap acceptance publish/public/web. Persetujuan tidak mengubah status task implementasi menjadi Done.
+Kontrak ini menjadi gerbang PUBLISH-001; [syarat publikasi nomor 5](../plans/video/implementation-plan.md#nomor-5--syarat-publikasi-disetujui-4-oktober-2026) disetujui 4 Oktober 2026 sebagai kontrak produk D4. Implementasi publish bergantung VID-016 + WORKER-002 + HLS-DELIVERY-001; real delivery implementation dan full E2E HLS dari worker tetap acceptance publish/public/web. Persetujuan tidak mengubah status task implementasi menjadi Done.
 
 ## Task: MEDIA-R2-001 — Ulangi proof storage pada R2 staging
 
@@ -344,11 +344,11 @@ Dedicated bucket staging proof dengan env proses server, redacted logs, per-oper
 
 ### Hasil dan bukti
 
-4 Oktober2026, feat/media-backend (belum commit): Belum dijalankan: bucket/credential R2 staging tidak tersedia pada environment sesi. MinIO tidak menjadi evidence R2. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
+4 Oktober2026, feat/media-backend (belum commit): Belum dijalankan: bucket/credential R2 staging tidak tersedia pada environment sesi. MinIO tidak menjadi evidence R2. Gate root dan batas lingkungan pada [Media Operations](../operations/media.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
-Bucket/credential R2 staging belum tersedia dalam sesi ini; task Backlog. [Rekomendasi deployment nomor 8](../VIDEO_IMPLEMENTATION_PLAN.md#nomor-8--rekomendasi-deployment-production-dan-r2-belum-disetujui) belum disetujui; full R2 E2E, scoped token/delete/abort/CORS, domain/server/volume/restart/restore/benchmark dibuktikan sebelum production. Development MinIO tidak harus menunggu provider production.
+Bucket/credential R2 staging belum tersedia dalam sesi ini; task Backlog. [Rekomendasi deployment nomor 8](../plans/video/implementation-plan.md#nomor-8--rekomendasi-deployment-production-dan-r2-belum-disetujui) belum disetujui; full R2 E2E, scoped token/delete/abort/CORS, domain/server/volume/restart/restore/benchmark dibuktikan sebelum production. Development MinIO tidak harus menunggu provider production.
 
 ## Evidence finalisasi — 4 Oktober 2026
 

@@ -6,9 +6,9 @@
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `main`.
 - Base SHA: `d1d3e0a36a4adf1c7198db7a1d36c49e9f1c93ed`.
-- Context: [VIDEO_REPOSITORY_CONTEXT.md](VIDEO_REPOSITORY_CONTEXT.md).
-- Data model: [VIDEO_DATA_MODEL.md](VIDEO_DATA_MODEL.md).
-- Task backlog: [videos](tasks/videos.md), [media foundation](tasks/media.md), [worker/retensi](tasks/media-worker.md), [publication/catalog/playback](tasks/media-publication.md).
+- Context: [VIDEO_REPOSITORY_CONTEXT.md](repository-context.md).
+- Data model: [VIDEO_DATA_MODEL.md](../../architecture/video-data-model.md).
+- Task backlog: [videos](../../tasks/videos.md), [media foundation](../../tasks/media.md), [worker/retensi](../../tasks/media-worker.md), [publication/catalog/playback](../../tasks/media-publication.md).
 - Baseline planning SHA: `d1d3e0a36a4adf1c7198db7a1d36c49e9f1c93ed`. SHA hasil tiap task dan validasi implementasi ada pada ledger di bawah.
 - Dibuat: 3 Oktober 2026, Asia/Jakarta.
 - Otorisasi awal 3 Oktober 2026: branch baru, implementasi tahap A, commit per task. Branch `feat/video-metadata`; tidak mencakup push/PR atau migrasi DB development.
@@ -48,25 +48,25 @@ Admin membuat series (sekaligus Season 1 secara atomik), menambah season, membua
 
 Path yang belum ada adalah target; penamaan final diperiksa sebelum implementasi. Action bukan bukti file telah dibuat.
 
-| Path                                                                                      | Action                         | Symbols / hasil                             | Reason / evidence                                                                           |
-| ----------------------------------------------------------------------------------------- | ------------------------------ | ------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `apps/api/src/db/schema/series.ts`, `seasons.ts`, `videos.ts`, `genres.ts`                | create                         | Tabel, CHECK, FK, indexes                   | Model §§3–6; schema saat ini auth saja.                                                     |
-| `apps/api/src/db/schema/index.ts`                                                         | modify                         | Ekspor konten bersama auth                  | `createDatabase`, Drizzle Kit resolve schema index.                                         |
-| `apps/api/drizzle/<next>_*.sql`, `drizzle/meta/*`                                         | create/modify                  | SQL, snapshots, journal generator           | Tambahan setelah 0002; bukan mengubah SQL auth lama.                                        |
-| `apps/api/src/modules/series/{index,model,service,repository}.ts`                         | create                         | `createSeriesModule`, service series/season | Pemilik grouping; create Season 1 dalam transaksi.                                          |
-| `apps/api/src/modules/videos/{index,model,service,repository}.ts`                         | create                         | `createVideosModule`, service video         | Unit playable, validation dan query episode.                                                |
-| `apps/api/src/modules/genres/{index,model,service,repository}.ts`                         | create                         | `createGenresModule`                        | Taxonomy create/list; validasi relasi.                                                      |
-| `apps/api/src/modules/*/*.test.ts`                                                        | create                         | Test domain/HTTP                            | Bun native; injeksi DB/clock/ID/admin reader.                                               |
-| `apps/api/src/shared/content-error.ts`, `plugins/errors.ts`                               | create                         | Error domain dan mapper HTTP                | Respons deterministik/redacted, requestId.                                                  |
-| `apps/api/src/shared/content-pagination.ts`                                               | create                         | Cursor/bound query                          | Dipakai listing series dan video; bukan utility package.                                    |
-| `apps/api/src/app.ts`                                                                     | modify                         | `AppDependencies`, `createApp`              | Mount bisnis sebelum schema OpenAPI.                                                        |
-| `apps/api/src/index.ts`                                                                   | modify                         | Wiring repository/service/admin reader      | Satu pool; lifecycle bootstrap yang sama.                                                   |
-| `apps/api/src/types.ts`                                                                   | modify bila perlu              | `App` tetap ReturnType type-only            | Tidak ekspor runtime/DB ke web.                                                             |
-| `apps/api/src/plugins/openapi.test.ts`, `app.test.ts`                                     | modify                         | Evidence bisnis + auth schema/rute          | Hindari regressions OpenAPI dan root.                                                       |
-| `apps/api/test/integration/content-schema-proof.test.ts`, `content-runtime-proof.test.ts` | create                         | Constraint/migrasi/HTTP DB nyata            | Suite integrasi terpisah.                                                                   |
-| `apps/web/test/content-eden-contract.ts`                                                  | create                         | Compile-only client kontrak Eden            | Verifikasi routes/types dari createApp memakai dependency Eden web existing; bukan test UI. |
-| `apps/api/package.json`                                                                   | modify                         | Script proof konten                         | Jika script ditambah, frozen install dan gate relevan.                                      |
-| `docs/tasks/videos.md`, `VIDEO_*.md`, `README.md`, `ENVIRONMENT.md`, `API_DEVELOPMENT.md` | create/modify sesuai kebutuhan | Status/rute/runbook/evidence                | Dokumentasi root sesuai workflow.                                                           |
+| Path                                                                                                              | Action                         | Symbols / hasil                             | Reason / evidence                                                                           |
+| ----------------------------------------------------------------------------------------------------------------- | ------------------------------ | ------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `apps/api/src/db/schema/series.ts`, `seasons.ts`, `videos.ts`, `genres.ts`                                        | create                         | Tabel, CHECK, FK, indexes                   | Model §§3–6; schema saat ini auth saja.                                                     |
+| `apps/api/src/db/schema/index.ts`                                                                                 | modify                         | Ekspor konten bersama auth                  | `createDatabase`, Drizzle Kit resolve schema index.                                         |
+| `apps/api/drizzle/<next>_*.sql`, `drizzle/meta/*`                                                                 | create/modify                  | SQL, snapshots, journal generator           | Tambahan setelah 0002; bukan mengubah SQL auth lama.                                        |
+| `apps/api/src/modules/series/{index,model,service,repository}.ts`                                                 | create                         | `createSeriesModule`, service series/season | Pemilik grouping; create Season 1 dalam transaksi.                                          |
+| `apps/api/src/modules/videos/{index,model,service,repository}.ts`                                                 | create                         | `createVideosModule`, service video         | Unit playable, validation dan query episode.                                                |
+| `apps/api/src/modules/genres/{index,model,service,repository}.ts`                                                 | create                         | `createGenresModule`                        | Taxonomy create/list; validasi relasi.                                                      |
+| `apps/api/src/modules/*/*.test.ts`                                                                                | create                         | Test domain/HTTP                            | Bun native; injeksi DB/clock/ID/admin reader.                                               |
+| `apps/api/src/shared/content-error.ts`, `plugins/errors.ts`                                                       | create                         | Error domain dan mapper HTTP                | Respons deterministik/redacted, requestId.                                                  |
+| `apps/api/src/shared/content-pagination.ts`                                                                       | create                         | Cursor/bound query                          | Dipakai listing series dan video; bukan utility package.                                    |
+| `apps/api/src/app.ts`                                                                                             | modify                         | `AppDependencies`, `createApp`              | Mount bisnis sebelum schema OpenAPI.                                                        |
+| `apps/api/src/index.ts`                                                                                           | modify                         | Wiring repository/service/admin reader      | Satu pool; lifecycle bootstrap yang sama.                                                   |
+| `apps/api/src/types.ts`                                                                                           | modify bila perlu              | `App` tetap ReturnType type-only            | Tidak ekspor runtime/DB ke web.                                                             |
+| `apps/api/src/plugins/openapi.test.ts`, `app.test.ts`                                                             | modify                         | Evidence bisnis + auth schema/rute          | Hindari regressions OpenAPI dan root.                                                       |
+| `apps/api/test/integration/content-schema-proof.test.ts`, `content-runtime-proof.test.ts`                         | create                         | Constraint/migrasi/HTTP DB nyata            | Suite integrasi terpisah.                                                                   |
+| `apps/web/test/content-eden-contract.ts`                                                                          | create                         | Compile-only client kontrak Eden            | Verifikasi routes/types dari createApp memakai dependency Eden web existing; bukan test UI. |
+| `apps/api/package.json`                                                                                           | modify                         | Script proof konten                         | Jika script ditambah, frozen install dan gate relevan.                                      |
+| `docs/tasks/videos.md`, `VIDEO_*.md`, `README.md`, `docs/guides/environment.md`, `docs/guides/api-development.md` | create/modify sesuai kebutuhan | Status/rute/runbook/evidence                | Dokumentasi root sesuai workflow.                                                           |
 
 Tidak semua module wajib memiliki lima file; repository dipisah pada tahap ini karena query pagination, transaksi genre dan hierarchy digunakan ulang dan perlu proof SQL. Jika task memakai file lebih kecil, perbarui impact map sebelum Ready.
 
@@ -116,7 +116,7 @@ Dependency DAG menunjukkan prerequisites, bukan instruksi menggunakan subagent/m
 
 ## Implementation Steps
 
-ID langkah sama dengan task pada [backlog detail](tasks/videos.md). Setiap task di sana memuat outcome/scope, affected files/symbols, dependencies, requirements, validation dan acceptance criteria sesuai template repo.
+ID langkah sama dengan task pada [backlog detail](../../tasks/videos.md). Setiap task di sana memuat outcome/scope, affected files/symbols, dependencies, requirements, validation dan acceptance criteria sesuai template repo.
 
 ### VID-001 — Keputusan metadata/kontrak siap implementasi
 
@@ -124,7 +124,7 @@ ID langkah sama dengan task pada [backlog detail](tasks/videos.md). Setiap task 
 - Depends on: none.
 - Files: Model/plan/backlog, D1–D3; path lengkap pada impact map dan backlog task.
 - Symbols: D1–D3, metadata/endpoint contracts (nama target; verifikasi pada implementasi).
-- Requirements: seluruh ruang lingkup dan acceptance task [VID-001](tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
+- Requirements: seluruh ruang lingkup dan acceptance task [VID-001](../../tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
 - Validation: Keputusan tercatat; model→endpoint→task→test lengkap.
 - Acceptance criteria: checklist task VID-001 lulus dengan bukti aktual; file dibuat saja belum berarti Done.
 
@@ -134,7 +134,7 @@ ID langkah sama dengan task pada [backlog detail](tasks/videos.md). Setiap task 
 - Depends on: VID-001.
 - Files: series.ts/seasons.ts/index, SQL/meta; path lengkap pada impact map dan backlog task.
 - Symbols: series, seasons, actor FKs, seasonal UNIQUE (nama target; verifikasi pada implementasi).
-- Requirements: seluruh ruang lingkup dan acceptance task [VID-002](tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
+- Requirements: seluruh ruang lingkup dan acceptance task [VID-002](../../tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
 - Validation: Proof FK/nomor/default/year-date dan preservation auth.
 - Acceptance criteria: checklist task VID-002 lulus dengan bukti aktual; file dibuat saja belum berarti Done.
 
@@ -144,7 +144,7 @@ ID langkah sama dengan task pada [backlog detail](tasks/videos.md). Setiap task 
 - Depends on: VID-002.
 - Files: videos.ts, SQL/meta; path lengkap pada impact map dan backlog task.
 - Symbols: videos, kind CHECK, episode UNIQUE (nama target; verifikasi pada implementasi).
-- Requirements: seluruh ruang lingkup dan acceptance task [VID-003](tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
+- Requirements: seluruh ruang lingkup dan acceptance task [VID-003](../../tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
 - Validation: Movie tanpa season, episode wajib parent, conflict race terbukti.
 - Acceptance criteria: checklist task VID-003 lulus dengan bukti aktual; file dibuat saja belum berarti Done.
 
@@ -154,7 +154,7 @@ ID langkah sama dengan task pada [backlog detail](tasks/videos.md). Setiap task 
 - Depends on: VID-003.
 - Files: genres.ts, SQL/meta; path lengkap pada impact map dan backlog task.
 - Symbols: genres, seriesGenres, videoGenres (nama target; verifikasi pada implementasi).
-- Requirements: seluruh ruang lingkup dan acceptance task [VID-004](tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
+- Requirements: seluruh ruang lingkup dan acceptance task [VID-004](../../tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
 - Validation: PK/FK, duplicate/unknown genre dan rollback.
 - Acceptance criteria: checklist task VID-004 lulus dengan bukti aktual; file dibuat saja belum berarti Done.
 
@@ -164,7 +164,7 @@ ID langkah sama dengan task pada [backlog detail](tasks/videos.md). Setiap task 
 - Depends on: VID-004.
 - Files: model.ts/shared/errors/pagination; path lengkap pada impact map dan backlog task.
 - Symbols: ContentError, CreateVideoBody, PatchVideoBody, content cursor (nama target; verifikasi pada implementasi).
-- Requirements: seluruh ruang lingkup dan acceptance task [VID-005](tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
+- Requirements: seluruh ruang lingkup dan acceptance task [VID-005](../../tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
 - Validation: DTO/no unknown fields, boundary/query/cursor tests.
 - Acceptance criteria: checklist task VID-005 lulus dengan bukti aktual; file dibuat saja belum berarti Done.
 
@@ -174,7 +174,7 @@ ID langkah sama dengan task pada [backlog detail](tasks/videos.md). Setiap task 
 - Depends on: VID-005.
 - Files: modules/series; path lengkap pada impact map dan backlog task.
 - Symbols: createSeriesModule, createSeries, listSeries, getSeries, updateSeries (nama target; verifikasi pada implementasi).
-- Requirements: seluruh ruang lingkup dan acceptance task [VID-006](tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
+- Requirements: seluruh ruang lingkup dan acceptance task [VID-006](../../tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
 - Validation: Default Season 1 atomik; conflict/version tests.
 - Acceptance criteria: checklist task VID-006 lulus dengan bukti aktual; file dibuat saja belum berarti Done.
 
@@ -184,7 +184,7 @@ ID langkah sama dengan task pada [backlog detail](tasks/videos.md). Setiap task 
 - Depends on: VID-006.
 - Files: modules/series; path lengkap pada impact map dan backlog task.
 - Symbols: createSeason, listSeasons, updateSeason (nama target; verifikasi pada implementasi).
-- Requirements: seluruh ruang lingkup dan acceptance task [VID-007](tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
+- Requirements: seluruh ruang lingkup dan acceptance task [VID-007](../../tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
 - Validation: Parent validity, per-series numbers, update race.
 - Acceptance criteria: checklist task VID-007 lulus dengan bukti aktual; file dibuat saja belum berarti Done.
 
@@ -194,7 +194,7 @@ ID langkah sama dengan task pada [backlog detail](tasks/videos.md). Setiap task 
 - Depends on: VID-005.
 - Files: modules/genres; path lengkap pada impact map dan backlog task.
 - Symbols: createGenresModule, createGenre, listGenres (nama target; verifikasi pada implementasi).
-- Requirements: seluruh ruang lingkup dan acceptance task [VID-008](tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
+- Requirements: seluruh ruang lingkup dan acceptance task [VID-008](../../tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
 - Validation: Unique slug/list/input errors.
 - Acceptance criteria: checklist task VID-008 lulus dengan bukti aktual; file dibuat saja belum berarti Done.
 
@@ -204,7 +204,7 @@ ID langkah sama dengan task pada [backlog detail](tasks/videos.md). Setiap task 
 - Depends on: VID-007,VID-008.
 - Files: videos service/admin/repository; path lengkap pada impact map dan backlog task.
 - Symbols: createVideosModule, createVideoDraft (nama target; verifikasi pada implementasi).
-- Requirements: seluruh ruang lingkup dan acceptance task [VID-009](tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
+- Requirements: seluruh ruang lingkup dan acceptance task [VID-009](../../tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
 - Validation: Movie/standalone/episode branch dan auth/service tests.
 - Acceptance criteria: checklist task VID-009 lulus dengan bukti aktual; file dibuat saja belum berarti Done.
 
@@ -214,7 +214,7 @@ ID langkah sama dengan task pada [backlog detail](tasks/videos.md). Setiap task 
 - Depends on: VID-009.
 - Files: videos repository/service + pagination; path lengkap pada impact map dan backlog task.
 - Symbols: listVideos, getVideo, mapVideoDto (nama target; verifikasi pada implementasi).
-- Requirements: seluruh ruang lingkup dan acceptance task [VID-010](tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
+- Requirements: seluruh ruang lingkup dan acceptance task [VID-010](../../tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
 - Validation: Cursor stable, filters/hierarchy/genre correct.
 - Acceptance criteria: checklist task VID-010 lulus dengan bukti aktual; file dibuat saja belum berarti Done.
 
@@ -224,7 +224,7 @@ ID langkah sama dengan task pada [backlog detail](tasks/videos.md). Setiap task 
 - Depends on: VID-010.
 - Files: videos service/repository/admin; path lengkap pada impact map dan backlog task.
 - Symbols: updateVideo, replaceVideoGenres, reassignEpisode (nama target; verifikasi pada implementasi).
-- Requirements: seluruh ruang lingkup dan acceptance task [VID-011](tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
+- Requirements: seluruh ruang lingkup dan acceptance task [VID-011](../../tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
 - Validation: Atomic version update; invalid parent/genre rollback.
 - Acceptance criteria: checklist task VID-011 lulus dengan bukti aktual; file dibuat saja belum berarti Done.
 
@@ -234,7 +234,7 @@ ID langkah sama dengan task pada [backlog detail](tasks/videos.md). Setiap task 
 - Depends on: VID-006,VID-007,VID-011.
 - Files: series/videos services; path lengkap pada impact map dan backlog task.
 - Symbols: archiveVideo, archiveSeries, archiveSeason (nama target; verifikasi pada implementasi).
-- Requirements: seluruh ruang lingkup dan acceptance task [VID-012](tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
+- Requirements: seluruh ruang lingkup dan acceptance task [VID-012](../../tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
 - Validation: Read archived, write blocked, child safe, idempotent archive.
 - Acceptance criteria: checklist task VID-012 lulus dengan bukti aktual; file dibuat saja belum berarti Done.
 
@@ -244,7 +244,7 @@ ID langkah sama dengan task pada [backlog detail](tasks/videos.md). Setiap task 
 - Depends on: VID-008,VID-010,VID-012.
 - Files: app/index/types/OpenAPI tests; path lengkap pada impact map dan backlog task.
 - Symbols: createApp, AppDependencies, App, content Eden contract (nama target; verifikasi pada implementasi).
-- Requirements: seluruh ruang lingkup dan acceptance task [VID-013](tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
+- Requirements: seluruh ruang lingkup dan acceptance task [VID-013](../../tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
 - Validation: Mounted routes typed, all private guarded, auth schema utuh.
 - Acceptance criteria: checklist task VID-013 lulus dengan bukti aktual; file dibuat saja belum berarti Done.
 
@@ -254,7 +254,7 @@ ID langkah sama dengan task pada [backlog detail](tasks/videos.md). Setiap task 
 - Depends on: VID-013.
 - Files: integration/proof scripts; path lengkap pada impact map dan backlog task.
 - Symbols: content schema/runtime integration proofs (nama target; verifikasi pada implementasi).
-- Requirements: seluruh ruang lingkup dan acceptance task [VID-014](tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
+- Requirements: seluruh ruang lingkup dan acceptance task [VID-014](../../tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
 - Validation: Dedicated DB; parallel constraint/version, migration rerun, auth preserved.
 - Acceptance criteria: checklist task VID-014 lulus dengan bukti aktual; file dibuat saja belum berarti Done.
 
@@ -264,7 +264,7 @@ ID langkah sama dengan task pada [backlog detail](tasks/videos.md). Setiap task 
 - Depends on: VID-014.
 - Files: docs/tasks/index/environment; path lengkap pada impact map dan backlog task.
 - Symbols: planning status, runbook, task evidence (nama target; verifikasi pada implementasi).
-- Requirements: seluruh ruang lingkup dan acceptance task [VID-015](tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
+- Requirements: seluruh ruang lingkup dan acceptance task [VID-015](../../tasks/videos.md); model data dan kontrak endpoint tahap A berlaku.
 - Validation: Gates selesai; batas backend vs gateway/media jelas.
 - Acceptance criteria: checklist task VID-015 lulus dengan bukti aktual; file dibuat saja belum berarti Done.
 
@@ -388,7 +388,7 @@ Saat ini factory memasang auth dan 16 endpoint metadata; loader env belum mengon
 - `config/env.ts` kelak memvalidasi kombinasi provider/endpoint/region/bucket/credential serta URL tanpa userinfo, query atau fragment. Nilai/error sensitif dan signed URL tidak dicetak. `turbo.json` harus meneruskan selector/base delivery ke `api#dev`/`api#start` dan task worker saat tersedia; perubahan mengikuti bundled docs Turbo. Sampel env pada sesi ini belum mengaktifkan loader tersebut.
 - `media_assets`/`media_renditions` menyimpan provider, bucket dan key, bukan signed URL. Ganti env tidak memindahkan data lama; perubahan provider pada dataset berisi aset memerlukan copy/verifikasi dan pembaruan pointer yang direncanakan terpisah.
 
-Contoh profil lengkap dan status variabel berada pada [Environment](ENVIRONMENT.md#storage-dan-hls--runtime-aktif). Scope env sample adalah dokumentasi, bukan konfigurasi live atau bukti akses bucket.
+Contoh profil lengkap dan status variabel berada pada [Environment](../../guides/environment.md#storage-dan-hls--runtime-aktif). Scope env sample adalah dokumentasi, bukan konfigurasi live atau bukti akses bucket.
 
 ### Nomor 3 — profil HLS disetujui 4 Oktober 2026
 
@@ -527,7 +527,7 @@ Finish succeeded membutuhkan identitas source/profile/generation yang cocok, lea
 
 **Proof sebelum WORKER-001/002 Done:** durable enqueue/crash setelah commit, dua claimer dan batas per-host, fake clock/backoff/attempt limit, expiry serta stale finish setelah takeover, lease loss dan subprocess terminate/orphan, shutdown/restart, input rusak versus gangguan storage, resource admission/disk/memory, watchdog walaupun heartbeat sehat, semua hasil terverifikasi sebelum ready, cleanup/retensi/source tombstone/archived race. Benchmark real FFmpeg portrait sumber 480p/720p/1080p, H.264/HEVC/VP9, 60 fps, episode 10 menit dan movie 30 menit mencatat wall time/RSS/CPU/disk serta dampak latency API; target thread/preset/deadline dituning bila gagal. Unit melalui bun:test, PostgreSQL/bucket test dedicated/FFmpeg untuk integrasi; fixture benchmark production tetap diperlukan sebelum scale.
 
-Konfigurasi melalui env, concurrency/retry/deadline/lease/recovery disetujui; resource ditetapkan melalui benchmark dan detail teknis tambahan dijelaskan pada [Environment](ENVIRONMENT.md#worker--env-aktif-dan-kandidat-resource). Sample apps/api/.env.example memuat concurrency/retry/deadline/lease/recovery sebagai konfigurasi rencana yang disetujui. Loader/env aktif/script worker, migration dan dependency belum diubah. WORKER-001/002 tetap roadmap; backlog kecil worker/retensi harus dipecah sebelum implementasi.
+Konfigurasi melalui env, concurrency/retry/deadline/lease/recovery disetujui; resource ditetapkan melalui benchmark dan detail teknis tambahan dijelaskan pada [Environment](../../guides/environment.md#worker--env-aktif-dan-kandidat-resource). Sample apps/api/.env.example memuat concurrency/retry/deadline/lease/recovery sebagai konfigurasi rencana yang disetujui. Loader/env aktif/script worker, migration dan dependency belum diubah. WORKER-001/002 tetap roadmap; backlog kecil worker/retensi harus dipecah sebelum implementasi.
 
 Referensi: [PostgreSQL locking SELECT](https://www.postgresql.org/docs/current/sql-select.html) menjelaskan SKIP LOCKED untuk consumer queue; schema/provider proyek tetap perlu integration proof. [Bun subprocess](https://bun.com/docs/runtime/child-process) menyediakan spawn/kill/timeout, dan [FFmpeg](https://www.ffmpeg.org/ffmpeg.html) mendokumentasikan progress, thread decoder/encoder serta filter pool. Angka retry/lease/concurrency/deadline di atas adalah rekomendasi aplikasi, bukan default yang diwajibkan referensi tersebut.
 
@@ -581,7 +581,7 @@ Semua path kode berikut adalah target future; buat hanya pada task yang memerluk
 | Path / symbol                                                                                                                 | Action        | Outcome dan evidence                                                                                                                                 |
 | ----------------------------------------------------------------------------------------------------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `apps/api/src/config/env.ts`, `env.test.ts`, `src/storage/s3.ts`                                                              | modify/create | Validasi selector/profile serta adapter native; loader dan storage belum ada integrasinya pada snapshot lanjutan.                                    |
-| `apps/api/.env.example`, `docs/ENVIRONMENT.md`, `turbo.json`                                                                  | modify        | Sampel dua profil dan penerusan runtime; hanya sampel/dokumen diperbarui sekarang, Turbo pada task konfigurasi.                                      |
+| `apps/api/.env.example`, `docs/guides/environment.md`, `turbo.json`                                                           | modify        | Sampel dua profil dan penerusan runtime; hanya sampel/dokumen diperbarui sekarang, Turbo pada task konfigurasi.                                      |
 | `apps/api/src/db/schema/media.ts`, `upload.ts`, `jobs.ts`, `renditions.ts`, `schema/index.ts`, `apps/api/drizzle/*`           | create/modify | Ownership/pointer, idempotency dan lease dari model tahap B/C; migration baru additive setelah 0005, bukan rewrite history.                          |
 | `apps/api/src/modules/media/{index,model,service,repository}.ts`, `src/app.ts`, `src/index.ts`                                | create/modify | Upload/session/status/abort dengan requireAdmin, chaining Eden/Scalar, wiring DB/storage eksplisit.                                                  |
 | `apps/api/src/workers/{queue,transcode,index}.ts`, `apps/api/package.json`                                                    | create/modify | Proses worker terpisah, claim/heartbeat/retry, FFmpeg dan proof scripts scoped.                                                                      |
@@ -591,7 +591,7 @@ Semua path kode berikut adalah target future; buat hanya pada task yang memerluk
 
 ### Urutan implementasi dan backlog media
 
-Backlog kecil tahap B dan refinement HLS ada pada [tasks/media.md](tasks/media.md); status implementasi belum Done. Dependency task di backlog mengikuti DAG berikut:
+Backlog kecil tahap B dan refinement HLS ada pada [tasks/media.md](../../tasks/media.md); status implementasi belum Done. Dependency task di backlog mengikuti DAG berikut:
 
 ```text
 VID-015 -> MEDIA-CFG-001 -> MEDIA-PROOF-001 -> MEDIA-DESIGN-001
@@ -611,7 +611,7 @@ PUBLIC-002 -> WEB-CONTENT-001 -> WEB-CONTENT-002
 MEDIA-R2-001 + proof HLS/public R2 -> readiness rollout production
 ```
 
-Setiap task memiliki outcome/files/dependencies/acceptance/validation pada backlog [media](tasks/media.md), [worker](tasks/media-worker.md) dan [publication](tasks/media-publication.md). MEDIA-CFG-001 Ready; task berikutnya Backlog sampai prerequisite/evidence terpenuhi. Tabel roadmap berikut merangkum task final; dependency task detail/DAG menjadi acuan eksekusi. Kebijakan worker nomor 7 sudah disetujui; angka thread/RAM/disk dibekukan melalui benchmark dan detail teknis tambahan masih refinement. Proof MinIO membuka development lokal; proof R2 dengan bucket staging khusus tetap prerequisite rollout, tanpa mengklaim kesetaraan provider dari MinIO saja.
+Setiap task memiliki outcome/files/dependencies/acceptance/validation pada backlog [media](../../tasks/media.md), [worker](../../tasks/media-worker.md) dan [publication](../../tasks/media-publication.md). MEDIA-CFG-001 Ready; task berikutnya Backlog sampai prerequisite/evidence terpenuhi. Tabel roadmap berikut merangkum task final; dependency task detail/DAG menjadi acuan eksekusi. Kebijakan worker nomor 7 sudah disetujui; angka thread/RAM/disk dibekukan melalui benchmark dan detail teknis tambahan masih refinement. Proof MinIO membuka development lokal; proof R2 dengan bucket staging khusus tetap prerequisite rollout, tanpa mengklaim kesetaraan provider dari MinIO saja.
 
 | Tahap / ID task                                              | Dependensi utama                                                                        | Hasil dan gate                                                                                                   |
 | ------------------------------------------------------------ | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
@@ -694,13 +694,13 @@ Ikuti AGENTS/API Development/Workflow; injeksi dependency, method chaining dan s
 
 Untuk tahap media, perubahan sample/plan dapat dikembalikan tanpa menyentuh bucket/data. Implementasi kelak memakai migration additive dan output per attempt; gagal upload/transcode tidak menghapus metadata atau source aktif. Jangan menghapus bucket existing atau mengganti provider lalu mengasumsikan data tersedia di endpoint baru. Recovery partial multipart/outputs mengikuti aturan nomor 6 yang disetujui; video asli konten non-archived eligible setelah 7 hari sejak HLS verified-ready, sumber failed terminal 7 hari sejak kegagalan terminal, dan semua aset konten archived termasuk video asli disimpan permanen. Implementation/proof cleanup tetap pending.
 
-Migrasi metadata additive dan tidak mengubah tabel auth; test memakai database disposable. Migrasi development diterapkan pada tindak lanjut VERIFY-001 atas instruksi pengguna; deployment belum. Sebelum rollout, periksa SQL/backup/target sesuai [Video Operations](VIDEO_OPERATIONS.md). Jika runtime gagal setelah migration additive, rollback binary yang belum memakai schema baru dan pertahankan data; jangan DROP tabel konten terisi untuk rollback otomatis. Koreksi lewat forward migration; hard deletion membutuhkan rencana eksplisit.
+Migrasi metadata additive dan tidak mengubah tabel auth; test memakai database disposable. Migrasi development diterapkan pada tindak lanjut VERIFY-001 atas instruksi pengguna; deployment belum. Sebelum rollout, periksa SQL/backup/target sesuai [Video Operations](../../operations/video-metadata.md). Jika runtime gagal setelah migration additive, rollback binary yang belum memakai schema baru dan pertahankan data; jangan DROP tabel konten terisi untuk rollback otomatis. Koreksi lewat forward migration; hard deletion membutuhkan rencana eksplisit.
 
 ## Evidence
 
-Refinement media memakai snapshot lanjutan pada [context](VIDEO_REPOSITORY_CONTEXT.md), bundled docs Video.js versi `10.0.0-rc.4`, [Bun S3](https://bun.com/docs/runtime/s3), [R2 compatibility](https://developers.cloudflare.com/r2/api/s3/api/), [R2 presign/domain](https://developers.cloudflare.com/r2/api/s3/presigned-urls/) dan [FFmpeg HLS](https://ffmpeg.org/ffmpeg-formats.html#hls-2). CLI terbaru mencetak mismatch; instruksi kemudian dibaca ulang melalui CLI versi `10.0.0-rc.4`. Tidak menjalankan perintah instalasi skin/player yang dicetak CLI.
+Refinement media memakai snapshot lanjutan pada [context](repository-context.md), bundled docs Video.js versi `10.0.0-rc.4`, [Bun S3](https://bun.com/docs/runtime/s3), [R2 compatibility](https://developers.cloudflare.com/r2/api/s3/api/), [R2 presign/domain](https://developers.cloudflare.com/r2/api/s3/presigned-urls/) dan [FFmpeg HLS](https://ffmpeg.org/ffmpeg-formats.html#hls-2). CLI terbaru mencetak mismatch; instruksi kemudian dibaca ulang melalui CLI versi `10.0.0-rc.4`. Tidak menjalankan perintah instalasi skin/player yang dicetak CLI.
 
-Base SHA dan evidence simbol/path ada di [context](VIDEO_REPOSITORY_CONTEXT.md#evidence-index). Model FK/CHECK/UNIQUE dilandasi [PostgreSQL](https://www.postgresql.org/docs/current/ddl-constraints.html) dan [Drizzle](https://orm.drizzle.team/docs/indexes-constraints). API inference mengikuti [Eden Treaty](https://elysiajs.com/eden/treaty/overview). Referensi vendor tidak membuktikan SQL atau runtime konten sudah lulus; seluruh proof tersebut merupakan acceptance implementasi.
+Base SHA dan evidence simbol/path ada di [context](repository-context.md#evidence-index). Model FK/CHECK/UNIQUE dilandasi [PostgreSQL](https://www.postgresql.org/docs/current/ddl-constraints.html) dan [Drizzle](https://orm.drizzle.team/docs/indexes-constraints). API inference mengikuti [Eden Treaty](https://elysiajs.com/eden/treaty/overview). Referensi vendor tidak membuktikan SQL atau runtime konten sudah lulus; seluruh proof tersebut merupakan acceptance implementasi.
 
 ## Open Decisions
 
@@ -835,7 +835,7 @@ D1–D3 disetujui dan diimplementasikan. D5 sebagian disetujui 3 Oktober 2026: M
 
 ## Validation History — tahap A selesai lokal
 
-Pada 3 Oktober 2026: 30 source tests/120 assertions, 19 content integration tests/183 assertions, dan 20 auth regression tests/160 assertions lulus. Root lint (web), check-types (API/web/auth/Eden), build kedua app, dan frozen install lulus. Bukti migrasi memakai database dedicated; DB development/production belum dimigrasi. Tidak ada perubahan dependency/lockfile, CI, player atau storage. Docs link/format dan diff diperiksa pada VID-015. Runbook serta batas smoke/load/browser ada pada [Video Operations](VIDEO_OPERATIONS.md).
+Pada 3 Oktober 2026: 30 source tests/120 assertions, 19 content integration tests/183 assertions, dan 20 auth regression tests/160 assertions lulus. Root lint (web), check-types (API/web/auth/Eden), build kedua app, dan frozen install lulus. Bukti migrasi memakai database dedicated; DB development/production belum dimigrasi. Tidak ada perubahan dependency/lockfile, CI, player atau storage. Docs link/format dan diff diperiksa pada VID-015. Runbook serta batas smoke/load/browser ada pada [Video Operations](../../operations/video-metadata.md).
 
 ## Commit ledger tahap A
 
@@ -863,7 +863,7 @@ Validasi akhir dokumentasi: 93 tautan lokal/anchor dan 15 task Done lulus; forma
 
 ## Tindak lanjut VERIFY-001 — migrasi development dan gerbang penyelesaian
 
-Sesudah VID-015, pengguna menginstruksikan test yang tersedia, check-types, lint yang tersedia, build, dan migrasi development untuk perubahan schema backend. Migrasi 0003–0005 berhasil pada localhost:5433/vertical_movie_app; journal 3 → 6, enam tabel/constraints metadata tersedia, serta snapshot user/account/session/verification/rate_limit tetap sama. Backup PostgreSQL custom-format di luar repo tervalidasi melalui pg_restore --list. API 30, package auth 3, web 35 dan content integration 19 test lulus (87 test, 463 assertions). Root check-types dan lint lulus menggunakan cache valid; root build kedua app lulus dengan eksekusi baru. Aturan dicatat pada AGENTS/Global Workflow/API Development. Deployment production, full backup restore dan storage tetap terpisah. Evidence dan batas operasi ada pada [VERIFY-001](tasks/development-verification.md).
+Sesudah VID-015, pengguna menginstruksikan test yang tersedia, check-types, lint yang tersedia, build, dan migrasi development untuk perubahan schema backend. Migrasi 0003–0005 berhasil pada localhost:5433/vertical_movie_app; journal 3 → 6, enam tabel/constraints metadata tersedia, serta snapshot user/account/session/verification/rate_limit tetap sama. Backup PostgreSQL custom-format di luar repo tervalidasi melalui pg_restore --list. API 30, package auth 3, web 35 dan content integration 19 test lulus (87 test, 463 assertions). Root check-types dan lint lulus menggunakan cache valid; root build kedua app lulus dengan eksekusi baru. Aturan dicatat pada AGENTS/Global Workflow/API Development. Deployment production, full backup restore dan storage tetap terpisah. Evidence dan batas operasi ada pada [VERIFY-001](../../tasks/development-verification.md).
 
 ## Finalisasi plan media — 4 Oktober 2026
 
@@ -887,7 +887,7 @@ Branch feat/media-backend dari 4ce185d. Implementasi inti tahap B–D tersedia u
 
 Upload selesai secara atomik memasang pointer immutable dan enqueue; GET status upload menyertakan state pemrosesan, progress, attempt/failure dan verified-ready. Worker terpisah menghasilkan HLS hls-v1 dan WebP tanpa autopublish. Publish/series visibility, catalog/next, preview/playback, archive serta retention/deletion claim telah mempunyai proof PostgreSQL/MinIO. Player Video.js 10 RC memakai adapter HLS versi sama; Chromium membuktikan pause/seek setelah expiry di Vite dan hasil build Bun/Nitro.
 
-Migrasi 0006–0008 development diterapkan melalui command resmi setelah backup; journal 9 dan data auth/metadata lama dipertahankan. Compatibility migration diuji dengan row legacy draft/published/unpublished/archived pada database khusus. Kontrak aktif dan command/evidence berada pada [Media Operations](MEDIA_OPERATIONS.md) serta [Upload Contract](MEDIA_UPLOAD_CONTRACT.md).
+Migrasi 0006–0008 development diterapkan melalui command resmi setelah backup; journal 9 dan data auth/metadata lama dipertahankan. Compatibility migration diuji dengan row legacy draft/published/unpublished/archived pada database khusus. Kontrak aktif dan command/evidence berada pada [Media Operations](../../operations/media.md) serta [Upload Contract](../../architecture/media-upload-contract.md).
 
 Root frozen install/check-types/lint/build lulus, API72/267, web37/157, auth3/14 dan content19/204. Matrix codec/container/HDR/VFR/rotasi/invalid/animasi 3/41 serta Chromium manual quality/expiry/terminal404 1/70 lulus. Gerbang eksternal tersisa: R2 staging, benchmark target 4 core/4 GB dan Safari/native HLS; proof episode10menit1/66 dan movie30menit1/63 lulus, termasuk paused near-end seek. Built Bun/Nitro tiga-tier12s1/70 dan cleanup fault3/26 juga lulus. Ini proof fungsi pada fixture sintetis; full restore serta stress supervisor/resource/visual/keyframe masih terpisah. Proposal deployment belum dijalankan. Implementasi belum di-commit/push; desain existing tidak termasuk scope.
 

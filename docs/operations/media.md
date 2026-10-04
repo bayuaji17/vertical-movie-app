@@ -1,6 +1,6 @@
 # Media Operations — development
 
-Implementasi development pada feat/media-backend berdasarkan base 4ce185d. Bukti lokal tidak mengesahkan rollout production. [Plan](VIDEO_IMPLEMENTATION_PLAN.md), [model](VIDEO_DATA_MODEL.md), [upload contract](MEDIA_UPLOAD_CONTRACT.md) dan [Environment](ENVIRONMENT.md).
+Implementasi development pada feat/media-backend berdasarkan base 4ce185d. Bukti lokal tidak mengesahkan rollout production. [Plan](../plans/video/implementation-plan.md), [model](../architecture/video-data-model.md), [upload contract](../architecture/media-upload-contract.md) dan [Environment](../guides/environment.md).
 
 ## Menjalankan API, web dan worker
 

@@ -1,6 +1,6 @@
 # Draft Global Rules — Vertical Movie App
 
-> Status: **Draft untuk ditinjau** · 30 September 2026 · Aturan produk dan teknik di bawah perlu disetujui sebelum dianggap kebijakan tetap. Instruksi kerja repo yang berlaku saat ini ada di [`AGENTS.md`](../AGENTS.md).
+> Status: **Draft untuk ditinjau** · 30 September 2026 · Aturan produk dan teknik di bawah perlu disetujui sebelum dianggap kebijakan tetap. Instruksi kerja repo yang berlaku saat ini ada di [`AGENTS.md`](../../AGENTS.md).
 
 ## Aturan produk lintas fitur
 
@@ -19,7 +19,7 @@
 ## Aturan implementasi
 
 - API Elysia adalah sumber kebenaran untuk validasi domain, otorisasi admin, status video, dan penerbitan. Web TanStack Start menyajikan interaksi dan tidak dapat mengesahkan transisi hanya dari state klien.
-- Eden Treaty dipilih pengguna pada 1 Oktober 2026 untuk kontrak API–web. API mengekspor tipe hasil komposisi Elysia; web mengimpor tipe saja dan memakai client Eden bersama TanStack Query. Ikuti [API Development](API_DEVELOPMENT.md) untuk lifecycle, scope plugin, dan kontrak error. Pemeriksaan akses tetap dilakukan server.
+- Eden Treaty dipilih pengguna pada 1 Oktober 2026 untuk kontrak API–web. API mengekspor tipe hasil komposisi Elysia; web mengimpor tipe saja dan memakai client Eden bersama TanStack Query. Ikuti [API Development](../guides/api-development.md) untuk lifecycle, scope plugin, dan kontrak error. Pemeriksaan akses tetap dilakukan server.
 - PostgreSQL menyimpan data terstruktur melalui Drizzle. Better Auth hanya melayani login admin; pengunjung tidak memerlukan akun. Pengaturan yang dapat diedit admin dipisahkan dari rahasia server.
 - Validasi berkas dilakukan sejak pemilihan file untuk memberi umpan balik cepat, lalu ditegakkan lagi oleh layanan yang menerima unggahan dan memproses media.
 - Simpan berkas video pada Cloudflare R2 atau layanan kompatibel S3, bukan di PostgreSQL. Database hanya menyimpan referensi objek, metadata, dan status. Provider final masih terbuka.
@@ -37,8 +37,8 @@
 - Pengalaman tonton diutamakan untuk ponsel, sementara desktop memiliki tata letak yang dirancang khusus; video vertikal tidak diregangkan atau dipotong tanpa pemberitahuan.
 - Status unggah/pemrosesan harus terlihat sebagai teks, termasuk ketika gagal atau membutuhkan aksi ulang.
 - Pemutaran video tidak dimulai dengan suara tanpa tindakan pengguna. Sediakan kontrol putar/jeda, indikator fokus, dan jalur caption sesuai keputusan aksesibilitas.
-- Target aksesibilitas awal adalah WCAG 2.2 AA; audit dan keputusan penerapan caption dicatat sebelum rilis publik. Lihat [Design System](DESIGN_SYSTEM.md).
+- Target aksesibilitas awal adalah WCAG 2.2 AA; audit dan keputusan penerapan caption dicatat sebelum rilis publik. Lihat [Design System](../design/design-system.md).
 
 ## Urutan sumber keputusan
 
-Kode dan skrip saat ini menjelaskan **apa yang sudah berjalan**; [`AGENTS.md`](../AGENTS.md) menjelaskan **cara bekerja di repo**. [PRD](PRD.md), [Architecture](ARCHITECTURE.md), dokumen ini, [Global Workflow](GLOBAL_WORKFLOW.md), dan [Design System](DESIGN_SYSTEM.md) masih berstatus draft. Ketika disetujui, catat tanggal, pemilik keputusan, dan perubahan ruang lingkup di dokumen terkait agar usulan tidak keliru dianggap implementasi.
+Kode dan skrip saat ini menjelaskan **apa yang sudah berjalan**; [`AGENTS.md`](../../AGENTS.md) menjelaskan **cara bekerja di repo**. [PRD](prd.md), [Architecture](../architecture/overview.md), dokumen ini, [Global Workflow](../guides/development-workflow.md), dan [Design System](../design/design-system.md) masih berstatus draft. Ketika disetujui, catat tanggal, pemilik keputusan, dan perubahan ruang lingkup di dokumen terkait agar usulan tidak keliru dianggap implementasi.

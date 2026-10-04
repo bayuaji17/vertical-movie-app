@@ -2,11 +2,11 @@
 
 ## Tujuan modul
 
-Admin tunggal dapat login email/password, menggunakan dashboard yang dilindungi, logout, dan memulihkan password melalui CLI. Pengunjung tetap mengakses halaman publik tanpa login. Referensi: PRD-01, PRD-07, GR-01, GR-02; [Architecture](../ARCHITECTURE.md), [API Development](../API_DEVELOPMENT.md), dan [rencana lengkap](../IMPLEMENTATION_PLAN.md).
+Admin tunggal dapat login email/password, menggunakan dashboard yang dilindungi, logout, dan memulihkan password melalui CLI. Pengunjung tetap mengakses halaman publik tanpa login. Referensi: PRD-01, PRD-07, GR-01, GR-02; [Architecture](../architecture/overview.md), [API Development](../guides/api-development.md), dan [rencana lengkap](../plans/auth/implementation-plan.md).
 
 Scope email/password + CLI provision/recovery + satu origin disetujui pengguna pada **1 Oktober 2026**. Status tiap task dan dependensinya dicatat di bawah; task tetap `Backlog` sampai prerequisite lulus. Semua task menggunakan owner **pengembang/agent pelaksana**, prioritas wajib berurutan, dan bukti aktual saat dikerjakan. Task ini tidak menetapkan sprint atau estimasi waktu kalender.
 
-> Status aktif 2 Oktober 2026: AUTH-REF-001–010 selesai dan memiliki commit per task. AUTH-001–013 di bawah dipertahankan sebagai riwayat. Kontrak/command native aktif ada pada [Auth Operations](../AUTH_OPERATIONS.md); expand/contract database development selesai pada AUTH-FUP-001; rollout deployment masih pending.
+> Status aktif 2 Oktober 2026: AUTH-REF-001–010 selesai dan memiliki commit per task. AUTH-001–013 di bawah dipertahankan sebagai riwayat. Kontrak/command native aktif ada pada [Auth Operations](../operations/auth.md); expand/contract database development selesai pada AUTH-FUP-001; rollout deployment masih pending.
 
 ## User story: AUTH-US-01 — Fondasi autentikasi persisten
 
@@ -236,7 +236,7 @@ Unit dan integration DB dengan beberapa sesi serta failure injection; smoke CLI 
 - `resetAdminPassword` memakai public Better Auth hasher, mengunci transaksi dengan advisory lock yang sama seperti provisioning, menemukan target dari singleton `primary`, memperbarui credential admin, lalu menghapus seluruh row session target dalam satu transaksi. Email, user ID, dan singleton tetap sama; tidak ada parameter user ID.
 - CLI `bun run --cwd apps/api admin:reset-password` meminta password tersembunyi atau satu baris stdin. Password tidak ada di argv/output; pesan sukses menyatakan seluruh sesi dicabut, dan error untuk singleton yang belum ada tidak membocorkan identitas/database.
 - PostgreSQL proof pada `vertical_movie_app_auth_admin_test` lulus: 4 test, 44 assertion. Dua sesi lama tidak berlaku lagi, password lama gagal dan password baru sukses; trigger pada penghapusan sesi membuktikan update hash dan session revoke rollback bersama; keadaan tanpa admin mengembalikan error CLI aman; argumen user ID ditolak.
-- Runbook recovery dan dampak logout semua perangkat ditambahkan ke `docs/ENVIRONMENT.md`. Database development tidak dipakai.
+- Runbook recovery dan dampak logout semua perangkat ditambahkan ke `docs/guides/environment.md`. Database development tidak dipakai.
 - `bun install --frozen-lockfile`, API unit suite, workspace type-check/build/lint, Prettier, `git diff --check`, serta provisioning proof setelah ekstraksi input CLI dijalankan sebelum commit khusus AUTH-006.
 
 ### Blocker atau tindak lanjut
@@ -516,7 +516,7 @@ Validasi lokal 2 Oktober 2026; perintah auth terperinci ada pada Test Requiremen
 
 Tindak lanjut: jalankan browser smoke untuk menutup AC-02/AC-05/AC-06/AC-08 saat browser runner tersedia; setelah domain dipilih, verifikasi HTTPS/cookie dan reverse proxy di deployment. Storage/media di luar scope modul ini.
 
-Arahan refactor diperinci pengguna pada 2 Oktober 2026. Desain lengkap ada pada [AUTH_REFACTOR_PLAN.md](../AUTH_REFACTOR_PLAN.md). Task AUTH-001–013 tetap menjadi riwayat. ID AUTH-REF-001–005 dipertahankan; scope web/cleanup/acceptance dipecah menjadi AUTH-REF-006–010. Rencana induk disetujui pengguna pada 2 Oktober 2026. Checklist rinci di bawah merupakan rencana eksekusi; kode belum diimplementasikan. AUTH-REF-001 berstatus Ready karena scope/AC jelas dan tidak memiliki dependensi; task lain tetap Backlog sampai dependensinya selesai.
+Arahan refactor diperinci pengguna pada 2 Oktober 2026. Desain lengkap ada pada [AUTH_REFACTOR_PLAN.md](../plans/auth/refactor-plan.md). Task AUTH-001–013 tetap menjadi riwayat. ID AUTH-REF-001–005 dipertahankan; scope web/cleanup/acceptance dipecah menjadi AUTH-REF-006–010. Rencana induk disetujui pengguna pada 2 Oktober 2026. Checklist rinci di bawah merupakan rencana eksekusi; kode belum diimplementasikan. AUTH-REF-001 berstatus Ready karena scope/AC jelas dan tidak memiliki dependensi; task lain tetap Backlog sampai dependensinya selesai.
 
 ## Revisi berikutnya — package auth dan TanStack isomorphic/Query
 
@@ -554,7 +554,7 @@ Sebagai operator, saya ingin membuat/memulihkan satu admin memakai API/CLI Bette
 - Status: Done
 - Owner: Codex
 - Prioritas: 1 dalam urutan eksekusi refactor.
-- Referensi: AUTH-REF-US01; AUTH_REFACTOR_PLAN.md; AGENTS.md; API_DEVELOPMENT.md.
+- Referensi: AUTH-REF-US01; docs/plans/auth/refactor-plan.md; AGENTS.md; docs/guides/api-development.md.
 - Dependensi: Tidak ada.
 - Ukuran: Satu perubahan ownership dan public entry point.
 
@@ -647,7 +647,7 @@ AUTH-REF-002 memperluas schema database; API handler/guard berpindah pada AUTH-R
 - Status: Done
 - Owner: Codex
 - Prioritas: 2 dalam urutan eksekusi refactor.
-- Referensi: AUTH-REF-US01; AUTH_REFACTOR_PLAN.md; AGENTS.md; API_DEVELOPMENT.md.
+- Referensi: AUTH-REF-US01; docs/plans/auth/refactor-plan.md; AGENTS.md; docs/guides/api-development.md.
 - Dependensi: AUTH-REF-001.
 - Ukuran: Satu migrasi eksplisit dan proof upgrade data lama.
 
@@ -665,7 +665,7 @@ Path bertanda baru adalah target yang dibuat saat eksekusi, bukan file yang suda
 | `packages/auth/test/fixtures/auth-schema.config.ts`                               | Konfigurasi generator sesuai factory/plugin native, tidak membuat HTTP server.                      |
 | `apps/api/drizzle/* (migration SQL dan meta baru)`                                | Expand migration additive, backfill role dari singleton; nomor berikutnya mengikuti journal aktual. |
 | `apps/api/test/integration/auth-schema-proof.test.ts`; `auth-admin-proof.test.ts` | Proof upgrade akun/constraint/plugin, tetap menggunakan database test yang dilindungi.              |
-| `apps/api/src/db/schema/auth.ts, index.ts`; `docs/ENVIRONMENT.md`                 | Pastikan agregator schema dan runbook menunjukkan kapan migration harus diterapkan.                 |
+| `apps/api/src/db/schema/auth.ts, index.ts`; `docs/guides/environment.md`          | Pastikan agregator schema dan runbook menunjukkan kapan migration harus diterapkan.                 |
 
 #### Kontrak dan batas task
 
@@ -726,7 +726,7 @@ Commit setelah acceptance criteria task terpenuhi: `feat(auth): migrate native a
 
 - CLI Better Auth 1.7.7 generate ke /tmp menghasilkan field role/banned/banReason/banExpires/impersonatedBy dengan mapping snake_case yang sesuai. Drizzle Kit 0.31.11 menghasilkan 0001 dan metadata; ditambahkan preflight credential serta backfill dari admin_identity sebelum constraint/index. Migration 0000 tetap identik.
 - Schema proof 8 test/36 assertion lulus: upgrade mempertahankan ID/email/hash/account/session, login native berhasil, hanya satu createUser concurrent menjadi admin tanpa account orphan kedua, role gabungan/unknown ditolak, data invalid menggagalkan dan me-rollback expansion. Adapter proof 2 test/16 assertion dan legacy admin regression 6 test/26 assertion lulus.
-- Semua proof memakai database test lokal khusus. Database development tidak dimigrasi atau akun direset. Backup/preflight, expand sebelum cutover, serta batas rollback aplikasi dicatat dalam AUTH_REFACTOR_PLAN.md. Gate tipe dan lint dijalankan hook commit. Commit: feat(auth): migrate native admin roles.
+- Semua proof memakai database test lokal khusus. Database development tidak dimigrasi atau akun direset. Backup/preflight, expand sebelum cutover, serta batas rollback aplikasi dicatat dalam docs/plans/auth/refactor-plan.md. Gate tipe dan lint dijalankan hook commit. Commit: feat(auth): migrate native admin roles.
 
 SHA task: `55d8caf`.
 
@@ -739,7 +739,7 @@ Contract migration penghapusan admin_identity hanya pada AUTH-REF-009.
 - Status: Done
 - Owner: Codex
 - Prioritas: 8 dalam urutan eksekusi refactor.
-- Referensi: AUTH-REF-US04; AUTH_REFACTOR_PLAN.md; AGENTS.md; API_DEVELOPMENT.md.
+- Referensi: AUTH-REF-US04; docs/plans/auth/refactor-plan.md; AGENTS.md; docs/guides/api-development.md.
 - Dependensi: AUTH-REF-001, AUTH-REF-002, AUTH-REF-004.
 - Ukuran: Composition entry operator, script seed dan wrapper recovery.
 
@@ -820,7 +820,7 @@ Commit setelah acceptance criteria task terpenuhi: `refactor(auth): provision an
 
 #### Hasil dan bukti
 
-CLI resmi auth 1.7.7 memuat apps/api/src/auth.ts tanpa HTTP listen; prompt native diuji dengan Bun PTY, tanpa password flag atau credential development. Admin proof: 4 pass/18 assertions; recovery proof: 8 pass/46 assertions; runtime: 8 pass/44 assertions; package: 3 pass/14 assertions; check-types lulus. Proof mencakup seed kedua/concurrent, min password, expiry/replay, endpoint HTTP operator tertutup, update/revoke parsial dan exit nonzero aman, native retry, orphan credential repair, serta race login/reset online. Runbook AUTH_OPERATIONS.md mewajibkan seluruh penerima login dan request in-flight berhenti. Database development/credential existing tidak diubah. Commit: feat(auth): use native admin provisioning and recovery.
+CLI resmi auth 1.7.7 memuat apps/api/src/auth.ts tanpa HTTP listen; prompt native diuji dengan Bun PTY, tanpa password flag atau credential development. Admin proof: 4 pass/18 assertions; recovery proof: 8 pass/46 assertions; runtime: 8 pass/44 assertions; package: 3 pass/14 assertions; check-types lulus. Proof mencakup seed kedua/concurrent, min password, expiry/replay, endpoint HTTP operator tertutup, update/revoke parsial dan exit nonzero aman, native retry, orphan credential repair, serta race login/reset online. Runbook docs/operations/auth.md mewajibkan seluruh penerima login dan request in-flight berhenti. Database development/credential existing tidak diubah. Commit: feat(auth): use native admin provisioning and recovery.
 
 SHA task: `09cfe99`.
 
@@ -833,7 +833,7 @@ Reset online tanpa downtime merupakan keputusan/proof terpisah apabila native ra
 - Status: Done
 - Owner: Codex
 - Prioritas: 3 dalam urutan eksekusi refactor.
-- Referensi: AUTH-REF-US02; AUTH_REFACTOR_PLAN.md; AGENTS.md; API_DEVELOPMENT.md.
+- Referensi: AUTH-REF-US02; docs/plans/auth/refactor-plan.md; AGENTS.md; docs/guides/api-development.md.
 - Dependensi: AUTH-REF-001, AUTH-REF-002.
 - Ukuran: Cutover handler/policy API dengan proof authorization.
 
@@ -930,7 +930,7 @@ Endpoint legacy /admin/session dipertahankan sementara sampai consumer web berpi
 - Status: Done
 - Owner: Codex
 - Prioritas: 4 dalam urutan eksekusi refactor.
-- Referensi: AUTH-REF-US02; AUTH_REFACTOR_PLAN.md; AGENTS.md; API_DEVELOPMENT.md.
+- Referensi: AUTH-REF-US02; docs/plans/auth/refactor-plan.md; AGENTS.md; docs/guides/api-development.md.
 - Dependensi: AUTH-REF-004.
 - Ukuran: Satu perbaikan transport dan proof dev/production runtime.
 
@@ -942,13 +942,13 @@ Selaraskan fixed upstream/allowlist/path-method dari package, public origin call
 
 Path bertanda baru adalah target yang dibuat saat eksekusi, bukan file yang sudah diimplementasikan.
 
-| File atau area                                                 | Perubahan yang direncanakan                                                                   |
-| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `apps/web/src/lib/server/auth-gateway.ts`                      | Forwarding/deadline/callback sesuai origin publik yang dikonfigurasi.                         |
-| `apps/web/src/routes/api/auth/$.ts`                            | Handler gateway native; route legacy admin/session belum dihapus.                             |
-| `packages/auth/src/server.ts dan internal policy transport`    | Kebijakan path/method/origin yang aman diekspor lewat server entry, tanpa membocorkan secret. |
-| `apps/web/test/auth-gateway.test.ts, auth-gateway-smoke.mjs`   | Tambah regression public callback, multi cookie, deadline/cancel.                             |
-| `apps/web/.env.example`; `docs/ENVIRONMENT.md jika diperlukan` | Jelaskan sumber public origin yang sama dengan API; internal URL tetap server-only.           |
+| File atau area                                                        | Perubahan yang direncanakan                                                                   |
+| --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `apps/web/src/lib/server/auth-gateway.ts`                             | Forwarding/deadline/callback sesuai origin publik yang dikonfigurasi.                         |
+| `apps/web/src/routes/api/auth/$.ts`                                   | Handler gateway native; route legacy admin/session belum dihapus.                             |
+| `packages/auth/src/server.ts dan internal policy transport`           | Kebijakan path/method/origin yang aman diekspor lewat server entry, tanpa membocorkan secret. |
+| `apps/web/test/auth-gateway.test.ts, auth-gateway-smoke.mjs`          | Tambah regression public callback, multi cookie, deadline/cancel.                             |
+| `apps/web/.env.example`; `docs/guides/environment.md jika diperlukan` | Jelaskan sumber public origin yang sama dengan API; internal URL tetap server-only.           |
 
 #### Kontrak dan batas task
 
@@ -1026,7 +1026,7 @@ Reader SSR AUTH-REF-006 memakai prinsip transport/deadline yang sama; OpenAPI/ru
 - Status: Done
 - Owner: Codex
 - Prioritas: 5 dalam urutan eksekusi refactor.
-- Referensi: AUTH-REF-US02; AUTH_REFACTOR_PLAN.md; AGENTS.md; API_DEVELOPMENT.md.
+- Referensi: AUTH-REF-US02; docs/plans/auth/refactor-plan.md; AGENTS.md; docs/guides/api-development.md.
 - Dependensi: AUTH-REF-001, AUTH-REF-004, AUTH-REF-005.
 - Ukuran: Cutover session transport SSR/browser dan boundary serialization.
 
@@ -1122,7 +1122,7 @@ AUTH-REF-007 menyatukan hydration dan cache; browser UI guard pada AUTH-REF-008.
 - Status: Done
 - Owner: Codex
 - Prioritas: 6 dalam urutan eksekusi refactor.
-- Referensi: AUTH-REF-US03; AUTH_REFACTOR_PLAN.md; AGENTS.md; API_DEVELOPMENT.md.
+- Referensi: AUTH-REF-US03; docs/plans/auth/refactor-plan.md; AGENTS.md; docs/guides/api-development.md.
 - Dependensi: AUTH-REF-006.
 - Ukuran: Satu query options/observer/cache integration dan network proof.
 
@@ -1220,7 +1220,7 @@ AUTH-REF-008 menghubungkan invalidation dengan routing/login/logout. Bukti brows
 - Status: Done
 - Owner: Codex
 - Prioritas: 7 dalam urutan eksekusi refactor.
-- Referensi: AUTH-REF-US02, AUTH-REF-US03; AUTH_REFACTOR_PLAN.md; AGENTS.md; API_DEVELOPMENT.md.
+- Referensi: AUTH-REF-US02, AUTH-REF-US03; docs/plans/auth/refactor-plan.md; AGENTS.md; docs/guides/api-development.md.
 - Dependensi: AUTH-REF-007.
 - Ukuran: Integrasi pathless guard, reactive layout dan mutation transitions.
 
@@ -1322,7 +1322,7 @@ AUTH-REF-009 menghapus jalur session/writer lama setelah semua consumer berpinda
 - Status: Done
 - Owner: Codex
 - Prioritas: 9 dalam urutan eksekusi refactor.
-- Referensi: AUTH-REF-US01; AUTH_REFACTOR_PLAN.md; AGENTS.md; API_DEVELOPMENT.md.
+- Referensi: AUTH-REF-US01; docs/plans/auth/refactor-plan.md; AGENTS.md; docs/guides/api-development.md.
 - Dependensi: AUTH-REF-003, AUTH-REF-008.
 - Ukuran: Cleanup jalur mati dan satu contract migration.
 
@@ -1415,7 +1415,7 @@ Backup/maintenance/rollback contract migration didokumentasikan AUTH-REF-010; ti
 - Status: Done
 - Owner: Codex
 - Prioritas: 10 dalam urutan eksekusi refactor.
-- Referensi: AUTH-REF-US01–04; AUTH_REFACTOR_PLAN.md; AGENTS.md; API_DEVELOPMENT.md.
+- Referensi: AUTH-REF-US01–04; docs/plans/auth/refactor-plan.md; AGENTS.md; docs/guides/api-development.md.
 - Dependensi: AUTH-REF-005, AUTH-REF-009.
 - Ukuran: Konsolidasi bukti perilaku, API spec dan dokumentasi.
 
@@ -1427,13 +1427,13 @@ Selaraskan Scalar/allowlist/schema native, environment/package/pool ownership, s
 
 Path bertanda baru adalah target yang dibuat saat eksekusi, bukan file yang sudah diimplementasikan.
 
-| File atau area                                                                                    | Perubahan yang direncanakan                                                                 |
-| ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `apps/api/src/plugins/openapi.ts, openapi.test.ts`; `test/integration/auth-openapi-proof.test.ts` | Filter spec native sesuai allowlist final, hapus /admin/session.                            |
-| `docs/ENVIRONMENT.md, API_DEVELOPMENT.md, README.md`                                              | Runbook public/internal env, package/pool/guard, seed/reset/maintenance dan command aktual. |
-| `docs/AUTH_REFACTOR_PLAN.md, IMPLEMENTATION_PLAN.md, REPOSITORY_CONTEXT.md`                       | Bedakan target versus hasil implementasi, source SHA tervalidasi dan baseline riwayat.      |
-| `docs/tasks/auth.md`                                                                              | Evidence per AC/task, commit dan daftar pending browser/deployment yang benar.              |
-| `Relevant API/web suites`; `apps/web/package.json, turbo.json hanya bila proof menuntut`          | Consolidated regression dan audit task graph/env/cache tanpa hosted CI.                     |
+| File atau area                                                                                                    | Perubahan yang direncanakan                                                                 |
+| ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `apps/api/src/plugins/openapi.ts, openapi.test.ts`; `test/integration/auth-openapi-proof.test.ts`                 | Filter spec native sesuai allowlist final, hapus /admin/session.                            |
+| `docs/guides/environment.md, docs/guides/api-development.md, README.md`                                           | Runbook public/internal env, package/pool/guard, seed/reset/maintenance dan command aktual. |
+| `docs/plans/auth/refactor-plan.md, docs/plans/auth/implementation-plan.md, docs/plans/auth/repository-context.md` | Bedakan target versus hasil implementasi, source SHA tervalidasi dan baseline riwayat.      |
+| `docs/tasks/auth.md`                                                                                              | Evidence per AC/task, commit dan daftar pending browser/deployment yang benar.              |
+| `Relevant API/web suites`; `apps/web/package.json, turbo.json hanya bila proof menuntut`                          | Consolidated regression dan audit task graph/env/cache tanpa hosted CI.                     |
 
 #### Kontrak dan batas task
 
@@ -1496,7 +1496,7 @@ Commit setelah acceptance criteria task terpenuhi: `docs(auth): document and ver
 
 #### Hasil dan bukti
 
-Regresi source final pada feat/auth-admin-module (parent 34402ea + perubahan task ini): frozen install tanpa lock changes; root lint web, check-types API/web/package, build dua app dan git diff --check lulus. Native unit API22/package3, web29, PostgreSQL serial34: 88 test lulus. Final schema proof memakai command Bun db:migrate --stage=expand, bukan hanya helper; CLI native stderr disanitasi, seed tetap hidden prompt dan duplicate tidak mengubah password. Command expand/cutover/contract dan rollback backup ditulis pada AUTH_OPERATIONS.md. Source app tidak mengimpor library auth langsung; auth package tetap TS-source/no-build terpisah. Negative import build menolak @repo/auth/server dan fixture dipulihkan; build normal sesudahnya lulus. Turbo source dependency hashes sudah dibuktikan AUTH-REF-007. Vite dan built Bun/Nitro gateway smoke lulus cookie/callback/status/no-store/legacy404; SSR smoke admin/null/user403/outage503/stall10s/cookie isolation/safe HTML lulus. Browser Chromium cache+routes pada Vite dan built Bun/Nitro lulus SSR1/hydration0/fresh0/stale dedup1/offline0/focus/reconnect/poll1, expiry/outage lock, login401/429/non-admin/admin authoritative1, logout failure, in-flight cancellation, dua tab, Back/direct-link. Tambahan native end-to-end browser memakai Better Auth asli + Elysia + PostgreSQL dedicated + built Bun/Nitro: login/non-admin/SSR refresh/native HttpOnly cookie/whitelist snapshot/fresh navigation0/logout/cross-tab/Back lulus, viewport390x844. Semua credential browser adalah fixture. Docs aktif/history diselaraskan; 56 link internal diverifikasi. DB development dicek read-only: migration baseline1, role column belum ada; credential existing tidak direset. Commit: docs(auth): document and verify native auth refactor. SHA commit final dapat ditemukan dari commit yang memuat task ini.
+Regresi source final pada feat/auth-admin-module (parent 34402ea + perubahan task ini): frozen install tanpa lock changes; root lint web, check-types API/web/package, build dua app dan git diff --check lulus. Native unit API22/package3, web29, PostgreSQL serial34: 88 test lulus. Final schema proof memakai command Bun db:migrate --stage=expand, bukan hanya helper; CLI native stderr disanitasi, seed tetap hidden prompt dan duplicate tidak mengubah password. Command expand/cutover/contract dan rollback backup ditulis pada docs/operations/auth.md. Source app tidak mengimpor library auth langsung; auth package tetap TS-source/no-build terpisah. Negative import build menolak @repo/auth/server dan fixture dipulihkan; build normal sesudahnya lulus. Turbo source dependency hashes sudah dibuktikan AUTH-REF-007. Vite dan built Bun/Nitro gateway smoke lulus cookie/callback/status/no-store/legacy404; SSR smoke admin/null/user403/outage503/stall10s/cookie isolation/safe HTML lulus. Browser Chromium cache+routes pada Vite dan built Bun/Nitro lulus SSR1/hydration0/fresh0/stale dedup1/offline0/focus/reconnect/poll1, expiry/outage lock, login401/429/non-admin/admin authoritative1, logout failure, in-flight cancellation, dua tab, Back/direct-link. Tambahan native end-to-end browser memakai Better Auth asli + Elysia + PostgreSQL dedicated + built Bun/Nitro: login/non-admin/SSR refresh/native HttpOnly cookie/whitelist snapshot/fresh navigation0/logout/cross-tab/Back lulus, viewport390x844. Semua credential browser adalah fixture. Docs aktif/history diselaraskan; 56 link internal diverifikasi. DB development dicek read-only: migration baseline1, role column belum ada; credential existing tidak direset. Commit: docs(auth): document and verify native auth refactor. SHA commit final dapat ditemukan dari commit yang memuat task ini.
 
 #### Blocker atau tindak lanjut
 
@@ -1504,18 +1504,17 @@ Tidak menambah GitHub CI. Domain/TLS/trusted proxy dan production smoke menunggu
 
 ## Ringkasan acceptance refactor final — 2 Oktober 2026
 
-| Suite | Hasil | Lingkungan/batas |
-| --- | --- | --- |
-| API unit / package unit / web proofs | 22 / 3 / 29 pass | Bun native; HTTP API unit tanpa port; mock transport web. |
-| Adapter / schema | 2 / 5 pass | PostgreSQL dedicated; rollback adapter, staged migration CLI, existing ID/hash/session, contract/preflight. |
-| Runtime / seed / recovery / authorization / OpenAPI | 8 / 4 / 8 / 5 / 2 pass | Database dedicated serial; CLI PTY; native reset failure/race/maintenance; cookie cache bypass guards; Scalar refs/paths. |
-| Gateway Vite + built Bun/Nitro / SSR built | Pass | Cookie/status/callback/no-store/legacy404, 403/503, deadline, request isolation, safe HTML. |
-| Chromium cache + routes, Vite dan built Bun/Nitro | Pass | SDK native + HTTP fixture; network counts, mobile390×844, cancellation, outage, expiry, lintas tab. |
-| Chromium native end-to-end | Pass | Better Auth asli + PostgreSQL dedicated + Elysia + build Bun/Nitro, mobile390×844. |
-| Frozen install / lint / type-check / build / import boundary | Pass | Bun1.4.2, Turbo2.11.5; lint hanya web; auth source dikompilasi consumer; no server import browser. |
+| Suite                                                        | Hasil                  | Lingkungan/batas                                                                                                          |
+| ------------------------------------------------------------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| API unit / package unit / web proofs                         | 22 / 3 / 29 pass       | Bun native; HTTP API unit tanpa port; mock transport web.                                                                 |
+| Adapter / schema                                             | 2 / 5 pass             | PostgreSQL dedicated; rollback adapter, staged migration CLI, existing ID/hash/session, contract/preflight.               |
+| Runtime / seed / recovery / authorization / OpenAPI          | 8 / 4 / 8 / 5 / 2 pass | Database dedicated serial; CLI PTY; native reset failure/race/maintenance; cookie cache bypass guards; Scalar refs/paths. |
+| Gateway Vite + built Bun/Nitro / SSR built                   | Pass                   | Cookie/status/callback/no-store/legacy404, 403/503, deadline, request isolation, safe HTML.                               |
+| Chromium cache + routes, Vite dan built Bun/Nitro            | Pass                   | SDK native + HTTP fixture; network counts, mobile390×844, cancellation, outage, expiry, lintas tab.                       |
+| Chromium native end-to-end                                   | Pass                   | Better Auth asli + PostgreSQL dedicated + Elysia + build Bun/Nitro, mobile390×844.                                        |
+| Frozen install / lint / type-check / build / import boundary | Pass                   | Bun1.4.2, Turbo2.11.5; lint hanya web; auth source dikompilasi consumer; no server import browser.                        |
 
 Source kode task AUTH-REF-001–009 dapat diperiksa pada SHA masing-masing; task010 berisi evidence/runbook, staged migration CLI, safe CLI diagnostics dan browser runner final. Setiap task telah di-commit sesudah validasi. Skenario deployment belum dijalankan: domain/TLS/trusted proxy/IP, backup/restore target, browser/perangkat lain, production smoke. Pada saat commit refactor final, rollout database development juga belum dijalankan; status itu diperbarui oleh AUTH-FUP-001 di bawah. Detail current/database/maintenance tidak disamakan dengan hasil proof test.
-
 
 ## User story: AUTH-US-FUP — Operasi development dan feedback auth
 
@@ -1553,7 +1552,6 @@ Backup pg_dump custom-format dengan akses file 600, pg_restore --list exit 0; he
 
 Restore penuh dan rollout deployment masih pending. AUTH-FUP-002 menambahkan toast auth pada web.
 
-
 ## Task: AUTH-FUP-002 — Feedback toast shadcn untuk aksi auth
 
 - Status: Done
@@ -1587,7 +1585,6 @@ Komponen dipasang melalui bunx --bun shadcn@latest add @shadcn/toast; Button exi
 
 Rollout deployment mengikuti AUTH-FUP-001; tidak menambah dependensi, endpoint, atau persistence toast.
 
-
 ## Task: AUTH-FUP-003 — Posisikan toast di top center
 
 - Status: Done
@@ -1619,7 +1616,6 @@ Root bun run lint, bun run check-types dan bun run build. Prettier check kompone
 ### Blocker atau tindak lanjut
 
 Tidak ada untuk perubahan layout lokal ini.
-
 
 ## Task: AUTH-FUP-004 — Redirect sesi admin aktif dari halaman login
 

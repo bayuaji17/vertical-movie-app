@@ -2,7 +2,7 @@
 
 ## Tujuan modul
 
-Menyediakan draf dan metadata backend untuk series multi-season, episode, movie panjang dan standalone. Referensi PRD-03/06/07/09, GR-03–07, [model](../VIDEO_DATA_MODEL.md), [plan](../VIDEO_IMPLEMENTATION_PLAN.md), [context](../VIDEO_REPOSITORY_CONTEXT.md). Ini backlog **tahap A**. Lanjutan MinIO development/R2 production via env dan HLS disetujui 3 Oktober 2026; task kecil konfigurasi/proof/upload/refinement HLS ada pada [backlog media](media.md). Worker/publikasi tetap roadmap yang dipecah sebelum implementasi.
+Menyediakan draf dan metadata backend untuk series multi-season, episode, movie panjang dan standalone. Referensi PRD-03/06/07/09, GR-03–07, [model](../architecture/video-data-model.md), [plan](../plans/video/implementation-plan.md), [context](../plans/video/repository-context.md). Ini backlog **tahap A**. Lanjutan MinIO development/R2 production via env dan HLS disetujui 3 Oktober 2026; task kecil konfigurasi/proof/upload/refinement HLS ada pada [backlog media](media.md). Worker/publikasi tetap roadmap yang dipecah sebelum implementasi.
 
 > Status per 3 Oktober 2026: implementasi tahap A disetujui pengguna; status setiap task diperbarui sesuai evidence. Base SHA `d1d3e0a36a4adf1c7198db7a1d36c49e9f1c93ed`. D1–D3 disetujui; status bergerak berdasarkan prerequisite. Tidak menetapkan sprint/estimasi kalender dan branch baru dan commit per task diotorisasi; migrasi development tetap terpisah.
 
@@ -43,7 +43,7 @@ Task Done mensyaratkan acceptance di bawah dan aturan GLOBAL_WORKFLOW. Unit API 
 
 Tinjau D1–D3: jenis konten, season default, enam tabel, field/batas input, genre inheritance, slug, archive dan expectedVersion. Periksa kontrak endpoint dan freshness terhadap SHA terbaru. Catat keputusan pengguna yang benar-benar diterima; tidak menganggap penulisan plan sebagai persetujuan implementasi.
 
-**Target file/symbol:** `docs/VIDEO_DATA_MODEL.md`, `docs/VIDEO_IMPLEMENTATION_PLAN.md`, `docs/tasks/videos.md`, `docs/PRD.md`, `docs/ARCHITECTURE.md`. Factory/service/repository dan symbols mengikuti impact map plan; refinement memastikan nama sebelum file dibuat.
+**Target file/symbol:** `docs/architecture/video-data-model.md`, `docs/plans/video/implementation-plan.md`, `docs/tasks/videos.md`, `docs/product/prd.md`, `docs/architecture/overview.md`. Factory/service/repository dan symbols mengikuti impact map plan; refinement memastikan nama sebelum file dibuat.
 
 ### Acceptance criteria
 
@@ -515,7 +515,7 @@ Tidak ada blocker task ini. Tahap media dan integrasi web tetap mengikuti roadma
 
 Perbarui active route/schema status, command test/migration, examples request/response dan evidence aktual per task. Jelaskan backend metadata completion dan kebutuhan business gateway sebelum UI. Tulis runbook migrasi additive/rollback binary; jangan menjalankan migrasi dev/production dari task dokumentasi. Refinement backlog MEDIA/WORKER/PUBLISH berikutnya.
 
-**Target file/symbol:** `docs/README.md`, `docs/API_DEVELOPMENT.md`, `docs/ENVIRONMENT.md`, `docs/VIDEO_REPOSITORY_CONTEXT.md`, `VIDEO_IMPLEMENTATION_PLAN.md`, `VIDEO_DATA_MODEL.md`, `tasks/videos.md`. Factory/service/repository dan symbols mengikuti impact map plan; refinement memastikan nama sebelum file dibuat.
+**Target file/symbol:** `docs/README.md`, `docs/guides/api-development.md`, `docs/guides/environment.md`, `docs/plans/video/repository-context.md`, `docs/plans/video/implementation-plan.md`, `docs/architecture/video-data-model.md`, `tasks/videos.md`. Factory/service/repository dan symbols mengikuti impact map plan; refinement memastikan nama sebelum file dibuat.
 
 ### Acceptance criteria
 
@@ -566,7 +566,7 @@ Proof domain/API dan PostgreSQL dedicated untuk transition/invalid transition/ve
 
 ### Hasil dan bukti
 
-4 Oktober2026: video-only schema/status/DTO/archive dan migration0008 tersedia; content regression19/204, legacy mapping1/10 dan worker publication/archive E2E lulus. Development journal9/data auth+metadata existing utuh setelah backup. Series lifecycle tetap terpisah. Root gates pada [Media Operations](../MEDIA_OPERATIONS.md); implementasi belum commit.
+4 Oktober2026: video-only schema/status/DTO/archive dan migration0008 tersedia; content regression19/204, legacy mapping1/10 dan worker publication/archive E2E lulus. Development journal9/data auth+metadata existing utuh setelah backup. Series lifecycle tetap terpisah. Root gates pada [Media Operations](../operations/media.md); implementasi belum commit.
 
 ### Blocker atau tindak lanjut
 

@@ -2,7 +2,7 @@
 
 ## Tujuan modul
 
-Menerapkan instruksi pengguna 3 Oktober 2026: sesudah implementasi jalankan test yang tersedia, check-types, lint yang tersedia, build, dan migrasi development jika schema backend berubah. Referensi [Global Workflow](../GLOBAL_WORKFLOW.md), [API Development](../API_DEVELOPMENT.md), serta [Video Operations](../VIDEO_OPERATIONS.md).
+Menerapkan instruksi pengguna 3 Oktober 2026: sesudah implementasi jalankan test yang tersedia, check-types, lint yang tersedia, build, dan migrasi development jika schema backend berubah. Referensi [Global Workflow](../guides/development-workflow.md), [API Development](../guides/api-development.md), serta [Video Operations](../operations/video-metadata.md).
 
 ## User story: VERIFY-US-01
 

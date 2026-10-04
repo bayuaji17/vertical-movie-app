@@ -44,4 +44,4 @@ Sebagai <aktor>, saya ingin <aksi>, sehingga <manfaat>.
 <Dependensi yang belum tersedia atau task lanjutan dengan ID-nya.>
 ```
 
-Status mengikuti [Global Workflow](GLOBAL_WORKFLOW.md). Task `Done` harus memenuhi acceptance criteria dan kriteria selesai yang relevan. Contoh pembagian modul auth: `AUTH-001` validasi konfigurasi server → `AUTH-002` skema/migrasi tabel auth → `AUTH-003` instance auth dan endpoint → `AUTH-004` otorisasi admin → `AUTH-005` formulir login dan pengujian alur. Ini contoh pembagian, bukan sprint atau implementasi yang sudah dimulai.
+Status mengikuti [Global Workflow](../guides/development-workflow.md). Task `Done` harus memenuhi acceptance criteria dan kriteria selesai yang relevan. Contoh pembagian modul auth: `AUTH-001` validasi konfigurasi server → `AUTH-002` skema/migrasi tabel auth → `AUTH-003` instance auth dan endpoint → `AUTH-004` otorisasi admin → `AUTH-005` formulir login dan pengujian alur. Ini contoh pembagian, bukan sprint atau implementasi yang sudah dimulai.

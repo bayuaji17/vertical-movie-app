@@ -2,7 +2,7 @@
 
 ## Tujuan modul
 
-Menghasilkan HLS terverifikasi melalui queue PostgreSQL dan proses Bun/FFmpeg di apps/api, di luar HTTP/transaksi. Retry/lease/timeout/retensi nomor 6–7 sudah disetujui; resource dibekukan setelah benchmark. Referensi [plan](../VIDEO_IMPLEMENTATION_PLAN.md), [model](../VIDEO_DATA_MODEL.md), [foundation](media.md) dan [Environment](../ENVIRONMENT.md).
+Menghasilkan HLS terverifikasi melalui queue PostgreSQL dan proses Bun/FFmpeg di apps/api, di luar HTTP/transaksi. Retry/lease/timeout/retensi nomor 6–7 sudah disetujui; resource dibekukan setelah benchmark. Referensi [plan](../plans/video/implementation-plan.md), [model](../architecture/video-data-model.md), [foundation](media.md) dan [Environment](../guides/environment.md).
 
 ## User story: WORKER-US-01
 
@@ -14,7 +14,7 @@ Sebagai operator, saya ingin file sementara dibersihkan dan arsip dipertahankan,
 
 ## Aturan evidence bersama
 
-Runtime inti telah diimplementasikan pada feat/media-backend; path/simbol final serta hasil proof tersedia pada [Media Operations](../MEDIA_OPERATIONS.md). Scope dan checklist berikut menjadi acuan review; checkbox belum dicentang bila seluruh matriks acceptance belum dibuktikan. Gunakan bun:test dengan dependency clock/storage/process/DB yang diinjeksi dan app.handle untuk HTTP. Integrasi memakai PostgreSQL/bucket test dedicated, terpisah dari data development. Sesudah implementasi jalankan relevant tests, root check-types/lint/build; frozen install bila scripts/dependency berubah. Schema baru memerlukan generate/review migration additive, proof test DB serta migration development/preservation sesuai AGENTS. Production migration/deployment adalah rollout terpisah. Isi hasil command, bukti acceptance dan commit ketika task benar-benar Done. Status Review menunjukkan implementasi/proof lokal tersedia; In Progress menunjukkan matriks masih tersisa; Blocked menunjukkan lingkungan eksternal belum tersedia.
+Runtime inti telah diimplementasikan pada feat/media-backend; path/simbol final serta hasil proof tersedia pada [Media Operations](../operations/media.md). Scope dan checklist berikut menjadi acuan review; checkbox belum dicentang bila seluruh matriks acceptance belum dibuktikan. Gunakan bun:test dengan dependency clock/storage/process/DB yang diinjeksi dan app.handle untuk HTTP. Integrasi memakai PostgreSQL/bucket test dedicated, terpisah dari data development. Sesudah implementasi jalankan relevant tests, root check-types/lint/build; frozen install bila scripts/dependency berubah. Schema baru memerlukan generate/review migration additive, proof test DB serta migration development/preservation sesuai AGENTS. Production migration/deployment adalah rollout terpisah. Isi hasil command, bukti acceptance dan commit ketika task benar-benar Done. Status Review menunjukkan implementasi/proof lokal tersedia; In Progress menunjukkan matriks masih tersisa; Blocked menunjukkan lingkungan eksternal belum tersedia.
 
 ## Task: WORKER-001 — Schema job dan enqueue durable
 
@@ -41,7 +41,7 @@ Dedicated DB race/rollback/restart proof, review SQL dan preservation data. Jala
 
 ### Hasil dan bukti
 
-4 Oktober2026, feat/media-backend (belum commit): Job/attempt/rendition schema0007 dan enqueue atomik tersedia/applied development; duplicate completion satu job, PostgreSQL durable claim dibuktikan E2E. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
+4 Oktober2026, feat/media-backend (belum commit): Job/attempt/rendition schema0007 dan enqueue atomik tersedia/applied development; duplicate completion satu job, PostgreSQL durable claim dibuktikan E2E. Gate root dan batas lingkungan pada [Media Operations](../operations/media.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -72,7 +72,7 @@ Clock boundary dan DB parallel claim/death/stale finish tests. Jalankan gate imp
 
 ### Hasil dan bukti
 
-4 Oktober2026, feat/media-backend (belum commit): SKIP LOCKED claim, token/lease heartbeat, expired recovery dan failure budget3 tersedia; concurrent claim/stale token/retry60/300/terminal3 dibuktikan E2E. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
+4 Oktober2026, feat/media-backend (belum commit): SKIP LOCKED claim, token/lease heartbeat, expired recovery dan failure budget3 tersedia; concurrent claim/stale token/retry60/300/terminal3 dibuktikan E2E. Gate root dan batas lingkungan pada [Media Operations](../operations/media.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -104,7 +104,7 @@ Subprocess failures/timeouts/stall, DB + MinIO/FFmpeg integration no-audio/10 me
 
 ### Hasil dan bukti
 
-4 Oktober2026, feat/media-backend (belum commit): Runner stream/download/hash→probe→FFmpeg→verify outputs→immutable attempt upload→fenced atomic ready tersedia. RealMinIO E2E/source tombstone lulus; complete media/death/resource matrix masih terbuka. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
+4 Oktober2026, feat/media-backend (belum commit): Runner stream/download/hash→probe→FFmpeg→verify outputs→immutable attempt upload→fenced atomic ready tersedia. RealMinIO E2E/source tombstone lulus; complete media/death/resource matrix masih terbuka. Gate root dan batas lingkungan pada [Media Operations](../operations/media.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -136,7 +136,7 @@ Restart/shutdown/dead-worker integration, env/process tests serta script/frozen-
 
 ### Hasil dan bukti
 
-4 Oktober2026, feat/media-backend (belum commit): Entry worker/build script/env/poll/lease/recovery/stop-claim/grace/TERM-KILL dan Linux orphan timeout tersedia. Process tests3/5 memeriksa missing binary/deadline/cancel serta TERM-ignoring child process group. API+worker bootstrap development/start/stop lulus. Full supervisor crash/OOM/disk/shutdown matrix masih terbuka. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
+4 Oktober2026, feat/media-backend (belum commit): Entry worker/build script/env/poll/lease/recovery/stop-claim/grace/TERM-KILL dan Linux orphan timeout tersedia. Process tests3/5 memeriksa missing binary/deadline/cancel serta TERM-ignoring child process group. API+worker bootstrap development/start/stop lulus. Full supervisor crash/OOM/disk/shutdown matrix masih terbuka. Gate root dan batas lingkungan pada [Media Operations](../operations/media.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -168,7 +168,7 @@ Clock boundaries, DB archive/claim/reprocess races, storage fail/crash/recovery 
 
 ### Hasil dan bukti
 
-4 Oktober2026, feat/media-backend (belum commit): Original7days sejak verifiedReady/terminal failure, archived preservation dan persistent deletion claim/tombstone; partial stopped attempt24h serta local orphan recovery tersedia. Dedicated original boundary/archive/recovery3/26 lulus; Partial24h/active/success skip/mid-delete retry sudah lulus; supervisor death/OOM/disk/orphan matrix tetap terbuka. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
+4 Oktober2026, feat/media-backend (belum commit): Original7days sejak verifiedReady/terminal failure, archived preservation dan persistent deletion claim/tombstone; partial stopped attempt24h serta local orphan recovery tersedia. Dedicated original boundary/archive/recovery3/26 lulus; Partial24h/active/success skip/mid-delete retry sudah lulus; supervisor death/OOM/disk/orphan matrix tetap terbuka. Gate root dan batas lingkungan pada [Media Operations](../operations/media.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
@@ -185,7 +185,7 @@ Restore/republish di luar scope; tidak hard-delete metadata konten.
 
 ### Ruang lingkup
 
-Dokumentasikan hasil di docs/VIDEO_OPERATIONS.md dan ENVIRONMENT.md; fixture 10/30 menit dengan resource limit pada server/container test. Worker 2 vCPU/1,5 GiB/thread 1 adalah kandidat proposal nomor 8, belum terbukti.
+Dokumentasikan hasil di docs/operations/video-metadata.md dan docs/guides/environment.md; fixture 10/30 menit dengan resource limit pada server/container test. Worker 2 vCPU/1,5 GiB/thread 1 adalah kandidat proposal nomor 8, belum terbukti.
 
 ### Acceptance criteria
 
@@ -199,7 +199,7 @@ Reproducible report versi FFmpeg/Bun, input/profile/limits dan hasil berhasil/ga
 
 ### Hasil dan bukti
 
-4 Oktober2026, feat/media-backend (belum commit): Belum dijalankan pada mesin target4core4GB dengan workload10/30min; kandidat thread1/disk10GiB dipertahankan. Tidak mengklaim kapasitas/production default proven. Gate root dan batas lingkungan pada [Media Operations](../MEDIA_OPERATIONS.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
+4 Oktober2026, feat/media-backend (belum commit): Belum dijalankan pada mesin target4core4GB dengan workload10/30min; kandidat thread1/disk10GiB dipertahankan. Tidak mengklaim kapasitas/production default proven. Gate root dan batas lingkungan pada [Media Operations](../operations/media.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
 ### Blocker atau tindak lanjut
 
