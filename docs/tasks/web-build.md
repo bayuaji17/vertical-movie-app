@@ -54,7 +54,7 @@ Planning tidak terblokir; implementasi menunggu permintaan eksekusi.
 
 ## Task: WEB-BUILD-002 — Filter warning dan wiring
 
-- Status: Review
+- Status: Done
 - Owner: Codex
 - Prioritas: P1
 - Referensi: WEB-BUILD-US-01, plan STEP-002.
@@ -71,7 +71,7 @@ Helper build logging, Vite/Nitro onLog dan native Bun diagnostic regression test
 - [x] Hanya pasangan package/directive target dengan ID dependency valid disaring.
 - [x] Unknown/source/missing ID, Windows/Bun path, ANSI dan code log lain diuji; default forwarding benar.
 - [x] Build semua environment tanpa cache serta test/types/lint/build/docs lulus.
-- [ ] Commit task terpisah; source/desain/dependency di luar scope terjaga.
+- [x] Commit task terpisah; source/desain/dependency di luar scope terjaga.
 
 ### Validasi
 
@@ -85,7 +85,7 @@ Native Bun web tests: 59 pass, 0 fail, 197 assertions; 22 test baru memeriksa ba
 
 ### Commit task
 
-Pesan: fix(web): filter known build directive warnings (WEB-BUILD-002). SHA/hook aktual dicatat sesudah commit; docs/format/whitespace dan scoped index diperiksa sebelum commit.
+Commit: 2a6a8ee590964aea6244dfb27c74caa3bf26efba, fix(web): filter known build directive warnings (WEB-BUILD-002). Docs:check 47/336, scoped index 40/317, targeted Prettier/whitespace serta hooks lint/types/Commitlint lulus tanpa bypass. Receipt dicatat sesudah commit pada task closure berikutnya.
 
 ### Blocker atau tindak lanjut
 
@@ -93,8 +93,8 @@ Implementasi disetujui pengguna. Optimasi chunk terpisah.
 
 ## Task: WEB-BUILD-003 — Verifikasi production build dan closure
 
-- Status: Backlog
-- Owner: Pengembang/agent saat implementasi diminta
+- Status: Review
+- Owner: Codex
 - Prioritas: P1
 - Referensi: WEB-BUILD-US-01, plan STEP-003.
 - Diperbarui: 2026-10-05
@@ -107,10 +107,10 @@ Negative import proof, build sukses final, SSR smoke existing pada fixture/port 
 
 ### Acceptance criteria
 
-- [ ] Warning target hilang; warning chunk/diagnostic lain tetap terlihat.
-- [ ] Import server terlarang tetap menggagalkan client build; fixture dipulihkan.
-- [ ] Build final/SSR smoke lulus, entry Bun dan route/client asset graph valid.
-- [ ] Gates/docs/preservation lulus; browser/hydration yang belum diuji dicatat.
+- [x] Warning target hilang; warning chunk/diagnostic lain tetap terlihat.
+- [x] Import server terlarang tetap menggagalkan client build; fixture dipulihkan.
+- [x] Build final/SSR smoke lulus, entry Bun dan route/client asset graph valid.
+- [x] Gates/docs/preservation lulus; browser/hydration yang belum diuji dicatat.
 - [ ] Evidence/receipt dan commit closure selesai.
 
 ### Validasi
@@ -119,12 +119,14 @@ Negative import proof, build sukses final, SSR smoke existing pada fixture/port 
 
 ### Hasil dan bukti
 
-Belum dijalankan untuk fix; baseline bukan bukti behavior pascaperubahan.
+5 Oktober 2026: bun run --cwd apps/web auth:import:proof lulus; client build menolak @repo/auth/server dan fixture admin.login.tsx dipulihkan identik. Setelah negative proof, bun run build --force lulus 2 task tanpa cache dalam 5.671 detik. Client/SSR/Nitro tidak mengeluarkan MODULE_LEVEL_DIRECTIVE dan warning ukuran chunk tetap muncul. Entry .output/server/index.mjs tersedia; 36 public assets mempunyai path dan SHA-256 identik dengan baseline, routeTree.gen.ts tidak berubah.
+
+Bun run --cwd apps/web auth:ssr:smoke lulus pada production entry dengan API fixture/port terisolasi: admin/null/user/outage/stall, redirect login admin aktif, ketersediaan login anonymous/user/outage, isolasi cookie, multi Set-Cookie dan safe HTML. Tidak menjalankan browser/hydration/device playback smoke, database/storage integration atau rollout production. Gate test/types/lint WEB-BUILD-002 tetap valid karena tidak ada perubahan source sesudah commit; negative fixture kembali ke semula. Dokumen/preservation/whitespace dan hooks diperiksa untuk commit closure.
 
 ### Commit task
 
-Belum dibuat; gunakan Conventional Commit ber-ID WEB-BUILD-003 dan catat SHA sesudah berhasil.
+Pesan: docs(web): record build warning verification (WEB-BUILD-003). SHA dan hook aktual dicatat setelah commit berhasil untuk pembaruan task berikutnya.
 
 ### Blocker atau tindak lanjut
 
-Menunggu WEB-BUILD-002. Push/PR/merge memerlukan instruksi delivery tersendiri; squash branch sebelumnya bukan default branch ini.
+Tidak ada blocker fix. Push/PR/merge belum diminta; squash branch sebelumnya bukan default branch ini.

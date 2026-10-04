@@ -42,12 +42,12 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 
 ## Context dan plan per fitur
 
-| Fitur       | Context                                                         | Plan                                                                                           | Penggunaan                                                               |
-| ----------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| Auth        | [Snapshot](plans/auth/repository-context.md)                    | [Plan awal](plans/auth/implementation-plan.md), [refactor native](plans/auth/refactor-plan.md) | Riwayat; command aktif berada di runbook auth.                           |
-| Video/media | [Snapshot](plans/video/repository-context.md)                   | [Plan](plans/video/implementation-plan.md)                                                     | Keputusan, refinement, proof dan ledger; batas production tetap dicatat. |
-| Dokumentasi | [Snapshot](plans/documentation/repository-context.md)           | [Plan](plans/documentation/implementation-plan.md)                                             | Organisasi kategori, aturan root, validasi dan review produk/arsitektur. |
-| Build web   | [Snapshot](plans/tanstack-build-warnings/repository-context.md) | [Plan](plans/tanstack-build-warnings/implementation-plan.md)                                   | Filter Vite/Nitro implemented; verifikasi import/SSR berjalan.           |
+| Fitur       | Context                                                         | Plan                                                                                           | Penggunaan                                                                                |
+| ----------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Auth        | [Snapshot](plans/auth/repository-context.md)                    | [Plan awal](plans/auth/implementation-plan.md), [refactor native](plans/auth/refactor-plan.md) | Riwayat; command aktif berada di runbook auth.                                            |
+| Video/media | [Snapshot](plans/video/repository-context.md)                   | [Plan](plans/video/implementation-plan.md)                                                     | Keputusan, refinement, proof dan ledger; batas production tetap dicatat.                  |
+| Dokumentasi | [Snapshot](plans/documentation/repository-context.md)           | [Plan](plans/documentation/implementation-plan.md)                                             | Organisasi kategori, aturan root, validasi dan review produk/arsitektur.                  |
+| Build web   | [Snapshot](plans/tanstack-build-warnings/repository-context.md) | [Plan](plans/tanstack-build-warnings/implementation-plan.md)                                   | Implemented/verified lokal: warning directive, batas import dan SSR; browser belum diuji. |
 
 ## Backlog dan evidence
 

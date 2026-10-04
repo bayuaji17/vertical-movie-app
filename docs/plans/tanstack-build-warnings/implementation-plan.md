@@ -2,7 +2,7 @@
 
 ## Plan metadata
 
-- Status: executing; implementasi disetujui pengguna 5 Oktober 2026.
+- Status: executing; implementasi dan verifikasi lokal lulus, menunggu commit closure.
 - Diperbarui: 2026-10-05.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `main`; base SHA / last validated SHA: `b60f7676101d94c8725528dbef02b92c28eeee32`.
@@ -102,11 +102,11 @@ Tidak menyaring berdasarkan substring directive saja, node_modules saja atau sel
 
 ## Acceptance criteria
 
-- [ ] Target warning dependency hilang dari build baru client/SSR/Nitro.
-- [ ] Source/unknown directives dan diagnostic lain tetap dilaporkan; build error tetap gagal.
-- [ ] Regression/existing tests, negative import proof, SSR smoke dan quality gates lulus.
-- [ ] Artefak Bun/routes tetap valid; browser yang belum diuji tidak diklaim lulus.
-- [ ] Docs/receipt konsisten, satu commit per task dan pekerjaan lokal lain terjaga.
+- [x] Target warning dependency hilang dari build baru client/SSR/Nitro.
+- [x] Source/unknown directives dan diagnostic lain tetap dilaporkan; build error tetap gagal.
+- [x] Regression/existing tests, negative import proof, SSR smoke dan quality gates lulus.
+- [x] Artefak Bun/routes tetap valid; browser yang belum diuji tidak diklaim lulus.
+- [x] Docs/receipt konsisten, satu commit per task dan pekerjaan lokal lain terjaga.
 
 ## Risks and mitigations
 
@@ -122,7 +122,7 @@ Revert commit filter/helper/wiring melalui commit biasa bila terjadi regresi. Ke
 
 ## Open decisions
 
-Tidak ada keputusan produk yang menghalangi scope directive. Optimasi chunk/upgrade/RSC/compiler merupakan pekerjaan terpisah bila diminta. Efektivitas wiring dan batas smoke browser harus dibuktikan saat implementasi.
+Tidak ada keputusan produk yang menghalangi scope directive. Optimasi chunk/upgrade/RSC/compiler merupakan pekerjaan terpisah bila diminta. Wiring client/SSR/Nitro dan SSR/import protection telah terverifikasi; browser/hydration/device playback smoke tidak dijalankan pada fix logging ini.
 
 ## Validation history
 
@@ -154,3 +154,11 @@ Tidak ada keputusan produk yang menghalangi scope directive. Optimasi chunk/upgr
 - Helper tooling, native ANSI stripping, allowlist dan forwarding sesuai plan; Vite dan Nitro memakai onLog. Penyesuaian folder di atas menjaga helper tracked tanpa perubahan ignore/dependency.
 - 59 web tests/197 assertions lulus; 22 test diagnostic baru. Probe nyata membuktikan source use server diteruskan. Types 3 task, lint 1 task dan build 2 task tanpa cache lulus setelah satu optional chain yang ditolak lint diperbaiki.
 - Log build client/SSR/Nitro: 0 directive warning dari baseline 135; warning chunk tetap visible. Import negative proof/SSR smoke mengikuti WEB-BUILD-003 setelah commit implementasi.
+
+- Receipt WEB-BUILD-002: 2a6a8ee590964aea6244dfb27c74caa3bf26efba; docs:check 47/336, scoped index 40/317, format/whitespace dan hooks lint/types/Commitlint lulus tanpa bypass. WEB-BUILD-003 dimulai setelah commit berhasil; source fix sesuai affected paths dan tidak ada perubahan dependency/config lain.
+
+### WEB-BUILD-003 — Verifikasi akhir
+
+- Negative auth import proof lulus dan fixture dipulihkan; build --force sukses setelah proof: 2 task, 0 cached, 5.671 detik. Directive warning client/SSR/Nitro 0; warning chunk tetap terlihat.
+- 36 public assets/path/SHA-256 identik baseline; production entry tersedia dan generated route tree tidak berubah. SSR native fixture lulus seluruh case existing; tidak mengklaim browser/hydration/device playback atau production rollout.
+- Source tidak berubah setelah WEB-BUILD-002 sehingga tests/types/lint tetap valid; receipt task implementasi masuk commit closure. Hasil docs checker/preservation/hook closure dicatat setelah pemeriksaan.
