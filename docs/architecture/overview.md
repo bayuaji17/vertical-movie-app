@@ -1,117 +1,138 @@
-# Draft Architecture — Vertical Movie App
+# Architecture — Vertical Movie App
 
-> Status: **Draft rincian integrasi** · Diperbarui 3 Oktober 2026 · Mengacu pada [PRD](../product/prd.md). Eden Treaty dipilih 1 Oktober 2026; MinIO development, Cloudflare R2 production melalui S3-compatible, selector env dan HLS dipilih pengguna 3 Oktober 2026. Media belum diimplementasikan.
+> Status: **Baseline implementasi repository; batas UI dan verifikasi production dicatat terpisah** · Review 5 Oktober 2026 · Snapshot `1f45728d5a0aeeecae48149ae538997c04f122f2`. Pilihan auth/metadata/media disetujui pengguna pada 1–4 Oktober 2026. Review ini menyelaraskan overview dengan kode tanpa keputusan produk baru, perubahan runtime atau klaim kesiapan production.
 
 ## Keadaan repo saat ini
 
-`apps/api` memakai factory Elysia tanpa listen, env tervalidasi, dan satu pool Bun SQL/Drizzle yang disuntikkan ke factory native Better Auth `@repo/auth/server`. Route aktif: root publik, `/api/auth/*`, 16 endpoint metadata `/admin/*`, Scalar `/openapi` dan `/openapi/json`. Schema canonical/admin plugin dimiliki `packages/auth`; role user/admin dan unique partial index membatasi satu admin. Seed memakai CLI resmi, recovery native hanya selama maintenance dengan seluruh penerima login berhenti. Macro `requireAdmin` memeriksa getSession authoritative, role/ban/expiry setiap request privat. Tidak ada writer/session endpoint/singleton custom aktif. TanStack Start memakai gateway same-origin fixed upstream dengan cookie/no-store/deadline, reader SDK isomorphic, satu snapshot Query per router/request, dan guard pathless sebelum loader anak. Cache UI/cookie 60 detik terpisah dari izin API; session tetap 24 jam. Browser acceptance lokal pada Vite dan hasil build Bun/Nitro termasuk native Better Auth/PostgreSQL sudah lolos; expand/contract DB development telah diterapkan dengan identitas/credential/sesi existing terjaga; rollout deployment masih terpisah. Eden khusus API bisnis type-only. Halaman publik masih starter dengan demo VerticalVideoPlayer 9:16; Video.js React/core 10.0.0-rc.4 sudah dipasang. HLS, storage/katalog, queue, worker dan FFmpeg belum diimplementasikan. Detail auth ada pada [Auth Operations](../operations/auth.md).
+Workspace Bun mempunyai dua aplikasi dan satu package auth bersama. `apps/api` menyediakan Elysia HTTP API, PostgreSQL/Drizzle, storage/upload, publikasi/katalog/playback dan kode worker. `apps/web` menyediakan TanStack Start, gateway same-origin, login/dashboard sesi admin dan player watch/preview minimal. `packages/auth` memiliki Better Auth server/client/types; credential server tidak masuk entry client.
+
+Media backend sudah diimplementasikan: multipart/freeze/enqueue, worker FFmpeg HLS/WebP, claim/lease/retry/recovery, readiness/publish/archive, katalog API dan signed delivery. Homepage masih starter MP4 demo. Dashboard CRUD/upload/publish/recovery, katalog web lengkap, konfigurasi situs dan subtitle belum tersedia lengkap. Spesifikasi/mockup desain tidak dianggap layar yang sudah berjalan.
+
+Ketentuan produk dan angka policy media dimiliki [PRD](../product/prd.md), aturan lintas fitur oleh [Global Rules](../product/global-rules.md). Overview ini memiliki batas komponen dan dataflow. Instruksi proses/command dimiliki [AGENTS.md](../../AGENTS.md), [API development](../guides/api-development.md), [environment](../guides/environment.md) dan runbook, sehingga tidak diduplikasi sebagai workflow baru.
 
 ## Tech stack yang dipilih
 
-| Lapisan               | Teknologi                                    | Peran yang direncanakan                                                                                                                                                         |
-| --------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Runtime dan workspace | Bun, Turborepo                               | Menjalankan kedua app dan task workspace; prioritaskan API native Bun bila cocok dengan kebutuhan dan stack terpilih.                                                           |
-| Backend               | ElysiaJS (`apps/api`)                        | API publik video, API admin, validasi, otorisasi, dan aturan publikasi.                                                                                                         |
-| Kontrak/client API    | Eden Treaty                                  | API mengekspor tipe kontrak Elysia; web memakai client bertipe untuk endpoint aplikasi di `/api`.                                                                               |
-| Frontend              | TanStack Start (`apps/web`)                  | Halaman tonton publik dan dashboard admin yang responsif.                                                                                                                       |
-| Database              | PostgreSQL                                   | Menyimpan metadata video, status, pengaturan sistem, dan data autentikasi.                                                                                                      |
-| ORM dan migrasi       | Drizzle ORM, Drizzle Kit                     | Definisi skema, query, dan migrasi PostgreSQL di sisi API. Schema auth/admin awal tersedia; database development lokal telah dimigrasikan, deployment belum diverifikasi.       |
-| Object storage        | MinIO development / Cloudflare R2 production | Menyimpan sumber/aset/hasil HLS melalui kontrak S3-compatible; selector `STORAGE_PROVIDER=minio\|r2` dan `S3_*` server. Prioritaskan `Bun.S3Client`, proof pada kedua provider. |
-| Queue media           | PostgreSQL                                   | Tabel job yang persisten untuk transcode; tidak memerlukan broker queue terpisah. Mekanisme klaim, retry, dan pemulihan worker perlu dirancang.                                 |
-| Transcode             | FFmpeg → HLS VOD                             | Worker Bun menghasilkan master/variant playlist dan segment lengkap. Codec/ladder/format dan durasi segment masih refinement.                                                   |
-| Autentikasi           | Better Auth                                  | Email/password admin saja, session PostgreSQL, CLI provision/recovery, guard API, dan gateway web same-origin sudah diterapkan; pengunjung tanpa login.                         |
-| UI                    | shadcn/ui, Tailwind CSS                      | Komponen dashboard dan antarmuka publik, dengan token desain lokal di `apps/web`.                                                                                               |
-| Form                  | TanStack Form                                | State dan validasi interaksi formulir admin; API tetap memvalidasi input.                                                                                                       |
-| Data fetching         | TanStack Query                               | Pengambilan, cache, dan pembaruan data API pada web.                                                                                                                            |
-| Pemutar video         | Video.js React/core 10.0.0-rc.4              | Demo MP4 sudah tersedia; integrasi HLS memerlukan media component/adapter dari bundled docs dan proof browser pada task frontend.                                               |
+| Lapisan           | Teknologi                                       | Kondisi/peran saat ini                                                                                                                                       |
+| ----------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Runtime/workspace | Bun, Turborepo                                  | Runtime API/web/worker dan orchestration task workspace; versi/dependensi mengikuti manifests/lockfile.                                                      |
+| Backend           | Elysia                                          | Factory bertipe tanpa listen pada `app.ts`; bootstrap dependency/listen di `index.ts`.                                                                       |
+| API client        | Eden Treaty                                     | Type-only `api/types`, `parseDate: false`; browser memakai public origin `/api`, auth memakai SDK Better Auth tersendiri.                                    |
+| Web               | TanStack Start, React, Bun/Nitro                | Gateway, auth dan watch/preview tersedia; homepage/admin konten lengkap masih lanjutan.                                                                      |
+| Database          | PostgreSQL, Drizzle, Bun SQL                    | Auth, metadata, aset, session upload, durable job/attempt/rendition dan operation tersedia. API/worker memakai pool per proses pada DB yang sama.            |
+| Auth              | Better Auth pada `@repo/auth`                   | Email/password, single-admin provisioning/recovery, sesi PostgreSQL dan private guard tersedia; signup publik nonaktif.                                      |
+| Object storage    | MinIO development / Cloudflare R2 production    | Satu bucket privat per env, selector server `STORAGE_PROVIDER`; profil provider/bucket/key persisten. R2 staging belum dibuktikan.                           |
+| Storage clients   | Native `Bun.S3Client` dan SDK S3                | Native read/stat/presign; SDK explicit multipart/copy/control dan penulisan output worker menutup kebutuhan yang belum dipenuhi native pada proof Bun 1.4.2. |
+| Queue/worker      | PostgreSQL, proses Bun terpisah, FFmpeg/FFprobe | Polling, SKIP LOCKED, heartbeat/recovery/retry, deadline/shutdown dan cleanup tersedia; tidak ada broker atau LISTEN/NOTIFY runtime.                         |
+| UI/form/data      | shadcn Base UI, Tailwind, TanStack Form/Query   | Primitive/login dan fondasi query/session tersedia; bukan bukti form upload/dashboard konten selesai.                                                        |
+| Player            | Video.js React/core/hlsjs-video 10.0.0-rc.4     | Adapter HLS dan renewal URL tersedia; compatibility Safari/native HLS/perangkat sasaran masih gerbang verifikasi.                                            |
 
-Pilihan provider per lingkungan, format HLS dan resolusi sumber/keluaran 480p–1080p sudah disetujui. Sumber 1440p/4K ditolak; dimensi tampilan setelah rotasi/SAR memenuhi sisi pendek 480–1080 dan sisi panjang maksimal 1920. Semua video/sampul wajib portrait 9:16, rasio lain ditolak tanpa upscale/crop. Batas sumber terbaru mengikuti kind: movie/standalone maksimal 30 menit dan 1,5 GB (1.500.000.000 byte), episode maksimal 10 menit dan 512 MB. Limit berlaku juga untuk file yang lebih pendek. Acuan ekspor sumber H.264 SDR 1080p24–30 pada 4–6 Mbps (default 6 Mbps), audio AAC 128 kbps; default memberi estimasi sekitar 459,6 MB untuk 10 menit dan 1.378,8 MB untuk 30 menit sebelum overhead. Profil hls-v1 disetujui terpisah pada 4 Oktober 2026; proof teknis tetap pending. Limit sumber mencakup audio/container, tidak membatasi total storage keluaran HLS; acuan bitrate ekspor harus disesuaikan untuk memenuhinya. MP4/MOV/MKV H.264/H.265 dan WebM VP8/VP9 disetujui. Sampul memakai satu standar antarjenis konten: gambar diam JPG/JPEG/PNG/WebP maksimal 5 MB, sumber minimal 1080 × 1920 portrait 9:16, hasil WebP 1080 × 1920. Decode/konversi sumber lebih besar menjadi hasil standar dilakukan pada pipeline media sebelum siap; belum diimplementasikan. S3 multipart dipilih sebagai metode upload media dengan part kecil, termasuk sampul kecil satu part. hls-v1, part 2%/minimum 5 MiB, concurrency upload 3, session 24 jam/URL part 15 menit, distribusi privat/TTL 2× durasi, cache dan syarat publikasi sudah disetujui. Identity resume/freeze, detail encoder/HDR/VFR, header provider dan resource worker memerlukan proof; hosting nomor 8 tetap proposal. R2 menyimpan objek; transcoding tetap FFmpeg milik worker API, tanpa Cloudflare Stream. Detail kontrak env/roadmap ada pada [plan video](../plans/video/implementation-plan.md) dan [backlog media](../tasks/media.md). Tabel tidak berarti integrasi tersebut sudah berjalan.
+Manifests API/web/auth menjadi acuan dependency. AWS SDK tidak mengubah keputusan provider atau metode upload; batas proof native dan alternatif tercatat pada [kontrak upload](media-upload-contract.md) dan [runbook media](../operations/media.md).
 
-## Batas sistem yang diusulkan
+## Batas sistem dan dataflow
 
 ```mermaid
 flowchart LR
-  V[Pengunjung tanpa login] --> W[Web publik · TanStack Start]
-  A[Admin tunggal] --> D[Dashboard · TanStack Start]
-  W -->|Eden Treaty| P[API publik · Elysia]
-  D -->|Eden Treaty| X[API admin · Elysia]
-  X --> H[Better Auth]
-  P --> R[Drizzle ORM]
-  X -->|Data dan enqueue| R
-  H --> R
-  R --> DB[(PostgreSQL · data + job queue)]
-  X --> O[(MinIO dev / R2 prod · S3)]
-  DB -->|Klaim job| T[Worker Bun · FFmpeg]
-  O -->|Video sumber| T
-  T -->|Master, variant, segment HLS| O
-  T -->|Status job dan aset| R
-  O --> M[Distribusi media · TBD]
-  M --> V
-  M --> A
+  B["Browser pengunjung / admin"] -->|"Same-origin /api"| W["TanStack Start + gateway"]
+  W -->|"Fixed upstream HTTP"| A["Elysia API + Better Auth"]
+  A -->|"Auth, metadata, job, operasi"| D[(PostgreSQL)]
+  A -->|"Multipart control, freeze, playlist, signing"| S["Bucket privat MinIO / R2"]
+  T["Worker Bun + FFmpeg"] -->|"Claim, heartbeat, ready, recovery"| D
+  T -->|"Baca source, tulis HLS / WebP"| S
+  B -->|"Signed GET output HLS / poster"| S
+  B -.->|"Signed PUT part; UI lengkap pending"| S
 ```
 
-- **Web publik:** menampilkan katalog video terbit dan pengalaman tonton mobile first. Pada desktop, pemutar vertikal tetap berproporsi dan ruang tambahan dapat menampung metadata serta navigasi. Video.js digunakan pada komponen player.
-- **Dashboard:** akses admin tunggal untuk video, status unggah/pemrosesan, publikasi, dan pengaturan yang disetujui. shadcn/ui menyediakan komponen, Tailwind CSS menyediakan styling, TanStack Form menangani interaksi formulir, dan TanStack Query mengelola data dari API.
-- **API Elysia:** sumber kebenaran untuk daftar/detail publik, operasi admin, validasi input, syarat publikasi, serta pemeriksaan sesi dan otorisasi. Kode domain tidak diduplikasi di TanStack Start.
-- **Eden Treaty:** web memakai tipe hasil komposisi Elysia melalui entry point type-only milik API. Client browser memakai origin web dengan base `/api`, `credentials: include`, dan tanpa konversi string tanggal menjadi `Date`; SSR memakai URL internal tetap dan cookie dari request aktif. Hasil sesi hanya membawa DTO whitelisted, sedangkan API tetap memvalidasi dan mengotorisasi setiap request. Eden berjalan dengan TanStack Query yang dibuat per router; Better Auth memakai client auth tersendiri. Aturan lifecycle, scope plugin, macro admin, dan SSR ada di [API Development](../guides/api-development.md).
-- **Better Auth:** dimiliki `packages/auth`; API memakai `@repo/auth/server`, web `@repo/auth/client`, tipe bersama type-only `@repo/auth/types`. Native admin role, session/CLI/reset menggantikan singleton dan writer custom; database diinjeksi API, web hanya memanggil SDK. Proteksi/cookie/cache/maintenance dijelaskan pada [Auth Operations](../operations/auth.md).
-- **PostgreSQL + Drizzle:** Bun SQL dan Drizzle adapter telah lulus proof terarah pada database test; factory runtime sudah tersedia. Schema auth native dan enam tabel metadata konten tersedia; migrasi metadata lulus proof dedicated dan sudah diterapkan pada development lokal. Queue/pengaturan/media masih task lanjutan. PostgreSQL menyimpan metadata, job, pengaturan, dan tabel auth; berkas video berada di object storage.
-- **Object storage:** MinIO pada development, Cloudflare R2 pada production melalui kontrak S3-compatible. Selector `STORAGE_PROVIDER` dan endpoint/region/bucket/credential dari env server; akses native `Bun.S3Client` untuk operasi yang terbukti didukung. Persistenkan provider asal bersama key; perubahan env bukan copy objek. Perbedaan fitur antarprovider dan versi Bun dibuktikan lewat proof terpisah.
-- **Unggah dan distribusi:** API admin membuat izin unggah terbatas, browser mengunggah langsung ke MinIO/R2 melalui signed URL part dalam S3 multipart yang disetujui. File dibagi menjadi bagian kecil dan digabung storage saat complete; sampul kecil dapat memakai satu part. Part target 2% ukuran aktual dengan minimum 5 MiB selain part terakhir disetujui; maksimal 3 part paralel per file, session 24 jam dan URL part 15 menit dibatasi sisa session disetujui. Detail identity resume/expiry/source freeze masih proof implementasi. Verifikasi objek dan bekukan identitas sumber sebelum enqueue. Bucket development existing adalah `vertical-movie-app`; port 9000 endpoint S3, port 9001 Console. Distribusi HLS harus mencakup master, variant, init dan segment, bukan presign master saja. Draft/source tetap privat; preview admin dan playback konten published mempunyai kebijakan akses/cache/archive yang disetujui pada nomor 4. R2 tidak memakai ACL S3 public-read dan presigned URL R2 tidak bisa dipindahkan ke custom domain.
-- **Worker media:** jalankan sebagai proses Bun terpisah dari server HTTP, dengan kode tetap di `apps/api`. Worker mengambil job dari PostgreSQL, membaca sumber dari object storage, menjalankan FFmpeg melalui `Bun.spawn`, memeriksa exit code dan keluaran, mengunggah hasil ke storage, lalu menyimpan status. Proses FFmpeg tidak berjalan di dalam transaksi database.
+- **Web/gateway:** bisnis browser `/api/*` diteruskan ke upstream API yang ditetapkan dengan satu prefix `/api` dihapus; auth `/api/auth/*` mempertahankan path native. Allowlist path/header, origin, batas body, timeout/cancellation dan forwarding cookie berlaku sesuai tipe route. Cookie/authorization hanya diteruskan untuk auth/admin, bukan endpoint katalog publik.
+- **API:** menyusun module series/videos/genres/media/catalog/publication/playback, menerapkan schema input dan guard authoritative untuk operasi privat. Pembacaan katalog/playback publik tidak membutuhkan login, tetapi tetap memeriksa effective visibility. Bootstrap menginjeksi DB, auth, storage dan service; konfigurasi storage yang tidak diaktifkan membuat service media/playback unavailable, bukan fallback provider tersembunyi.
+- **Auth:** `packages/auth` memiliki entry server/client/types. API menginjeksi database ke server auth; web menggunakan client/reader per request, guard layout dan state sesi. Hak admin ditegakkan server dan unique partial index, bukan hanya UI. Pengaturan recovery/maintenance dimiliki [runbook auth](../operations/auth.md).
+- **Database:** menyimpan state durable dan constraints; body video/sampul/HLS berada di object storage. Transaksi claim/completion/publish/activation pendek; storage network dan subprocess tidak berada di dalamnya. API dan worker mempunyai pool sendiri, bukan singleton pool bersama lintas proses.
+- **Storage:** source, staging upload dan output attempt memakai namespace berbeda dalam satu bucket privat. Publikasi tidak mengubah prefix menjadi publik atau memindahkan segment. Browser harus dapat menjangkau endpoint signed URL dan CORS yang sesuai; mengganti env tidak memindahkan data/provider asal.
+- **Worker:** kode tetap di `apps/api`, tetapi entry process terpisah dari HTTP. Parameter resource/concurrency/retry/lease/deadline dimiliki env worker; default concurrency 1 merupakan keputusan yang sudah disetujui, kapasitas target tetap menunggu benchmark.
 
-Prioritaskan API native Bun untuk koneksi database, object storage, dan pemanggilan FFmpeg ketika kompatibel dengan library yang sudah dipilih. Gunakan library tambahan hanya jika operasi yang dibutuhkan tidak didukung, tidak kompatibel, atau hasil pengujian menunjukkan kebutuhan tersebut. Keputusan dan alasannya dicatat saat implementasi.
+HLS master/variant berjalan melalui API/gateway; segment/init dan poster menggunakan signed GET output langsung dari storage. Gateway bukan proxy seluruh body video. Browser multipart merupakan kontrak backend yang tersedia dan telah mempunyai proof lokal; UI penjadwalan/upload/resume lengkap masih perlu dibangun.
 
-## Alur queue transcode yang diusulkan
+## Alur upload dan pemrosesan
 
-Lifecycle video terbaru disetujui 4 Oktober 2026: **draft → published → archived**, tanpa status produk unpublished. Ini target lanjutan, bukan schema/runtime yang sudah berubah. VID-016 menyiapkan compatibility; Pengguna memilih satu bucket aplikasi per environment pada 4 Oktober 2026. Kontrak nomor 4 disepakati 4 Oktober 2026: seluruh bucket privat, sources/ untuk input dan outputs/ untuk hasil immutable, master/variant playlist melalui API dan init/segment/caption langsung dari storage melalui signed GET URL. TTL playback disetujui 4 Oktober 2026: 2× durasi video aktual terverifikasi sejak URL diterbitkan; cache bila diaktifkan wajib memiliki expiry/invalidation, dengan cache terkait signed URL tidak melewati expiry URL. Cache metadata TTL 60 detik, playlist no-store dan cache segment privat maksimal min(300 detik, sisa umur URL) disetujui 4 Oktober 2026; proof response headers/invalidation masih diperlukan; archive menghentikan URL baru sementara URL lama berlaku sampai expiry. Kontrak akses memakai expiry URL lama, bukan pencabutan instan; tidak menjanjikan revocation instan atau CDN/custom-domain presign. Playlist disajikan API; data video langsung dari storage. Gateway yang memproksi seluruh segment bukan kontrak yang dipilih. Detail pada [plan nomor 4](../plans/video/implementation-plan.md#nomor-4--akses-video-distribusi-hls-dan-cache-disepakati-4-oktober-2026).
+1. Admin membuat metadata draft dan memulai session source/poster melalui API. Owner/kind/parent, ukuran/format awal, idempotency dan profile diperiksa; API menetapkan staging key, geometry dan expiry. Browser mengunggah part langsung memakai URL yang diotorisasi; part sukses direkonsiliasi dari storage saat resume.
+2. Complete mengklaim session, memeriksa daftar part/ukuran, menyelesaikan multipart dan membekukan source ke key final lewat copy/stat di luar transaksi. Claim yang masih sah kemudian menyelesaikan session, memasang pointer source/poster dan enqueue satu job generation dalam transaksi yang sama. Completed belum ready atau published.
+3. Worker polling mengklaim job eligible dengan `FOR UPDATE SKIP LOCKED`, membuat lease token/attempt dan prefix output immutable. Transaksi selesai sebelum download/probe/FFmpeg. Heartbeat memperpanjang lease; job generation dan claim diperiksa lagi sebelum hasil menjadi aktif.
+4. Untuk source, FFprobe/decode memverifikasi container/codec, rotasi/SAR, durasi/resolusi/9:16 dan sumber; FFmpeg menghasilkan HLS `hls-v1`. Untuk poster, worker memverifikasi gambar diam/rasio/dimensi dan menghasilkan WebP standar. Output diprobe/divalidasi, diunggah dan diperiksa sebelum activation.
+5. Transaksi activation mensyaratkan lease belum expired, token/generation masih sama dan asset tidak sedang/selesai dihapus. Job menjadi succeeded, daftar objek/rendition dicatat, asset ready dan readyJobId/provenance dipasang. Tidak ada autopublish.
+6. Failure transient dijadwalkan retry; lease expired direcover atau menjadi failure terminal sesuai batas. Attempt yang kehilangan claim tidak mengaktifkan output. Worker menampilkan kode status operasional; UI lengkap untuk pemulihan masih lanjutan.
+7. Maintenance worker menjalankan expiry/cleanup upload dan source/failed attempt, dengan claim/namespace tercatat. Shutdown menghentikan claim baru dan membatasi subprocess; source/HLS/metadata tidak dihapus oleh sweep bucket tanpa seleksi.
 
-1. Setelah server memastikan objek sumber benar-benar ada, API mencatat status aset dan job `queued` di PostgreSQL secara atomik.
-2. Worker mengklaim satu job secara aman untuk beberapa worker, misalnya melalui transaksi dan `FOR UPDATE SKIP LOCKED`, lalu mencatat lease serta jumlah percobaan. Transaksi klaim selesai sebelum FFmpeg dijalankan; lease perlu diperpanjang selama proses yang lama.
-3. Worker mengambil sumber, menjalankan FFprobe/FFmpeg, memvalidasi master/variant playlist serta seluruh segment/init HLS VOD, dan mengunggah hasil ke prefix immutable per job/attempt. **hls-v1 disetujui 4 Oktober 2026**: H.264 SDR, AAC 128 kbps bila audio tersedia, target video 480p/720p/1080p 1,2/2,5/4,5 Mbps, output maksimal 30 fps, segment fMP4 dengan target 6 detik dan pemilihan kualitas adaptif; tanpa crop/upscale, hanya kualitas yang dapat dibuat dari sumber. Detail encoder/GOP/SAR/VFR/MIME serta kualitas visual dan compatibility tetap memerlukan proof HLS-PROFILE-001. rasio sumber portrait 9:16 dipertahankan; sumber rasio lain ditolak.
-4. Setelah seluruh keluaran yang diwajibkan tersimpan, worker yang masih memegang lease menandai job `succeeded` dan aset `ready`. Kegagalan dicatat dengan alasan dan dijadwalkan ulang hingga batas percobaan; setelah itu job menjadi `failed` dan terlihat di dashboard.
-5. Lease yang kedaluwarsa diklaim ulang setelah worker mati. Hasil setiap percobaan harus aman diproses ulang agar file atau status yang tertinggal tidak membuat video terbit secara keliru.
+Profil/limit media, geometry multipart dan timeout policy yang telah disetujui mengikuti [PRD](../product/prd.md#keputusan-inti-yang-disetujui) serta [environment](../guides/environment.md). Polling/recovery/cleanup saat ini sudah mempunyai implementasi; LISTEN/NOTIFY tetap bukan kebutuhan atau fitur runtime yang diklaim tersedia.
 
-Tabel job adalah sumber kebenaran yang persisten. `LISTEN/NOTIFY` boleh dipakai untuk membangunkan worker lebih cepat, tetapi worker tetap memeriksa tabel saat mulai, setelah koneksi pulih, dan secara berkala. Jumlah worker, waktu lease, batas retry, dan kebijakan pembersihan file sementara masih keputusan implementasi.
+## Model data dan status aktif
 
-## Model data dan status awal
+| Data / owner                                           | Peran implementasi                                                                                                               |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| Native auth                                            | Identitas, account/session/rate-limit dan enforcement satu admin, dimiliki package auth.                                         |
+| `series`, `seasons`, `videos`                          | Hierarchy konten; video kind movie/standalone tanpa season, episode melalui season; metadata/audit/versioning dan pointer asset. |
+| `genres`, `series_genres`, `video_genres`              | Taxonomy dan inheritance/override metadata genre.                                                                                |
+| `media_assets`, `upload_sessions`                      | Ownership, provider/bucket/key, generation/facts/provenance, session multipart/claim/expiry, source/poster siap atau gagal.      |
+| `media_jobs`, `media_job_attempts`, `media_renditions` | Durable queue, lease/retry, prefix/daftar output per attempt dan rendition HLS.                                                  |
+| `content_operations`                                   | Rekam idempotency/hasil operasi publikasi; bukan tabel body media.                                                               |
+| Pengaturan situs / subtitle                            | Belum mempunyai fitur schema/API/UI lengkap; tetap pekerjaan lanjutan.                                                           |
 
-Pada 3 Oktober 2026 pengguna meminta plan series dengan banyak video dan movie panjang. Rancangan detail konten kini ada pada [VIDEO_DATA_MODEL.md](video-data-model.md), dengan [plan tahap metadata](../plans/video/implementation-plan.md) dan [backlog](../tasks/videos.md). Relasi metadata disetujui dan diimplementasikan: series → seasons → videos berjenis episode; movie/standalone memakai tabel videos tanpa season. Metadata editorial dipisahkan dari sumber media, generation transcode, dan rendition. Enam tabel tahap A dan 16 endpoint admin lulus proof lokal. Tabel media, queue, dan pengaturan pada ringkasan berikut tetap rancangan; migrasi konten development diterapkan pada VERIFY-001; production belum.
+| Subject        | Status yang ada pada source                                                                                                                                   |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Video          | `draft`, `published`, `archived`; archive menyimpan audit/version dan menutup visibility baru.                                                                |
+| Series         | `publicationStatus` masih `draft/published/unpublished` dari kontrak parent sebelumnya, dengan `archivedAt` terpisah. Jangan memakai enum video untuk parent. |
+| Season         | `archivedAt`/audit; tidak mempunyai publicationStatus sendiri.                                                                                                |
+| Asset          | `uploading`, `uploaded`, `processing`, `ready`, `failed`; berbeda dari publicationStatus.                                                                     |
+| Upload session | `initializing`, `pending`, `completing`, `completed`, `aborting`, `aborted`, `expired`, `failed`.                                                             |
+| Job            | `queued`, `running`, `retry`, `succeeded`, `failed`, `cancelled`; attempt/lease dan output aktif terpisah.                                                    |
 
-| Data             | Isi utama yang diusulkan                                     | Akses                                                                     |
-| ---------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------- |
-| Akun/sesi admin  | Identitas dan sesi yang dikelola Better Auth                 | Admin dan layanan autentikasi                                             |
-| Video            | ID, judul, deskripsi, sampul, status publikasi, waktu terbit | Tulis oleh admin; respons publik hanya saat terbit                        |
-| Series/season    | Metadata serial, nomor season, relasi episode melalui season | Tulis oleh admin; episode publik mengikuti visibility parent series       |
-| Aset video       | Kunci objek, status unggah/pemrosesan, metadata teknis       | Admin dan pekerja media; kunci objek privat tidak bocor ke respons publik |
-| Job transcode    | ID aset, status, percobaan, jadwal ulang, lease, kesalahan   | API dan worker; status ringkas dapat dibaca admin                         |
-| Pengaturan situs | Kunci dan nilai yang disetujui untuk diubah dari dashboard   | Tulis oleh admin; sebagian nilai dapat dibaca publik                      |
+Source canonical berada pada `apps/api/src/db/schema/`. Model data menyimpan detail tahap A serta [schema media aktif](video-data-model.md#schema-media-aktif--4-oktober-2026); ketika bagian historis berbeda, periksa schema/migration saat ini. Migration source `0006_media-upload`, `0007_media-jobs`, `0008_media-publication` tersedia; `0008` memetakan legacy video unpublished/archived ke enum baru tanpa menulis ulang migration lama. Runbook mencatat penerapan dan preservation development pada 4 Oktober 2026; review ini tidak memeriksa ulang DB aktual atau melakukan migrasi production.
 
-Pisahkan status aset `pending_upload` → `uploaded` → `processing` → `ready` atau `failed` dari status video `draft` → `published` → `unpublished`. Terbit mensyaratkan metadata lengkap dan aset `ready`. Detail skema dan migrasi masih perlu dirancang. Hanya satu identitas boleh memperoleh hak admin; pembatasan ini harus ditegakkan di provisioning dan API, bukan hanya disembunyikan dari UI.
+## Kontrak API aktif
 
-## Kontrak API kandidat
+Path berikut adalah path upstream Elysia. Browser bisnis menambahkan `/api` melalui gateway; auth upstream tetap memakai `/api/auth`. DTO/schema/OpenAPI dan module source menjadi acuan rinci, bukan kontrak kandidat baru.
 
-Nama rute dan bentuk respons masih rancangan. Pemisahan aksesnya adalah keputusan penting:
+| Operasi/family route                                                                                           | Peran                                                             | Akses                                         |
+| -------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | --------------------------------------------- |
+| `GET /videos`, `/videos/:slug`, `/videos/:slug/next`                                                           | Katalog/detail dan next episode efektif playable                  | Publik                                        |
+| `GET /series`, `/series/:slug`                                                                                 | Series publik dengan child playable                               | Publik                                        |
+| `GET /videos/:slug/playback`                                                                                   | DTO playback/poster dan expiry                                    | Publik setelah pemeriksaan visibility         |
+| `GET /playback/videos/:slug/master.m3u8`, `/playback/videos/:slug/variants/:index`                             | Playlist terverifikasi/rewrite output                             | Publik setelah pemeriksaan visibility         |
+| `GET/POST /admin/videos`, `GET/PATCH /admin/videos/:id`                                                        | Draft/read/edit metadata                                          | Admin                                         |
+| `GET/POST /admin/series`, `GET/PATCH /admin/series/:id`                                                        | Metadata series                                                   | Admin                                         |
+| `GET/POST /admin/series/:id/seasons`, `GET/PATCH /admin/seasons/:id`                                           | Metadata season                                                   | Admin                                         |
+| `GET/POST /admin/genres`                                                                                       | Taxonomy genre                                                    | Admin                                         |
+| `POST /admin/media/uploads`, `GET /admin/media/uploads/:id`                                                    | Initiate dan status multipart/processing                          | Admin                                         |
+| `POST /admin/media/uploads/:id/parts`, `/admin/media/uploads/:id/complete`, `/admin/media/uploads/:id/abort`   | Izin part, freeze/enqueue atau abort                              | Admin                                         |
+| `POST /admin/videos/:id/publish`, `/admin/series/:id/publish`                                                  | Publish manual/idempotency/readiness                              | Admin                                         |
+| `POST /admin/videos/:id/archive`, `/admin/series/:id/archive`, `/admin/seasons/:id/archive`                    | Archive/versioning dan parent visibility                          | Admin                                         |
+| `GET /admin/videos/:id/playback`, `/admin/videos/:id/hls/master.m3u8`, `/admin/videos/:id/hls/variants/:index` | Preview output ready                                              | Admin                                         |
+| `/api/auth/*`                                                                                                  | Kontrak native auth dengan path yang dinonaktifkan tetap tertutup | Sesuai Better Auth/guard, tanpa signup publik |
+| `GET /`, `/openapi`, `/openapi/json`                                                                           | Health dan kontrak Scalar/OpenAPI                                 | Publik                                        |
 
-| Operasi                                           | Tujuan                                      | Akses                                                |
-| ------------------------------------------------- | ------------------------------------------- | ---------------------------------------------------- |
-| `GET /videos`                                     | Katalog video terbit                        | Publik, tanpa login                                  |
-| `GET /videos/:id`                                 | Detail dan informasi pemutaran video terbit | Publik, tanpa login                                  |
-| `GET /admin/videos` dan `POST /admin/videos`      | Daftar semua video dan buat draf            | Admin                                                |
-| `PATCH /admin/videos/:id`                         | Ubah metadata                               | Admin                                                |
-| `POST /admin/videos/:id/upload-session`           | Mulai unggah berizin                        | Admin                                                |
-| `POST /admin/videos/:id/publish`                  | Terbitkan video siap                        | Admin                                                |
-| `POST /admin/videos/:id/unpublish`                | Tarik publikasi                             | Admin                                                |
-| `GET /admin/settings` dan `PATCH /admin/settings` | Baca dan ubah konfigurasi yang diizinkan    | Admin                                                |
-| Rute Better Auth                                  | Masuk, keluar, dan pengelolaan sesi admin   | Sesuai kontrak Better Auth; tanpa pendaftaran publik |
+Tidak ada endpoint aktif `/admin/videos/:id/upload-session`, `/admin/videos/:id/unpublish`, `/admin/settings`, restore atau manual reprocess. Status operation/schema tidak berarti route kandidat tersebut tersedia. Rincian input/idempotency/conflict dan respons dimiliki [kontrak upload](media-upload-contract.md), [runbook metadata](../operations/video-metadata.md) dan [runbook media](../operations/media.md).
 
-Semua operasi tulis memvalidasi input di API. Unggah, callback pemrosesan, dan publikasi harus aman terhadap pengulangan. API publik tidak mengembalikan draf, rahasia, atau kunci objek privat. URL unggah bertanda tangan hanya diberikan setelah otorisasi admin dan berlaku untuk objek serta operasi terbatas. Gateway auth dan origin/cookie sudah diimplementasikan; gateway bisnis web tetap task berikutnya sebelum UI metadata.
+## Publikasi, delivery dan retensi
 
-[Rekomendasi deployment nomor 8](../plans/video/implementation-plan.md#nomor-8--rekomendasi-deployment-production-dan-r2-belum-disetujui) dicatat sebagai belum disetujui: satu server Linux dengan proses web/API/worker/PostgreSQL terpisah via Docker Compose, reverse proxy HTTPS, bucket R2 privat/token scoped/CORS, volume DB/workspace serta backup/restore proof. Target uji pengguna 4 core/RAM 4 GB; provider/domain/disk belum ditentukan. Kandidat worker 1,5 GiB/2 vCPU/thread 1 serta kapasitas keseluruhan menunggu benchmark; same-origin dan signed S3 delivery mengikuti keputusan yang sudah ada. Tidak ada Dockerfile/Compose/provisioning/deployment/migration baru.
+API publish memerlukan metadata/hak/source/HLS/poster siap; source tombstone setelah retensi tidak membuat HLS siap kehilangan provenance. Episode published hanya publik ketika parent dan readiness memenuhi effective visibility. Series tanpa child playable tidak ditampilkan. Metadata katalog DTO whitelisted; playback sengaja mengirim kapabilitas signed output temporer, tanpa credential server atau source asli.
 
-## Keputusan teknis yang masih diperlukan
+Playback memeriksa provider/bucket persisten, job/output namespace aktif dan durasi verified; master/variant di-rewrite agar hanya objek terverifikasi dapat diminta. Player watch `/watch/:slug` dan admin preview `/admin/videos/:id/preview` menggunakan loader playback dan renewal saat expiry/play/seek/pergantian kualitas dengan posisi/pause dipertahankan. Tidak ada UI next episode/katalog lengkap hanya karena endpoint tersedia.
 
-Provider MinIO/R2, selector env dan HLS sudah dipilih. S3 multipart dengan part kecil juga sudah dipilih. Yang masih diperlukan: parameter part/paralelisme/expiry/identity resume/source freeze/checksum dan proof operasi native Bun pada kedua provider; profil HLS codec/ladder/segment/resource; jumlah worker/lease/retry/cleanup; adapter HLS yang cocok Video.js existing; delivery seluruh objek HLS/CDN/cache/expiry serta bound URL lama setelah archive; implementasi D4 publication; hosting/observabilitas. Auth/metadata tetap mengikuti evidence lokalnya, bukan proof media. Rahasia hanya konfigurasi server, bukan dashboard atau bundle web.
+TTL signed 2× durasi aktual dan kebijakan cache/invalidation mengikuti [PRD](../product/prd.md#publikasi-akses-dan-cache). DTO/playlist no-store; payload MinIO menggunakan fallback private/no-store. Archive menghentikan akses/URL baru; signed URL lama/buffer/cache mengikuti batas expiry yang disetujui, bukan revocation instan.
+
+Retensi source non-archived dimulai tujuh hari sejak HLS verified-ready tanpa job aktif. Archived mempertahankan file valid yang masih ada, termasuk source; source deleted tidak dipulihkan dan deletion claim mempunyai batas race. Tombstone/metadata tetap tersedia. Kebijakan failure/upload/attempt/temp cleanup dan reprocess mengikuti [PRD](../product/prd.md#retensi-dan-pemulihan) dan runbook, bukan lifecycle bucket unconditional.
+
+## Pekerjaan lanjutan dan gerbang verifikasi
+
+- **UI produk:** dashboard CRUD/upload/publish/progres/recovery, katalog/navigasi publik lengkap dan konfigurasi situs. Field pengaturan, UX katalog dan kebijakan konten masih pertanyaan PRD yang dilewati; tidak diputuskan oleh review arsitektur.
+- **Fitur opsional/lanjutan:** subtitle, restore/republish, revisi source published dan cascade parent yang belum dirancang/diimplementasikan. Tidak mengklaim caption delivery karena kontrol caption player tersedia.
+- **Provider/platform:** R2 staging/end-to-end serta Safari/native HLS/perangkat sasaran. Proof MinIO/Chromium historis tidak menggantikannya.
+- **Resource/recovery:** benchmark target 4 core/RAM 4 GB, kualitas visual, supervisor/stress/fault dan full restore yang belum lengkap. Concurrency/config defaults bukan bukti kapasitas.
+- **Deployment:** server/domain/disk, TLS/provisioning, migrasi/backup/rollout production masih terpisah. [Proposal deployment](../plans/video/implementation-plan.md#nomor-8--rekomendasi-deployment-production-dan-r2-belum-disetujui) belum dijalankan; review docs tidak menambah Dockerfile/Compose atau membeli/provision server.
+
+Bukti lokal auth/metadata/media, command/tanggal/fixture dan batas test dimiliki [auth runbook](../operations/auth.md), [media runbook](../operations/media.md), [backlog media](../tasks/media.md), [worker](../tasks/media-worker.md) dan [publication](../tasks/media-publication.md). Review statis source dan pemetaan klaim ada pada [context DOCS-006](../plans/documentation/repository-context.md#review-architecture--5-oktober-2026); tidak menjalankan ulang proof runtime/production atau menaikkan seluruh backlog menjadi Done.
+
+## Riwayat baseline
+
+Overview sebelumnya merupakan draft integrasi pada 3–4 Oktober 2026. Metadata enam tabel/endpoint tahap A dan keputusan kandidat saat itu tetap menjadi sejarah di plan/backlog. Review 5 Oktober 2026 mengganti klaim media/gateway belum tersedia, delivery TBD, enum video lama dan rute kandidat dengan baseline source pada snapshot di atas. Referensi teknis berikut dipertahankan sebagai navigasi pendukung; bukti kondisi implementasi berasal dari source dan runbook pada SHA/tanggal yang dicatat.
 
 ## Referensi teknis
 

@@ -21,7 +21,7 @@ Aturan penamaan, ownership dan maintenance berada pada [Documentation rules](../
 
 - [PRD](product/prd.md): mendekati final; keputusan inti, matriks implementasi PRD-01–10, keputusan produk tersisa dan gerbang rilis. Review repository 5 Oktober 2026; MVP lengkap belum selesai.
 - [Aturan produk](product/global-rules.md): GR-01–09 selaras PRD/kode pada review 5 Oktober 2026; aturan inti, batas signed URL/cache dan proposal UI/kebijakan dipisahkan.
-- [Arsitektur](architecture/overview.md): Bun/Elysia/TanStack, PostgreSQL, MinIO/R2, queue dan FFmpeg; rancangan dibedakan dari runtime.
+- [Arsitektur](architecture/overview.md): baseline implementasi pada review 5 Oktober 2026; diagram/dataflow, schema/status dan rute aktif, dengan batas UI/deployment/verification terpisah.
 - [Model data video](architecture/video-data-model.md): series/season/video/genre dan aset/upload/job/attempt/rendition/operation.
 - [Kontrak upload](architecture/media-upload-contract.md): S3 multipart, idempotency, freeze dan completion.
 - [Design system](design/design-system.md): baseline spesifikasi desain dari Git, dipindahkan tanpa memasukkan perubahan desain lokal.
@@ -46,7 +46,7 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 | ----------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
 | Auth        | [Snapshot](plans/auth/repository-context.md)          | [Plan awal](plans/auth/implementation-plan.md), [refactor native](plans/auth/refactor-plan.md) | Riwayat; command aktif berada di runbook auth.                           |
 | Video/media | [Snapshot](plans/video/repository-context.md)         | [Plan](plans/video/implementation-plan.md)                                                     | Keputusan, refinement, proof dan ledger; batas production tetap dicatat. |
-| Dokumentasi | [Snapshot](plans/documentation/repository-context.md) | [Plan](plans/documentation/implementation-plan.md)                                             | Organisasi kategori, aturan root, validasi dan review PRD terhadap kode. |
+| Dokumentasi | [Snapshot](plans/documentation/repository-context.md) | [Plan](plans/documentation/implementation-plan.md)                                             | Organisasi kategori, aturan root, validasi dan review produk/arsitektur. |
 
 ## Backlog dan evidence
 

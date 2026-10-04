@@ -257,3 +257,52 @@ Receipt DOCS-003 dicatat setelah commit berhasil dan disertakan pada pembaruan d
 - PRD hanya mengubah referensi status Global Rules, index memperbarui entry canonical; receipt DOCS-004 masuk ledger berikutnya dan format baris DOCS-003 diselaraskan. Tidak ada source/schema/env/dependency/design/rollout berubah.
 - 5 Oktober 2026: checker worktree 44 Markdown/303 tautan dan scoped index 37 Markdown/284 tautan lulus; targeted Prettier/whitespace lulus; preservation GR/PRD/13 file desain serta HEAD freshness lulus. Tidak mengulang runtime/production proof.
 - Commit lokal DOCS-005 dijalankan sesudah gates; SHA/hook aktual dicatat sesudah commit untuk ledger berikutnya. Tidak ada push/PR/merge.
+
+- Receipt post-commit DOCS-005: `1f45728d5a0aeeecae48149ae538997c04f122f2`, `docs(product): align global rules with approved decisions (DOCS-005)`; hooks docs:check 44/303, lint 1 task dan check-types 3 task (cache valid), Commitlint lulus tanpa bypass. Receipt ini masuk pembaruan dokumentasi task berikutnya sesuai aturan root; tidak ada push/PR/merge.
+
+## Review Architecture — DOCS-006
+
+- Status: completed
+- Diperbarui: 2026-10-05
+- Base ref: chore/docs-organization
+- Base SHA / last validated SHA: `1f45728d5a0aeeecae48149ae538997c04f122f2`
+- Context: [Review Architecture](repository-context.md#review-architecture--5-oktober-2026), disimpan sebelum perluasan plan.
+- Objective: Architecture overview menjelaskan sistem saat ini, bukan integrasi yang masih dianggap belum ada.
+- Current behavior: media/queue/worker/HLS/gateway bisnis belum implemented menurut overview; diagram delivery TBD, enum video dan rute kandidat usang.
+- Desired behavior: baseline implementasi API/web/auth/DB/storage/worker beserta dataflow, status/schema, active routes, pemilik kontrak dan UI/production gaps yang akurat.
+- Constraints: hanya docs; preserve keputusan dan desain existing; source/schema/dependency/env tidak berubah. Commit lokal per task, remote/rollout tidak diotorisasi.
+
+### Impact dan affected files DOCS-006
+
+| Path                                                                       | Action | Subject                                                         | Reason / evidence                                                                 |
+| -------------------------------------------------------------------------- | ------ | --------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `docs/architecture/overview.md`                                            | modify | Snapshot, diagram, ownership/dataflow/schema/routes/future gaps | Trace source/API/worker/gateway/schema pada context.                              |
+| `docs/product/prd.md`, `docs/product/global-rules.md`                      | modify | Referensi status Architecture                                   | Hapus klaim perlu review overview lama setelah task; keputusan/subjek lain tetap. |
+| `docs/README.md`                                                           | modify | Entry Architecture                                              | Navigasi baseline/current status; exclude desain lokal.                           |
+| `docs/tasks/documentation.md`                                              | modify | DOCS-STORY-003, DOCS-006, receipt DOCS-005                      | AC/evidence dan ledger aktual.                                                    |
+| `docs/plans/documentation/repository-context.md`, `implementation-plan.md` | modify | Context, STEP-006, hasil review                                 | Riwayat canonical tanpa dokumen/session baru.                                     |
+
+### STEP-006 — Review dan selaraskan Architecture
+
+- Outcome: overview baseline implemented selaras kode/PRD/Global Rules dengan batas UI/verification eksplisit.
+- Depends on: STEP-005.
+- Files: tujuh path affected di atas.
+- Symbols: createApp/bootstrap, business/auth gateway, multipart/freeze/enqueue, queue/runner/cleanup, schema enums dan endpoint aktif.
+- Requirements: diagram delivery tanpa TBD, subprocess di luar HTTP/DB transaksi, bedakan lifecycle video/series/season dan source/HLS; rute cocok module aktif, parameter policy merujuk owner; preserve referensi/evidence historis.
+- Validation: cross-check source/route/schema/manifests/runbook; docs checker, targeted Prettier, whitespace/index snapshot serta source/design preservation. Tidak mengulang DB/storage/browser atau proof production; hooks commit tanpa bypass.
+- Acceptance criteria: klaim obsolete diperbaiki, diagram/route/state selaras source, future UI/config/subtitle/deploy/gates jelas, reverse status references diperbarui dan commit scoped.
+
+### Freshness DOCS-006 — 5 Oktober 2026
+
+- Result: valid.
+- Previous review SHA: `846929a82b1b9c6c1ae5516afa29f5004d01597c`; current target SHA: `1f45728d5a0aeeecae48149ae538997c04f122f2`.
+- Checked paths: overview/PRD/Global Rules, API/bootstrap/worker/DB/schema/migration source, gateway/client/routes dan package scripts.
+- Changed relevant paths: DOCS-005 saja, source runtime tetap baseline media. Local design/receipt dipisahkan.
+- Decision: context refreshed dahulu, STEP-006 valid pada snapshot baru; mempertahankan keputusan/proof yang belum selesai.
+
+### Execution Log — DOCS-006
+
+- Context ditulis sebelum STEP-006 pada snapshot `1f45728d5a0aeeecae48149ae538997c04f122f2`. Overview menjadi baseline implemented dengan diagram/dataflow, enum/schema dan rute aktif. Source/runtime/schema/env/dependency tidak berubah; UI dan verification/rollout gaps tetap eksplisit.
+- PRD/Global Rules hanya memperbarui referensi status overview; index dan backlog selaras, receipt DOCS-005 dicatat pada update berikutnya. Tidak mengubah keputusan produk/proposal atau menyerap desain existing.
+- 5 Oktober 2026: checker worktree 44 Markdown/318 tautan dan scoped index 37 Markdown/299 tautan lulus; targeted Prettier/whitespace lulus. 28 path route unik cocok module, referensi teknis/keputusan PRD/GR/13 file desain protected terjaga dan HEAD freshness valid. Review statis, tidak mengulang proof runtime/production.
+- Commit lokal DOCS-006 setelah gates; SHA/hook aktual dicatat sesudah commit. Tidak ada push/PR/merge/deployment.

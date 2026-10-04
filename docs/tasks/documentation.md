@@ -119,6 +119,7 @@ Tidak ada blocker.
 | DOCS-002 | 29dd9325a2d9a01ae7fa0ae10cd001c1355eada0 | Snapshot index dan hook docs/lint/check-types/Commitlint lulus tanpa bypass                        |
 | DOCS-003 | 790e174a9fef748564450244d05038fce8e9bdbd | Snapshot index 37 Markdown/263 tautan dan hook docs/lint/check-types/Commitlint lulus tanpa bypass |
 | DOCS-004 | 846929a82b1b9c6c1ae5516afa29f5004d01597c | Snapshot index 37 Markdown/271 tautan dan hook docs/lint/check-types/Commitlint lulus tanpa bypass |
+| DOCS-005 | 1f45728d5a0aeeecae48149ae538997c04f122f2 | Snapshot index 37 Markdown/284 tautan dan hook docs/lint/check-types/Commitlint lulus tanpa bypass |
 
 SHA dicatat sesudah commit berhasil. Push/PR/merge tidak dilakukan. Commit task terakhir dicatat pada pembaruan ledger berikutnya.
 
@@ -205,3 +206,47 @@ Review mengoreksi provider final terbuka, signed URL dilarang seluruh respons pu
 ### Blocker atau tindak lanjut
 
 Tidak ada blocker review. Architecture masih memerlukan review terpisah; proposal PRD/UI/kebijakan dan proof production tidak diselesaikan oleh task ini.
+
+## User story: DOCS-STORY-003
+
+Sebagai pengembang, saya ingin overview arsitektur menjelaskan batas API/web/worker/storage/database dan kontrak aktif agar implementasi berikutnya tidak memakai rute atau status dari draft lama.
+
+## Task: DOCS-006 — Review dan selaraskan Architecture
+
+- Status: Done
+- Owner: pengembang/agent
+- Prioritas: 6
+- Referensi: DOCS-STORY-003, [context review](../plans/documentation/repository-context.md#review-architecture--5-oktober-2026), [plan STEP-006](../plans/documentation/implementation-plan.md#step-006--review-dan-selaraskan-architecture)
+- Diperbarui: 2026-10-05
+- Dependensi: DOCS-005
+- Ukuran: satu review canonical overview arsitektur
+
+### Ruang lingkup
+
+Overview, referensi status pada PRD/Global Rules/index serta context/plan/backlog pada snapshot `1f45728d5a0aeeecae48149ae538997c04f122f2`. Receipt DOCS-005 masuk ledger berikutnya. Dokumentasi saja, tanpa source/schema/env/dependency/asset desain atau perubahan keputusan produk.
+
+### Acceptance criteria
+
+- [x] Klaim media/worker/queue/HLS/gateway bisnis belum tersedia diperbaiki dan diagram delivery bukan TBD.
+- [x] Dataflow, status video/parent/asset/session/job, native/SDK dan rute aktif sesuai source; source asli bukan playback.
+- [x] Batas frontend/config/subtitle/deployment/proof production jelas; parameter policy merujuk pemilik canonical dan referensi teknis/evidence historis dipertahankan.
+- [x] PRD/Global Rules/index merujuk status terbaru; checker/format/whitespace/index/preservation lulus, commit scoped tanpa bypass.
+
+### Validasi
+
+Review bootstrap/factory, gateway/client/routes, DB/schema/migration source, storage/media/worker dan runbook; cross-check rute/status. `bun run docs:check`, targeted Prettier, `git diff --check`, snapshot index, preservasi referensi teknis/PRD/GR/desain dan audit staging. Hooks docs/lint/types/Commitlint; tidak mengulang DB/storage/browser atau migration/build untuk perubahan docs saja.
+
+### Hasil dan bukti
+
+Architecture diperbarui dari draft integrasi menjadi baseline implemented pada snapshot, lengkap diagram delivery, alur freeze/enqueue/worker/activation, enum source dan kontrak route saat ini. UI dan production gates tetap eksplisit. Verifikasi 5 Oktober 2026: checker worktree 44 Markdown/318 tautan, scoped index tujuh dokumen 37 Markdown/299 tautan, targeted formatter dan whitespace lulus. Sebanyak 28 path route unik pada ringkasan cocok dengan module source; referensi teknis, keputusan PRD/GR dan 13 file desain protected tetap sama. HEAD freshness valid. Ini review statis/dokumentasi, bukan proof runtime/DB/production baru.
+
+### Commit task
+
+- Pesan: `docs(architecture): align overview with current implementation (DOCS-006)`
+- SHA: receipt aktual dicatat setelah commit berhasil pada execution log dan dapat masuk pembaruan task berikutnya.
+- Hook/checks: docs/Prettier/whitespace/index dan consistency/preservation lulus; hooks docs/lint/types/Commitlint dijalankan oleh commit dan hasil aktual dicatat pada receipt.
+- Ledger: receipt DOCS-005 aktual dimasukkan; receipt DOCS-006 setelah commit berhasil.
+
+### Blocker atau tindak lanjut
+
+Tidak ada blocker review overview. Full audit model data/plan historis serta gerbang UI/production tidak dianggap selesai oleh task ini; source/schema aktif dan runbook tetap acuan status implemented.
