@@ -133,7 +133,7 @@ Tidak ada blocker fix. Push/PR/merge belum diminta; squash branch sebelumnya buk
 
 ## Task: WEB-BUILD-004 — Import config Vite dengan ekstensi eksplisit
 
-- Status: Review
+- Status: Done
 - Owner: Codex
 - Prioritas: P1
 - Referensi: WEB-BUILD-US-01, laporan warning Vite pengguna 5 Oktober 2026.
@@ -150,7 +150,7 @@ Tambahkan `.ts` pada import `./tooling/log-filter` di `apps/web/vite.config.ts` 
 - [x] Import relatif config eksplisit; tanpa env suppression atau perubahan filter.
 - [x] Build baru tidak mengeluarkan warning native config loader atau MODULE_LEVEL_DIRECTIVE; warning chunk tetap terlihat.
 - [x] Existing web tests, root types/lint/build dan docs/format/whitespace lulus.
-- [ ] Commit task terpisah; pekerjaan desain lokal terjaga.
+- [x] Commit task terpisah; pekerjaan desain lokal terjaga.
 
 ### Validasi
 
@@ -167,10 +167,10 @@ Freshness pada SHA `604acedefc342d4ae40b9e1718bba877fc3c36a7`; config import tan
 ### Commit task
 
 - Pesan: `fix(web): add extension to Vite config import (WEB-BUILD-004)`.
-- SHA: Belum dibuat.
-- Hook/checks: Menunggu hasil aktual.
-- Ledger: Receipt dicatat setelah commit berhasil.
+- SHA: `e1037a24dc0a8f27e45768c943afc886c5d25eef`.
+- Hook/checks: docs:check 47/336, lint 1 task/types 3 task cache valid dan Commitlint lulus tanpa bypass; scoped index docs 40/317 dan preservation 21 file existing lulus.
+- Ledger: Receipt/status Done dicatat setelah commit berhasil untuk pembaruan task berikutnya.
 
 ### Blocker atau tindak lanjut
 
-Tidak ada blocker; remote delivery belum diminta.
+Tidak ada blocker. Pada 5 Oktober 2026 pengguna mengotorisasi push, PR dan squash merge khusus branch ini; receipt task disertakan sebelum delivery. Hasil remote dicatat setelah operasi berhasil.

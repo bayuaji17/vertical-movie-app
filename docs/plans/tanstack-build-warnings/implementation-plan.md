@@ -2,15 +2,15 @@
 
 ## Plan metadata
 
-- Status: executing; follow-up WEB-BUILD-004 terverifikasi lokal, menunggu commit task.
+- Status: completed; follow-up WEB-BUILD-004 terverifikasi lokal dan di-commit.
 - Diperbarui: 2026-10-05.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `main`; base SHA: `b60f7676101d94c8725528dbef02b92c28eeee32`.
-- Last validated SHA: `604acedefc342d4ae40b9e1718bba877fc3c36a7` (source identik commit implementasi yang diuji; closure hanya dokumentasi).
+- Last validated SHA: `e1037a24dc0a8f27e45768c943afc886c5d25eef` (config dengan import `.ts` telah diuji).
 - Branch: `fix/tanstack-build-warnings`.
 - Context: [repository-context.md](repository-context.md), disimpan sebelum plan ini.
 - Backlog: [web-build](../../tasks/web-build.md).
-- Otorisasi saat ini: pengguna menyetujui implementasi plan pada 5 Oktober 2026; commit per task mengikuti workflow root. Remote delivery belum diminta.
+- Otorisasi saat ini: pengguna menyetujui implementasi plan pada 5 Oktober 2026; commit per task mengikuti workflow root. Pada 5 Oktober 2026 pengguna mengotorisasi push, PR dan merge dengan squash khusus branch ini.
 
 ## Objective
 
@@ -172,3 +172,8 @@ Tidak ada keputusan produk yang menghalangi scope directive. Optimasi chunk/upgr
 - Refinement: setelah STEP-003, tambahkan ekstensi `.ts` pada import relatif helper; tsconfig existing mengizinkan import ekstensi TypeScript. Tidak memakai env suppression atau memperluas filter log. Affected files follow-up hanya config, plan dan backlog existing; struktur/status indeks akhir tetap sama.
 - Validation: existing web tests, root types/lint/build --force, inspeksi diagnostik log baru, docs/format/whitespace dan preservation. Receipt/verifikasi dicatat setelah hasil aktual.
 - Hasil: 59 web tests/197 assertions, types 3 task, lint 1 task dan build 2 task tanpa cache lulus. Log build 7.603 detik tidak memiliki warning native config loader/extensionless import atau directive; warning chunk tetap terlihat. Docs:check 47/336, targeted Prettier dan whitespace lulus. Perubahan config hanya ekstensi import; proof native loader penuh/browser tidak dijalankan.
+- Receipt WEB-BUILD-004: `e1037a24dc0a8f27e45768c943afc886c5d25eef`; scoped index docs 40/317 dan preservation 21 file existing lulus; hooks docs:check 47/336, lint/types cache valid dan Commitlint lulus tanpa bypass. Receipt/status akhir dicatat sesudah commit untuk pembaruan task berikutnya.
+
+### Remote delivery — 2026-10-05
+
+Pengguna meminta push, buka PR dan merge; squash diizinkan khusus `fix/tanstack-build-warnings`. Receipt WEB-BUILD-004 disertakan sebelum push. Pemeriksaan freshness remote tidak menunjukkan commit baru pada `origin/main`; perubahan source tetap sama dengan hasil quality gates WEB-BUILD-004. Pekerjaan desain lokal tidak masuk delivery. Hasil PR/merge dicatat setelah operasi berhasil.
