@@ -2,7 +2,7 @@
 
 ## Plan metadata
 
-- Status: **draft untuk review** · 5 Oktober 2026. Pengguna meminta penyusunan plan; runtime dan mockup raster belum diimplementasikan. Task proof/desain memiliki gate sebelum runtime berikutnya.
+- Status: **plan disetujui pengguna** · 5 Oktober 2026; pengguna meminta melanjutkan mockup. Runtime belum diimplementasikan. Task proof/desain memiliki gate sebelum runtime berikutnya; hasil mockup memerlukan visual review tersendiri.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `main`; base SHA / last validated SHA: `d8417249de99611e1a661ade03bb4b03dd5f0538`.
 - Context: [repository-context.md](repository-context.md), disimpan lebih dahulu.
@@ -42,7 +42,7 @@ Gap teramati: status hanya berdasarkan session ID; detail metadata tidak membawa
 | Finalizing/processing     | Upload sent bukan completed; finalizing/check status; pemrosesan queued/running/retry dengan indeterminate progress. Tidak menampilkan persen transcode/ETA yang tidak didukung.                                |
 | Ready/error/read-only     | Ready source/poster terpisah; preview hanya jika seluruh capability server valid. Error kode aman + action relevan; archived/published menjelaskan upload tidak tersedia.                                       |
 
-Design task menghasilkan **empat layout acuan** desktop light/dark dan mobile light/dark pada canonical `docs/design/admin-media-upload.md`, dengan state matrix/source/poster/Series dan modal cancel/replacement/pause-and-leave. English UI; accessible label, aria-invalid, live region throttled, keyboard focus/Escape dan target 44 px. Mockup raster adalah task desain, bukan screenshot runtime; plan ini baru menetapkan spesifikasinya. Desain/implementation scope perlu review pengguna sebelum runtime acceptance.
+Design task menghasilkan **empat layout acuan** desktop light/dark dan mobile light/dark pada [canonical desain](../../design/admin-media-upload.md), dengan state matrix/source/poster/Series dan modal cancel/replacement/pause-and-leave. English UI; accessible label, aria-invalid, live region throttled, keyboard focus/Escape dan target 44 px. Empat raster tersedia untuk review; state variants/modal dicatat sebagai specification, bukan screenshot runtime. Scope plan telah disetujui; hasil visual tetap perlu review pengguna sebelum runtime panel.
 
 ### Dataflow dan batas Eden
 
@@ -294,9 +294,10 @@ Validation: Visual inspection/prompts/PNG/path tracking + docs/Prettier; raster 
 
 Acceptance criteria:
 
-- [ ] Layout dan resource conditional konsisten dengan detail halaman existing; tidak ada halaman upload baru.
-- [ ] Tidak menjanjikan publish/transcode percent/manual reprocess yang belum tersedia.
-- [ ] Prompts/status/review/batas raster tercatat; implementasi menunggu scope/visual approval.
+- [x] Layout dan resource conditional konsisten dengan detail halaman existing; tidak ada halaman upload baru.
+- [x] Tidak menjanjikan publish/transcode percent/manual reprocess yang belum tersedia.
+- [x] Prompts/status/review/batas raster tercatat; scope disetujui, implementasi panel menunggu visual approval.
+- [ ] Pengguna menyetujui empat mockup baru untuk menutup visual acceptance ADUP-006.
 
 ### ADUP-007 — Typed media client, Query dan error mapping DRY
 
@@ -535,10 +536,10 @@ Revert uploader task commits bertahap; leave current metadata/playback UI bekerj
 
 ## Open decisions
 
-1. **Scope review:** cross-reload resume dengan bounded full SHA dan small backend additions adalah rekomendasi teknis, bukan penetapan produk baru. Pengguna perlu meninjau sebelum runtime; alternatives same-tab-only harus mengubah plan/AC secara eksplisit, bukan diam-diam memakai filename/size identity.
+1. **Scope approved 2026-10-05:** pengguna menyetujui plan dan meminta melanjutkan mockup. Cross-reload resume dengan bounded full SHA dan small backend additions tetap scope; hash proof dan visual review belum selesai. Alternatives same-tab-only harus mengubah plan/AC secara eksplisit, bukan diam-diam memakai filename/size identity.
 2. **Hash implementation:** native capability/browser incremental library/version/license/memory dipilih ADUP-002; tanpa proof ini task identity/file worker belum Ready.
-3. **Visual review:** empat layout desktop/mobile light/dark dan state variants dibuat ADUP-006 setelah request desain; English/theme/shell existing tetap requirement. Tidak ada raster Upload Media baru dari planning ini.
-4. **Defaults UX:** polling5s, retry3 attempts1s/2s+jitter, satu file aktif/3 PUT total tab adalah proposed frontend policy untuk review; server config/cap/TTL tidak diubah.
+3. **Visual review:** pengguna meminta mockup pada 2026-10-05; ADUP-006 membuat empat layout desktop/mobile light/dark dan state specification. English/theme/shell existing tetap requirement. Review hasil raster terpisah dari approval plan.
+4. **Defaults UX approved melalui plan:** polling5s, retry3 attempts1s/2s+jitter, satu file aktif/3 PUT total tab; server config/cap/TTL tidak diubah. Bukti perilaku tetap task implementasi, bukan hasil mockup.
 5. **Platform scope:** resume bergantung file reselection; tab/browser force-close menghilangkan File memory. R2 staging/perangkat fisik/Safari/full capacity adalah gerbang terpisah, bukan blockers menyusun plan.
 
 ## Validation history
@@ -560,4 +561,6 @@ Revert uploader task commits bertahap; leave current metadata/playback UI bekerj
 - Read-only Bun checks: 15 ID task unik, dependencies plan/backlog sama dan DAG tanpa cycle; hash 22 file lokal unrelated tidak berubah, README lokal sebelum edit diverifikasi terhadap preservation snapshot.
 - ADUP-001 selesai pada commit `5a165fb7410d81e09af81f1761419ebf0369c564` (`docs(web): plan admin media uploads (ADUP-001)`): empat file docs/index, tanpa runtime/config/schema/dependency. Receipt dicatat pada update dokumentasi sesudah commit, bukan SHA self-referential.
 - Hook aktual lulus: `bun run docs:check` (55 Markdown / 466 links), `bun run lint` (1/1 task cache), `bun run check-types` (3/3 task cache), dan Commitlint pada commit-msg. Tidak ada hook yang dilewati.
-- Runtime ADUP-002–015, migrasi dan empat mockup belum dibuat; belum ada push/PR/merge branch planning. Plan tetap draft untuk review scope; Done ADUP-001 hanya penutupan planning.
+- Riwayat saat closure ADUP-001: runtime ADUP-002–015, migrasi dan empat mockup belum dibuat; belum ada push/PR/merge branch planning. Plan saat itu draft untuk review scope; Done ADUP-001 hanya penutupan planning.
+- 2026-10-05: pengguna menyetujui plan dan meminta mockup; ADUP-006 In Progress pada branch feature planning yang sama. Runtime/schema/dependency belum diubah. Source evidence base tetap valid untuk desain; freshness ulang wajib sebelum implementasi.
+- ADUP-006: empat mockup final dan [state/modal specification](../../design/admin-media-upload.md) tersedia, status Review menunggu visual approval. Dua desktop1070×1470 dan dua mobile793×1983; lima built-in image_gen calls termasuk correction Edit metadata. Original generator dipertahankan; final docs/design diperiksa visual dan header PNG. Checks/receipt dicatat pada backlog setelah dijalankan.

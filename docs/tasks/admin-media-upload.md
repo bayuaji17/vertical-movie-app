@@ -1,6 +1,6 @@
 # Modul: admin media upload
 
-- Status: **draft untuk review**; planning ADUP-001 Done, ADUP-002–015 belum diimplementasikan.
+- Status: **plan disetujui pengguna** pada 2026-10-05; ADUP-001 Done, ADUP-006 Review dengan empat mockup tersedia, runtime belum diimplementasikan.
 - Diperbarui: 2026-10-05.
 - Snapshot: `d8417249de99611e1a661ade03bb4b03dd5f0538` pada `main`.
 - Plan canonical: [implementation-plan](../plans/admin-media-upload/implementation-plan.md).
@@ -81,7 +81,7 @@ Context disimpan sebelum plan pada snapshot di atas. Read-only Bun checks membuk
 
 ### Blocker atau tindak lanjut
 
-Tidak ada blocker planning tersisa. ADUP-002–015 menunggu review scope runtime; hash proof dan empat layout desain tetap task tersendiri sebelum implementation panel.
+Tidak ada blocker planning tersisa. Scope plan disetujui pengguna sesudah closure ADUP-001. Hash proof dan visual review ADUP-006 tetap gerbang sebelum implementation panel.
 
 ## Task: ADUP-002 — Proof identitas file dan bounded hashing browser
 
@@ -130,7 +130,7 @@ Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan
 
 ### Blocker atau tindak lanjut
 
-Dependencies ADUP-001 dan review scope runtime. Keputusan native/library hashing harus berdasarkan proof bounded memory, bukan asumsi.
+Dependencies ADUP-001 (scope plan telah disetujui pengguna). Keputusan native/library hashing harus berdasarkan proof bounded memory, bukan asumsi.
 
 ## Task: ADUP-003 — API private owner media inventory dan rediscovery
 
@@ -188,7 +188,7 @@ Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan
 
 ### Blocker atau tindak lanjut
 
-Dependencies ADUP-001 dan review scope runtime. Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
+Dependencies ADUP-001 (scope plan telah disetujui pengguna). Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
 
 ## Task: ADUP-004 — Schema additive expected file SHA-256
 
@@ -239,7 +239,7 @@ Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan
 
 ### Blocker atau tindak lanjut
 
-Dependencies ADUP-002 dan review scope runtime. Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
+Dependencies ADUP-002 (scope plan telah disetujui pengguna). Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
 
 ## Task: ADUP-005 — Bind fingerprint pada initiate dan verification worker
 
@@ -292,11 +292,11 @@ Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan
 
 ### Blocker atau tindak lanjut
 
-Dependencies ADUP-003, ADUP-004 dan review scope runtime. Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
+Dependencies ADUP-003, ADUP-004 (scope plan telah disetujui pengguna). Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
 
 ## Task: ADUP-006 — Desain panel Upload Media desktop/mobile light/dark
 
-- Status: Backlog
+- Status: Review
 - Owner: pengembang/agent pelaksana task.
 - Prioritas: 6, mengikuti dependencies.
 - Referensi: ADUP-US01; [plan canonical](../plans/admin-media-upload/implementation-plan.md), [PRD](../product/prd.md).
@@ -320,9 +320,10 @@ Target/symbol: Shared media card, file selection/status/progress/recovery/confir
 
 ### Acceptance criteria
 
-- [ ] Layout dan resource conditional konsisten dengan detail halaman existing; tidak ada halaman upload baru.
-- [ ] Tidak menjanjikan publish/transcode percent/manual reprocess yang belum tersedia.
-- [ ] Prompts/status/review/batas raster tercatat; implementasi menunggu scope/visual approval.
+- [x] Layout dan resource conditional konsisten dengan detail halaman existing; tidak ada halaman upload baru.
+- [x] Tidak menjanjikan publish/transcode percent/manual reprocess yang belum tersedia.
+- [x] Prompts/status/review/batas raster tercatat; scope disetujui, implementasi panel menunggu visual approval.
+- [ ] Pengguna menyetujui empat mockup baru untuk menutup visual acceptance ADUP-006.
 
 ### Validasi
 
@@ -330,7 +331,9 @@ Visual inspection/prompts/PNG/path tracking + docs/Prettier; raster bukan proof 
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan rencana, bukan hasil test yang telah dijalankan. Isi evidence aktual dan batas proof saat task dikerjakan.
+Pada 2026-10-05 pengguna menyetujui plan dan meminta mockup. [Empat final dan prompt set](../design/admin-media-upload.md) dibuat dengan built-in image_gen: dua desktop1070×1470, dua mobile793×1983; lima calls termasuk correction Edit metadata. Final diinspeksi: English/shell/theme/avatar/logout, role/progress/cancel/choose/readiness sesuai scope, tanpa source player atau publish/transcode persen. Header PNG dan ukuran pasangan valid. State/Series/Standalone/modal variants berupa specification; tidak diklaim seluruhnya tampil di raster. Runtime tidak berubah; visual approval pengguna masih pending.
+
+Actual checks: `bun run docs:check` lulus (56 Markdown / 481 local links), installed Prettier write/check untuk empat Markdown task lulus, `git diff --check` dan `git diff --cached --check` lulus. Staged-only checkout dengan `checkDocumentation` lulus (49 Markdown / 462 links). Staging hanya delapan file task, termasuk empat PNG; 22 file unrelated tetap sama melalui SHA-256, referensi desain lokal pada README dipertahankan dan tidak ikut staged index. Commit/hook receipt dicatat setelah hasil aktual; tidak menjalankan runtime uploader test/build/migration yang belum ada.
 
 ### Commit task
 
@@ -341,7 +344,7 @@ Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan
 
 ### Blocker atau tindak lanjut
 
-Dependencies ADUP-001 dan review scope runtime. Review pengguna atas desain sebelum panel runtime; mockup bukan evidence browser.
+ADUP-001 sudah Done dan scope plan disetujui. Empat mockup tersedia; tunggu review pengguna atas hasil visual sebelum menutup ADUP-006 atau mengimplementasikan panel ADUP-012. Mockup bukan evidence browser.
 
 ## Task: ADUP-007 — Typed media client, Query dan error mapping DRY
 
@@ -394,7 +397,7 @@ Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan
 
 ### Blocker atau tindak lanjut
 
-Dependencies ADUP-003, ADUP-005 dan review scope runtime. Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
+Dependencies ADUP-003, ADUP-005 (scope plan telah disetujui pengguna). Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
 
 ## Task: ADUP-008 — File selection, validation dan fingerprint worker
 
@@ -446,7 +449,7 @@ Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan
 
 ### Blocker atau tindak lanjut
 
-Dependencies ADUP-002, ADUP-005, ADUP-007 dan review scope runtime. Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
+Dependencies ADUP-002, ADUP-005, ADUP-007 (scope plan telah disetujui pengguna). Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
 
 ## Task: ADUP-009 — Direct PUT transport dengan progress dan abort
 
@@ -495,7 +498,7 @@ Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan
 
 ### Blocker atau tindak lanjut
 
-Dependencies ADUP-007 dan review scope runtime. Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
+Dependencies ADUP-007 (scope plan telah disetujui pengguna). Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
 
 ## Task: ADUP-010 — Scheduler multipart, retry dan aggregate progress
 
@@ -545,7 +548,7 @@ Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan
 
 ### Blocker atau tindak lanjut
 
-Dependencies ADUP-008, ADUP-009 dan review scope runtime. Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
+Dependencies ADUP-008, ADUP-009 (scope plan telah disetujui pengguna). Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
 
 ## Task: ADUP-011 — Resume, pause, finalization dan cancel recovery
 
@@ -595,7 +598,7 @@ Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan
 
 ### Blocker atau tindak lanjut
 
-Dependencies ADUP-003, ADUP-005, ADUP-010 dan review scope runtime. Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
+Dependencies ADUP-003, ADUP-005, ADUP-010 (scope plan telah disetujui pengguna). Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
 
 ## Task: ADUP-012 — Shared Upload Media panel pada detail draft
 
@@ -646,7 +649,7 @@ Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan
 
 ### Blocker atau tindak lanjut
 
-Dependencies ADUP-006, ADUP-007, ADUP-008, ADUP-010, ADUP-011 dan review scope runtime. Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
+Dependencies ADUP-006, ADUP-007, ADUP-008, ADUP-010, ADUP-011 (scope plan telah disetujui pengguna). Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
 
 ## Task: ADUP-013 — Status pemrosesan dasar dan readiness owner
 
@@ -698,7 +701,7 @@ Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan
 
 ### Blocker atau tindak lanjut
 
-Dependencies ADUP-003, ADUP-005, ADUP-007, ADUP-012 dan review scope runtime. Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
+Dependencies ADUP-003, ADUP-005, ADUP-007, ADUP-012 (scope plan telah disetujui pengguna). Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
 
 ## Task: ADUP-014 — Auth cleanup dan navigasi upload aktif
 
@@ -749,7 +752,7 @@ Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan
 
 ### Blocker atau tindak lanjut
 
-Dependencies ADUP-011, ADUP-012 dan review scope runtime. Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
+Dependencies ADUP-011, ADUP-012 (scope plan telah disetujui pengguna). Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
 
 ## Task: ADUP-015 — Acceptance uploader MinIO dan closure dokumentasi
 
@@ -806,7 +809,7 @@ Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan
 
 ### Blocker atau tindak lanjut
 
-Dependencies ADUP-003, ADUP-004, ADUP-005, ADUP-006, ADUP-007, ADUP-008, ADUP-009, ADUP-010, ADUP-011, ADUP-012, ADUP-013, ADUP-014 dan review scope runtime. R2 staging, Safari/native HLS, production migrations dan kapasitas VPS tetap gerbang terpisah.
+Dependencies ADUP-003, ADUP-004, ADUP-005, ADUP-006, ADUP-007, ADUP-008, ADUP-009, ADUP-010, ADUP-011, ADUP-012, ADUP-013, ADUP-014 (scope plan telah disetujui pengguna). R2 staging, Safari/native HLS, production migrations dan kapasitas VPS tetap gerbang terpisah.
 
 ## Ledger planning
 
@@ -814,4 +817,4 @@ Dependencies ADUP-003, ADUP-004, ADUP-005, ADUP-006, ADUP-007, ADUP-008, ADUP-00
 | ---------- | -------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
 | 2026-10-05 | ADUP-001 | Done: context-before-plan, 15 task/DAG, docs/Prettier/diff/staged snapshot/preservation dan hooks lulus | `5a165fb7410d81e09af81f1761419ebf0369c564` |
 
-ADUP-002–015 tetap Backlog. Status Done planning tidak berarti runtime, migrasi atau desain sudah selesai.
+ADUP-006 berada pada Review setelah mockup tersedia; task runtime lainnya tetap Backlog. Status Done planning tidak berarti runtime, migrasi atau desain sudah selesai.
