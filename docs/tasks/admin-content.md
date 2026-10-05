@@ -578,7 +578,7 @@ Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
 ## Task: ADMC-010 — Perlindungan input belum disimpan
 
-- Status: Review
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai dependency
 - Referensi: ADMC-US-04; PRD-03/08/09; GR-01/05/08; plan STEP-010.
@@ -620,6 +620,8 @@ Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready ha
 Shared router resolver/AlertDialog and beforeunload protect dirty create/edit input, allowing login/invalid-session transitions. Cancel retains input; confirmed save/unmount releases pending blockers. Dirty data stays in memory; force-close/mobile/browser policies cannot guarantee an unload dialog. Private mutation keys include identity; auth cleanup removes admin mutation variables/results, including pending writes that settle later, while public data is preserved. Completed writes do not navigate from an unmounted editor. Native auth/cache proof 17 tests/58 assertions pass; types (3), lint (1), build (2) pass. Browser cancel/confirm/back/logout proof ADMC-011.
 
 Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
+
+- Receipt commit task: `778a57583f18a8bd87de43c64ad7841ffcc5196c`; hooks docs/lint/types/Commitlint lulus tanpa bypass.
 
 ## Task: ADMC-011 — Acceptance UI, persistensi dan closure
 
@@ -663,7 +665,7 @@ Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready ha
 
 ## Task: ADMC-012 — Theme switcher shared shell
 
-- Status: Backlog
+- Status: Review
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1
 - Referensi: ADMC-US-01; PRD-02/08; plan STEP-012; permintaan pengguna 5 Oktober 2026.
@@ -677,10 +679,10 @@ Avatar dropdown kanan atas berisi identity/Appearance Light/Dark/System; English
 
 ### Acceptance criteria
 
-- [ ] Semua lima halaman memiliki switcher yang sama dengan Light/Dark/System berfungsi melalui semantic tokens.
-- [ ] Preference persisted, System mengikuti media change, storage unavailable/invalid preference punya fallback; default System merupakan proposal untuk review.
-- [ ] Initial render/hydration tidak flash/mismatch; pergantian tema mempertahankan form dirty dan tidak memblokir auth expiry/logout.
-- [ ] Keyboard/nama aksesibel/active state dan tests/browser/root gates lulus.
+- [x] Semua lima halaman memiliki switcher yang sama dengan Light/Dark/System berfungsi melalui semantic tokens.
+- [x] Preference persisted, System mengikuti media change, storage unavailable/invalid preference punya fallback; default System merupakan proposal untuk review.
+- [x] Initial render/hydration tidak flash/mismatch; pergantian tema mempertahankan form dirty dan tidak memblokir auth expiry/logout.
+- [x] Keyboard/nama aksesibel/active state dan tests/browser/root gates lulus.
 
 ### Validasi
 
@@ -700,6 +702,12 @@ Belum diimplementasikan. Mockup Light hanya menunjukkan posisi/appearance kontro
 ### Blocker atau tindak lanjut
 
 Menunggu review visual/permintaan implementasi dan dependency.
+
+### Evidence implementasi — 5 Oktober 2026
+
+Shared avatar Appearance radio menu Light/Dark/System, non-secret theme preference, cross-window/media listeners and pre-CSS self-contained head bootstrap. Provider defers applying until preference initialization; theme changes do not remount forms. Theme native proof 2 tests/28 assertions, server-import boundary rejection proof and post-build SSR native smoke pass. Types (3), lint (1), build (2) pass. Initial SSR attempt overlapped build output and was rerun successfully after build completion. Actual keyboard/theme/dirty/storage browser closure ADMC-011.
+
+Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
 ## User story: ADMC-US-06
 

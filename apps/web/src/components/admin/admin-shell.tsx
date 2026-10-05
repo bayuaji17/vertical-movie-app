@@ -1,3 +1,4 @@
+import { ThemeMenu } from './theme-menu'
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import {
@@ -164,6 +165,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                   <span className="break-all">{user.email}</span>
                 </DropdownMenuLabel>
               </DropdownMenuGroup>
+              <ThemeMenu />
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
