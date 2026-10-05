@@ -620,3 +620,9 @@ Native client/cache/gateway/guard regression `bun test apps/web/test/admin-media
 Worker browser produksi dan bridge pembatalan/resume diimplementasikan. `bun test apps/web/test/admin-media-file.test.ts apps/web/test/admin-media-fingerprint.test.ts`: 13 pass/41 assertions. Chromium actual File 1.500.000.000 bytes: SHA-256 cocok oracle, 358 progress events, 67.635 ms, 3.381 heartbeat, zero late callbacks; combined worker heap/backing peak 202.435.107 bytes (<256 MiB). Lima small-file oracles, wrong same-size/name file rejection, MIME fallback dan cancellation lulus. Root check-types (3/3), lint (1/1), build (2/2) lulus. Target expansion: shared typed test fixture dan worker/browser proof updated untuk produksi, safe file codes. R2/Safari belum dibuktikan; multipart/browser end-to-end mengikuti task berikutnya.
 
 - Task commit belum ditulis pada saat evidence ini disimpan; receipt actual SHA/hooks dicatat pada update task berikutnya.
+
+### ADUP-009 — 2026-10-05 local execution
+
+XHR direct PUT diimplementasikan tanpa cookie/Authorization aplikasi; exact Blob.slice, abort cleanup, safe CORS/signature/timeout codes dan no late progress. `bun test apps/web/test/admin-upload-transport.test.ts`: 3 pass/19 assertions. Dedicated private MinIO/Chromium proof: 1 pass/8 assertions; dua part 5 MiB dan 1 KiB, real progress, ListParts/ETag, downloaded byte integrity dan storage signature 403 aman tanpa app-auth logout. HTTP 2xx hanya transport result; ListParts pada scheduler berikutnya menjadi authority sebelum completion, termasuk ETag tidak terekspos. Root check-types 3/3, lint 1/1, build 2/2 lulus. Target expansion: apps/api/test/integration/media-transport-proof.test.ts menggunakan isolated bucket, cleanup, runner eval tanpa media/URL persistence. Browser panel dan R2 staging mengikuti acceptance lanjutan.
+
+- Task commit belum ditulis pada saat evidence ini disimpan; receipt actual SHA/hooks dicatat pada update task berikutnya.

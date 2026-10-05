@@ -463,8 +463,8 @@ Worker browser produksi dan bridge pembatalan/resume diimplementasikan. `bun tes
 ### Commit task
 
 - Pesan yang direncanakan: `feat(web): adup-008 validate selected upload files`.
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- SHA: `d4afadb0ea7bd72cf74dc2fc0ee0a97aebcf622e`.
+- Hook/checks: docs, lint, check-types dan Commitlint lulus; tidak ada hook dilewati.
 - Ledger: catat SHA aktual setelah commit berhasil pada update dokumentasi berikutnya; jangan menulis SHA self-referential.
 
 ### Blocker atau tindak lanjut
@@ -473,7 +473,7 @@ Tidak ada blocker pada scope file checking. Uploader runtime mengikuti ADUP-009�
 
 ## Task: ADUP-009 — Direct PUT transport dengan progress dan abort
 
-- Status: Backlog
+- Status: Done
 - Owner: pengembang/agent pelaksana task.
 - Prioritas: 9, mengikuti dependencies.
 - Referensi: ADUP-US01; [plan canonical](../plans/admin-media-upload/implementation-plan.md), [PRD](../product/prd.md).
@@ -497,9 +497,9 @@ Target/symbol: Injected XHR PUT transport / browser adapter.
 
 ### Acceptance criteria
 
-- [ ] Gateway menerima JSON saja; storage mendapatkan range byte part yang tepat.
-- [ ] Abort menghentikan request aktif; callbacks setelah dispose tidak mengubah state.
-- [ ] CORS/network/signature failures aman dan tidak logout pengguna melalui auth handler.
+- [x] Gateway menerima JSON saja; storage mendapatkan range byte part yang tepat.
+- [x] Abort menghentikan request aktif; callbacks setelah dispose tidak mengubah state.
+- [x] CORS/network/signature failures aman dan tidak logout pengguna melalui auth handler.
 
 ### Validasi
 
@@ -507,7 +507,7 @@ Injected transport meaningful callbacks/cancel/status + real browser direct MinI
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan rencana, bukan hasil test yang telah dijalankan. Isi evidence aktual dan batas proof saat task dikerjakan.
+XHR direct PUT diimplementasikan tanpa cookie/Authorization aplikasi; exact Blob.slice, abort cleanup, safe CORS/signature/timeout codes dan no late progress. `bun test apps/web/test/admin-upload-transport.test.ts`: 3 pass/19 assertions. Dedicated private MinIO/Chromium proof: 1 pass/8 assertions; dua part 5 MiB dan 1 KiB, real progress, ListParts/ETag, downloaded byte integrity dan storage signature 403 aman tanpa app-auth logout. HTTP 2xx hanya transport result; ListParts pada scheduler berikutnya menjadi authority sebelum completion, termasuk ETag tidak terekspos. Root check-types 3/3, lint 1/1, build 2/2 lulus. Target expansion: apps/api/test/integration/media-transport-proof.test.ts menggunakan isolated bucket, cleanup, runner eval tanpa media/URL persistence. Browser panel dan R2 staging mengikuti acceptance lanjutan.
 
 ### Commit task
 
@@ -518,7 +518,7 @@ Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan
 
 ### Blocker atau tindak lanjut
 
-Dependencies ADUP-007 (scope plan telah disetujui pengguna). Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
+Tidak ada blocker transport lokal; scheduler/recovery/UI mengikuti ADUP-010–015.
 
 ## Task: ADUP-010 — Scheduler multipart, retry dan aggregate progress
 
