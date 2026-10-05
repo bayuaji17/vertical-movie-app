@@ -23,9 +23,12 @@ export const UploadPartBody = t.Object(
   { partNumber: t.Integer({ minimum: 1, maximum: 10000 }) },
   { additionalProperties: false },
 );
+export const ProcessPosterBody = t.Object({}, { additionalProperties: false });
 export const UploadDto = t.Object({
   id: Uuid,
   assetId: Uuid,
+  processingMode: t.Union([t.Literal("worker"), t.Literal("request")]),
+  canProcessPoster: t.Boolean(),
   status: t.String(),
   sizeBytes: Size,
   partSizeBytes: Size,
@@ -78,6 +81,8 @@ const UploadDescriptor = t.Object({
   failureCode: t.Nullable(t.String()),
   expectedSha256: t.Nullable(t.String()),
   canResume: t.Boolean(),
+  processingMode: t.Union([t.Literal("worker"), t.Literal("request")]),
+  canProcessPoster: t.Boolean(),
 });
 const CurrentAsset = t.Object({
   id: Uuid,
@@ -96,6 +101,7 @@ const RoleInventory = t.Object({
   active: t.Nullable(UploadDescriptor),
   lastAttempt: t.Nullable(UploadDescriptor),
   busy: t.Boolean(),
+  canProcessPoster: t.Boolean(),
 });
 const Rules = t.Object({
   maxBytes: Size,

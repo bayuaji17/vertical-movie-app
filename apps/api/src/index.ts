@@ -6,6 +6,7 @@ import { loadPlaybackBaseUrl } from "./config/playback-env";
 import { createMultipartStorage } from "./storage/multipart";
 import { createMediaRepository } from "./modules/media/repository";
 import { MediaService } from "./modules/media/service";
+import { PosterProcessingService } from "./modules/media/poster-processing";
 import { loadApiEnv } from "./config/env";
 import { createStorageClient } from "./storage/s3";
 import { createApp } from "./app";
@@ -55,13 +56,22 @@ const app = createApp({
           env.storage,
         )
       : undefined,
-  mediaService: env.storage
-    ? new MediaService(
-        createMediaRepository(database.db),
-        multipart,
-        env.storage,
-      )
-    : undefined,
+  mediaService:
+    env.storage && storage && multipart
+      ? new MediaService(
+          createMediaRepository(database.db),
+          multipart,
+          env.storage,
+          undefined,
+          new PosterProcessingService(
+            createMediaRepository(database.db),
+            multipart,
+            storage,
+            env.storage,
+            env.poster,
+          ),
+        )
+      : undefined,
   database,
   auth,
   authOpenApiSchema,

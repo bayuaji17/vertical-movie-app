@@ -1,6 +1,6 @@
 # Modul: admin cover processing
 
-- Status: **plan disetujui 6 Oktober 2026; ACOV-001–004 selesai** pada `feat/admin-cover-processing`; implementasi berlanjut.
+- Status: **plan disetujui 6 Oktober 2026; ACOV-001–005 selesai** pada `feat/admin-cover-processing`; implementasi browser berlanjut.
 - Diperbarui: 6 Oktober 2026.
 - Persetujuan: pengguna menyetujui plan/default pada 6 Oktober 2026; feasibility gate menentukan guard native/browser. Rincian di [plan](../plans/admin-cover-processing/implementation-plan.md).
 - Snapshot source: `06e7ce75e9d3f87bbe501bac054711310e14e5a2`; [context](../plans/admin-cover-processing/repository-context.md).
@@ -203,7 +203,7 @@ Tidak ada blocker ACOV-004. ACOV-005 menghubungkan processor dan config ini ke e
 
 ## Task: ACOV-005 — Endpoint prepare dengan provenance dan worker exclusion
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex / pengembang proyek
 - Prioritas: 5
 - Referensi: ACOV-US-02, ACOV-US-03; PRD media/sampul dan GR lifecycle; [plan](../plans/admin-cover-processing/implementation-plan.md).
@@ -219,10 +219,10 @@ Target: `apps/api/src/modules/media/{index,model,service,repository,poster-proce
 
 ### Acceptance criteria
 
-- [ ] Admin actor/session/owner/generation eligible diverifikasi; source/legacy mode ditolak endpoint; GET status tetap read-only dan DTO tidak membocorkan storage/claim secrets.
-- [ ] New valid poster request menghasilkan succeeded job/attempt dan verified Ready output; replay/race/crash/replacement tidak menggandakan output activation atau meloloskan stale claim.
-- [ ] Worker claim/recover tidak mengambil request rows; legacy poster/source dan cleanup successful output kompatibel.
-- [ ] Gateway timeout scoped POST/path, auth/source tetap 10s; busy/retry/terminal error aman, max 3 attempts dan Retry-After; lost response dapat direkonsiliasi.
+- [x] Admin actor/session/owner/generation eligible diverifikasi; source/legacy mode ditolak endpoint; GET status tetap read-only dan DTO tidak membocorkan storage/claim secrets.
+- [x] New valid poster request menghasilkan succeeded job/attempt dan verified Ready output; replay/race/crash/replacement tidak menggandakan output activation atau meloloskan stale claim.
+- [x] Worker claim/recover tidak mengambil request rows; legacy poster/source dan cleanup successful output kompatibel.
+- [x] Gateway timeout scoped POST/path, auth/source tetap 10s; busy/retry/terminal error aman, max 3 attempts dan Retry-After; lost response dapat direkonsiliasi.
 
 ### Validasi
 
@@ -230,22 +230,24 @@ Elysia app.handle HTTP tests tanpa port, injected storage/native failure; dedica
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau divalidasi; hasil runtime dan command aktual dicatat saat task dikerjakan.
+2026-10-06: POST privat body `{}` ditambahkan dengan actor/session/owner/draft/current-generation fence dan DTO capability aman. Poster baru wajib membawa expected SHA-256 dan diberi mode `request`; replay legacy mempertahankan hash serta mode lama. Complete membuat durable request job atomik. Processor memeriksa source HEAD/etag/size/MIME, membaca maksimal5 MB lewat native S3, await Bun.Image, menulis prefix attempt immutable, lalu HEAD dan readback/hash output sebelum Ready commit. `media_assets.sha256` tetap digest source; `facts.outputSha256` merekam hasil WebP. Lease60s, maksimal3 attempts, retry1/2s, Retry-After dan recovery expired claim diterapkan. Worker claim/recovery hanya mode `worker`; gateway exact process POST30s, request lain/auth10s. Cleanup compatibility diverifikasi agar prefix Ready tidak dihapus.
+
+Dedicated PostgreSQL media test DB, real Bun.Image, fake S3/storage: processing/replay/expired lease/concurrency/replacement fence/retry exhaustion/legacy rejection 6 tests/48 assertions; worker exclusion/recovery 1/5. `bun test apps/api/src`: 101/409; `bun test apps/web/test`: 117/474. Root `bun run check-types` (3/3), `bun run lint` (web 1/1) dan `bun run build` (API/web 2/2) lulus. Unit app.handle menguji auth/body/no-store/retry header; gateway path/method policy teruji. Belum ada storage MinIO/R2 jalur poster atau browser UI proof. Tidak ada migration, dependency, development DB atau bucket aplikasi yang diubah.
 
 ### Commit task
 
 - Pesan: `feat(api): prepare covers through private requests (ACOV-005)`
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- SHA: dicatat pada receipt ACOV-006 setelah task commit.
+- Hook/checks: root gates di atas lulus; hook commit dan SHA dicatat pada receipt task berikutnya.
 - Ledger: SHA aktual dicatat pada update dokumentasi setelah commit, tanpa self-referential SHA.
 
 ### Blocker atau tindak lanjut
 
-Persetujuan plan, freshness check dan dependensi task di atas; bukan izin untuk mulai runtime pada permintaan planning ini.
+Tidak ada blocker implementasi API. Proof MinIO/R2 penuh, crop browser dan UI recovery tetap berada di ACOV-009 serta task berikutnya.
 
 ## Task: ACOV-006 — Crop geometry dan Canvas export dengan identitas payload tepat
 
-- Status: Backlog
+- Status: In Progress
 - Owner: Codex / pengembang proyek
 - Prioritas: 6
 - Referensi: ACOV-US-01, ACOV-US-03; PRD media/sampul dan GR lifecycle; [plan](../plans/admin-cover-processing/implementation-plan.md).

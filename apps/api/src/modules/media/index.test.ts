@@ -2,6 +2,7 @@ import { test, expect } from "bun:test";
 import { createApp } from "../../app";
 import { MediaService } from "./service";
 import type { SessionInput } from "@repo/auth/types";
+import { ContentError } from "../../shared/content-error";
 const admin: SessionInput = {
   user: {
     id: "admin",
@@ -50,6 +51,10 @@ test("all upload routes require authoritative admin before any storage or domain
       calls++;
       throw new Error("forbidden");
     };
+    service.processPoster = async () => {
+      calls++;
+      throw new Error("forbidden");
+    };
     service.status = async () => {
       calls++;
       throw new Error("forbidden");
@@ -72,7 +77,13 @@ test("all upload routes require authoritative admin before any storage or domain
         )
       ).status,
     ).toBe(status);
-    for (const suffix of ["", "/parts", "/complete", "/abort"]) {
+    for (const suffix of [
+      "",
+      "/parts",
+      "/complete",
+      "/abort",
+      "/process-poster",
+    ]) {
       const r = await app.handle(
         new Request(
           "http://localhost/admin/media/uploads/" + body.ownerId + suffix,
@@ -83,7 +94,12 @@ test("all upload routes require authoritative admin before any storage or domain
                   headers: { "content-type": "application/json" },
                   body: JSON.stringify({ partNumber: 1 }),
                 }
-              : {}),
+              : suffix === "/process-poster"
+                ? {
+                    headers: { "content-type": "application/json" },
+                    body: "{}",
+                  }
+                : {}),
           },
         ),
       );
@@ -139,4 +155,93 @@ test("strict typed input is rejected before initiate; storage failures remain pr
   expect(failed.status).toBe(500);
   expect(await failed.text()).not.toContain("credentials");
   expect(failed.headers.get("cache-control")).toBe("private, no-store");
+});
+
+test("process-poster is a private empty-object command and forwards the request signal", async () => {
+  const id = crypto.randomUUID();
+  let received: { id: string; actor: string; signal: AbortSignal } | undefined;
+  const service = new MediaService();
+  service.processPoster = async (uploadId, actor, signal) => {
+    received = { id: uploadId, actor, signal: signal! };
+    return {
+      id: uploadId,
+      assetId: crypto.randomUUID(),
+      processingMode: "request",
+      canProcessPoster: false,
+      status: "completed",
+      sizeBytes: "100",
+      partSizeBytes: "5242880",
+      partCount: 1,
+      partConcurrency: 1,
+      expiresAt: new Date(Date.now() + 60_000).toISOString(),
+      completedAt: new Date().toISOString(),
+      uploadedBytes: "100",
+      parts: [],
+      failureCode: null,
+      processing: {
+        state: "ready",
+        jobState: "succeeded",
+        progressSeconds: 0,
+        attempts: 1,
+        failureCode: null,
+        verifiedReadyAt: new Date().toISOString(),
+      },
+    };
+  };
+  const app = createApp({
+    mediaService: service,
+    getSession: async () => admin,
+  });
+  const response = await app.handle(
+    new Request(`http://localhost/admin/media/uploads/${id}/process-poster`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: "{}",
+    }),
+  );
+  expect(response.status).toBe(200);
+  expect(received?.id).toBe(id);
+  expect(received?.actor).toBe(admin.user.id);
+  expect(received?.signal).toBeInstanceOf(AbortSignal);
+  expect(response.headers.get("cache-control")).toBe("private, no-store");
+
+  const malformed = await app.handle(
+    new Request(`http://localhost/admin/media/uploads/${id}/process-poster`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: '{"objectKey":"private"}',
+    }),
+  );
+  expect(malformed.status).toBe(422);
+  expect(received?.id).toBe(id);
+});
+
+test("process-poster exposes only safe retry status and Retry-After metadata", async () => {
+  const id = crypto.randomUUID();
+  const service = new MediaService();
+  service.processPoster = async () => {
+    throw new ContentError(
+      "POSTER_PROCESSING_RETRY",
+      "Cover processing failed temporarily. Retry after the supplied delay.",
+      503,
+      2,
+    );
+  };
+  const app = createApp({
+    mediaService: service,
+    getSession: async () => admin,
+  });
+  const response = await app.handle(
+    new Request(`http://localhost/admin/media/uploads/${id}/process-poster`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: "{}",
+    }),
+  );
+  expect(response.status).toBe(503);
+  expect(response.headers.get("retry-after")).toBe("2");
+  expect(response.headers.get("cache-control")).toBe("private, no-store");
+  const body = await response.text();
+  expect(body).toContain("POSTER_PROCESSING_RETRY");
+  expect(body).not.toMatch(/bucket|objectKey|leaseToken|accessKey/);
 });

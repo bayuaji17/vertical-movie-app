@@ -317,6 +317,8 @@ export class UploadManager {
         failureCode: status.failureCode,
         expectedSha256: digest,
         canResume: status.status === 'pending',
+        processingMode: status.processingMode,
+        canProcessPoster: status.canProcessPoster,
       }
       this.update(kind, { descriptor: bound, status })
     }

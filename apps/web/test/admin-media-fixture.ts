@@ -13,6 +13,7 @@ export function inventoryFixture(): OwnerMedia {
     active: null,
     lastAttempt: null,
     busy: false,
+    canProcessPoster: false,
   })
   return {
     ownerType: 'video',
@@ -58,6 +59,8 @@ export function uploadFixture(size = 100): UploadStatus {
   return {
     id: mediaUploadId,
     assetId: mediaAssetId,
+    processingMode: 'worker',
+    canProcessPoster: false,
     status: 'pending',
     sizeBytes: String(size),
     partSizeBytes: String(partSize),
@@ -94,5 +97,7 @@ export function descriptorFixture(): UploadDescriptor {
     failureCode: null,
     expectedSha256: 'a'.repeat(64),
     canResume: true,
+    processingMode: 'worker',
+    canProcessPoster: false,
   }
 }

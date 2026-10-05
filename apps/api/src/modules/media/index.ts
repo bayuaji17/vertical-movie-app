@@ -14,6 +14,7 @@ import {
   UploadPartDto,
   OwnerParams,
   OwnerMediaDto,
+  ProcessPosterBody,
 } from "./model";
 const detail = (operationId: string, summary: string) => ({
   tags: ["Media"],
@@ -101,6 +102,21 @@ export function createMediaModule({
         detail: detail(
           "completeMediaUpload",
           "Verify and freeze the uploaded source",
+        ),
+      },
+    )
+    .post(
+      "/admin/media/uploads/:id/process-poster",
+      ({ params, adminSession, request }) =>
+        service.processPoster(params.id, adminSession.user.id, request.signal),
+      {
+        requireAdmin: true,
+        params: UploadParams,
+        body: ProcessPosterBody,
+        response: { 200: UploadDto, ...ErrorResponses },
+        detail: detail(
+          "processMediaPoster",
+          "Process a completed cover upload and verify its ready output",
         ),
       },
     )

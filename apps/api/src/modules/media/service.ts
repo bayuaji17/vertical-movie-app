@@ -18,6 +18,7 @@ import {
   posterReadiness,
 } from "../../shared/media-readiness";
 import type { InitiateUploadInput } from "./model";
+import type { PosterProcessingService } from "./poster-processing";
 import {
   geometry,
   partTtl,
@@ -71,6 +72,7 @@ export class MediaService {
       now: () => new Date(),
       id: () => crypto.randomUUID(),
     },
+    private readonly posterProcessing?: PosterProcessingService,
   ) {}
   private deps() {
     if (!this.repository || !this.storage || !this.config) unavailable();
@@ -113,6 +115,21 @@ export class MediaService {
         const asset = await store.asset(session.assetId);
         if (!asset) notFound();
         checkProfile(asset);
+        const job = await store.assetJob(asset.id, asset.generation);
+        const now = this.runtime.now();
+        const canProcessPoster = Boolean(
+          session.kind === "poster" &&
+          session.processingMode === "request" &&
+          session.status === "completed" &&
+          canUpload &&
+          owner.posterAssetId === asset.id &&
+          job?.executionMode === "request" &&
+          job.failures < 3 &&
+          ((["queued", "retry"].includes(job.state) && job.runAfter <= now) ||
+            (job.state === "running" &&
+              job.leaseUntil !== null &&
+              job.leaseUntil <= now)),
+        );
         return {
           id: session.id,
           assetId: asset.id,
@@ -126,6 +143,8 @@ export class MediaService {
           completedAt: session.completedAt?.toISOString() ?? null,
           failureCode: session.failureCode,
           expectedSha256: session.expectedSha256,
+          processingMode: session.processingMode,
+          canProcessPoster,
           canResume:
             canUpload &&
             session.status === "pending" &&
@@ -153,6 +172,10 @@ export class MediaService {
           return Number.isSafeInteger(n) && n > 0 ? n : null;
         };
         const active = await store.active(input, kind);
+        const activeDescriptor = await descriptor(active);
+        const lastAttemptDescriptor = await descriptor(
+          await store.lastAttempt(input, kind, actor),
+        );
         return {
           current: asset
             ? {
@@ -168,11 +191,13 @@ export class MediaService {
                 processing: processingSummary(asset, job),
               }
             : null,
-          active: await descriptor(active),
-          lastAttempt: await descriptor(
-            await store.lastAttempt(input, kind, actor),
-          ),
+          active: activeDescriptor,
+          lastAttempt: lastAttemptDescriptor,
           busy: !!active,
+          canProcessPoster: Boolean(
+            activeDescriptor?.canProcessPoster ||
+            lastAttemptDescriptor?.canProcessPoster,
+          ),
         };
       };
       const source =
@@ -225,9 +250,27 @@ export class MediaService {
     const asset = await repo.store.asset(s.assetId);
     if (!asset) notFound();
     const job = await repo.store.assetJob(asset.id, asset.generation);
+    const owner = await repo.store.owner(ownerOf(s));
+    const now = this.runtime.now();
+    const canProcessPoster = Boolean(
+      s.kind === "poster" &&
+      s.processingMode === "request" &&
+      s.status === "completed" &&
+      !owner.archived &&
+      owner.status === "draft" &&
+      owner.posterAssetId === asset.id &&
+      job?.executionMode === "request" &&
+      job.failures < 3 &&
+      ((["queued", "retry"].includes(job.state) && job.runAfter <= now) ||
+        (job.state === "running" &&
+          job.leaseUntil !== null &&
+          job.leaseUntil <= now)),
+    );
     return {
       id: s.id,
       assetId: s.assetId,
+      processingMode: s.processingMode,
+      canProcessPoster,
       status: s.status,
       sizeBytes: s.sizeBytes.toString(),
       partSizeBytes: s.partSizeBytes.toString(),
@@ -322,6 +365,8 @@ export class MediaService {
           initialize: true,
         };
       }
+      if (input.kind === "poster" && input.expectedSha256 === undefined)
+        invalid("A SHA-256 fingerprint is required for a new cover upload.");
       if (await store.active(input, input.kind))
         throw new ContentError(
           "UPLOAD_ALREADY_ACTIVE",
@@ -355,6 +400,7 @@ export class MediaService {
         assetId,
         ...ownership,
         kind: input.kind,
+        processingMode: input.kind === "poster" ? "request" : "worker",
         actorId: actor,
         idempotencyKey: input.idempotencyKey,
         requestHash: hash,
@@ -537,7 +583,7 @@ export class MediaService {
           updatedAt: end,
         });
         await store.activate(ownerOf(s), s.kind, a.id, actor, end);
-        await store.enqueue(a.id, a.generation, s.kind, end);
+        await store.enqueue(a.id, a.generation, s.kind, end, s.processingMode);
         return store.updateSession(id, {
           status: "completed",
           completedAt: end,
@@ -582,6 +628,11 @@ export class MediaService {
         503,
       );
     }
+  }
+  async processPoster(id: string, actor: string, signal?: AbortSignal) {
+    if (!this.posterProcessing) unavailable();
+    await this.posterProcessing.process(id, actor, signal);
+    return this.status(id, actor);
   }
   async abort(id: string, actor: string, expired = false) {
     const { s } = await this.read(id, actor),

@@ -226,6 +226,7 @@ export class MediaStore {
     generation: number,
     kind: UploadKind,
     now: Date,
+    executionMode: "worker" | "request" = "worker",
   ) {
     await this.db
       .insert(mediaJobs)
@@ -234,6 +235,7 @@ export class MediaStore {
         assetId,
         generation,
         kind,
+        executionMode,
         runAfter: now,
         createdAt: now,
         updatedAt: now,
@@ -242,18 +244,17 @@ export class MediaStore {
         target: [mediaJobs.assetId, mediaJobs.generation],
       });
   }
-  async assetJob(assetId: string, generation: number) {
-    return (
-      await this.db
-        .select()
-        .from(mediaJobs)
-        .where(
-          and(
-            eq(mediaJobs.assetId, assetId),
-            eq(mediaJobs.generation, generation),
-          ),
-        )
-    )[0];
+  async assetJob(assetId: string, generation: number, lock = false) {
+    const q = this.db
+      .select()
+      .from(mediaJobs)
+      .where(
+        and(
+          eq(mediaJobs.assetId, assetId),
+          eq(mediaJobs.generation, generation),
+        ),
+      );
+    return (await (lock ? q.for("update") : q))[0];
   }
   async job(id: string, lock = false) {
     const q = this.db.select().from(mediaJobs).where(eq(mediaJobs.id, id));
@@ -272,11 +273,14 @@ export class MediaStore {
       })
       .where(eq(mediaJobs.id, id));
   }
-  async stopAttempt(token: string, now: Date) {
+  async stopAttempt(token: string, now: Date, failureCode?: string) {
     await this.db
       .update(mediaJobAttempts)
-      .set({ stoppedAt: now })
+      .set({ stoppedAt: now, ...(failureCode ? { failureCode } : {}) })
       .where(eq(mediaJobAttempts.token, token));
+  }
+  async insertAttempt(values: typeof mediaJobAttempts.$inferInsert) {
+    await this.db.insert(mediaJobAttempts).values(values);
   }
   async insertRenditions(values: (typeof mediaRenditions.$inferInsert)[]) {
     if (values.length) await this.db.insert(mediaRenditions).values(values);
