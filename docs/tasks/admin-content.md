@@ -437,7 +437,7 @@ Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
 ## Task: ADMC-007 — Buat draft movie dan standalone
 
-- Status: Backlog
+- Status: Review
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai dependency
 - Referensi: ADMC-US-03; PRD-03/09; GR-01/05/08; plan STEP-007.
@@ -451,9 +451,9 @@ Route videos/new dan create mutation; sukses navigate detail dari ID server sert
 
 ### Acceptance criteria
 
-- [ ] Satu submit pending satu POST, Film/Standalone/Series metadata didukung melalui resource benar (ADMC-014).
-- [ ] Hanya confirmed success menavigasi; slug/422/network/503 gagal mempertahankan input.
-- [ ] Ambiguous POST outcome tidak otomatis diulang; UI menjelaskan cek daftar sebelum submit lagi.
+- [x] Satu submit pending satu POST, Film/Standalone/Series metadata didukung melalui resource benar (ADMC-014).
+- [x] Hanya confirmed success menavigasi; slug/422/network/503 gagal mempertahankan input.
+- [x] Ambiguous POST outcome tidak otomatis diulang; UI menjelaskan cek daftar sebelum submit lagi.
 
 ### Validasi
 
@@ -474,9 +474,15 @@ Belum diimplementasikan atau diuji. Hasil runtime tidak disimpulkan dari plan.
 
 Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready hanya karena source API tersedia.
 
+### Evidence implementasi — 5 Oktober 2026
+
+Create route generated and dashboard/list CTA targets added. Shared editor uses no-retry Eden/Query mutation, synchronous pending guard, stable form initial values, confirmed nested Series/defaultSeason response ID or video ID navigation and scoped list/detail invalidation. Errors preserve input and ambiguous outcomes advise checking the list. Native client/mapper proof 11 tests/54 assertions pass. Types (3), lint (1), build (2) pass. Real browser rapid-submit/errors/persistence follows ADMC-011; Series resource verification ADMC-014.
+
+Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
+
 ## Task: ADMC-008 — Detail konten dan readonly state
 
-- Status: Review
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai dependency
 - Referensi: ADMC-US-04; PRD-03/08/09; GR-01/05/08; plan STEP-008.
@@ -518,6 +524,8 @@ Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready ha
 Generated detail leaf route and reusable guarded ContentResource, shared status badge and metadata view. Invalid type/UUID avoids metadata request; missing/failed reads have safe retry/back states. Draft edit capability uses lifecycle/kind, readonly episode/published/archived, Series completion/seasons separate from video rights/source. Source availability explicitly differs from HLS readiness; preview sibling links preserved. Existing mapper/client tests cover readonly/mismatch/404; root types (3), lint (1), build (2) pass. Browser direct-refresh/readability/preview closure ADMC-011.
 
 Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
+
+- Receipt commit task: `c90349bd07aa618bc3043b6555d21554bc5ee11b`; hooks docs/lint/types/Commitlint lulus tanpa bypass.
 
 ## Task: ADMC-009 — Edit draft dengan version conflict
 

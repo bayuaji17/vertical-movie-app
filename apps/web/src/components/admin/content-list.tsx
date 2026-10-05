@@ -77,6 +77,15 @@ export function ContentList({
       <AdminPageHeading
         title="Content"
         description="Find and manage films, standalone videos, and series."
+        actions={
+          <Button
+            nativeButton={false}
+            className="min-h-11"
+            render={<Link to="/admin/content/new" />}
+          >
+            Create draft
+          </Button>
+        }
       />
       <ContentFiltersPanel filters={filters} onChange={onChange} />
       {query.isError && (

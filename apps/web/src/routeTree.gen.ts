@@ -18,6 +18,7 @@ import { Route as WatchSlugRouteImport } from './routes/watch.$slug'
 import { Route as AdminAuthenticatedIndexRouteImport } from './routes/admin._authenticated.index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AdminAuthenticatedContentIndexRouteImport } from './routes/admin._authenticated.content.index'
+import { Route as AdminAuthenticatedContentNewRouteImport } from './routes/admin._authenticated.content.new'
 import { Route as AdminAuthenticatedVideosIdPreviewRouteImport } from './routes/admin._authenticated.videos.$id.preview'
 import { Route as AdminAuthenticatedContentTypeIdIndexRouteImport } from './routes/admin._authenticated.content.$type.$id.index'
 
@@ -66,6 +67,12 @@ const AdminAuthenticatedContentIndexRoute =
     path: '/content/',
     getParentRoute: () => AdminAuthenticatedRoute,
   } as any)
+const AdminAuthenticatedContentNewRoute =
+  AdminAuthenticatedContentNewRouteImport.update({
+    id: '/content/new',
+    path: '/content/new',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
 const AdminAuthenticatedVideosIdPreviewRoute =
   AdminAuthenticatedVideosIdPreviewRouteImport.update({
     id: '/videos/$id/preview',
@@ -87,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/watch/$slug': typeof WatchSlugRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/': typeof AdminAuthenticatedIndexRoute
+  '/admin/content/new': typeof AdminAuthenticatedContentNewRoute
   '/admin/content/': typeof AdminAuthenticatedContentIndexRoute
   '/admin/videos/$id/preview': typeof AdminAuthenticatedVideosIdPreviewRoute
   '/admin/content/$type/$id/': typeof AdminAuthenticatedContentTypeIdIndexRoute
@@ -98,6 +106,7 @@ export interface FileRoutesByTo {
   '/api/$': typeof ApiSplatRoute
   '/watch/$slug': typeof WatchSlugRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/admin/content/new': typeof AdminAuthenticatedContentNewRoute
   '/admin/content': typeof AdminAuthenticatedContentIndexRoute
   '/admin/videos/$id/preview': typeof AdminAuthenticatedVideosIdPreviewRoute
   '/admin/content/$type/$id': typeof AdminAuthenticatedContentTypeIdIndexRoute
@@ -112,6 +121,7 @@ export interface FileRoutesById {
   '/watch/$slug': typeof WatchSlugRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/_authenticated/': typeof AdminAuthenticatedIndexRoute
+  '/admin/_authenticated/content/new': typeof AdminAuthenticatedContentNewRoute
   '/admin/_authenticated/content/': typeof AdminAuthenticatedContentIndexRoute
   '/admin/_authenticated/videos/$id/preview': typeof AdminAuthenticatedVideosIdPreviewRoute
   '/admin/_authenticated/content/$type/$id/': typeof AdminAuthenticatedContentTypeIdIndexRoute
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/watch/$slug'
     | '/api/auth/$'
     | '/admin/'
+    | '/admin/content/new'
     | '/admin/content/'
     | '/admin/videos/$id/preview'
     | '/admin/content/$type/$id/'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '/api/$'
     | '/watch/$slug'
     | '/api/auth/$'
+    | '/admin/content/new'
     | '/admin/content'
     | '/admin/videos/$id/preview'
     | '/admin/content/$type/$id'
@@ -150,6 +162,7 @@ export interface FileRouteTypes {
     | '/watch/$slug'
     | '/api/auth/$'
     | '/admin/_authenticated/'
+    | '/admin/_authenticated/content/new'
     | '/admin/_authenticated/content/'
     | '/admin/_authenticated/videos/$id/preview'
     | '/admin/_authenticated/content/$type/$id/'
@@ -228,6 +241,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuthenticatedContentIndexRouteImport
       parentRoute: typeof AdminAuthenticatedRoute
     }
+    '/admin/_authenticated/content/new': {
+      id: '/admin/_authenticated/content/new'
+      path: '/content/new'
+      fullPath: '/admin/content/new'
+      preLoaderRoute: typeof AdminAuthenticatedContentNewRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
     '/admin/_authenticated/videos/$id/preview': {
       id: '/admin/_authenticated/videos/$id/preview'
       path: '/videos/$id/preview'
@@ -247,6 +267,7 @@ declare module '@tanstack/react-router' {
 
 interface AdminAuthenticatedRouteChildren {
   AdminAuthenticatedIndexRoute: typeof AdminAuthenticatedIndexRoute
+  AdminAuthenticatedContentNewRoute: typeof AdminAuthenticatedContentNewRoute
   AdminAuthenticatedContentIndexRoute: typeof AdminAuthenticatedContentIndexRoute
   AdminAuthenticatedVideosIdPreviewRoute: typeof AdminAuthenticatedVideosIdPreviewRoute
   AdminAuthenticatedContentTypeIdIndexRoute: typeof AdminAuthenticatedContentTypeIdIndexRoute
@@ -254,6 +275,7 @@ interface AdminAuthenticatedRouteChildren {
 
 const AdminAuthenticatedRouteChildren: AdminAuthenticatedRouteChildren = {
   AdminAuthenticatedIndexRoute: AdminAuthenticatedIndexRoute,
+  AdminAuthenticatedContentNewRoute: AdminAuthenticatedContentNewRoute,
   AdminAuthenticatedContentIndexRoute: AdminAuthenticatedContentIndexRoute,
   AdminAuthenticatedVideosIdPreviewRoute:
     AdminAuthenticatedVideosIdPreviewRoute,

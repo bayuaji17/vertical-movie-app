@@ -45,24 +45,43 @@ function AdminDashboard() {
           </p>
         </CardContent>
       </Card>
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Manage content</CardTitle>
-          <CardDescription>
-            Find content and update draft metadata.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button
-            nativeButton={false}
-            className="min-h-11"
-            variant="outline"
-            render={<Link to="/admin/content" search={contentSearch({})} />}
-          >
-            View content
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="mb-6 grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Create a new draft</CardTitle>
+            <CardDescription>
+              Save the title and initial content metadata.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              nativeButton={false}
+              className="min-h-11"
+              render={<Link to="/admin/content/new" />}
+            >
+              Create draft
+            </Button>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Manage content</CardTitle>
+            <CardDescription>
+              Find content and update draft metadata.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              nativeButton={false}
+              className="min-h-11"
+              variant="outline"
+              render={<Link to="/admin/content" search={contentSearch({})} />}
+            >
+              View content
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
       <Card>
         <CardHeader>
           <CardTitle>
