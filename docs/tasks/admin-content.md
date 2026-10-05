@@ -151,7 +151,7 @@ Tidak ada blocker penulisan plan; source runtime dan remote delivery belum dimin
 
 ## Task: ADMC-002 — Fondasi primitives dashboard
 
-- Status: Review
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai dependency
 - Referensi: ADMC-US-01; PRD-02/08; GR-01/05/08; plan STEP-002.
@@ -194,9 +194,11 @@ Shadcn base-rhea/Remixicon official docs + CLI dry-run reviewed; 11 new primitiv
 
 Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
+- Receipt commit task: `97718bc243d86ed08dad01074f383f496c5cdd48`; hooks docs/lint/types/Commitlint lulus tanpa bypass.
+
 ## Task: ADMC-003 — Typed client dan private query cache
 
-- Status: Backlog
+- Status: Review
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai dependency
 - Referensi: ADMC-US-02; PRD-01/03/09; GR-01/05/08; plan STEP-003.
@@ -210,9 +212,9 @@ lib/admin content client/queries/errors, infer DTO/request dari Eden; operasi li
 
 ### Acceptance criteria
 
-- [ ] Error HTTP/network/abort menjadi failure, signal diteruskan; base URL invalid menutup akses data.
-- [ ] Query key admin memuat identity/filter; logout/expiry cleanup existing berlaku.
-- [ ] POST/PATCH tanpa automatic retry; payload typed tanpa runtime import API/server secrets.
+- [x] Error HTTP/network/abort menjadi failure, signal diteruskan; base URL invalid menutup akses data.
+- [x] Query key admin memuat identity/filter; logout/expiry cleanup existing berlaku.
+- [x] POST/PATCH tanpa automatic retry; payload typed tanpa runtime import API/server secrets.
 
 ### Validasi
 
@@ -232,6 +234,12 @@ Belum diimplementasikan atau diuji. Hasil runtime tidak disimpulkan dari plan.
 ### Blocker atau tindak lanjut
 
 Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready hanya karena source API tersedia.
+
+### Evidence implementasi — 5 Oktober 2026
+
+Six native behavior tests/28 assertions pass: filters/credentials/no-store/signal, 401 cleanup/public preservation, 403/404/409/422/503, cancellation, identity keys, nested Series create, one POST on lost connection and invalid configuration. Eden 1.4.10 synthetic fetch-error 503 is normalized separately from HTTP failures; Root check-types (3 tasks), lint (1), build (2) pass. Types inferred from API only; no API/server runtime import or cache persistence.
+
+Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
 ## Task: ADMC-004 — Shell dan navigasi admin responsif
 

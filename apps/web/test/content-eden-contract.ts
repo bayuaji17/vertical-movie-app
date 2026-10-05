@@ -4,6 +4,11 @@ import type { createApiClient } from '../src/lib/api/client'
 export async function verifyContentContract(
   client: ReturnType<typeof createApiClient>,
 ) {
+  await client.admin.content.get({
+    query: { type: 'film', page: '2', pageSize: '25' },
+  })
+  // @ts-expect-error Episode is not a top-level content type.
+  await client.admin.content.get({ query: { type: 'episode' } })
   const movie = await client.admin.videos.post({
     kind: 'movie',
     title: 'Movie',

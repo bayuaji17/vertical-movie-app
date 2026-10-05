@@ -409,3 +409,5 @@ Roadmap bukan daftar task Ready atau perluasan acceptance iterasi 1. Jangan mene
 - Foundation charcoal CSS lokal disetujui tetapi belum tracked; integrasi token menjadi task terpisah ADMC-015 sebelum theme/browser acceptance, tanpa memasukkan artefak unrelated. Tidak membuat schema baru; proof PostgreSQL memakai dedicated database.
 
 - Receipt ADMC-013: `841db1736f9625ada7968830a77ca70acfc1cd86`; checks/AC teramati ada pada backlog. Commit lokal, belum push/PR/merge.
+
+- Receipt ADMC-002: `97718bc243d86ed08dad01074f383f496c5cdd48`; checks/AC teramati ada pada backlog. Commit lokal, belum push/PR/merge.
