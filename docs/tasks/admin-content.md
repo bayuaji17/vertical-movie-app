@@ -151,7 +151,7 @@ Tidak ada blocker penulisan plan; source runtime dan remote delivery belum dimin
 
 ## Task: ADMC-002 — Fondasi primitives dashboard
 
-- Status: Backlog
+- Status: Review
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai dependency
 - Referensi: ADMC-US-01; PRD-02/08; GR-01/05/08; plan STEP-002.
@@ -165,9 +165,9 @@ Primitives yang belum installed dan dependency transitif source/manifest/lock/CS
 
 ### Acceptance criteria
 
-- [ ] Sidebar/Table/Checkbox/ToggleGroup/Empty/Skeleton/AlertDialog tersedia dengan Base UI Rhea dan API yang ditinjau.
-- [ ] Tidak overwrite komponen existing, token/font/player atau pekerjaan desain; integrasi Git fondasi final dicatat terpisah.
-- [ ] Frozen install jika dependency/script berubah serta root gates lulus.
+- [x] Sidebar/Table/Checkbox/ToggleGroup/Empty/Skeleton/AlertDialog tersedia dengan Base UI Rhea dan API yang ditinjau.
+- [x] Tidak overwrite komponen existing, token/font/player atau pekerjaan desain; integrasi Git fondasi final dicatat terpisah.
+- [x] Frozen install jika dependency/script berubah serta root gates lulus.
 
 ### Validasi
 
@@ -187,6 +187,12 @@ Belum diimplementasikan atau diuji. Hasil runtime tidak disimpulkan dari plan.
 ### Blocker atau tindak lanjut
 
 Menunggu review/permintaan implementasi dan dependency. Integrasi token/assets desain worktree harus dicatat sebagai pekerjaan tersendiri sebelum fresh-checkout visual acceptance.
+
+### Evidence implementasi — 5 Oktober 2026
+
+Shadcn base-rhea/Remixicon official docs + CLI dry-run reviewed; 11 new primitives, existing button deliberately skipped. No manifests/lock/preset/CSS changed. Existing auth guard/cache: 16 tests/55 assertions pass. Root types 3 tasks, lint 1 task and build 2 tasks pass; registry inline type imports fixed to repository top-level import-type convention after initial lint failure. Sidebar implemented later by shell using Sheet/shared navigation; no redundant Sidebar dependency.
+
+Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
 ## Task: ADMC-003 — Typed client dan private query cache
 
@@ -629,7 +635,7 @@ Desain dark/mobile dan implementasi menjadi langkah setelah review; request ini 
 
 ## Task: ADMC-013 — Kontrak pagination server
 
-- Status: Review
+- Status: Done
 - Owner: Codex/pengembang pelaksana
 - Prioritas: P1
 - Referensi: plan; revisi pengguna 5 Oktober 2026.
@@ -670,6 +676,8 @@ Visual v2 untuk review; runtime belum diminta/diimplementasikan.
 HTTP/regression: 16 tests/74 assertions pass (content/videos/series/gateway). Dedicated PostgreSQL: 2 tests/52 assertions pass; 43 rows per resource, boundaries, wildcard literals and concurrent count/page parity. Root check-types (3 tasks), lint (1), build (2) pass. No schema migration or development DB mutation. Offset pagination beyond the last returns an empty page; large-dataset profiling remains a deployment check.
 
 Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
+
+- Receipt commit task: `841db1736f9625ada7968830a77ca70acfc1cd86`; hooks docs/lint/types/Commitlint lulus tanpa bypass.
 
 ## Task: ADMC-014 — Metadata Series dan resource dispatch
 

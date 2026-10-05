@@ -407,3 +407,5 @@ Roadmap bukan daftar task Ready atau perluasan acceptance iterasi 1. Jangan mene
 - Branch `feat/admin-content-dashboard` dibuat dari `e5043eb`; freshness diperiksa, context diperbarui sebelum plan. Pengguna menyetujui desain/rencana dan implementasi Eden, TanStack Query, DRY, commit setiap task.
 - Urutan: ADMC-013, ADMC-002, ADMC-003, ADMC-004, ADMC-012, ADMC-005, ADMC-006, ADMC-014, ADMC-008, ADMC-007, ADMC-009, ADMC-010, ADMC-011. Dependency UI create/edit/detail diselesaikan bertahap; route generator tetap owner route tree.
 - Foundation charcoal CSS lokal disetujui tetapi belum tracked; integrasi token menjadi task terpisah ADMC-015 sebelum theme/browser acceptance, tanpa memasukkan artefak unrelated. Tidak membuat schema baru; proof PostgreSQL memakai dedicated database.
+
+- Receipt ADMC-013: `841db1736f9625ada7968830a77ca70acfc1cd86`; checks/AC teramati ada pada backlog. Commit lokal, belum push/PR/merge.
