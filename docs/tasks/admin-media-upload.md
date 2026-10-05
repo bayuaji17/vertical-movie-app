@@ -1,6 +1,6 @@
 # Modul: admin media upload
 
-- Status: **draft untuk review**; planning ADUP-001 dalam review/commit, ADUP-002–015 belum diimplementasikan.
+- Status: **draft untuk review**; planning ADUP-001 Done, ADUP-002–015 belum diimplementasikan.
 - Diperbarui: 2026-10-05.
 - Snapshot: `d8417249de99611e1a661ade03bb4b03dd5f0538` pada `main`.
 - Plan canonical: [implementation-plan](../plans/admin-media-upload/implementation-plan.md).
@@ -35,7 +35,7 @@ Task dikerjakan menurut dependencies di plan. Proof hashing dan review desain me
 
 ## Task: ADUP-001 — Context, plan dan backlog Upload Media
 
-- Status: Review
+- Status: Done
 - Owner: pengembang/agent pelaksana task.
 - Prioritas: 1, mengikuti dependencies.
 - Referensi: ADUP-US01; [plan canonical](../plans/admin-media-upload/implementation-plan.md), [PRD](../product/prd.md).
@@ -62,7 +62,7 @@ Target/symbol: Snapshot/evidence, requirement map dan task ledger.
 
 - [x] Context dan plan memiliki base SHA serta evidence yang dapat ditelusuri.
 - [x] Seluruh task/dependency/AC konsisten; proposed additions dibedakan dari current API.
-- [ ] Hanya file planning/navigasi milik task committed; receipt SHA aktual dicatat sesudah commit.
+- [x] Hanya file planning/navigasi milik task committed; receipt SHA aktual dicatat sesudah commit.
 
 ### Validasi
 
@@ -70,18 +70,18 @@ bun run docs:check; installed Prettier; git diff --check; staged-only docs snaps
 
 ### Hasil dan bukti
 
-Context disimpan sebelum plan pada snapshot di atas. Read-only Bun checks membuktikan 15 ID unik, dependencies plan/backlog identik dan DAG tanpa cycle. `bun run docs:check` lulus (55 Markdown / 466 local links), installed Prettier write/check lulus dan `git diff --check` lulus. Staged-only checkout melalui `checkDocumentation` lulus (48 Markdown / 447 links); hanya empat file planning/index masuk staging. Hash 22 file unrelated tetap sama; README lokal sebelum edit diverifikasi dan referensi desain lokal tidak ikut commit. Hook/receipt masih menunggu commit aktual. Runtime, migrasi dan desain belum dibuat.
+Context disimpan sebelum plan pada snapshot di atas. Read-only Bun checks membuktikan 15 ID unik, dependencies plan/backlog identik dan DAG tanpa cycle. `bun run docs:check` lulus (55 Markdown / 466 local links), installed Prettier write/check lulus dan `git diff --check` lulus. Staged-only checkout melalui `checkDocumentation` lulus (48 Markdown / 447 links); hanya empat file planning/index masuk staging. Hash 22 file unrelated tetap sama; README lokal sebelum edit diverifikasi dan referensi desain lokal tidak ikut commit. Commit task berhasil dengan seluruh hook normal lulus. Runtime, migrasi dan desain belum dibuat.
 
 ### Commit task
 
-- Pesan yang direncanakan: `docs(web): plan admin media uploads (ADUP-001)`.
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
-- Ledger: catat SHA aktual setelah commit berhasil pada update dokumentasi berikutnya; jangan menulis SHA self-referential.
+- Pesan: `docs(web): plan admin media uploads (ADUP-001)`.
+- SHA: `5a165fb7410d81e09af81f1761419ebf0369c564`.
+- Hook/checks: docs (55 Markdown / 466 links), lint (1/1 cache), check-types (3/3 cache) dan Commitlint lulus pada commit aktual; tanpa bypass.
+- Ledger: receipt ini dicatat sesudah commit task berhasil pada update dokumentasi berikutnya, bukan SHA self-referential.
 
 ### Blocker atau tindak lanjut
 
-Selesaikan docs/format/whitespace, staged snapshot dan preservation; commit task lalu catat receipt. Scope runtime masih draft untuk review.
+Tidak ada blocker planning tersisa. ADUP-002–015 menunggu review scope runtime; hash proof dan empat layout desain tetap task tersendiri sebelum implementation panel.
 
 ## Task: ADUP-002 — Proof identitas file dan bounded hashing browser
 
@@ -810,8 +810,8 @@ Dependencies ADUP-003, ADUP-004, ADUP-005, ADUP-006, ADUP-007, ADUP-008, ADUP-00
 
 ## Ledger planning
 
-| Tanggal    | Task     | Bukti/status                                                                                    | Commit       |
-| ---------- | -------- | ----------------------------------------------------------------------------------------------- | ------------ |
-| 2026-10-05 | ADUP-001 | Review: context-before-plan, 15 task/DAG, docs/Prettier/diff/staged snapshot/preservation lulus | Belum dibuat |
+| Tanggal    | Task     | Bukti/status                                                                                            | Commit                                     |
+| ---------- | -------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| 2026-10-05 | ADUP-001 | Done: context-before-plan, 15 task/DAG, docs/Prettier/diff/staged snapshot/preservation dan hooks lulus | `5a165fb7410d81e09af81f1761419ebf0369c564` |
 
 ADUP-002–015 tetap Backlog. Status Done planning tidak berarti runtime, migrasi atau desain sudah selesai.

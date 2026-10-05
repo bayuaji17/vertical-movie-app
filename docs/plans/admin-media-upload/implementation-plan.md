@@ -189,7 +189,7 @@ Acceptance criteria:
 
 - [x] Context dan plan memiliki base SHA serta evidence yang dapat ditelusuri.
 - [x] Seluruh task/dependency/AC konsisten; proposed additions dibedakan dari current API.
-- [ ] Hanya file planning/navigasi milik task committed; receipt SHA aktual dicatat sesudah commit.
+- [x] Hanya file planning/navigasi milik task committed; receipt SHA aktual dicatat sesudah commit.
 
 ### ADUP-002 — Proof identitas file dan bounded hashing browser
 
@@ -558,4 +558,6 @@ Revert uploader task commits bertahap; leave current metadata/playback UI bekerj
 - ADUP-001 review: `bun run docs:check` lulus (55 Markdown / 466 local links); installed Prettier write/check untuk empat file task lulus; `git diff --check` lulus.
 - Staged-only checkout diperiksa melalui `checkDocumentation`: 48 Markdown / 447 links, tanpa error. Hanya context/plan/backlog dan dua entry index baru masuk staging; referensi desain lokal yang belum committed tetap di luar index commit.
 - Read-only Bun checks: 15 ID task unik, dependencies plan/backlog sama dan DAG tanpa cycle; hash 22 file lokal unrelated tidak berubah, README lokal sebelum edit diverifikasi terhadap preservation snapshot.
-- ADUP-001 menunggu commit/hook dan receipt SHA aktual. Runtime ADUP-002–015, migrasi dan empat mockup belum dibuat; belum ada push/PR/merge branch planning.
+- ADUP-001 selesai pada commit `5a165fb7410d81e09af81f1761419ebf0369c564` (`docs(web): plan admin media uploads (ADUP-001)`): empat file docs/index, tanpa runtime/config/schema/dependency. Receipt dicatat pada update dokumentasi sesudah commit, bukan SHA self-referential.
+- Hook aktual lulus: `bun run docs:check` (55 Markdown / 466 links), `bun run lint` (1/1 task cache), `bun run check-types` (3/3 task cache), dan Commitlint pada commit-msg. Tidak ada hook yang dilewati.
+- Runtime ADUP-002–015, migrasi dan empat mockup belum dibuat; belum ada push/PR/merge branch planning. Plan tetap draft untuk review scope; Done ADUP-001 hanya penutupan planning.
