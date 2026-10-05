@@ -198,7 +198,7 @@ Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
 ## Task: ADMC-003 — Typed client dan private query cache
 
-- Status: Review
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai dependency
 - Referensi: ADMC-US-02; PRD-01/03/09; GR-01/05/08; plan STEP-003.
@@ -241,9 +241,11 @@ Six native behavior tests/28 assertions pass: filters/credentials/no-store/signa
 
 Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
+- Receipt commit task: `b44b8dbf1dbe598f85a5bc3edb6251b58f515746`; hooks docs/lint/types/Commitlint lulus tanpa bypass. Lint import spacing failures fixed and hooks rerun successfully.
+
 ## Task: ADMC-004 — Shell dan navigasi admin responsif
 
-- Status: Backlog
+- Status: Review
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai dependency
 - Referensi: ADMC-US-01; PRD-01/02/08; GR-01/05/08; plan STEP-004.
@@ -257,9 +259,9 @@ Admin shell/navigation/logout dan protected layout/index. Pertahankan authoritat
 
 ### Acceptance criteria
 
-- [ ] Dashboard/Konten/CTA bekerja pada desktop dan mobile tanpa dead navigation atau fake analytics.
-- [ ] Semua anak route tetap guarded; preview existing tetap dapat dirender.
-- [ ] Logout success/failure, session expiry, forbidden/unavailable tetap benar; keyboard/focus/touch layout dapat dipakai.
+- [x] Dashboard/Konten/CTA bekerja pada desktop dan mobile tanpa dead navigation atau fake analytics.
+- [x] Semua anak route tetap guarded; preview existing tetap dapat dirender.
+- [x] Logout success/failure, session expiry, forbidden/unavailable tetap benar; keyboard/focus/touch layout dapat dipakai.
 
 ### Validasi
 
@@ -279,6 +281,12 @@ Belum diimplementasikan atau diuji. Hasil runtime tidak disimpulkan dari plan.
 ### Blocker atau tindak lanjut
 
 Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready hanya karena source API tersedia.
+
+### Evidence implementasi — 5 Oktober 2026
+
+Shared AdminShell/one logout controller; sidebar at lg, focus-managed titled mobile Sheet, top-right avatar identity menu, English private lock screens, skip link and real principal account. Child routes keep existing authoritative guard/context. New content navigation/action cards are added with ADMC-005/007 once targets exist; theme is ADMC-012. Auth guard/cache/session: 20 tests/83 assertions pass; SSR Bun smoke passes admin/null/non-admin/outage/stall/cookie/no-secret checks. Built Bun/Nitro browser cache + routes proof passed: login/logout failures, loading/result toasts, role lock, in-flight logout, cross-tab/back denial and no transient error screen. Mobile drawer hides the background access tree while open; assertion closes the drawer before checking Dashboard. Root check-types (3), lint (1), build (2) pass.
+
+Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
 ## Task: ADMC-005 — Daftar metadata dengan search dan pagination
 

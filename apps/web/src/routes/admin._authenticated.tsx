@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card'
 import { useAdminSession, setAuthFailureStatus } from '#/lib/auth/session'
 import { AuthDependencyError } from '@repo/auth/client'
 import { sessionQueryKey } from '#/lib/auth/session-cache'
+import { AdminShell } from '#/components/admin/admin-shell'
 
 export const Route = createFileRoute('/admin/_authenticated')({
   headers: () => ({ 'Cache-Control': 'private, no-store' }),
@@ -52,7 +53,9 @@ function ProtectedAdminLayout() {
   if (adminSessionState.status === 'authenticated')
     return (
       <AdminSessionContext value={adminSessionState.session}>
-        <Outlet />
+        <AdminShell>
+          <Outlet />
+        </AdminShell>
       </AdminSessionContext>
     )
   if (adminSessionState.status === 'forbidden') return <AdminAccessDenied />
@@ -67,14 +70,14 @@ function AdminAccessDenied() {
       <Card className="w-full max-w-lg">
         <CardHeader>
           <CardTitle>
-            <h1>Akses admin ditolak</h1>
+            <h1>Admin access denied</h1>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <Alert variant="destructive">
-            <AlertTitle>Akun ini tidak memiliki akses admin.</AlertTitle>
+            <AlertTitle>This account does not have admin access.</AlertTitle>
             <AlertDescription>
-              Hubungi operator jika Anda seharusnya dapat mengelola aplikasi.
+              Contact the operator if you should have access.
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -105,14 +108,15 @@ function AdminSessionUnavailable() {
           }
         })(),
         {
-          loading: { title: 'Memeriksa sesi...' },
+          loading: { title: 'Checking session...' },
           success: {
-            title: 'Pemeriksaan sesi selesai',
-            description: 'Status sesi berhasil diperbarui.',
+            title: 'Session check complete',
+            description: 'Your session status has been updated.',
           },
           error: {
-            title: 'Pemeriksaan sesi gagal',
-            description: 'Layanan autentikasi belum tersedia. Coba lagi.',
+            title: 'Session check failed',
+            description:
+              'The authentication service is unavailable. Try again.',
           },
         },
       )
@@ -128,15 +132,15 @@ function AdminSessionUnavailable() {
       <Card className="w-full max-w-lg">
         <CardHeader>
           <CardTitle>
-            <h1>Sesi admin belum dapat diperiksa</h1>
+            <h1>Admin session unavailable</h1>
           </CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4">
           <Alert variant="destructive">
-            <AlertTitle>Dashboard tetap terkunci.</AlertTitle>
+            <AlertTitle>The dashboard remains locked.</AlertTitle>
             <AlertDescription>
-              Koneksi atau layanan autentikasi sedang bermasalah. Coba lagi
-              setelah layanan tersedia.
+              The connection or authentication service is unavailable. Try again
+              when the service is available.
             </AlertDescription>
           </Alert>
           <Button
@@ -145,7 +149,7 @@ function AdminSessionUnavailable() {
             disabled={retrying}
             onClick={() => void retrySessionCheck()}
           >
-            {retrying ? 'Memeriksa...' : 'Coba lagi'}
+            {retrying ? 'Checking...' : 'Try again'}
           </Button>
         </CardContent>
       </Card>

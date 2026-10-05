@@ -128,7 +128,13 @@ try {
     .getByRole('heading', { name: 'Dashboard', exact: true })
     .waitFor()
   await hydrate(second)
-  await page.getByRole('button', { name: 'Keluar', exact: true }).click()
+  if (
+    !(await page
+      .getByRole('button', { name: 'Log out', exact: true })
+      .isVisible())
+  )
+    await page.getByRole('button', { name: 'Open navigation' }).click()
+  await page.getByRole('button', { name: 'Log out', exact: true }).click()
   for (const target of [page, second]) {
     await target.getByRole('heading', { name: 'Masuk ke admin' }).waitFor()
     assert.equal(

@@ -132,7 +132,7 @@ try {
   )
   await page.clock.runFor(10)
   await page
-    .getByRole('heading', { name: 'Sesi admin belum dapat diperiksa' })
+    .getByRole('heading', { name: 'Admin session unavailable' })
     .waitFor()
   assert.equal(
     await page.getByRole('heading', { name: 'Dashboard', exact: true }).count(),
