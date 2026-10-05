@@ -1,6 +1,6 @@
 # Admin media upload — desktop dan mobile light/dark
 
-> Status: **empat mockup tersedia untuk visual review** · 5 Oktober 2026. Plan disetujui pengguna dan pengguna meminta melanjutkan mockup. Approval plan tidak berarti raster baru telah disetujui. ADUP-006 Review; uploader runtime belum diimplementasikan.
+> Status: **empat mockup disetujui pengguna** · 5 Oktober 2026. Approval eksplisit pengguna: “oke approve”. ADUP-006 Done; uploader runtime belum diimplementasikan.
 
 ## Scope dan acuan
 
@@ -92,7 +92,7 @@ Built-in `image_gen`, transparent_background=false, dipakai untuk setiap asset/v
 
 Empat final diperiksa secara visual: English UI; source sedang upload dan cover belum dipilih; Sent62%/Verified60% terpisah; Pause/Cancel/Choose cover tersedia; Preview HLS disabled; Edit metadata terlihat; desktop memakai menu Appearance Light/Dark sesuai tema dan logout di kiri bawah; mobile tanpa sidebar desktop. Tidak ada publish/original player/transcode persen atau ETA.
 
-Lima panggilan built-in menghasilkan empat final: desktop light, satu targeted correction untuk tombol Edit metadata, mobile light dan dua recolor dark. Candidate desktop sebelum correction tidak dipilih sebagai deliverable. Header/magic PNG, pasangan dimensi dan preservation diperiksa terpisah dari inspeksi visual. Bukti docs/commit berada pada [ADUP-006](../tasks/admin-media-upload.md). Approval hasil raster masih menunggu pengguna; generation bukan persetujuan visual otomatis.
+Lima panggilan built-in menghasilkan empat final: desktop light, satu targeted correction untuk tombol Edit metadata, mobile light dan dua recolor dark. Candidate desktop sebelum correction tidak dipilih sebagai deliverable. Header/magic PNG, pasangan dimensi dan preservation diperiksa terpisah dari inspeksi visual. Bukti docs/commit berada pada [ADUP-006](../tasks/admin-media-upload.md). Pengguna menyetujui keempat final melalui “oke approve” pada 5 Oktober 2026; visual acceptance selesai. Verification runtime tetap menjadi task implementasi.
 
 ## Prompt set
 

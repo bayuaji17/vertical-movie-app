@@ -2,7 +2,7 @@
 
 ## Plan metadata
 
-- Status: **plan disetujui pengguna** · 5 Oktober 2026; pengguna meminta melanjutkan mockup. Runtime belum diimplementasikan. Task proof/desain memiliki gate sebelum runtime berikutnya; hasil mockup memerlukan visual review tersendiri.
+- Status: **plan dan empat mockup disetujui pengguna** · 5 Oktober 2026. ADUP-001/ADUP-006 Done; runtime belum diimplementasikan. Proof hashing ADUP-002 tetap mendahului task identity yang bergantung padanya.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `main`; base SHA / last validated SHA: `d8417249de99611e1a661ade03bb4b03dd5f0538`.
 - Context: [repository-context.md](repository-context.md), disimpan lebih dahulu.
@@ -42,7 +42,7 @@ Gap teramati: status hanya berdasarkan session ID; detail metadata tidak membawa
 | Finalizing/processing     | Upload sent bukan completed; finalizing/check status; pemrosesan queued/running/retry dengan indeterminate progress. Tidak menampilkan persen transcode/ETA yang tidak didukung.                                |
 | Ready/error/read-only     | Ready source/poster terpisah; preview hanya jika seluruh capability server valid. Error kode aman + action relevan; archived/published menjelaskan upload tidak tersedia.                                       |
 
-Design task menghasilkan **empat layout acuan** desktop light/dark dan mobile light/dark pada [canonical desain](../../design/admin-media-upload.md), dengan state matrix/source/poster/Series dan modal cancel/replacement/pause-and-leave. English UI; accessible label, aria-invalid, live region throttled, keyboard focus/Escape dan target 44 px. Empat raster tersedia untuk review; state variants/modal dicatat sebagai specification, bukan screenshot runtime. Scope plan telah disetujui; hasil visual tetap perlu review pengguna sebelum runtime panel.
+Design task menghasilkan **empat layout acuan** desktop light/dark dan mobile light/dark pada [canonical desain](../../design/admin-media-upload.md), dengan state matrix/source/poster/Series dan modal cancel/replacement/pause-and-leave. English UI; accessible label, aria-invalid, live region throttled, keyboard focus/Escape dan target 44 px. Empat raster disetujui pengguna pada 5 Oktober 2026; state variants/modal dicatat sebagai specification, bukan screenshot runtime. Visual gate ADUP-006 selesai; panel tetap mengikuti dependencies implementasi.
 
 ### Dataflow dan batas Eden
 
@@ -296,8 +296,8 @@ Acceptance criteria:
 
 - [x] Layout dan resource conditional konsisten dengan detail halaman existing; tidak ada halaman upload baru.
 - [x] Tidak menjanjikan publish/transcode percent/manual reprocess yang belum tersedia.
-- [x] Prompts/status/review/batas raster tercatat; scope disetujui, implementasi panel menunggu visual approval.
-- [ ] Pengguna menyetujui empat mockup baru untuk menutup visual acceptance ADUP-006.
+- [x] Prompts/status/review/batas raster tercatat; scope dan hasil visual disetujui pengguna.
+- [x] Pengguna menyetujui empat mockup baru untuk menutup visual acceptance ADUP-006.
 
 ### ADUP-007 — Typed media client, Query dan error mapping DRY
 
@@ -536,9 +536,9 @@ Revert uploader task commits bertahap; leave current metadata/playback UI bekerj
 
 ## Open decisions
 
-1. **Scope approved 2026-10-05:** pengguna menyetujui plan dan meminta melanjutkan mockup. Cross-reload resume dengan bounded full SHA dan small backend additions tetap scope; hash proof dan visual review belum selesai. Alternatives same-tab-only harus mengubah plan/AC secara eksplisit, bukan diam-diam memakai filename/size identity.
+1. **Scope approved 2026-10-05:** pengguna menyetujui plan dan empat mockup. Cross-reload resume dengan bounded full SHA dan small backend additions tetap scope; hash proof belum selesai. Alternatives same-tab-only harus mengubah plan/AC secara eksplisit, bukan diam-diam memakai filename/size identity.
 2. **Hash implementation:** native capability/browser incremental library/version/license/memory dipilih ADUP-002; tanpa proof ini task identity/file worker belum Ready.
-3. **Visual review:** pengguna meminta mockup pada 2026-10-05; ADUP-006 membuat empat layout desktop/mobile light/dark dan state specification. English/theme/shell existing tetap requirement. Review hasil raster terpisah dari approval plan.
+3. **Visual approved 2026-10-05:** pengguna menyetujui empat layout desktop/mobile light/dark melalui “oke approve”; ADUP-006 Done. English/theme/shell existing dan state specification menjadi acuan implementasi. Runtime acceptance tetap perlu bukti tersendiri.
 4. **Defaults UX approved melalui plan:** polling5s, retry3 attempts1s/2s+jitter, satu file aktif/3 PUT total tab; server config/cap/TTL tidak diubah. Bukti perilaku tetap task implementasi, bukan hasil mockup.
 5. **Platform scope:** resume bergantung file reselection; tab/browser force-close menghilangkan File memory. R2 staging/perangkat fisik/Safari/full capacity adalah gerbang terpisah, bukan blockers menyusun plan.
 
@@ -565,3 +565,4 @@ Revert uploader task commits bertahap; leave current metadata/playback UI bekerj
 - 2026-10-05: pengguna menyetujui plan dan meminta mockup; ADUP-006 In Progress pada branch feature planning yang sama. Runtime/schema/dependency belum diubah. Source evidence base tetap valid untuk desain; freshness ulang wajib sebelum implementasi.
 - ADUP-006: empat mockup final dan [state/modal specification](../../design/admin-media-upload.md) tersedia, status Review menunggu visual approval. Dua desktop1070×1470 dan dua mobile793×1983; lima built-in image_gen calls termasuk correction Edit metadata. Original generator dipertahankan; final docs/design diperiksa visual dan header PNG. Checks/receipt dicatat pada backlog setelah dijalankan.
 - Commit artefak ADUP-006: `f93e9af81c18107f1d70e7c645a2ef496f26db05` (`docs(web): add media upload mockups (ADUP-006)`), delapan file task. Docs/Prettier/diff/staged snapshot/preservation dan seluruh commit hooks lulus; evidence di backlog. Receipt follow-up menetapkan empat PNG mode100644 tanpa mengubah byte gambar. Status Review; tidak ada push/PR/merge atau runtime implementation dari task mockup.
+- 2026-10-05 — pengguna memberikan “oke approve” untuk empat mockup. ADUP-006 Done; canonical desain/plan/backlog/index diperbarui. Entry Review di atas adalah riwayat sebelum approval; tidak ada perubahan raster atau runtime. Task berikutnya sesuai DAG adalah proof hashing ADUP-002.
