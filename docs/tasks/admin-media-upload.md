@@ -333,14 +333,14 @@ Visual inspection/prompts/PNG/path tracking + docs/Prettier; raster bukan proof 
 
 Pada 2026-10-05 pengguna menyetujui plan dan meminta mockup. [Empat final dan prompt set](../design/admin-media-upload.md) dibuat dengan built-in image_gen: dua desktop1070×1470, dua mobile793×1983; lima calls termasuk correction Edit metadata. Final diinspeksi: English/shell/theme/avatar/logout, role/progress/cancel/choose/readiness sesuai scope, tanpa source player atau publish/transcode persen. Header PNG dan ukuran pasangan valid. State/Series/Standalone/modal variants berupa specification; tidak diklaim seluruhnya tampil di raster. Runtime tidak berubah; visual approval pengguna masih pending.
 
-Actual checks: `bun run docs:check` lulus (56 Markdown / 481 local links), installed Prettier write/check untuk empat Markdown task lulus, `git diff --check` dan `git diff --cached --check` lulus. Staged-only checkout dengan `checkDocumentation` lulus (49 Markdown / 462 links). Staging hanya delapan file task, termasuk empat PNG; 22 file unrelated tetap sama melalui SHA-256, referensi desain lokal pada README dipertahankan dan tidak ikut staged index. Commit/hook receipt dicatat setelah hasil aktual; tidak menjalankan runtime uploader test/build/migration yang belum ada.
+Actual checks: `bun run docs:check` lulus (56 Markdown / 481 local links), installed Prettier write/check untuk empat Markdown task lulus, `git diff --check` dan `git diff --cached --check` lulus. Staged-only checkout dengan `checkDocumentation` lulus (49 Markdown / 462 links). Staging hanya delapan file task, termasuk empat PNG; 22 file unrelated tetap sama melalui SHA-256, referensi desain lokal pada README dipertahankan dan tidak ikut staged index. Commit artefak berhasil; seluruh hook normal lulus: docs (56 Markdown /481 links), lint (1/1 cache), check-types (3/3 cache) dan Commitlint, tanpa bypass. Tidak menjalankan runtime uploader test/build/migration yang belum ada. Follow-up receipt menyelaraskan permission empat PNG ke mode100644 tanpa mengubah byte gambar.
 
 ### Commit task
 
-- Pesan yang direncanakan: `docs(web): adup-006 document media upload layouts`.
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
-- Ledger: catat SHA aktual setelah commit berhasil pada update dokumentasi berikutnya; jangan menulis SHA self-referential.
+- Pesan: `docs(web): add media upload mockups (ADUP-006)`.
+- SHA: `f93e9af81c18107f1d70e7c645a2ef496f26db05`.
+- Hook/checks: docs, lint, check-types dan Commitlint lulus; PNG content/dimensions, staged docs dan preservation lulus.
+- Ledger: receipt dicatat sesudah commit artefak pada update ini, bukan SHA self-referential. Status Review tetap sampai approval visual pengguna.
 
 ### Blocker atau tindak lanjut
 
@@ -813,8 +813,9 @@ Dependencies ADUP-003, ADUP-004, ADUP-005, ADUP-006, ADUP-007, ADUP-008, ADUP-00
 
 ## Ledger planning
 
-| Tanggal    | Task     | Bukti/status                                                                                            | Commit                                     |
-| ---------- | -------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| 2026-10-05 | ADUP-001 | Done: context-before-plan, 15 task/DAG, docs/Prettier/diff/staged snapshot/preservation dan hooks lulus | `5a165fb7410d81e09af81f1761419ebf0369c564` |
+| Tanggal    | Task     | Bukti/status                                                                                                    | Commit                                     |
+| ---------- | -------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| 2026-10-05 | ADUP-001 | Done: context-before-plan, 15 task/DAG, docs/Prettier/diff/staged snapshot/preservation dan hooks lulus         | `5a165fb7410d81e09af81f1761419ebf0369c564` |
+| 2026-10-05 | ADUP-006 | Review: empat raster/state spec, PNG/docs/staged snapshot/preservation dan hooks lulus; visual approval pending | `f93e9af81c18107f1d70e7c645a2ef496f26db05` |
 
 ADUP-006 berada pada Review setelah mockup tersedia; task runtime lainnya tetap Backlog. Status Done planning tidak berarti runtime, migrasi atau desain sudah selesai.
