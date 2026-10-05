@@ -471,3 +471,11 @@ Preservation audit terhadap snapshot sebelum implementasi lulus untuk file unrel
 Pengguna meminta commit, push, PR dan merge **tanpa squash** setelah acceptance implementasi. Delivery memakai `feat/admin-content-dashboard` ke `main`, merge commit dan mempertahankan branch sumber. `git fetch origin` teramati: target `origin/main` ancestor HEAD, 0 commit berbeda di sisi base dan 21 commit fitur/planning/desain di sisi head sebelum receipt otorisasi ini; tidak ada konflik integrasi. PR branch belum ada saat pengecekan.
 
 Task implementation dan receipt sudah committed hingga `afa5a09`; validasi runtime ADMC-011 tetap berlaku karena sesudahnya hanya dokumentasi. Perubahan worktree lama (design system/boards dan receipt build) disnapshot untuk preservation dan tidak ikut staging/push. Command/result/docs/format/hooks delivery dicatat setelah teramati; hasil merge tidak dinyatakan sebelum dikonfirmasi GitHub.
+
+#### Checkpoint sebelum merge PR — 5 Oktober 2026
+
+- Receipt otorisasi: `3ec2d4a05474463d3cd64da2cda010484ba9092d`; Prettier/docs 52 Markdown/409 links/whitespace dan hooks docs/lint/types/Commitlint lulus tanpa bypass.
+- `git push -u origin feat/admin-content-dashboard` berhasil; HEAD lokal dan origin sama pada SHA receipt otorisasi tersebut.
+- [PR #6: feat(web): implement admin content dashboard](https://github.com/bayuaji17/vertical-movie-app/pull/6) dibuka ke `main` dan di-attach pada task. Snapshot GitHub teramati OPEN/MERGEABLE/CLEAN, head cocok dengan origin; tidak ada hosted checks pada snapshot.
+- Delivery menggunakan merge commit dengan pemeriksaan exact head, tanpa squash/rebase, dan branch sumber dipertahankan. Hasil final/merge SHA harus dikonfirmasi dari PR GitHub; checkpoint ini mendahului aksi merge.
+- Source runtime tidak berubah setelah acceptance; test/DB/browser/SSR/build evidence ADMC-011 masih valid. Snapshot preservation mencakup 23 perubahan lokal unrelated; hanya plan receipt ini yang ditambahkan. Tidak ada rollout production atau perubahan schema.
