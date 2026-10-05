@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { Link } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAdminPrincipal } from '#/lib/auth/session-context'
 import { browserMediaClient } from '#/lib/admin/media-client'
@@ -34,6 +35,21 @@ export function OwnerMediaPanel({
             publication are separate steps.
           </p>
         </div>
+        {query.data?.canPreview && owner.ownerType === 'video' && (
+          <Button
+            nativeButton={false}
+            variant="outline"
+            className="min-h-11"
+            render={
+              <Link
+                to="/admin/videos/$id/preview"
+                params={{ id: owner.ownerId }}
+              />
+            }
+          >
+            Preview video
+          </Button>
+        )}
         <Button
           variant="outline"
           className="min-h-11"

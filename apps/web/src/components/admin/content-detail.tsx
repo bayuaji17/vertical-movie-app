@@ -155,21 +155,6 @@ export function ContentDetailView({ detail }: { detail: ContentDetail }) {
                   Source availability describes the original upload. HLS
                   playback readiness is managed separately.
                 </p>
-                {detail.data.sourceAvailability === 'available' && (
-                  <Button
-                    nativeButton={false}
-                    variant="outline"
-                    className="min-h-11"
-                    render={
-                      <Link
-                        to="/admin/videos/$id/preview"
-                        params={{ id: d.id }}
-                      />
-                    }
-                  >
-                    Preview video
-                  </Button>
-                )}
               </>
             )}
           </CardContent>

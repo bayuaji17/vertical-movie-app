@@ -35,6 +35,7 @@ import {
   EmptyDescription,
 } from '#/components/ui/empty'
 import { MediaConfirmDialog } from './media-confirm-dialog'
+import { MediaProcessingStatus } from './media-processing-status'
 
 const phaseLabels: Record<UploadPhase, string> = {
   idle: 'No upload selected',
@@ -108,9 +109,7 @@ export function MediaUploadCard({
         {role.current ? (
           <div className="flex flex-col gap-2">
             <p className="text-sm font-medium">Attached media</p>
-            <Badge variant="secondary" className="w-fit">
-              {role.current.state}
-            </Badge>
+            <MediaProcessingStatus role={role} />
           </div>
         ) : (
           <Empty className="border p-6">

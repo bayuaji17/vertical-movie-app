@@ -663,8 +663,8 @@ Shared Upload Media panel below metadata diimplementasikan pada existing detail 
 ### Commit task
 
 - Pesan yang direncanakan: `feat(web): adup-012 render media upload panel`.
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- SHA: `912889bcf2de322ea930f7c0663783e64f82116d`.
+- Hook/checks: docs, lint, check-types dan Commitlint lulus; tidak ada hook dilewati.
 - Ledger: catat SHA aktual setelah commit berhasil pada update dokumentasi berikutnya; jangan menulis SHA self-referential.
 
 ### Blocker atau tindak lanjut
@@ -673,7 +673,7 @@ Tidak ada blocker layout/panel; readiness dan auth closure mengikuti ADUP-013–
 
 ## Task: ADUP-013 — Status pemrosesan dasar dan readiness owner
 
-- Status: Backlog
+- Status: Done
 - Owner: pengembang/agent pelaksana task.
 - Prioritas: 13, mengikuti dependencies.
 - Referensi: ADUP-US03; [plan canonical](../plans/admin-media-upload/implementation-plan.md), [PRD](../product/prd.md).
@@ -700,9 +700,9 @@ Target/symbol: Separate upload/asset/job badges, polling and preview capability.
 
 ### Acceptance criteria
 
-- [ ] Tidak menampilkan Ready/Preview ketika hanya upload selesai atau satu role ready.
-- [ ] Tidak ada polling loop terminal/background/offline atau presign logging/persistence.
-- [ ] Existing player/watch/preview source tetap tidak diubah; preview readiness gating sesuai server.
+- [x] Tidak menampilkan Ready/Preview ketika hanya upload selesai atau satu role ready.
+- [x] Tidak ada polling loop terminal/background/offline atau presign logging/persistence.
+- [x] Existing player/watch/preview source tetap tidak diubah; preview readiness gating sesuai server.
 
 ### Validasi
 
@@ -710,7 +710,7 @@ Native state/polling tests + real MinIO/worker browser both roles completion/fai
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan rencana, bukan hasil test yang telah dijalankan. Isi evidence aktual dan batas proof saat task dikerjakan.
+Owner/session polling hanya nonterminal saat visible/online, setiap 5 detik; upload/job/media state terpisah, unknown neutral, processing indeterminate. Source original tombstone tidak mematikan HLS readiness; Preview ditawarkan hanya server canPreview pada both verified roles. Native media state+client 9 pass/48 assertions. Built PostgreSQL/MinIO/FFmpeg Chromium workflow lulus source/poster completion→processing→Ready, Preview gate, Series cover-only tanpa preview, refresh dan dirty editor409 input retention. Existing playback/player source tidak diubah. Root check-types 3/3, lint 1/1, build 2/2 lulus. Poll/backend fixture reality dipisahkan dari injected auth; terminal/offline/background native tests lulus. Runtime extended acceptance berikutnya ADUP-015.
 
 ### Commit task
 
@@ -721,7 +721,7 @@ Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan
 
 ### Blocker atau tindak lanjut
 
-Dependencies ADUP-003, ADUP-005, ADUP-007, ADUP-012 (scope plan telah disetujui pengguna). Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
+Tidak ada blocker readiness; auth lifecycle dan acceptance closure mengikuti ADUP-014–015.
 
 ## Task: ADUP-014 — Auth cleanup dan navigasi upload aktif
 

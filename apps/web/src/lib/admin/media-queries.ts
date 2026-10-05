@@ -1,4 +1,8 @@
-import { mutationOptions, queryOptions } from '@tanstack/react-query'
+import {
+  mutationOptions,
+  queryOptions,
+  onlineManager,
+} from '@tanstack/react-query'
 import type { QueryClient } from '@tanstack/react-query'
 import type {
   MediaClient,
@@ -9,6 +13,16 @@ import type {
 import { MediaApiError } from './media-errors'
 import { invalidateContent } from './content-queries'
 import type { ContentType } from './content-client'
+import { inventoryNeedsPolling, sessionNeedsPolling } from './media-state'
+
+export function mediaPollInterval(
+  pending: boolean,
+  visible = typeof document !== 'undefined' &&
+    document.visibilityState === 'visible',
+  online = onlineManager.isOnline(),
+) {
+  return pending && visible && online ? 5000 : false
+}
 
 export const mediaKeys = {
   root: (identity: string) => ['admin', identity, 'media'] as const,
@@ -43,6 +57,9 @@ export function ownerMediaOptions(
     gcTime: 300000,
     enabled: typeof window !== 'undefined',
     queryFn: ({ signal }) => configured(client).owner(owner, signal),
+    refetchIntervalInBackground: false,
+    refetchInterval: (query) =>
+      mediaPollInterval(inventoryNeedsPolling(query.state.data)),
   })
 }
 export function uploadStatusOptions(
@@ -59,6 +76,9 @@ export function uploadStatusOptions(
     gcTime: 300000,
     enabled: typeof window !== 'undefined',
     queryFn: ({ signal }) => configured(client).status(id, signal),
+    refetchIntervalInBackground: false,
+    refetchInterval: (query) =>
+      mediaPollInterval(sessionNeedsPolling(query.state.data)),
   })
 }
 export function initiateMediaOptions(
