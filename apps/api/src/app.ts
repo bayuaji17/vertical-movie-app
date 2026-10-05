@@ -25,8 +25,11 @@ import type { GenresService } from "./modules/genres/service";
 import type { RequireAdminDependencies } from "./modules/auth/admin/guard";
 
 import type { S3Client } from "bun";
+import { createContentModule } from "./modules/content";
+import type { ContentPageService } from "./modules/content/service";
 
 type AppDependencies = {
+  contentPageService?: ContentPageService;
   storage?: S3Client;
   mediaService?: MediaService;
   catalogService?: CatalogService;
@@ -60,6 +63,7 @@ function createAuthRoutes(auth?: AppDependencies["auth"]) {
 }
 
 export function createApp({
+  contentPageService,
   storage,
   mediaService,
   catalogService,
@@ -89,6 +93,7 @@ export function createApp({
     .use(createSeriesModule({ service: seriesService, getSession }))
     .use(createVideosModule({ service: videosService, getSession }))
     .use(createGenresModule({ service: genresService, getSession }))
+    .use(createContentModule({ service: contentPageService, getSession }))
     .use(createMediaModule({ service: mediaService, getSession }))
     .use(createCatalogModule(catalogService))
     .use(createPublicationModule({ service: publicationService, getSession }))

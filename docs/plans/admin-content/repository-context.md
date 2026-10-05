@@ -127,3 +127,7 @@ Freshness HEAD 71a9dfb67f379afcd6b7411d2788587f284f7ed3; source sama dengan base
 ## Mobile design — 5 Oktober 2026
 
 Snapshot 0ef62913b98d85517fc663319830d3247263e1d9; source tetap identik base, HEAD hanya penambahan aset/docs. Pengguna menyetujui desktop dark lalu meminta mobile. Scope ADMC-DES-004: lima halaman × light/dark, full-page portrait, hamburger/drawer/header/avatar, list cards/custom pagination dan single-column form/detail. Mobile raster tidak berarti route responsif atau drawer/theme browser behavior sudah implemented. Source/token/dependency/desktop existing dipertahankan.
+
+## Implementasi disetujui — 5 Oktober 2026
+
+Pengguna menyetujui desktop/mobile light/dark dan meminta implementasi Eden/TanStack Query/DRY serta commit setiap task. Snapshot `e5043eb14d3dc7f8429fa7e70c51bf87242a31dc`; branch `feat/admin-content-dashboard`. Pemeriksaan freshness: kontrak/source tetap sesuai plan; perubahan existing desain/CSS, indeks dan receipt dipertahankan. Tambahan `/admin/content` diperlukan untuk total/page, tanpa schema baru. Scope metadata dashboard, bukan upload/publication/player baru.

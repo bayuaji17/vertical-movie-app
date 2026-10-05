@@ -2,14 +2,14 @@
 
 ## Plan metadata
 
-- Status: requirement revisi v2 disetujui pengguna; hasil visual dan rincian teknis masih proposal untuk review. Implementasi belum diminta.
+- Status: disetujui pengguna, implementasi In Progress pada 5 Oktober 2026.
 - Tanggal: 5 Oktober 2026.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `main`; base SHA / last validated SHA: `c5406282f8f3c86563ba7112ec43d2aa17f97da2`.
 - Context: [repository-context.md](repository-context.md), disimpan sebelum plan ini.
 - Backlog: [admin-content](../../tasks/admin-content.md).
 - Branch planning: `chore/admin-content-plan`; branch implementasi yang diusulkan: `feat/admin-content-dashboard`.
-- Otorisasi: pengguna meminta plan detail tahap pertama frontend, kemudian desain desktop light untuk lima halaman dengan theme switcher pada 5 Oktober 2026. Root workflow mengotorisasi commit task planning/desain; source runtime, instalasi komponen, push/PR/merge fitur ini belum diminta.
+- Otorisasi: pengguna meminta plan detail tahap pertama frontend, kemudian desain desktop light untuk lima halaman dengan theme switcher pada 5 Oktober 2026. Root workflow mengotorisasi commit task planning/desain; Implementasi runtime/komponen disetujui pengguna pada 5 Oktober 2026; push/PR/merge/deployment belum diminta.
 
 ## Objective
 
@@ -399,3 +399,11 @@ Roadmap bukan daftar task Ready atau perluasan acceptance iterasi 1. Jangan mene
 - User meminta mobile dari desktop yang disetujui; snapshot 0ef62913b98d85517fc663319830d3247263e1d9, source unchanged. Context disimpan sebelum refinement plan.
 - ADMC-DES-004 menghasilkan lima halaman × dua tema, single-column/drawer/card navigation dan custom pagination sample3. Header/avatar/Appearance/resource fields mengikuti canonical desktop; scope hanya assets/docs.
 - Prompt/evidence serta data contoh/batas full-page capture ada pada canonical mobile; runtime responsive/theme/drawer/touch/browser acceptance tetap tasks implementasi. Checks/commit aktual dicatat setelah teramati.
+
+- Receipt ADMC-DES-004: `e5043eb14d3dc7f8429fa7e70c51bf87242a31dc`; sepuluh mobile PNG/canonical prompts dan refinement docs committed lokal. Visual/PNG, preservation 33 file, docs worktree 52/391/staged 45/372, format/whitespace dan hooks docs/lint/types/Commitlint lulus. Receipt pascacommit untuk pembaruan task berikutnya; Done berarti aset selesai, approval visual dan responsive/theme/drawer runtime tetap terpisah.
+
+### 2026-10-05 — Implementasi disetujui
+
+- Branch `feat/admin-content-dashboard` dibuat dari `e5043eb`; freshness diperiksa, context diperbarui sebelum plan. Pengguna menyetujui desain/rencana dan implementasi Eden, TanStack Query, DRY, commit setiap task.
+- Urutan: ADMC-013, ADMC-002, ADMC-003, ADMC-004, ADMC-012, ADMC-005, ADMC-006, ADMC-014, ADMC-008, ADMC-007, ADMC-009, ADMC-010, ADMC-011. Dependency UI create/edit/detail diselesaikan bertahap; route generator tetap owner route tree.
+- Foundation charcoal CSS lokal disetujui tetapi belum tracked; integrasi token menjadi task terpisah ADMC-015 sebelum theme/browser acceptance, tanpa memasukkan artefak unrelated. Tidak membuat schema baru; proof PostgreSQL memakai dedicated database.

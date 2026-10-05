@@ -1,10 +1,10 @@
 # Modul: Dashboard metadata konten
 
-> Status: planning · 5 Oktober 2026 · Permintaan pengguna: plan tahap pertama frontend. Requirement v2 disetujui pengguna; hasil visual/rincian teknis masih untuk review, runtime belum diminta. Hasil pemeriksaan hanya dicatat setelah teramati.
+> Status: planning · 5 Oktober 2026 · Permintaan pengguna: plan tahap pertama frontend. Requirement v2 disetujui pengguna; desain/rencana dan implementasi disetujui pengguna 5 Oktober 2026; runtime In Progress. Hasil pemeriksaan hanya dicatat setelah teramati.
 
 ## Task: ADMC-DES-004 — Desain mobile light/dark v2
 
-- Status: Review
+- Status: Done
 - Owner: Codex
 - Prioritas: P1
 - Referensi: ADMC-US-06; permintaan pengguna 5 Oktober 2026.
@@ -21,7 +21,7 @@ Mobile dashboard/list/create/detail/edit English, hamburger/drawer navigation, a
 - [x] Sepuluh aset mobile portrait tersedia, shared header/avatar/menu dan kedua palet konsisten dengan desktop v2.
 - [x] Semua metadata/actions/create tiga jenis/edit immutable/rights/genre/state tersedia pada single-column flow; list cards/custom3/range1–3of42/page1of14 konsisten.
 - [x] Dashboard dropdown menunjukkan theme aktif; navigasi drawer/log out, safe touch/scroll dan batas screenshot vs runtime dicatat.
-- [ ] Prompt/path/tool/PNG/visual proof, preservation/docs/format/whitespace/staged snapshot serta commit task lulus.
+- [x] Prompt/path/tool/PNG/visual proof, preservation/docs/format/whitespace/staged snapshot serta commit task lulus.
 
 ### Validasi
 
@@ -34,8 +34,8 @@ Built-in image_gen: sepuluh panggilan utama, tanpa koreksi tambahan. Sepuluh fin
 ### Commit task
 
 - Pesan: docs(design): add admin mobile mockups (ADMC-DES-004).
-- SHA: Belum dibuat.
-- Hook/checks: Menunggu hasil aktual.
+- SHA: `e5043eb14d3dc7f8429fa7e70c51bf87242a31dc`.
+- Hook/checks: docs:check 52/391, lint 1 task/types 3 task (cache valid), Commitlint lulus tanpa bypass. Commit 16 file assets/docs; belum push/PR/merge.
 - Ledger: Receipt pascacommit untuk task berikutnya.
 
 ### Blocker atau tindak lanjut
@@ -629,7 +629,7 @@ Desain dark/mobile dan implementasi menjadi langkah setelah review; request ini 
 
 ## Task: ADMC-013 — Kontrak pagination server
 
-- Status: Backlog
+- Status: Review
 - Owner: Codex/pengembang pelaksana
 - Prioritas: P1
 - Referensi: plan; revisi pengguna 5 Oktober 2026.
@@ -643,8 +643,8 @@ Proposal GET /admin/content type/page/pageSize/search/includeArchived dengan typ
 
 ### Acceptance criteria
 
-- [ ] Tiga jenis, total filter, numbered boundaries dan custom 1–100 akurat; invalid/empty/out-of-range behavior terdokumentasi.
-- [ ] HTTP authorization/query/DTO tests serta dedicated PostgreSQL filter/count/snapshot/performance proof dan root gates lulus; existing consumers tidak rusak.
+- [x] Tiga jenis, total filter, numbered boundaries dan custom 1–100 akurat; invalid/empty/out-of-range behavior terdokumentasi.
+- [x] HTTP authorization/query/DTO tests serta dedicated PostgreSQL filter/count/snapshot/performance proof dan root gates lulus; existing consumers tidak rusak.
 
 ### Validasi
 
@@ -664,6 +664,12 @@ Belum implemented. Current DTO hanya items/nextCursor; angka 42 pada mockup meru
 ### Blocker atau tindak lanjut
 
 Visual v2 untuk review; runtime belum diminta/diimplementasikan.
+
+### Evidence implementasi — 5 Oktober 2026
+
+HTTP/regression: 16 tests/74 assertions pass (content/videos/series/gateway). Dedicated PostgreSQL: 2 tests/52 assertions pass; 43 rows per resource, boundaries, wildcard literals and concurrent count/page parity. Root check-types (3 tasks), lint (1), build (2) pass. No schema migration or development DB mutation. Offset pagination beyond the last returns an empty page; large-dataset profiling remains a deployment check.
+
+Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
 ## Task: ADMC-014 — Metadata Series dan resource dispatch
 
