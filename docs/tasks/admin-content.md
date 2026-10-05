@@ -336,7 +336,7 @@ Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
 ## Task: ADMC-005 — Daftar metadata dengan search dan pagination
 
-- Status: Review
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai dependency
 - Referensi: ADMC-US-02; PRD-02/03/08/09; GR-01/05/08; plan STEP-005.
@@ -384,6 +384,8 @@ Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 Root check-types (3), lint (1), build (2), docs:check and diff --check pass. Content pagination/filter unit proof: 3 tests, 13 assertions. Full browser acceptance follows in ADMC-011.
 
 Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
+
+- Receipt commit task: `8dd531147dfb01e5ff0742dc8978a9f9938a5da5`; hooks docs/lint/types/Commitlint lulus tanpa bypass.
 
 ## Task: ADMC-006 — Reusable form metadata dan genre
 
@@ -830,3 +832,45 @@ Built-in image_gen: lima edit utama dan dua koreksi avatar. Semua final inspecte
 ### Blocker atau tindak lanjut
 
 Visual v2 untuk review; runtime belum diminta/diimplementasikan.
+
+## Task: ADMC-016 — Recheck sesi tanpa kehilangan form pada business outage
+
+- Status: Review
+- Owner: Codex
+- Prioritas: P1
+- Diperbarui: 2026-10-05
+- Dependensi: ADMC-003, ADMC-004; sebelum ADMC-007/009.
+- Referensi: ADMC-US-03/04; approved failure/input-preservation contract.
+- Ukuran: Transisi auth dan regression tests.
+
+### Ruang lingkup
+
+Recheck authoritative pada 403/5xx metadata mempertahankan snapshot valid selama pemeriksaan. Null/role revoked/dependency failure tetap mengunci layout dan menghapus private data. Refresh login/logout/cross-tab tetap memakai mekanisme clear existing.
+
+### Acceptance criteria
+
+- [x] Business outage dengan admin valid tidak menghapus snapshot/form sebelum verdict.
+- [x] Null/revoked/outage menghapus private data, public cache tetap, session query error mengunci layout meskipun ada snapshot lama.
+- [x] 401 dan logout tetap clear/cancel; tidak ada automatic mutation retry.
+
+### Validasi
+
+Native transition/guard tests dan root gates. Browser save outage/input preservation dibuktikan pada ADMC-011.
+
+### Hasil dan bukti
+
+`bun test apps/web/test/admin-session-recheck.test.ts apps/web/test/admin-route-guard.test.ts`: 16 tests/56 assertions pass. Gate hasil dicatat setelah selesai.
+
+### Commit task
+
+Pesan `fix(web): preserve forms during session recheck (ADMC-016)`; SHA setelah commit berhasil.
+
+### Blocker atau tindak lanjut
+
+Browser closure ADMC-011. Production readiness tidak disimpulkan.
+
+### Evidence implementasi — 5 Oktober 2026
+
+Types (3), lint (1), build (2) passed; native recheck/route guards 16 tests/56 assertions. Auth error state remains the lock even when its previous snapshot exists; private data is removed. Browser form retention closure on ADMC-011.
+
+Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
