@@ -29,7 +29,7 @@ Untuk task runtime, jalankan tests yang relevan, `bun run check-types`, `bun run
 
 ## Task: ACOV-001 — Context, plan dan backlog berbasis repository
 
-- Status: Review
+- Status: Done
 - Owner: Codex / pengembang proyek
 - Prioritas: 1
 - Referensi: ACOV-US-01–03; PRD media/sampul dan GR lifecycle; [plan](../plans/admin-cover-processing/implementation-plan.md).
@@ -47,7 +47,7 @@ Target: `docs/plans/admin-cover-processing/{repository-context,implementation-pl
 
 - [x] Snapshot, dampak readiness/provenance, keterbatasan native dan policy proposal tercatat; status proposal dibedakan dari runtime.
 - [x] Sepuluh task memiliki dependensi, acceptance criteria, validation dan commit terpisah; dokumen saling tertaut tanpa link rusak.
-- [ ] Format/docs/diff dan preservation lulus; commit task lokal berhasil tanpa memasukkan pekerjaan lain.
+- [x] Format/docs/diff dan preservation lulus; commit task lokal berhasil tanpa memasukkan pekerjaan lain.
 
 ### Validasi
 
@@ -55,18 +55,18 @@ bun run docs:check; Prettier pada empat Markdown terkait; git diff --check; audi
 
 ### Hasil dan bukti
 
-2026-10-06: context ditulis sebelum plan pada snapshot di atas. `bun run docs:check` passed (59 Markdown, 514 local links/anchors); Prettier empat Markdown passed; `git diff --check` passed. Audit sepuluh ID unik, template dan dependensi DAG konsisten/acyclic passed. SHA-256 22 unrelated paths sama; link desain existing pada README tetap ada dan perubahan indeks task di-stage terpisah. Staged export docs checker passed (52 Markdown, 495 local links/anchors, tanpa errors); `git diff --cached --check` passed dan hanya empat path plan/backlog/index masuk staging. Commit receipt dicatat setelah commit berhasil. Tidak menjalankan runtime tests/build/migration karena scope dokumentasi saja.
+2026-10-06: context ditulis sebelum plan pada snapshot di atas. `bun run docs:check` passed (59 Markdown, 514 local links/anchors); Prettier empat Markdown passed; `git diff --check` passed. Audit sepuluh ID unik, template dan dependensi DAG konsisten/acyclic passed. SHA-256 22 unrelated paths sama; link desain existing pada README tetap ada dan perubahan indeks task di-stage terpisah. Staged export docs checker passed (52 Markdown, 495 local links/anchors, tanpa errors); `git diff --cached --check` passed dan hanya empat path plan/backlog/index masuk staging. Commit task berhasil pada `693b557031c59d6ae0ab2d013c54a4bc38625e7e`; hook normal docs/lint/check-types/Commitlint passed. Lint web dan check-types api/web/auth merupakan cache hits, tanpa klaim runtime proof baru. Tidak menjalankan runtime tests/build/migration karena scope dokumentasi saja.
 
 ### Commit task
 
 - Pesan: `docs(media): plan native cover processing (ACOV-001)`
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
-- Ledger: SHA aktual dicatat pada update dokumentasi setelah commit, tanpa self-referential SHA.
+- SHA: `693b557031c59d6ae0ab2d013c54a4bc38625e7e`.
+- Hook/checks: docs:check passed (59/514); lint web passed (1 cache hit); check-types api/web/auth passed (3 cache hits); Commitlint passed; Prettier/diff/task DAG/staged-docs/preservation passed.
+- Ledger: receipt ini mencatat commit task sebelumnya; commit receipt tidak mengklaim SHA dirinya sendiri.
 
 ### Blocker atau tindak lanjut
 
-Tuntaskan checks/commit planning; runtime tetap menunggu review plan.
+Planning Done; runtime ACOV-002–010 tetap Backlog sampai plan disetujui dan freshness diperiksa. Tidak ada implementasi/migration/remote delivery pada task ini.
 
 ## Task: ACOV-002 — Buktikan native image dan browser crop memenuhi policy
 

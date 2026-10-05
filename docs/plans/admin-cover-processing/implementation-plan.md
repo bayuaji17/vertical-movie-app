@@ -188,3 +188,5 @@ Direction approved: browser crop + Bun.Image API, no worker dependency for new c
 
 - 2026-10-06: context saved before plan; generated stable 10-task backlog. Planning changes only feature Markdown/index. No application/runtime/env/schema modifications, migration, storage mutation or new worker processing triggered.
 - Planning checks 2026-10-06: `bun run docs:check` passed (59 Markdown, 514 local links/anchors); Prettier four owned Markdown passed; `git diff --check` passed; audit 10 unique task IDs, matching acyclic dependencies/template sections passed; 22 unrelated file hashes + existing README design links retained. Staged documentation/commit receipt follows ACOV-001; tests above remain planned runtime proof.
+
+- 2026-10-06: ACOV-001 Done, task commit `693b557031c59d6ae0ab2d013c54a4bc38625e7e`. Hook docs/lint/check-types/Commitlint passed (lint/types cache hits). Staged export: 52 Markdown, 495 local links/anchors, zero errors. Freshness: source apps/packages/manifests/lock tidak berubah dari base ke commit planning; runtime ACOV-002–010 belum dimulai. Receipt tersimpan pada update dokumentasi sesudah commit task.
