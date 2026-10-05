@@ -9,7 +9,7 @@
 - Context: [repository-context.md](repository-context.md), disimpan sebelum plan ini.
 - Backlog: [admin-content](../../tasks/admin-content.md).
 - Branch planning: `chore/admin-content-plan`; branch implementasi: `feat/admin-content-dashboard`.
-- Otorisasi: pengguna meminta plan detail tahap pertama frontend, kemudian desain desktop light untuk lima halaman dengan theme switcher pada 5 Oktober 2026. Root workflow mengotorisasi commit task planning/desain; Implementasi runtime/komponen disetujui pengguna pada 5 Oktober 2026; push/PR/merge/deployment belum diminta.
+- Otorisasi: pengguna meminta plan detail tahap pertama frontend, kemudian desain desktop light untuk lima halaman dengan theme switcher pada 5 Oktober 2026. Root workflow mengotorisasi commit task planning/desain; Implementasi runtime/komponen disetujui pengguna pada 5 Oktober 2026; push/PR/merge tanpa squash disetujui pengguna pada 5 Oktober 2026 setelah acceptance; deployment production tetap di luar permintaan.
 
 ## Objective
 
@@ -465,3 +465,9 @@ Preservation audit terhadap snapshot sebelum implementasi lulus untuk file unrel
 - Receipt ADMC-011: `b5ccd0c2ec0deb97abaf122b5e10938b712249fc`; checks/AC teramati ada pada backlog. Commit lokal, belum push/PR/merge.
 
 - Acceptance commit berhasil: `b5ccd0c2ec0deb97abaf122b5e10938b712249fc`; docs/lint/types/Commitlint lulus tanpa bypass. ADMC-011 Done. Receipt ini ditulis setelah commit berhasil, tidak menggunakan SHA self-referential. Source branch tetap lokal; remote delivery memerlukan permintaan pengguna.
+
+### 2026-10-05 — Otorisasi delivery Git
+
+Pengguna meminta commit, push, PR dan merge **tanpa squash** setelah acceptance implementasi. Delivery memakai `feat/admin-content-dashboard` ke `main`, merge commit dan mempertahankan branch sumber. `git fetch origin` teramati: target `origin/main` ancestor HEAD, 0 commit berbeda di sisi base dan 21 commit fitur/planning/desain di sisi head sebelum receipt otorisasi ini; tidak ada konflik integrasi. PR branch belum ada saat pengecekan.
+
+Task implementation dan receipt sudah committed hingga `afa5a09`; validasi runtime ADMC-011 tetap berlaku karena sesudahnya hanya dokumentasi. Perubahan worktree lama (design system/boards dan receipt build) disnapshot untuk preservation dan tidak ikut staging/push. Command/result/docs/format/hooks delivery dicatat setelah teramati; hasil merge tidak dinyatakan sebelum dikonfirmasi GitHub.
