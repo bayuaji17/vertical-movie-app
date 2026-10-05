@@ -1,6 +1,6 @@
 # Environment aplikasi
 
-> Diperbarui 4 Oktober 2026. API media/worker/HLS aktif pada development MinIO; production R2 melalui selector env tersedia tetapi proof staging belum dijalankan. Kontrak/command/batas evidence: [Media Operations](../operations/media.md).
+> Diperbarui 6 Oktober 2026. API media/worker/HLS aktif pada development MinIO; production R2 melalui selector env tersedia tetapi proof staging belum dijalankan. Adapter pemrosesan poster native tersedia, sedangkan endpoint request-path akan di-wire pada ACOV-005. Kontrak/command/batas evidence: [Media Operations](../operations/media.md).
 
 ## Mulai dari root repo
 
@@ -29,6 +29,9 @@ Perintah `cp` cukup dijalankan sekali; jika `.env` sudah ada, tambahkan variabel
 | `FFMPEG_PATH`, `FFPROBE_PATH`              | Lokasi executable transcode dan pemeriksaan media; nilai contoh mengandalkan `PATH`.             | Aktif pada worker terpisah.                          |
 | `MEDIA_PLAYBACK_BASE_URL`                  | Origin/path delivery seluruh objek HLS setelah mekanisme akses ditetapkan.                       | Aktif; kosong = WEB_ORIGIN/api, wajib same origin.   |
 | `MEDIA_WORKER_CONCURRENCY`                 | Maksimal job video aktif per instance worker; default 1, dapat diatur melalui env server.        | Aktif pada worker, default1; command terpisah.       |
+| `MEDIA_POSTER_MAX_PIXELS`                  | Batas pixel decode poster; default 16.777.216, rentang 2.073.600–16.777.216.                     | Loader aktif; processor disambungkan oleh ACOV-005.  |
+| `MEDIA_POSTER_PROCESS_CONCURRENCY`         | Maksimal proses poster aktif per instance API; default 1, rentang 1–4 tanpa queue menunggu.      | Limiter tersedia; runtime wiring ACOV-005.           |
+| `MEDIA_POSTER_PROCESS_TIMEOUT_SECONDS`     | Deadline logis proses; default 20 detik, rentang 1–120.                                          | Pembatas response; native terminal tetap ditunggu.   |
 
 Nilai database dalam sampel hanya contoh lokal. Menyalin env belum membuat database, tabel, bucket, akun admin, atau worker. Queue menggunakan PostgreSQL yang sama; tidak memerlukan Redis. Konfigurasi melalui env dan concurrency default 1 disetujui pada nomor 7 di bawah; angka retry 3 attempt/jeda 60–300 detik, encoding max(900 detik,3×durasi), stall 300 detik, heartbeat 15/lease 120/recovery 30 detik juga sudah disetujui. Worker runtime menerapkan parameter tersebut.
 
@@ -87,6 +90,12 @@ Parameter berikut disetujui 4 Oktober 2026. Loader, session API dan scheduler up
 | MEDIA_UPLOAD_PART_URL_TTL_SECONDS | 900     | URL part maksimal 15 menit sejak signing, dibatasi sisa session                      |
 
 Runtime menghitung partUrlTtlSeconds = min(900, floor((sessionExpiresAt - now)/1000)); sisa kurang dari 1 detik atau session non-pending ditolak. Renewal memeriksa admin/session/part dan tidak mengulang part yang sudah terverifikasi. MEDIA-CFG-001 menguji default/validasi positive integer tanpa storage I/O; MEDIA-PROOF/DESIGN/UPLOAD membuktikan native signing, expiry dan browser concurrency. Konfigurasi milik API, disampaikan sebagai nilai aman kepada browser tanpa VITE_ secret atau signed URL persisten.
+
+## Pemrosesan poster — batas native
+
+Adapter poster menggunakan `Bun.Image` untuk decode, auto-orient, resize tanpa memperbesar, lalu encode WebP quality 85 dan memverifikasi ulang codec, dimensi, dan hash hasilnya. Input harus PNG/WebP statis, cocok dengan Content-Type dan SHA-256 yang diberikan, berasio 9:16, sekurangnya 1080×1920, serta maksimal 5.000.000 byte. Batas pixel default 16.777.216 melindungi decode sebelum alokasi; output 1080×1920 membutuhkan 2.073.600 pixel. `MEDIA_POSTER_PROCESS_CONCURRENCY` membatasi kerja tiap instance API; request saat sibuk ditolak segera tanpa antrean memori.
+
+`MEDIA_POSTER_PROCESS_TIMEOUT_SECONDS` membatasi waktu penggunaan hasil dan waktu jawaban. Terminal native `Bun.Image` tidak dapat dibatalkan secara paksa; bila masih berjalan saat deadline atau request abort, processor menolak hasil dan mempertahankan slot concurrency sampai terminal selesai. Jadi nilai ini tidak menjamin operasi CPU langsung berhenti. Env loader dan adapter tersedia, sedangkan endpoint request-path dan pemakaian adapter akan terhubung pada ACOV-005. Restart API setelah mengganti env.
 
 ## Worker — env aktif dan kandidat resource
 

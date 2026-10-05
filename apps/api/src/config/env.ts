@@ -1,7 +1,10 @@
 import { loadStorageEnv, type StorageEnv } from "./storage-env";
+import { loadPosterEnv, type PosterEnv } from "./poster-env";
 export { loadStorageEnv } from "./storage-env";
+export { loadPosterEnv } from "./poster-env";
 
 export interface ApiEnv {
+  poster: PosterEnv;
   storage?: StorageEnv;
   port: number;
   databaseUrl: string;
@@ -95,6 +98,7 @@ export function loadApiEnv(
   }
 
   return {
+    poster: loadPosterEnv(source),
     ...(source.STORAGE_PROVIDER !== undefined
       ? { storage: loadStorageEnv(source) }
       : {}),

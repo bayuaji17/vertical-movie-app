@@ -13,6 +13,11 @@ const validEnv = {
 describe("loadApiEnv", () => {
   it("loads PostgreSQL settings and normalizes valid local origins", () => {
     expect(loadApiEnv({ ...validEnv, PORT: "3100" })).toEqual({
+      poster: {
+        maxPixels: 16_777_216,
+        concurrency: 1,
+        timeoutSeconds: 20,
+      },
       port: 3100,
       databaseUrl: validEnv.DATABASE_URL,
       betterAuthUrl: "http://localhost:3000",

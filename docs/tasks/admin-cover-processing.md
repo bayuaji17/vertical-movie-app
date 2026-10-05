@@ -1,6 +1,6 @@
 # Modul: admin cover processing
 
-- Status: **plan disetujui 6 Oktober 2026; implementasi berjalan** pada `feat/admin-cover-processing`.
+- Status: **plan disetujui 6 Oktober 2026; ACOV-001–004 selesai** pada `feat/admin-cover-processing`; implementasi berlanjut.
 - Diperbarui: 6 Oktober 2026.
 - Persetujuan: pengguna menyetujui plan/default pada 6 Oktober 2026; feasibility gate menentukan guard native/browser. Rincian di [plan](../plans/admin-cover-processing/implementation-plan.md).
 - Snapshot source: `06e7ce75e9d3f87bbe501bac054711310e14e5a2`; [context](../plans/admin-cover-processing/repository-context.md).
@@ -158,7 +158,7 @@ Tidak ada blocker ACOV-003. `request` tetap belum dipilih aplikasi sampai ACOV-0
 
 ## Task: ACOV-004 — Adapter Bun.Image dengan batas resource dan output terverifikasi
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex / pengembang proyek
 - Prioritas: 4
 - Referensi: ACOV-US-02; PRD media/sampul dan GR lifecycle; [plan](../plans/admin-cover-processing/implementation-plan.md).
@@ -174,9 +174,9 @@ Target: `apps/api/src/modules/media/poster-image.ts dan tests; apps/api/src/conf
 
 ### Acceptance criteria
 
-- [ ] Payload valid menghasilkan WebP 1080×1920 dengan alpha dan orientation benar, tanpa Sharp/FFmpeg/subprocess pada adapter.
-- [ ] Byte/pixel/hash/type/dimensi/animated invalid ditolak dengan error domain aman; hasil encode diverifikasi sebelum upload/Ready.
-- [ ] Concurrency default 1, pixel cap 16777216 dan logical deadline 20s diuji; busy/abort/timeout tidak membuat unbounded queue atau premature limiter release.
+- [x] Payload valid menghasilkan WebP 1080×1920 dengan alpha dan auto-orient, tanpa Sharp/FFmpeg/subprocess pada adapter.
+- [x] Byte/pixel/hash/type/dimensi/animated invalid ditolak dengan error domain aman; codec, dimensi dan hash hasil encode diverifikasi sebelum hasil dapat dipakai.
+- [x] Concurrency default 1 (dibatasi 1–4 per instance), pixel cap default 16.777.216 dan logical deadline default 20s diuji; busy/abort/timeout tidak membuat unbounded queue atau premature limiter release.
 
 ### Validasi
 
@@ -184,18 +184,22 @@ bun test pada adapter/config dengan native fixture + dependency failure; uji ter
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau divalidasi; hasil runtime dan command aktual dicatat saat task dikerjakan.
+ACOV-004 menambah adapter native tanpa dependency baru. Adapter menyalin payload maksimal 5.000.000 byte, mencocokkan SHA-256 lowercase dan Content-Type, menolak APNG/WebP animasi melalui bounded container scan, lalu meminta Bun.Image memverifikasi format/pixel budget, rasio 9:16, dan minimum 1080×1920. Hasil WebP quality 85 diverifikasi ulang untuk framing statis, format, 1080×1920 dan hash; fixture transparan tetap mempertahankan alpha.
+
+Env API aktif memberi default pixel cap 16.777.216, concurrency 1 per instance (maksimum 4) tanpa antrean, dan deadline logis 20 detik (rentang 1–120). Timeout/abort menolak hasil agar tidak dapat diteruskan. Bun.Image tidak mendukung pembatalan paksa; slot tetap terpakai hingga terminal native selesai, lalu hasil late dibuang. Runtime request belum di-wire sampai ACOV-005.
+
+Hasil: test terarah 24 lulus/0 gagal (79 assertion); suite API 99 lulus/0 gagal (395 assertion). Root `bun run check-types` (3/3), `bun run lint` (web 1/1), `bun run build` (API/web 2/2), `bun run docs:check` (59 Markdown/514 link-anchor) dan Prettier/diff check lulus. Commit hook dicatat pada receipt setelah dijalankan.
 
 ### Commit task
 
 - Pesan: `feat(api): add bounded native poster adapter (ACOV-004)`
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- SHA: dicatat pada receipt pasca-task, tanpa self-referential SHA.
+- Hook/checks: root gates dan hook dicatat pada receipt setelah seluruh pemeriksaan lulus.
 - Ledger: SHA aktual dicatat pada update dokumentasi setelah commit, tanpa self-referential SHA.
 
 ### Blocker atau tindak lanjut
 
-Persetujuan plan, freshness check dan dependensi task di atas; bukan izin untuk mulai runtime pada permintaan planning ini.
+Tidak ada blocker ACOV-004. ACOV-005 menghubungkan processor dan config ini ke endpoint request-path serta storage/provenance yang persisten.
 
 ## Task: ACOV-005 — Endpoint prepare dengan provenance dan worker exclusion
 
