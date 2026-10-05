@@ -58,6 +58,7 @@ function fixture(durationMs: number) {
     ),
     clock,
     signatures,
+    row,
     revoke: () => {
       allowed = false;
     },
@@ -90,4 +91,27 @@ test("renewal reauthorizes catalog visibility before issuing any new signature",
     httpStatus: 404,
   });
   expect(f.signatures).toEqual([1200]);
+});
+test("invalid profile, output, duration and poster fail before any signing", async () => {
+  for (const mutate of [
+    (r: PlayableRow) => {
+      r.source.bucket = "another";
+    },
+    (r: PlayableRow) => {
+      r.hls.outputPrefix = "outputs/wrong/";
+    },
+    (r: PlayableRow) => {
+      r.source.facts = { durationMs: 1800001 };
+    },
+    (r: PlayableRow) => {
+      r.posterJob.outputFiles = [];
+    },
+  ]) {
+    const f = fixture(1000);
+    mutate(f.row);
+    await expect(f.service.info("fixture", true)).rejects.toMatchObject({
+      httpStatus: 503,
+    });
+    expect(f.signatures).toEqual([]);
+  }
 });

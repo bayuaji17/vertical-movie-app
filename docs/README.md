@@ -52,7 +52,7 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 | Dokumentasi        | [Snapshot](plans/documentation/repository-context.md)           | [Plan](plans/documentation/implementation-plan.md)                                             | Organisasi kategori, aturan root, validasi dan review produk/arsitektur.                                                                    |
 | Build web          | [Snapshot](plans/tanstack-build-warnings/repository-context.md) | [Plan](plans/tanstack-build-warnings/implementation-plan.md)                                   | Implemented/verified lokal: warning directive, batas import dan SSR; browser belum diuji.                                                   |
 | Dashboard konten   | [Snapshot](plans/admin-content/repository-context.md)           | [Plan](plans/admin-content/implementation-plan.md)                                             | Implemented metadata: lima template responsif, Eden/Query, theme, pagination, create/detail/edit dan conflict; evidence lokal pada backlog. |
-| Upload Media admin | [Snapshot](plans/admin-media-upload/repository-context.md)      | [Plan](plans/admin-media-upload/implementation-plan.md)                                        | Plan/mockup disetujui; ADUP-001/002/006 Done; runtime inventory/multipart sedang diimplementasikan.                                                         |
+| Upload Media admin | [Snapshot](plans/admin-media-upload/repository-context.md)      | [Plan](plans/admin-media-upload/implementation-plan.md)                                        | Plan/mockup disetujui; ADUP-001/002/003/006 Done; API inventory tersedia, uploader runtime berikutnya.                                                         |
 
 ## Backlog dan evidence
 
@@ -65,7 +65,7 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 - [Development verification](tasks/development-verification.md): quality gate, preservation migrasi dan upgrade Turbo 2.11.7 terverifikasi lokal.
 - [Build web](tasks/web-build.md): baseline warning directive, plan filter logging dan verifikasi build/SSR.
 - [Dashboard konten](tasks/admin-content.md): ADMC-001–016 dan ADMC-DES-001–004; metadata, tema, pagination/Series dan desain.
-- [Upload Media admin](tasks/admin-media-upload.md): ADUP-001–015; planning/hash/desain ADUP-001/002/006 Done; task discovery/multipart/recovery/runtime sedang diimplementasikan.
+- [Upload Media admin](tasks/admin-media-upload.md): ADUP-001–015; planning/hash/inventory/desain ADUP-001/002/003/006 Done; task identity/multipart/recovery/runtime berikutnya.
 - [Dokumentasi](tasks/documentation.md): organisasi folder, aturan dan validasi.
 
 ## Gambaran implementasi saat ini

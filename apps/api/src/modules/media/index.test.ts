@@ -54,11 +54,24 @@ test("all upload routes require authoritative admin before any storage or domain
       calls++;
       throw new Error("forbidden");
     };
+    service.ownerMedia = async () => {
+      calls++;
+      throw new Error("forbidden");
+    };
     const app = createApp({
       mediaService: service,
       getSession: async () => session,
     });
     expect((await app.handle(request())).status).toBe(status);
+    expect(
+      (
+        await app.handle(
+          new Request(
+            "http://localhost/admin/media/owners/video/" + body.ownerId,
+          ),
+        )
+      ).status,
+    ).toBe(status);
     for (const suffix of ["", "/parts", "/complete", "/abort"]) {
       const r = await app.handle(
         new Request(
@@ -78,6 +91,22 @@ test("all upload routes require authoritative admin before any storage or domain
     }
     expect(calls).toBe(0);
   }
+});
+test("owner inventory rejects unknown resources and keeps dependencies private", async () => {
+  const app = createApp({ getSession: async () => admin });
+  for (const path of [
+    "owners/other/" + body.ownerId,
+    "owners/video/not-a-uuid",
+  ])
+    expect(
+      (await app.handle(new Request("http://localhost/admin/media/" + path)))
+        .status,
+    ).toBe(422);
+  const response = await app.handle(
+    new Request("http://localhost/admin/media/owners/video/" + body.ownerId),
+  );
+  expect(response.status).toBe(503);
+  expect(response.headers.get("cache-control")).toBe("private, no-store");
 });
 test("strict typed input is rejected before initiate; storage failures remain private", async () => {
   let calls = 0;

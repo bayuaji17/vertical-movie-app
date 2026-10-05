@@ -282,3 +282,130 @@ test("concurrent completion and abort cannot activate a stale claim", async () =
     )[0].source_asset_id,
   ).toBeNull();
 });
+test("owner inventory separates current media from replacements and hides other actors", async () => {
+  const svc = service(),
+    ownerId = await movie(),
+    owner = { ownerType: "video" as const, ownerId };
+  const empty = await svc.ownerMedia(owner, "media-admin");
+  expect(empty.source?.current).toBeNull();
+  expect(empty.canPreview).toBe(false);
+  expect(empty.canUpload).toBe(true);
+  expect(empty.config.source.maxBytes).toBe("1500000000");
+  const initial = await svc.initiate(input(ownerId), "media-admin");
+  const discovered = await svc.ownerMedia(owner, "media-admin");
+  expect(discovered.source?.active?.id).toBe(initial.id);
+  const encoded = JSON.stringify(discovered);
+  for (const forbidden of [
+    "provider-upload",
+    "uploads/",
+    "sources/",
+    "test-key",
+    "test-secret",
+    "claimToken",
+    "stagingKey",
+    "uploadId",
+    "bucket",
+  ])
+    expect(encoded).not.toContain(forbidden);
+  const another = await svc.ownerMedia(owner, "another-actor");
+  expect(another.source?.active).toBeNull();
+  expect(another.source?.lastAttempt).toBeNull();
+  expect(another.source?.busy).toBe(true);
+  await expect(svc.status(initial.id, "another-actor")).rejects.toMatchObject({
+    httpStatus: 404,
+  });
+  parts = [{ partNumber: 1, etag: '"etag"', sizeBytes: 100 }];
+  await svc.complete(initial.id, "media-admin");
+  now = new Date(now.getTime() + 1);
+  const replacement = await svc.initiate(input(ownerId), "media-admin");
+  const pending = await svc.ownerMedia(owner, "media-admin");
+  expect(pending.source?.current?.id).toBe(initial.assetId);
+  expect(pending.source?.current?.processing.jobState).toBe("queued");
+  expect(pending.source?.active?.id).toBe(replacement.id);
+  expect(pending.rowVersion).toBe(empty.rowVersion + 1);
+  await svc.abort(replacement.id, "media-admin");
+  await db.client`UPDATE upload_sessions SET status='failed',failure_code='UPLOAD_INVALID_OBJECT' WHERE id=${replacement.id}`;
+  const failed = await svc.ownerMedia(owner, "media-admin");
+  expect(failed.source?.current?.id).toBe(initial.assetId);
+  expect(failed.source?.active).toBeNull();
+  expect(failed.source?.lastAttempt?.failureCode).toBe("UPLOAD_INVALID_OBJECT");
+  await db.client`UPDATE videos SET publication_status='archived',archived_at=now() WHERE id=${ownerId}`;
+  expect((await svc.ownerMedia(owner, "media-admin")).canUpload).toBe(false);
+  const mismatch = new MediaService(createMediaRepository(db.db), storage, {
+    ...config,
+    bucket: "another-bucket",
+  });
+  await expect(mismatch.ownerMedia(owner, "media-admin")).rejects.toMatchObject(
+    { code: "STORAGE_PROFILE_CONFLICT" },
+  );
+  const seriesId = crypto.randomUUID();
+  await db.db
+    .insert(series)
+    .values({ id: seriesId, title: "Series", slug: seriesId, ...actor });
+  expect(
+    (
+      await svc.ownerMedia(
+        { ownerType: "series", ownerId: seriesId },
+        "media-admin",
+      )
+    ).source,
+  ).toBeNull();
+  await expect(
+    svc.ownerMedia(
+      { ownerType: "video", ownerId: crypto.randomUUID() },
+      "media-admin",
+    ),
+  ).rejects.toMatchObject({ httpStatus: 404 });
+});
+test("preview inventory follows output provenance and survives original retention; snapshot is consistent", async () => {
+  const owner = { ownerType: "video" as const, ownerId: await movie() },
+    repo = createMediaRepository(db.db),
+    svc = service();
+  for (const kind of ["source", "poster"] as const) {
+    const id = crypto.randomUUID();
+    await repo.store.insertAsset({
+      id,
+      videoId: owner.ownerId,
+      kind,
+      provider: config.provider,
+      bucket: config.bucket,
+      objectKey: "sources/" + id + "/original",
+      sizeBytes: 100n,
+      contentType: kind === "source" ? "video/mp4" : "image/png",
+      createdBy: "media-admin",
+      state: "ready",
+      sha256: "a".repeat(64),
+      verifiedReadyAt: new Date(),
+      facts: { durationMs: 1000, width: 1080, height: 1920 },
+    });
+    await repo.store.enqueue(id, 1, kind, new Date());
+    const job = (await repo.store.assetJob(id, 1))!;
+    const prefix =
+      "outputs/" + id + "/" + job.id + "/" + crypto.randomUUID() + "/";
+    const files = JSON.stringify(
+      kind === "source" ? ["master.m3u8", "0/index.m3u8"] : ["poster.webp"],
+    );
+    await db.client`UPDATE media_jobs SET state='succeeded',output_prefix=${prefix},output_files=${files}::text::jsonb,finished_at=now() WHERE id=${job.id}`;
+    await repo.store.updateAsset(id, { readyJobId: job.id });
+    await repo.store.activate(owner, kind, id, "media-admin", new Date());
+  }
+  const ready = await svc.ownerMedia(owner, "media-admin");
+  expect(ready.canPreview).toBe(true);
+  const sourceId = ready.source!.current!.id,
+    posterId = ready.poster.current!.id;
+  await repo.store.updateAsset(sourceId, { deletedAt: new Date() });
+  const retained = await svc.ownerMedia(owner, "media-admin");
+  expect(retained.canPreview).toBe(true);
+  expect(retained.source?.current?.originalAvailable).toBe(false);
+  await db.client`UPDATE media_jobs SET output_files='[]'::jsonb WHERE asset_id=${posterId}`;
+  expect((await svc.ownerMedia(owner, "media-admin")).canPreview).toBe(false);
+  await db.client`UPDATE media_jobs SET output_files='["poster.webp"]'::jsonb WHERE asset_id=${posterId}`;
+  await db.client`UPDATE media_jobs SET output_prefix='outputs/wrong/' WHERE asset_id=${sourceId}`;
+  expect((await svc.ownerMedia(owner, "media-admin")).canPreview).toBe(false);
+  await repo.snapshot(async (store) => {
+    expect((await store.owner(owner)).status).toBe("draft");
+    await db.client`UPDATE videos SET publication_status='archived',archived_at=now() WHERE id=${owner.ownerId}`;
+    expect((await store.owner(owner)).status).toBe("draft");
+  });
+  expect((await svc.ownerMedia(owner, "media-admin")).canUpload).toBe(false);
+});

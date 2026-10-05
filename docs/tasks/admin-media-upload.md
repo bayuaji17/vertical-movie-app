@@ -126,8 +126,8 @@ Native Web Crypto tidak incremental; exact noble-hashes2.4.0 MIT dipilih. Target
 ### Commit task
 
 - Pesan yang direncanakan: `test(web): prove bounded file hashing (ADUP-002)`.
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- SHA: `689e7e60dd3aff4173a88591c18220029103cc67`; lock correction `3d7118b` tanpa memperbarui paket lain.
+- Hook/checks: docs/lint/types/Commitlint lulus; tidak ada hook dilewati. Frozen install dan root gates diulang setelah lock correction, seluruhnya lulus.
 - Ledger: catat SHA aktual setelah commit berhasil pada update dokumentasi berikutnya; jangan menulis SHA self-referential.
 
 ### Blocker atau tindak lanjut
@@ -136,7 +136,7 @@ ADUP-001 dan proof bounded hashing selesai. Library/core yang sama digunakan ADU
 
 ## Task: ADUP-003 — API private owner media inventory dan rediscovery
 
-- Status: Backlog
+- Status: Done
 - Owner: pengembang/agent pelaksana task.
 - Prioritas: 3, mengikuti dependencies.
 - Referensi: ADUP-US02; [plan canonical](../plans/admin-media-upload/implementation-plan.md), [PRD](../product/prd.md).
@@ -169,9 +169,9 @@ Target/symbol: GET /admin/media/owners/:ownerType/:ownerId; ownerMedia DTO/servi
 
 ### Acceptance criteria
 
-- [ ] Refresh menemukan session dan current source/poster yang benar, termasuk replacement gagal.
-- [ ] Anon/non-admin/other actor/malformed owner tidak memperoleh private descriptor.
-- [ ] DTO aman dan typed; old cursor/metadata/control APIs tetap kompatibel.
+- [x] Refresh menemukan session dan current source/poster yang benar, termasuk replacement gagal.
+- [x] Anon/non-admin/other actor/malformed owner tidak memperoleh private descriptor.
+- [x] DTO aman dan typed; old cursor/metadata/control APIs tetap kompatibel.
 
 ### Validasi
 
@@ -179,7 +179,9 @@ HTTP app.handle guards/invalid DTO; real dedicated PG no-media/current+replaceme
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan rencana, bukan hasil test yang telah dijalankan. Isi evidence aktual dan batas proof saat task dikerjakan.
+API inventory ditambahkan, safe DTO whitelist, current pointer/active/last dipisahkan, descriptors actor-scoped, repeatable-read/read-only transaction, tanpa ListParts/presign/mutation pada GET. Current/read-only/expiry/profile config dan shared unsigned playback checks mengikuti source existing. Fingerprint masih null/canResume false sampai ADUP-004/005.
+
+`bun test apps/api/src/modules/media apps/api/src/modules/playback`: 14 pass/70 assertions. Dedicated `MEDIA_TEST_DATABASE_URL` proof: `bun test apps/api/test/integration/media-upload-proof.test.ts` 6 pass/69 assertions, termasuk failed replacement, actor isolation, read-only/resource/profile, ready provenance/original retention, snapshot consistency dan existing races. Root check-types/lint/build, docs/format/diff/staged-doc/preservation diperiksa saat penutupan; hasil akhir dicatat pada execution log.
 
 ### Commit task
 
@@ -190,7 +192,7 @@ Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan
 
 ### Blocker atau tindak lanjut
 
-Dependencies ADUP-001 (scope plan telah disetujui pengguna). Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
+Tidak ada blocker. Discovery aman tersedia; identity/capability resume diikat pada task ADUP-004/005.
 
 ## Task: ADUP-004 — Schema additive expected file SHA-256
 

@@ -1,4 +1,4 @@
-import { and, eq, lt, isNull, inArray, or, sql } from "drizzle-orm";
+import { and, eq, lt, isNull, inArray, or, sql, desc } from "drizzle-orm";
 import {
   mediaAssets,
   uploadSessions,
@@ -15,6 +15,7 @@ import type {
 import { ContentError, notFound } from "../../shared/content-error";
 import { VideosStore } from "../videos/repository";
 import type { Owner, UploadKind } from "./policy";
+import { CatalogStore } from "../catalog/repository";
 export type UploadRow = typeof uploadSessions.$inferSelect;
 export type AssetRow = typeof mediaAssets.$inferSelect;
 export class MediaStore {
@@ -32,6 +33,9 @@ export class MediaStore {
         archived: r.archivedAt !== null,
         status: r.publicationStatus,
         id: r.id,
+        rowVersion: r.rowVersion,
+        sourceAssetId: null,
+        posterAssetId: r.posterAssetId,
       };
     }
     const store = new VideosStore(this.db);
@@ -55,7 +59,31 @@ export class MediaStore {
       archived: archived || r.archivedAt !== null,
       status: r.publicationStatus,
       id: r.id,
+      rowVersion: r.rowVersion,
+      sourceAssetId: r.sourceAssetId,
+      posterAssetId: r.posterAssetId,
     };
+  }
+  async lastAttempt(owner: Owner, kind: UploadKind, actor: string) {
+    return (
+      await this.db
+        .select()
+        .from(uploadSessions)
+        .where(
+          and(
+            owner.ownerType === "video"
+              ? eq(uploadSessions.videoId, owner.ownerId)
+              : eq(uploadSessions.seriesId, owner.ownerId),
+            eq(uploadSessions.kind, kind),
+            eq(uploadSessions.actorId, actor),
+          ),
+        )
+        .orderBy(desc(uploadSessions.createdAt), desc(uploadSessions.id))
+        .limit(1)
+    )[0];
+  }
+  preview(id: string) {
+    return new CatalogStore(this.db).preview(id);
   }
   async session(id: string, lock = false) {
     const q = this.db
@@ -288,10 +316,16 @@ export class MediaStore {
 export interface MediaRepository {
   store: MediaStore;
   transact<T>(action: (store: MediaStore) => Promise<T>): Promise<T>;
+  snapshot<T>(action: (store: MediaStore) => Promise<T>): Promise<T>;
 }
 export function createMediaRepository(db: ContentDatabase): MediaRepository {
   return {
     store: new MediaStore(db),
     transact: (action) => db.transaction((tx) => action(new MediaStore(tx))),
+    snapshot: (action) =>
+      db.transaction((tx) => action(new MediaStore(tx)), {
+        isolationLevel: "repeatable read",
+        accessMode: "read only",
+      }),
   };
 }

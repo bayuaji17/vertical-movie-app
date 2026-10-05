@@ -1,3 +1,7 @@
+import {
+  playbackReadiness,
+  posterReadiness,
+} from "../../shared/media-readiness";
 import type { S3Client } from "bun";
 import {
   ContentError,
@@ -30,36 +34,7 @@ export class PlaybackService {
         ? await store.preview(identifier)
         : (await store.playable({ slug: identifier, limit: 1 }))[0];
     if (!row) notFound();
-    if (
-      row.source.provider !== profile.provider ||
-      row.source.bucket !== profile.bucket ||
-      row.poster.provider !== profile.provider ||
-      row.poster.bucket !== profile.bucket
-    )
-      throw new ContentError(
-        "PLAYBACK_PROFILE_CONFLICT",
-        "Playback storage profile is unavailable.",
-        503,
-      );
-    if (
-      !row.hls.outputPrefix ||
-      !new RegExp(
-        "^outputs/" + row.source.id + "/" + row.hls.id + "/[a-f0-9-]{36}/$",
-      ).test(row.hls.outputPrefix)
-    )
-      throw new ContentError(
-        "PLAYBACK_INVALID_OUTPUT",
-        "Playback output identity is invalid.",
-        503,
-      );
-    const duration = Number(row.source.facts?.durationMs);
-    if (!Number.isSafeInteger(duration) || duration < 1 || duration > 1800000)
-      throw new ContentError(
-        "PLAYBACK_INVALID_DURATION",
-        "Playback duration is unavailable.",
-        503,
-      );
-    return { row, ttl: Math.ceil((duration * 2) / 1000) };
+    return { row, ...playbackReadiness(row, profile) };
   }
   private route(row: PlayableRow, preview: boolean) {
     const { base } = this.dependencies();
@@ -71,17 +46,7 @@ export class PlaybackService {
     const { row, ttl } = await this.row(identifier, preview),
       { native } = this.dependencies();
     const poster = row.posterJob.outputPrefix + "poster.webp";
-    if (
-      !row.posterJob.outputFiles?.includes("poster.webp") ||
-      !row.posterJob.outputPrefix?.startsWith(
-        "outputs/" + row.poster.id + "/" + row.posterJob.id + "/",
-      )
-    )
-      throw new ContentError(
-        "PLAYBACK_INVALID_POSTER",
-        "Poster is unavailable.",
-        503,
-      );
+    posterReadiness(row);
     return {
       videoId: row.video.id,
       title: row.video.title,

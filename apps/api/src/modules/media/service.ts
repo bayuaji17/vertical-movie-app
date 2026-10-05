@@ -7,7 +7,16 @@ import {
   notFound,
   unavailable,
 } from "../../shared/content-error";
-import type { MediaRepository, MediaStore, UploadRow } from "./repository";
+import type {
+  MediaRepository,
+  MediaStore,
+  UploadRow,
+  AssetRow,
+} from "./repository";
+import {
+  playbackReadiness,
+  posterReadiness,
+} from "../../shared/media-readiness";
 import type { InitiateUploadInput } from "./model";
 import {
   geometry,
@@ -15,6 +24,9 @@ import {
   validateUpload,
   verifyParts,
   type Owner,
+  type UploadKind,
+  UPLOAD_FORMATS,
+  uploadLimit,
 } from "./policy";
 function conflict(): never {
   throw new ContentError(
@@ -37,6 +49,19 @@ const missing = (e: unknown) =>
   ["NoSuchUpload", "NotFound", "NoSuchKey"].includes(
     (e as { name?: string })?.name ?? "",
   );
+function processingSummary(
+  asset: AssetRow,
+  job: Awaited<ReturnType<MediaStore["assetJob"]>> | undefined,
+) {
+  return {
+    state: asset.state,
+    jobState: job?.state ?? null,
+    progressSeconds: job?.progressSeconds ?? 0,
+    attempts: job?.attempts ?? 0,
+    failureCode: job?.failureCode ?? null,
+    verifiedReadyAt: asset.verifiedReadyAt?.toISOString() ?? null,
+  };
+}
 export class MediaService {
   constructor(
     private readonly repository?: MediaRepository,
@@ -68,6 +93,129 @@ export class MediaService {
       );
     return { s, a };
   }
+  async ownerMedia(input: Owner, actor: string) {
+    const { repo, config } = this.deps();
+    return repo.snapshot(async (store) => {
+      const owner = await store.owner(input);
+      const canUpload = !owner.archived && owner.status === "draft";
+      const checkProfile = (asset: { provider: string; bucket: string }) => {
+        if (
+          asset.provider !== config.provider ||
+          asset.bucket !== config.bucket
+        )
+          throw new ContentError(
+            "STORAGE_PROFILE_CONFLICT",
+            "Stored asset belongs to another storage profile.",
+          );
+      };
+      const descriptor = async (session: UploadRow | undefined) => {
+        if (!session || session.actorId !== actor) return null;
+        const asset = await store.asset(session.assetId);
+        if (!asset) notFound();
+        checkProfile(asset);
+        return {
+          id: session.id,
+          assetId: asset.id,
+          status: session.status,
+          filename: session.filename,
+          contentType: asset.contentType,
+          sizeBytes: session.sizeBytes.toString(),
+          partSizeBytes: session.partSizeBytes.toString(),
+          partCount: session.partCount,
+          expiresAt: session.expiresAt.toISOString(),
+          completedAt: session.completedAt?.toISOString() ?? null,
+          failureCode: session.failureCode,
+          expectedSha256: null,
+          canResume: false,
+        };
+      };
+      const role = async (kind: UploadKind, assetId: string | null) => {
+        const asset = assetId ? await store.asset(assetId) : undefined;
+        if (assetId && !asset) notFound();
+        if (asset) {
+          checkProfile(asset);
+          if (
+            asset.kind !== kind ||
+            (input.ownerType === "video" ? asset.videoId : asset.seriesId) !==
+              input.ownerId
+          )
+            notFound();
+        }
+        const job = asset
+          ? await store.assetJob(asset.id, asset.generation)
+          : undefined;
+        const fact = (name: string) => {
+          const n = Number(asset?.facts?.[name]);
+          return Number.isSafeInteger(n) && n > 0 ? n : null;
+        };
+        const active = await store.active(input, kind);
+        return {
+          current: asset
+            ? {
+                id: asset.id,
+                state: asset.state,
+                sizeBytes: asset.sizeBytes.toString(),
+                contentType: asset.contentType,
+                originalAvailable: !asset.deletedAt && !asset.deletionToken,
+                verifiedReadyAt: asset.verifiedReadyAt?.toISOString() ?? null,
+                width: fact("width"),
+                height: fact("height"),
+                durationMs: fact("durationMs"),
+                processing: processingSummary(asset, job),
+              }
+            : null,
+          active: await descriptor(active),
+          lastAttempt: await descriptor(
+            await store.lastAttempt(input, kind, actor),
+          ),
+          busy: !!active,
+        };
+      };
+      const source =
+        input.ownerType === "video"
+          ? await role("source", owner.sourceAssetId)
+          : null;
+      const poster = await role("poster", owner.posterAssetId);
+      let canPreview = false;
+      if (input.ownerType === "video") {
+        const row = await store.preview(input.ownerId);
+        if (row) {
+          try {
+            playbackReadiness(row, config);
+            posterReadiness(row);
+            canPreview = true;
+          } catch (error) {
+            if (!(error instanceof ContentError)) throw error;
+          }
+        }
+      }
+      const rules = (kind: UploadKind) => ({
+        maxBytes: uploadLimit(kind, owner.kind).toString(),
+        formats: Object.entries(UPLOAD_FORMATS[kind]).map(
+          ([extension, contentTypes]) => ({ extension, contentTypes }),
+        ),
+      });
+      return {
+        ...input,
+        rowVersion: owner.rowVersion,
+        status: owner.archived ? "archived" : owner.status,
+        canUpload,
+        canPreview,
+        source,
+        poster,
+        config: {
+          ...config.upload,
+          source: rules("source"),
+          poster: rules("poster"),
+          maxDurationSeconds: owner.kind === "episode" ? 600 : 1800,
+          minVideoWidth: 480,
+          maxVideoWidth: 1080,
+          minPosterWidth: 1080,
+          minPosterHeight: 1920,
+        },
+      };
+    });
+  }
   private async dto(s: UploadRow, parts: UploadedPart[] = []) {
     const { config, repo } = this.deps();
     const asset = await repo.store.asset(s.assetId);
@@ -89,14 +237,7 @@ export class MediaService {
           : parts.reduce((n, p) => n + BigInt(p.sizeBytes), 0n).toString(),
       parts: parts.map((p) => ({ ...p, sizeBytes: p.sizeBytes.toString() })),
       failureCode: s.failureCode,
-      processing: {
-        state: asset.state,
-        jobState: job?.state ?? null,
-        progressSeconds: job?.progressSeconds ?? 0,
-        attempts: job?.attempts ?? 0,
-        failureCode: job?.failureCode ?? null,
-        verifiedReadyAt: asset.verifiedReadyAt?.toISOString() ?? null,
-      },
+      processing: processingSummary(asset, job),
     };
   }
   private async lock(
