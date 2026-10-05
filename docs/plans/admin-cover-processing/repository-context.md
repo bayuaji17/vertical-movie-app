@@ -6,8 +6,8 @@
 - Base ref: `feat/admin-media-upload`.
 - Base SHA / last validated SHA: `06e7ce75e9d3f87bbe501bac054711310e14e5a2`.
 - Analyzed at: 2026-10-06, Asia/Jakarta.
-- Context status: current untuk planning; periksa ulang sebelum implementasi.
-- Persetujuan arah pengguna 6 Oktober 2026: crop sampul di browser, pemrosesan memakai Bun.Image langsung di API; buat plan sebelum implementasi. Default teknis dan perubahan policy rinci tetap proposal untuk review.
+- Context status: snapshot source pada SHA di atas; freshness diperiksa ulang sebelum implementasi pada 6 Oktober 2026.
+- Persetujuan pengguna 6 Oktober 2026: plan/default disetujui; implementasi lokal dimulai pada branch `feat/admin-cover-processing`.
 
 ## Product and users
 
@@ -52,19 +52,20 @@ Menghapus seluruh catatan pemrosesan poster akan merusak readiness/catalog/publi
 
 - Bun runtime dan bun-types lokal 1.4.2. Native S3 membaca/menulis file; SDK mengelola explicit multipart/freeze.
 - Dokumentasi resmi [Bun.Image](https://bun.sh/docs/runtime/image) dan typings lokal `Bun.Image.ResizeOptions` mendukung fill/inside, resize, WebP, metadata/maxPixels/autoOrient dan awaited terminals off JS thread. Tidak ada crop/extract/fit cover pada versi ini.
+- ACOV-002 memverifikasi bahwa metadata native hanya melaporkan width/height/format. APNG dua frame pada fixture proof terbaca sebagai `format: png`; GIF dua frame juga memberi metadata still tanpa frame count. Bun mengonversi APNG/GIF ke still PNG. [Contoh animasi WebP resmi](https://www.gstatic.com/webp/animated/1.webp) memuat 100 ANMF frames: metadata memberi `300×225/webp`, tetapi terminal transcode menolak `ERR_IMAGE_DECODE_FAILED`. Karena perilaku native sendiri tidak cukup untuk menolak animasi, UI memeriksa marker APNG/WebP pada original sebelum crop dan API memeriksa agar payload crop PNG/WebP statis.
 - Read-only proof pada sesi sebelum planning: PNG 1070×1470 → inside 90×160 menghasilkan WebP 90×124, 1800 byte; fit cover ditolak ERR_INVALID_ARG_TYPE. Prototype tidak mempunyai crop/extract. Hasil ini membuktikan resize/encode, belum parity validasi FFmpeg, pixel fidelity, cancellation atau crop UI.
-- Metadata Bun.Image hanya header; tidak ada frame count pada metadata. GIF first-frame decode/permissive damaged JPEG pada dokumentasi tidak cukup untuk mengklaim original image non-animated/strict integrity. Proof format/animation menjadi task awal.
+- Historical read-only proof sebelum plan hanya menguji resize/encode dasar dan belum mencakup parity animasi atau damaged file. ACOV-002 kemudian menguji fixture APNG/GIF, contoh WebP animasi, mismatch MIME, pixel limit dan JPEG terpotong; hasilnya mendukung pemeriksaan container terbatas pada ACOV-004/006, bukan klaim bahwa Bun metadata sendiri membuktikan gambar statis.
 - Crop dapat dilakukan memakai Canvas [drawImage](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage); UI/raster/result MIME serta batas perangkat harus dibuktikan saat implementasi.
 
 ## Development, testing and delivery
 
 Ikuti root AGENTS, workflow, API guide dan template task. Native Bun tests di dekat API module; integration PostgreSQL/MinIO memakai dedicated media_test/random bucket, serial. Schema berubah harus generated/reviewed/applied development setelah backup dan preservation; production terpisah.
 
-Commit tiap task setelah AC/checks lulus. Permintaan ini membuat Markdown plan, bukan runtime/migration/delivery remote. Branch saat inspeksi tetap feat/admin-media-upload; tidak membuat branch implementasi baru untuk planning ini.
+Commit tiap task setelah AC/checks lulus. Branch implementasi dimulai dari planning commit; perubahan source sebelum proof tetap sama dengan snapshot SHA. Production migration dan remote delivery terpisah.
 
 ## Constraints and conventions
 
-Sumber video dan player existing tetap; jangan edit routeTree.gen. Tidak menambah Sharp atau dependency server image lain sebelum native gap dibuktikan. File/Blob/URL/encoding candidates tetap memory privat, bukan Query/persistence; signed URLs tidak masuk DTO/cache/log. Crop hanya setelah admin menyetujui preview; no-upscale tetap default proposal mengikuti kualitas existing.
+Sumber video dan player existing tetap; jangan edit routeTree.gen. Tidak menambah Sharp atau dependency server image lain sebelum native gap dibuktikan. File/Blob/URL/encoding candidates tetap memory privat, bukan Query/persistence; signed URLs tidak masuk DTO/cache/log. Crop hanya setelah admin menyetujui preview; input animasi ditolak dan area crop kecil tidak di-upscale.
 
 ## Relevant active work
 

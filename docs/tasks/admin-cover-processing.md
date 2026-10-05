@@ -1,13 +1,13 @@
 # Modul: admin cover processing
 
-- Status: **plan siap review; runtime belum diimplementasikan**.
+- Status: **plan disetujui 6 Oktober 2026; implementasi berjalan** pada `feat/admin-cover-processing`.
 - Diperbarui: 6 Oktober 2026.
-- Persetujuan arah: pengguna, crop browser + Bun.Image langsung di API. Default teknis rinci mengikuti proposal pada [plan](../plans/admin-cover-processing/implementation-plan.md).
+- Persetujuan: pengguna menyetujui plan/default pada 6 Oktober 2026; feasibility gate menentukan guard native/browser. Rincian di [plan](../plans/admin-cover-processing/implementation-plan.md).
 - Snapshot source: `06e7ce75e9d3f87bbe501bac054711310e14e5a2`; [context](../plans/admin-cover-processing/repository-context.md).
 
 ## Tujuan modul
 
-Admin mengatur crop sampul 9:16 dan memperoleh WebP 1080×1920 Ready tanpa media worker terpisah. Publication tetap manual dan verified media tetap wajib. Rujukan: [PRD](../product/prd.md), [aturan produk](../product/global-rules.md), [kontrak upload](../architecture/media-upload-contract.md) dan [workflow](../guides/development-workflow.md). Policy crop baru masih proposal; tidak mengubah validasi video/HLS.
+Admin mengatur crop sampul 9:16 dan memperoleh WebP 1080×1920 Ready tanpa media worker terpisah. Publication tetap manual dan verified media tetap wajib. Rujukan: [PRD](../product/prd.md), [aturan produk](../product/global-rules.md), [kontrak upload](../architecture/media-upload-contract.md) dan [workflow](../guides/development-workflow.md). Keputusan crop ini tidak mengubah validasi video/HLS.
 
 ## User story: ACOV-US-01
 
@@ -23,7 +23,7 @@ Sebagai admin, saya ingin error dan upload terputus dapat dipulihkan dengan aman
 
 ## Urutan, gates dan otorisasi
 
-Ikuti DAG pada plan; dependensi di bawah adalah gate task. Runtime menunggu persetujuan plan dan freshness check. ACOV-002 adalah feasibility gate sebelum adapter/schema/UX. Setiap task diperkecil lagi bila proof membuka kebutuhan berbeda. Commit tiap task setelah AC/checks lulus; pesan di bawah usulan sampai benar-benar dibuat. Push/PR/merge/deployment memerlukan instruksi tersendiri.
+Ikuti DAG pada plan; dependensi di bawah adalah gate task. Plan disetujui pengguna; freshness diperiksa ulang sebelum implementasi. ACOV-002 adalah feasibility gate sebelum adapter/schema/UX. Setiap task diperkecil lagi bila proof membuka kebutuhan berbeda. Commit tiap task setelah AC/checks lulus; pesan di bawah usulan sampai benar-benar dibuat. Push/PR/merge/deployment memerlukan instruksi tersendiri.
 
 Untuk task runtime, jalankan tests yang relevan, `bun run check-types`, `bun run lint`, `bun run build`, docs/format/diff. Dependency/script berubah: `bun install --frozen-lockfile`. Schema task mengikuti dedicated integration dan preservation development; jangan reset development. Dokumen-only cukup docs/format/diff, hook normal tetap berjalan. Evidence ditulis sesudah eksekusi, bukan disalin dari daftar rencana.
 
@@ -66,11 +66,11 @@ bun run docs:check; Prettier pada empat Markdown terkait; git diff --check; audi
 
 ### Blocker atau tindak lanjut
 
-Planning Done; runtime ACOV-002–010 tetap Backlog sampai plan disetujui dan freshness diperiksa. Tidak ada implementasi/migration/remote delivery pada task ini.
+Planning Done; plan disetujui dan freshness diperiksa ulang sebelum branch implementasi.
 
 ## Task: ACOV-002 — Buktikan native image dan browser crop memenuhi policy
 
-- Status: Backlog
+- Status: Review
 - Owner: Codex / pengembang proyek
 - Prioritas: 2
 - Referensi: ACOV-US-01, ACOV-US-02; PRD media/sampul dan GR lifecycle; [plan](../plans/admin-cover-processing/implementation-plan.md).
@@ -80,34 +80,38 @@ Planning Done; runtime ACOV-002–010 tetap Backlog sampai plan disetujui dan fr
 
 ### Ruang lingkup
 
-Buktikan Bun.Image pada runtime repo dan Canvas pada browser target dengan fixture sendiri. Putuskan guard animation/format, EXIF/alpha, batas pixel/byte, native cancellation, output quality dan budget waktu. Catat gap sebelum adapter/UX diimplementasikan; jangan menganggap sumber browser sudah diverifikasi server.
+Buktikan Bun.Image pada runtime repo dan Canvas pada browser target dengan fixture sendiri. Putuskan guard animasi/MIME, EXIF/alpha, batas pixel/byte, native cancellation, output quality dan budget waktu. Catat gap sebelum adapter/UX diimplementasikan; jangan menganggap sumber browser sudah diverifikasi server.
 
-Target: `apps/api/src/modules/media/poster-image.test.ts (planned); fixture/integration harness existing; browser proof; plan/backlog.`
+Target: `apps/api/src/modules/media/poster-image.test.ts`; generated static and animated fixtures under `apps/api/test/fixtures/media/`; Canvas proof via Chrome CDP; plan/backlog.
 
 ### Acceptance criteria
 
-- [ ] JPEG/PNG/WebP, EXIF, alpha, APNG/animated WebP, MIME mismatch, damaged/truncated serta batas pixel/byte diuji; kemampuan native dan guard yang masih diperlukan tercatat.
-- [ ] Crop area natural minimal 1080×1920 tanpa upscale, output WebP/PNG aktual, orientasi dan hasil double encode dibuktikan; format/quality default ditetapkan berdasarkan hasil.
-- [ ] Timing/memory dan request cancellation diukur; logical deadline tidak diklaim sebagai hard cancellation; perubahan policy yang perlu keputusan produk kembali ke plan.
+- [x] PNG/WebP/JPEG, EXIF, alpha, APNG/GIF dua frame, animated WebP, MIME mismatch, truncated JPEG dan batas pixel diuji; native gaps/guard tercatat.
+- [x] Chrome membuktikan crop natural 1080×1920 tanpa upscale, WebP/PNG fallback aktual dan transparansi; Bun membuktikan orientasi EXIF dan encode sesudah browser; format/quality default ditetapkan.
+- [x] Waktu/memori fixture sintetis diukur; abort signal tidak menghentikan native terminal; deadline API diperlakukan sebagai batas logical, bukan hard cancellation.
 
 ### Validasi
 
-Native bun:test / script proof dengan fixture generated; browser Canvas proof; ukur elapsed dan memori tanpa membaca file user atau mengubah bucket aplikasi. Perbarui proposal dengan hasil aktual; root gates jika ada source/script implementasi.
+`bun test apps/api/src/modules/media/poster-image.test.ts apps/api/src/modules/media/policy.test.ts`; Canvas proof Chrome via CDP pada fixture sintetis; fixture animasi APNG/GIF dua frame dan contoh WebP animasi resmi; ukur elapsed/RSS. `bun run check-types`, `bun run lint`, `bun run build`, `bun run docs:check`, Prettier dan `git diff --check`.
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau divalidasi; hasil runtime dan command aktual dicatat saat task dikerjakan.
+2026-10-06: Chrome 154 (Windows) memotong PNG sintetis 1920×1920 dengan source rect 1080×1920 ke output WebP 1080×1920, rasio 9:16, scale 1.0; Blob 4516 byte, alpha transparan terbukti sebelum/sesudah WebP decode. MIME tidak didukung menghasilkan PNG fallback 48168 byte. Bun 1.4.2 Linux x64 membaca file crop WebP 4516 byte dan menghasilkan WebP 4580 byte; satu encode 111 ms dengan process RSS 39.7 MiB pada proses fixture baru (bukan benchmark VPS). Fixture gradient sintetis 1080×1920: PNG 2657891 byte → WebP 56972 byte dalam 217 ms, RSS 89.6 MiB.
+
+`bun test apps/api/src/modules/media/poster-image.test.ts`: 8 tests / 22 assertions passed; policy suite also verifies the 5,000,001-byte rejection. Cakupan PNG/WebP actual crop, alpha setelah native re-encode, sniff bytes vs File MIME/extension, JPEG EXIF orientation 6 (1080×1920 → 1920×1080), oversized 4097×4096 di atas 16777216 px (`ERR_IMAGE_TOO_MANY_PIXELS`), truncated JPEG (`ERR_IMAGE_DECODE_FAILED`), APNG/GIF dua frame tanpa frame count pada metadata, dan abort signal yang tidak menghentikan native terminal. APNG/GIF diubah jadi still PNG oleh Bun. Contoh WebP animasi resmi Google memiliki 100 `ANMF` frames; metadata native hanya menunjukkan 300×225/WebP dan terminal transcode menolak `ERR_IMAGE_DECODE_FAILED`. Tidak ada frame API atau crop/extract native.
+
+Aturan hasil: crop sumber animasi ditolak di browser melalui pemeriksaan APNG `acTL` dan WebP animation flag/chunks; payload hasil crop API mesti statis dan MIME harus sama dengan format bytes yang di-sniff. Browser original tidak pernah diunggah, sehingga API hanya dapat membuktikan payload crop, bukan asal frame. Quality WebP browser 0.95 dan API 85 memenuhi fixture di bawah 5 MB; belum mewakili foto nyata/perangkat lambat/production VPS. Bukti browser Chrome tidak mencakup Safari/iOS/Firefox. Quality gates 6 Oktober lulus: root check-types, lint dan build sukses; docs checker 59 Markdown/514 link-anchor; Prettier dan diff bersih. Tidak ada env, dependency, schema, worker atau bucket aplikasi yang diubah.
 
 ### Commit task
 
 - Pesan: `test(media): verify native poster feasibility (ACOV-002)`
 - SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- Hook/checks: root tests/check-types/lint/build dan docs/format/diff lulus; commit hook berjalan saat commit.
 - Ledger: SHA aktual dicatat pada update dokumentasi setelah commit, tanpa self-referential SHA.
 
 ### Blocker atau tindak lanjut
 
-Persetujuan plan, freshness check dan dependensi task di atas; bukan izin untuk mulai runtime pada permintaan planning ini.
+Semua acceptance dan root gates lulus; buat task commit ACOV-002, lalu catat SHA pada update ledger berikutnya.
 
 ## Task: ACOV-003 — Persist executor dengan migrasi yang menjaga data lama
 

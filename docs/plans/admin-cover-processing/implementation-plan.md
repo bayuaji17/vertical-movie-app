@@ -2,14 +2,15 @@
 
 ## Plan metadata
 
-- Status: **ready untuk review plan** · 6 Oktober 2026; arah crop browser + native Bun.Image di API disetujui pengguna. Default/policy rinci di bawah diajukan bersama plan; runtime belum diimplementasikan.
+- Status: **plan disetujui pengguna 6 Oktober 2026; implementasi berjalan**. ACOV-001 selesai; ACOV-002 menjadi feasibility gate pertama.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `feat/admin-media-upload`.
 - Base SHA / last validated SHA: `06e7ce75e9d3f87bbe501bac054711310e14e5a2`.
+- Implementation branch dibuat 6 Oktober 2026 dari planning receipt `8367f1781d9dba618f0117dfd0273ab0662d051d`: `feat/admin-cover-processing`.
 - Context: [repository-context.md](repository-context.md), ditulis sebelum plan.
 - Backlog: [admin-cover-processing](../../tasks/admin-cover-processing.md); ACOV-001–010.
-- Branch planning: checkout existing, tanpa branch/runtime baru. Saat implementasi gunakan purpose prefix, usulan `feat/admin-cover-processing`, dimulai dari uploader lengkap setelah freshness check.
-- Otorisasi: buat context/plan/backlog/index dan local task commit sesuai workflow pengguna. Tidak menjalankan migration, pemrosesan file aplikasi, push/PR/merge/deployment pada tahap planning.
+- Keputusan pengguna: seluruh plan dan default teknis disetujui pada 6 Oktober 2026; ACOV-002 dapat memperbarui rincian bila proof menunjukkan batas native/browser.
+- Otorisasi: implementasikan task ACOV sesuai DAG dan acceptance criteria dengan commit lokal terpisah. Push/PR/merge/deployment tetap menunggu instruksi tersendiri.
 
 ## Objective
 
@@ -42,7 +43,7 @@ Bun 1.4.2 sudah berhasil diuji untuk resize/WebP, tetapi tidak mempunyai crop/ex
 
 | Parameter      | Rekomendasi plan                                                                                                               |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| Source browser | JPG/JPEG/PNG/WebP, <=5 MB; rasio awal bebas. UI menolak animated/invalid input yang terdeteksi.                                |
+| Source browser | JPG/JPEG/PNG/WebP statis, <=5 MB; rasio awal bebas. UI menolak input animasi/invalid lewat pemeriksaan format.                 |
 | Crop           | Exact 9:16, dikonfirmasi admin; bukan center-crop otomatis tanpa preview.                                                      |
 | Kualitas       | Crop area natural minimal 1080×1920; tanpa upscale default. Gambar terlalu kecil mendapat penjelasan sebelum upload.           |
 | Output browser | Raster 1080×1920, WebP 0.95 atau PNG fallback, <=5 MB, File baru dengan filename/MIME aktual.                                  |
@@ -50,7 +51,7 @@ Bun 1.4.2 sudah berhasil diuji untuk resize/WebP, tetapi tidak mempunyai crop/ex
 | Pixel budget   | Usulan maxPixels 16.777.216 pada browser input dan API decode; output 2.073.600. Batas byte tidak menggantikan batas pixel.    |
 | Executor       | Poster session baru request; source/legacy session worker. Discriminator server-owned, bukan pilihan user/browser.             |
 
-Crop mengubah syarat sumber sampul yang dulu wajib 9:16. Syarat video tetap. Crop tidak menjadikan gambar kecil tajam; penurunan minimum/upscale bukan bagian default plan ini. Server memverifikasi **payload crop yang diterima**, bukan original browser yang tidak pernah dikirim. UI dapat menolak animated original; itu tidak menjadi bukti server tentang original. Server tetap menolak uploaded payload animated, MIME/codec mismatch, invalid geometry/hash/limit dan hasil decode yang gagal. Parity damaged JPEG/animation dituntaskan pada proof ACOV-002 sebelum processor dianggap siap.
+Crop mengubah syarat sumber sampul yang dulu wajib 9:16. Syarat video tetap. Crop tidak menjadikan gambar kecil tajam; penurunan minimum/upscale bukan bagian default plan ini. Server memverifikasi **payload crop yang diterima**, bukan original browser yang tidak pernah dikirim. Pemeriksaan file browser menolak PNG/WebP animasi sebelum crop; server memeriksa agar payload PNG/WebP yang diterima statis, lalu mencocokkan format byte dengan Content-Type. Itu menjaga jalur server dari file animasi yang dikirim langsung. Bun.Image metadata tidak melaporkan frame count, jadi API memerlukan pemeriksaan container ringan untuk acTL dan flag/chunk WebP animasi. Detail parser dan malformed-container tests menjadi bagian ACOV-004/006.
 
 ### Kontrak dan pemisahan executor
 
@@ -168,11 +169,11 @@ Generated migration additive/default worker; restore image UI/service by reverti
 
 ## Evidence
 
-[Context](repository-context.md#evidence-index) maps current behavior to source symbols at immutable SHA. [Bun Image](https://bun.sh/docs/runtime/image) documents native resize/encode/off-thread awaited terminals; local runtime/types confirm no crop. [Canvas drawImage](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage) provides source-rectangle crop, not server policy verification. Runtime implementation evidence will be added to backlog, not inferred from this plan.
+[Context](repository-context.md#evidence-index) maps current behavior to source symbols at immutable SHA. [Bun Image](https://bun.sh/docs/runtime/image) documents native resize/encode/off-thread awaited terminals; local runtime/types confirm no crop or frame-count metadata. [Canvas drawImage](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage) provides source-rectangle crop, not server policy verification. Google's [WebP RIFF container](https://developers.google.com/speed/webp/docs/riff_container) defines the animation flag/chunks. The [official animated WebP sample](https://www.gstatic.com/webp/animated/1.webp) has 100 ANMF frames; runtime evidence is in the backlog.
 
 ## Open decisions
 
-Direction approved: browser crop + Bun.Image API, no worker dependency for new covers. Proposed defaults requiring plan review: no-upscale crop minimum, pixel/timeout/concurrency/quality values, PNG fallback and exact-payload refresh recovery. Recommended policy distinguishes browser original from server-received static crop. ACOV-002 must resolve native animation/damaged-file parity and measured timing; if a hard requirement cannot be met, update affected task/plan before runtime rather than silently accepting invalid files.
+Tidak ada keputusan produk yang menunggu persetujuan awal; plan dan default disetujui pengguna 6 Oktober 2026. ACOV-002 memvalidasi batas teknis. Revisi akibat proof dicatat sebelum dependensi implementasi memakai asumsi baru. Server memverifikasi payload crop yang diterima; browser menolak original animasi karena original tidak dikirim ke API.
 
 ## Validation history
 
@@ -181,12 +182,20 @@ Direction approved: browser crop + Bun.Image API, no worker dependency for new c
 - Result: valid for planning/review.
 - Base/current target SHA: `06e7ce75e9d3f87bbe501bac054711310e14e5a2`.
 - Checked paths: root/index/guides/product/template, media/schema/worker/readiness/catalog/storage/bootstrap, web manager/client/card/gateway and native types/probe.
-- Relevant runtime changes since snapshot: none at planning start; 23 unrelated worktree paths preserved.
+- Relevant runtime changes since snapshot: none at planning start; source freshness rechecked sebelum implementation. 23 unrelated worktree paths preserved.
 - Recheck mode/gateway/provenance/native behavior before implementation or branch checkout; plan commit itself may change target SHA without invalidating source evidence.
+
+### 2026-10-06 — approval and implementation freshness
+
+- Pengguna menyetujui seluruh plan/default; branch `feat/admin-cover-processing` dibuat dari planning receipt `8367f1781d9dba618f0117dfd0273ab0662d051d`.
+- Recheck diff dari source snapshot `06e7ce75e9d3f87bbe501bac054711310e14e5a2` menunjukkan tidak ada perubahan pada `apps/`, manifests atau lockfile sebelum ACOV-002. Perubahan README/design/docs task lain tetap tidak di-stage.
+- Browser feasibility berjalan pada Chrome 154 di Windows; native proof berjalan pada Bun 1.4.2 Linux x64. Pengukuran fixture sintetis bukan benchmark VPS/production.
 
 ## Execution log
 
-- 2026-10-06: context saved before plan; generated stable 10-task backlog. Planning changes only feature Markdown/index. No application/runtime/env/schema modifications, migration, storage mutation or new worker processing triggered.
+- 2026-10-06: context saved before plan; stable 10-task backlog approved and implementation started on `feat/admin-cover-processing`. ACOV-002 feasibility tests, Chrome/native proof and root gates passed 6 October 2026; task commit SHA is recorded after commit.
 - Planning checks 2026-10-06: `bun run docs:check` passed (59 Markdown, 514 local links/anchors); Prettier four owned Markdown passed; `git diff --check` passed; audit 10 unique task IDs, matching acyclic dependencies/template sections passed; 22 unrelated file hashes + existing README design links retained. Staged documentation/commit receipt follows ACOV-001; tests above remain planned runtime proof.
 
 - 2026-10-06: ACOV-001 Done, task commit `693b557031c59d6ae0ab2d013c54a4bc38625e7e`. Hook docs/lint/check-types/Commitlint passed (lint/types cache hits). Staged export: 52 Markdown, 495 local links/anchors, zero errors. Freshness: source apps/packages/manifests/lock tidak berubah dari base ke commit planning; runtime ACOV-002–010 belum dimulai. Receipt tersimpan pada update dokumentasi sesudah commit task.
+
+- 2026-10-06: ACOV-002 feasibility evidence recorded after Canvas/Native proof. Eight feasibility tests plus four existing policy tests pass; root type/lint/build/docs/format/diff pass. Chrome 154 Canvas and Bun 1.4.2 Linux x64 proof established static-image/MIME-guard contract for ACOV-003 onward.
