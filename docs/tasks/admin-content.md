@@ -1,6 +1,6 @@
 # Modul: Dashboard metadata konten
 
-> Status: implemented dan verified lokal · 5 Oktober 2026 · Desain/rencana dan implementasi disetujui pengguna. Acceptance ADMC-011 lulus; commit closure/receipt diselesaikan sesudah hooks. Hasil tidak menyatakan production readiness.
+> Status: implemented dan verified lokal · 5 Oktober 2026 · Desain/rencana dan implementasi disetujui pengguna. Acceptance ADMC-011 lulus dan semua task runtime memiliki commit terpisah. Hasil tidak menyatakan production readiness.
 
 ## Task: ADMC-DES-004 — Desain mobile light/dark v2
 
@@ -625,7 +625,7 @@ Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
 ## Task: ADMC-011 — Acceptance UI, persistensi dan closure
 
-- Status: Review
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai dependency
 - Referensi: ADMC-US-05; PRD-01/02/03/08/09; GR-01/05/08; plan STEP-011.
@@ -642,7 +642,7 @@ Browser smoke fixtures/worker mengikuti harness existing; dedicated DB persisten
 - [x] Movie/standalone list/create/read/edit/conflict terbukti dengan API dan dedicated PostgreSQL, bukan fixture HTTP saja.
 - [x] Browser light/dark 320/390/768/1024/1440 px, keyboard/labels/contrast/loading/empty/error, auth cleanup dan preview routing lulus.
 - [x] Existing/new relevant tests, types/lint/build/docs/format/whitespace serta conditional frozen install lulus; limitations dicatat.
-- [ ] Semua task runtime committed per task; scope upload/publish/season/episode/katalog dan production readiness tidak diklaim selesai.
+- [x] Semua task runtime committed per task; scope upload/publish/season/episode/katalog dan production readiness tidak diklaim selesai.
 
 ### Validasi
 
@@ -650,13 +650,13 @@ Root gates, production Bun browser/SSR proof terkait, dedicated content schema/r
 
 ### Hasil dan bukti
 
-Acceptance runtime lokal lulus; command/results dan batas verifikasi ada pada evidence di bawah. Commit task dan receipt dicatat setelah hooks berhasil.
+Acceptance runtime lokal lulus; command/results dan batas verifikasi ada pada evidence di bawah. Commit task dan receipt aktual dicatat setelah hooks berhasil.
 
 ### Commit task
 
 - Pesan: Conventional Commit dengan ID ADMC-011 sesuai hasil implementasi.
-- SHA: Pending commit acceptance setelah hooks.
-- Hook/checks: Quality gates teramati lulus; hooks commit acceptance belum dijalankan.
+- SHA: `b5ccd0c2ec0deb97abaf122b5e10938b712249fc`.
+- Hook/checks: docs/lint/types/Commitlint lulus tanpa bypass pada commit acceptance; checks aktual di bawah.
 - Ledger: Receipt aktual dicatat setelah commit berhasil untuk update task berikutnya.
 
 ### Blocker atau tindak lanjut
@@ -670,6 +670,8 @@ Native API/auth/web regression: 158 tests / 621 assertions lulus. Dedicated Elys
 Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
 Targeted Prettier, `git diff --check` dan `git diff --cached --check` lulus. Docs worktree: 52 Markdown/409 local links; staged-only checkout: 45 Markdown/390 links, tanpa errors. Latest lint sesudah perubahan script cleanup lulus (1 task). Preservation: 21 file unrelated identik snapshot. Diff manifest/lock/schema/player/watch/preview dari base implementasi kosong. Staging acceptance hanya 26 file source/test/docs/screenshots task; indeks docs dipartial-stage agar referensi design boards lokal unrelated tidak ikut. Hooks/commit berikutnya dicatat pascacommit.
+
+- Receipt commit task: `b5ccd0c2ec0deb97abaf122b5e10938b712249fc`; hooks docs/lint/types/Commitlint lulus tanpa bypass. Acceptance runtime dan canonical docs/screenshots committed; final root/unit/DB/browser/SSR/format/preservation evidence di atas tetap valid. Tidak push/PR/merge.
 
 ## Task: ADMC-012 — Theme switcher shared shell
 

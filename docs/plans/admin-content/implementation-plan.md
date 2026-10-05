@@ -2,7 +2,7 @@
 
 ## Plan metadata
 
-- Status: implemented dan verified lokal pada 5 Oktober 2026; commit acceptance/receipt pending hooks.
+- Status: implemented dan verified lokal pada 5 Oktober 2026; semua task runtime committed terpisah.
 - Tanggal: 5 Oktober 2026.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref planning: `main`; base SHA: `c5406282f8f3c86563ba7112ec43d2aa17f97da2`. Eksekusi dimulai pada `e5043eb14d3dc7f8429fa7e70c51bf87242a31dc`; freshness closure diperiksa pada `ec7ea091bb20073479d86721502c3e994393eea8` beserta perubahan task ADMC-011.
@@ -322,7 +322,7 @@ Bun workspace; API tetap owns business rules, client type-only; no server secret
 - [x] Version/slug/state/network/validation conflicts tidak menimpa input atau memicu replay tulis otomatis.
 - [x] Logout/expiry membersihkan cache private; UI dan endpoint tetap terlindungi.
 - [x] Semua halaman responsif/keyboard/light/dark; shared theme switcher bekerja tanpa kehilangan input dan route preview existing tetap berfungsi.
-- [ ] Test/gates/DB/browser evidence sesuai scope, docs/status dan commit per task selesai; commit acceptance/receipt pending hooks.
+- [x] Test/gates/DB/browser evidence sesuai scope, docs/status dan commit per task selesai.
 
 ## Risks and mitigations
 
@@ -461,3 +461,7 @@ Perbaikan acceptance: checkbox memakai label eksplisit, page di luar batas dijep
 Preservation audit terhadap snapshot sebelum implementasi lulus untuk file unrelated; existing design boards/build receipts tetap terpisah dari staging. Tidak menambah CI, membuka PR, push atau merge. Format/docs/whitespace/staged-document/hook results serta SHA actual closure ditambahkan sesudah teramati.
 
 - Closure checks teramati: targeted Prettier/whitespace lulus; docs worktree 52 Markdown/409 links dan staged-only snapshot 45 Markdown/390 links lulus. Preservation 21 file unrelated lulus; staging terbatas 26 file milik acceptance dan partial index. Latest script lint lulus; hooks/commit acceptance dicatat pascacommit.
+
+- Receipt ADMC-011: `b5ccd0c2ec0deb97abaf122b5e10938b712249fc`; checks/AC teramati ada pada backlog. Commit lokal, belum push/PR/merge.
+
+- Acceptance commit berhasil: `b5ccd0c2ec0deb97abaf122b5e10938b712249fc`; docs/lint/types/Commitlint lulus tanpa bypass. ADMC-011 Done. Receipt ini ditulis setelah commit berhasil, tidak menggunakan SHA self-referential. Source branch tetap lokal; remote delivery memerlukan permintaan pengguna.
