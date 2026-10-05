@@ -115,7 +115,7 @@ Tidak ada blocker ACOV-002. Catatan untuk adapter/parser: Bun metadata tidak mem
 
 ## Task: ACOV-003 — Persist executor dengan migrasi yang menjaga data lama
 
-- Status: Review
+- Status: Done
 - Owner: Codex / pengembang proyek
 - Prioritas: 3
 - Referensi: ACOV-US-02, ACOV-US-03; PRD media/sampul dan GR lifecycle; [plan](../plans/admin-cover-processing/implementation-plan.md).
@@ -148,9 +148,9 @@ Existing migration regressions lulus serial: fingerprint proof 1/15 dan publicat
 ### Commit task
 
 - Pesan: `feat(api): persist poster execution mode (ACOV-003)`
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
-- Ledger: SHA aktual dicatat pada update dokumentasi setelah commit, tanpa self-referential SHA.
+- SHA: `edd4d7e`.
+- Hook/checks: docs:check (59 Markdown/514 links), lint (web), check-types (api/web/auth) dan Commitlint lulus; integration/API tests, build, Prettier, diff dan migration preservation lulus sebelum commit.
+- Ledger: SHA task ini dicatat pada backlog dan execution log plan setelah task commit.
 
 ### Blocker atau tindak lanjut
 
