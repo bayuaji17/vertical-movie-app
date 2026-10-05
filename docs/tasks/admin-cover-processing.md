@@ -1,6 +1,6 @@
 # Modul: admin cover processing
 
-- Status: **plan disetujui 6 Oktober 2026; ACOV-001–005 selesai** pada `feat/admin-cover-processing`; implementasi browser berlanjut.
+- Status: **plan disetujui 6 Oktober 2026; ACOV-001–006 selesai** pada `feat/admin-cover-processing`; implementasi dialog berlanjut.
 - Diperbarui: 6 Oktober 2026.
 - Persetujuan: pengguna menyetujui plan/default pada 6 Oktober 2026; feasibility gate menentukan guard native/browser. Rincian di [plan](../plans/admin-cover-processing/implementation-plan.md).
 - Snapshot source: `06e7ce75e9d3f87bbe501bac054711310e14e5a2`; [context](../plans/admin-cover-processing/repository-context.md).
@@ -237,8 +237,8 @@ Dedicated PostgreSQL media test DB, real Bun.Image, fake S3/storage: processing/
 ### Commit task
 
 - Pesan: `feat(api): prepare covers through private requests (ACOV-005)`
-- SHA: dicatat pada receipt ACOV-006 setelah task commit.
-- Hook/checks: root gates di atas lulus; hook commit dan SHA dicatat pada receipt task berikutnya.
+- SHA: `66ed89dbbd2322b2c5d86041b979fcf50e9cbbaa`.
+- Hook/checks: docs:check 59 Markdown/514 links, lint, check-types 3/3 dan Commitlint lulus pada commit hook; build API/web 2/2 serta tes terkait lulus sebelum commit.
 - Ledger: SHA aktual dicatat pada update dokumentasi setelah commit, tanpa self-referential SHA.
 
 ### Blocker atau tindak lanjut
@@ -247,7 +247,7 @@ Tidak ada blocker implementasi API. Proof MinIO/R2 penuh, crop browser dan UI re
 
 ## Task: ACOV-006 — Crop geometry dan Canvas export dengan identitas payload tepat
 
-- Status: In Progress
+- Status: Done
 - Owner: Codex / pengembang proyek
 - Prioritas: 6
 - Referensi: ACOV-US-01, ACOV-US-03; PRD media/sampul dan GR lifecycle; [plan](../plans/admin-cover-processing/implementation-plan.md).
@@ -263,9 +263,9 @@ Target: `apps/web/src/lib/admin/{cover-crop,cover-raster,media-file}.ts; crop te
 
 ### Acceptance criteria
 
-- [ ] Portrait/landscape/square/edge zoom tetap bounds dan exact 9:16; area kecil ditolak sebelum upload tanpa stretching/upscale.
-- [ ] Raster actual dimensions/type/byte limit benar; File baru sesuai MIME/extension, fingerprint menghitung exact exported bytes.
-- [ ] Cancel/abort/unmount/owner change melepas URLs dan mengabaikan hasil lama; File/Blob/geometry tidak dipersist ke cache atau localStorage.
+- [x] Portrait/landscape/square/edge zoom tetap bounds dan exact 9:16; area kecil ditolak sebelum upload tanpa stretching/upscale.
+- [x] Raster actual dimensions/type/byte limit benar; File baru sesuai MIME/extension, fingerprint menghitung exact exported bytes.
+- [x] Cancel/abort/unmount/owner change melepas URLs dan mengabaikan hasil lama; File/Blob/geometry tidak dipersist ke cache atau localStorage.
 
 ### Validasi
 
@@ -273,22 +273,26 @@ Pure math tests untuk boundary/crop mapping dan Canvas browser fixtures untuk MI
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau divalidasi; hasil runtime dan command aktual dicatat saat task dikerjakan.
+2026-10-06: Ditambahkan geometri crop 9:16 yang pure dengan pan normalisasi, zoom dibatasi sumber dan margin numerik anti-upscale; crop di bawah 1080×1920 ditolak. Decode menghormati EXIF, menolak GIF/APNG/animated WebP sebelum memilih frame, dan membatasi sumber ke40 megapiksel. Canvas menghasilkan File1080×1920 WebP quality0.95 atau PNG dari MIME aktual; nama ekstensi mengikuti Blob.type, hasil di atas batas konfigurasi 5.000.000 byte ditolak. SHA-256 menggunakan exact bytes File hasil; tidak ada base64, Blob atau geometri yang masuk cache/storage.
+
+CoverRasterScope mengikat decode/export ke attempt dan owner; replace/unmount abort signal, menutup ImageBitmap, membatalkan hasil late dan mereset backing store canvas. Pemroses crop sendiri tidak membuat object URL; upload manager tetap memiliki lifecycle URL preview bagi File hasil.
+
+Unit crop/raster: 12 tests/105 assertions; root web suite:129/579. Chrome154 Headless via Canvas proof: source2160×3840 → WebP1080×1920 (4.282 byte), pan pixel merah/biru sesuai batas, SHA-256 exact payload, PNG fallback aktual48166 byte dengan nama/MIME `.png`, EXIF orientation JPEG →400×600, dan PNG noise output >5.000.000 byte ditolak. Root check-types3/3, lint1/1, build2/2 lulus. Browser proof hanya Chromium; Safari/iOS dan perangkat berdaya rendah belum diverifikasi.
 
 ### Commit task
 
 - Pesan: `feat(web): add cover crop raster primitives (ACOV-006)`
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- SHA: dicatat pada receipt ACOV-007 setelah task commit.
+- Hook/checks: gates di atas lulus; hook commit dan SHA dicatat pada receipt task berikutnya.
 - Ledger: SHA aktual dicatat pada update dokumentasi setelah commit, tanpa self-referential SHA.
 
 ### Blocker atau tindak lanjut
 
-Persetujuan plan, freshness check dan dependensi task di atas; bukan izin untuk mulai runtime pada permintaan planning ini.
+Tidak ada blocker. Dialog dan integrasi card Film/Standalone/Series menjadi ACOV-007.
 
 ## Task: ACOV-007 — Modal crop dengan preview pada seluruh cover owner
 
-- Status: Backlog
+- Status: In Progress
 - Owner: Codex / pengembang proyek
 - Prioritas: 7
 - Referensi: ACOV-US-01; PRD media/sampul dan GR lifecycle; [plan](../plans/admin-cover-processing/implementation-plan.md).

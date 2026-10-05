@@ -7,6 +7,54 @@ export type SelectedFileDescriptor = {
   contentType: string
   sizeBytes: string
 }
+
+export const MAX_CROPPED_COVER_BYTES = 5_000_000
+
+/** Build the upload File from the bytes and actual format returned by Canvas. */
+export function createCroppedCoverFile(
+  originalFilename: string,
+  blob: Blob,
+  maxBytes = MAX_CROPPED_COVER_BYTES,
+) {
+  const extension =
+    blob.type === 'image/webp'
+      ? 'webp'
+      : blob.type === 'image/png'
+        ? 'png'
+        : undefined
+  if (!extension)
+    throw new MediaApiError(
+      422,
+      'FILE_UNSUPPORTED',
+      'The cropped cover format is not supported.',
+    )
+  if (
+    !Number.isSafeInteger(maxBytes) ||
+    maxBytes < 1 ||
+    blob.size < 1 ||
+    blob.size > maxBytes
+  )
+    throw new MediaApiError(
+      422,
+      'FILE_TOO_LARGE',
+      'The cropped cover is larger than the allowed file size.',
+    )
+
+  const basename = originalFilename.split(/[\\/]/).at(-1) || 'cover',
+    dot = basename.lastIndexOf('.'),
+    rawStem = dot > 0 ? basename.slice(0, dot) : basename,
+    stem =
+      Array.from(rawStem, (char) =>
+        char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127 ? '_' : char,
+      )
+        .slice(0, 250)
+        .join('') || 'cover'
+  return new File([blob], `${stem}.${extension}`, {
+    type: blob.type,
+    lastModified: Date.now(),
+  })
+}
+
 export function describeMediaFile(
   file: Pick<File, 'name' | 'size' | 'type'>,
   kind: MediaKind,
