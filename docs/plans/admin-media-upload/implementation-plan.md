@@ -604,3 +604,13 @@ Credentials aplikasi terbukti scoped pada bucket sehingga CreateBucket test awal
 AC backend diperjelas sesuai dependency DAG: actual UI wrong-file-before-PUT guard berada pada ADUP-008/011, tidak diklaim sudah ada pada ADUP-005. Task target diperluas ke existing upload integration proof/Eden type proof untuk compatibility evidence. Docs/format/diff/staged-doc/preservation dan hooks diperiksa saat commit.
 
 - Task commit belum ditulis pada saat evidence ini disimpan; receipt actual SHA/hooks dicatat pada update task berikutnya.
+
+### ADUP-007 — 2026-10-05 local execution
+
+Typed media client/input/DTO derived from Eden API contract, private authoritative fetcher reused. Shared `private-result.ts` centralizes abort/network/domain handling; ContentApiError compatibility preserved. Identity-scoped owner/session queries support AbortSignal, no-store, retry:false; initiate/complete/abort mutation factories retry:false. Signed authorization is direct Eden and never inserted into Query/mutation cache. Stable safe error whitelist hides raw provider/auth messages; malformed response/owner identity cannot become confirmed success.
+
+Native client/cache/gateway/guard regression `bun test apps/web/test/admin-media-client.test.ts apps/web/test/admin-content-client.test.ts apps/web/test/session-cache.test.ts apps/web/test/business-gateway.test.ts apps/web/test/admin-route-guard.test.ts`:31 pass/126 assertions. Explicit `bun run --cwd apps/web auth:import:proof` rejects server import in client build and restores fixture. Root check-types3/3, lint1/1, build2/2 lulus.
+
+401/expiry cleanup removes media cache/mutations while public data survives. Confirmed-complete invalidation helper marks owner/content detail/list stale; existing edit baseline remains component-owned. Actual upload-manager auth stop and browser dirty-editor conflict are ADUP-014/015, not claimed here. Docs/format/diff/staged-doc/preservation and hooks checked at task commit.
+
+- Task commit belum ditulis pada saat evidence ini disimpan; receipt actual SHA/hooks dicatat pada update task berikutnya.

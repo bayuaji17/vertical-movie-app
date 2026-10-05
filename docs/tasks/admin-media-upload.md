@@ -300,8 +300,8 @@ AC backend diperjelas sesuai dependency DAG: actual UI wrong-file-before-PUT gua
 ### Commit task
 
 - Pesan yang direncanakan: `feat(api): adup-005 verify upload file identity`.
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- SHA: `4e87c24206c5dd6ae19a0fbed7035728a4d94490`.
+- Hook/checks: docs, lint, check-types dan Commitlint lulus; tidak ada hook dilewati.
 - Ledger: catat SHA aktual setelah commit berhasil pada update dokumentasi berikutnya; jangan menulis SHA self-referential.
 
 ### Blocker atau tindak lanjut
@@ -364,7 +364,7 @@ Tidak ada blocker desain tersisa. ADUP-001 dan visual acceptance ADUP-006 selesa
 
 ## Task: ADUP-007 — Typed media client, Query dan error mapping DRY
 
-- Status: Backlog
+- Status: Done
 - Owner: pengembang/agent pelaksana task.
 - Prioritas: 7, mengikuti dependencies.
 - Referensi: ADUP-US01; [plan canonical](../plans/admin-media-upload/implementation-plan.md), [PRD](../product/prd.md).
@@ -392,9 +392,9 @@ Target/symbol: MediaClient; admin identity owner/session keys; shared private re
 
 ### Acceptance criteria
 
-- [ ] No server imports/secrets masuk bundle, control error bukan cached success.
-- [ ] Logout/expiry membersihkan media query/mutations; public cache tetap utuh.
-- [ ] Query invalidate owner/content detail/list sesudah confirmed complete tanpa mengganti dirty edit baseline.
+- [x] No server imports/secrets masuk bundle, control error bukan cached success.
+- [x] Logout/expiry membersihkan media query/mutations; public cache tetap utuh.
+- [x] Query invalidate owner/content detail/list sesudah confirmed complete tanpa mengganti dirty edit baseline.
 
 ### Validasi
 
@@ -402,7 +402,11 @@ Bun native client/cache/gateway/auth regression + compile-only Eden mismatches; 
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan rencana, bukan hasil test yang telah dijalankan. Isi evidence aktual dan batas proof saat task dikerjakan.
+Typed media client/input/DTO derived from Eden API contract, private authoritative fetcher reused. Shared `private-result.ts` centralizes abort/network/domain handling; ContentApiError compatibility preserved. Identity-scoped owner/session queries support AbortSignal, no-store, retry:false; initiate/complete/abort mutation factories retry:false. Signed authorization is direct Eden and never inserted into Query/mutation cache. Stable safe error whitelist hides raw provider/auth messages; malformed response/owner identity cannot become confirmed success.
+
+Native client/cache/gateway/guard regression `bun test apps/web/test/admin-media-client.test.ts apps/web/test/admin-content-client.test.ts apps/web/test/session-cache.test.ts apps/web/test/business-gateway.test.ts apps/web/test/admin-route-guard.test.ts`:31 pass/126 assertions. Explicit `bun run --cwd apps/web auth:import:proof` rejects server import in client build and restores fixture. Root check-types3/3, lint1/1, build2/2 lulus.
+
+401/expiry cleanup removes media cache/mutations while public data survives. Confirmed-complete invalidation helper marks owner/content detail/list stale; existing edit baseline remains component-owned. Actual upload-manager auth stop and browser dirty-editor conflict are ADUP-014/015, not claimed here. Docs/format/diff/staged-doc/preservation and hooks checked at task commit.
 
 ### Commit task
 
@@ -413,7 +417,7 @@ Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan
 
 ### Blocker atau tindak lanjut
 
-Dependencies ADUP-003, ADUP-005 (scope plan telah disetujui pengguna). Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
+API adapter/cache layer ready. File/Worker/XHR ownership remains in memory manager implemented on subsequent tasks; no browser uploader is claimed yet.
 
 ## Task: ADUP-008 — File selection, validation dan fingerprint worker
 
