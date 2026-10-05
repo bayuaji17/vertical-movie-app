@@ -612,8 +612,8 @@ In-memory owner/kind state machine, one-file coordinator, optional browser lock,
 ### Commit task
 
 - Pesan yang direncanakan: `feat(web): adup-011 recover upload sessions`.
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- SHA: `6d09513634406a01c0c278c4da1c5216074a43a4`.
+- Hook/checks: docs, lint, check-types dan Commitlint lulus; tidak ada hook dilewati.
 - Ledger: catat SHA aktual setelah commit berhasil pada update dokumentasi berikutnya; jangan menulis SHA self-referential.
 
 ### Blocker atau tindak lanjut
@@ -622,7 +622,7 @@ Tidak ada blocker controller; browser UI/auth/reload acceptance tetap milik ADUP
 
 ## Task: ADUP-012 — Shared Upload Media panel pada detail draft
 
-- Status: Backlog
+- Status: Done
 - Owner: pengembang/agent pelaksana task.
 - Prioritas: 12, mengikuti dependencies.
 - Referensi: ADUP-US01; [plan canonical](../plans/admin-media-upload/implementation-plan.md), [PRD](../product/prd.md).
@@ -648,9 +648,9 @@ Target/symbol: OwnerMediaPanel, generic role card, media dialog.
 
 ### Acceptance criteria
 
-- [ ] Tidak ada route baru wajib atau upload di create form sebelum owner tersimpan.
-- [ ] Video/poster independent namun tab transport tetap capped; changing theme tidak kehilangan attempt.
-- [ ] Control/error UX sesuai API state, tanpa publish/crop/quality selector atau storage credentials.
+- [x] Tidak ada route baru wajib atau upload di create form sebelum owner tersimpan.
+- [x] Video/poster independent namun tab transport tetap capped; changing theme tidak kehilangan attempt.
+- [x] Control/error UX sesuai API state, tanpa publish/crop/quality selector atau storage credentials.
 
 ### Validasi
 
@@ -658,7 +658,7 @@ Browser three kinds/read-only/loading/empty/errors + desktop/mobile light/dark w
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan rencana, bukan hasil test yang telah dijalankan. Isi evidence aktual dan batas proof saat task dikerjakan.
+Shared Upload Media panel below metadata diimplementasikan pada existing detail routes; Film/Standalone source+cover, Series cover-only, server read-only, keyboard chooser/actions, labelled Progress sent/verified, replacement/cancel dialog, selected cover preview dan independent role states. @shadcn/progress dry-run/view/install menggunakan existing Base UI/cn; manifest/lock tidak berubah dan frozen install lulus. Built Bun/Nitro Chromium layout: tiga kinds, draft/published/archived, 45 Light/Dark/System viewport combinations 320/390/768/1024/1440, zero horizontal overflow. Native hidden file input memperbaiki Field sr-only width interaction. Root check-types 3/3, lint 1/1, build 2/2 lulus. Manager progress notifications bounded 200 ms dan verified final update; native recovery tetap 5/24 pass. Full media/auth browser acceptance milik ADUP-015; worker truth codec/duration/dimensions tetap authoritative. Target expansion use-upload-manager.ts untuk signal-aware Query mutations tanpa File/URLs dalam cache.
 
 ### Commit task
 
@@ -669,7 +669,7 @@ Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan
 
 ### Blocker atau tindak lanjut
 
-Dependencies ADUP-006, ADUP-007, ADUP-008, ADUP-010, ADUP-011 (scope plan telah disetujui pengguna). Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
+Tidak ada blocker layout/panel; readiness dan auth closure mengikuti ADUP-013–015.
 
 ## Task: ADUP-013 — Status pemrosesan dasar dan readiness owner
 

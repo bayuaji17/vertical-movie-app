@@ -57,6 +57,7 @@ export class UploadManager {
   }
   private inventory?: OwnerMedia
   private disposed = false
+  private progressAt = { source: 0, poster: 0 }
   constructor(
     private readonly options: {
       client: MediaClient
@@ -70,6 +71,10 @@ export class UploadManager {
   ) {}
   snapshot(kind: MediaKind) {
     return this.slots[kind].view
+  }
+  activate() {
+    this.disposed = false
+    if (this.inventory) this.observe(this.inventory)
   }
   private releasePreview(kind: MediaKind) {
     const url = this.slots[kind].view.previewUrl
@@ -314,8 +319,17 @@ export class UploadManager {
       client: this.options.client,
       signal,
       onProgress: (bytes) => {
-        if (this.alive(kind, epoch, signal))
-          this.update(kind, { progress: bytes })
+        if (!this.alive(kind, epoch, signal)) return
+        // Keep the latest snapshot without announcing every parallel XHR event.
+        slot.view = { ...slot.view, progress: bytes }
+        const now = Date.now()
+        if (
+          now - this.progressAt[kind] >= 200 ||
+          bytes.verified === bytes.total
+        ) {
+          this.progressAt[kind] = now
+          this.options.changed()
+        }
       },
       put: this.options.put,
     })

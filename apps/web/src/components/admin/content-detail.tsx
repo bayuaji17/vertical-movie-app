@@ -9,6 +9,7 @@ import { ContentStatus } from './content-status'
 import { Button } from '#/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '#/components/ui/card'
 import { Badge } from '#/components/ui/badge'
+import { OwnerMediaPanel } from './media-panel'
 
 function MetadataRows({
   rows,
@@ -202,6 +203,15 @@ export function ContentDetailView({ detail }: { detail: ContentDetail }) {
           </CardContent>
         </Card>
       </div>
+      {(detail.type === 'series' || detail.data.kind !== 'episode') && (
+        <OwnerMediaPanel
+          owner={{
+            ownerType: detail.type === 'series' ? 'series' : 'video',
+            ownerId: d.id,
+          }}
+          type={detail.type}
+        />
+      )}
     </div>
   )
 }
