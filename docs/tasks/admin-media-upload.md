@@ -85,7 +85,7 @@ Tidak ada blocker planning tersisa. Scope plan dan empat mockup disetujui penggu
 
 ## Task: ADUP-002 — Proof identitas file dan bounded hashing browser
 
-- Status: Backlog
+- Status: Done
 - Owner: pengembang/agent pelaksana task.
 - Prioritas: 2, mengikuti dependencies.
 - Referensi: ADUP-US01; [plan canonical](../plans/admin-media-upload/implementation-plan.md), [PRD](../product/prd.md).
@@ -109,9 +109,9 @@ Target/symbol: Incremental SHA-256 proof, browser worker cancellation.
 
 ### Acceptance criteria
 
-- [ ] Digest sama dengan oracle dan berbeda untuk isi berbeda yang metadata filenya sama.
-- [ ] Hash bisa dihentikan saat auth loss/unmount dan tidak mengirim stale result.
-- [ ] Memory bounded pada chunks, bukan O(file size); pilihan algoritma/dependency dan batas platform dicatat.
+- [x] Digest sama dengan oracle dan berbeda untuk isi berbeda yang metadata filenya sama.
+- [x] Hash bisa dihentikan saat auth loss/unmount dan tidak mengirim stale result.
+- [x] Memory bounded pada chunks, bukan O(file size); pilihan algoritma/dependency dan batas platform dicatat.
 
 ### Validasi
 
@@ -119,18 +119,20 @@ Native digest oracle + browser host proof pada ukuran kecil dan near-limit; reco
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan rencana, bukan hasil test yang telah dijalankan. Isi evidence aktual dan batas proof saat task dikerjakan.
+Native oracle: `bun test apps/web/test/admin-media-fingerprint.test.ts` lulus 9 test/16 assertions. Browser: `bun apps/web/test/admin-media-fingerprint-proof.mjs` memakai adapter `AUTH_BROWSER_NODE`, `AUTH_PLAYWRIGHT_MODULE`, `AUTH_BROWSER_EXECUTABLE` host; File disk 1500000000 byte, 358 progress events, digest sama dengan Bun createHash, 3267 heartbeat ticks, 0 late cancellation callbacks; 66021 ms. CDP sampling tiap100ms: heap peak1162112 byte, backing storage peak197139258 byte (termasuk buffer); combined konservatif189,1 MiB, di bawah threshold256 MiB. Chunk read maksimum4194304 byte; GC dapat menahan lebih dari satu buffer, tanpa full-file buffer. Worker proof minified6362 byte. Bukan total RSS/benchmark perangkat fisik atau VPS.
+
+Native Web Crypto tidak incremental; exact noble-hashes2.4.0 MIT dipilih. Target diperluas dengan core production bersama, manifest dan lock; lihat keputusan pada plan. `bun install --frozen-lockfile`, `bun run check-types` (3/3), `bun run lint` (1/1), `bun run build` (2/2) lulus. Dokumentasi/format/diff dan hooks diperiksa saat task commit.
 
 ### Commit task
 
-- Pesan yang direncanakan: `test(api): adup-002 prove bounded file hashing`.
+- Pesan yang direncanakan: `test(web): prove bounded file hashing (ADUP-002)`.
 - SHA: belum dibuat.
 - Hook/checks: belum dijalankan untuk task ini.
 - Ledger: catat SHA aktual setelah commit berhasil pada update dokumentasi berikutnya; jangan menulis SHA self-referential.
 
 ### Blocker atau tindak lanjut
 
-Dependencies ADUP-001 (scope plan telah disetujui pengguna). Keputusan native/library hashing harus berdasarkan proof bounded memory, bukan asumsi.
+ADUP-001 dan proof bounded hashing selesai. Library/core yang sama digunakan ADUP-008; fallback seluruh buffer tidak tersedia.
 
 ## Task: ADUP-003 — API private owner media inventory dan rediscovery
 

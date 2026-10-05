@@ -2,7 +2,7 @@
 
 ## Plan metadata
 
-- Status: **plan dan empat mockup disetujui pengguna** · 5 Oktober 2026. ADUP-001/ADUP-006 Done; runtime belum diimplementasikan. Proof hashing ADUP-002 tetap mendahului task identity yang bergantung padanya.
+- Status: **plan dan empat mockup disetujui pengguna** · 5 Oktober 2026. ADUP-001/ADUP-006 Done; implementasi runtime dimulai pada branch `feat/admin-media-upload`. Proof hashing ADUP-002 tetap mendahului task identity yang bergantung padanya.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `main`; base SHA / last validated SHA: `d8417249de99611e1a661ade03bb4b03dd5f0538`.
 - Context: [repository-context.md](repository-context.md), disimpan lebih dahulu.
@@ -567,3 +567,10 @@ Revert uploader task commits bertahap; leave current metadata/playback UI bekerj
 - Commit artefak ADUP-006: `f93e9af81c18107f1d70e7c645a2ef496f26db05` (`docs(web): add media upload mockups (ADUP-006)`), delapan file task. Docs/Prettier/diff/staged snapshot/preservation dan seluruh commit hooks lulus; evidence di backlog. Receipt follow-up menetapkan empat PNG mode100644 tanpa mengubah byte gambar. Status Review; tidak ada push/PR/merge atau runtime implementation dari task mockup.
 - 2026-10-05 — pengguna memberikan “oke approve” untuk empat mockup. ADUP-006 Done; canonical desain/plan/backlog/index diperbarui. Entry Review di atas adalah riwayat sebelum approval; tidak ada perubahan raster atau runtime. Task berikutnya sesuai DAG adalah proof hashing ADUP-002.
 - Approval commit: `f80998cd18fafaf12de5cc4a18e2c53563a9f872` (`docs(web): approve media upload designs (ADUP-006)`). Docs/format/diff/staged-doc/preservation dan seluruh hooks lulus; receipt/evidence dicatat sesudah commit pada backlog. Task runtime tetap belum dimulai.
+
+### 2026-10-05 — ADUP-002 / keputusan hashing
+
+- Freshness implementasi: base branch `ca26e88fbd1cfe037406705b6955776a9bd7988b`; remote/local main tetap `d8417249de99611e1a661ade03bb4b03dd5f0538`, tanpa perubahan runtime relevan sejak snapshot. Scope implementasi diotorisasi pengguna.
+- [Web Crypto digest](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest) membutuhkan seluruh buffer; tidak memenuhi bounded full-file hashing. Dipilih [noble-hashes](https://github.com/paulmillr/noble-hashes) SHA-256 incremental, exact `@noble/hashes@2.4.0`, MIT. Worker bundle proof minified 6362 byte.
+- Target ADUP-002 diperluas ke `apps/web/src/lib/admin/file-fingerprint-core.ts`, `apps/web/package.json` dan `bun.lock`: algoritma proof yang sama dipakai worker produksi ADUP-008, menghindari implementasi ganda. Dependency dipasang pada spike, bukan ditunda ke ADUP-008. Browser tanpa Worker/secure context menampilkan error; tidak ada fallback whole-file atau crypto buatan sendiri.
+- Native oracle, cancellation dan bounded slice tests lulus. Chromium host membaca File disk 1500000000 byte melalui Worker, bukan Blob sintetis seluruh file. Memory diukur melalui CDP Runtime.getHeapUsage terpisah dari oracle; evidence akhir pada backlog. Ini bukan benchmark perangkat fisik/VPS.
