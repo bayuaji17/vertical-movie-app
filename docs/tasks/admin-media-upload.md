@@ -512,8 +512,8 @@ XHR direct PUT diimplementasikan tanpa cookie/Authorization aplikasi; exact Blob
 ### Commit task
 
 - Pesan yang direncanakan: `feat(web): adup-009 add direct multipart transport`.
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- SHA: `8c5134f363e7a944c9309bbd711cf0168ffbfccc`.
+- Hook/checks: docs, lint, check-types dan Commitlint lulus; tidak ada hook dilewati.
 - Ledger: catat SHA aktual setelah commit berhasil pada update dokumentasi berikutnya; jangan menulis SHA self-referential.
 
 ### Blocker atau tindak lanjut
@@ -522,7 +522,7 @@ Tidak ada blocker transport lokal; scheduler/recovery/UI mengikuti ADUP-010–01
 
 ## Task: ADUP-010 — Scheduler multipart, retry dan aggregate progress
 
-- Status: Backlog
+- Status: Done
 - Owner: pengembang/agent pelaksana task.
 - Prioritas: 10, mengikuti dependencies.
 - Referensi: ADUP-US01; [plan canonical](../plans/admin-media-upload/implementation-plan.md), [PRD](../product/prd.md).
@@ -547,9 +547,9 @@ Target/symbol: Per-session scheduler, global manager transport cap, reconcile/re
 
 ### Acceptance criteria
 
-- [ ] Tidak lebih dari cap PUT aktif atau alokasi seluruh file; verified progress tepat dengan retries.
-- [ ] Unknown PUT outcome direconcile, bukan replay sukses secara buta.
-- [ ] 100% sent menampilkan finalizing; Upload completed hanya dari confirmed DTO.
+- [x] Tidak lebih dari cap PUT aktif atau alokasi seluruh file; verified progress tepat dengan retries.
+- [x] Unknown PUT outcome direconcile, bukan replay sukses secara buta.
+- [x] 100% sent menampilkan finalizing; Upload completed hanya dari confirmed DTO.
 
 ### Validasi
 
@@ -557,7 +557,7 @@ Native scheduler injected clock/I/O (small last part, 1 part poster, concurrency
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan rencana, bukan hasil test yang telah dijalankan. Isi evidence aktual dan batas proof saat task dikerjakan.
+Scheduler server geometry, concurrency min(cap,3), bounded retries/backoff dan ListParts reconciliation diimplementasikan; sent vs verified tidak menggandakan retry. Native scheduler 4 pass/18 assertions (small last part, resume, cap, unknown PUT success, retries, malformed parts, expiry, pause). Dedicated Chromium/MinIO transport+production scheduler 2 pass/17 assertions: pre-stored 5 MiB part dilewati, hanya 1 KiB tersisa dikirim, completed object byte integrity lulus. Root check-types 3/3, lint 1/1, build 2/2 lulus. API integration fixture diperluas untuk bundle scheduler dan fresh storage ListParts; signed URLs hanya live transport input. Satu-file coordinator menjadi scope ADUP-011, panel/auth acceptance ADUP-012–015.
 
 ### Commit task
 
@@ -568,7 +568,7 @@ Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan
 
 ### Blocker atau tindak lanjut
 
-Dependencies ADUP-008, ADUP-009 (scope plan telah disetujui pengguna). Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
+Tidak ada blocker scheduler lokal; controller dan UI mengikuti backlog.
 
 ## Task: ADUP-011 — Resume, pause, finalization dan cancel recovery
 

@@ -626,3 +626,9 @@ Worker browser produksi dan bridge pembatalan/resume diimplementasikan. `bun tes
 XHR direct PUT diimplementasikan tanpa cookie/Authorization aplikasi; exact Blob.slice, abort cleanup, safe CORS/signature/timeout codes dan no late progress. `bun test apps/web/test/admin-upload-transport.test.ts`: 3 pass/19 assertions. Dedicated private MinIO/Chromium proof: 1 pass/8 assertions; dua part 5 MiB dan 1 KiB, real progress, ListParts/ETag, downloaded byte integrity dan storage signature 403 aman tanpa app-auth logout. HTTP 2xx hanya transport result; ListParts pada scheduler berikutnya menjadi authority sebelum completion, termasuk ETag tidak terekspos. Root check-types 3/3, lint 1/1, build 2/2 lulus. Target expansion: apps/api/test/integration/media-transport-proof.test.ts menggunakan isolated bucket, cleanup, runner eval tanpa media/URL persistence. Browser panel dan R2 staging mengikuti acceptance lanjutan.
 
 - Task commit belum ditulis pada saat evidence ini disimpan; receipt actual SHA/hooks dicatat pada update task berikutnya.
+
+### ADUP-010 — 2026-10-05 local execution
+
+Scheduler server geometry, concurrency min(cap,3), bounded retries/backoff dan ListParts reconciliation diimplementasikan; sent vs verified tidak menggandakan retry. Native scheduler 4 pass/18 assertions (small last part, resume, cap, unknown PUT success, retries, malformed parts, expiry, pause). Dedicated Chromium/MinIO transport+production scheduler 2 pass/17 assertions: pre-stored 5 MiB part dilewati, hanya 1 KiB tersisa dikirim, completed object byte integrity lulus. Root check-types 3/3, lint 1/1, build 2/2 lulus. API integration fixture diperluas untuk bundle scheduler dan fresh storage ListParts; signed URLs hanya live transport input. Satu-file coordinator menjadi scope ADUP-011, panel/auth acceptance ADUP-012–015.
+
+- Task commit belum ditulis pada saat evidence ini disimpan; receipt actual SHA/hooks dicatat pada update task berikutnya.
