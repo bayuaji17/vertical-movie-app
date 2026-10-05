@@ -26,6 +26,7 @@ import {
 } from '#/components/ui/sheet'
 import { useAdminPrincipal } from '#/lib/auth/session-context'
 import { AdminLogout, useAdminLogout } from './admin-logout'
+import { contentSearch } from '#/lib/admin/content-list-state'
 
 function Brand() {
   return (
@@ -63,6 +64,15 @@ export function AdminShell({ children }: { children: ReactNode }) {
       >
         <RiDashboardLine className="size-5" aria-hidden="true" />
         Dashboard
+      </Link>
+      <Link
+        to="/admin/content"
+        search={contentSearch({})}
+        onClick={() => setDrawer(false)}
+        className="mt-1 flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium hover:bg-sidebar-accent focus-visible:outline-2 focus-visible:outline-ring"
+        activeProps={{ className: 'bg-primary/15' }}
+      >
+        Content
       </Link>
       <div className="mt-auto pt-8">
         <AdminLogout {...logout} />

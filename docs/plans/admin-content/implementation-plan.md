@@ -417,3 +417,5 @@ Roadmap bukan daftar task Ready atau perluasan acceptance iterasi 1. Jangan mene
 - Receipt ADMC-004: `d66c78407d462f0b3c7027e55ed3321d22958308`; checks/AC teramati ada pada backlog. Commit lokal, belum push/PR/merge.
 
 - Eksekusi ADMC-015 memisahkan integrasi override `.dark` approved dari primitive task. Theme ADMC-012 akan ditutup sesudah form runtime tersedia agar input preservation dapat diuji. Metadata Series dispatch tersedia pada client/mapper; ADMC-014 menutup validasi resource/persistensi sesudah halaman runtime.
+
+- Receipt ADMC-015: `2f3d95e3454c5787d22865a8fc52593f5c2fcfed`; checks/AC teramati ada pada backlog. Commit lokal, belum push/PR/merge.

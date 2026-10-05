@@ -164,9 +164,8 @@ export function createContentClient(
 }
 export type ContentClient = ReturnType<typeof createContentClient>
 export type ContentDetail = Awaited<ReturnType<ContentClient['detail']>>
-export type ContentItem = Awaited<
-  ReturnType<ContentClient['list']>
->['items'][number]
+export type ContentPage = Awaited<ReturnType<ContentClient['list']>>
+export type ContentItem = ContentPage['items'][number]
 export function browserContentClient(queryClient: QueryClient) {
   const base = getBrowserApiBaseUrl()
   return base ? createContentClient(base, queryClient) : undefined

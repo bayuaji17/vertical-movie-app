@@ -245,7 +245,7 @@ Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
 ## Task: ADMC-015 — Integrasi token charcoal approved
 
-- Status: Review
+- Status: Done
 - Owner: Codex
 - Prioritas: P1
 - Referensi: desain final disetujui pengguna 3 Oktober 2026; implementasi disetujui 5 Oktober 2026.
@@ -284,6 +284,8 @@ Tidak menganggap artefak final desain untracked sudah tersedia pada checkout lai
 CSS diff reviewed: only approved dark overrides, unchanged light/media/preset. Root types 3 tasks, lint 1, build 2 passed (valid cache from matching source). Design notes staged against HEAD to preserve pre-existing full design-system edits/exports; CSS token integration intentionally owns approved existing override. Prior shell auth native/SSR/browser proofs remain unchanged. Docs/staged checks below.
 
 Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
+
+- Receipt commit task: `2f3d95e3454c5787d22865a8fc52593f5c2fcfed`; hooks docs/lint/types/Commitlint lulus tanpa bypass.
 
 ## Task: ADMC-004 — Shell dan navigasi admin responsif
 
@@ -334,7 +336,7 @@ Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
 ## Task: ADMC-005 — Daftar metadata dengan search dan pagination
 
-- Status: Backlog
+- Status: Review
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai dependency
 - Referensi: ADMC-US-02; PRD-02/03/08/09; GR-01/05/08; plan STEP-005.
@@ -348,9 +350,9 @@ Route videos index, list table/mobile cards, kind/search/includeArchived URL sta
 
 ### Acceptance criteria
 
-- [ ] Film/Standalone/Series, search/debounce dan Include archived; total filter dari ADMC-013, tanpa status filter/sort palsu.
-- [ ] Numbered pages, default 10/preset 10/25/50/100 dan Custom 1–100; filter/size reset page 1 dan request race tidak mencampur hasil.
-- [ ] Loading/empty/error/page retry accessible; page error mempertahankan hasil lama bertanda stale, range/boundaries benar.
+- [x] Film/Standalone/Series, search/debounce dan Include archived; total filter dari ADMC-013, tanpa status filter/sort palsu.
+- [x] Numbered pages, default 10/preset 10/25/50/100 dan Custom 1–100; filter/size reset page 1 dan request race tidak mencampur hasil.
+- [x] Loading/empty/error/page retry accessible; page error mempertahankan hasil lama bertanda stale, range/boundaries benar.
 
 ### Validasi
 
@@ -370,6 +372,18 @@ Belum diimplementasikan atau diuji. Hasil runtime tidak disimpulkan dari plan.
 ### Blocker atau tindak lanjut
 
 Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready hanya karena source API tersedia.
+
+### Evidence implementasi — 5 Oktober 2026
+
+Content route generated, shared navigation/View content action added with working list target. Eden/Query list uses real server totals, cards/table from one query, three types, archived-inclusive filter, debounce URL state, default/preset/custom 1–100, bounded pagination, loading/empty/error/manual retry. Unit tests 3/13 pass including cancelled-filter cache isolation. Detail/edit links complete with ADMC-008/009; Create CTA added with ADMC-007. Browser integration/full persistence closure on ADMC-011; root gates recorded when observed.
+
+Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
+
+### Evidence implementasi — 5 Oktober 2026
+
+Root check-types (3), lint (1), build (2), docs:check and diff --check pass. Content pagination/filter unit proof: 3 tests, 13 assertions. Full browser acceptance follows in ADMC-011.
+
+Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
 ## Task: ADMC-006 — Reusable form metadata dan genre
 

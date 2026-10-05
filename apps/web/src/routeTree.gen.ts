@@ -17,6 +17,7 @@ import { Route as ApiSplatRouteImport } from './routes/api/$'
 import { Route as WatchSlugRouteImport } from './routes/watch.$slug'
 import { Route as AdminAuthenticatedIndexRouteImport } from './routes/admin._authenticated.index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as AdminAuthenticatedContentIndexRouteImport } from './routes/admin._authenticated.content.index'
 import { Route as AdminAuthenticatedVideosIdPreviewRouteImport } from './routes/admin._authenticated.videos.$id.preview'
 
 const IndexRoute = IndexRouteImport.update({
@@ -58,6 +59,12 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAuthenticatedContentIndexRoute =
+  AdminAuthenticatedContentIndexRouteImport.update({
+    id: '/content/',
+    path: '/content/',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
 const AdminAuthenticatedVideosIdPreviewRoute =
   AdminAuthenticatedVideosIdPreviewRouteImport.update({
     id: '/videos/$id/preview',
@@ -73,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/watch/$slug': typeof WatchSlugRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/': typeof AdminAuthenticatedIndexRoute
+  '/admin/content/': typeof AdminAuthenticatedContentIndexRoute
   '/admin/videos/$id/preview': typeof AdminAuthenticatedVideosIdPreviewRoute
 }
 export interface FileRoutesByTo {
@@ -82,6 +90,7 @@ export interface FileRoutesByTo {
   '/api/$': typeof ApiSplatRoute
   '/watch/$slug': typeof WatchSlugRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/admin/content': typeof AdminAuthenticatedContentIndexRoute
   '/admin/videos/$id/preview': typeof AdminAuthenticatedVideosIdPreviewRoute
 }
 export interface FileRoutesById {
@@ -94,6 +103,7 @@ export interface FileRoutesById {
   '/watch/$slug': typeof WatchSlugRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/_authenticated/': typeof AdminAuthenticatedIndexRoute
+  '/admin/_authenticated/content/': typeof AdminAuthenticatedContentIndexRoute
   '/admin/_authenticated/videos/$id/preview': typeof AdminAuthenticatedVideosIdPreviewRoute
 }
 export interface FileRouteTypes {
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
     | '/watch/$slug'
     | '/api/auth/$'
     | '/admin/'
+    | '/admin/content/'
     | '/admin/videos/$id/preview'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -115,6 +126,7 @@ export interface FileRouteTypes {
     | '/api/$'
     | '/watch/$slug'
     | '/api/auth/$'
+    | '/admin/content'
     | '/admin/videos/$id/preview'
   id:
     | '__root__'
@@ -126,6 +138,7 @@ export interface FileRouteTypes {
     | '/watch/$slug'
     | '/api/auth/$'
     | '/admin/_authenticated/'
+    | '/admin/_authenticated/content/'
     | '/admin/_authenticated/videos/$id/preview'
   fileRoutesById: FileRoutesById
 }
@@ -195,6 +208,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/_authenticated/content/': {
+      id: '/admin/_authenticated/content/'
+      path: '/content'
+      fullPath: '/admin/content/'
+      preLoaderRoute: typeof AdminAuthenticatedContentIndexRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
     '/admin/_authenticated/videos/$id/preview': {
       id: '/admin/_authenticated/videos/$id/preview'
       path: '/videos/$id/preview'
@@ -207,11 +227,13 @@ declare module '@tanstack/react-router' {
 
 interface AdminAuthenticatedRouteChildren {
   AdminAuthenticatedIndexRoute: typeof AdminAuthenticatedIndexRoute
+  AdminAuthenticatedContentIndexRoute: typeof AdminAuthenticatedContentIndexRoute
   AdminAuthenticatedVideosIdPreviewRoute: typeof AdminAuthenticatedVideosIdPreviewRoute
 }
 
 const AdminAuthenticatedRouteChildren: AdminAuthenticatedRouteChildren = {
   AdminAuthenticatedIndexRoute: AdminAuthenticatedIndexRoute,
+  AdminAuthenticatedContentIndexRoute: AdminAuthenticatedContentIndexRoute,
   AdminAuthenticatedVideosIdPreviewRoute:
     AdminAuthenticatedVideosIdPreviewRoute,
 }

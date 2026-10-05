@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { RiFilmLine } from '@remixicon/react'
 import {
   Card,
@@ -10,6 +10,8 @@ import {
 import { Badge } from '#/components/ui/badge'
 import { useAdminPrincipal } from '#/lib/auth/session-context'
 import { AdminPageHeading } from '#/components/admin/page-heading'
+import { Button } from '#/components/ui/button'
+import { contentSearch } from '#/lib/admin/content-list-state'
 
 export const Route = createFileRoute('/admin/_authenticated/')({
   head: () => ({
@@ -41,6 +43,24 @@ function AdminDashboard() {
             Create and manage films, standalone videos, and series before
             uploading.
           </p>
+        </CardContent>
+      </Card>
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Manage content</CardTitle>
+          <CardDescription>
+            Find content and update draft metadata.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button
+            nativeButton={false}
+            className="min-h-11"
+            variant="outline"
+            render={<Link to="/admin/content" search={contentSearch({})} />}
+          >
+            View content
+          </Button>
         </CardContent>
       </Card>
       <Card>
