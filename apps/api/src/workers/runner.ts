@@ -118,6 +118,8 @@ export function createJobRunner({
       if (BigInt(downloaded) !== asset.sizeBytes)
         throw new MediaProcessError("MEDIA_SOURCE_CHANGED");
       const sha256 = hash.digest("hex");
+      if (upload.expectedSha256 !== null && sha256 !== upload.expectedSha256)
+        throw new MediaProcessError("MEDIA_SOURCE_CHANGED");
       let facts: Record<string, unknown>,
         files: string[],
         tiers: {

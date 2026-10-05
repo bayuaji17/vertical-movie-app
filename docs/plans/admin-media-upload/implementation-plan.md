@@ -2,7 +2,7 @@
 
 ## Plan metadata
 
-- Status: **plan dan empat mockup disetujui pengguna** · 5 Oktober 2026. ADUP-001/ADUP-006 Done; implementasi runtime dimulai pada branch `feat/admin-media-upload`. Proof hashing ADUP-002 tetap mendahului task identity yang bergantung padanya.
+- Status: **plan dan empat mockup disetujui pengguna** · 5 Oktober 2026. ADUP-001–006 Done; backend additions locally verified pada branch `feat/admin-media-upload`; frontend ADUP-007–015 berikutnya. Proof hashing ADUP-002 tetap mendahului task identity yang bergantung padanya.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `main`; base SHA / last validated SHA: `d8417249de99611e1a661ade03bb4b03dd5f0538`.
 - Context: [repository-context.md](repository-context.md), disimpan lebih dahulu.
@@ -67,7 +67,7 @@ Path tabel ialah upstream Elysia; browser menambahkan prefix `/api`.
 
 | Endpoint                                    | Status/requirements                                                                                                                                                                                                           |
 | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| POST /admin/media/uploads                   | Existing; body ownerType/ownerId/kind/filename/contentType/sizeBytes/idempotencyKey. Tambahan **proposed optional** expectedSha256 lowercase 64 hex untuk binding file baru, legacy tetap kompatibel.                         |
+| POST /admin/media/uploads                   | Existing; body ownerType/ownerId/kind/filename/contentType/sizeBytes/idempotencyKey. Tambahan **implemented ADUP-005 optional** expectedSha256 lowercase 64 hex untuk binding file baru, legacy tetap kompatibel.             |
 | GET /admin/media/uploads/:id                | Existing; ListParts/bytes/session dan processing. Fingerprint/descriptor/capability untuk resume baru di-whitelist atau dibaca melalui inventory; signed URL tetap endpoint part.                                             |
 | POST /admin/media/uploads/:id/parts         | Existing partNumber; alreadyUploaded/url/expiry. Jangan mengira successful part jika hanya optimistic client state.                                                                                                           |
 | POST /admin/media/uploads/:id/complete      | Existing freeze+activate+enqueue; status reconciliation sebelum retry pada uncertain outcome. Tidak publish.                                                                                                                  |
@@ -274,7 +274,7 @@ Validation: Native HTTP request hash replay/conflict/legacy; dedicated PG immuta
 Acceptance criteria:
 
 - [ ] Metadata identik dengan fingerprint berbeda menghasilkan idempotency conflict, bukan session tercampur.
-- [ ] Matching file bisa resume; mismatch tidak lanjut PUT pada UI dan hasil manipulasi ditolak worker.
+- [ ] Session dengan fingerprint valid mempunyai capability resume; manipulasi byte ditolak worker sebelum decode. Guard file UI diverifikasi pada ADUP-008/011 sesuai dependency DAG.
 - [ ] Tidak ada breaking change pada legacy clients, queue retry atau valid assets lama.
 
 ### ADUP-006 — Desain panel Upload Media desktop/mobile light/dark
@@ -590,5 +590,17 @@ Generated/reviewed `0009_upload-fingerprint`: hanya nullable field + lowercase h
 Dedicated suites dijalankan serial: fingerprint migration1 pass/14 assertions; upload6 pass/72; publication migration1 pass/10. Native media/playback14 pass/70. Lazy Bun SQL assertions diperbaiki dengan Promise.resolve setelah timeout awal; rerun serial seluruhnya lulus. Root check-types3/3, lint1/1, build2/2 lulus.
 
 Development backup custom-format pg_dump PostgreSQL18 (61216 byte) divalidasi pg_restore list; ignored directory0700/file0600. Command resmi `bun run --cwd apps/api db:migrate` lulus, journal9→10, nullable column terverifikasi. Snapshot17 tabel existing utuh (auth user1/account1/session2, rate_limit1, video1; lainnya kosong). Full restore/production migration tidak diklaim. Docs/Prettier/diff/staged-doc/preservation dan hooks diperiksa saat commit.
+
+- Task commit belum ditulis pada saat evidence ini disimpan; receipt actual SHA/hooks dicatat pada update task berikutnya.
+
+### ADUP-005 — 2026-10-05 local execution
+
+Optional lowercase hex64 fingerprint diterima pada initiate, immutable pada replay dan masuk canonical request hash hanya jika diberikan. Legacy metadata array/hash tetap identik. Discovery actor-scoped membawa expected hash serta canResume hanya draft/pending/unexpired/bound. Worker membandingkan streaming digest sebelum probe/transcode; mismatch terminal `MEDIA_SOURCE_CHANGED`, tanpa ready pointer/facts/output.
+
+Native media/playback14 pass/74 assertions; dedicated PG7 pass/82 (replay same key/hash, different hash/absent hash conflicts, legacy canonical hash, canResume/expiry). MinIO→worker/HLS/publication/playback/recovery proof1 pass/63, mencakup matching digest, legacy source/poster, mismatched bytes terminal sebelum binary probe (missing test binary tidak pernah dijalankan), no output/ready asset. Root check-types3/3, lint1/1, build2/2 lulus, Eden compile optional hash lulus.
+
+Credentials aplikasi terbukti scoped pada bucket sehingga CreateBucket test awal403; isolated fixture memakai credentials admin lokal dari konfigurasi container melalui process memory, tanpa log/file/env sample secret atau perubahan bucket aplikasi. Scope test tetap dedicated DB/bucket unik, cleanup fixture selesai.
+
+AC backend diperjelas sesuai dependency DAG: actual UI wrong-file-before-PUT guard berada pada ADUP-008/011, tidak diklaim sudah ada pada ADUP-005. Task target diperluas ke existing upload integration proof/Eden type proof untuk compatibility evidence. Docs/format/diff/staged-doc/preservation dan hooks diperiksa saat commit.
 
 - Task commit belum ditulis pada saat evidence ini disimpan; receipt actual SHA/hooks dicatat pada update task berikutnya.

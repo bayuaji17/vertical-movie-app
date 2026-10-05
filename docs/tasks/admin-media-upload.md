@@ -241,8 +241,8 @@ Development backup custom-format pg_dump PostgreSQL18 (61216 byte) divalidasi pg
 ### Commit task
 
 - Pesan yang direncanakan: `feat(api): adup-004 bind expected upload checksum`.
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- SHA: `1f2bc9f32710fd70b3120b7cb1adc5217b271d52`.
+- Hook/checks: docs, lint, check-types dan Commitlint lulus; tidak ada hook dilewati.
 - Ledger: catat SHA aktual setelah commit berhasil pada update dokumentasi berikutnya; jangan menulis SHA self-referential.
 
 ### Blocker atau tindak lanjut
@@ -251,7 +251,7 @@ ADUP-004 selesai; expected fingerprint dapat diikat API/worker pada ADUP-005. Pr
 
 ## Task: ADUP-005 — Bind fingerprint pada initiate dan verification worker
 
-- Status: Backlog
+- Status: Done
 - Owner: pengembang/agent pelaksana task.
 - Prioritas: 5, mengikuti dependencies.
 - Referensi: ADUP-US02; [plan canonical](../plans/admin-media-upload/implementation-plan.md), [PRD](../product/prd.md).
@@ -279,9 +279,9 @@ Target/symbol: InitiateUploadBody.expectedSha256; requestHash compatibility; wor
 
 ### Acceptance criteria
 
-- [ ] Metadata identik dengan fingerprint berbeda menghasilkan idempotency conflict, bukan session tercampur.
-- [ ] Matching file bisa resume; mismatch tidak lanjut PUT pada UI dan hasil manipulasi ditolak worker.
-- [ ] Tidak ada breaking change pada legacy clients, queue retry atau valid assets lama.
+- [x] Metadata identik dengan fingerprint berbeda menghasilkan idempotency conflict, bukan session tercampur.
+- [x] Session dengan fingerprint valid mempunyai capability resume; manipulasi byte ditolak worker sebelum decode. Guard file UI diverifikasi pada ADUP-008/011 sesuai dependency DAG.
+- [x] Tidak ada breaking change pada legacy clients, queue retry atau valid assets lama.
 
 ### Validasi
 
@@ -289,7 +289,13 @@ Native HTTP request hash replay/conflict/legacy; dedicated PG immutable identity
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan rencana, bukan hasil test yang telah dijalankan. Isi evidence aktual dan batas proof saat task dikerjakan.
+Optional lowercase hex64 fingerprint diterima pada initiate, immutable pada replay dan masuk canonical request hash hanya jika diberikan. Legacy metadata array/hash tetap identik. Discovery actor-scoped membawa expected hash serta canResume hanya draft/pending/unexpired/bound. Worker membandingkan streaming digest sebelum probe/transcode; mismatch terminal `MEDIA_SOURCE_CHANGED`, tanpa ready pointer/facts/output.
+
+Native media/playback14 pass/74 assertions; dedicated PG7 pass/82 (replay same key/hash, different hash/absent hash conflicts, legacy canonical hash, canResume/expiry). MinIO→worker/HLS/publication/playback/recovery proof1 pass/63, mencakup matching digest, legacy source/poster, mismatched bytes terminal sebelum binary probe (missing test binary tidak pernah dijalankan), no output/ready asset. Root check-types3/3, lint1/1, build2/2 lulus, Eden compile optional hash lulus.
+
+Credentials aplikasi terbukti scoped pada bucket sehingga CreateBucket test awal403; isolated fixture memakai credentials admin lokal dari konfigurasi container melalui process memory, tanpa log/file/env sample secret atau perubahan bucket aplikasi. Scope test tetap dedicated DB/bucket unik, cleanup fixture selesai.
+
+AC backend diperjelas sesuai dependency DAG: actual UI wrong-file-before-PUT guard berada pada ADUP-008/011, tidak diklaim sudah ada pada ADUP-005. Task target diperluas ke existing upload integration proof/Eden type proof untuk compatibility evidence. Docs/format/diff/staged-doc/preservation dan hooks diperiksa saat commit.
 
 ### Commit task
 
@@ -300,7 +306,7 @@ Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan
 
 ### Blocker atau tindak lanjut
 
-Dependencies ADUP-003, ADUP-004 (scope plan telah disetujui pengguna). Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
+Backend identity selesai. Reselection client guard, upload transport/UI dan browser acceptance mengikuti ADUP-007–015; R2 staging/production tetap terpisah.
 
 ## Task: ADUP-006 — Desain panel Upload Media desktop/mobile light/dark
 

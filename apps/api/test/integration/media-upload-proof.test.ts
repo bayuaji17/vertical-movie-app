@@ -1,4 +1,5 @@
 import { beforeAll, afterAll, test, expect } from "bun:test";
+import { createHash } from "node:crypto";
 import { resetMediaDatabase, mediaTestUrl } from "./media-fixture";
 import {
   mediaAssets,
@@ -223,6 +224,60 @@ test("same request replays one session, conflicting payload and parallel owner u
     svc.initiate(input(request.ownerId), "media-admin"),
   ]);
   expect(outcomes.every((o) => o.status === "rejected")).toBe(true);
+});
+test("file identity binds new idempotency keys while preserving legacy canonical request hashes", async () => {
+  const svc = service(),
+    request = input(await movie());
+  const legacy = await svc.initiate(request, "media-admin");
+  const stored = await createMediaRepository(db.db).store.session(legacy.id);
+  const expectedLegacy = createHash("sha256")
+    .update(
+      JSON.stringify([
+        request.ownerType,
+        request.ownerId,
+        request.kind,
+        request.filename,
+        request.contentType,
+        request.sizeBytes,
+      ]),
+    )
+    .digest("hex");
+  expect(stored.requestHash).toBe(expectedLegacy);
+  expect(stored.expectedSha256).toBeNull();
+  expect(
+    (await svc.ownerMedia(request, "media-admin")).source?.active?.canResume,
+  ).toBe(false);
+  await svc.abort(legacy.id, "media-admin");
+  const boundInput = {
+    ...input(request.ownerId),
+    expectedSha256: "a".repeat(64),
+  };
+  const bound = await svc.initiate(boundInput, "media-admin");
+  expect((await svc.initiate(boundInput, "media-admin")).id).toBe(bound.id);
+  await expect(
+    svc.initiate(
+      { ...boundInput, expectedSha256: "b".repeat(64) },
+      "media-admin",
+    ),
+  ).rejects.toMatchObject({ code: "UPLOAD_IDEMPOTENCY_CONFLICT" });
+  await expect(
+    svc.initiate({ ...boundInput, expectedSha256: undefined }, "media-admin"),
+  ).rejects.toMatchObject({ code: "UPLOAD_IDEMPOTENCY_CONFLICT" });
+  const discovered = (await svc.ownerMedia(request, "media-admin")).source
+    ?.active;
+  expect(discovered?.expectedSha256).toBe(boundInput.expectedSha256);
+  expect(discovered?.canResume).toBe(true);
+  await expect(
+    svc.initiate(
+      { ...input(await movie()), expectedSha256: "INVALID" },
+      "media-admin",
+    ),
+  ).rejects.toMatchObject({ code: "VALIDATION_ERROR" });
+  now = new Date(now.getTime() + 86400000);
+  expect(
+    (await svc.ownerMedia(request, "media-admin")).source?.active?.canResume,
+  ).toBe(false);
+  now = new Date();
 });
 test("resume, expiry and completion failures preserve draft until one immutable freeze", async () => {
   const svc = service(),

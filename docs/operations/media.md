@@ -6,7 +6,7 @@ Implementasi development pada feat/media-backend berdasarkan base 4ce185d. Bukti
 
 ADUP-004 menambahkan nullable `expected_sha256` melalui generated `0009_upload-fingerprint`. Journal development sekarang10; angka journal9 pada evidence backend di bawah merupakan riwayat sebelum perubahan ini. Backup custom-format dibuat melalui pg_dump PostgreSQL18 sebelum command resmi `bun run --cwd apps/api db:migrate`; pg_restore list berhasil membaca archive61216 byte. Backup/snapshot berada di ignored `.turbo/admin-media-upload-implementation/backups/`, directory0700/file0600, di luar Git; jangan menghapus backup sebelum review/rilis selesai.
 
-Snapshot sebelum/sesudah membuktikan17 tabel tetap utuh: user1/account1/session2/rate_limit1/video1, lainnya kosong. Dedicated test membuktikan legacy upload/asset/auth preservation, nullable/no backfill, digest constraint dan rerun. Fingerprint binding API/worker mengikuti ADUP-005; UI belum tersedia. Full restore serta migration production memerlukan rollout terpisah. Rincian checks/receipt pada [backlog uploader](../tasks/admin-media-upload.md).
+Snapshot sebelum/sesudah membuktikan17 tabel tetap utuh: user1/account1/session2/rate_limit1/video1, lainnya kosong. Dedicated test membuktikan legacy upload/asset/auth preservation, nullable/no backfill, digest constraint dan rerun. Fingerprint binding API/worker ADUP-005 terverifikasi native/PG/MinIO; UI belum tersedia. Full restore serta migration production memerlukan rollout terpisah. Rincian checks/receipt pada [backlog uploader](../tasks/admin-media-upload.md).
 
 ## Menjalankan API, web dan worker
 

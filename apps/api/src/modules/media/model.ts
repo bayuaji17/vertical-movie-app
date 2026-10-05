@@ -10,6 +10,7 @@ export const InitiateUploadBody = t.Object(
     contentType: t.String({ minLength: 1, maxLength: 100 }),
     sizeBytes: Size,
     idempotencyKey: Uuid,
+    expectedSha256: t.Optional(t.String({ pattern: "^[a-f0-9]{64}$" })),
   },
   { additionalProperties: false },
 );

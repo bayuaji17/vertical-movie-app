@@ -125,8 +125,12 @@ export class MediaService {
           expiresAt: session.expiresAt.toISOString(),
           completedAt: session.completedAt?.toISOString() ?? null,
           failureCode: session.failureCode,
-          expectedSha256: null,
-          canResume: false,
+          expectedSha256: session.expectedSha256,
+          canResume:
+            canUpload &&
+            session.status === "pending" &&
+            session.expectedSha256 !== null &&
+            session.expiresAt > this.runtime.now(),
         };
       };
       const role = async (kind: UploadKind, assetId: string | null) => {
@@ -259,17 +263,24 @@ export class MediaService {
       g = geometry(size);
     if (input.ownerType === "series" && input.kind !== "poster")
       invalid("Series only accepts a poster.");
+    if (
+      input.expectedSha256 !== undefined &&
+      !/^[a-f0-9]{64}$/.test(input.expectedSha256)
+    )
+      invalid("File fingerprint is invalid.");
+    const canonical = [
+      input.ownerType,
+      input.ownerId,
+      input.kind,
+      input.filename,
+      input.contentType,
+      size.toString(),
+    ];
+    // Legacy keys retain their exact original canonical payload without a null suffix.
+    if (input.expectedSha256 !== undefined)
+      canonical.push(input.expectedSha256);
     const hash = createHash("sha256")
-      .update(
-        JSON.stringify([
-          input.ownerType,
-          input.ownerId,
-          input.kind,
-          input.filename,
-          input.contentType,
-          size.toString(),
-        ]),
-      )
+      .update(JSON.stringify(canonical))
       .digest("hex");
     const token = this.runtime.id();
     const result = await repo.transact(async (store) => {
@@ -347,6 +358,7 @@ export class MediaService {
         actorId: actor,
         idempotencyKey: input.idempotencyKey,
         requestHash: hash,
+        expectedSha256: input.expectedSha256 ?? null,
         filename: input.filename,
         stagingKey: "uploads/" + id + "/original",
         status: "initializing",

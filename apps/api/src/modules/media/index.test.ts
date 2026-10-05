@@ -124,6 +124,17 @@ test("strict typed input is rejected before initiate; storage failures remain pr
   );
   expect(bad.status).toBe(422);
   expect(calls).toBe(0);
+  for (const expectedSha256 of [
+    "A".repeat(64),
+    "a".repeat(63),
+    "not-a-digest",
+  ]) {
+    expect(
+      (await app.handle(request({ ...body, expectedSha256 } as typeof body)))
+        .status,
+    ).toBe(422);
+  }
+  expect(calls).toBe(0);
   const failed = await app.handle(request());
   expect(failed.status).toBe(500);
   expect(await failed.text()).not.toContain("credentials");

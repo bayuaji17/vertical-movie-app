@@ -26,6 +26,7 @@ export async function verifyMediaContract(
     contentType: 'video/mp4',
     sizeBytes: '100',
     idempotencyKey: id,
+    expectedSha256: 'a'.repeat(64),
   })
   if (upload.data) {
     const size: string = upload.data.sizeBytes
