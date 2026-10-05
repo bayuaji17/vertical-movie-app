@@ -562,8 +562,8 @@ Scheduler server geometry, concurrency min(cap,3), bounded retries/backoff dan L
 ### Commit task
 
 - Pesan yang direncanakan: `feat(web): adup-010 schedule multipart uploads`.
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- SHA: `7ddd4e900f15634782d35ebe3528d1e814b56e06`.
+- Hook/checks: docs, lint, check-types dan Commitlint lulus; tidak ada hook dilewati.
 - Ledger: catat SHA aktual setelah commit berhasil pada update dokumentasi berikutnya; jangan menulis SHA self-referential.
 
 ### Blocker atau tindak lanjut
@@ -572,7 +572,7 @@ Tidak ada blocker scheduler lokal; controller dan UI mengikuti backlog.
 
 ## Task: ADUP-011 — Resume, pause, finalization dan cancel recovery
 
-- Status: Backlog
+- Status: Done
 - Owner: pengembang/agent pelaksana task.
 - Prioritas: 11, mengikuti dependencies.
 - Referensi: ADUP-US02; [plan canonical](../plans/admin-media-upload/implementation-plan.md), [PRD](../product/prd.md).
@@ -597,9 +597,9 @@ Target/symbol: Owner/kind attempt state machine; control operation reconciliatio
 
 ### Acceptance criteria
 
-- [ ] Tidak ada completion/session ganda atau mixed source; zero byte/data corruption setelah resume terbukti.
-- [ ] User tidak kehilangan hasil completed hanya karena response timeout/abort race.
-- [ ] Stopped/expired/unknown states tidak menerbitkan PUT; server state/readiness tetap authority.
+- [x] Tidak ada completion/session ganda atau mixed source; zero byte/data corruption setelah resume terbukti.
+- [x] User tidak kehilangan hasil completed hanya karena response timeout/abort race.
+- [x] Stopped/expired/unknown states tidak menerbitkan PUT; server state/readiness tetap authority.
 
 ### Validasi
 
@@ -607,7 +607,7 @@ State machine/HTTP ambiguity/native race tests + reload/offline/tab conflict/dif
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan rencana, bukan hasil test yang telah dijalankan. Isi evidence aktual dan batas proof saat task dikerjakan.
+In-memory owner/kind state machine, one-file coordinator, optional browser lock, immutable initiation key, full-hash resume, pause, finalization/cancel reconciliation dan resource cleanup diimplementasikan. Native recovery 5 pass/24 assertions: same-key unknown initiation, same-name/size wrong file blocked before PUT, lost completion retained, complete-vs-abort win, unconfirmed abort remains unknown, coordinator queue and late reply suppression. Reused native scheduler and real Chromium/MinIO partial-resume proof from ADUP-010. Root check-types 3/3, lint 1/1, build 2/2 lulus. UI reload/offline/cross-tab acceptance dilakukan pada ADUP-015; native proof tidak diklaim sebagai browser UI coverage. Preview object URLs hanya memory dan direvoke saat clear/cancel/completion/dispose; no persistence.
 
 ### Commit task
 
@@ -618,7 +618,7 @@ Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan
 
 ### Blocker atau tindak lanjut
 
-Dependencies ADUP-003, ADUP-005, ADUP-010 (scope plan telah disetujui pengguna). Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
+Tidak ada blocker controller; browser UI/auth/reload acceptance tetap milik ADUP-012–015.
 
 ## Task: ADUP-012 — Shared Upload Media panel pada detail draft
 

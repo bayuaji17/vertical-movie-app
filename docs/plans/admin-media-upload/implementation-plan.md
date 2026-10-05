@@ -632,3 +632,9 @@ XHR direct PUT diimplementasikan tanpa cookie/Authorization aplikasi; exact Blob
 Scheduler server geometry, concurrency min(cap,3), bounded retries/backoff dan ListParts reconciliation diimplementasikan; sent vs verified tidak menggandakan retry. Native scheduler 4 pass/18 assertions (small last part, resume, cap, unknown PUT success, retries, malformed parts, expiry, pause). Dedicated Chromium/MinIO transport+production scheduler 2 pass/17 assertions: pre-stored 5 MiB part dilewati, hanya 1 KiB tersisa dikirim, completed object byte integrity lulus. Root check-types 3/3, lint 1/1, build 2/2 lulus. API integration fixture diperluas untuk bundle scheduler dan fresh storage ListParts; signed URLs hanya live transport input. Satu-file coordinator menjadi scope ADUP-011, panel/auth acceptance ADUP-012–015.
 
 - Task commit belum ditulis pada saat evidence ini disimpan; receipt actual SHA/hooks dicatat pada update task berikutnya.
+
+### ADUP-011 — 2026-10-05 local execution
+
+In-memory owner/kind state machine, one-file coordinator, optional browser lock, immutable initiation key, full-hash resume, pause, finalization/cancel reconciliation dan resource cleanup diimplementasikan. Native recovery 5 pass/24 assertions: same-key unknown initiation, same-name/size wrong file blocked before PUT, lost completion retained, complete-vs-abort win, unconfirmed abort remains unknown, coordinator queue and late reply suppression. Reused native scheduler and real Chromium/MinIO partial-resume proof from ADUP-010. Root check-types 3/3, lint 1/1, build 2/2 lulus. UI reload/offline/cross-tab acceptance dilakukan pada ADUP-015; native proof tidak diklaim sebagai browser UI coverage. Preview object URLs hanya memory dan direvoke saat clear/cancel/completion/dispose; no persistence.
+
+- Task commit belum ditulis pada saat evidence ini disimpan; receipt actual SHA/hooks dicatat pada update task berikutnya.
