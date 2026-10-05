@@ -29,6 +29,13 @@ const messages: Record<string, string> = {
     'File verification failed. Select the correct file and start a new upload.',
   FILE_MISMATCH:
     'Select the same file to resume. Its contents must match the original file.',
+  FILE_EMPTY: 'Choose a file that is not empty.',
+  FILE_NAME_INVALID: 'Choose a file with a valid filename.',
+  FILE_TOO_LARGE: 'Choose a file within the size limit shown below.',
+  FILE_UNSUPPORTED: 'Choose a supported format with a matching media type.',
+  FILE_READ_ERROR: 'The file could not be read. Select it again.',
+  FILE_CHECK_UNAVAILABLE:
+    'This browser cannot check the file. Use a browser with Web Worker support.',
   LEGACY_UPLOAD:
     'This upload has no file fingerprint. Cancel it and start a new upload.',
   ANOTHER_TAB:

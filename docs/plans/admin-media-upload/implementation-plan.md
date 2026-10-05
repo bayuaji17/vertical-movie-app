@@ -614,3 +614,9 @@ Native client/cache/gateway/guard regression `bun test apps/web/test/admin-media
 401/expiry cleanup removes media cache/mutations while public data survives. Confirmed-complete invalidation helper marks owner/content detail/list stale; existing edit baseline remains component-owned. Actual upload-manager auth stop and browser dirty-editor conflict are ADUP-014/015, not claimed here. Docs/format/diff/staged-doc/preservation and hooks checked at task commit.
 
 - Task commit belum ditulis pada saat evidence ini disimpan; receipt actual SHA/hooks dicatat pada update task berikutnya.
+
+### ADUP-008 — 2026-10-05 local execution
+
+Worker browser produksi dan bridge pembatalan/resume diimplementasikan. `bun test apps/web/test/admin-media-file.test.ts apps/web/test/admin-media-fingerprint.test.ts`: 13 pass/41 assertions. Chromium actual File 1.500.000.000 bytes: SHA-256 cocok oracle, 358 progress events, 67.635 ms, 3.381 heartbeat, zero late callbacks; combined worker heap/backing peak 202.435.107 bytes (<256 MiB). Lima small-file oracles, wrong same-size/name file rejection, MIME fallback dan cancellation lulus. Root check-types (3/3), lint (1/1), build (2/2) lulus. Target expansion: shared typed test fixture dan worker/browser proof updated untuk produksi, safe file codes. R2/Safari belum dibuktikan; multipart/browser end-to-end mengikuti task berikutnya.
+
+- Task commit belum ditulis pada saat evidence ini disimpan; receipt actual SHA/hooks dicatat pada update task berikutnya.

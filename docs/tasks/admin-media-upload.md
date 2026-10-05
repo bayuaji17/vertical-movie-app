@@ -411,8 +411,8 @@ Native client/cache/gateway/guard regression `bun test apps/web/test/admin-media
 ### Commit task
 
 - Pesan yang direncanakan: `feat(web): adup-007 add typed media controls`.
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- SHA: `9f1ef9d436c2071ec047ab06917f39fefd4ae809`.
+- Hook/checks: docs, lint, check-types dan Commitlint lulus; tidak ada hook dilewati.
 - Ledger: catat SHA aktual setelah commit berhasil pada update dokumentasi berikutnya; jangan menulis SHA self-referential.
 
 ### Blocker atau tindak lanjut
@@ -421,7 +421,7 @@ API adapter/cache layer ready. File/Worker/XHR ownership remains in memory manag
 
 ## Task: ADUP-008 — File selection, validation dan fingerprint worker
 
-- Status: Backlog
+- Status: Done
 - Owner: pengembang/agent pelaksana task.
 - Prioritas: 8, mengikuti dependencies.
 - Referensi: ADUP-US01; [plan canonical](../plans/admin-media-upload/implementation-plan.md), [PRD](../product/prd.md).
@@ -448,9 +448,9 @@ Target/symbol: Allowed file descriptor, bounded SHA worker bridge, File ownershi
 
 ### Acceptance criteria
 
-- [ ] Oversize/unsupported/zero file tidak membuat session; helper tidak mengklaim codec valid dari MIME.
-- [ ] Fingerprint match diperlukan sebelum resume dan hasil worker stale diabaikan.
-- [ ] Tidak membaca seluruh video ke satu buffer atau menyimpan File/signature ke storage persisten.
+- [x] Oversize/unsupported/zero file tidak membuat session; helper tidak mengklaim codec valid dari MIME.
+- [x] Fingerprint match diperlukan sebelum resume dan hasil worker stale diabaikan.
+- [x] Tidak membaca seluruh video ke satu buffer atau menyimpan File/signature ke storage persisten.
 
 ### Validasi
 
@@ -458,7 +458,7 @@ Native descriptor tests + browser hash/cancellation/MIME fallback/big file; cond
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan rencana, bukan hasil test yang telah dijalankan. Isi evidence aktual dan batas proof saat task dikerjakan.
+Worker browser produksi dan bridge pembatalan/resume diimplementasikan. `bun test apps/web/test/admin-media-file.test.ts apps/web/test/admin-media-fingerprint.test.ts`: 13 pass/41 assertions. Chromium actual File 1.500.000.000 bytes: SHA-256 cocok oracle, 358 progress events, 67.635 ms, 3.381 heartbeat, zero late callbacks; combined worker heap/backing peak 202.435.107 bytes (<256 MiB). Lima small-file oracles, wrong same-size/name file rejection, MIME fallback dan cancellation lulus. Root check-types (3/3), lint (1/1), build (2/2) lulus. Target expansion: shared typed test fixture dan worker/browser proof updated untuk produksi, safe file codes. R2/Safari belum dibuktikan; multipart/browser end-to-end mengikuti task berikutnya.
 
 ### Commit task
 
@@ -469,7 +469,7 @@ Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan
 
 ### Blocker atau tindak lanjut
 
-Dependencies ADUP-002, ADUP-005, ADUP-007 (scope plan telah disetujui pengguna). Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
+Tidak ada blocker pada scope file checking. Uploader runtime mengikuti ADUP-009–015.
 
 ## Task: ADUP-009 — Direct PUT transport dengan progress dan abort
 
