@@ -81,9 +81,13 @@ export type CreateContent =
 export type PatchContent =
   | { type: 'series'; id: string; input: SeriesPatch }
   | { type: 'film' | 'standalone'; id: string; input: VideoPatch }
-export function createContentOptions(client: ContentClient | undefined) {
+export function createContentOptions(
+  client: ContentClient | undefined,
+  identity = 'unscoped',
+) {
   return mutationOptions({
     retry: false,
+    mutationKey: [...contentKeys.root(identity), 'create'],
     mutationFn: async (command: CreateContent) => {
       const api = configured(client)
       if (command.type === 'series') {
@@ -95,9 +99,13 @@ export function createContentOptions(client: ContentClient | undefined) {
     },
   })
 }
-export function patchContentOptions(client: ContentClient | undefined) {
+export function patchContentOptions(
+  client: ContentClient | undefined,
+  identity = 'unscoped',
+) {
   return mutationOptions({
     retry: false,
+    mutationKey: [...contentKeys.root(identity), 'patch'],
     mutationFn: async (command: PatchContent) =>
       command.type === 'series'
         ? configured(client).patchSeries(command.id, command.input)

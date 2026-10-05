@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from '@tanstack/react-router'
 import type { ContentType } from './content-client'
 import { invalidateContent } from './content-queries'
@@ -8,6 +8,13 @@ import { toast } from '#/components/ui/toast'
 export function useContentEditor() {
   const api = useContentApi(),
     router = useRouter()
+  const mounted = useRef(true)
+  useEffect(() => {
+    mounted.current = true
+    return () => {
+      mounted.current = false
+    }
+  }, [])
   const [dirty, setDirty] = useState(false),
     [saved, setSaved] = useState(false),
     [error, setError] = useState<unknown>()
@@ -21,6 +28,7 @@ export function useContentEditor() {
       type: 'success',
     })
     await invalidateContent(api.queryClient, api.identity, type, id)
+    if (!mounted.current) return
     await router.navigate({ to: `/admin/content/${type}/${id}` })
   }
   return {

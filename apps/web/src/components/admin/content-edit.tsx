@@ -1,3 +1,4 @@
+import { UnsavedChangesGuard } from './unsaved-changes'
 import { useState, useMemo, useRef } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useMutation } from '@tanstack/react-query'
@@ -25,7 +26,7 @@ export function EditContentView({ detail }: { detail: ContentDetail }) {
     [reloading, setReloading] = useState(false)
   const initial = useMemo(() => valuesFromDetail(baseline), [baseline])
   const editor = useContentEditor(),
-    mutation = useMutation(patchContentOptions(editor.client))
+    mutation = useMutation(patchContentOptions(editor.client, editor.identity))
   const pending = useRef(false)
   async function reload() {
     if (reloading || pending.current) return
@@ -72,6 +73,7 @@ export function EditContentView({ detail }: { detail: ContentDetail }) {
     return <ContentDetailView detail={baseline} />
   return (
     <>
+      <UnsavedChangesGuard dirty={editor.dirty} />
       <AdminPageHeading
         title="Edit draft"
         description="Update metadata. Your changes are saved only when you submit."

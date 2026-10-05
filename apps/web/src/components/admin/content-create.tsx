@@ -1,3 +1,4 @@
+import { UnsavedChangesGuard } from './unsaved-changes'
 import { useMutation } from '@tanstack/react-query'
 import { useRef, useState } from 'react'
 import { AdminPageHeading } from './page-heading'
@@ -13,7 +14,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '#/components/ui/card'
 
 export function CreateContentView() {
   const editor = useContentEditor(),
-    mutation = useMutation(createContentOptions(editor.client))
+    mutation = useMutation(createContentOptions(editor.client, editor.identity))
   const pending = useRef(false)
   const [initial] = useState(() => emptyContentValues())
   async function submit(values: ContentValues) {
@@ -31,6 +32,7 @@ export function CreateContentView() {
   }
   return (
     <>
+      <UnsavedChangesGuard dirty={editor.dirty} />
       <AdminPageHeading
         title="Create draft"
         description="Save initial metadata for a film, standalone video, or series."

@@ -18,6 +18,7 @@ export async function clearAdminPrivateQueries(
       predicate(query) &&
       !(query.queryKey[0] === 'auth' && query.queryKey[1] === 'session'),
   })
+  clearPrivateMutations(queryClient, isAdminPrivateQueryKey)
   queryClient.setQueryData(sessionQueryKey, null)
 }
 
@@ -26,4 +27,14 @@ export async function clearAdminDataQueries(queryClient: QueryClient) {
     queryKey[0] === 'admin'
   await queryClient.cancelQueries({ predicate })
   queryClient.removeQueries({ predicate })
+  clearPrivateMutations(queryClient, (key) => key[0] === 'admin')
+}
+
+function clearPrivateMutations(
+  queryClient: QueryClient,
+  matches: (key: readonly unknown[]) => boolean,
+) {
+  const cache = queryClient.getMutationCache()
+  for (const mutation of cache.getAll())
+    if (matches(mutation.options.mutationKey ?? [])) cache.remove(mutation)
 }

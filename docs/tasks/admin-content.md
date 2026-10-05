@@ -531,7 +531,7 @@ Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
 ## Task: ADMC-009 — Edit draft dengan version conflict
 
-- Status: Review
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai dependency
 - Referensi: ADMC-US-04; PRD-03/09; GR-01/05/08; plan STEP-009.
@@ -574,9 +574,11 @@ Edit route generated. Form owns a stable loaded baseline; background refetch can
 
 Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
+- Receipt commit task: `b932a1764760255090790264131a3ef65c162ddf`; hooks docs/lint/types/Commitlint lulus tanpa bypass.
+
 ## Task: ADMC-010 — Perlindungan input belum disimpan
 
-- Status: Backlog
+- Status: Review
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai dependency
 - Referensi: ADMC-US-04; PRD-03/08/09; GR-01/05/08; plan STEP-010.
@@ -590,9 +592,9 @@ Hook router blocker/beforeunload dan AlertDialog untuk create/edit dirty state; 
 
 ### Acceptance criteria
 
-- [ ] Navigasi internal/back dapat dibatalkan atau dikonfirmasi; focus kembali benar dan guard hilang setelah save.
-- [ ] Logout/session expiry/forbidden tetap dapat membersihkan cache dan mengunci akses tanpa navigation loop.
-- [ ] Limitasi browser/force-close mobile dicatat; tidak menambah private localStorage persistence.
+- [x] Navigasi internal/back dapat dibatalkan atau dikonfirmasi; focus kembali benar dan guard hilang setelah save.
+- [x] Logout/session expiry/forbidden tetap dapat membersihkan cache dan mengunci akses tanpa navigation loop.
+- [x] Limitasi browser/force-close mobile dicatat; tidak menambah private localStorage persistence.
 
 ### Validasi
 
@@ -612,6 +614,12 @@ Belum diimplementasikan atau diuji. Hasil runtime tidak disimpulkan dari plan.
 ### Blocker atau tindak lanjut
 
 Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready hanya karena source API tersedia.
+
+### Evidence implementasi — 5 Oktober 2026
+
+Shared router resolver/AlertDialog and beforeunload protect dirty create/edit input, allowing login/invalid-session transitions. Cancel retains input; confirmed save/unmount releases pending blockers. Dirty data stays in memory; force-close/mobile/browser policies cannot guarantee an unload dialog. Private mutation keys include identity; auth cleanup removes admin mutation variables/results, including pending writes that settle later, while public data is preserved. Completed writes do not navigate from an unmounted editor. Native auth/cache proof 17 tests/58 assertions pass; types (3), lint (1), build (2) pass. Browser cancel/confirm/back/logout proof ADMC-011.
+
+Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
 ## Task: ADMC-011 — Acceptance UI, persistensi dan closure
 
