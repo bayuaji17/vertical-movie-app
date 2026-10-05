@@ -51,12 +51,14 @@ export function ContentForm({
   onSubmit,
   error,
   onDirtyChange,
+  locked = false,
 }: {
   initialValues: ContentValues
   baseline?: ContentDetail
   onSubmit: (value: ContentValues) => Promise<void>
   error?: unknown
   onDirtyChange: (value: boolean) => void
+  locked?: boolean
 }) {
   const form = useForm({
     defaultValues: initialValues,
@@ -78,7 +80,9 @@ export function ContentForm({
   })
   return (
     <form.Subscribe
-      selector={(state) => [state.values, state.isSubmitting] as const}
+      selector={(state) =>
+        [state.values, state.isSubmitting || locked] as const
+      }
     >
       {([values, pending]) => (
         <form
@@ -87,7 +91,7 @@ export function ContentForm({
           onSubmit={(event) => {
             event.preventDefault()
             event.stopPropagation()
-            if (!form.state.isSubmitting) void form.handleSubmit()
+            if (!locked && !form.state.isSubmitting) void form.handleSubmit()
           }}
           className="space-y-6"
         >
@@ -324,6 +328,7 @@ export function ContentForm({
             <Button
               variant="outline"
               className="min-h-11"
+              disabled={pending}
               nativeButton={false}
               render={<Link to="/admin/content" search={contentSearch({})} />}
             >

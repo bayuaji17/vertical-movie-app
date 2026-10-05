@@ -437,7 +437,7 @@ Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
 ## Task: ADMC-007 — Buat draft movie dan standalone
 
-- Status: Review
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai dependency
 - Referensi: ADMC-US-03; PRD-03/09; GR-01/05/08; plan STEP-007.
@@ -479,6 +479,8 @@ Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready ha
 Create route generated and dashboard/list CTA targets added. Shared editor uses no-retry Eden/Query mutation, synchronous pending guard, stable form initial values, confirmed nested Series/defaultSeason response ID or video ID navigation and scoped list/detail invalidation. Errors preserve input and ambiguous outcomes advise checking the list. Native client/mapper proof 11 tests/54 assertions pass. Types (3), lint (1), build (2) pass. Real browser rapid-submit/errors/persistence follows ADMC-011; Series resource verification ADMC-014.
 
 Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
+
+- Receipt commit task: `86d6b9f8b5b38d70dfa7486cb068a308f3f45a2d`; hooks docs/lint/types/Commitlint lulus tanpa bypass.
 
 ## Task: ADMC-008 — Detail konten dan readonly state
 
@@ -529,7 +531,7 @@ Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
 ## Task: ADMC-009 — Edit draft dengan version conflict
 
-- Status: Backlog
+- Status: Review
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai dependency
 - Referensi: ADMC-US-04; PRD-03/09; GR-01/05/08; plan STEP-009.
@@ -543,9 +545,9 @@ Route edit, form baseline/version, PATCH mutation/error mapping dan success inva
 
 ### Acceptance criteria
 
-- [ ] Form baseline/rowVersion tidak berubah diam-diam akibat background refetch; payload hanya changed fields + expectedVersion.
-- [ ] Stale version/slug/state/archived race mempertahankan input dan tidak auto-retry/overwrite.
-- [ ] Reload terbaru memerlukan konfirmasi dirty; save sukses memakai metadata canonical/versi baru dan persist setelah refresh.
+- [x] Form baseline/rowVersion tidak berubah diam-diam akibat background refetch; payload hanya changed fields + expectedVersion.
+- [x] Stale version/slug/state/archived race mempertahankan input dan tidak auto-retry/overwrite.
+- [x] Reload terbaru memerlukan konfirmasi dirty; save sukses memakai metadata canonical/versi baru dan persist setelah refresh.
 
 ### Validasi
 
@@ -565,6 +567,12 @@ Belum diimplementasikan atau diuji. Hasil runtime tidak disimpulkan dari plan.
 ### Blocker atau tindak lanjut
 
 Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready hanya karena source API tersedia.
+
+### Evidence implementasi — 5 Oktober 2026
+
+Edit route generated. Form owns a stable loaded baseline; background refetch cannot change its values or expectedVersion. No-retry PATCH sends only changed fields. Conflict/error retains input; explicit reload requires dirty confirmation, locks fields while fetching, and resets only after a confirmed fresh response. Readonly lifecycle rechecked after reload. Confirmed save invalidates and opens canonical detail. Types (3), lint (1), build (2) pass; mapper/client regression passed. Two-tab/browser conflict proof follows ADMC-011.
+
+Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
 ## Task: ADMC-010 — Perlindungan input belum disimpan
 

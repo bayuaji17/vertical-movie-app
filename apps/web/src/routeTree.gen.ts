@@ -21,6 +21,7 @@ import { Route as AdminAuthenticatedContentIndexRouteImport } from './routes/adm
 import { Route as AdminAuthenticatedContentNewRouteImport } from './routes/admin._authenticated.content.new'
 import { Route as AdminAuthenticatedVideosIdPreviewRouteImport } from './routes/admin._authenticated.videos.$id.preview'
 import { Route as AdminAuthenticatedContentTypeIdIndexRouteImport } from './routes/admin._authenticated.content.$type.$id.index'
+import { Route as AdminAuthenticatedContentTypeIdEditRouteImport } from './routes/admin._authenticated.content.$type.$id.edit'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -85,6 +86,12 @@ const AdminAuthenticatedContentTypeIdIndexRoute =
     path: '/content/$type/$id/',
     getParentRoute: () => AdminAuthenticatedRoute,
   } as any)
+const AdminAuthenticatedContentTypeIdEditRoute =
+  AdminAuthenticatedContentTypeIdEditRouteImport.update({
+    id: '/content/$type/$id/edit',
+    path: '/content/$type/$id/edit',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -97,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/admin/content/new': typeof AdminAuthenticatedContentNewRoute
   '/admin/content/': typeof AdminAuthenticatedContentIndexRoute
   '/admin/videos/$id/preview': typeof AdminAuthenticatedVideosIdPreviewRoute
+  '/admin/content/$type/$id/edit': typeof AdminAuthenticatedContentTypeIdEditRoute
   '/admin/content/$type/$id/': typeof AdminAuthenticatedContentTypeIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -109,6 +117,7 @@ export interface FileRoutesByTo {
   '/admin/content/new': typeof AdminAuthenticatedContentNewRoute
   '/admin/content': typeof AdminAuthenticatedContentIndexRoute
   '/admin/videos/$id/preview': typeof AdminAuthenticatedVideosIdPreviewRoute
+  '/admin/content/$type/$id/edit': typeof AdminAuthenticatedContentTypeIdEditRoute
   '/admin/content/$type/$id': typeof AdminAuthenticatedContentTypeIdIndexRoute
 }
 export interface FileRoutesById {
@@ -124,6 +133,7 @@ export interface FileRoutesById {
   '/admin/_authenticated/content/new': typeof AdminAuthenticatedContentNewRoute
   '/admin/_authenticated/content/': typeof AdminAuthenticatedContentIndexRoute
   '/admin/_authenticated/videos/$id/preview': typeof AdminAuthenticatedVideosIdPreviewRoute
+  '/admin/_authenticated/content/$type/$id/edit': typeof AdminAuthenticatedContentTypeIdEditRoute
   '/admin/_authenticated/content/$type/$id/': typeof AdminAuthenticatedContentTypeIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/admin/content/new'
     | '/admin/content/'
     | '/admin/videos/$id/preview'
+    | '/admin/content/$type/$id/edit'
     | '/admin/content/$type/$id/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -151,6 +162,7 @@ export interface FileRouteTypes {
     | '/admin/content/new'
     | '/admin/content'
     | '/admin/videos/$id/preview'
+    | '/admin/content/$type/$id/edit'
     | '/admin/content/$type/$id'
   id:
     | '__root__'
@@ -165,6 +177,7 @@ export interface FileRouteTypes {
     | '/admin/_authenticated/content/new'
     | '/admin/_authenticated/content/'
     | '/admin/_authenticated/videos/$id/preview'
+    | '/admin/_authenticated/content/$type/$id/edit'
     | '/admin/_authenticated/content/$type/$id/'
   fileRoutesById: FileRoutesById
 }
@@ -262,6 +275,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuthenticatedContentTypeIdIndexRouteImport
       parentRoute: typeof AdminAuthenticatedRoute
     }
+    '/admin/_authenticated/content/$type/$id/edit': {
+      id: '/admin/_authenticated/content/$type/$id/edit'
+      path: '/content/$type/$id/edit'
+      fullPath: '/admin/content/$type/$id/edit'
+      preLoaderRoute: typeof AdminAuthenticatedContentTypeIdEditRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
   }
 }
 
@@ -270,6 +290,7 @@ interface AdminAuthenticatedRouteChildren {
   AdminAuthenticatedContentNewRoute: typeof AdminAuthenticatedContentNewRoute
   AdminAuthenticatedContentIndexRoute: typeof AdminAuthenticatedContentIndexRoute
   AdminAuthenticatedVideosIdPreviewRoute: typeof AdminAuthenticatedVideosIdPreviewRoute
+  AdminAuthenticatedContentTypeIdEditRoute: typeof AdminAuthenticatedContentTypeIdEditRoute
   AdminAuthenticatedContentTypeIdIndexRoute: typeof AdminAuthenticatedContentTypeIdIndexRoute
 }
 
@@ -279,6 +300,8 @@ const AdminAuthenticatedRouteChildren: AdminAuthenticatedRouteChildren = {
   AdminAuthenticatedContentIndexRoute: AdminAuthenticatedContentIndexRoute,
   AdminAuthenticatedVideosIdPreviewRoute:
     AdminAuthenticatedVideosIdPreviewRoute,
+  AdminAuthenticatedContentTypeIdEditRoute:
+    AdminAuthenticatedContentTypeIdEditRoute,
   AdminAuthenticatedContentTypeIdIndexRoute:
     AdminAuthenticatedContentTypeIdIndexRoute,
 }
