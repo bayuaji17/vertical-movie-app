@@ -335,12 +335,14 @@ Pada 2026-10-05 pengguna menyetujui plan dan meminta mockup. [Empat final dan pr
 
 Actual checks: `bun run docs:check` lulus (56 Markdown / 481 local links), installed Prettier write/check untuk empat Markdown task lulus, `git diff --check` dan `git diff --cached --check` lulus. Staged-only checkout dengan `checkDocumentation` lulus (49 Markdown / 462 links). Staging hanya delapan file task, termasuk empat PNG; 22 file unrelated tetap sama melalui SHA-256, referensi desain lokal pada README dipertahankan dan tidak ikut staged index. Commit artefak berhasil; seluruh hook normal lulus: docs (56 Markdown /481 links), lint (1/1 cache), check-types (3/3 cache) dan Commitlint, tanpa bypass. Tidak menjalankan runtime uploader test/build/migration yang belum ada. Follow-up receipt menyelaraskan permission empat PNG ke mode100644 tanpa mengubah byte gambar.
 
+Approval closure checks (2026-10-05): docs56Markdown/481links, installed Prettier dan git diff checks lulus; staged snapshot49Markdown/462links tanpa error, empat file status/index saja. Hash22file unrelated tetap sama. Hook approval commit normal lulus: docs, lint1/1cache, types3/3cache dan Commitlint; tanpa bypass. Tidak ada perubahan raster, runtime, migration atau remote delivery.
+
 ### Commit task
 
 - Pesan: `docs(web): add media upload mockups (ADUP-006)`.
 - SHA: `f93e9af81c18107f1d70e7c645a2ef496f26db05`.
 - Hook/checks: docs, lint, check-types dan Commitlint lulus; PNG content/dimensions, staged docs dan preservation lulus.
-- Ledger: receipt artefak dicatat sesudah commit, bukan SHA self-referential. Pengguna menyetujui hasil visual pada 2026-10-05; task Done. SHA commit pencatatan approval dicatat pada update dokumentasi berikutnya sesudah commit aktual tersedia.
+- Ledger: receipt artefak dicatat sesudah commit, bukan SHA self-referential. Approval pengguna dicatat pada commit `f80998cd18fafaf12de5cc4a18e2c53563a9f872` (`docs(web): approve media upload designs (ADUP-006)`); task Done. Approval receipt ini dicatat sesudah commit aktual tersedia.
 
 ### Blocker atau tindak lanjut
 
@@ -817,6 +819,6 @@ Dependencies ADUP-003, ADUP-004, ADUP-005, ADUP-006, ADUP-007, ADUP-008, ADUP-00
 | ---------- | -------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
 | 2026-10-05 | ADUP-001 | Done: context-before-plan, 15 task/DAG, docs/Prettier/diff/staged snapshot/preservation dan hooks lulus         | `5a165fb7410d81e09af81f1761419ebf0369c564` |
 | 2026-10-05 | ADUP-006 | Review: empat raster/state spec, PNG/docs/staged snapshot/preservation dan hooks lulus; visual approval pending | `f93e9af81c18107f1d70e7c645a2ef496f26db05` |
-| 2026-10-05 | ADUP-006 | Done: pengguna menyetujui empat mockup melalui ‘oke approve’; visual acceptance selesai                         | Approval commit belum dibuat               |
+| 2026-10-05 | ADUP-006 | Done: pengguna menyetujui empat mockup melalui ‘oke approve’; visual acceptance selesai                         | `f80998cd18fafaf12de5cc4a18e2c53563a9f872` |
 
 ADUP-001/ADUP-006 Done setelah approval plan dan empat mockup; task runtime lainnya tetap Backlog. Status Done planning/desain tidak berarti uploader atau migrasi telah diimplementasikan.
