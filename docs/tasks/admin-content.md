@@ -665,7 +665,7 @@ Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready ha
 
 ## Task: ADMC-012 — Theme switcher shared shell
 
-- Status: Review
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1
 - Referensi: ADMC-US-01; PRD-02/08; plan STEP-012; permintaan pengguna 5 Oktober 2026.
@@ -708,6 +708,8 @@ Menunggu review visual/permintaan implementasi dan dependency.
 Shared avatar Appearance radio menu Light/Dark/System, non-secret theme preference, cross-window/media listeners and pre-CSS self-contained head bootstrap. Provider defers applying until preference initialization; theme changes do not remount forms. Theme native proof 2 tests/28 assertions, server-import boundary rejection proof and post-build SSR native smoke pass. Types (3), lint (1), build (2) pass. Initial SSR attempt overlapped build output and was rerun successfully after build completion. Actual keyboard/theme/dirty/storage browser closure ADMC-011.
 
 Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
+
+- Receipt commit task: `4ec8bc1912fdba9b5b792fa6a9bd8172855f9c97`; hooks docs/lint/types/Commitlint lulus tanpa bypass.
 
 ## User story: ADMC-US-06
 
@@ -803,7 +805,7 @@ Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
 ## Task: ADMC-014 — Metadata Series dan resource dispatch
 
-- Status: Backlog
+- Status: Review
 - Owner: Codex/pengembang pelaksana
 - Prioritas: P1
 - Referensi: plan; revisi pengguna 5 Oktober 2026.
@@ -817,8 +819,8 @@ Lima template content melayani Film/Standalone/Series, conditional fields/cards 
 
 ### Acceptance criteria
 
-- [ ] Tidak mengirim kind series/rights/source video pada Series; create/read/edit editorial/completionStatus dan expectedVersion sesuai kontrak.
-- [ ] Resource immutable, payload isolation, nested response, errors/dirty input, browser dan dedicated persistence/root gates dibuktikan.
+- [x] Tidak mengirim kind series/rights/source video pada Series; create/read/edit editorial/completionStatus dan expectedVersion sesuai kontrak.
+- [x] Resource immutable, payload isolation, nested response, errors/dirty input, browser dan dedicated persistence/root gates dibuktikan.
 
 ### Validasi
 
@@ -838,6 +840,12 @@ Belum implemented. Screenshot Film adalah acuan layout; template Series conditio
 ### Blocker atau tindak lanjut
 
 Visual v2 untuk review; runtime belum diminta/diimplementasikan.
+
+### Evidence implementasi — 5 Oktober 2026
+
+Series is dispatched to its own Eden resource in the shared client/form/create/detail/edit, with completionStatus/default Season 1 and no video kind/rights/source fields. Dedicated real Elysia/PostgreSQL proof 2 tests/61 assertions passed for all three resource persistence, nullable/genre/rights clearing, version increment/stale rollback, genre cursor pages, slug conflict, lifecycle readonly and unauthorized access. Reusable fixture resets only the allowlisted local test DB and retains one admin (updates seeded test identity rather than creating a second admin); first fixture attempt correctly hit the single-admin constraint, repaired before proof. Types (3), lint (1), build (2) pass; browser closure ADMC-011.
+
+Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
 ## Task: ADMC-DES-002 — Revisi desktop light v2
 

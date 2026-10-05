@@ -433,3 +433,5 @@ Roadmap bukan daftar task Ready atau perluasan acceptance iterasi 1. Jangan mene
 - Receipt ADMC-009: `b932a1764760255090790264131a3ef65c162ddf`; checks/AC teramati ada pada backlog. Commit lokal, belum push/PR/merge.
 
 - Receipt ADMC-010: `778a57583f18a8bd87de43c64ad7841ffcc5196c`; checks/AC teramati ada pada backlog. Commit lokal, belum push/PR/merge.
+
+- Receipt ADMC-012: `4ec8bc1912fdba9b5b792fa6a9bd8172855f9c97`; checks/AC teramati ada pada backlog. Commit lokal, belum push/PR/merge.
