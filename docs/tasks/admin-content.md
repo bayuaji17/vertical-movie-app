@@ -243,9 +243,51 @@ Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
 - Receipt commit task: `b44b8dbf1dbe598f85a5bc3edb6251b58f515746`; hooks docs/lint/types/Commitlint lulus tanpa bypass. Lint import spacing failures fixed and hooks rerun successfully.
 
-## Task: ADMC-004 — Shell dan navigasi admin responsif
+## Task: ADMC-015 — Integrasi token charcoal approved
 
 - Status: Review
+- Owner: Codex
+- Prioritas: P1
+- Referensi: desain final disetujui pengguna 3 Oktober 2026; implementasi disetujui 5 Oktober 2026.
+- Diperbarui: 2026-10-05
+- Dependensi: ADMC-002.
+- Ukuran: CSS semantic tokens existing + scoped documentation.
+
+### Ruang lingkup
+
+Masukkan override `.dark` approved yang sudah ada pada worktree ke source tracked; tidak mengubah light/preset/nama token/player. Artefak boards/exports unrelated tetap tidak distage. Desain runtime fresh checkout memakai CSS sebagai source canonical, bukan ketergantungan pada untracked JSON/HTML.
+
+### Acceptance criteria
+
+- [x] Charcoal #1E201E serta pasangan semantic tokens dark approved menjadi tracked.
+- [x] Light dan existing semantic contract/preset/media styling tetap utuh; scope staging hanya CSS/token notes/evidence.
+- [x] Root types/lint/build/docs/whitespace serta commit lulus.
+
+### Validasi
+
+Review diff CSS; root gates dan existing auth regression. Exact screenshot/contrast runtime ditinjau pada ADMC-011, berbeda dari token integration.
+
+### Hasil dan bukti
+
+Menunggu checks aktual.
+
+### Commit task
+
+Pesan: `style(web): integrate approved charcoal tokens (ADMC-015)`; SHA setelah commit.
+
+### Blocker atau tindak lanjut
+
+Tidak menganggap artefak final desain untracked sudah tersedia pada checkout lain.
+
+### Evidence implementasi — 5 Oktober 2026
+
+CSS diff reviewed: only approved dark overrides, unchanged light/media/preset. Root types 3 tasks, lint 1, build 2 passed (valid cache from matching source). Design notes staged against HEAD to preserve pre-existing full design-system edits/exports; CSS token integration intentionally owns approved existing override. Prior shell auth native/SSR/browser proofs remain unchanged. Docs/staged checks below.
+
+Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
+
+## Task: ADMC-004 — Shell dan navigasi admin responsif
+
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai dependency
 - Referensi: ADMC-US-01; PRD-01/02/08; GR-01/05/08; plan STEP-004.
@@ -287,6 +329,8 @@ Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready ha
 Shared AdminShell/one logout controller; sidebar at lg, focus-managed titled mobile Sheet, top-right avatar identity menu, English private lock screens, skip link and real principal account. Child routes keep existing authoritative guard/context. New content navigation/action cards are added with ADMC-005/007 once targets exist; theme is ADMC-012. Auth guard/cache/session: 20 tests/83 assertions pass; SSR Bun smoke passes admin/null/non-admin/outage/stall/cookie/no-secret checks. Built Bun/Nitro browser cache + routes proof passed: login/logout failures, loading/result toasts, role lock, in-flight logout, cross-tab/back denial and no transient error screen. Mobile drawer hides the background access tree while open; assertion closes the drawer before checking Dashboard. Root check-types (3), lint (1), build (2) pass.
 
 Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
+
+- Receipt commit task: `d66c78407d462f0b3c7027e55ed3321d22958308`; hooks docs/lint/types/Commitlint lulus tanpa bypass.
 
 ## Task: ADMC-005 — Daftar metadata dengan search dan pagination
 

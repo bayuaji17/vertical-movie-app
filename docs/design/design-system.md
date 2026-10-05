@@ -58,3 +58,7 @@ Desain belum selesai sampai alur publik tanpa login dan alur admin mencakup kead
 - [shadcn/ui for TanStack Start](https://ui.shadcn.com/docs/installation/tanstack)
 - [Video.js documentation](https://videojs.com/guides/embeds)
 - [WCAG 2.2](https://www.w3.org/TR/WCAG22/)
+
+## Integrasi runtime charcoal — 5 Oktober 2026
+
+Override `.dark` approved menjadi source tracked pada ADMC-015: charcoal #1E201E, semantic surface/foreground/input/border/ring/sidebar. Light/preset dan styling media tetap utuh. Runtime memakai [CSS aplikasi](../../apps/web/src/styles.css), sehingga tidak membutuhkan artefak export lokal untracked. Theme/browser acceptance dashboard mengikuti [backlog](../tasks/admin-content.md); integrasi token tidak membuktikan seluruh UX/product board telah diimplementasikan.
