@@ -193,9 +193,9 @@ Hasil: test terarah 24 lulus/0 gagal (79 assertion); suite API 99 lulus/0 gagal 
 ### Commit task
 
 - Pesan: `feat(api): add bounded native poster adapter (ACOV-004)`
-- SHA: dicatat pada receipt pasca-task, tanpa self-referential SHA.
-- Hook/checks: root gates dan hook dicatat pada receipt setelah seluruh pemeriksaan lulus.
-- Ledger: SHA aktual dicatat pada update dokumentasi setelah commit, tanpa self-referential SHA.
+- SHA: `0b7a6e2`.
+- Hook/checks: hook docs:check (59 Markdown/514 link-anchor), lint web, check-types api/web/auth dan Commitlint lulus; suite API 99/395, root check-types/build, Prettier dan diff check lulus.
+- Ledger: SHA task ini dicatat pada receipt plan dan backlog setelah task commit.
 
 ### Blocker atau tindak lanjut
 
