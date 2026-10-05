@@ -1,6 +1,6 @@
 # Dashboard content — desktop light dan dark
 
-> Status: light v2 disetujui pengguna; dark v2 dibuat untuk review · 5 Oktober 2026 · Avatar/dropdown, English UI, Film/Standalone/Series dan pagination disetujui sebagai requirement oleh pengguna. Mockup dibuat oleh Codex melalui built-in image_gen; bukan implementasi atau browser screenshot.
+> Status: desain desktop/mobile light/dark disetujui pengguna 5 Oktober 2026; dashboard metadata kini diimplementasikan. Raster mockup tetap artefak desain, bukan screenshot runtime. Evidence implementasi pada [backlog](../tasks/admin-content.md).
 
 ## Scope dan acuan
 
@@ -10,9 +10,9 @@ Acuan: [design system](design-system.md), [plan](../plans/admin-content/implemen
 
 ## Halaman v2
 
-Lima template halaman tetap dipakai. Namespace frontend generik berikut diusulkan agar Series tidak ditempatkan sebagai video kind; path v1 belum diimplementasikan. Preview existing tetap pada /admin/videos/:id/preview.
+Lima template halaman tetap dipakai. Namespace frontend generik berikut diterapkan agar Series tidak ditempatkan sebagai video kind; namespace v1 sudah digantikan. Preview existing tetap pada /admin/videos/:id/preview.
 
-| Halaman         | Path frontend yang diusulkan    | Referensi desktop                                                    |
+| Halaman         | Path frontend aktif             | Referensi desktop                                                    |
 | --------------- | ------------------------------- | -------------------------------------------------------------------- |
 | Dashboard       | `/admin`                        | [Dashboard + dropdown terbuka](admin-dashboard-desktop-light-v2.png) |
 | Content list    | `/admin/content`                | [List + pagination](admin-content-list-desktop-light-v2.png)         |
@@ -20,15 +20,15 @@ Lima template halaman tetap dipakai. Namespace frontend generik berikut diusulka
 | Content details | `/admin/content/:type/:id`      | [Details — contoh Film](admin-content-detail-desktop-light-v2.png)   |
 | Edit draft      | `/admin/content/:type/:id/edit` | [Edit — contoh Film](admin-content-edit-desktop-light-v2.png)        |
 
-`:type` whitelist film/standalone/series; dispatch resource API tetap video atau series sesuai model. Detail/edit screenshot menggunakan Film untuk meninjau komposisi; perbedaan Series wajib diterapkan pada ADMC-014, bukan dipalsukan sebagai VideoDto. Template frontend dan URL masih proposal; tidak mengubah route existing sekarang.
+`:type` whitelist film/standalone/series; dispatch resource API tetap video atau series sesuai model. Detail/edit screenshot menggunakan Film untuk meninjau komposisi; perbedaan Series wajib diterapkan pada ADMC-014, bukan dipalsukan sebagai VideoDto. Template frontend dan URL telah diterapkan pada iterasi metadata; daftar kontrak/resource tetap mengikuti plan canonical.
 
 ## Shared shell dan avatar dropdown
 
 Sidebar berisi Dashboard/Content. Footer hanya Log out di kiri bawah. Trigger akun di kanan atas memakai avatar initials AD, nama Admin dan chevron. Avatar/identitas berasal dari sesi saat runtime; initials merupakan fallback jika image tidak tersedia. Dropdown sejajar kanan berisi identitas admin, email dan grup Appearance: Light/Dark/System. Light dipilih dengan ikon/checkmark. Tidak menambah halaman account, billing, upgrade atau notifikasi dari screenshot referensi.
 
-Dashboard menampilkan dropdown terbuka; empat halaman lain menampilkan dropdown tertutup dengan trigger yang sama. Theme switcher hanya di dalam dropdown; tidak ada switcher terpisah di top bar. Akses keyboard, focus return/Escape, accessible name/expanded state dan pilihan tema diperlukan saat implementasi. Header/palette/form tetap konsisten.
+Dashboard menampilkan dropdown terbuka; empat halaman lain menampilkan dropdown tertutup dengan trigger yang sama. Theme switcher hanya di dalam dropdown; tidak ada switcher terpisah di top bar. Akses keyboard, focus return/Escape, accessible name/expanded state dan pilihan tema runtime dibuktikan pada ADMC-011. Header/palette/form tetap konsisten.
 
-Preferensi tema non-rahasia dapat dipersist; default System masih proposal. System mengikuti prefers-color-scheme; bootstrap mencegah flash/hydration mismatch dan perubahan tema tidak membuang form dirty. Metadata/cache/form privat tidak dipersist. Dark tersedia sebagai pasangan raster pada bagian di bawah; aset tidak membuktikan switching runtime atau mobile.
+Preferensi tema non-rahasia dapat dipersist; default System diterapkan pada iterasi metadata. System mengikuti prefers-color-scheme; bootstrap mencegah flash/hydration mismatch dan perubahan tema tidak membuang form dirty. Metadata/cache/form privat tidak dipersist. Dark tersedia sebagai pasangan raster pada bagian di bawah; aset tidak membuktikan switching runtime atau mobile.
 
 ## Content type dan conditional metadata
 
@@ -38,9 +38,9 @@ Field editorial bersama tetap title/slug/original title/language/synopsis/descri
 
 ## Pagination dan custom page size
 
-List mengganti Load more dengan Previous/Next, tombol nomor halaman, range serta total hasil filter. Default 10; pilihan yang diusulkan 10/25/50/100, dengan input Custom integer 1–100. Custom yang valid diterapkan melalui Enter/blur; input tidak valid menampilkan inline error dan mempertahankan page size aktif. Perubahan jenis/search/includeArchived/page size kembali ke page 1; URL dan query key memasukkan seluruh parameter. Batas 100 merupakan proposal operasional, bukan angka yang diminta pengguna.
+List mengganti Load more dengan Previous/Next, tombol nomor halaman, range serta total hasil filter. Default 10; pilihan 10/25/50/100, dengan input Custom integer 1–100. Custom yang valid diterapkan melalui Enter/blur; input tidak valid menampilkan inline error dan mempertahankan page size aktif. Perubahan jenis/search/includeArchived/page size kembali ke page 1; URL dan query key memasukkan seluruh parameter. Batas 100 mengikuti rencana teknis yang disetujui pengguna; bukan limit media.
 
-Mockup menampilkan 10 baris, `Showing 1–10 of 42`, page 1 dari 5. Angka hanya contoh. Implementasi memerlukan total/filter dan akses halaman dari server; jangan menghitung total dari page/cursor yang sudah diunduh. API existing hanya mengembalikan items/nextCursor, sehingga ADMC-013 menjadi dependensi listing. Saat data berubah/halaman terakhir kosong, refetch total dan clamp page tanpa mencampur hasil request lama. Empty/error/loading, disabled boundaries dan last-page range perlu diverifikasi.
+Mockup menampilkan 10 baris, `Showing 1–10 of 42`, page 1 dari 5. Angka hanya contoh. Implementasi memerlukan total/filter dan akses halaman dari server; jangan menghitung total dari page/cursor yang sudah diunduh. API cursor existing tetap items/nextCursor; GET /admin/content pada ADMC-013 menyediakan numbered totals. Saat data berubah/halaman terakhir kosong, refetch total dan clamp page tanpa mencampur hasil request lama. Empty/error/loading, disabled boundaries dan last-page range perlu diverifikasi.
 
 ## Evidence v2
 
@@ -191,3 +191,7 @@ Koreksi status detail menggunakan output dark detail awal sebagai referenced_ima
 ```text
 Use case: ui-mockup / precise-object-edit. Input image1 is the edit target, the completed Vertical Movie DARK detail screenshot. Change ONLY the small "Draft" badge immediately below the main title next to the "Film" badge. Its background is currently olive green; replace with neutral dark gray #303430 and white #F3F5F3 text, matching the neutral Draft badge in the right Content status card. Leave the right status badge unchanged. Preserve every other color, text, geometry, cards, metadata, controls, avatar, sidebar, Log out, full 1536x1024 canvas and dark palette exactly. No redesign, no other changes.
 ```
+
+## Screenshot runtime — acceptance 5 Oktober 2026
+
+Contoh daftar konten pada build Bun/Nitro: [light desktop](admin-content-implemented-light-desktop.png) dan [dark desktop](admin-content-implemented-dark-desktop.png). Data berasal dari fixture test PostgreSQL; account/title/total bukan data production. Semua lima template diuji pada lima lebar viewport dan dua tema; rincian flow/proof/batas dimiliki backlog ADMC-011. Screenshot ini berbeda dari mockup AI di atas. Kartu sambutan memakai bg-card standar setelah ukuran kontras teks pada tinted surface sedikit di bawah 4,5:1; palette/token approved tetap dipertahankan.

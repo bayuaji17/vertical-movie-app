@@ -302,18 +302,21 @@ export function ContentForm({
                   <form.Field name="rightsConfirmed">
                     {(field) => (
                       <Field>
-                        <label className="flex min-h-11 items-start gap-3 py-2">
+                        <div className="flex min-h-11 items-center gap-3">
                           <Checkbox
                             id="rightsConfirmed"
                             disabled={pending}
                             checked={field.state.value}
                             onCheckedChange={field.handleChange}
                           />
-                          <span className="text-sm">
+                          <FieldLabel
+                            htmlFor="rightsConfirmed"
+                            className="min-h-11 cursor-pointer items-center text-sm"
+                          >
                             I confirm that I have the rights to distribute this
                             content.
-                          </span>
-                        </label>
+                          </FieldLabel>
+                        </div>
                         <FieldDescription>
                           Rights confirmation is optional for a draft.
                         </FieldDescription>

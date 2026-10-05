@@ -28,7 +28,7 @@ export function DiscardDialog({
 }) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-[calc(100vw-2rem)]">
+      <AlertDialogContent className="w-[calc(100vw-2rem)]">
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>

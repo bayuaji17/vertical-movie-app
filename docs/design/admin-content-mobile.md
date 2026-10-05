@@ -1,10 +1,10 @@
 # Dashboard content — mobile light/dark
 
-> Status: proposal visual untuk review pengguna · 5 Oktober 2026 · Permintaan pengguna: lanjutkan desktop v2 ke mobile. Scope sepuluh mockup (lima halaman × dua tema), built-in image_gen. Belum implementasi aplikasi atau hasil browser screenshot.
+> Status: desain desktop/mobile light/dark disetujui pengguna 5 Oktober 2026; dashboard metadata kini diimplementasikan. Raster mockup tetap artefak desain, bukan screenshot runtime. Evidence implementasi pada [backlog](../tasks/admin-content.md).
 
 ## Scope dan referensi
 
-Acuan visual/kontrak bersama: [desktop light/dark](admin-content-desktop-light.md), [design system](design-system.md), [plan](../plans/admin-content/implementation-plan.md) dan [backlog](../tasks/admin-content.md). Field/resource/lifecycle serta batas Film/Standalone/Series mengikuti desktop canonical; mobile tidak membuat jenis/API baru. Metadata dan total adalah contoh fiktif. Semua UI English; source aplikasi/auth/player/API tidak diubah.
+Acuan visual/kontrak bersama: [desktop light/dark](admin-content-desktop-light.md), [design system](design-system.md), [plan](../plans/admin-content/implementation-plan.md) dan [backlog](../tasks/admin-content.md). Field/resource/lifecycle serta batas Film/Standalone/Series mengikuti desktop canonical; mobile tidak membuat jenis/API baru. Metadata dan total adalah contoh fiktif. Semua UI English. Pembuatan mockup tidak mengubah source; implementasi runtime dan evidence dimiliki backlog.
 
 ## Halaman
 
@@ -16,11 +16,11 @@ Acuan visual/kontrak bersama: [desktop light/dark](admin-content-desktop-light.m
 | Content details | [Light](admin-content-detail-mobile-light-v2.png) | [Dark](admin-content-detail-mobile-dark-v2.png) |
 | Edit draft      | [Light](admin-content-edit-mobile-light-v2.png)   | [Dark](admin-content-edit-mobile-dark-v2.png)   |
 
-Namespace frontend tetap proposal /admin/content pada plan; lima template sama dengan desktop. Capture merupakan satu full-page portrait untuk meninjau konten yang akan discroll, bukan seluruh konten muat pada satu viewport ponsel. Prompt menargetkan 384 CSS px dengan output 768×2304; header PNG menunjukkan dimensi aktual 836×1881 untuk kelima light dan 836×1882 untuk kelima dark. Selisih satu piksel tinggi berasal dari output generator; aset tidak di-resize. Tidak ada browser/device frame/status bar atau collage. Exact pixel token/radius/font dan responsivitas nyata perlu diuji saat implementasi.
+Namespace frontend `/admin/content` sudah diterapkan; lima template sama dengan desktop. Capture merupakan satu full-page portrait untuk meninjau konten yang akan discroll, bukan seluruh konten muat pada satu viewport ponsel. Prompt menargetkan 384 CSS px dengan output 768×2304; header PNG menunjukkan dimensi aktual 836×1881 untuk kelima light dan 836×1882 untuk kelima dark. Selisih satu piksel tinggi berasal dari output generator; aset tidak di-resize. Tidak ada browser/device frame/status bar atau collage. Raster tidak membuktikan exact CSS/token/responsivitas. Verifikasi runtime terpisah tercatat pada ADMC-011.
 
 ## Mobile shell dan navigation
 
-Header compact: hamburger kiri, play logo/Vertical Movie, avatar initials AD + chevron kanan. Drawer navigation closed pada screenshot halaman; perilaku proposal drawer memiliki Dashboard/Content serta Log out di footer kiri bawah. Pemindahan sidebar ke drawer mempertahankan ownership aksi logout; logout tidak ditambahkan ke avatar dropdown.
+Header compact: hamburger kiri, play logo/Vertical Movie, avatar initials AD + chevron kanan. Drawer navigation closed pada screenshot halaman; drawer runtime memiliki Dashboard/Content serta Log out di footer kiri bawah. Pemindahan sidebar ke drawer mempertahankan ownership aksi logout; logout tidak ditambahkan ke avatar dropdown.
 
 Avatar membuka identity Admin/admin@example.test dan Appearance Light/Dark/System. Dashboard menunjukkan dropdown overlay terbuka dengan tema sesuai aset; halaman lain closed. Overlay alami dapat menutupi sebagian welcome card selama menu aktif. Pemilihan tema tetap mempertahankan input form; preference/theme behavior berasal dari ADMC-012. Menu/drawer harus memiliki focus return, keyboard/Escape/expanded label dan safe viewport bounds; screenshot tidak membuktikan behavior tersebut.
 
@@ -30,7 +30,7 @@ Avatar membuka identity Admin/admin@example.test dan Appearance Light/Dark/Syste
 - List: card title/type/status/date/View/Edit, tanpa table horizontal/thumbnail. Filter type, search dan Include archived ditumpuk. Screenshot memakai custom page size 3: tiga kartu, Showing 1–3 of 42, Page 1 of 14 dan pagination 1/2/ellipsis/14. Default runtime 10/preset dan validasi custom 1–100 mengikuti plan; angka pada screenshot hanya contoh.
 - Create/edit: satu kolom dengan label/helper/validation; genre chips boleh wrap, checkbox rights tidak default checked. Film/Standalone/Series ada pada create, jenis readonly pada edit. Semua field dan action akhir tersedia di full-page capture; tidak mengecilkan font untuk memaksa masuk satu viewport.
 - Detail: metadata dengan labels/values yang dapat wrap, lalu status/source/rights cards ditumpuk; contoh Film. Conditional Series fields/cards mengikuti ADMC-014.
-- Touch target proposal minimal 44 CSS px; safe-area/soft keyboard/form focus, sticky actions jika diperlukan dan keyboard/navigation/theme perlu browser proof saat implementasi. Aksi footer tidak boleh menutupi field/konten terakhir.
+- Target kontrol minimal 44 CSS px; keyboard/navigation/theme runtime dibuktikan pada ADMC-011. Safe-area/soft keyboard perangkat fisik tetap membutuhkan acceptance perangkat. Aksi footer tidak boleh menutupi field/konten terakhir.
 
 ## Tema
 
@@ -145,3 +145,7 @@ Dark palette: page/header background #1E201E; cards/popover #272A27; secondary/m
 Recolor only; no new/removed/rearranged fields/actions/cards; do not omit last-page footer, form actions or metadata. Match desktop dark palette while keeping mobile layout IDENTICAL to image1. Drawer remains closed; Log out belongs to mobile nav drawer (do not add it to main page or avatar menu). Avatar dropdown is open ONLY on dashboard; all other pages closed. Theme is Dark, with no standalone theme switcher outside account menu.
 Maintain Unsaved changes, full fields, readonly Content type Film, rights UNCHECKED, Drama/Romance selected, guidance about slug/conflicts and Discard changes/Save changes actions. Avatar dropdown closed.
 ```
+
+## Screenshot runtime — acceptance 5 Oktober 2026
+
+Contoh full-page content cards: [light mobile](admin-content-implemented-light-mobile.png) dan [dark mobile](admin-content-implemented-dark-mobile.png). Ini browser screenshot 390 px pada build Bun/Nitro dengan fixture PostgreSQL. Sepuluh mockup di atas tetap referensi desain; bukan screenshot implementasi. Matriks lima template × Light/Dark × 320/390/768/1024/1440 px, keyboard/menu/focus, dirty navigation dan batas perangkat tercatat pada ADMC-011.

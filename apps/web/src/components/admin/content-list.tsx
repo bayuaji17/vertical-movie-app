@@ -1,6 +1,7 @@
 import { ContentStatus } from './content-status'
 import { ContentFiltersPanel } from './content-filters'
 import { ContentPagination } from './content-pagination'
+import { useEffect } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import type { ContentFilters, ContentItem } from '#/lib/admin/content-client'
@@ -71,6 +72,11 @@ export function ContentList({
   const { client, identity } = useContentApi()
   const query = useQuery(contentListOptions(client, identity, filters))
   const data = query.data
+  useEffect(() => {
+    if (!data || query.isFetching || query.isError) return
+    const lastPage = Math.max(1, data.totalPages)
+    if (filters.page > lastPage) onChange({ page: lastPage })
+  }, [data, filters.page, onChange, query.isFetching, query.isError])
 
   return (
     <>

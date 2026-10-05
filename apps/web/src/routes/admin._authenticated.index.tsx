@@ -30,7 +30,7 @@ function AdminDashboard() {
         title="Dashboard"
         description="Manage your content metadata in one place."
       />
-      <Card className="mb-6 bg-primary/10">
+      <Card className="mb-6">
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-2xl">
             <RiFilmLine className="size-7" aria-hidden="true" />

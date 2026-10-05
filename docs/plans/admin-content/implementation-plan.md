@@ -2,13 +2,13 @@
 
 ## Plan metadata
 
-- Status: disetujui pengguna, implementasi In Progress pada 5 Oktober 2026.
+- Status: implemented dan verified lokal pada 5 Oktober 2026; commit acceptance/receipt pending hooks.
 - Tanggal: 5 Oktober 2026.
 - Repository: `bayuaji17/vertical-movie-app`.
-- Base ref: `main`; base SHA / last validated SHA: `c5406282f8f3c86563ba7112ec43d2aa17f97da2`.
+- Base ref planning: `main`; base SHA: `c5406282f8f3c86563ba7112ec43d2aa17f97da2`. Eksekusi dimulai pada `e5043eb14d3dc7f8429fa7e70c51bf87242a31dc`; freshness closure diperiksa pada `ec7ea091bb20073479d86721502c3e994393eea8` beserta perubahan task ADMC-011.
 - Context: [repository-context.md](repository-context.md), disimpan sebelum plan ini.
 - Backlog: [admin-content](../../tasks/admin-content.md).
-- Branch planning: `chore/admin-content-plan`; branch implementasi yang diusulkan: `feat/admin-content-dashboard`.
+- Branch planning: `chore/admin-content-plan`; branch implementasi: `feat/admin-content-dashboard`.
 - Otorisasi: pengguna meminta plan detail tahap pertama frontend, kemudian desain desktop light untuk lima halaman dengan theme switcher pada 5 Oktober 2026. Root workflow mengotorisasi commit task planning/desain; Implementasi runtime/komponen disetujui pengguna pada 5 Oktober 2026; push/PR/merge/deployment belum diminta.
 
 ## Objective
@@ -21,7 +21,7 @@ Iterasi 1 mencakup shell dashboard dengan theme switcher, list/search/type/inclu
 
 Upload video/sampul, progres/resume, processing/readiness, aksi publish/archive, pengelolaan season/episode (metadata Series masuk iterasi ini), genre CRUD, pengaturan situs dan katalog publik berada pada iterasi berikutnya. Tidak menambah analytics, metrik global palsu, rich text editor, auto-save, akun atau schema baru.
 
-## Current behavior
+## Snapshot sebelum implementasi (sejarah)
 
 Dashboard `/admin` memiliki informasi principal/logout saja. Protected layout, private-query cleanup dan same-origin gateway tersedia. Video API menyediakan metadata create/read/update untuk tiga kind, serta resource Series tersendiri. Requirement v2 frontend membuka Film/Standalone/Series. PATCH draft memakai expectedVersion; published/archived read-only. Cursor, taxonomy dan error domain sudah tersedia; total/page belum tersedia dan perlu ADMC-013; metadata DTO belum membawa poster URL atau status job lengkap.
 
@@ -31,16 +31,16 @@ Context membedakan snapshot committed dan perubahan desain lokal yang sudah dise
 
 ### Halaman dan navigasi
 
-| URL publik web                | Route file yang diusulkan di apps/web/src/routes/ | Perilaku                                                                              |
-| ----------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| /admin                        | admin._authenticated.index.tsx                    | Dashboard, Create draft/View content; tidak menampilkan analytics palsu.              |
-| /admin/content                | admin._authenticated.content.index.tsx            | Film/Standalone/Series, search, Include archived, server pagination/custom page size. |
-| /admin/content/new            | admin._authenticated.content.new.tsx              | Tiga jenis, conditional fields; POST video atau Series sesuai resource.               |
-| /admin/content/:type/:id      | admin._authenticated.content.$type.$id.index.tsx  | Detail typed video/Series; type whitelist film/standalone/series.                     |
-| /admin/content/:type/:id/edit | admin._authenticated.content.$type.$id.edit.tsx   | Edit draft resource immutable dan expectedVersion baseline.                           |
-| /admin/videos/:id/preview     | Route existing                                    | Guard/player existing tetap berfungsi.                                                |
+| URL publik web                | Route file di apps/web/src/routes/               | Perilaku                                                                              |
+| ----------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------- |
+| /admin                        | admin._authenticated.index.tsx                   | Dashboard, Create draft/View content; tidak menampilkan analytics palsu.              |
+| /admin/content                | admin._authenticated.content.index.tsx           | Film/Standalone/Series, search, Include archived, server pagination/custom page size. |
+| /admin/content/new            | admin._authenticated.content.new.tsx             | Tiga jenis, conditional fields; POST video atau Series sesuai resource.               |
+| /admin/content/:type/:id      | admin._authenticated.content.$type.$id.index.tsx | Detail typed video/Series; type whitelist film/standalone/series.                     |
+| /admin/content/:type/:id/edit | admin._authenticated.content.$type.$id.edit.tsx  | Edit draft resource immutable dan expectedVersion baseline.                           |
+| /admin/videos/:id/preview     | Route existing                                   | Guard/player existing tetap berfungsi.                                                |
 
-Namespace content adalah proposal teknis v2 untuk lima template yang sama; rute metadata v1 belum diimplementasikan. Film dipetakan ke movie; Series bukan video kind. Generator route tree digunakan saat runtime tasks.
+Namespace content adalah implementasi v2 untuk lima template yang sama; rute metadata v1 tidak dibuat; template generik diterapkan. Film dipetakan ke movie; Series bukan video kind. Generator route tree digunakan saat runtime tasks.
 Route index baru harus menjadi leaf; jangan memakai detail `$id.tsx` tanpa Outlet yang menghalangi preview/edit. Gunakan generator untuk routeTree.gen.ts dan pastikan trailing slash/canonical routing serta direct refresh berjalan.
 
 Sidebar desktop memakai Dashboard/Content; mobile memakai trigger/panel dengan focus management. Navigasi hanya menautkan halaman yang berfungsi. Logout ditempatkan pada shell agar tersedia di semua halaman tanpa menggandakan workflow auth. Avatar/name/chevron di kanan atas membuka identity dan Appearance Light/Dark/System; Log out tetap kiri bawah. Gunakan English untuk semua copy UI dan landmark/lang shell, tanpa mengubah bahasa metadata asli.
@@ -281,7 +281,7 @@ ADMC-011 juga bergantung pada semua task runtime. Eksekusi default satu task uta
 - Files: apps/api content list module/model/service/repository, shared query helpers bila benar-benar dibutuhkan; apps/web gateway allowlist bila /admin/content belum diizinkan; API contract/runbook/task.
 - Requirements: GET /admin/content proposal type=film|standalone|series, page positif/pageSize integer 1–100, search/includeArchived; typed item union, total/page/pageSize/totalPages, deterministic createdAt/id order. requireAdmin dan parameterized query; count/data filter serta snapshot sama. Invalid/out-of-range/empty behavior terdokumentasi; tidak menghitung total client. Existing endpoints dan DTO cursor tidak berubah.
 - Validation: bun:test HTTP authorization/query/DTO/error, dedicated PostgreSQL proof pagination/filter parity/empty/last-page/concurrent change dan meaningful query performance; root types/lint/build/docs. Tidak ada schema/migration wajib yang diasumsikan; bila schema berubah ikuti migration gate.
-- Acceptance criteria: total akurat dan page boundaries benar untuk Film/Standalone/Series, old consumers tetap lulus; belum implemented sekarang.
+- Acceptance criteria: total akurat dan page boundaries benar untuk Film/Standalone/Series, old consumers tetap lulus; implementasi/evidence aktual pada backlog ADMC-013.
 
 ### STEP-014 / ADMC-014 — Metadata Series dan resource dispatch
 
@@ -316,13 +316,13 @@ Bun workspace; API tetap owns business rules, client type-only; no server secret
 
 ## Acceptance criteria
 
-- [ ] Admin sah dapat list/search/page Film/Standalone/Series dengan server total serta page size custom serta create/read/edit draft dengan persistensi benar.
-- [ ] Metadata title-only dapat disimpan; optional fields, rights dan genre mengikuti API.
-- [ ] Published/archived serta episode di luar scope tidak dapat diedit melalui form iterasi ini.
-- [ ] Version/slug/state/network/validation conflicts tidak menimpa input atau memicu replay tulis otomatis.
-- [ ] Logout/expiry membersihkan cache private; UI dan endpoint tetap terlindungi.
-- [ ] Semua halaman responsif/keyboard/light/dark; shared theme switcher bekerja tanpa kehilangan input dan route preview existing tetap berfungsi.
-- [ ] Test/gates/DB/browser evidence sesuai scope, docs/status dan commit per task selesai.
+- [x] Admin sah dapat list/search/page Film/Standalone/Series dengan server total serta page size custom serta create/read/edit draft dengan persistensi benar.
+- [x] Metadata title-only dapat disimpan; optional fields, rights dan genre mengikuti API.
+- [x] Published/archived serta episode di luar scope tidak dapat diedit melalui form iterasi ini.
+- [x] Version/slug/state/network/validation conflicts tidak menimpa input atau memicu replay tulis otomatis.
+- [x] Logout/expiry membersihkan cache private; UI dan endpoint tetap terlindungi.
+- [x] Semua halaman responsif/keyboard/light/dark; shared theme switcher bekerja tanpa kehilangan input dan route preview existing tetap berfungsi.
+- [ ] Test/gates/DB/browser evidence sesuai scope, docs/status dan commit per task selesai; commit acceptance/receipt pending hooks.
 
 ## Risks and mitigations
 
@@ -334,13 +334,13 @@ Revert commit runtime task secara bertahap bila regressions; dashboard sesi exis
 
 ## Evidence
 
-[Repository context](repository-context.md#evidence-index) memetakan source/kontrak/versi/worktree dan dokumentasi resmi. [Backlog](../../tasks/admin-content.md) menyimpan status serta bukti command aktual; plan ini belum evidence runtime fitur.
+[Repository context](repository-context.md#evidence-index) memetakan source/kontrak/versi/worktree dan dokumentasi resmi. [Backlog](../../tasks/admin-content.md) menyimpan status serta bukti command aktual; evidence runtime aktual tercatat pada backlog dan closure execution log di bawah.
 
 ## Open decisions
 
-Requirement v2 pengguna: English UI, avatar/menu Appearance di kanan atas, Log out sidebar, Film/Standalone/Series dan pagination/custom size. Default Film/System, namespace content, preset/default/max page size serta rincian endpoint baru masih proposal teknis. Visual v2 siap review; runtime tasks belum diminta.
+Tidak ada keputusan terbuka yang menghalangi scope metadata iterasi 1. Namespace `/admin/content`, default Film/System, page size default 10, preset 10/25/50/100 dan custom 1–100 sudah diimplementasikan sesuai rencana yang disetujui. API numbered pagination/Series dan integrasi charcoal CSS memiliki task/commit tersendiri. Visual runtime memakai fondasi tracked; artefak desain lokal unrelated tetap dipertahankan.
 
-Integrasi Git desain lokal perlu dipastikan sebelum ADMC-002/final visual acceptance. Batas backend sudah diketahui; jika diminta status filter/global metrics/poster/readiness, perlu task kontrak terpisah. Menambahkan atau mengubah field metadata bukan bagian otomatis implementasi plan.
+Status job/poster/global metrics, upload/publication, season/episode dan katalog memerlukan refinement iterasi berikutnya. Menambahkan field baru bukan perluasan otomatis scope ini.
 
 ## Roadmap setelah iterasi 1
 
@@ -435,3 +435,29 @@ Roadmap bukan daftar task Ready atau perluasan acceptance iterasi 1. Jangan mene
 - Receipt ADMC-010: `778a57583f18a8bd87de43c64ad7841ffcc5196c`; checks/AC teramati ada pada backlog. Commit lokal, belum push/PR/merge.
 
 - Receipt ADMC-012: `4ec8bc1912fdba9b5b792fa6a9bd8172855f9c97`; checks/AC teramati ada pada backlog. Commit lokal, belum push/PR/merge.
+
+- Receipt ADMC-014: `ec7ea091bb20073479d86721502c3e994393eea8`; checks/AC teramati ada pada backlog. Commit lokal, belum push/PR/merge.
+
+### 2026-10-05 — Acceptance lokal ADMC-011
+
+Semua lima template metadata aktif melalui Eden/type-only contract dan TanStack Query. Read cache/cancellation dan write no-retry dipisahkan; normalized form, immutable version baseline, dirty protection dan auth lock/cleanup telah dibuktikan. Tidak ada perubahan schema/dependency/player/watch/preview source atau database development.
+
+| Pemeriksaan aktual                                                             | Hasil                                                                                                                                                                                                                                                             |
+| ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bun test apps/api/src packages/auth/src apps/web/test`                        | 158 tests / 621 assertions lulus.                                                                                                                                                                                                                                 |
+| Dedicated API/PostgreSQL pagination ADMC-013                                   | 2 tests / 52 assertions lulus.                                                                                                                                                                                                                                    |
+| Dedicated API/PostgreSQL metadata ADMC-014                                     | 2 tests / 61 assertions lulus, tiga resource serta stale rollback.                                                                                                                                                                                                |
+| `bun run check-types`, `bun run lint`, `bun run build`                         | 3 paket types, web lint dan API/web build lulus.                                                                                                                                                                                                                  |
+| `bun run --cwd apps/web auth:ssr:smoke`                                        | Native Bun/Nitro SSR/auth/cookie/isolation/locking lulus sesudah final build.                                                                                                                                                                                     |
+| `bun run --cwd apps/web auth:import:proof` (ADMC-012)                          | Client/server import violation sengaja ditolak; fixture dipulihkan dan build berikutnya lulus.                                                                                                                                                                    |
+| `AUTH_BROWSER_PHASE=all` dengan content test database melalui harness existing | Cache/auth/content phases lulus. Business metadata menggunakan API/PostgreSQL nyata, sesi/error dikontrol auth fixture.                                                                                                                                           |
+| Browser responsif/theme                                                        | Lima template × dua tema × lima lebar = 50 kombinasi. Light/Dark/System, pagination/filter race, double-submit, genre cursor, nullable clear, two-tab conflict, dirty cancel/confirm/back/logout, keyboard/labels/contrast dan no overflow/hydration error lulus. |
+| `bun install --frozen-lockfile`                                                | 770 installs diperiksa; tanpa perubahan dependency/lock.                                                                                                                                                                                                          |
+
+Browser dijalankan dengan bundled host Playwright/Edge dan built Bun server; bukti bukan Safari/perangkat mobile fisik/full assistive technology audit. beforeunload bergantung kebijakan browser. Profiling dataset production, R2/FFmpeg/upload/publication serta rollout production tetap di luar proof ini. Empat screenshot runtime disimpan pada canonical [desktop](../../design/admin-content-desktop-light.md) dan [mobile](../../design/admin-content-mobile.md), terpisah dari mockup.
+
+Perbaikan acceptance: checkbox memakai label eksplisit, page di luar batas dijepit setelah fresh result, dialog menjaga gutter 320 px, welcome card memakai card surface setelah primary-tint text terukur 4.49379:1, dan response write dikonfirmasi sebelum navigasi. UUID validator digunakan bersama agar tidak berulang. Palette approved tetap sama.
+
+Preservation audit terhadap snapshot sebelum implementasi lulus untuk file unrelated; existing design boards/build receipts tetap terpisah dari staging. Tidak menambah CI, membuka PR, push atau merge. Format/docs/whitespace/staged-document/hook results serta SHA actual closure ditambahkan sesudah teramati.
+
+- Closure checks teramati: targeted Prettier/whitespace lulus; docs worktree 52 Markdown/409 links dan staged-only snapshot 45 Markdown/390 links lulus. Preservation 21 file unrelated lulus; staging terbatas 26 file milik acceptance dan partial index. Latest script lint lulus; hooks/commit acceptance dicatat pascacommit.

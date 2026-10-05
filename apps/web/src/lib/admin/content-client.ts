@@ -1,3 +1,4 @@
+import { isUuid } from './content-identifiers'
 import { createPrivateApiClient, getBrowserApiBaseUrl } from '../api/client'
 import type { ApiFetcher } from '../api/client'
 import type { QueryClient } from '@tanstack/react-query'
@@ -105,6 +106,32 @@ async function unwrap<T>(
     )
   return result.data
 }
+
+function invalidResponse(): never {
+  throw new ContentApiError(
+    0,
+    'INVALID_RESPONSE',
+    'The response could not be confirmed.',
+  )
+}
+function verifiedRecord<T>(value: T, version: number, id?: string): T {
+  const raw: unknown = value
+  if (
+    !raw ||
+    typeof raw !== 'object' ||
+    !('id' in raw) ||
+    !isUuid(raw.id) ||
+    !('rowVersion' in raw) ||
+    raw.rowVersion !== version ||
+    !('title' in raw) ||
+    typeof raw.title !== 'string' ||
+    !('slug' in raw) ||
+    typeof raw.slug !== 'string' ||
+    (id && raw.id !== id)
+  )
+    invalidResponse()
+  return value
+}
 export function createContentClient(
   baseUrl: string,
   queryClient: QueryClient,
@@ -154,12 +181,41 @@ export function createContentClient(
         )
       return { type, data } as const
     },
-    createVideo: (input: VideoCreate) => unwrap(api.admin.videos.post(input)),
-    createSeries: (input: SeriesCreate) => unwrap(api.admin.series.post(input)),
-    patchVideo: (id: string, input: VideoPatch) =>
-      unwrap(api.admin.videos({ id }).patch(input)),
-    patchSeries: (id: string, input: SeriesPatch) =>
-      unwrap(api.admin.series({ id }).patch(input)),
+
+    async createVideo(input: VideoCreate) {
+      return verifiedRecord(await unwrap(api.admin.videos.post(input)), 1)
+    },
+    async createSeries(input: SeriesCreate) {
+      const result = await unwrap(api.admin.series.post(input))
+      verifiedRecord(result.series, 1)
+      const raw: unknown = result.defaultSeason
+      if (
+        !raw ||
+        typeof raw !== 'object' ||
+        !('id' in raw) ||
+        !isUuid(raw.id) ||
+        !('seriesId' in raw) ||
+        raw.seriesId !== result.series.id ||
+        !('seasonNumber' in raw) ||
+        raw.seasonNumber !== 1
+      )
+        invalidResponse()
+      return result
+    },
+    async patchVideo(id: string, input: VideoPatch) {
+      return verifiedRecord(
+        await unwrap(api.admin.videos({ id }).patch(input)),
+        input.expectedVersion + 1,
+        id,
+      )
+    },
+    async patchSeries(id: string, input: SeriesPatch) {
+      return verifiedRecord(
+        await unwrap(api.admin.series({ id }).patch(input)),
+        input.expectedVersion + 1,
+        id,
+      )
+    },
   }
 }
 export type ContentClient = ReturnType<typeof createContentClient>

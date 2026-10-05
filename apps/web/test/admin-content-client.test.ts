@@ -92,7 +92,19 @@ test('abort remains cancellation, mutations never replay and Series uses nested 
       expect(new URL(String(url)).pathname).toBe('/api/admin/series')
       expect(JSON.parse(String(init?.body))).toEqual({ title: 'Series' })
       return Response.json(
-        { series: { id: 'server-id' }, defaultSeason: { id: 'season-id' } },
+        {
+          series: {
+            id: '00000000-0000-4000-8000-000000000001',
+            title: 'Series',
+            slug: 'series',
+            rowVersion: 1,
+          },
+          defaultSeason: {
+            id: '00000000-0000-4000-8000-000000000002',
+            seriesId: '00000000-0000-4000-8000-000000000001',
+            seasonNumber: 1,
+          },
+        },
         { status: 201 },
       )
     },
@@ -110,7 +122,10 @@ test('abort remains cancellation, mutations never replay and Series uses nested 
     { type: 'series', input: { title: 'Series' } },
     {} as never,
   )
-  expect(result).toEqual({ type: 'series', id: 'server-id' })
+  expect(result).toEqual({
+    type: 'series',
+    id: '00000000-0000-4000-8000-000000000001',
+  })
   expect(calls).toBe(2)
 })
 test('identity keys isolate data, cleanup handles every content resource', async () => {
@@ -145,4 +160,25 @@ test('a network failure executes one POST and never creates confirmed cache data
   expect(() =>
     createContentClient('http://user:secret@localhost', cache),
   ).toThrow('Invalid API base URL')
+})
+
+test('malformed 2xx write responses never count as confirmed saves', async () => {
+  const cache = new QueryClient()
+  const id = '00000000-0000-4000-8000-000000000001'
+  for (const body of [
+    {},
+    { id, title: 'Draft', slug: 'draft', rowVersion: 1 },
+  ]) {
+    const api = createContentClient('http://localhost/api', cache, async () =>
+      Response.json(body),
+    )
+    await expect(api.createSeries({ title: 'Draft' })).rejects.toMatchObject({
+      code: 'INVALID_RESPONSE',
+      status: 0,
+    })
+    await expect(
+      api.patchVideo(id, { title: 'Changed', expectedVersion: 1 }),
+    ).rejects.toMatchObject({ code: 'INVALID_RESPONSE', status: 0 })
+  }
+  cache.clear()
 })

@@ -1,3 +1,4 @@
+import { isUuid } from './content-identifiers'
 import type { ContentDetail, ContentType } from './content-client'
 import type { CreateContent, PatchContent } from './content-queries'
 
@@ -102,14 +103,7 @@ export function validateContentValues(v: ContentValues, editing = false) {
   }
   if (v.genreIds.length > 100 || new Set(v.genreIds).size !== v.genreIds.length)
     errors.genreIds = 'Choose at most 100 distinct genres.'
-  if (
-    v.genreIds.some(
-      (id) =>
-        !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-          id,
-        ),
-    )
-  )
+  if (v.genreIds.some((id) => !isUuid(id)))
     errors.genreIds = 'One or more genre IDs are invalid.'
   return errors
 }

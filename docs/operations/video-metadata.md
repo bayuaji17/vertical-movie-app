@@ -1,4 +1,26 @@
-# Video Operations — metadata tahap A
+# Video Operations — metadata
+
+> Status aktif: metadata dashboard diimplementasikan lokal 5 Oktober 2026 pada `feat/admin-content-dashboard`, sesuai persetujuan pengguna. Evidence pada [backlog admin content](../tasks/admin-content.md). Runbook [media](media.md) memiliki upload/worker/HLS/publication yang ditambahkan setelah tahap A. Bagian 3–4 Oktober di bawah adalah sejarah; klaim belum tersedia pada snapshot tersebut bukan kondisi runtime saat ini.
+
+## Dashboard metadata aktif — 5 Oktober 2026
+
+Lima template web: `/admin`, `/admin/content`, `/admin/content/new`, `/admin/content/:type/:id`, `/admin/content/:type/:id/edit`. Type film/standalone/series; Film ke API videos.kind movie, Standalone ke standalone, Series ke API series. Video preview existing tetap `/admin/videos/:id/preview`. Semua rute tetap dalam guard admin authoritative. Eden memakai base browser `/api`; gateway bisnis meneruskan `/api/admin/*` ke Elysia dengan cookie/origin/no-store. Rahasia tetap env API.
+
+List bernomor memakai kontrak [ADMC-013](#numbered-content-pages--admc-013). UI menyimpan filters/page/pageSize di URL; search debounce 300 ms, default 10, presets 10/25/50/100, custom integer 1–100. Filter/size kembali ke page 1; page yang telah melewati total terbaru di-clamp setelah hasil fresh. Total berasal dari server.
+
+Form metadata title-only boleh disimpan, genre paginated/search tetap mempertahankan selected IDs; type immutable pada edit. PATCH mengirim field berubah dan expectedVersion baseline; clear nullable menggunakan null, genre [], hak false. Sukses confirmed menginvalidasi cache terkait dan membuka detail; conflict/failure mempertahankan input, reload dirty meminta konfirmasi. Tidak ada automatic mutation replay.
+
+Avatar kanan atas memuat identity dan Appearance Light/Dark/System; default System, preference non-secret pada localStorage vertical-movie-theme. Private metadata/form/query/mutation tidak dipersist. Auth logout/expiry/revocation membersihkan private query dan mutation cache; business 5xx memverifikasi sesi tanpa membuang form bila admin masih valid. Dirty navigation menggunakan dialog; beforeunload mengikuti kebijakan browser dan tidak menjamin force-close mobile.
+
+### Proof dashboard
+
+- Unit/regression: `bun test apps/api/src packages/auth/src apps/web/test`.
+- Dedicated API persistence: `bun test apps/api/test/integration/admin-content-proof.test.ts` dengan `CONTENT_TEST_DATABASE_URL` yang hanya mengizinkan localhost database `vertical_movie_app_content_test`. Fixture mereset hanya DB tersebut; satu admin dan metadata test diisi ulang. Jangan gunakan DB development/production.
+- Built browser: `AUTH_BROWSER_PHASE=content AUTH_BROWSER_RUNTIME=built bun apps/web/test/auth-browser-smoke.mjs` dengan DB test di atas serta adapter Playwright `AUTH_BROWSER_NODE`, `AUTH_PLAYWRIGHT_MODULE`, `AUTH_BROWSER_EXECUTABLE`, `AUTH_BROWSER_WORKER_PATH` dari runtime host. Worker path harus bisa dibaca Node host. `all` menjalankan cache/routes/content ketika DB test disediakan; tanpa DB test tetap menjalankan suite auth existing. `ADMIN_BROWSER_SCREENSHOT_PREFIX` opsional ialah prefix file absolut yang bisa ditulis Node host.
+
+Browser content memakai API Elysia dan repository PostgreSQL nyata dengan auth fixture serta injected metadata outage; ini proof metadata/persistence, bukan proof deployment Better Auth/storage/HLS production. Jangan menjalankan proof yang mereset DB test bersamaan; jalankan browser/SSR sesudah build selesai agar output Bun/Nitro tidak berubah saat server berjalan. Hasil aktual, screenshot dan batas browser pada backlog.
+
+## Sejarah tahap A — 3 Oktober 2026
 
 Pada 3 Oktober 2026, backend metadata mendukung `standalone`, `movie`, dan `episode` pada branch `feat/video-metadata`. Enam tabel dan 16 endpoint admin tersedia. Validasi memakai PostgreSQL localhost dedicated dan `app.handle()` tanpa membuka port. Storage S3, upload, worker FFmpeg, publikasi, katalog publik, serta UI/gateway bisnis belum tersedia pada iterasi ini.
 
@@ -8,7 +30,7 @@ Path Elysia adalah `/admin/series`, `/admin/genres`, dan `/admin/videos`; daftar
 
 Setiap endpoint konten membaca sesi native tanpa cookie cache, lalu memeriksa role admin, ban, dan expiry. Response privat memakai `Cache-Control: private, no-store`. Unauthorized 401, non-admin/banned 403, auth dependency unavailable 503. Field metadata divalidasi ketat; unknown fields dan status publikasi buatan client ditolak 422. Error domain memakai `{error:{code,message,requestId}}`; duplicate slug/nomor dan stale version menghasilkan 409.
 
-Browser Eden saat ini memakai base `/api`, tetapi gateway web hanya meneruskan auth. Jangan menganggap `/api/admin/videos` sudah berfungsi. Integrasi browser, penerusan cookie, dan SSR bisnis mengikuti WEB-CONTENT-001. Proof backend memakai direct request dengan cookie native fixture; belum ada uji browser pengelolaan konten.
+Pada snapshot tahap A 3 Oktober 2026, browser Eden memakai base `/api`, tetapi gateway web hanya meneruskan auth. Jangan menganggap `/api/admin/videos` sudah berfungsi. Integrasi browser, penerusan cookie, dan SSR bisnis mengikuti WEB-CONTENT-001. Proof backend memakai direct request dengan cookie native fixture; belum ada uji browser pengelolaan konten.
 
 ## Contoh alur
 

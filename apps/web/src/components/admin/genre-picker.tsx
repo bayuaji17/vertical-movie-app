@@ -101,11 +101,12 @@ export function GenrePicker({
       )}
       <div className="grid gap-1 sm:grid-cols-2">
         {items.map((item) => (
-          <label
+          <div
             key={item.id}
             className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border px-3 py-2"
           >
             <Checkbox
+              id={`genre-option-${item.id}`}
               checked={value.includes(item.id)}
               disabled={
                 disabled || (!value.includes(item.id) && value.length >= 100)
@@ -118,8 +119,13 @@ export function GenrePicker({
                 )
               }
             />
-            <span className="break-words text-sm">{item.name}</span>
-          </label>
+            <FieldLabel
+              htmlFor={`genre-option-${item.id}`}
+              className="min-h-11 flex-1 cursor-pointer items-center break-words text-sm"
+            >
+              {item.name}
+            </FieldLabel>
+          </div>
         ))}
       </div>
       {query.hasNextPage && (

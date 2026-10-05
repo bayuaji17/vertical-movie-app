@@ -131,3 +131,9 @@ Snapshot 0ef62913b98d85517fc663319830d3247263e1d9; source tetap identik base, HE
 ## Implementasi disetujui — 5 Oktober 2026
 
 Pengguna menyetujui desktop/mobile light/dark dan meminta implementasi Eden/TanStack Query/DRY serta commit setiap task. Snapshot `e5043eb14d3dc7f8429fa7e70c51bf87242a31dc`; branch `feat/admin-content-dashboard`. Pemeriksaan freshness: kontrak/source tetap sesuai plan; perubahan existing desain/CSS, indeks dan receipt dipertahankan. Tambahan `/admin/content` diperlukan untuk total/page, tanpa schema baru. Scope metadata dashboard, bukan upload/publication/player baru.
+
+## Freshness dan scope closure — 5 Oktober 2026
+
+Implementasi dilakukan pada branch `feat/admin-content-dashboard`, mulai snapshot desain `e5043eb14d3dc7f8429fa7e70c51bf87242a31dc`. Receipt task tersimpan pada plan/backlog; source runtime sekarang mencakup lima template metadata, typed Eden/Query/Form, shell/theme, numbered API serta conflict/dirty/error handling. Bagian current behavior/source map sebelum snapshot ini merupakan konteks historis, bukan status runtime terbaru. Runbook/specification/index diperbarui bersama closure; tidak ada schema migration, manifest/lock/dependency baru, perubahan player/watch/preview source, remote Git atau rollout production.
+
+Preservation audit membandingkan SHA-256 awal: source/artefak desain dan receipt build-warning yang tidak dimiliki task tetap sama. Override dark approved di styles.css diintegrasikan ke Git tanpa mengubah nilainya; tambahan penjelasan dimiliki ADMC-015, sementara perubahan desain/index lokal sebelumnya tetap tidak dibundel ke commit modul. Bukti browser memakai API Elysia/PostgreSQL nyata pada database test allowlisted, dengan auth fixture. Auth existing dibuktikan lewat suite browser/SSR tersendiri; deployment/R2/Safari/assistive-technology audit penuh tetap gerbang lain.

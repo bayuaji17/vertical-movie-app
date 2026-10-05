@@ -1,3 +1,4 @@
+import { isUuid } from '#/lib/admin/content-identifiers'
 import type { ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
@@ -35,10 +36,7 @@ export function ContentResource({
   id: string
   children: (detail: ContentDetail) => ReactNode
 }) {
-  if (
-    !isContentType(type) ||
-    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
-  )
+  if (!isContentType(type) || !isUuid(id))
     return (
       <>
         <AdminPageHeading

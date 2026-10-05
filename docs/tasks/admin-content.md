@@ -1,6 +1,6 @@
 # Modul: Dashboard metadata konten
 
-> Status: planning · 5 Oktober 2026 · Permintaan pengguna: plan tahap pertama frontend. Requirement v2 disetujui pengguna; desain/rencana dan implementasi disetujui pengguna 5 Oktober 2026; runtime In Progress. Hasil pemeriksaan hanya dicatat setelah teramati.
+> Status: implemented dan verified lokal · 5 Oktober 2026 · Desain/rencana dan implementasi disetujui pengguna. Acceptance ADMC-011 lulus; commit closure/receipt diselesaikan sesudah hooks. Hasil tidak menyatakan production readiness.
 
 ## Task: ADMC-DES-004 — Desain mobile light/dark v2
 
@@ -175,18 +175,18 @@ CLI docs/dry-run/diff, import review, conditional frozen install, root types/lin
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diuji. Hasil runtime tidak disimpulkan dari plan.
+Implementasi dan checks lokal selesai; hasil aktual ada pada evidence implementasi di bawah. Production readiness tidak disimpulkan.
 
 ### Commit task
 
 - Pesan: Conventional Commit dengan ID ADMC-002 sesuai hasil implementasi.
-- SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan untuk task ini.
+- SHA: `97718bc243d86ed08dad01074f383f496c5cdd48`.
+- Hook/checks: Lulus tanpa bypass; command/results ada pada evidence implementasi.
 - Ledger: Receipt aktual dicatat setelah commit berhasil untuk update task berikutnya.
 
 ### Blocker atau tindak lanjut
 
-Menunggu review/permintaan implementasi dan dependency. Integrasi token/assets desain worktree harus dicatat sebagai pekerjaan tersendiri sebelum fresh-checkout visual acceptance.
+Primitives selesai; integrasi token tracked pada ADMC-015 dan runtime acceptance pada ADMC-011. Artefak desain unrelated tetap terpisah.
 
 ### Evidence implementasi — 5 Oktober 2026
 
@@ -222,18 +222,18 @@ Injected fetch behavior tests, compile-only positive/negative contract, auth cac
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diuji. Hasil runtime tidak disimpulkan dari plan.
+Implementasi dan checks lokal selesai; hasil aktual ada pada evidence implementasi di bawah. Production readiness tidak disimpulkan.
 
 ### Commit task
 
 - Pesan: Conventional Commit dengan ID ADMC-003 sesuai hasil implementasi.
-- SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan untuk task ini.
+- SHA: `b44b8dbf1dbe598f85a5bc3edb6251b58f515746`.
+- Hook/checks: Lulus tanpa bypass; command/results ada pada evidence implementasi.
 - Ledger: Receipt aktual dicatat setelah commit berhasil untuk update task berikutnya.
 
 ### Blocker atau tindak lanjut
 
-Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready hanya karena source API tersedia.
+Acceptance modul/closure pada ADMC-011; pekerjaan upload/publication dan editor season/episode tetap tahap berikutnya.
 
 ### Evidence implementasi — 5 Oktober 2026
 
@@ -313,18 +313,18 @@ Existing auth/session/gateway tests dan browser/SSR guard/logout smoke terkait, 
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diuji. Hasil runtime tidak disimpulkan dari plan.
+Implementasi dan checks lokal selesai; hasil aktual ada pada evidence implementasi di bawah. Production readiness tidak disimpulkan.
 
 ### Commit task
 
 - Pesan: Conventional Commit dengan ID ADMC-004 sesuai hasil implementasi.
-- SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan untuk task ini.
+- SHA: `d66c78407d462f0b3c7027e55ed3321d22958308`.
+- Hook/checks: Lulus tanpa bypass; command/results ada pada evidence implementasi.
 - Ledger: Receipt aktual dicatat setelah commit berhasil untuk update task berikutnya.
 
 ### Blocker atau tindak lanjut
 
-Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready hanya karena source API tersedia.
+Acceptance modul/closure pada ADMC-011; pekerjaan upload/publication dan editor season/episode tetap tahap berikutnya.
 
 ### Evidence implementasi — 5 Oktober 2026
 
@@ -360,18 +360,18 @@ Route videos index, list table/mobile cards, kind/search/includeArchived URL sta
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diuji. Hasil runtime tidak disimpulkan dari plan.
+Implementasi dan checks lokal selesai; hasil aktual ada pada evidence implementasi di bawah. Production readiness tidak disimpulkan.
 
 ### Commit task
 
 - Pesan: Conventional Commit dengan ID ADMC-005 sesuai hasil implementasi.
-- SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan untuk task ini.
+- SHA: `8dd531147dfb01e5ff0742dc8978a9f9938a5da5`.
+- Hook/checks: Lulus tanpa bypass; command/results ada pada evidence implementasi.
 - Ledger: Receipt aktual dicatat setelah commit berhasil untuk update task berikutnya.
 
 ### Blocker atau tindak lanjut
 
-Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready hanya karena source API tersedia.
+Acceptance modul/closure pada ADMC-011; pekerjaan upload/publication dan editor season/episode tetap tahap berikutnya.
 
 ### Evidence implementasi — 5 Oktober 2026
 
@@ -414,18 +414,18 @@ Meaningful mapper fixtures batas/normalisasi/calendar/year/genre/rights/diff; ke
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diuji. Hasil runtime tidak disimpulkan dari plan.
+Implementasi dan checks lokal selesai; hasil aktual ada pada evidence implementasi di bawah. Production readiness tidak disimpulkan.
 
 ### Commit task
 
 - Pesan: Conventional Commit dengan ID ADMC-006 sesuai hasil implementasi.
-- SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan untuk task ini.
+- SHA: `8720ba4283b0603aebb49fce9a3633a4db71e727`.
+- Hook/checks: Lulus tanpa bypass; command/results ada pada evidence implementasi.
 - Ledger: Receipt aktual dicatat setelah commit berhasil untuk update task berikutnya.
 
 ### Blocker atau tindak lanjut
 
-Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready hanya karena source API tersedia.
+Acceptance modul/closure pada ADMC-011; pekerjaan upload/publication dan editor season/episode tetap tahap berikutnya.
 
 ### Evidence implementasi — 5 Oktober 2026
 
@@ -461,18 +461,18 @@ Success dua kind, minimal/full form, slug conflict/invalid response/timeout, rap
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diuji. Hasil runtime tidak disimpulkan dari plan.
+Implementasi dan checks lokal selesai; hasil aktual ada pada evidence implementasi di bawah. Production readiness tidak disimpulkan.
 
 ### Commit task
 
 - Pesan: Conventional Commit dengan ID ADMC-007 sesuai hasil implementasi.
-- SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan untuk task ini.
+- SHA: `86d6b9f8b5b38d70dfa7486cb068a308f3f45a2d`.
+- Hook/checks: Lulus tanpa bypass; command/results ada pada evidence implementasi.
 - Ledger: Receipt aktual dicatat setelah commit berhasil untuk update task berikutnya.
 
 ### Blocker atau tindak lanjut
 
-Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready hanya karena source API tersedia.
+Acceptance modul/closure pada ADMC-011; pekerjaan upload/publication dan editor season/episode tetap tahap berikutnya.
 
 ### Evidence implementasi — 5 Oktober 2026
 
@@ -508,18 +508,18 @@ Lifecycle/kind fixtures, 404, direct refresh, timestamps/canonical metadata dan 
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diuji. Hasil runtime tidak disimpulkan dari plan.
+Implementasi dan checks lokal selesai; hasil aktual ada pada evidence implementasi di bawah. Production readiness tidak disimpulkan.
 
 ### Commit task
 
 - Pesan: Conventional Commit dengan ID ADMC-008 sesuai hasil implementasi.
-- SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan untuk task ini.
+- SHA: `c90349bd07aa618bc3043b6555d21554bc5ee11b`.
+- Hook/checks: Lulus tanpa bypass; command/results ada pada evidence implementasi.
 - Ledger: Receipt aktual dicatat setelah commit berhasil untuk update task berikutnya.
 
 ### Blocker atau tindak lanjut
 
-Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready hanya karena source API tersedia.
+Acceptance modul/closure pada ADMC-011; pekerjaan upload/publication dan editor season/episode tetap tahap berikutnya.
 
 ### Evidence implementasi — 5 Oktober 2026
 
@@ -555,18 +555,18 @@ Two-tab race, background refetch saat dirty, clear nullable/genre/rights, stale 
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diuji. Hasil runtime tidak disimpulkan dari plan.
+Implementasi dan checks lokal selesai; hasil aktual ada pada evidence implementasi di bawah. Production readiness tidak disimpulkan.
 
 ### Commit task
 
 - Pesan: Conventional Commit dengan ID ADMC-009 sesuai hasil implementasi.
-- SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan untuk task ini.
+- SHA: `b932a1764760255090790264131a3ef65c162ddf`.
+- Hook/checks: Lulus tanpa bypass; command/results ada pada evidence implementasi.
 - Ledger: Receipt aktual dicatat setelah commit berhasil untuk update task berikutnya.
 
 ### Blocker atau tindak lanjut
 
-Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready hanya karena source API tersedia.
+Acceptance modul/closure pada ADMC-011; pekerjaan upload/publication dan editor season/episode tetap tahap berikutnya.
 
 ### Evidence implementasi — 5 Oktober 2026
 
@@ -602,18 +602,18 @@ Cancel/confirm/clean/save/back/unload plus logout/expiry, browser keyboard dan r
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diuji. Hasil runtime tidak disimpulkan dari plan.
+Implementasi dan checks lokal selesai; hasil aktual ada pada evidence implementasi di bawah. Production readiness tidak disimpulkan.
 
 ### Commit task
 
 - Pesan: Conventional Commit dengan ID ADMC-010 sesuai hasil implementasi.
-- SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan untuk task ini.
+- SHA: `778a57583f18a8bd87de43c64ad7841ffcc5196c`.
+- Hook/checks: Lulus tanpa bypass; command/results ada pada evidence implementasi.
 - Ledger: Receipt aktual dicatat setelah commit berhasil untuk update task berikutnya.
 
 ### Blocker atau tindak lanjut
 
-Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready hanya karena source API tersedia.
+Acceptance modul/closure pada ADMC-011; pekerjaan upload/publication dan editor season/episode tetap tahap berikutnya.
 
 ### Evidence implementasi — 5 Oktober 2026
 
@@ -625,7 +625,7 @@ Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
 ## Task: ADMC-011 — Acceptance UI, persistensi dan closure
 
-- Status: Backlog
+- Status: Review
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai dependency
 - Referensi: ADMC-US-05; PRD-01/02/03/08/09; GR-01/05/08; plan STEP-011.
@@ -639,10 +639,10 @@ Browser smoke fixtures/worker mengikuti harness existing; dedicated DB persisten
 
 ### Acceptance criteria
 
-- [ ] Movie/standalone list/create/read/edit/conflict terbukti dengan API dan dedicated PostgreSQL, bukan fixture HTTP saja.
-- [ ] Browser light/dark 320/390/768/1024/1440 px, keyboard/labels/contrast/loading/empty/error, auth cleanup dan preview routing lulus.
-- [ ] Existing/new relevant tests, types/lint/build/docs/format/whitespace serta conditional frozen install lulus; limitations dicatat.
-- [ ] Semua task runtime committed per task; scope upload/publish/series/katalog dan production readiness tidak diklaim selesai.
+- [x] Movie/standalone list/create/read/edit/conflict terbukti dengan API dan dedicated PostgreSQL, bukan fixture HTTP saja.
+- [x] Browser light/dark 320/390/768/1024/1440 px, keyboard/labels/contrast/loading/empty/error, auth cleanup dan preview routing lulus.
+- [x] Existing/new relevant tests, types/lint/build/docs/format/whitespace serta conditional frozen install lulus; limitations dicatat.
+- [ ] Semua task runtime committed per task; scope upload/publish/season/episode/katalog dan production readiness tidak diklaim selesai.
 
 ### Validasi
 
@@ -650,18 +650,26 @@ Root gates, production Bun browser/SSR proof terkait, dedicated content schema/r
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diuji. Hasil runtime tidak disimpulkan dari plan.
+Acceptance runtime lokal lulus; command/results dan batas verifikasi ada pada evidence di bawah. Commit task dan receipt dicatat setelah hooks berhasil.
 
 ### Commit task
 
 - Pesan: Conventional Commit dengan ID ADMC-011 sesuai hasil implementasi.
-- SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan untuk task ini.
+- SHA: Pending commit acceptance setelah hooks.
+- Hook/checks: Quality gates teramati lulus; hooks commit acceptance belum dijalankan.
 - Ledger: Receipt aktual dicatat setelah commit berhasil untuk update task berikutnya.
 
 ### Blocker atau tindak lanjut
 
-Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready hanya karena source API tersedia.
+Tidak ada blocker implementation scope iterasi ini. Browser proof memakai Edge/Chromium dengan viewport mobile, bukan perangkat mobile fisik/Safari atau audit assistive technology menyeluruh. Auth fixture mengontrol sesi/error, business requests dan metadata memakai Elysia/PostgreSQL nyata. Tidak menguji R2/FFmpeg/upload/publication atau deployment production. Browser force-close tidak menjamin beforeunload dialog. Worktree desain unrelated dipertahankan; tidak push/PR/merge.
+
+### Evidence implementasi — 5 Oktober 2026
+
+Native API/auth/web regression: 158 tests / 621 assertions lulus. Dedicated Elysia/PostgreSQL persistence ADMC-014: 2 tests / 61 assertions, dan pagination ADMC-013: 2 tests / 52 assertions lulus. Built Bun/Nitro browser all phases lulus: existing cache/auth routes serta content dengan tiga resource PostgreSQL nyata, numbered totals/custom page size/request race, create/edit/clear/version conflict, dirty navigation/logout dan tema Light/Dark/System. Semua lima template diuji pada 320/390/768/1024/1440 px dalam dua tema (50 kombinasi), keyboard/drawer/menu/labels, contrast text terukur minimal 4.5:1 dan tidak ada horizontal overflow/hydration error. Root check-types (3 paket), lint (web), build (API/web), auth:ssr:smoke dan conditional bun install --frozen-lockfile (770 installs, tanpa perubahan) lulus; server-import proof ADMC-012 tetap valid. Screenshot runtime empat PNG disimpan terpisah dari mockup. Perbaikan acceptance: label checkbox eksplisit, clamp halaman setelah data fresh, lebar dirty dialog, kontras welcome card dan konfirmasi response tulis/UUID helper bersama.
+
+Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
+
+Targeted Prettier, `git diff --check` dan `git diff --cached --check` lulus. Docs worktree: 52 Markdown/409 local links; staged-only checkout: 45 Markdown/390 links, tanpa errors. Latest lint sesudah perubahan script cleanup lulus (1 task). Preservation: 21 file unrelated identik snapshot. Diff manifest/lock/schema/player/watch/preview dari base implementasi kosong. Staging acceptance hanya 26 file source/test/docs/screenshots task; indeks docs dipartial-stage agar referensi design boards lokal unrelated tidak ikut. Hooks/commit berikutnya dicatat pascacommit.
 
 ## Task: ADMC-012 — Theme switcher shared shell
 
@@ -680,7 +688,7 @@ Avatar dropdown kanan atas berisi identity/Appearance Light/Dark/System; English
 ### Acceptance criteria
 
 - [x] Semua lima halaman memiliki switcher yang sama dengan Light/Dark/System berfungsi melalui semantic tokens.
-- [x] Preference persisted, System mengikuti media change, storage unavailable/invalid preference punya fallback; default System merupakan proposal untuk review.
+- [x] Preference persisted, System mengikuti media change, storage unavailable/invalid preference punya fallback; default System diterapkan sesuai rencana yang disetujui.
 - [x] Initial render/hydration tidak flash/mismatch; pergantian tema mempertahankan form dirty dan tidak memblokir auth expiry/logout.
 - [x] Keyboard/nama aksesibel/active state dan tests/browser/root gates lulus.
 
@@ -690,18 +698,18 @@ Mode/reload/persistence/system change/storage failure tests, browser keyboard/di
 
 ### Hasil dan bukti
 
-Belum diimplementasikan. Mockup Light hanya menunjukkan posisi/appearance kontrol, bukan bukti theme switching runtime.
+Theme runtime telah diimplementasikan; mockup tetap referensi desain. Evidence dan batas verifikasi tercatat di bawah.
 
 ### Commit task
 
 - Pesan: Conventional Commit dengan ID ADMC-012 sesuai implementasi.
-- SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan untuk task runtime ini.
+- SHA: `4ec8bc1912fdba9b5b792fa6a9bd8172855f9c97`.
+- Hook/checks: Lulus tanpa bypass; evidence implementasi di bawah.
 - Ledger: Receipt setelah commit berhasil.
 
 ### Blocker atau tindak lanjut
 
-Menunggu review visual/permintaan implementasi dan dependency.
+Dependency telah dipenuhi; browser/theme closure ADMC-011.
 
 ### Evidence implementasi — 5 Oktober 2026
 
@@ -774,7 +782,7 @@ Proposal GET /admin/content type/page/pageSize/search/includeArchived dengan typ
 ### Acceptance criteria
 
 - [x] Tiga jenis, total filter, numbered boundaries dan custom 1–100 akurat; invalid/empty/out-of-range behavior terdokumentasi.
-- [x] HTTP authorization/query/DTO tests serta dedicated PostgreSQL filter/count/snapshot/performance proof dan root gates lulus; existing consumers tidak rusak.
+- [x] HTTP authorization/query/DTO tests serta dedicated PostgreSQL filter/count/snapshot proof dan root gates lulus; existing consumers tidak rusak. Profiling dataset production tetap pemeriksaan deployment.
 
 ### Validasi
 
@@ -782,18 +790,18 @@ bun:test HTTP; dedicated DB pagination/filter parity/last page/concurrent writes
 
 ### Hasil dan bukti
 
-Belum implemented. Current DTO hanya items/nextCursor; angka 42 pada mockup merupakan contoh.
+Kontrak numbered pagination sudah diimplementasikan dan diverifikasi lokal; bukti HTTP/PostgreSQL dan batas profiling deployment ada di bawah. Angka mockup tetap data contoh.
 
 ### Commit task
 
 - Pesan: Conventional Commit dengan ID ADMC-013.
-- SHA: Belum dibuat.
-- Hook/checks: Menunggu hasil aktual.
+- SHA: `841db1736f9625ada7968830a77ca70acfc1cd86`.
+- Hook/checks: Lulus tanpa bypass; evidence dan receipt aktual di bawah.
 - Ledger: Receipt pascacommit untuk task berikutnya.
 
 ### Blocker atau tindak lanjut
 
-Visual v2 untuk review; runtime belum diminta/diimplementasikan.
+Dependency implementasi dipenuhi. Verifikasi acceptance modul ada pada ADMC-011; upload/publication dan season/episode tetap roadmap.
 
 ### Evidence implementasi — 5 Oktober 2026
 
@@ -805,7 +813,7 @@ Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
 ## Task: ADMC-014 — Metadata Series dan resource dispatch
 
-- Status: Review
+- Status: Done
 - Owner: Codex/pengembang pelaksana
 - Prioritas: P1
 - Referensi: plan; revisi pengguna 5 Oktober 2026.
@@ -828,24 +836,26 @@ Mapper/resource/contract behavior, tiga jenis create/read/edit, invalid type/ID/
 
 ### Hasil dan bukti
 
-Belum implemented. Screenshot Film adalah acuan layout; template Series conditional menjadi pekerjaan task ini.
+Dispatch dan metadata Series sudah diimplementasikan serta diverifikasi melalui API/PostgreSQL dan browser pada ADMC-011. Screenshot mockup tetap acuan visual.
 
 ### Commit task
 
 - Pesan: Conventional Commit dengan ID ADMC-014.
-- SHA: Belum dibuat.
-- Hook/checks: Menunggu hasil aktual.
+- SHA: `ec7ea091bb20073479d86721502c3e994393eea8`.
+- Hook/checks: Lulus tanpa bypass; evidence dan receipt aktual di bawah.
 - Ledger: Receipt pascacommit untuk task berikutnya.
 
 ### Blocker atau tindak lanjut
 
-Visual v2 untuk review; runtime belum diminta/diimplementasikan.
+Dependency implementasi dipenuhi. Verifikasi acceptance modul ada pada ADMC-011; upload/publication dan season/episode tetap roadmap.
 
 ### Evidence implementasi — 5 Oktober 2026
 
 Series is dispatched to its own Eden resource in the shared client/form/create/detail/edit, with completionStatus/default Season 1 and no video kind/rights/source fields. Dedicated real Elysia/PostgreSQL proof 2 tests/61 assertions passed for all three resource persistence, nullable/genre/rights clearing, version increment/stale rollback, genre cursor pages, slug conflict, lifecycle readonly and unauthorized access. Reusable fixture resets only the allowlisted local test DB and retains one admin (updates seeded test identity rather than creating a second admin); first fixture attempt correctly hit the single-admin constraint, repaired before proof. Types (3), lint (1), build (2) pass; browser closure ADMC-011.
 
 Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
+
+- Receipt commit task: `ec7ea091bb20073479d86721502c3e994393eea8`; hooks docs/lint/types/Commitlint lulus tanpa bypass.
 
 ## Task: ADMC-DES-002 — Revisi desktop light v2
 
