@@ -115,7 +115,7 @@ Tidak ada blocker ACOV-002. Catatan untuk adapter/parser: Bun metadata tidak mem
 
 ## Task: ACOV-003 — Persist executor dengan migrasi yang menjaga data lama
 
-- Status: Backlog
+- Status: Review
 - Owner: Codex / pengembang proyek
 - Prioritas: 3
 - Referensi: ACOV-US-02, ACOV-US-03; PRD media/sampul dan GR lifecycle; [plan](../plans/admin-cover-processing/implementation-plan.md).
@@ -125,23 +125,25 @@ Tidak ada blocker ACOV-002. Catatan untuk adapter/parser: Bun metadata tidak mem
 
 ### Ruang lingkup
 
-Tambahkan processing_mode pada upload_sessions dan execution_mode pada media_jobs, worker/request default worker. Request hanya untuk poster; server memilih mode baru dan replay mempertahankan mode existing. Generate migration, bukan hand-edit migration/journal.
+Tambahkan `processing_mode` pada `upload_sessions` dan `execution_mode` pada `media_jobs`, keduanya non-null default `worker`; CHECK mengizinkan `request` hanya untuk poster. Jangan aktifkan pemilihan runtime `request` sebelum ACOV-005 juga mengecualikan job tersebut dari claim/recovery worker. Generate migration, bukan hand-edit migration/journal.
 
-Target: `apps/api/src/db/schema/{upload,jobs}.ts; apps/api/drizzle/<generated-next>*; schema integration tests.`
+Target: `apps/api/src/db/schema/{upload,jobs}.ts`, generated `apps/api/drizzle/0010_poster-execution-mode.sql` dan snapshot/journal, dedicated migration proof.
 
 ### Acceptance criteria
 
-- [ ] Historical rows tetap worker; pending/active/succeeded jobs dan upload identity/hash tidak berubah; constraint request-poster valid.
-- [ ] Migration generated direview dan diuji pada dedicated database berisi data legacy, termasuk readiness composite FK dan uniqueness.
-- [ ] Pending migration diterapkan pada development database yang dikonfigurasi sesudah backup; journal/schema/data preservation diverifikasi tanpa reset.
+- [x] Historical rows tetap worker; queued/running/succeeded jobs dan upload identity/hash tidak berubah; constraint request-poster valid.
+- [x] Migration generated direview dan diuji pada dedicated database berisi data legacy, termasuk readiness composite FK, attempt provenance, constraint dan uniqueness.
+- [x] Pending migration diterapkan pada development database yang dikonfigurasi sesudah backup; journal/schema/data preservation diverifikasi tanpa reset.
 
 ### Validasi
 
-Dedicated PostgreSQL migration proof; bun run --cwd apps/api db:generate dan db:migrate sesuai scripts setelah recheck; backup development di luar Git, compare counts/identities/statuses sebelum-sesudah; tests relevan dan root gates.
+`bun run drizzle-kit generate --name=poster-execution-mode` dari `apps/api`; dedicated PostgreSQL migration proof dan existing media migration proofs serial; API unit suite; root check-types/lint/build. Sebelum dev apply: custom-format backup di luar repo, `bun run --cwd apps/api db:migrate`, journal/schema/17 table snapshots dan counts sebelum/sesudah; docs/Prettier/diff.
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau divalidasi; hasil runtime dan command aktual dicatat saat task dikerjakan.
+2026-10-06: Schema Drizzle menghasilkan `processing_mode`/`execution_mode` dengan default `worker`, CHECK nilai valid dan `request` hanya untuk poster. Migration `0010_poster-execution-mode.sql` generated oleh Drizzle Kit, ditinjau tanpa hand-edit. Dedicated test `media-cover-executor-migration-proof.test.ts` lulus (1 test/14 assertions): session/job legacy tetap worker; pending/running/succeeded job, completed upload, asset, attempt, id/hash, ready-job composite FK, generation uniqueness dan migration rerun terjaga. CHECK menolak request pada source/enum invalid dan menerima poster request.
+
+Existing migration regressions lulus serial: fingerprint proof 1/15 dan publication proof 1/10. `bun test apps/api/src`: 86/335 lulus. Root `check-types`, `lint`, `build`; Prettier dan `git diff --check` lulus. Development `vertical_movie_app` dibackup sebelum migrasi: custom archive 64,168 bytes/143 list entries, file mode 0600. Command resmi `bun run --cwd apps/api db:migrate` menaikkan journal 10→11. Snapshot SHA-256/count semua 17 application tables identik (kolom baru dikecualikan); tiga session dan tiga job legacy semuanya `worker`. Schema baru non-null/default worker dan seluruh constraint diverifikasi. Tidak ada production migration atau mode runtime request yang dijalankan.
 
 ### Commit task
 
@@ -152,7 +154,7 @@ Belum diimplementasikan atau divalidasi; hasil runtime dan command aktual dicata
 
 ### Blocker atau tindak lanjut
 
-Persetujuan plan, freshness check dan dependensi task di atas; bukan izin untuk mulai runtime pada permintaan planning ini.
+Tidak ada blocker ACOV-003. `request` tetap belum dipilih aplikasi sampai ACOV-005 menambah API processing dan mengecualikan request jobs dari worker claim/recovery.
 
 ## Task: ACOV-004 — Adapter Bun.Image dengan batas resource dan output terverifikasi
 

@@ -71,8 +71,8 @@ test("nullable fingerprint migration preserves legacy upload and auth identity w
       ).map((row: { data: Record<string, unknown> }) => {
         if (table === "upload_sessions") {
           expect(row.data.expected_sha256).toBeNull();
-          const { expected_sha256: _, ...legacy } = row.data;
-          return legacy;
+          expect(row.data.processing_mode).toBe("worker");
+          return omit(row.data, ["expected_sha256", "processing_mode"]);
         }
         return row.data;
       });
@@ -103,3 +103,9 @@ test("nullable fingerprint migration preserves legacy upload and auth identity w
     await rm(dir, { recursive: true, force: true });
   }
 }, 60000);
+
+function omit(row: Record<string, unknown>, keys: string[]) {
+  return Object.fromEntries(
+    Object.entries(row).filter(([key]) => !keys.includes(key)),
+  );
+}

@@ -40,6 +40,12 @@ Evidence HTTP/native/dedicated PG, regression playback serta scope platform dica
 
 Database development memakai command resmi `bun run --cwd apps/api db:migrate`: journal9→10. Backup PostgreSQL custom-format sudah divalidasi dengan pg_restore list; snapshot17 tabel membuktikan data existing tetap utuh. Full restore/production migration tetap belum dibuktikan. Dedicated migration test juga mempertahankan legacy session, asset, metadata serta user/account/session auth dan menguji constraint/rerun; evidence pada backlog ADUP-004.
 
+## Executor schema — ACOV-003
+
+**Implemented/local verified · 6 Oktober 2026.** Generated `0010_poster-execution-mode` menambah `upload_sessions.processing_mode` dan `media_jobs.execution_mode`, `text NOT NULL DEFAULT 'worker'`, dengan CHECK nilai `worker|request` dan `request` hanya untuk poster. Session/job legacy tidak di-backfill ke jalur berbeda; semuanya tetap worker. Kolom ini internal, tidak menjadi pilihan client/DTO. Sampai ACOV-005 menyelesaikan request processor serta filter worker claim dan recovery, API tetap membuat/memproses upload dengan perilaku worker yang ada.
+
+Migration resmi diterapkan pada database development setelah backup tervalidasi: journal10→11, SHA-256 dan jumlah row seluruh17 application tables tetap sama, semua session/job lama `worker`. Dedicated PostgreSQL proof meliputi state queued/running/succeeded, fingerprint/idempotency, ready-job composite FK, attempt history, CHECK poster-only dan rerun. Production belum dimigrasikan; full restore belum dibuktikan.
+
 Worker menghitung SHA-256 sambil streaming download existing, lalu membandingkan expected digest sebelum FFprobe/transcode. Mismatch terminal `MEDIA_SOURCE_CHANGED`; job/asset failed, tanpa facts/readyJob/output valid. Completed upload tetap berbeda dari ready; fingerprint bukan codec/rights/publication proof. Completed legacy dengan expected hash null tetap diproses. Native/PG/MinIO compatibility evidence pada backlog ADUP-005; reselection guard UI ADUP-008/011 telah diimplementasikan dan diuji.
 
 ## Runtime uploader admin — 6 Oktober 2026

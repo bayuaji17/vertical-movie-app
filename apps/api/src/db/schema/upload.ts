@@ -24,6 +24,10 @@ export const uploadSessions = pgTable(
     videoId: uuid("video_id"),
     seriesId: uuid("series_id"),
     kind: text("kind").$type<"source" | "poster">().notNull(),
+    processingMode: text("processing_mode")
+      .$type<"worker" | "request">()
+      .notNull()
+      .default("worker"),
     actorId: text("actor_id")
       .notNull()
       .references(() => user.id, { onDelete: "restrict" }),
@@ -84,6 +88,10 @@ export const uploadSessions = pgTable(
     check(
       "upload_sessions_owner_check",
       sql`num_nonnulls(${t.videoId},${t.seriesId})=1`,
+    ),
+    check(
+      "upload_sessions_processing_mode_check",
+      sql`${t.processingMode} IN ('worker','request') AND (${t.processingMode}='worker' OR ${t.kind}='poster')`,
     ),
     check(
       "upload_sessions_state_check",

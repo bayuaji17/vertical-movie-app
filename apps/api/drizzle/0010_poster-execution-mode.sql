@@ -1,0 +1,4 @@
+ALTER TABLE "media_jobs" ADD COLUMN "execution_mode" text DEFAULT 'worker' NOT NULL;--> statement-breakpoint
+ALTER TABLE "upload_sessions" ADD COLUMN "processing_mode" text DEFAULT 'worker' NOT NULL;--> statement-breakpoint
+ALTER TABLE "media_jobs" ADD CONSTRAINT "media_jobs_execution_mode_check" CHECK ("media_jobs"."execution_mode" IN ('worker','request') AND ("media_jobs"."execution_mode"='worker' OR "media_jobs"."kind"='poster'));--> statement-breakpoint
+ALTER TABLE "upload_sessions" ADD CONSTRAINT "upload_sessions_processing_mode_check" CHECK ("upload_sessions"."processing_mode" IN ('worker','request') AND ("upload_sessions"."processing_mode"='worker' OR "upload_sessions"."kind"='poster'));

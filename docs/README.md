@@ -53,7 +53,7 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 | Build web          | [Snapshot](plans/tanstack-build-warnings/repository-context.md) | [Plan](plans/tanstack-build-warnings/implementation-plan.md)                                   | Implemented/verified lokal: warning directive, batas import dan SSR; browser belum diuji.                                                       |
 | Dashboard konten   | [Snapshot](plans/admin-content/repository-context.md)           | [Plan](plans/admin-content/implementation-plan.md)                                             | Implemented metadata: lima template responsif, Eden/Query, theme, pagination, create/detail/edit dan conflict; evidence lokal pada backlog.     |
 | Upload Media admin | [Snapshot](plans/admin-media-upload/repository-context.md)      | [Plan](plans/admin-media-upload/implementation-plan.md)                                        | Plan/mockup disetujui; ADUP-001–015 Done; uploader source/cover, recovery/readiness dan auth cleanup implemented/verified lokal 6 Oktober 2026. |
-| Pemrosesan sampul  | [Snapshot](plans/admin-cover-processing/repository-context.md)  | [Plan](plans/admin-cover-processing/implementation-plan.md)                                    | Plan disetujui; ACOV-001–002 Done; proof selesai; ACOV-003 berikutnya.                                                                          |
+| Pemrosesan sampul  | [Snapshot](plans/admin-cover-processing/repository-context.md)  | [Plan](plans/admin-cover-processing/implementation-plan.md)                                    | Plan disetujui; ACOV-001–003 Done; schema executor diterapkan lokal; processor berlanjut.                                                       |
 
 ## Backlog dan evidence
 
@@ -67,7 +67,7 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 - [Build web](tasks/web-build.md): baseline warning directive, plan filter logging dan verifikasi build/SSR.
 - [Dashboard konten](tasks/admin-content.md): ADMC-001–016 dan ADMC-DES-001–004; metadata, tema, pagination/Series dan desain.
 - [Upload Media admin](tasks/admin-media-upload.md): ADUP-001–015; ADUP-001–015 Done; evidence hashing, API/schema/worker, direct multipart, browser/recovery/auth dan local task commits.
-- [Pemrosesan sampul](tasks/admin-cover-processing.md): ACOV-001–002 Done; ACOV-003–009 implementation backlog; proof native/browser tercatat.
+- [Pemrosesan sampul](tasks/admin-cover-processing.md): ACOV-001–003 Done; schema executor 0010 terverifikasi; adapter/API/crop/recovery menyusul.
 - [Dokumentasi](tasks/documentation.md): organisasi folder, aturan dan validasi.
 
 ## Gambaran implementasi saat ini

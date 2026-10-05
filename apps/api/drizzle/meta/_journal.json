@@ -71,6 +71,13 @@
       "when": 1791205205900,
       "tag": "0009_upload-fingerprint",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791238147758,
+      "tag": "0010_poster-execution-mode",
+      "breakpoints": true
     }
   ]
 }

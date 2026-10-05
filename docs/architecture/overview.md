@@ -67,15 +67,15 @@ Profil/limit media, geometry multipart dan timeout policy yang telah disetujui m
 
 ## Model data dan status aktif
 
-| Data / owner                                           | Peran implementasi                                                                                                               |
-| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
-| Native auth                                            | Identitas, account/session/rate-limit dan enforcement satu admin, dimiliki package auth.                                         |
-| `series`, `seasons`, `videos`                          | Hierarchy konten; video kind movie/standalone tanpa season, episode melalui season; metadata/audit/versioning dan pointer asset. |
-| `genres`, `series_genres`, `video_genres`              | Taxonomy dan inheritance/override metadata genre.                                                                                |
-| `media_assets`, `upload_sessions`                      | Ownership, provider/bucket/key, generation/facts/provenance, session multipart/claim/expiry, source/poster siap atau gagal.      |
-| `media_jobs`, `media_job_attempts`, `media_renditions` | Durable queue, lease/retry, prefix/daftar output per attempt dan rendition HLS.                                                  |
-| `content_operations`                                   | Rekam idempotency/hasil operasi publikasi; bukan tabel body media.                                                               |
-| Pengaturan situs / subtitle                            | Belum mempunyai fitur schema/API/UI lengkap; tetap pekerjaan lanjutan.                                                           |
+| Data / owner                                           | Peran implementasi                                                                                                                                                                |
+| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Native auth                                            | Identitas, account/session/rate-limit dan enforcement satu admin, dimiliki package auth.                                                                                          |
+| `series`, `seasons`, `videos`                          | Hierarchy konten; video kind movie/standalone tanpa season, episode melalui season; metadata/audit/versioning dan pointer asset.                                                  |
+| `genres`, `series_genres`, `video_genres`              | Taxonomy dan inheritance/override metadata genre.                                                                                                                                 |
+| `media_assets`, `upload_sessions`                      | Ownership, provider/bucket/key, generation/facts/provenance, multipart/claim/expiry, source/poster readiness; ACOV-003 adds `processing_mode` (default `worker`).                 |
+| `media_jobs`, `media_job_attempts`, `media_renditions` | Durable queue, lease/retry, output attempt and HLS renditions; ACOV-003 adds `execution_mode` (default `worker`). `request` is poster-only and runtime switching awaits ACOV-005. |
+| `content_operations`                                   | Rekam idempotency/hasil operasi publikasi; bukan tabel body media.                                                                                                                |
+| Pengaturan situs / subtitle                            | Belum mempunyai fitur schema/API/UI lengkap; tetap pekerjaan lanjutan.                                                                                                            |
 
 | Subject        | Status yang ada pada source                                                                                                                                   |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
