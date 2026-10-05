@@ -14,6 +14,7 @@ import {
   setAuthFailureStatusOnServer,
 } from './session.server'
 import { sessionQueryKey, clearAdminDataQueries } from './session-cache'
+import { stopAdminPrivateEffects } from './private-effects'
 
 export const readSession = createIsomorphicFn()
   .server(readSessionOnServer)
@@ -93,6 +94,7 @@ export function useAdminSession() {
     if (!expiresAt) return
     const timer = setTimeout(
       () => {
+        stopAdminPrivateEffects(queryClient)
         updateClock((revision) => revision + 1)
         void queryClient
           .cancelQueries({ queryKey: sessionQueryKey })

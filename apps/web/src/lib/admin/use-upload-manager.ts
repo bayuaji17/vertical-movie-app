@@ -11,6 +11,11 @@ import {
   sessionControlOptions,
 } from './media-queries'
 import { UploadCoordinator, UploadManager } from './upload-manager'
+import { registerPrivateEffect } from '../auth/private-effects'
+import {
+  notifyUploadState,
+  registerUploadManager,
+} from './upload-session-registry'
 
 const coordinators = new WeakMap<QueryClient, UploadCoordinator>()
 function coordinatorFor(cache: QueryClient) {
@@ -63,14 +68,29 @@ export function useUploadManager(
     return new UploadManager({
       client: control,
       coordinator: coordinatorFor(cache),
-      changed,
+      changed: () => {
+        changed()
+        notifyUploadState(cache)
+      },
       committed: () => invalidateMedia(cache, user.id, target, type),
     })
   }, [cache, client, user.id, owner.ownerId, owner.ownerType, type])
   useEffect(() => {
     if (inventory) manager?.observe(inventory)
   }, [inventory, manager])
-  useEffect(() => () => manager?.dispose(), [manager])
+  useEffect(() => {
+    if (!manager) return
+    manager.activate()
+    const unregister = registerUploadManager(cache, manager),
+      release = registerPrivateEffect(cache, () =>
+        manager.pause(undefined, true),
+      )
+    return () => {
+      release()
+      unregister()
+      manager.dispose()
+    }
+  }, [manager, cache])
   useEffect(() => {
     const offline = () => manager?.pause()
     window.addEventListener('offline', offline)

@@ -715,8 +715,8 @@ Owner/session polling hanya nonterminal saat visible/online, setiap 5 detik; upl
 ### Commit task
 
 - Pesan yang direncanakan: `feat(web): adup-013 show media processing state`.
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- SHA: `c9baac89a95aacc16134a44c1b7c1df8b3b6386f`.
+- Hook/checks: docs, lint, check-types dan Commitlint lulus; tidak ada hook dilewati.
 - Ledger: catat SHA aktual setelah commit berhasil pada update dokumentasi berikutnya; jangan menulis SHA self-referential.
 
 ### Blocker atau tindak lanjut
@@ -725,7 +725,7 @@ Tidak ada blocker readiness; auth lifecycle dan acceptance closure mengikuti ADU
 
 ## Task: ADUP-014 — Auth cleanup dan navigasi upload aktif
 
-- Status: Backlog
+- Status: Done
 - Owner: pengembang/agent pelaksana task.
 - Prioritas: 14, mengikuti dependencies.
 - Referensi: ADUP-US04; [plan canonical](../plans/admin-media-upload/implementation-plan.md), [PRD](../product/prd.md).
@@ -751,9 +751,9 @@ Target/symbol: Identity-scoped upload lifecycle/provider, router leave blocker.
 
 ### Acceptance criteria
 
-- [ ] Auth transition tidak terhambat leave dialog dan private data tidak muncul lewat browser back.
-- [ ] After auth stop tidak ada new requests/late callback yang menghidupkan attempt lagi.
-- [ ] Unrelated public cache/theme dan baseline metadata tetap terjaga.
+- [x] Auth transition tidak terhambat leave dialog dan private data tidak muncul lewat browser back.
+- [x] After auth stop tidak ada new requests/late callback yang menghidupkan attempt lagi.
+- [x] Unrelated public cache/theme dan baseline metadata tetap terjaga.
 
 ### Validasi
 
@@ -761,7 +761,7 @@ Existing auth SSR/cache/routes smoke + built browser in-flight hash/PUT logout/r
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan rencana, bukan hasil test yang telah dijalankan. Isi evidence aktual dan batas proof saat task dikerjakan.
+Authenticated upload lifecycle is implemented: synchronous private-effect stop before cache cleanup and sign-out, expiry stop, scoped manager registration/disposal, route stay/pause-and-leave and beforeunload guard. Offline initiation fails locally; networkMode always keeps control mutations abortable instead of paused in Query. Native auth/upload/cache/recheck suite: 8 pass/41 assertions. Built Bun/Nitro Chromium auth cache and routes regressions pass (SSR/hydrate/preload, offline/reconnect/poll, auth outage/idle expiry, native login errors, logout failure, role lock, cross-tab/back denial). Built real PG/MinIO media flow additionally passes API503 with valid recheck/file retention, cross-tab lock without extra presign, offline pause/resume, leave stay/confirm, cancellation and in-flight PUT logout/back. Full native suite 198 pass/807. Root check-types3/3, lint1/1, build2/2 pass. Auth fixture controls are injected; real storage/worker evidence is separate. Already-issued storage URLs retain their expiry; no background upload guarantee. Additional targets required by this task: private-effects, upload-session-registry, use-upload-manager, session expiry, authenticated route and media-queries network policy.
 
 ### Commit task
 
@@ -772,7 +772,7 @@ Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan
 
 ### Blocker atau tindak lanjut
 
-Dependencies ADUP-011, ADUP-012 (scope plan telah disetujui pengguna). Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
+No blocker for ADUP-014. Final acceptance/documentation receipts and remote-delivery boundary follow ADUP-015; R2/Safari/production capacity remain separate.
 
 ## Task: ADUP-015 — Acceptance uploader MinIO dan closure dokumentasi
 

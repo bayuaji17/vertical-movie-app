@@ -89,6 +89,7 @@ export function initiateMediaOptions(
   return mutationOptions({
     mutationKey: [...mediaKeys.owner(identity, owner), 'initiate'],
     retry: false,
+    networkMode: 'always',
     mutationFn: (input: MediaInitiate) => configured(client).initiate(input),
   })
 }
@@ -100,6 +101,7 @@ export function sessionControlOptions(
   return mutationOptions({
     mutationKey: [...mediaKeys.owner(identity, owner), 'control'],
     retry: false,
+    networkMode: 'always',
     mutationFn: (command: { action: 'complete' | 'abort'; id: string }) =>
       configured(client)[command.action](command.id),
   })

@@ -2,6 +2,7 @@ import { PrivateApiError } from '../api/private-result'
 
 export class MediaApiError extends PrivateApiError {}
 const messages: Record<string, string> = {
+  OFFLINE: 'You are offline. Reconnect, then resume the upload.',
   NETWORK_ERROR:
     'The request could not be confirmed. Check upload status before retrying.',
   CONFIG_UNAVAILABLE:

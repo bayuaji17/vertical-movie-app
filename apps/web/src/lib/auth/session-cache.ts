@@ -1,4 +1,5 @@
 import type { QueryClient } from '@tanstack/react-query'
+import { stopAdminPrivateEffects } from './private-effects'
 
 export const sessionQueryKey = ['auth', 'session'] as const
 
@@ -9,6 +10,7 @@ export function isAdminPrivateQueryKey(queryKey: readonly unknown[]): boolean {
 export async function clearAdminPrivateQueries(
   queryClient: QueryClient,
 ): Promise<void> {
+  stopAdminPrivateEffects(queryClient)
   const predicate = ({ queryKey }: { queryKey: readonly unknown[] }) =>
     isAdminPrivateQueryKey(queryKey)
 
@@ -23,6 +25,7 @@ export async function clearAdminPrivateQueries(
 }
 
 export async function clearAdminDataQueries(queryClient: QueryClient) {
+  stopAdminPrivateEffects(queryClient)
   const predicate = ({ queryKey }: { queryKey: readonly unknown[] }) =>
     queryKey[0] === 'admin'
   await queryClient.cancelQueries({ predicate })

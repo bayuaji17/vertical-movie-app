@@ -6,6 +6,7 @@ import { authClient } from '#/lib/auth/client'
 import { clearAdminPrivateQueries } from '#/lib/auth/session-cache'
 import { publishAuthChange } from '#/lib/auth/transitions'
 import { Button } from '#/components/ui/button'
+import { stopAdminPrivateEffects } from '#/lib/auth/private-effects'
 import { toast } from '#/components/ui/toast'
 import { Alert, AlertTitle, AlertDescription } from '#/components/ui/alert'
 
@@ -16,6 +17,7 @@ export function useAdminLogout() {
     [error, setError] = useState<string>()
   async function logout() {
     if (pending) return
+    stopAdminPrivateEffects(cache)
     setPending(true)
     setError(undefined)
     try {

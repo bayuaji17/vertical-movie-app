@@ -12,6 +12,7 @@ import { useAdminSession, setAuthFailureStatus } from '#/lib/auth/session'
 import { AuthDependencyError } from '@repo/auth/client'
 import { sessionQueryKey } from '#/lib/auth/session-cache'
 import { AdminShell } from '#/components/admin/admin-shell'
+import { UploadSessionProvider } from '#/components/admin/upload-session-provider'
 
 export const Route = createFileRoute('/admin/_authenticated')({
   headers: () => ({ 'Cache-Control': 'private, no-store' }),
@@ -53,9 +54,11 @@ function ProtectedAdminLayout() {
   if (adminSessionState.status === 'authenticated')
     return (
       <AdminSessionContext value={adminSessionState.session}>
-        <AdminShell>
-          <Outlet />
-        </AdminShell>
+        <UploadSessionProvider>
+          <AdminShell>
+            <Outlet />
+          </AdminShell>
+        </UploadSessionProvider>
       </AdminSessionContext>
     )
   if (adminSessionState.status === 'forbidden') return <AdminAccessDenied />

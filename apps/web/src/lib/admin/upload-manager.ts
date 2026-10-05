@@ -67,6 +67,7 @@ export class UploadManager {
       hash?: typeof hashFile
       put?: PartPut
       lock?: BrowserLock
+      online?: () => boolean
     },
   ) {}
   snapshot(kind: MediaKind) {
@@ -201,6 +202,18 @@ export class UploadManager {
       !this.inventory?.canUpload
     )
       return
+    if (!(
+      this.options.online?.() ??
+      (typeof navigator === 'undefined' || navigator.onLine !== false)
+    )) {
+      this.update(kind, {
+        phase: 'paused',
+        error: mediaFailure(
+          new MediaApiError(0, 'OFFLINE', 'Reconnect before resuming.'),
+        ),
+      })
+      return
+    }
     const controller = new AbortController(),
       epoch = ++slot.epoch
     slot.controller = controller
