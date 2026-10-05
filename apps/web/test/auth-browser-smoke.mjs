@@ -15,11 +15,49 @@ let held = false
 const releases = new Set()
 let signInCalls = 0
 let authoritativeReads = 0
+const includeContent =
+  ['all', 'content'].includes(process.env.AUTH_BROWSER_PHASE ?? 'cache') &&
+  !!process.env.CONTENT_TEST_DATABASE_URL
+const contentFixture = includeContent
+  ? await (
+      await import('../../api/test/integration/admin-content-fixture')
+    ).createAdminContentFixture(async ({ headers }) => {
+      if (outage) throw new Error('Fixture auth unavailable')
+      return (headers.get('cookie') ?? '').includes('browser-fixture=admin')
+        ? {
+            user: {
+              id: 'browser-admin',
+              name: 'Browser Admin',
+              email: 'browser@example.test',
+              role,
+              banned: false,
+            },
+            session: { expiresAt: new Date(Date.now() + 86400000) },
+          }
+        : null
+    })
+  : undefined
+if (process.env.AUTH_BROWSER_PHASE === 'content')
+  assert.ok(
+    contentFixture,
+    'CONTENT_TEST_DATABASE_URL is required for the dedicated content browser proof',
+  )
 const api = Bun.serve({
   hostname: '127.0.0.1',
   port: 0,
   fetch: async (request) => {
     const url = new URL(request.url)
+    if (url.pathname === '/control/content' && contentFixture) {
+      contentFixture.control(await request.json())
+      return Response.json({ ok: true })
+    }
+    if (url.pathname === '/content-proof' && contentFixture)
+      return Response.json({
+        ids: contentFixture.ids,
+        traces: contentFixture.traces,
+      })
+    if (url.pathname.startsWith('/admin/') && contentFixture)
+      return contentFixture.handle(request)
     if (url.pathname === '/control') {
       const body = await request.json()
       if (body.role) role = body.role
@@ -151,6 +189,7 @@ if (built) {
   ])
   if (code) {
     api.stop(true)
+    await contentFixture?.close()
     throw new Error('Browser fixture build failed: ' + (out + err).slice(-4000))
   }
 }
@@ -180,14 +219,16 @@ try {
   assert.ok(ready)
   const phases =
     process.env.AUTH_BROWSER_PHASE === 'all'
-      ? ['cache', 'routes']
+      ? ['cache', 'routes', ...(contentFixture ? ['content'] : [])]
       : [process.env.AUTH_BROWSER_PHASE ?? 'cache']
   for (const phase of phases) {
     const workerSource = await Bun.file(
       import.meta.dir +
-        (phase === 'routes'
-          ? '/auth-routes-browser-worker.mjs'
-          : '/auth-browser-worker.mjs'),
+        (phase === 'content'
+          ? '/admin-content-browser-worker.mjs'
+          : phase === 'routes'
+            ? '/auth-routes-browser-worker.mjs'
+            : '/auth-browser-worker.mjs'),
     ).text()
     const workerPath = process.env.AUTH_BROWSER_WORKER_PATH
     assert.ok(
@@ -209,6 +250,7 @@ try {
         module,
         executable,
         'http://127.0.0.1:' + api.port,
+        process.env.ADMIN_BROWSER_SCREENSHOT_PREFIX ?? '',
       ],
       { stdout: 'pipe', stderr: 'pipe' },
     )
@@ -227,4 +269,5 @@ try {
   child.kill()
   await child.exited
   api.stop(true)
+  await contentFixture?.close()
 }

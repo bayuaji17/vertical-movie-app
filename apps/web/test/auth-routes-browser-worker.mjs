@@ -144,21 +144,29 @@ try {
   await control({ logoutFailure: true })
   const failedLogout = await withLoadingToast(
     '/api/auth/sign-out',
-    'Memproses logout...',
+    'Logging out...',
     async () => {
-      await page.getByRole('button', { name: 'Keluar', exact: true }).click()
+      if (
+        !(await page
+          .getByRole('button', { name: 'Log out', exact: true })
+          .isVisible())
+      )
+        await page.getByRole('button', { name: 'Open navigation' }).click()
+      await page.getByRole('button', { name: 'Log out', exact: true }).click()
       assert.ok(
-        await page.getByRole('button', { name: 'Keluar...' }).isDisabled(),
+        await page.getByRole('button', { name: 'Logging out...' }).isDisabled(),
       )
     },
   )
-  await expectToastResult(failedLogout, 'Logout gagal')
+  await expectToastResult(failedLogout, 'Log out failed')
   await page
-    .locator('main')
     .getByText(
-      'Layanan autentikasi tidak dapat dihubungi. Sesi belum dapat dipastikan berakhir.',
+      'Your session could not be confirmed as ended. Try logging out again.',
+      { exact: true },
     )
+    .last()
     .waitFor()
+  await page.getByRole('button', { name: 'Close navigation' }).click()
   assert.equal(
     await page.getByRole('heading', { name: 'Dashboard', exact: true }).count(),
     1,
@@ -170,21 +178,21 @@ try {
     }),
   )
   await page
-    .getByRole('heading', { name: 'Sesi admin belum dapat diperiksa' })
+    .getByRole('heading', { name: 'Admin session unavailable' })
     .waitFor()
   const retry = async (title) => {
     const element = await withLoadingToast(
       '/api/auth/get-session**',
-      'Memeriksa sesi...',
+      'Checking session...',
       async () => {
-        await page.getByRole('button', { name: 'Coba lagi' }).click()
+        await page.getByRole('button', { name: 'Try again' }).click()
       },
     )
     await expectToastResult(element, title)
   }
-  await retry('Pemeriksaan sesi gagal')
+  await retry('Session check failed')
   await control({ outage: false })
-  await retry('Pemeriksaan sesi selesai')
+  await retry('Session check complete')
   await page.getByRole('heading', { name: 'Dashboard', exact: true }).waitFor()
   await control({ logoutFailure: false, role: 'user' })
   await page.evaluate(() =>
@@ -192,7 +200,7 @@ try {
       queryKey: ['auth', 'session'],
     }),
   )
-  await page.getByRole('heading', { name: 'Akses admin ditolak' }).waitFor()
+  await page.getByRole('heading', { name: 'Admin access denied' }).waitFor()
   assert.equal(
     await page.getByRole('heading', { name: 'Dashboard', exact: true }).count(),
     0,
@@ -231,8 +239,8 @@ try {
       const record = () => {
         for (const heading of document.querySelectorAll('main h1')) {
           if (
-            heading.textContent === 'Sesi admin belum dapat diperiksa' ||
-            heading.textContent === 'Akses admin ditolak'
+            heading.textContent === 'Admin session unavailable' ||
+            heading.textContent === 'Admin access denied'
           )
             window.__logoutErrorScreens.push(heading.textContent)
         }
@@ -247,12 +255,18 @@ try {
   }
   const successfulLogout = await withLoadingToast(
     '/api/auth/sign-out',
-    'Memproses logout...',
+    'Logging out...',
     async () => {
-      await page.getByRole('button', { name: 'Keluar', exact: true }).click()
+      if (
+        !(await page
+          .getByRole('button', { name: 'Log out', exact: true })
+          .isVisible())
+      )
+        await page.getByRole('button', { name: 'Open navigation' }).click()
+      await page.getByRole('button', { name: 'Log out', exact: true }).click()
     },
   )
-  await expectToastResult(successfulLogout, 'Logout berhasil')
+  await expectToastResult(successfulLogout, 'Logged out')
   await page.getByRole('heading', { name: 'Masuk ke admin' }).waitFor()
   await control({ held: false })
   await tab.getByRole('heading', { name: 'Masuk ke admin' }).waitFor()

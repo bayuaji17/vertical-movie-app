@@ -2,11 +2,13 @@
 
 > Status: **Baseline implementasi repository; batas UI dan verifikasi production dicatat terpisah** · Review 5 Oktober 2026 · Snapshot `1f45728d5a0aeeecae48149ae538997c04f122f2`. Pilihan auth/metadata/media disetujui pengguna pada 1–4 Oktober 2026. Review ini menyelaraskan overview dengan kode tanpa keputusan produk baru, perubahan runtime atau klaim kesiapan production.
 
+Update implementasi 5 Oktober 2026, disetujui pengguna: dashboard metadata tahap pertama tersedia pada `feat/admin-content-dashboard`; scope/evidence pada [backlog admin content](../tasks/admin-content.md). Snapshot review awal di atas dipertahankan sebagai sejarah; tidak ada rollout production.
+
 ## Keadaan repo saat ini
 
-Workspace Bun mempunyai dua aplikasi dan satu package auth bersama. `apps/api` menyediakan Elysia HTTP API, PostgreSQL/Drizzle, storage/upload, publikasi/katalog/playback dan kode worker. `apps/web` menyediakan TanStack Start, gateway same-origin, login/dashboard sesi admin dan player watch/preview minimal. `packages/auth` memiliki Better Auth server/client/types; credential server tidak masuk entry client.
+Workspace Bun mempunyai dua aplikasi dan satu package auth bersama. `apps/api` menyediakan Elysia HTTP API, PostgreSQL/Drizzle, storage/upload, publikasi/katalog/playback dan kode worker. `apps/web` menyediakan TanStack Start, gateway same-origin, login/dashboard metadata admin (Eden/TanStack Query) dan player watch/preview minimal. `packages/auth` memiliki Better Auth server/client/types; credential server tidak masuk entry client.
 
-Media backend sudah diimplementasikan: multipart/freeze/enqueue, worker FFmpeg HLS/WebP, claim/lease/retry/recovery, readiness/publish/archive, katalog API dan signed delivery. Homepage masih starter MP4 demo. Dashboard CRUD/upload/publish/recovery, katalog web lengkap, konfigurasi situs dan subtitle belum tersedia lengkap. Spesifikasi/mockup desain tidak dianggap layar yang sudah berjalan.
+Media backend sudah diimplementasikan: multipart/freeze/enqueue, worker FFmpeg HLS/WebP, claim/lease/retry/recovery, readiness/publish/archive, katalog API dan signed delivery. Homepage masih starter MP4 demo. Dashboard metadata Film/Standalone/Series tersedia: list/search/pagination, create/detail/edit, theme, conflict dan dirty-navigation. Dashboard upload/publish/recovery, editor season/episode, katalog web lengkap, konfigurasi situs dan subtitle masih lanjutan. Spesifikasi/mockup desain tidak dianggap layar yang sudah berjalan.
 
 Ketentuan produk dan angka policy media dimiliki [PRD](../product/prd.md), aturan lintas fitur oleh [Global Rules](../product/global-rules.md). Overview ini memiliki batas komponen dan dataflow. Instruksi proses/command dimiliki [AGENTS.md](../../AGENTS.md), [API development](../guides/api-development.md), [environment](../guides/environment.md) dan runbook, sehingga tidak diduplikasi sebagai workflow baru.
 
@@ -17,7 +19,7 @@ Ketentuan produk dan angka policy media dimiliki [PRD](../product/prd.md), atura
 | Runtime/workspace | Bun, Turborepo                                  | Runtime API/web/worker dan orchestration task workspace; versi/dependensi mengikuti manifests/lockfile.                                                      |
 | Backend           | Elysia                                          | Factory bertipe tanpa listen pada `app.ts`; bootstrap dependency/listen di `index.ts`.                                                                       |
 | API client        | Eden Treaty                                     | Type-only `api/types`, `parseDate: false`; browser memakai public origin `/api`, auth memakai SDK Better Auth tersendiri.                                    |
-| Web               | TanStack Start, React, Bun/Nitro                | Gateway, auth dan watch/preview tersedia; homepage/admin konten lengkap masih lanjutan.                                                                      |
+| Web               | TanStack Start, React, Bun/Nitro                | Gateway, auth, dashboard metadata responsif/light-dark dan watch/preview tersedia; upload/publication UI serta katalog masih lanjutan.                       |
 | Database          | PostgreSQL, Drizzle, Bun SQL                    | Auth, metadata, aset, session upload, durable job/attempt/rendition dan operation tersedia. API/worker memakai pool per proses pada DB yang sama.            |
 | Auth              | Better Auth pada `@repo/auth`                   | Email/password, single-admin provisioning/recovery, sesi PostgreSQL dan private guard tersedia; signup publik nonaktif.                                      |
 | Object storage    | MinIO development / Cloudflare R2 production    | Satu bucket privat per env, selector server `STORAGE_PROVIDER`; profil provider/bucket/key persisten. R2 staging belum dibuktikan.                           |
@@ -96,6 +98,7 @@ Path berikut adalah path upstream Elysia. Browser bisnis menambahkan `/api` mela
 | `GET /series`, `/series/:slug`                                                                                 | Series publik dengan child playable                               | Publik                                        |
 | `GET /videos/:slug/playback`                                                                                   | DTO playback/poster dan expiry                                    | Publik setelah pemeriksaan visibility         |
 | `GET /playback/videos/:slug/master.m3u8`, `/playback/videos/:slug/variants/:index`                             | Playlist terverifikasi/rewrite output                             | Publik setelah pemeriksaan visibility         |
+| `GET /admin/content`                                                                                           | Pagination metadata Film/Standalone/Series; total/page/pageSize   | Admin                                         |
 | `GET/POST /admin/videos`, `GET/PATCH /admin/videos/:id`                                                        | Draft/read/edit metadata                                          | Admin                                         |
 | `GET/POST /admin/series`, `GET/PATCH /admin/series/:id`                                                        | Metadata series                                                   | Admin                                         |
 | `GET/POST /admin/series/:id/seasons`, `GET/PATCH /admin/seasons/:id`                                           | Metadata season                                                   | Admin                                         |
@@ -122,7 +125,7 @@ Retensi source non-archived dimulai tujuh hari sejak HLS verified-ready tanpa jo
 
 ## Pekerjaan lanjutan dan gerbang verifikasi
 
-- **UI produk:** dashboard CRUD/upload/publish/progres/recovery, katalog/navigasi publik lengkap dan konfigurasi situs. Field pengaturan, UX katalog dan kebijakan konten masih pertanyaan PRD yang dilewati; tidak diputuskan oleh review arsitektur.
+- **UI produk:** dashboard upload/publish/progres/recovery, editor season/episode, katalog/navigasi publik lengkap dan konfigurasi situs. Field pengaturan, UX katalog dan kebijakan konten masih pertanyaan PRD yang dilewati; tidak diputuskan oleh review arsitektur.
 - **Fitur opsional/lanjutan:** subtitle, restore/republish, revisi source published dan cascade parent yang belum dirancang/diimplementasikan. Tidak mengklaim caption delivery karena kontrol caption player tersedia.
 - **Provider/platform:** R2 staging/end-to-end serta Safari/native HLS/perangkat sasaran. Proof MinIO/Chromium historis tidak menggantikannya.
 - **Resource/recovery:** benchmark target 4 core/RAM 4 GB, kualitas visual, supervisor/stress/fault dan full restore yang belum lengkap. Concurrency/config defaults bukan bukti kapasitas.
@@ -145,3 +148,9 @@ Overview sebelumnya merupakan draft integrasi pada 3–4 Oktober 2026. Metadata 
 - [Bun S3 API](https://bun.com/docs/runtime/s3), [Drizzle dengan Bun SQL](https://orm.drizzle.team/docs/connect-bun-sql), dan [kompatibilitas S3 Cloudflare R2](https://developers.cloudflare.com/r2/api/s3/api/)
 - [Cloudflare R2 presigned URLs](https://developers.cloudflare.com/r2/api/s3/presigned-urls/)
 - [FFmpeg CLI](https://ffmpeg.org/ffmpeg.html), [Bun.spawn](https://bun.com/docs/runtime/child-process), [PostgreSQL row locking](https://www.postgresql.org/docs/current/sql-select.html), dan [PostgreSQL NOTIFY](https://www.postgresql.org/docs/current/sql-notify.html)
+
+## Dashboard metadata — update 5 Oktober 2026
+
+Web memakai Eden dengan kontrak API type-only dan TanStack Query untuk metadata, serta satu TanStack Form/mapper bagi create/edit. Private query keys memasukkan identity/type/id atau seluruh filters/page/pageSize; retry baca manual, stale 15 detik dan GC 5 menit. Mutation tidak diulang otomatis, memverifikasi identifier/versi respons sebelum confirmed success dan menginvalidasi list/detail terkait. Business 403/5xx memverifikasi sesi authoritative; snapshot valid dipertahankan selama recheck, invalid/error tetap mengunci layout dan membersihkan private cache.
+
+Baseline edit dimiliki form sampai explicit reload/success; background refetch tidak mengganti rowVersion atau input. PATCH hanya field berubah + expectedVersion, dengan null/[]/false untuk clearing. Genre selector memakai cursor existing dan mempertahankan IDs di memory. Query/mutation/form privat tidak dipersist; logout/expiry/revocation menghapus query dan mutation cache. Theme preference non-secret terpisah dari auth/data, bootstrap sebelum CSS dan System/media listener tidak remount form. Rincian lima rute, kontrak dan proof ada pada [runbook metadata aktif](../operations/video-metadata.md#dashboard-metadata-aktif--5-oktober-2026).

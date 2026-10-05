@@ -1,7 +1,11 @@
 import type { QueryClient } from '@tanstack/react-query'
+import type { SessionSnapshot } from '@repo/auth/types'
 import { isAdminSession } from '@repo/auth/client'
-import { adminSessionQueryOptions } from './session'
-import { clearAdminPrivateQueries } from './session-cache'
+import { adminSessionQueryOptions, readSession } from './session'
+import {
+  clearAdminPrivateQueries,
+  clearAdminDataQueries,
+} from './session-cache'
 import { AdminAccessDeniedError } from './guard'
 
 export async function refreshAdminSession(queryClient: QueryClient) {
@@ -25,7 +29,29 @@ export async function handlePrivateApiFailure(
     return
   }
   if (status === 403 || status >= 500) {
-    await refreshAdminSession(queryClient).catch(() => undefined)
+    await recheckAdminSession(queryClient).catch(() => undefined)
+  }
+}
+// A metadata outage must not unmount a dirty form while authorization is valid.
+// Session query errors still lock the layout, and invalid sessions remove data.
+export async function recheckAdminSession(
+  queryClient: QueryClient,
+  reader: (options: {
+    signal?: AbortSignal
+    authoritative?: boolean
+  }) => Promise<SessionSnapshot | null> = readSession,
+) {
+  try {
+    const snapshot = await queryClient.query({
+      ...adminSessionQueryOptions({ authoritative: true }),
+      staleTime: 0,
+      queryFn: ({ signal }) => reader({ signal, authoritative: true }),
+    })
+    if (!isAdminSession(snapshot)) await clearAdminDataQueries(queryClient)
+    return snapshot
+  } catch (error) {
+    await clearAdminDataQueries(queryClient)
+    throw error
   }
 }
 export function publishAuthChange() {

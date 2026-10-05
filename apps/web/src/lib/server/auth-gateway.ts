@@ -15,7 +15,7 @@ type RequestBodyRead =
 
 const targetPaths: Record<GatewayTarget, (pathname: string) => boolean> = {
   business: (pathname) =>
-    /^\/api\/(?:admin\/(?:videos|series|seasons|genres|media)(?:\/|$)|videos(?:\/|$)|series(?:\/|$)|playback\/videos\/)/.test(
+    /^\/api\/(?:admin\/(?:videos|series|seasons|genres|media|content)(?:\/|$)|videos(?:\/|$)|series(?:\/|$)|playback\/videos\/)/.test(
       pathname,
     ) && !/%|\\/.test(pathname),
   auth: (pathname) =>

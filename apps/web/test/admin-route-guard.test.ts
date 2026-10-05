@@ -133,9 +133,9 @@ describe('admin beforeLoad and transitions', () => {
         (await fetcher('http://api.internal.test/admin/business')).status,
       ).toBe(status)
       expect(client.getQueryData(['admin', 'private'])).toBeUndefined()
-      expect(client.getQueryData(sessionQueryKey)).toBeNull()
-      if (status !== 401)
-        expect(client.getQueryState(sessionQueryKey)?.status).toBe('error')
+      if (status === 401)
+        expect(client.getQueryData(sessionQueryKey)).toBeNull()
+      else expect(client.getQueryState(sessionQueryKey)?.status).toBe('error')
     }
     client.clear()
   })

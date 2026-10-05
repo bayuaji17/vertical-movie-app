@@ -17,7 +17,11 @@ import { Route as ApiSplatRouteImport } from './routes/api/$'
 import { Route as WatchSlugRouteImport } from './routes/watch.$slug'
 import { Route as AdminAuthenticatedIndexRouteImport } from './routes/admin._authenticated.index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as AdminAuthenticatedContentIndexRouteImport } from './routes/admin._authenticated.content.index'
+import { Route as AdminAuthenticatedContentNewRouteImport } from './routes/admin._authenticated.content.new'
 import { Route as AdminAuthenticatedVideosIdPreviewRouteImport } from './routes/admin._authenticated.videos.$id.preview'
+import { Route as AdminAuthenticatedContentTypeIdIndexRouteImport } from './routes/admin._authenticated.content.$type.$id.index'
+import { Route as AdminAuthenticatedContentTypeIdEditRouteImport } from './routes/admin._authenticated.content.$type.$id.edit'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -58,10 +62,34 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAuthenticatedContentIndexRoute =
+  AdminAuthenticatedContentIndexRouteImport.update({
+    id: '/content/',
+    path: '/content/',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
+const AdminAuthenticatedContentNewRoute =
+  AdminAuthenticatedContentNewRouteImport.update({
+    id: '/content/new',
+    path: '/content/new',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
 const AdminAuthenticatedVideosIdPreviewRoute =
   AdminAuthenticatedVideosIdPreviewRouteImport.update({
     id: '/videos/$id/preview',
     path: '/videos/$id/preview',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
+const AdminAuthenticatedContentTypeIdIndexRoute =
+  AdminAuthenticatedContentTypeIdIndexRouteImport.update({
+    id: '/content/$type/$id/',
+    path: '/content/$type/$id/',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
+const AdminAuthenticatedContentTypeIdEditRoute =
+  AdminAuthenticatedContentTypeIdEditRouteImport.update({
+    id: '/content/$type/$id/edit',
+    path: '/content/$type/$id/edit',
     getParentRoute: () => AdminAuthenticatedRoute,
   } as any)
 
@@ -73,7 +101,11 @@ export interface FileRoutesByFullPath {
   '/watch/$slug': typeof WatchSlugRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/': typeof AdminAuthenticatedIndexRoute
+  '/admin/content/new': typeof AdminAuthenticatedContentNewRoute
+  '/admin/content/': typeof AdminAuthenticatedContentIndexRoute
   '/admin/videos/$id/preview': typeof AdminAuthenticatedVideosIdPreviewRoute
+  '/admin/content/$type/$id/edit': typeof AdminAuthenticatedContentTypeIdEditRoute
+  '/admin/content/$type/$id/': typeof AdminAuthenticatedContentTypeIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -82,7 +114,11 @@ export interface FileRoutesByTo {
   '/api/$': typeof ApiSplatRoute
   '/watch/$slug': typeof WatchSlugRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/admin/content/new': typeof AdminAuthenticatedContentNewRoute
+  '/admin/content': typeof AdminAuthenticatedContentIndexRoute
   '/admin/videos/$id/preview': typeof AdminAuthenticatedVideosIdPreviewRoute
+  '/admin/content/$type/$id/edit': typeof AdminAuthenticatedContentTypeIdEditRoute
+  '/admin/content/$type/$id': typeof AdminAuthenticatedContentTypeIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -94,7 +130,11 @@ export interface FileRoutesById {
   '/watch/$slug': typeof WatchSlugRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/_authenticated/': typeof AdminAuthenticatedIndexRoute
+  '/admin/_authenticated/content/new': typeof AdminAuthenticatedContentNewRoute
+  '/admin/_authenticated/content/': typeof AdminAuthenticatedContentIndexRoute
   '/admin/_authenticated/videos/$id/preview': typeof AdminAuthenticatedVideosIdPreviewRoute
+  '/admin/_authenticated/content/$type/$id/edit': typeof AdminAuthenticatedContentTypeIdEditRoute
+  '/admin/_authenticated/content/$type/$id/': typeof AdminAuthenticatedContentTypeIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -106,7 +146,11 @@ export interface FileRouteTypes {
     | '/watch/$slug'
     | '/api/auth/$'
     | '/admin/'
+    | '/admin/content/new'
+    | '/admin/content/'
     | '/admin/videos/$id/preview'
+    | '/admin/content/$type/$id/edit'
+    | '/admin/content/$type/$id/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -115,7 +159,11 @@ export interface FileRouteTypes {
     | '/api/$'
     | '/watch/$slug'
     | '/api/auth/$'
+    | '/admin/content/new'
+    | '/admin/content'
     | '/admin/videos/$id/preview'
+    | '/admin/content/$type/$id/edit'
+    | '/admin/content/$type/$id'
   id:
     | '__root__'
     | '/'
@@ -126,7 +174,11 @@ export interface FileRouteTypes {
     | '/watch/$slug'
     | '/api/auth/$'
     | '/admin/_authenticated/'
+    | '/admin/_authenticated/content/new'
+    | '/admin/_authenticated/content/'
     | '/admin/_authenticated/videos/$id/preview'
+    | '/admin/_authenticated/content/$type/$id/edit'
+    | '/admin/_authenticated/content/$type/$id/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -195,6 +247,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/_authenticated/content/': {
+      id: '/admin/_authenticated/content/'
+      path: '/content'
+      fullPath: '/admin/content/'
+      preLoaderRoute: typeof AdminAuthenticatedContentIndexRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
+    '/admin/_authenticated/content/new': {
+      id: '/admin/_authenticated/content/new'
+      path: '/content/new'
+      fullPath: '/admin/content/new'
+      preLoaderRoute: typeof AdminAuthenticatedContentNewRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
     '/admin/_authenticated/videos/$id/preview': {
       id: '/admin/_authenticated/videos/$id/preview'
       path: '/videos/$id/preview'
@@ -202,18 +268,42 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuthenticatedVideosIdPreviewRouteImport
       parentRoute: typeof AdminAuthenticatedRoute
     }
+    '/admin/_authenticated/content/$type/$id/': {
+      id: '/admin/_authenticated/content/$type/$id/'
+      path: '/content/$type/$id'
+      fullPath: '/admin/content/$type/$id/'
+      preLoaderRoute: typeof AdminAuthenticatedContentTypeIdIndexRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
+    '/admin/_authenticated/content/$type/$id/edit': {
+      id: '/admin/_authenticated/content/$type/$id/edit'
+      path: '/content/$type/$id/edit'
+      fullPath: '/admin/content/$type/$id/edit'
+      preLoaderRoute: typeof AdminAuthenticatedContentTypeIdEditRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
   }
 }
 
 interface AdminAuthenticatedRouteChildren {
   AdminAuthenticatedIndexRoute: typeof AdminAuthenticatedIndexRoute
+  AdminAuthenticatedContentNewRoute: typeof AdminAuthenticatedContentNewRoute
+  AdminAuthenticatedContentIndexRoute: typeof AdminAuthenticatedContentIndexRoute
   AdminAuthenticatedVideosIdPreviewRoute: typeof AdminAuthenticatedVideosIdPreviewRoute
+  AdminAuthenticatedContentTypeIdEditRoute: typeof AdminAuthenticatedContentTypeIdEditRoute
+  AdminAuthenticatedContentTypeIdIndexRoute: typeof AdminAuthenticatedContentTypeIdIndexRoute
 }
 
 const AdminAuthenticatedRouteChildren: AdminAuthenticatedRouteChildren = {
   AdminAuthenticatedIndexRoute: AdminAuthenticatedIndexRoute,
+  AdminAuthenticatedContentNewRoute: AdminAuthenticatedContentNewRoute,
+  AdminAuthenticatedContentIndexRoute: AdminAuthenticatedContentIndexRoute,
   AdminAuthenticatedVideosIdPreviewRoute:
     AdminAuthenticatedVideosIdPreviewRoute,
+  AdminAuthenticatedContentTypeIdEditRoute:
+    AdminAuthenticatedContentTypeIdEditRoute,
+  AdminAuthenticatedContentTypeIdIndexRoute:
+    AdminAuthenticatedContentTypeIdIndexRoute,
 }
 
 const AdminAuthenticatedRouteWithChildren =

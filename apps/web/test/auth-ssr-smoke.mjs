@@ -101,10 +101,10 @@ try {
   assert.ok([302, 307].includes(anonymous.status))
   assert.match(anonymous.headers.get('location'), /admin\/login/)
   assert.equal(user.status, 403)
-  assert.ok(!(await user.text()).includes('Sesi admin aktif untuk'))
+  assert.ok(!(await user.text()).includes('Administrator account'))
   const outage = await load('fixture=outage')
   assert.equal(outage.status, 503)
-  assert.ok(!(await outage.text()).includes('Sesi admin aktif untuk'))
+  assert.ok(!(await outage.text()).includes('Administrator account'))
   assert.ok(!outage.headers.get('location'))
   const loginURL = `http://127.0.0.1:${port}/admin/login?redirect=%2Fadmin%3Ftab%3Dcatalog%23videos`
   const activeLogin = await fetch(loginURL, {
@@ -126,7 +126,7 @@ try {
   const start = Date.now()
   const stalled = await load('fixture=stall')
   assert.ok(Date.now() - start < 12_000)
-  assert.ok(!(await stalled.text()).includes('Sesi admin aktif untuk'))
+  assert.ok(!(await stalled.text()).includes('Administrator account'))
   assert.ok(
     seen.includes('fixture=admin') &&
       seen.includes('') &&

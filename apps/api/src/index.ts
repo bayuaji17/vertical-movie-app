@@ -9,6 +9,8 @@ import { MediaService } from "./modules/media/service";
 import { loadApiEnv } from "./config/env";
 import { createStorageClient } from "./storage/s3";
 import { createApp } from "./app";
+import { ContentPageService } from "./modules/content/service";
+import { createContentPageRepository } from "./modules/content/repository";
 import { createDatabase } from "./db/client";
 import { SeriesService } from "./modules/series/service";
 import { createSeriesRepository } from "./modules/series/repository";
@@ -35,6 +37,9 @@ const auth = createAdminAuthServer({
 });
 const authOpenApiSchema = await generateAuthOpenAPISchema(auth);
 const app = createApp({
+  contentPageService: new ContentPageService(
+    createContentPageRepository(database.db),
+  ),
   storage,
   catalogService,
   publicationService: new PublicationService(
