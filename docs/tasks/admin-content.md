@@ -389,7 +389,7 @@ Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
 ## Task: ADMC-006 — Reusable form metadata dan genre
 
-- Status: Review
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai dependency
 - Referensi: ADMC-US-03; PRD-03/08/09; GR-01/05/08; plan STEP-006.
@@ -433,6 +433,8 @@ Shared TanStack Form/Field metadata UI and paginated Eden/Query genre picker. Mi
 
 Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
+- Receipt commit task: `8720ba4283b0603aebb49fce9a3633a4db71e727`; hooks docs/lint/types/Commitlint lulus tanpa bypass.
+
 ## Task: ADMC-007 — Buat draft movie dan standalone
 
 - Status: Backlog
@@ -474,7 +476,7 @@ Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready ha
 
 ## Task: ADMC-008 — Detail konten dan readonly state
 
-- Status: Backlog
+- Status: Review
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai dependency
 - Referensi: ADMC-US-04; PRD-03/08/09; GR-01/05/08; plan STEP-008.
@@ -488,9 +490,9 @@ Route detail index leaf dan content-detail; statuses/timestamps/genre serta edit
 
 ### Acceptance criteria
 
-- [ ] Direct link/refresh bekerja; invalid/missing ID punya state jelas tanpa membocorkan private data.
-- [ ] Edit hanya draft Film/Standalone/Series; published/archived/episode readonly dan Series tidak membawa rights/source video.
-- [ ] Source availability tidak dilabeli sebagai readiness HLS; preview sibling routing tidak terganggu.
+- [x] Direct link/refresh bekerja; invalid/missing ID punya state jelas tanpa membocorkan private data.
+- [x] Edit hanya draft Film/Standalone/Series; published/archived/episode readonly dan Series tidak membawa rights/source video.
+- [x] Source availability tidak dilabeli sebagai readiness HLS; preview sibling routing tidak terganggu.
 
 ### Validasi
 
@@ -510,6 +512,12 @@ Belum diimplementasikan atau diuji. Hasil runtime tidak disimpulkan dari plan.
 ### Blocker atau tindak lanjut
 
 Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready hanya karena source API tersedia.
+
+### Evidence implementasi — 5 Oktober 2026
+
+Generated detail leaf route and reusable guarded ContentResource, shared status badge and metadata view. Invalid type/UUID avoids metadata request; missing/failed reads have safe retry/back states. Draft edit capability uses lifecycle/kind, readonly episode/published/archived, Series completion/seasons separate from video rights/source. Source availability explicitly differs from HLS readiness; preview sibling links preserved. Existing mapper/client tests cover readonly/mismatch/404; root types (3), lint (1), build (2) pass. Browser direct-refresh/readability/preview closure ADMC-011.
+
+Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
 ## Task: ADMC-009 — Edit draft dengan version conflict
 

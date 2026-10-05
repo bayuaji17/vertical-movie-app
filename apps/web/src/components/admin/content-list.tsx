@@ -1,3 +1,4 @@
+import { ContentStatus } from './content-status'
 import { ContentFiltersPanel } from './content-filters'
 import { ContentPagination } from './content-pagination'
 import { Link } from '@tanstack/react-router'
@@ -35,16 +36,6 @@ import {
   TableCaption,
 } from '#/components/ui/table'
 
-function ContentStatus({ item }: { item: ContentItem }) {
-  return (
-    <Badge variant="outline">
-      {item.archivedAt
-        ? 'Archived'
-        : item.publicationStatus[0].toUpperCase() +
-          item.publicationStatus.slice(1)}
-    </Badge>
-  )
-}
 function ContentActions({ item }: { item: ContentItem }) {
   const path = '/admin/content/' + item.type + '/' + item.id
   return (

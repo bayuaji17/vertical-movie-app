@@ -19,6 +19,7 @@ import { Route as AdminAuthenticatedIndexRouteImport } from './routes/admin._aut
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AdminAuthenticatedContentIndexRouteImport } from './routes/admin._authenticated.content.index'
 import { Route as AdminAuthenticatedVideosIdPreviewRouteImport } from './routes/admin._authenticated.videos.$id.preview'
+import { Route as AdminAuthenticatedContentTypeIdIndexRouteImport } from './routes/admin._authenticated.content.$type.$id.index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -71,6 +72,12 @@ const AdminAuthenticatedVideosIdPreviewRoute =
     path: '/videos/$id/preview',
     getParentRoute: () => AdminAuthenticatedRoute,
   } as any)
+const AdminAuthenticatedContentTypeIdIndexRoute =
+  AdminAuthenticatedContentTypeIdIndexRouteImport.update({
+    id: '/content/$type/$id/',
+    path: '/content/$type/$id/',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminAuthenticatedIndexRoute
   '/admin/content/': typeof AdminAuthenticatedContentIndexRoute
   '/admin/videos/$id/preview': typeof AdminAuthenticatedVideosIdPreviewRoute
+  '/admin/content/$type/$id/': typeof AdminAuthenticatedContentTypeIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -92,6 +100,7 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/content': typeof AdminAuthenticatedContentIndexRoute
   '/admin/videos/$id/preview': typeof AdminAuthenticatedVideosIdPreviewRoute
+  '/admin/content/$type/$id': typeof AdminAuthenticatedContentTypeIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -105,6 +114,7 @@ export interface FileRoutesById {
   '/admin/_authenticated/': typeof AdminAuthenticatedIndexRoute
   '/admin/_authenticated/content/': typeof AdminAuthenticatedContentIndexRoute
   '/admin/_authenticated/videos/$id/preview': typeof AdminAuthenticatedVideosIdPreviewRoute
+  '/admin/_authenticated/content/$type/$id/': typeof AdminAuthenticatedContentTypeIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/content/'
     | '/admin/videos/$id/preview'
+    | '/admin/content/$type/$id/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/admin/content'
     | '/admin/videos/$id/preview'
+    | '/admin/content/$type/$id'
   id:
     | '__root__'
     | '/'
@@ -140,6 +152,7 @@ export interface FileRouteTypes {
     | '/admin/_authenticated/'
     | '/admin/_authenticated/content/'
     | '/admin/_authenticated/videos/$id/preview'
+    | '/admin/_authenticated/content/$type/$id/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -222,6 +235,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuthenticatedVideosIdPreviewRouteImport
       parentRoute: typeof AdminAuthenticatedRoute
     }
+    '/admin/_authenticated/content/$type/$id/': {
+      id: '/admin/_authenticated/content/$type/$id/'
+      path: '/content/$type/$id'
+      fullPath: '/admin/content/$type/$id/'
+      preLoaderRoute: typeof AdminAuthenticatedContentTypeIdIndexRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
   }
 }
 
@@ -229,6 +249,7 @@ interface AdminAuthenticatedRouteChildren {
   AdminAuthenticatedIndexRoute: typeof AdminAuthenticatedIndexRoute
   AdminAuthenticatedContentIndexRoute: typeof AdminAuthenticatedContentIndexRoute
   AdminAuthenticatedVideosIdPreviewRoute: typeof AdminAuthenticatedVideosIdPreviewRoute
+  AdminAuthenticatedContentTypeIdIndexRoute: typeof AdminAuthenticatedContentTypeIdIndexRoute
 }
 
 const AdminAuthenticatedRouteChildren: AdminAuthenticatedRouteChildren = {
@@ -236,6 +257,8 @@ const AdminAuthenticatedRouteChildren: AdminAuthenticatedRouteChildren = {
   AdminAuthenticatedContentIndexRoute: AdminAuthenticatedContentIndexRoute,
   AdminAuthenticatedVideosIdPreviewRoute:
     AdminAuthenticatedVideosIdPreviewRoute,
+  AdminAuthenticatedContentTypeIdIndexRoute:
+    AdminAuthenticatedContentTypeIdIndexRoute,
 }
 
 const AdminAuthenticatedRouteWithChildren =
