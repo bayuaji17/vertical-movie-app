@@ -191,7 +191,22 @@ test("schema enforces ownership, identities, geometry and cross-owner pointers",
     (
       await db.client`SELECT count(*)::int AS n FROM drizzle.__drizzle_migrations`
     )[0].n,
-  ).toBe(9);
+  ).toBe(
+    (
+      await Bun.file(
+        new URL("../../drizzle/meta/_journal.json", import.meta.url),
+      ).json()
+    ).entries.length,
+  );
+  for (const digest of ["A".repeat(64), "a".repeat(63), "not-a-digest"]) {
+    await expect(
+      Promise.resolve(
+        db.client`UPDATE upload_sessions SET expected_sha256=${digest} WHERE id=${session.id}`,
+      ),
+    ).rejects.toThrow();
+  }
+  await db.client`UPDATE upload_sessions SET expected_sha256=${"a".repeat(64)} WHERE id=${session.id}`;
+  await db.client`UPDATE upload_sessions SET expected_sha256=NULL WHERE id=${session.id}`;
 }, 30000);
 test("same request replays one session, conflicting payload and parallel owner upload reject", async () => {
   const request = input(await movie()),

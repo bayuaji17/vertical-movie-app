@@ -186,8 +186,8 @@ API inventory ditambahkan, safe DTO whitelist, current pointer/active/last dipis
 ### Commit task
 
 - Pesan yang direncanakan: `feat(api): adup-003 add owner media inventory`.
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- SHA: `6442e19c54a80831fa6afab856d5768dc25dba3d`.
+- Hook/checks: docs, lint, check-types dan Commitlint lulus; tidak ada hook dilewati.
 - Ledger: catat SHA aktual setelah commit berhasil pada update dokumentasi berikutnya; jangan menulis SHA self-referential.
 
 ### Blocker atau tindak lanjut
@@ -196,7 +196,7 @@ Tidak ada blocker. Discovery aman tersedia; identity/capability resume diikat pa
 
 ## Task: ADUP-004 — Schema additive expected file SHA-256
 
-- Status: Backlog
+- Status: Done
 - Owner: pengembang/agent pelaksana task.
 - Prioritas: 4, mengikuti dependencies.
 - Referensi: ADUP-US02; [plan canonical](../plans/admin-media-upload/implementation-plan.md), [PRD](../product/prd.md).
@@ -222,9 +222,9 @@ Target/symbol: uploadSessions.expectedSha256 nullable + check constraint; genera
 
 ### Acceptance criteria
 
-- [ ] Legacy sessions/assets/auth data tetap utuh dan existing API tetap berjalan.
-- [ ] Digest invalid ditolak, null legacy valid; migration rerun tidak mengubah data.
-- [ ] Development journal/schema terbukti; production migration tetap rollout terpisah.
+- [x] Legacy sessions/assets/auth data tetap utuh dan existing API tetap berjalan.
+- [x] Digest invalid ditolak, null legacy valid; migration rerun tidak mengubah data.
+- [x] Development journal/schema terbukti; production migration tetap rollout terpisah.
 
 ### Validasi
 
@@ -232,7 +232,11 @@ Dedicated migration constraints/preservation/legacy null/new hash; generate/revi
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan rencana, bukan hasil test yang telah dijalankan. Isi evidence aktual dan batas proof saat task dikerjakan.
+Generated/reviewed `0009_upload-fingerprint`: hanya nullable field + lowercase hex64/null check, tanpa backfill atau edit migration historis. Target proof diperluas ke dedicated `media-fingerprint-migration-proof.test.ts` dan existing publication test; publication prefix dipin0008 agar schema HEAD baru tidak merusak legacy fixture.
+
+Dedicated suites dijalankan serial: fingerprint migration1 pass/14 assertions; upload6 pass/72; publication migration1 pass/10. Native media/playback14 pass/70. Lazy Bun SQL assertions diperbaiki dengan Promise.resolve setelah timeout awal; rerun serial seluruhnya lulus. Root check-types3/3, lint1/1, build2/2 lulus.
+
+Development backup custom-format pg_dump PostgreSQL18 (61216 byte) divalidasi pg_restore list; ignored directory0700/file0600. Command resmi `bun run --cwd apps/api db:migrate` lulus, journal9→10, nullable column terverifikasi. Snapshot17 tabel existing utuh (auth user1/account1/session2, rate_limit1, video1; lainnya kosong). Full restore/production migration tidak diklaim. Docs/Prettier/diff/staged-doc/preservation dan hooks diperiksa saat commit.
 
 ### Commit task
 
@@ -243,7 +247,7 @@ Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan
 
 ### Blocker atau tindak lanjut
 
-Dependencies ADUP-002 (scope plan telah disetujui pengguna). Temuan proof baru diperbarui pada plan dan task terkait sebelum melanjutkan.
+ADUP-004 selesai; expected fingerprint dapat diikat API/worker pada ADUP-005. Production rollout dan full restore tetap terpisah.
 
 ## Task: ADUP-005 — Bind fingerprint pada initiate dan verification worker
 

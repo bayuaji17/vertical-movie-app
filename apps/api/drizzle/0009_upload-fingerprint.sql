@@ -1,0 +1,2 @@
+ALTER TABLE "upload_sessions" ADD COLUMN "expected_sha256" text;--> statement-breakpoint
+ALTER TABLE "upload_sessions" ADD CONSTRAINT "upload_sessions_expected_sha256_check" CHECK ("upload_sessions"."expected_sha256" IS NULL OR "upload_sessions"."expected_sha256" ~ '^[a-f0-9]{64}$');

@@ -31,3 +31,9 @@ Inventory memakai snapshot repeatable-read/read-only. GET tidak mengubah expiry,
 `canPreview` memakai query existing `CatalogStore.preview`, lalu unsigned profile/output identity/duration/poster checks yang juga digunakan PlaybackService. Tidak menerbitkan URL saat polling. Original yang sudah dihapus dapat tetap memiliki HLS valid; preview endpoint tetap memeriksa readiness/akses saat dibuka. Readiness output di sini berdasarkan fakta/provenance DB hasil worker; inventory tidak melakukan audit semua objek bucket.
 
 Evidence HTTP/native/dedicated PG, regression playback serta scope platform dicatat pada backlog ADUP-003, bukan klaim production readiness.
+
+## Fingerprint schema — ADUP-004
+
+**Implemented/local verified · 5 Oktober 2026.** Migration generated `0009_upload-fingerprint` menambah `upload_sessions.expected_sha256` nullable dengan constraint null atau lowercase hex64. Migration historis tidak diubah; session legacy tetap null tanpa identitas palsu. API binding dan pemeriksaan worker diimplementasikan pada ADUP-005 berikutnya.
+
+Database development memakai command resmi `bun run --cwd apps/api db:migrate`: journal9→10. Backup PostgreSQL custom-format sudah divalidasi dengan pg_restore list; snapshot17 tabel membuktikan data existing tetap utuh. Full restore/production migration tetap belum dibuktikan. Dedicated migration test juga mempertahankan legacy session, asset, metadata serta user/account/session auth dan menguji constraint/rerun; evidence pada backlog ADUP-004.

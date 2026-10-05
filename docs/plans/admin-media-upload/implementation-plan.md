@@ -65,14 +65,14 @@ Eden hanya JSON control/data; gunakan native XHR transport terpisah untuk progre
 
 Path tabel ialah upstream Elysia; browser menambahkan prefix `/api`.
 
-| Endpoint                                    | Status/requirements                                                                                                                                                                                                     |
-| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| POST /admin/media/uploads                   | Existing; body ownerType/ownerId/kind/filename/contentType/sizeBytes/idempotencyKey. Tambahan **proposed optional** expectedSha256 lowercase 64 hex untuk binding file baru, legacy tetap kompatibel.                   |
-| GET /admin/media/uploads/:id                | Existing; ListParts/bytes/session dan processing. Fingerprint/descriptor/capability untuk resume baru di-whitelist atau dibaca melalui inventory; signed URL tetap endpoint part.                                       |
-| POST /admin/media/uploads/:id/parts         | Existing partNumber; alreadyUploaded/url/expiry. Jangan mengira successful part jika hanya optimistic client state.                                                                                                     |
-| POST /admin/media/uploads/:id/complete      | Existing freeze+activate+enqueue; status reconciliation sebelum retry pada uncertain outcome. Tidak publish.                                                                                                            |
-| POST /admin/media/uploads/:id/abort         | Existing; race complete bisa menang. Confirm server status sebelum cancelled.                                                                                                                                           |
-| GET /admin/media/owners/:ownerType/:ownerId | **Proposed new read**, bukan endpoint yang sudah ada. Owner media inventory/config/capabilities/current asset + active session + last attempt, actor-scoped/no-store; tidak expose private storage identity/signatures. |
+| Endpoint                                    | Status/requirements                                                                                                                                                                                                           |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| POST /admin/media/uploads                   | Existing; body ownerType/ownerId/kind/filename/contentType/sizeBytes/idempotencyKey. Tambahan **proposed optional** expectedSha256 lowercase 64 hex untuk binding file baru, legacy tetap kompatibel.                         |
+| GET /admin/media/uploads/:id                | Existing; ListParts/bytes/session dan processing. Fingerprint/descriptor/capability untuk resume baru di-whitelist atau dibaca melalui inventory; signed URL tetap endpoint part.                                             |
+| POST /admin/media/uploads/:id/parts         | Existing partNumber; alreadyUploaded/url/expiry. Jangan mengira successful part jika hanya optimistic client state.                                                                                                           |
+| POST /admin/media/uploads/:id/complete      | Existing freeze+activate+enqueue; status reconciliation sebelum retry pada uncertain outcome. Tidak publish.                                                                                                                  |
+| POST /admin/media/uploads/:id/abort         | Existing; race complete bisa menang. Confirm server status sebelum cancelled.                                                                                                                                                 |
+| GET /admin/media/owners/:ownerType/:ownerId | **Implemented/local verified ADUP-003**, private inventory. Owner media inventory/config/capabilities/current asset + active session + last attempt, actor-scoped/no-store; tidak expose private storage identity/signatures. |
 
 Inventory direkomendasikan mempunyai per-role current asset summary (state/readiness/job provenance/tombstone), active upload descriptor (session ID/filename/MIME/size/fingerprint/expiry/resume capability), last attempt summary, owner/version/canUpload dan canPreview untuk video. Pisahkan current pointer dari pending replacement dan last failed attempt; sesudah complete pointer baru uploaded menjadi current, sehingga output lama tidak dijadikan current readiness. `canPreview` reuse CatalogStore.preview dan unsigned PlaybackService profile/output/duration checks; extract helper DRY jika perlu, jangan presign setiap poll. Endpoint playback tetap otorisasi akhir, bukan janji UI.
 
@@ -537,7 +537,7 @@ Revert uploader task commits bertahap; leave current metadata/playback UI bekerj
 ## Open decisions
 
 1. **Scope approved 2026-10-05:** pengguna menyetujui plan dan empat mockup. Cross-reload resume dengan bounded full SHA dan small backend additions tetap scope; hash proof belum selesai. Alternatives same-tab-only harus mengubah plan/AC secara eksplisit, bukan diam-diam memakai filename/size identity.
-2. **Hash implementation:** native capability/browser incremental library/version/license/memory dipilih ADUP-002; tanpa proof ini task identity/file worker belum Ready.
+2. **Hash implementation:** ADUP-002 selesai: noble-hashes2.4.0/MIT incremental bounded Worker, native/browser near-limit proof lulus; evidence pada backlog.
 3. **Visual approved 2026-10-05:** pengguna menyetujui empat layout desktop/mobile light/dark melalui “oke approve”; ADUP-006 Done. English/theme/shell existing dan state specification menjadi acuan implementasi. Runtime acceptance tetap perlu bukti tersendiri.
 4. **Defaults UX approved melalui plan:** polling5s, retry3 attempts1s/2s+jitter, satu file aktif/3 PUT total tab; server config/cap/TTL tidak diubah. Bukti perilaku tetap task implementasi, bukan hasil mockup.
 5. **Platform scope:** resume bergantung file reselection; tab/browser force-close menghilangkan File memory. R2 staging/perangkat fisik/Safari/full capacity adalah gerbang terpisah, bukan blockers menyusun plan.
@@ -582,3 +582,13 @@ Revert uploader task commits bertahap; leave current metadata/playback UI bekerj
 - Native media/playback: 14 pass/70 assertions; PG dedicated upload proof: 6 pass/69 assertions. Current-ready fixture dalam test membuktikan DB provenance, bukan transcoding riil; media worker/browser end-to-end tetap ADUP-015. Root gates/docs/staged-doc/preservation dan hooks dijalankan sebelum commit; receipt SHA ADUP-003 masuk update task berikutnya.
 
 - ADUP-003 closure: check-types3/3, lint1/1, build2/2 lulus; Eden compile-only inventory/new private-field exclusions lulus. Target diperluas ke existing `policy.ts` (DRY whitelist/limits), `playback/service.test.ts` (unsigned regression) dan `apps/web/test/media-eden-contract.ts` (boundary proof). Native14/70 dan PG6/69 lulus pada source final.
+
+### ADUP-004 — 2026-10-05 local execution
+
+Generated/reviewed `0009_upload-fingerprint`: hanya nullable field + lowercase hex64/null check, tanpa backfill atau edit migration historis. Target proof diperluas ke dedicated `media-fingerprint-migration-proof.test.ts` dan existing publication test; publication prefix dipin0008 agar schema HEAD baru tidak merusak legacy fixture.
+
+Dedicated suites dijalankan serial: fingerprint migration1 pass/14 assertions; upload6 pass/72; publication migration1 pass/10. Native media/playback14 pass/70. Lazy Bun SQL assertions diperbaiki dengan Promise.resolve setelah timeout awal; rerun serial seluruhnya lulus. Root check-types3/3, lint1/1, build2/2 lulus.
+
+Development backup custom-format pg_dump PostgreSQL18 (61216 byte) divalidasi pg_restore list; ignored directory0700/file0600. Command resmi `bun run --cwd apps/api db:migrate` lulus, journal9→10, nullable column terverifikasi. Snapshot17 tabel existing utuh (auth user1/account1/session2, rate_limit1, video1; lainnya kosong). Full restore/production migration tidak diklaim. Docs/Prettier/diff/staged-doc/preservation dan hooks diperiksa saat commit.
+
+- Task commit belum ditulis pada saat evidence ini disimpan; receipt actual SHA/hooks dicatat pada update task berikutnya.

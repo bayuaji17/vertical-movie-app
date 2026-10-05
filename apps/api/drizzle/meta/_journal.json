@@ -64,6 +64,13 @@
       "when": 1791113539582,
       "tag": "0008_media-publication",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791205205900,
+      "tag": "0009_upload-fingerprint",
+      "breakpoints": true
     }
   ]
 }

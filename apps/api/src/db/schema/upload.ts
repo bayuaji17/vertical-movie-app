@@ -29,6 +29,7 @@ export const uploadSessions = pgTable(
       .references(() => user.id, { onDelete: "restrict" }),
     idempotencyKey: uuid("idempotency_key").notNull(),
     requestHash: text("request_hash").notNull(),
+    expectedSha256: text("expected_sha256"),
     filename: text("filename").notNull(),
     stagingKey: text("staging_key").notNull().unique(),
     uploadId: text("upload_id"),
@@ -95,6 +96,10 @@ export const uploadSessions = pgTable(
     check(
       "upload_sessions_hash_check",
       sql`${t.requestHash} ~ '^[a-f0-9]{64}$'`,
+    ),
+    check(
+      "upload_sessions_expected_sha256_check",
+      sql`${t.expectedSha256} IS NULL OR ${t.expectedSha256} ~ '^[a-f0-9]{64}$'`,
     ),
     check(
       "upload_sessions_claim_check",
