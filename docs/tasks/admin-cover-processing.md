@@ -70,7 +70,7 @@ Planning Done; plan disetujui dan freshness diperiksa ulang sebelum branch imple
 
 ## Task: ACOV-002 — Buktikan native image dan browser crop memenuhi policy
 
-- Status: Review
+- Status: Done
 - Owner: Codex / pengembang proyek
 - Prioritas: 2
 - Referensi: ACOV-US-01, ACOV-US-02; PRD media/sampul dan GR lifecycle; [plan](../plans/admin-cover-processing/implementation-plan.md).
@@ -105,13 +105,13 @@ Aturan hasil: crop sumber animasi ditolak di browser melalui pemeriksaan APNG `a
 ### Commit task
 
 - Pesan: `test(media): verify native poster feasibility (ACOV-002)`
-- SHA: belum dibuat.
-- Hook/checks: root tests/check-types/lint/build dan docs/format/diff lulus; commit hook berjalan saat commit.
-- Ledger: SHA aktual dicatat pada update dokumentasi setelah commit, tanpa self-referential SHA.
+- SHA: `7111d524816d62f33882d2efbc967648c87a3e5a`.
+- Hook/checks: docs:check (59 Markdown/514 links), lint (web), check-types (api/web/auth) dan Commitlint lulus; task tests, build, Prettier dan diff check juga lulus sebelum commit.
+- Ledger: SHA task ini dicatat pada backlog dan execution log plan setelah task commit.
 
 ### Blocker atau tindak lanjut
 
-Semua acceptance dan root gates lulus; buat task commit ACOV-002, lalu catat SHA pada update ledger berikutnya.
+Tidak ada blocker ACOV-002. Catatan untuk adapter/parser: Bun metadata tidak memberikan frame count dan terminal native tidak menghentikan pekerjaan setelah dimulai; implementasikan guard container statis dan fence logical deadline sesuai plan.
 
 ## Task: ACOV-003 — Persist executor dengan migrasi yang menjaga data lama
 
