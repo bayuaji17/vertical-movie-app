@@ -389,7 +389,7 @@ Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
 ## Task: ADMC-006 — Reusable form metadata dan genre
 
-- Status: Backlog
+- Status: Review
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — sesuai dependency
 - Referensi: ADMC-US-03; PRD-03/08/09; GR-01/05/08; plan STEP-006.
@@ -403,10 +403,10 @@ TanStack Form UI, genre selector paginated, validasi dan whitelist mapper create
 
 ### Acceptance criteria
 
-- [ ] Title-only draft valid; optional nullable/slug/year/date/BCP47/genre/rights mengikuti kontrak API.
-- [ ] Genre selection mempertahankan selected IDs pada pagination/search; empty taxonomy tidak menghalangi draft.
-- [ ] PATCH clear null/[] dibedakan dari unchanged, expectedVersion dari baseline, immutable/server-owned fields tidak dikirim.
-- [ ] Field errors/focus/labels accessible; no-op save disabled, plain text tidak di-render HTML.
+- [x] Title-only draft valid; optional nullable/slug/year/date/BCP47/genre/rights mengikuti kontrak API.
+- [x] Genre selection mempertahankan selected IDs pada pagination/search; empty taxonomy tidak menghalangi draft.
+- [x] PATCH clear null/[] dibedakan dari unchanged, expectedVersion dari baseline, immutable/server-owned fields tidak dikirim.
+- [x] Field errors/focus/labels accessible; no-op save disabled, plain text tidak di-render HTML.
 
 ### Validasi
 
@@ -426,6 +426,12 @@ Belum diimplementasikan atau diuji. Hasil runtime tidak disimpulkan dari plan.
 ### Blocker atau tindak lanjut
 
 Menunggu review/permintaan implementasi dan dependency; tidak berstatus Ready hanya karena source API tersedia.
+
+### Evidence implementasi — 5 Oktober 2026
+
+Shared TanStack Form/Field metadata UI and paginated Eden/Query genre picker. Minimal draft, calendar/year/BCP47 validation; whitelisted normalized create and changed-only PATCH with original rowVersion, explicit nullable/genre/rights clearing. Selected IDs survive search/pagination in memory; no readonly fields serialized, no-op normalized PATCH disabled. Native mapper proof 5 tests/26 assertions pass. Types (3), lint (1), build (2) pass; keyboard/live taxonomy proof follows with page integration in ADMC-011.
+
+Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
 
 ## Task: ADMC-007 — Buat draft movie dan standalone
 
@@ -835,7 +841,7 @@ Visual v2 untuk review; runtime belum diminta/diimplementasikan.
 
 ## Task: ADMC-016 — Recheck sesi tanpa kehilangan form pada business outage
 
-- Status: Review
+- Status: Done
 - Owner: Codex
 - Prioritas: P1
 - Diperbarui: 2026-10-05
@@ -874,3 +880,5 @@ Browser closure ADMC-011. Production readiness tidak disimpulkan.
 Types (3), lint (1), build (2) passed; native recheck/route guards 16 tests/56 assertions. Auth error state remains the lock even when its previous snapshot exists; private data is removed. Browser form retention closure on ADMC-011.
 
 Commit lokal berikutnya merekam task ini; SHA aktual dicatat pascacommit.
+
+- Receipt commit task: `0cc865157946d59c6a888f4fef01a6c601ab1966`; hooks docs/lint/types/Commitlint lulus tanpa bypass.
