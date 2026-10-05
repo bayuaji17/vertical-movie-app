@@ -2,12 +2,12 @@
 
 ## Plan metadata
 
-- Status: **plan dan empat mockup disetujui pengguna** · 5 Oktober 2026. ADUP-001–006 Done; backend additions locally verified pada branch `feat/admin-media-upload`; frontend ADUP-007–015 berikutnya. Proof hashing ADUP-002 tetap mendahului task identity yang bergantung padanya.
+- Status: **implemented dan verified lokal** · 6 Oktober 2026. ADUP-001–015 Done pada `feat/admin-media-upload`; plan dan empat mockup disetujui pengguna 5 Oktober 2026. Runtime dimulai dari planning/design commit `ca26e88fbd1cfe037406705b6955776a9bd7988b`; snapshot main di bawah tetap riwayat context. Receipt/checks/batas proof pada backlog dan execution history.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `main`; base SHA / last validated SHA: `d8417249de99611e1a661ade03bb4b03dd5f0538`.
 - Context: [repository-context.md](repository-context.md), disimpan lebih dahulu.
 - Backlog: [admin-media-upload](../../tasks/admin-media-upload.md); task ID ADUP-001–015.
-- Branch planning: `chore/admin-media-upload-plan`; branch runtime yang direkomendasikan `feat/admin-media-upload`, dibuat setelah scope disetujui dan freshness diperiksa.
+- Branch planning: `chore/admin-media-upload-plan`; branch runtime `feat/admin-media-upload` dibuat setelah scope disetujui dan freshness diperiksa.
 - Otorisasi: dokumen planning dan local task commit mengikuti workflow pengguna. Push/PR/merge sebelumnya berlaku pada dashboard yang sudah selesai, bukan otomatis pada branch baru. Plan ini tidak mengubah angka produk atau mengotorisasi rollout production.
 
 ## Objective
@@ -20,13 +20,13 @@ Dalam scope: Film/Standalone source+poster, Series poster; pemilihan/validasi aw
 
 Tidak termasuk: upload sebelum metadata owner tersimpan, episode/hierarchy editor, publication/archive actions, manual reprocess API, subtitle, public catalog, image crop/edit, original-video player, storage credentials dashboard, site settings, R2 staging provisioning, produksi atau benchmark VPS. Preview route/player existing digunakan melalui tautan readiness yang valid, tanpa mengubah player source.
 
-## Current behavior
+## Baseline saat planning
 
 Dashboard metadata sudah merged pada base SHA. Lima template tetap `/admin`, `/admin/content`, `/admin/content/new`, `/admin/content/:type/:id` dan `/admin/content/:type/:id/edit`. API sudah mempunyai initiate/status/sign-part/complete/abort, durable worker dan HLS/WebP.
 
 Gap teramati: status hanya berdasarkan session ID; detail metadata tidak membawa inventory/session ID. RequestHash adalah metadata, bukan fingerprint isi file. SourceAvailability bukan HLS readiness. Upload complete menaikkan rowVersion sehingga baseline form edit di tab lain tidak boleh diam-diam diganti. [Context](repository-context.md#domain-and-data-model) memetakan fakta/gap ke source.
 
-## Desired behavior
+## Perilaku disetujui dan diimplementasikan
 
 ### Halaman, resources dan design
 
@@ -61,7 +61,7 @@ flowchart LR
 
 Eden hanya JSON control/data; gunakan native XHR transport terpisah untuk progress upload byte. PUT tanpa cookie/Authorization aplikasi; byte video tidak lewat metadata API proxy. Signed URL hanya berada dalam memory transport selama diperlukan, tidak dipersist atau dimasukkan ke UI/debug log. Request browser tetap terlihat di network DevTools; URL tidak dapat disembunyikan dari browser yang menggunakannya. Query keys prefix admin memasukkan principal/owner/kind/session. File/Worker/XHR/attempt di memory manager, bukan Query/persisted storage. Public auth boundary/source imports existing tetap berlaku.
 
-### Kontrak API: existing dan proposed additions
+### Kontrak API aktif
 
 Path tabel ialah upstream Elysia; browser menambahkan prefix `/api`.
 
@@ -74,7 +74,7 @@ Path tabel ialah upstream Elysia; browser menambahkan prefix `/api`.
 | POST /admin/media/uploads/:id/abort         | Existing; race complete bisa menang. Confirm server status sebelum cancelled.                                                                                                                                                 |
 | GET /admin/media/owners/:ownerType/:ownerId | **Implemented/local verified ADUP-003**, private inventory. Owner media inventory/config/capabilities/current asset + active session + last attempt, actor-scoped/no-store; tidak expose private storage identity/signatures. |
 
-Inventory direkomendasikan mempunyai per-role current asset summary (state/readiness/job provenance/tombstone), active upload descriptor (session ID/filename/MIME/size/fingerprint/expiry/resume capability), last attempt summary, owner/version/canUpload dan canPreview untuk video. Pisahkan current pointer dari pending replacement dan last failed attempt; sesudah complete pointer baru uploaded menjadi current, sehingga output lama tidak dijadikan current readiness. `canPreview` reuse CatalogStore.preview dan unsigned PlaybackService profile/output/duration checks; extract helper DRY jika perlu, jangan presign setiap poll. Endpoint playback tetap otorisasi akhir, bukan janji UI.
+Inventory mempunyai per-role current asset summary (state/readiness/job provenance/tombstone), active upload descriptor (session ID/filename/MIME/size/fingerprint/expiry/resume capability), last attempt summary, owner/version/canUpload dan canPreview untuk video. Pisahkan current pointer dari pending replacement dan last failed attempt; sesudah complete pointer baru uploaded menjadi current, sehingga output lama tidak dijadikan current readiness. `canPreview` reuse CatalogStore.preview dan unsigned PlaybackService profile/output/duration checks; extract helper DRY jika perlu, jangan presign setiap poll. Endpoint playback tetap otorisasi akhir, bukan janji UI.
 
 Capabilities termasuk max bytes/extension-MIME rules dari server policy agar UX tidak menggandakan angka secara tersembunyi. Server tetap memvalidasi payload dan media sebenarnya. Inventory GET tidak melakukan state mutation/presign/abort/expiry atau ListParts untuk seluruh history; session yang sedang dipantau menggunakan endpoint status existing.
 
@@ -83,15 +83,15 @@ Capabilities termasuk max bytes/extension-MIME rules dari server policy agar UX 
 Aturan authoritative dimiliki [PRD](../../product/prd.md#sumber-video-dan-sampul) dan [upload contract](../../architecture/media-upload-contract.md):
 Film/Standalone ≤1.500.000.000 byte/30 menit, poster ≤5.000.000 byte; sumber MP4/MOV/MKV/WebM sesuai MIME+codec allowlist; vertical 9:16, 480–1080 sisi pendek dan sisi panjang ≤1920; poster diam minimal1080×1920/outputWebP. Episode bukan selectable scope. Browser hanya melakukan extension/MIME/size dan hint; codec/duration/display geometry/animation/decode dicek worker. File MIME kosong boleh di-map allowlist extension, bukan bypass worker.
 
-**Rekomendasi resume aman:** incremental full-file SHA-256 via Worker sebelum initiate, chunk target4 MiB, tidak membaca seluruh file ke arrayBuffer; current source limit1,5 GB dapat berat jika buffering. Field `expected_sha256` nullable ditambahkan pada upload_sessions melalui migration additive. Optional API field menjaga old clients; canonical request hash legacy tetap memakai urutan metadata lama tanpa menambahkan null fingerprint. New same-key/different fingerprint conflict. Legacy pending tanpa fingerprint tidak di-resume lintas reload: cancel/restart explicit, tidak backfill fingerprint fiktif. Worker membandingkan streaming digest existing dengan expected sebelum probe/transcode; mismatch terminal, tanpa activated HLS ready.
+**Resume aman yang diimplementasikan:** incremental full-file SHA-256 via Worker sebelum initiate, chunk target4 MiB, tidak membaca seluruh file ke arrayBuffer; current source limit1,5 GB dapat berat jika buffering. Field `expected_sha256` nullable ditambahkan pada upload_sessions melalui migration additive. Optional API field menjaga old clients; canonical request hash legacy tetap memakai urutan metadata lama tanpa menambahkan null fingerprint. New same-key/different fingerprint conflict. Legacy pending tanpa fingerprint tidak di-resume lintas reload: cancel/restart explicit, tidak backfill fingerprint fiktif. Worker membandingkan streaming digest existing dengan expected sebelum probe/transcode; mismatch terminal, tanpa activated HLS ready.
 
-Setelah refresh/private cache clear, inventory menemukan session melalui server; pengguna memilih ulang File dan digest harus sama sebelum sign/PUT. Filename/size/lastModified/ETag saja tidak cukup. Pemilihan library incremental/browser memory proof selesai ADUP-002; package baru hanya jika gap native tercatat. Tidak menyimpan File, private descriptor/session IDs/hash/signed URLs di localStorage/IndexedDB; hanya theme preference existing yang dipersist. Binding hash adalah proof isi file, bukan proof codec/hak/publish readiness.
+Setelah refresh/private cache clear, inventory menemukan session melalui server; pengguna memilih ulang File dan digest harus sama sebelum sign/PUT. Filename/size/lastModified/ETag saja tidak cukup. Pemilihan library incremental/browser memory proof selesai ADUP-002; package baru hanya jika gap native tercatat. Tidak menyimpan File, private descriptor/session IDs/hash/signed URLs di localStorage/IndexedDB; preferensi theme dan posisi scroll router existing tetap boleh dipersist, terpisah dari data upload. Binding hash adalah proof isi file, bukan proof codec/hak/publish readiness.
 
 ### Geometry, concurrency dan progress
 
 Server menetapkan geometry sekali: partSize=max(ceil(size/50),5 MiB); target2%, last part boleh lebih kecil; sampul kecil satu part. Gunakan partSizeBytes/partCount/partConcurrency/expiry DTO, bukan menghitung persen part secara berbeda di client. Config default part concurrency3/session86400s/part URL≤900s tetap env API; worker concurrency1 adalah konfigurasi terpisah.
 
-Proposal browser: satu file aktif per tab, source/poster mengantre; maksimum min(server cap,3) PUT total tab, bukan dua scheduler masing-masing3 yang menggandakan resource. Attempt manager tidak mengalokasikan semua part sebagai ArrayBuffer. Blob.slice range tepat; unknown size/geometry response fail safely sebelum PUT.
+Browser menjalankan satu file aktif per tab, source/poster mengantre; maksimum min(server cap,3) PUT total tab, bukan dua scheduler masing-masing3 yang menggandakan resource. Attempt manager tidak mengalokasikan semua part sebagai ArrayBuffer. Blob.slice range tepat; unknown size/geometry response fail safely sebelum PUT.
 
 Progress **sent** = verified ListParts bytes + unique in-flight bytes yang dibatasi ukuran part, ≤fileSize. **Verified** hanya hasil ListParts/session completed. Retry/cancel tidak count bytes lama dua kali; sent progress boleh turun ketika attempt dikonfirmasi belum tersimpan dan diberi status penjelas. 100% sent → Finalizing, bukan ready. Complete success setelah DTO server confirmed; source/poster job masih dapat running/failed.
 
@@ -115,7 +115,7 @@ Client Query mutation retry:false. Scheduler retry terkontrol hanya part yang be
 
 ### Status processing dan invalidasi
 
-Polling proposed5s hanya visible/online ketika upload/session atau job nonterminal. Completed upload dengan job queued/running/retry **tetap** perlu polling. Terminal ready/failed stop; focus/manual read tersedia. Mapping raw status/job unknown neutral dan actions disabled. `progressSeconds` bukan persen encode atau wall-clock ETA tanpa denominator; tampilkan elapsed media processed/indeterminate. This iteration tidak membuat global job monitoring page/SSE.
+Polling setiap5s hanya visible/online ketika upload/session atau job nonterminal. Completed upload dengan job queued/running/retry **tetap** perlu polling. Terminal ready/failed stop; focus/manual read tersedia. Mapping raw status/job unknown neutral dan actions disabled. `progressSeconds` bukan persen encode atau wall-clock ETA tanpa denominator; tampilkan elapsed media processed/indeterminate. This iteration tidak membuat global job monitoring page/SSE.
 
 Ready owner berasal dari current source+poster readiness/provenance/capability, bukan last attempt/latest createdAt atau sourceAvailability. Original yang sudah retired tidak mematikan HLS valid. Series poster ready bukan series video ready. Link existing preview hanya jika server eligible; tidak menambahkan original-video preview atau mengambil URL poster publik tanpa kontrak signing.
 
@@ -127,7 +127,7 @@ Pekerjaan utama web, dengan **dua area backend tambahan**: owner discovery/readi
 
 ## Affected files and symbols
 
-Tabel target task di bawah adalah evidence-backed planned set, bukan source yang sudah berubah. Semua create/modify berada pada app pemilik; path generated migration bersifat placeholder sampai schema HEAD reviewed.
+Tabel berikut mempertahankan planned scope saat approval. Implementasi mengikuti app pemilik; generated migration aktual adalah `0009_upload-fingerprint`. Target tambahan hasil proof dicatat pada execution/task evidence, termasuk auth lifecycle helpers. Fixture browser memakai `admin-media-browser-fixture.ts` untuk membedakannya dari native upload proof. Closure juga menyelaraskan status PRD/global rules/overview tanpa mengubah keputusan produk.
 
 | Area/path                                                                                                                                          | Action                                        | Symbol/reason                                                       | Evidence                                                            |
 | -------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------- |
@@ -142,7 +142,7 @@ Tabel target task di bawah adalah evidence-backed planned set, bukan source yang
 | apps/web/src/components/ui/progress.tsx                                                                                                            | create after CLI dry-run                      | Existing Progress missing; semantic primitive reuse                 | shadcn info current @shadcn base-rhea                               |
 | apps/web/package.json; bun.lock                                                                                                                    | modify conditionally                          | Hash dependency only after proof; one lockfile writer               | Current direct deps no selected digest implementation               |
 | apps/web/test/admin-media-_.test.ts/.mjs; admin-upload-_.test.ts; auth-browser-smoke.mjs; media-eden-contract.ts                                   | create/modify                                 | Meaningful client/transport/state/browser/cache/type proofs         | Existing Bun/browser/Eden harness                                   |
-| apps/api/test/integration/admin-media-upload-fixture.ts; media-upload-proof.test.ts; media-worker-proof.test.ts; module media tests                | create/modify                                 | Real PG/MinIO and guards/hash/migration/readiness proof             | Existing guarded test DB/bucket patterns                            |
+| apps/api/test/integration/admin-media-browser-fixture.ts; media-upload-proof.test.ts; media-worker-proof.test.ts; module media tests               | create/modify                                 | Real PG/MinIO and guards/hash/migration/readiness proof             | Existing guarded test DB/bucket patterns                            |
 | docs/design/admin-media-upload.md; <viewport>-<theme>.png                                                                                          | create at design task                         | Four raster acuan + state map; not generated in planning            | Approved shell/theme/resource baseline                              |
 | docs/architecture/media-upload-contract.md; docs/operations/media.md; guides/environment.md; docs/README.md                                        | modify at owning tasks                        | Proposed additions become active only when implemented/proved       | Canonical ownership                                                 |
 | docs/plans/admin-media-upload/*; docs/tasks/admin-media-upload.md                                                                                  | create/update                                 | Context-before-plan, execution/AC/actual receipt                    | Root workflow                                                       |
@@ -208,9 +208,9 @@ Validation: Native digest oracle + browser host proof pada ukuran kecil dan near
 
 Acceptance criteria:
 
-- [ ] Digest sama dengan oracle dan berbeda untuk isi berbeda yang metadata filenya sama.
-- [ ] Hash bisa dihentikan saat auth loss/unmount dan tidak mengirim stale result.
-- [ ] Memory bounded pada chunks, bukan O(file size); pilihan algoritma/dependency dan batas platform dicatat.
+- [x] Digest sama dengan oracle dan berbeda untuk isi berbeda yang metadata filenya sama.
+- [x] Hash bisa dihentikan saat auth loss/unmount dan tidak mengirim stale result.
+- [x] Memory bounded pada chunks, bukan O(file size); pilihan algoritma/dependency dan batas platform dicatat.
 
 ### ADUP-003 — API private owner media inventory dan rediscovery
 
@@ -231,9 +231,9 @@ Validation: HTTP app.handle guards/invalid DTO; real dedicated PG no-media/curre
 
 Acceptance criteria:
 
-- [ ] Refresh menemukan session dan current source/poster yang benar, termasuk replacement gagal.
-- [ ] Anon/non-admin/other actor/malformed owner tidak memperoleh private descriptor.
-- [ ] DTO aman dan typed; old cursor/metadata/control APIs tetap kompatibel.
+- [x] Refresh menemukan session dan current source/poster yang benar, termasuk replacement gagal.
+- [x] Anon/non-admin/other actor/malformed owner tidak memperoleh private descriptor.
+- [x] DTO aman dan typed; old cursor/metadata/control APIs tetap kompatibel.
 
 ### ADUP-004 — Schema additive expected file SHA-256
 
@@ -252,9 +252,9 @@ Validation: Dedicated migration constraints/preservation/legacy null/new hash; g
 
 Acceptance criteria:
 
-- [ ] Legacy sessions/assets/auth data tetap utuh dan existing API tetap berjalan.
-- [ ] Digest invalid ditolak, null legacy valid; migration rerun tidak mengubah data.
-- [ ] Development journal/schema terbukti; production migration tetap rollout terpisah.
+- [x] Legacy sessions/assets/auth data tetap utuh dan existing API tetap berjalan.
+- [x] Digest invalid ditolak, null legacy valid; migration rerun tidak mengubah data.
+- [x] Development journal/schema terbukti; production migration tetap rollout terpisah.
 
 ### ADUP-005 — Bind fingerprint pada initiate dan verification worker
 
@@ -273,9 +273,9 @@ Validation: Native HTTP request hash replay/conflict/legacy; dedicated PG immuta
 
 Acceptance criteria:
 
-- [ ] Metadata identik dengan fingerprint berbeda menghasilkan idempotency conflict, bukan session tercampur.
-- [ ] Session dengan fingerprint valid mempunyai capability resume; manipulasi byte ditolak worker sebelum decode. Guard file UI diverifikasi pada ADUP-008/011 sesuai dependency DAG.
-- [ ] Tidak ada breaking change pada legacy clients, queue retry atau valid assets lama.
+- [x] Metadata identik dengan fingerprint berbeda menghasilkan idempotency conflict, bukan session tercampur.
+- [x] Session dengan fingerprint valid mempunyai capability resume; manipulasi byte ditolak worker sebelum decode. Guard file UI diverifikasi pada ADUP-008/011 sesuai dependency DAG.
+- [x] Tidak ada breaking change pada legacy clients, queue retry atau valid assets lama.
 
 ### ADUP-006 — Desain panel Upload Media desktop/mobile light/dark
 
@@ -316,9 +316,9 @@ Validation: Bun native client/cache/gateway/auth regression + compile-only Eden 
 
 Acceptance criteria:
 
-- [ ] No server imports/secrets masuk bundle, control error bukan cached success.
-- [ ] Logout/expiry membersihkan media query/mutations; public cache tetap utuh.
-- [ ] Query invalidate owner/content detail/list sesudah confirmed complete tanpa mengganti dirty edit baseline.
+- [x] No server imports/secrets masuk bundle, control error bukan cached success.
+- [x] Logout/expiry membersihkan media query/mutations; public cache tetap utuh.
+- [x] Query invalidate owner/content detail/list sesudah confirmed complete tanpa mengganti dirty edit baseline.
 
 ### ADUP-008 — File selection, validation dan fingerprint worker
 
@@ -337,9 +337,9 @@ Validation: Native descriptor tests + browser hash/cancellation/MIME fallback/bi
 
 Acceptance criteria:
 
-- [ ] Oversize/unsupported/zero file tidak membuat session; helper tidak mengklaim codec valid dari MIME.
-- [ ] Fingerprint match diperlukan sebelum resume dan hasil worker stale diabaikan.
-- [ ] Tidak membaca seluruh video ke satu buffer atau menyimpan File/signature ke storage persisten.
+- [x] Oversize/unsupported/zero file tidak membuat session; helper tidak mengklaim codec valid dari MIME.
+- [x] Fingerprint match diperlukan sebelum resume dan hasil worker stale diabaikan.
+- [x] Tidak membaca seluruh video ke satu buffer atau menyimpan File/signature ke storage persisten.
 
 ### ADUP-009 — Direct PUT transport dengan progress dan abort
 
@@ -358,9 +358,9 @@ Validation: Injected transport meaningful callbacks/cancel/status + real browser
 
 Acceptance criteria:
 
-- [ ] Gateway menerima JSON saja; storage mendapatkan range byte part yang tepat.
-- [ ] Abort menghentikan request aktif; callbacks setelah dispose tidak mengubah state.
-- [ ] CORS/network/signature failures aman dan tidak logout pengguna melalui auth handler.
+- [x] Gateway menerima JSON saja; storage mendapatkan range byte part yang tepat.
+- [x] Abort menghentikan request aktif; callbacks setelah dispose tidak mengubah state.
+- [x] CORS/network/signature failures aman dan tidak logout pengguna melalui auth handler.
 
 ### ADUP-010 — Scheduler multipart, retry dan aggregate progress
 
@@ -380,9 +380,9 @@ Validation: Native scheduler injected clock/I/O (small last part, 1 part poster,
 
 Acceptance criteria:
 
-- [ ] Tidak lebih dari cap PUT aktif atau alokasi seluruh file; verified progress tepat dengan retries.
-- [ ] Unknown PUT outcome direconcile, bukan replay sukses secara buta.
-- [ ] 100% sent menampilkan finalizing; Upload completed hanya dari confirmed DTO.
+- [x] Tidak lebih dari cap PUT aktif atau alokasi seluruh file; verified progress tepat dengan retries.
+- [x] Unknown PUT outcome direconcile, bukan replay sukses secara buta.
+- [x] 100% sent menampilkan finalizing; Upload completed hanya dari confirmed DTO.
 
 ### ADUP-011 — Resume, pause, finalization dan cancel recovery
 
@@ -402,9 +402,9 @@ Validation: State machine/HTTP ambiguity/native race tests + reload/offline/tab 
 
 Acceptance criteria:
 
-- [ ] Tidak ada completion/session ganda atau mixed source; zero byte/data corruption setelah resume terbukti.
-- [ ] User tidak kehilangan hasil completed hanya karena response timeout/abort race.
-- [ ] Stopped/expired/unknown states tidak menerbitkan PUT; server state/readiness tetap authority.
+- [x] Tidak ada completion/session ganda atau mixed source; zero byte/data corruption setelah resume terbukti.
+- [x] User tidak kehilangan hasil completed hanya karena response timeout/abort race.
+- [x] Stopped/expired/unknown states tidak menerbitkan PUT; server state/readiness tetap authority.
 
 ### ADUP-012 — Shared Upload Media panel pada detail draft
 
@@ -423,9 +423,9 @@ Validation: Browser three kinds/read-only/loading/empty/errors + desktop/mobile 
 
 Acceptance criteria:
 
-- [ ] Tidak ada route baru wajib atau upload di create form sebelum owner tersimpan.
-- [ ] Video/poster independent namun tab transport tetap capped; changing theme tidak kehilangan attempt.
-- [ ] Control/error UX sesuai API state, tanpa publish/crop/quality selector atau storage credentials.
+- [x] Tidak ada route baru wajib atau upload di create form sebelum owner tersimpan.
+- [x] Video/poster independent namun tab transport tetap capped; changing theme tidak kehilangan attempt.
+- [x] Control/error UX sesuai API state, tanpa publish/crop/quality selector atau storage credentials.
 
 ### ADUP-013 — Status pemrosesan dasar dan readiness owner
 
@@ -445,9 +445,9 @@ Validation: Native state/polling tests + real MinIO/worker browser both roles co
 
 Acceptance criteria:
 
-- [ ] Tidak menampilkan Ready/Preview ketika hanya upload selesai atau satu role ready.
-- [ ] Tidak ada polling loop terminal/background/offline atau presign logging/persistence.
-- [ ] Existing player/watch/preview source tetap tidak diubah; preview readiness gating sesuai server.
+- [x] Tidak menampilkan Ready/Preview ketika hanya upload selesai atau satu role ready.
+- [x] Tidak ada polling loop terminal/background/offline atau presign logging/persistence.
+- [x] Existing player/watch/preview source tetap tidak diubah; preview readiness gating sesuai server.
 
 ### ADUP-014 — Auth cleanup dan navigasi upload aktif
 
@@ -466,9 +466,9 @@ Validation: Existing auth SSR/cache/routes smoke + built browser in-flight hash/
 
 Acceptance criteria:
 
-- [ ] Auth transition tidak terhambat leave dialog dan private data tidak muncul lewat browser back.
-- [ ] After auth stop tidak ada new requests/late callback yang menghidupkan attempt lagi.
-- [ ] Unrelated public cache/theme dan baseline metadata tetap terjaga.
+- [x] Auth transition tidak terhambat leave dialog dan private data tidak muncul lewat browser back.
+- [x] After auth stop tidak ada new requests/late callback yang menghidupkan attempt lagi.
+- [x] Unrelated public cache/theme dan baseline metadata tetap terjaga.
 
 ### ADUP-015 — Acceptance uploader MinIO dan closure dokumentasi
 
@@ -488,9 +488,9 @@ Validation: Relevant native suite + guarded dedicated DB/storage + built browser
 
 Acceptance criteria:
 
-- [ ] End-to-end UI menghasilkan immutable source dengan matching fingerprint, exactly one activated session/job pada complete replay, lalu verified output.
-- [ ] Semua meaningful failure/recovery/auth/layout cases lulus; evidence real-vs-fixture/platform jelas.
-- [ ] Semua task implementasi committed lokal per task dan canonical docs diperbarui; delivery remote hanya jika diminta.
+- [x] End-to-end UI menghasilkan immutable source dengan matching fingerprint, exactly one activated session/job pada complete replay, lalu verified output.
+- [x] Semua meaningful failure/recovery/auth/layout cases lulus; evidence real-vs-fixture/platform jelas.
+- [x] Semua task implementasi committed lokal per task dan canonical docs diperbarui; delivery remote hanya jika diminta.
 
 ## Test requirements
 
@@ -505,7 +505,7 @@ Acceptance criteria:
 
 Root implementation gates: `bun test apps/api/src packages/auth/src apps/web/test`, `bun run check-types`, `bun run lint`, `bun run build`, docs/Prettier/diff; conditional `bun install --frozen-lockfile` after scripts/deps. Dedicated DB/storage/worker/browser tests mengikuti [runbook](../../operations/media.md), serialized. Jika hash schema berubah, generated migration reviewed/applied local development melalui `bun run --cwd apps/api db:migrate` dengan preservation proof. Env samples/runbook diupdate hanya bila benar-benar ada config baru.
 
-Planning sekarang hanya docs/format/whitespace/staged-doc/preservation dan commit hooks; tidak menjalankan destructive fixtures, migration, hashing large file, server/S3 upload atau browser uploader yang belum ada.
+Riwayat tahap planning: hanya docs/format/whitespace/staged-doc/preservation dan commit hooks dijalankan. Runtime, migration, hashing large file serta browser proof kemudian dijalankan per task; evidence aktual pada execution log/backlog.
 
 ## Constraints
 
@@ -513,14 +513,14 @@ Current product media limits/provider/env/lifecycle/hard server auth tidak berub
 
 ## Acceptance criteria
 
-- [ ] Film/Standalone source+poster dan Series poster dapat diunggah dari draft detail, tanpa source option untuk Series.
-- [ ] File rules/geometry/concurrency/expiry mengikuti server; 100% send/completed/ready/published tidak disamakan.
-- [ ] Server rediscovery + file fingerprint menjaga resume after reload; wrong same-size file ditolak dan worker membuktikan byte match.
-- [ ] Retry/reconcile/pause/cancel/complete idempotency tidak menyebabkan mixed source atau duplicate activated job.
-- [ ] Auth/leave/cross-tab/metadata stale baseline/query cleanup bekerja tanpa private persistence atau lost valid attempt karena transient recheck.
-- [ ] Processing/readiness current source+poster dan preview link mengikuti server; unknown/failed/tombstone/replacement aman.
-- [ ] Desktop/mobile light/dark/System accessible, bounded memory/time dan actual PG/MinIO/browser behavior dibuktikan.
-- [ ] Per-task commits/gates/docs/migration evidence selesai dan tidak mengklaim R2/Safari/production/full MVP proof.
+- [x] Film/Standalone source+poster dan Series poster dapat diunggah dari draft detail, tanpa source option untuk Series.
+- [x] File rules/geometry/concurrency/expiry mengikuti server; 100% send/completed/ready/published tidak disamakan.
+- [x] Server rediscovery + file fingerprint menjaga resume after reload; wrong same-size file ditolak dan worker membuktikan byte match.
+- [x] Retry/reconcile/pause/cancel/complete idempotency tidak menyebabkan mixed source atau duplicate activated job.
+- [x] Auth/leave/cross-tab/metadata stale baseline/query cleanup bekerja tanpa private persistence atau lost valid attempt karena transient recheck.
+- [x] Processing/readiness current source+poster dan preview link mengikuti server; unknown/failed/tombstone/replacement aman.
+- [x] Desktop/mobile light/dark/System accessible, bounded memory/time dan actual PG/MinIO/browser behavior dibuktikan.
+- [x] Per-task commits/gates/docs/migration evidence selesai dan tidak mengklaim R2/Safari/production/full MVP proof.
 
 ## Risks and mitigations
 
@@ -532,14 +532,14 @@ Revert uploader task commits bertahap; leave current metadata/playback UI bekerj
 
 ## Evidence
 
-[Context evidence index](repository-context.md#evidence-index) memiliki source/symbol pada immutable base. [Backlog](../../tasks/admin-media-upload.md) mengikat stories/task/AC/check/receipt. Source current DTO/worker proof adalah bukti backend existing, **bukan uploader frontend atau perubahan API proposed sudah selesai**.
+[Context evidence index](repository-context.md#evidence-index) memiliki source/symbol pada immutable base sebelum implementasi. [Backlog](../../tasks/admin-media-upload.md) mengikat stories/task/AC/check/receipt aktual. Runtime uploader dan additions API kini mempunyai proof tersendiri; snapshot context tetap bukti sejarah.
 
 ## Open decisions
 
-1. **Scope approved 2026-10-05:** pengguna menyetujui plan dan empat mockup. Cross-reload resume dengan bounded full SHA dan small backend additions tetap scope; hash proof belum selesai. Alternatives same-tab-only harus mengubah plan/AC secara eksplisit, bukan diam-diam memakai filename/size identity.
+1. **Scope approved 2026-10-05, implemented/local verified 2026-10-06:** cross-reload resume dengan bounded full SHA dan backend additions selesai. Filename/size saja tidak menjadi identitas file. Tidak ada keputusan scope uploader tersisa.
 2. **Hash implementation:** ADUP-002 selesai: noble-hashes2.4.0/MIT incremental bounded Worker, native/browser near-limit proof lulus; evidence pada backlog.
-3. **Visual approved 2026-10-05:** pengguna menyetujui empat layout desktop/mobile light/dark melalui “oke approve”; ADUP-006 Done. English/theme/shell existing dan state specification menjadi acuan implementasi. Runtime acceptance tetap perlu bukti tersendiri.
-4. **Defaults UX approved melalui plan:** polling5s, retry3 attempts1s/2s+jitter, satu file aktif/3 PUT total tab; server config/cap/TTL tidak diubah. Bukti perilaku tetap task implementasi, bukan hasil mockup.
+3. **Visual approved 2026-10-05:** pengguna menyetujui empat layout desktop/mobile light/dark melalui “oke approve”; ADUP-006 Done. English/theme/shell existing dan state specification menjadi acuan implementasi. Browser layouts dan runtime dibuktikan pada ADUP-012–015.
+4. **Defaults UX approved melalui plan dan diimplementasikan:** polling5s, retry3 attempts1s/2s+jitter, satu file aktif/3 PUT total tab; server config/cap/TTL tidak diubah. Bukti perilaku berada pada task implementasi, terpisah dari mockup.
 5. **Platform scope:** resume bergantung file reselection; tab/browser force-close menghilangkan File memory. R2 staging/perangkat fisik/Safari/full capacity adalah gerbang terpisah, bukan blockers menyusun plan.
 
 ## Validation history
@@ -654,5 +654,11 @@ Owner/session polling hanya nonterminal saat visible/online, setiap 5 detik; upl
 ### ADUP-014 — 2026-10-06 local execution
 
 Authenticated upload lifecycle is implemented: synchronous private-effect stop before cache cleanup and sign-out, expiry stop, scoped manager registration/disposal, route stay/pause-and-leave and beforeunload guard. Offline initiation fails locally; networkMode always keeps control mutations abortable instead of paused in Query. Native auth/upload/cache/recheck suite: 8 pass/41 assertions. Built Bun/Nitro Chromium auth cache and routes regressions pass (SSR/hydrate/preload, offline/reconnect/poll, auth outage/idle expiry, native login errors, logout failure, role lock, cross-tab/back denial). Built real PG/MinIO media flow additionally passes API503 with valid recheck/file retention, cross-tab lock without extra presign, offline pause/resume, leave stay/confirm, cancellation and in-flight PUT logout/back. Full native suite 198 pass/807. Root check-types3/3, lint1/1, build2/2 pass. Auth fixture controls are injected; real storage/worker evidence is separate. Already-issued storage URLs retain their expiry; no background upload guarantee. Additional targets required by this task: private-effects, upload-session-registry, use-upload-manager, session expiry, authenticated route and media-queries network policy.
+
+- Task commit belum ditulis pada saat evidence ini disimpan; receipt actual SHA/hooks dicatat pada update task berikutnya.
+
+### ADUP-015 — 2026-10-06 local execution
+
+Implemented/verified lokal 6 Oktober 2026. Built Bun/Nitro Chromium UI→same-origin gateway→Elysia→dedicated PostgreSQL→private random MinIO bucket→separate production worker entry/FFmpeg passes: Film source/poster and Series cover; 45 Light/Dark/System viewport combinations320/390/768/1024/1440 without horizontal overflow; published/archived read-only; source interrupted/pause/reload/full-hash reselection, same-name/size wrong file blocked before any new presign, verified-part skip, matching immutable source SHA against independent streaming oracle, one durable job after repeated completion, both roles verified Ready and Preview gate, dirty editor409 retains input, valid-session API503 recovery, best-effort cross-tab lock without extra presign, offline/resume, leave stay/pause, confirm cancel and in-flight logout/back. Theme changes preserve selected cover Blob; browser storage contains only theme and router scroll preferences, no file/fingerprint/signature/upload session; new part signing after logout returns401. Storage actual direct PUT/CORS/ETag, worker actual subprocess and native auth fixture controls are distinguished. Native auth/cache/routes built regressions and standalone SSR smoke pass; client import proof rejects @repo/auth/server and restores fixture. Full native command `bun test apps/api/src packages/auth/src apps/web/test`:198 pass/807 assertions/43 files. Serial guarded integrations: upload7/82, fingerprint migration1/14, worker1/63, Chromium transport/scheduler2/17. No development DB reset: prior ADUP-004 migration official journal9→10 preserved all17 tables, archive-list proof retained. `bun install --frozen-lockfile`:770 installs/947 packages, no changes. Root check-types3/3, lint1/1, build2/2 pass. UI finding: cover bytes now use B/KB below1MB instead of misleading0MB. Fixture target named admin-media-browser-fixture.ts; reused DRY harness and expanded canonical status PRD/global rules/overview. Browser screenshots inspected at ignored `.turbo/admin-media-upload-implementation/admin-upload-desktop-light.png` and `admin-upload-mobile-dark.png`; no generated build/test bucket/source/backup/secret artifacts staged. Docs/format/whitespace, staged-only documentation and unrelated path preservation checked before commit. Hash near1.5GB actual File proof remains ADUP-002/008 evidence, not a full-size end-to-end upload. No R2/Safari/physical-device/VPS/full-restore/production rollout or whole-MVP claim. Per-task commits remain local; actual ADUP-015 SHA is recorded in the following receipt update after its commit succeeds.
 
 - Task commit belum ditulis pada saat evidence ini disimpan; receipt actual SHA/hooks dicatat pada update task berikutnya.

@@ -22,7 +22,7 @@ Schema constraints, races PostgreSQL, routes dengan injected storage/clock, dan 
 
 ## Owner inventory — ADUP-003
 
-**Implemented/local verified · 5 Oktober 2026**, scope disetujui pengguna melalui [plan uploader](../plans/admin-media-upload/implementation-plan.md). Runtime browser uploader dan identity migration masih task berikutnya pada [backlog](../tasks/admin-media-upload.md).
+**Implemented/local verified · 5 Oktober 2026**, scope disetujui pengguna melalui [plan uploader](../plans/admin-media-upload/implementation-plan.md). Runtime browser uploader dan identity migration selesai serta terverifikasi lokal 6 Oktober 2026; evidence pada [backlog](../tasks/admin-media-upload.md).
 
 `GET /admin/media/owners/:ownerType/:ownerId` menerima `video` atau `series` dengan UUID, requireAdmin dan private/no-store. Response whitelist membawa owner/version/status/canUpload/canPreview, source inventory (null untuk Series), poster inventory serta aturan format/ukuran/dimensi/durasi dan upload concurrency/TTL dari config server. `canUpload` hanya draft/parent aktif; otorisasi akhir tetap pada setiap operasi kontrol.
 
@@ -40,4 +40,20 @@ Evidence HTTP/native/dedicated PG, regression playback serta scope platform dica
 
 Database development memakai command resmi `bun run --cwd apps/api db:migrate`: journal9→10. Backup PostgreSQL custom-format sudah divalidasi dengan pg_restore list; snapshot17 tabel membuktikan data existing tetap utuh. Full restore/production migration tetap belum dibuktikan. Dedicated migration test juga mempertahankan legacy session, asset, metadata serta user/account/session auth dan menguji constraint/rerun; evidence pada backlog ADUP-004.
 
-Worker menghitung SHA-256 sambil streaming download existing, lalu membandingkan expected digest sebelum FFprobe/transcode. Mismatch terminal `MEDIA_SOURCE_CHANGED`; job/asset failed, tanpa facts/readyJob/output valid. Completed upload tetap berbeda dari ready; fingerprint bukan codec/rights/publication proof. Completed legacy dengan expected hash null tetap diproses. Native/PG/MinIO compatibility evidence pada backlog ADUP-005; reselection guard UI mengikuti ADUP-008/011.
+Worker menghitung SHA-256 sambil streaming download existing, lalu membandingkan expected digest sebelum FFprobe/transcode. Mismatch terminal `MEDIA_SOURCE_CHANGED`; job/asset failed, tanpa facts/readyJob/output valid. Completed upload tetap berbeda dari ready; fingerprint bukan codec/rights/publication proof. Completed legacy dengan expected hash null tetap diproses. Native/PG/MinIO compatibility evidence pada backlog ADUP-005; reselection guard UI ADUP-008/011 telah diimplementasikan dan diuji.
+
+## Runtime uploader admin — 6 Oktober 2026
+
+Implemented/local verified pada detail `/admin/content/:type/:id`: Film/Standalone source+cover, Series cover-only; published/archived read-only. Tidak menambah halaman atau tindakan publish. Metadata tetap utuh di atas panel. Preview memakai capability server dan route HLS existing.
+
+Eden/TanStack Query membawa kontrol JSON bertipe melalui same-origin gateway. File, Worker, Blob, XHR, request attempt dan URL signing berada pada memory manager; signed URL tidak masuk Query/mutation data, log atau browser persistence. Cache privat in-memory hanya DTO aman dengan principal/owner/session key. Part signing memakai Eden langsung, lalu XHR PUT tanpa cookie/Authorization aplikasi. Network DevTools tetap dapat melihat URL yang digunakan browser.
+
+SHA-256 full-file dihitung incremental pada Worker memakai chunk4 MiB; pemilihan ulang memerlukan nama/ukuran/MIME dan digest identik sebelum resume. MIME kosong boleh diinfer dari ekstensi allowlist; pemeriksaan codec/durasi/dimensi tetap worker. Legacy pending tanpa fingerprint perlu cancel/restart. File tidak dipersistenkan: refresh menemukan descriptor dari inventory dan meminta pemilihan ulang.
+
+Scheduler memakai geometry server, satu file aktif per tab dengan antrean source/cover, maksimal min(server cap,3) PUT. ListParts menjadi kebenaran verified bytes/ETag; response PUT sendiri bukan completion. Maksimal3 attempt per part dengan jeda1s/2s+jitter; reconcile unknown outcome sebelum retry, skip verified parts dan final reconcile sebelum complete. Sent bytes tidak dihitung ganda saat retry. Upload completed, processing dan verified Ready tampil terpisah.
+
+Pause/offline/leave menghentikan hash/transfer lokal; session server tetap berumur24h sejak initiate. Route guard menawarkan Stay/Pause and leave; hard refresh memakai beforeunload lalu reselect. Browser Locks mencegah konflik dua tab secara best-effort; server claim/idempotency tetap authoritative. Complete/abort ambigu harus dicek ulang; race completed tidak ditampilkan sebagai cancelled. Unknown status ditampilkan netral.
+
+Logout/expiry/revocation/error sesi menghentikan private effects secara sinkron sebelum cache cleanup, melepaskan file/object URL/transport/lock dan mengabaikan late callbacks. Recheck API5xx dengan sesi admin valid mempertahankan attempt. Storage403 tidak memicu logout. Mutasi kontrol retry:false dan networkMode always agar tetap abortable saat offline; start offline ditolak lokal. URL yang sudah terbit dapat tetap berlaku hingga TTL.
+
+Owner/session polling5s hanya visible/online dan nonterminal, termasuk completed upload dengan job queued/running/retry. Terminal Ready/failed berhenti polling; focus/manual refresh tersedia. Complete menginvalidasi inventory/detail/list dan menaikkan rowVersion; dirty metadata baseline tetap milik form, save stale409 mempertahankan input. Evidence MinIO/PostgreSQL/FFmpeg/browser dan batas R2/Safari/production pada backlog/runbook.

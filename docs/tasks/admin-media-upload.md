@@ -1,6 +1,6 @@
 # Modul: admin media upload
 
-- Status: **plan dan empat mockup disetujui pengguna** pada 2026-10-05; ADUP-001/ADUP-006 Done, runtime belum diimplementasikan.
+- Status: **implemented dan verified lokal** pada 2026-10-06; ADUP-001–015 Done pada branch `feat/admin-media-upload`. Plan/empat mockup disetujui pengguna 2026-10-05; bukan klaim deployment production.
 - Diperbarui: 2026-10-05.
 - Snapshot: `d8417249de99611e1a661ade03bb4b03dd5f0538` pada `main`.
 - Plan canonical: [implementation-plan](../plans/admin-media-upload/implementation-plan.md).
@@ -9,7 +9,7 @@
 
 ## Tujuan modul
 
-Menambahkan Upload Media pada detail draft Film/Standalone (video asli dan sampul) dan Series (sampul), memakai Eden/TanStack Query untuk kontrol JSON dan direct S3 multipart PUT untuk byte. Pertahankan shell responsif, theme/avatar, metadata dan preview HLS existing. Identitas file saat resume, rediscovery session, status pemrosesan dan cleanup browser harus mempunyai bukti saat implementasi. Aturan produk tetap pada [PRD](../product/prd.md), [aturan produk](../product/global-rules.md) dan [kontrak upload](../architecture/media-upload-contract.md); proposed additions di plan belum menjadi kontrak aktif.
+Menambahkan Upload Media pada detail draft Film/Standalone (video asli dan sampul) dan Series (sampul), memakai Eden/TanStack Query untuk kontrol JSON dan direct S3 multipart PUT untuk byte. Pertahankan shell responsif, theme/avatar, metadata dan preview HLS existing. Identitas file saat resume, rediscovery session, status pemrosesan dan cleanup browser harus mempunyai bukti saat implementasi. Aturan produk tetap pada [PRD](../product/prd.md), [aturan produk](../product/global-rules.md) dan [kontrak upload](../architecture/media-upload-contract.md); kontrak inventory/fingerprint dan runtime uploader telah aktif; evidence serta batas platform berada pada task terkait.
 
 Tidak ada runtime atau empat mockup raster yang dibuat pada task planning. Episode editor, subtitle, publication actions dan rollout production berada di luar modul ini. Branch planning `chore/admin-media-upload-plan`; branch runtime yang direkomendasikan `feat/admin-media-upload` setelah scope/review dan freshness. Local task commit telah diotorisasi workflow pengguna; push/PR/merge memerlukan instruksi tersendiri.
 
@@ -729,7 +729,7 @@ Tidak ada blocker readiness; auth lifecycle dan acceptance closure mengikuti ADU
 - Owner: pengembang/agent pelaksana task.
 - Prioritas: 14, mengikuti dependencies.
 - Referensi: ADUP-US04; [plan canonical](../plans/admin-media-upload/implementation-plan.md), [PRD](../product/prd.md).
-- Diperbarui: 2026-10-05.
+- Diperbarui: 2026-10-06.
 - Dependensi: ADUP-011, ADUP-012.
 - Ukuran: satu hasil konkret; pecah menjadi task turunan ber-ID jika scope bertambah.
 
@@ -766,8 +766,8 @@ Authenticated upload lifecycle is implemented: synchronous private-effect stop b
 ### Commit task
 
 - Pesan yang direncanakan: `feat(web): adup-014 clean up private uploads`.
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- SHA: `cda2c036b75344cda4d801bf10560900e5050b38`.
+- Hook/checks: docs, lint, check-types dan Commitlint lulus; tidak ada hook dilewati.
 - Ledger: catat SHA aktual setelah commit berhasil pada update dokumentasi berikutnya; jangan menulis SHA self-referential.
 
 ### Blocker atau tindak lanjut
@@ -776,11 +776,11 @@ No blocker for ADUP-014. Final acceptance/documentation receipts and remote-deli
 
 ## Task: ADUP-015 — Acceptance uploader MinIO dan closure dokumentasi
 
-- Status: Backlog
+- Status: Done
 - Owner: pengembang/agent pelaksana task.
 - Prioritas: 15, mengikuti dependencies.
 - Referensi: ADUP-US04; [plan canonical](../plans/admin-media-upload/implementation-plan.md), [PRD](../product/prd.md).
-- Diperbarui: 2026-10-05.
+- Diperbarui: 2026-10-06.
 - Dependensi: ADUP-003, ADUP-004, ADUP-005, ADUP-006, ADUP-007, ADUP-008, ADUP-009, ADUP-010, ADUP-011, ADUP-012, ADUP-013, ADUP-014.
 - Ukuran: satu task acceptance lintas alur menggunakan harness existing.
 
@@ -792,7 +792,7 @@ Target/symbol: Built admin UI→gateway→Elysia→PG→MinIO→worker proof; ta
 
 - `apps/web/test/admin-media-upload-browser-worker.mjs`
 - `apps/web/test/auth-browser-smoke.mjs`
-- `apps/api/test/integration/admin-media-upload-fixture.ts`
+- `apps/api/test/integration/admin-media-browser-fixture.ts`
 - `apps/api/test/integration/media-upload-proof.test.ts`
 - `docs/operations/media.md`
 - `docs/architecture/media-upload-contract.md`
@@ -808,9 +808,9 @@ Target/symbol: Built admin UI→gateway→Elysia→PG→MinIO→worker proof; ta
 
 ### Acceptance criteria
 
-- [ ] End-to-end UI menghasilkan immutable source dengan matching fingerprint, exactly one activated session/job pada complete replay, lalu verified output.
-- [ ] Semua meaningful failure/recovery/auth/layout cases lulus; evidence real-vs-fixture/platform jelas.
-- [ ] Semua task implementasi committed lokal per task dan canonical docs diperbarui; delivery remote hanya jika diminta.
+- [x] End-to-end UI menghasilkan immutable source dengan matching fingerprint, exactly one activated session/job pada complete replay, lalu verified output.
+- [x] Semua meaningful failure/recovery/auth/layout cases lulus; evidence real-vs-fixture/platform jelas.
+- [x] Semua task implementasi committed lokal per task dan canonical docs diperbarui; delivery remote hanya jika diminta.
 
 ### Validasi
 
@@ -818,7 +818,7 @@ Relevant native suite + guarded dedicated DB/storage + built browser/SSR/auth bo
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan rencana, bukan hasil test yang telah dijalankan. Isi evidence aktual dan batas proof saat task dikerjakan.
+Implemented/verified lokal 6 Oktober 2026. Built Bun/Nitro Chromium UI→same-origin gateway→Elysia→dedicated PostgreSQL→private random MinIO bucket→separate production worker entry/FFmpeg passes: Film source/poster and Series cover; 45 Light/Dark/System viewport combinations320/390/768/1024/1440 without horizontal overflow; published/archived read-only; source interrupted/pause/reload/full-hash reselection, same-name/size wrong file blocked before any new presign, verified-part skip, matching immutable source SHA against independent streaming oracle, one durable job after repeated completion, both roles verified Ready and Preview gate, dirty editor409 retains input, valid-session API503 recovery, best-effort cross-tab lock without extra presign, offline/resume, leave stay/pause, confirm cancel and in-flight logout/back. Theme changes preserve selected cover Blob; browser storage contains only theme and router scroll preferences, no file/fingerprint/signature/upload session; new part signing after logout returns401. Storage actual direct PUT/CORS/ETag, worker actual subprocess and native auth fixture controls are distinguished. Native auth/cache/routes built regressions and standalone SSR smoke pass; client import proof rejects @repo/auth/server and restores fixture. Full native command `bun test apps/api/src packages/auth/src apps/web/test`:198 pass/807 assertions/43 files. Serial guarded integrations: upload7/82, fingerprint migration1/14, worker1/63, Chromium transport/scheduler2/17. No development DB reset: prior ADUP-004 migration official journal9→10 preserved all17 tables, archive-list proof retained. `bun install --frozen-lockfile`:770 installs/947 packages, no changes. Root check-types3/3, lint1/1, build2/2 pass. UI finding: cover bytes now use B/KB below1MB instead of misleading0MB. Fixture target named admin-media-browser-fixture.ts; reused DRY harness and expanded canonical status PRD/global rules/overview. Browser screenshots inspected at ignored `.turbo/admin-media-upload-implementation/admin-upload-desktop-light.png` and `admin-upload-mobile-dark.png`; no generated build/test bucket/source/backup/secret artifacts staged. Docs/format/whitespace, staged-only documentation and unrelated path preservation checked before commit. Hash near1.5GB actual File proof remains ADUP-002/008 evidence, not a full-size end-to-end upload. No R2/Safari/physical-device/VPS/full-restore/production rollout or whole-MVP claim. Per-task commits remain local; actual ADUP-015 SHA is recorded in the following receipt update after its commit succeeds.
 
 ### Commit task
 
@@ -829,7 +829,7 @@ Belum diimplementasikan atau diverifikasi. Perintah di bagian validasi merupakan
 
 ### Blocker atau tindak lanjut
 
-Dependencies ADUP-003, ADUP-004, ADUP-005, ADUP-006, ADUP-007, ADUP-008, ADUP-009, ADUP-010, ADUP-011, ADUP-012, ADUP-013, ADUP-014 (scope plan telah disetujui pengguna). R2 staging, Safari/native HLS, production migrations dan kapasitas VPS tetap gerbang terpisah.
+No blocker for the approved uploader module. Publication UI, episode editor/upload, subtitle and broader product work remain separate. Push/PR/merge/deployment are not authorized for this branch; R2 staging, Safari/native HLS, capacity and full restore remain separate gates.
 
 ## Ledger planning
 
@@ -839,4 +839,4 @@ Dependencies ADUP-003, ADUP-004, ADUP-005, ADUP-006, ADUP-007, ADUP-008, ADUP-00
 | 2026-10-05 | ADUP-006 | Review: empat raster/state spec, PNG/docs/staged snapshot/preservation dan hooks lulus; visual approval pending | `f93e9af81c18107f1d70e7c645a2ef496f26db05` |
 | 2026-10-05 | ADUP-006 | Done: pengguna menyetujui empat mockup melalui ‘oke approve’; visual acceptance selesai                         | `f80998cd18fafaf12de5cc4a18e2c53563a9f872` |
 
-ADUP-001/ADUP-006 Done setelah approval plan dan empat mockup; task runtime lainnya tetap Backlog. Status Done planning/desain tidak berarti uploader atau migrasi telah diimplementasikan.
+Riwayat planning 2026-10-05: pada saat approval hanya ADUP-001/ADUP-006 Done. Runtime kemudian diimplementasikan dan diverifikasi per task; status serta receipt terbaru berada pada task ADUP-002–015 di atas.

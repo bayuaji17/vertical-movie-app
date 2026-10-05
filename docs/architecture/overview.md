@@ -8,25 +8,25 @@ Update implementasi 5 Oktober 2026, disetujui pengguna: dashboard metadata tahap
 
 Workspace Bun mempunyai dua aplikasi dan satu package auth bersama. `apps/api` menyediakan Elysia HTTP API, PostgreSQL/Drizzle, storage/upload, publikasi/katalog/playback dan kode worker. `apps/web` menyediakan TanStack Start, gateway same-origin, login/dashboard metadata admin (Eden/TanStack Query) dan player watch/preview minimal. `packages/auth` memiliki Better Auth server/client/types; credential server tidak masuk entry client.
 
-Media backend sudah diimplementasikan: multipart/freeze/enqueue, worker FFmpeg HLS/WebP, claim/lease/retry/recovery, readiness/publish/archive, katalog API dan signed delivery. Homepage masih starter MP4 demo. Dashboard metadata Film/Standalone/Series tersedia: list/search/pagination, create/detail/edit, theme, conflict dan dirty-navigation. Dashboard upload/publish/recovery, editor season/episode, katalog web lengkap, konfigurasi situs dan subtitle masih lanjutan. Spesifikasi/mockup desain tidak dianggap layar yang sudah berjalan.
+Media backend sudah diimplementasikan: multipart/freeze/enqueue, worker FFmpeg HLS/WebP, claim/lease/retry/recovery, readiness/publish/archive, katalog API dan signed delivery. Homepage masih starter MP4 demo. Dashboard metadata Film/Standalone/Series tersedia: list/search/pagination, create/detail/edit, theme, conflict dan dirty-navigation. Uploader source/cover Film/Standalone dan cover Series tersedia, dengan hash/pause/resume/readiness dan auth cleanup; evidence lokal 6 Oktober 2026 pada [backlog ADUP](../tasks/admin-media-upload.md). Publication UI, editor season/episode, katalog web lengkap, konfigurasi situs dan subtitle masih lanjutan. Spesifikasi/mockup desain tidak dianggap layar yang sudah berjalan.
 
 Ketentuan produk dan angka policy media dimiliki [PRD](../product/prd.md), aturan lintas fitur oleh [Global Rules](../product/global-rules.md). Overview ini memiliki batas komponen dan dataflow. Instruksi proses/command dimiliki [AGENTS.md](../../AGENTS.md), [API development](../guides/api-development.md), [environment](../guides/environment.md) dan runbook, sehingga tidak diduplikasi sebagai workflow baru.
 
 ## Tech stack yang dipilih
 
-| Lapisan           | Teknologi                                       | Kondisi/peran saat ini                                                                                                                                       |
-| ----------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Runtime/workspace | Bun, Turborepo                                  | Runtime API/web/worker dan orchestration task workspace; versi/dependensi mengikuti manifests/lockfile.                                                      |
-| Backend           | Elysia                                          | Factory bertipe tanpa listen pada `app.ts`; bootstrap dependency/listen di `index.ts`.                                                                       |
-| API client        | Eden Treaty                                     | Type-only `api/types`, `parseDate: false`; browser memakai public origin `/api`, auth memakai SDK Better Auth tersendiri.                                    |
-| Web               | TanStack Start, React, Bun/Nitro                | Gateway, auth, dashboard metadata responsif/light-dark dan watch/preview tersedia; upload/publication UI serta katalog masih lanjutan.                       |
-| Database          | PostgreSQL, Drizzle, Bun SQL                    | Auth, metadata, aset, session upload, durable job/attempt/rendition dan operation tersedia. API/worker memakai pool per proses pada DB yang sama.            |
-| Auth              | Better Auth pada `@repo/auth`                   | Email/password, single-admin provisioning/recovery, sesi PostgreSQL dan private guard tersedia; signup publik nonaktif.                                      |
-| Object storage    | MinIO development / Cloudflare R2 production    | Satu bucket privat per env, selector server `STORAGE_PROVIDER`; profil provider/bucket/key persisten. R2 staging belum dibuktikan.                           |
-| Storage clients   | Native `Bun.S3Client` dan SDK S3                | Native read/stat/presign; SDK explicit multipart/copy/control dan penulisan output worker menutup kebutuhan yang belum dipenuhi native pada proof Bun 1.4.2. |
-| Queue/worker      | PostgreSQL, proses Bun terpisah, FFmpeg/FFprobe | Polling, SKIP LOCKED, heartbeat/recovery/retry, deadline/shutdown dan cleanup tersedia; tidak ada broker atau LISTEN/NOTIFY runtime.                         |
-| UI/form/data      | shadcn Base UI, Tailwind, TanStack Form/Query   | Primitive/login dan fondasi query/session tersedia; bukan bukti form upload/dashboard konten selesai.                                                        |
-| Player            | Video.js React/core/hlsjs-video 10.0.0-rc.4     | Adapter HLS dan renewal URL tersedia; compatibility Safari/native HLS/perangkat sasaran masih gerbang verifikasi.                                            |
+| Lapisan           | Teknologi                                       | Kondisi/peran saat ini                                                                                                                                          |
+| ----------------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Runtime/workspace | Bun, Turborepo                                  | Runtime API/web/worker dan orchestration task workspace; versi/dependensi mengikuti manifests/lockfile.                                                         |
+| Backend           | Elysia                                          | Factory bertipe tanpa listen pada `app.ts`; bootstrap dependency/listen di `index.ts`.                                                                          |
+| API client        | Eden Treaty                                     | Type-only `api/types`, `parseDate: false`; browser memakai public origin `/api`, auth memakai SDK Better Auth tersendiri.                                       |
+| Web               | TanStack Start, React, Bun/Nitro                | Gateway, auth, dashboard metadata responsif/light-dark dan watch/preview tersedia; uploader source/cover tersedia; publication UI serta katalog masih lanjutan. |
+| Database          | PostgreSQL, Drizzle, Bun SQL                    | Auth, metadata, aset, session upload, durable job/attempt/rendition dan operation tersedia. API/worker memakai pool per proses pada DB yang sama.               |
+| Auth              | Better Auth pada `@repo/auth`                   | Email/password, single-admin provisioning/recovery, sesi PostgreSQL dan private guard tersedia; signup publik nonaktif.                                         |
+| Object storage    | MinIO development / Cloudflare R2 production    | Satu bucket privat per env, selector server `STORAGE_PROVIDER`; profil provider/bucket/key persisten. R2 staging belum dibuktikan.                              |
+| Storage clients   | Native `Bun.S3Client` dan SDK S3                | Native read/stat/presign; SDK explicit multipart/copy/control dan penulisan output worker menutup kebutuhan yang belum dipenuhi native pada proof Bun 1.4.2.    |
+| Queue/worker      | PostgreSQL, proses Bun terpisah, FFmpeg/FFprobe | Polling, SKIP LOCKED, heartbeat/recovery/retry, deadline/shutdown dan cleanup tersedia; tidak ada broker atau LISTEN/NOTIFY runtime.                            |
+| UI/form/data      | shadcn Base UI, Tailwind, TanStack Form/Query   | Primitive/login, dashboard metadata dan uploader menggunakan Query/Eden/Form sesuai kebutuhan; File/transport berada pada manager privat.                       |
+| Player            | Video.js React/core/hlsjs-video 10.0.0-rc.4     | Adapter HLS dan renewal URL tersedia; compatibility Safari/native HLS/perangkat sasaran masih gerbang verifikasi.                                               |
 
 Manifests API/web/auth menjadi acuan dependency. AWS SDK tidak mengubah keputusan provider atau metode upload; batas proof native dan alternatif tercatat pada [kontrak upload](media-upload-contract.md) dan [runbook media](../operations/media.md).
 
@@ -125,7 +125,7 @@ Retensi source non-archived dimulai tujuh hari sejak HLS verified-ready tanpa jo
 
 ## Pekerjaan lanjutan dan gerbang verifikasi
 
-- **UI produk:** dashboard upload/publish/progres/recovery, editor season/episode, katalog/navigasi publik lengkap dan konfigurasi situs. Field pengaturan, UX katalog dan kebijakan konten masih pertanyaan PRD yang dilewati; tidak diputuskan oleh review arsitektur.
+- **UI produk:** publication UI, upload/editor season/episode, katalog/navigasi publik lengkap dan konfigurasi situs. Field pengaturan, UX katalog dan kebijakan konten masih pertanyaan PRD yang dilewati; tidak diputuskan oleh review arsitektur.
 - **Fitur opsional/lanjutan:** subtitle, restore/republish, revisi source published dan cascade parent yang belum dirancang/diimplementasikan. Tidak mengklaim caption delivery karena kontrol caption player tersedia.
 - **Provider/platform:** R2 staging/end-to-end serta Safari/native HLS/perangkat sasaran. Proof MinIO/Chromium historis tidak menggantikannya.
 - **Resource/recovery:** benchmark target 4 core/RAM 4 GB, kualitas visual, supervisor/stress/fault dan full restore yang belum lengkap. Concurrency/config defaults bukan bukti kapasitas.

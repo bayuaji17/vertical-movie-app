@@ -78,7 +78,7 @@ bun -e 'console.log(Array.from(crypto.getRandomValues(new Uint8Array(32)), byte 
 
 ## Upload multipart — parameter disetujui
 
-Parameter berikut disetujui 4 Oktober 2026. Loader dan session API aktif; scheduler dashboard upload lengkap belum dibuat. Kontrak lengkap pada [parameter upload](../plans/video/implementation-plan.md#nomor-2--parameter-upload-disetujui-4-oktober-2026).
+Parameter berikut disetujui 4 Oktober 2026. Loader, session API dan scheduler uploader admin aktif; proof lokal 6 Oktober 2026 pada [backlog ADUP](../tasks/admin-media-upload.md). Kontrak lengkap pada [parameter upload](../plans/video/implementation-plan.md#nomor-2--parameter-upload-disetujui-4-oktober-2026).
 
 | Variabel server aktif             | Default | Arti                                                                                 |
 | --------------------------------- | ------- | ------------------------------------------------------------------------------------ |
@@ -86,7 +86,7 @@ Parameter berikut disetujui 4 Oktober 2026. Loader dan session API aktif; schedu
 | MEDIA_UPLOAD_SESSION_TTL_SECONDS  | 86400   | Session 24 jam sejak initiate, tidak diperpanjang oleh retry                         |
 | MEDIA_UPLOAD_PART_URL_TTL_SECONDS | 900     | URL part maksimal 15 menit sejak signing, dibatasi sisa session                      |
 
-Runtime kelak menghitung partUrlTtlSeconds = min(900, floor((sessionExpiresAt - now)/1000)); sisa kurang dari 1 detik atau session non-pending ditolak. Renewal memeriksa admin/session/part dan tidak mengulang part yang sudah terverifikasi. MEDIA-CFG-001 menguji default/validasi positive integer tanpa storage I/O; MEDIA-PROOF/DESIGN/UPLOAD membuktikan native signing, expiry dan browser concurrency. Konfigurasi milik API, disampaikan sebagai nilai aman kepada browser tanpa VITE_ secret atau signed URL persisten.
+Runtime menghitung partUrlTtlSeconds = min(900, floor((sessionExpiresAt - now)/1000)); sisa kurang dari 1 detik atau session non-pending ditolak. Renewal memeriksa admin/session/part dan tidak mengulang part yang sudah terverifikasi. MEDIA-CFG-001 menguji default/validasi positive integer tanpa storage I/O; MEDIA-PROOF/DESIGN/UPLOAD membuktikan native signing, expiry dan browser concurrency. Konfigurasi milik API, disampaikan sebagai nilai aman kepada browser tanpa VITE_ secret atau signed URL persisten.
 
 ## Worker — env aktif dan kandidat resource
 
@@ -138,3 +138,11 @@ Gateway memakai origin publik terkonfigurasi `VITE_API_URL` (runtime server jika
 - [FFmpeg HLS muxer](https://ffmpeg.org/ffmpeg-formats.html#hls-2)
 - [Vite environment variables](https://vite.dev/guide/env-and-mode) dan [env pada config Vite](https://vite.dev/config/#using-environment-variables-in-config)
 - [Better Auth installation](https://better-auth.com/docs/installation)
+
+## Uploader browser — konfigurasi dan proof lokal
+
+Update6 Oktober 2026: uploader memakai origin gateway existing dan safe config inventory dari API. Tidak ada env storage credential baru pada web atau VITE__. MinIO/R2 tetap dipilih oleh STORAGE_PROVIDER dan S3__ server; client tidak menyimpan URL/File/session privat di localStorage/IndexedDB. MEDIA_UPLOAD_PART_CONCURRENCY dibatasi client maksimum3 dengan satu file aktif per tab; MEDIA_WORKER_CONCURRENCY default1 tetap terpisah.
+
+Test fixture uploader menggunakan MEDIA_TEST_DATABASE_URL hanya loopback/vertical_movie_app_media_test serta MEDIA_STORAGE_TEST_ENDPOINT/ACCESS_KEY_ID/SECRET_ACCESS_KEY yang eksplisit untuk bucket fixture acak. Credential test perlu hak create/delete bucket; credential aplikasi scoped bucket tidak perlu hak tersebut. Jangan menaruh nilai credential pada docs/log.
+
+Browser harness menggunakan AUTH_BROWSER_PHASE=media, AUTH_BROWSER_RUNTIME=built, MEDIA_BROWSER_PHASE=full|layout|outage dan AUTH_BROWSER_NODE/AUTH_PLAYWRIGHT_MODULE/AUTH_BROWSER_EXECUTABLE untuk runner yang tersedia. Default worker dibaca dari checkout dan dievaluasi di runner; AUTH_BROWSER_WORKER_PATH hanya compatibility override. Auth fixture tidak membuktikan deployment Better Auth production. Root build dan suite reset DB harus serial terhadap browser proof; [runbook media](../operations/media.md#upload-media-admin--workflow-dan-proof-6-oktober-2026) memisahkan runtime dan test.

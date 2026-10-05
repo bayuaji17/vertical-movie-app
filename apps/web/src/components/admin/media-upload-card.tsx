@@ -52,8 +52,11 @@ const phaseLabels: Record<UploadPhase, string> = {
   unknown: 'Check upload status',
   failed: 'Upload stopped',
 }
-const bytes = (size: number) =>
-  `${(size / 1000000).toLocaleString('en-US', { maximumFractionDigits: 1 })} MB`
+const bytes = (size: number) => {
+  if (size < 1000) return `${size} B`
+  const divisor = size < 1000000 ? 1000 : 1000000
+  return `${(size / divisor).toLocaleString('en-US', { maximumFractionDigits: 1 })} ${divisor === 1000 ? 'KB' : 'MB'}`
+}
 export function MediaUploadCard({
   kind,
   role,

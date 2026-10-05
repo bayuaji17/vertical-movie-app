@@ -1,6 +1,6 @@
 # Admin media upload — desktop dan mobile light/dark
 
-> Status: **empat mockup disetujui pengguna** · 5 Oktober 2026. Approval eksplisit pengguna: “oke approve”. ADUP-006 Done; uploader runtime belum diimplementasikan.
+> Status: **empat mockup disetujui pengguna** · 5 Oktober 2026. Approval eksplisit pengguna: “oke approve”. ADUP-006 Done. Runtime diimplementasikan dan verified lokal 6 Oktober 2026; evidence browser/45 kombinasi tema-viewport pada [ADUP-012–015](../tasks/admin-media-upload.md). Raster di bawah tetap artefak approval 5 Oktober, bukan screenshot runtime.
 
 ## Scope dan acuan
 
