@@ -823,8 +823,8 @@ Implemented/verified lokal 6 Oktober 2026. Built Bun/Nitro Chromium UI→same-or
 ### Commit task
 
 - Pesan yang direncanakan: `test(web): adup-015 verify media upload workflow`.
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- SHA: `e83627b89b21d5133e1c21d8f4073615c1c6fe06`.
+- Hook/checks: docs56/491, lint1/1, check-types3/3 dan Commitlint lulus; tidak ada hook dilewati. Prettier, diff serta staged-only docs49/472/preservation22 paths lulus sebelum commit.
 - Ledger: catat SHA aktual setelah commit berhasil pada update dokumentasi berikutnya; jangan menulis SHA self-referential.
 
 ### Blocker atau tindak lanjut
