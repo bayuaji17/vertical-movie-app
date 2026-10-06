@@ -18,7 +18,7 @@ Grid, featured placement serta search/filter adalah arah visual yang disetujui p
 
 ## Keputusan tahap frontend — 7 Oktober 2026
 
-Pengguna meminta fokus FE dengan dummy JSON dan belum memakai API. [Context](../plans/home-catalog/repository-context.md), [plan detail](../plans/home-catalog/implementation-plan.md) dan [backlog HOMEFE](../tasks/home-catalog.md) menjadi pemilik rincian implementasi. Usulan default: 18 fixture items, batch enam tanpa perbedaan SSR/mobile, detail dialog lokal dan CTA View film. Dua kartu pada raster mobile hanya contoh tampilan; source fixture tetap sama di semua viewport. Playback/real published data bukan hasil tahap ini.
+Pengguna meminta fokus FE dengan dummy JSON dan belum memakai API. [Context](../plans/home-catalog/repository-context.md), [plan detail](../plans/home-catalog/implementation-plan.md) dan [backlog HOMEFE](../tasks/home-catalog.md) menjadi pemilik rincian implementasi. Usulan default: 18 fixture items, batch enam tanpa perbedaan SSR/mobile, detail dialog lokal dan CTA View film. Refinement pengguna 7 Oktober 2026 memakai useInfiniteQuery TanStack Query, queryFn JSON lokal dan Load more manual; detail caching/SSR/page contract berada pada plan. Dua kartu pada raster mobile hanya contoh tampilan; source fixture tetap sama di semua viewport. Playback/real published data bukan hasil tahap ini.
 
 ## Artefak
 

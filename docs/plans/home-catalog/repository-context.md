@@ -44,7 +44,7 @@ Pengunjung menemukan Film, Series dan Standalone tanpa akun. Arah visual light d
 
 Saat ini: homepage → komponen demo → MP4 eksternal. Watch → browser Eden → gateway/API playback. Homepage tidak memiliki katalog/store public.
 
-Target tahap dummy: import JSON lokal → validasi typed sekali → pure selectors → state React → public components → dialog detail lokal. Tidak ada fetch JSON, server function katalog, Eden, Query fetcher, session query atau server API loader pada jalur baru. JSON dan gambar dikemas/disajikan oleh aplikasi web sendiri; request asset HTML/JS/CSS/font/gambar tetap normal.
+Target tahap dummy: import JSON lokal → validasi typed sekali → pure page selectors → useInfiniteQuery dengan queryFn lokal → public components → dialog detail lokal. Tidak ada fetch JSON, server function katalog, Eden, HTTP Query fetcher, session query atau server API loader pada jalur baru. JSON dan gambar dikemas/disajikan oleh aplikasi web sendiri; request asset HTML/JS/CSS/font/gambar tetap normal.
 
 ## Domain and data model
 
@@ -66,7 +66,7 @@ Planning Markdown: Prettier, docs:check, diff check. Implementasi nanti: tes sel
 
 ## Constraints and conventions
 
-Dokumentasi feature pada folder ini, backlog pada [home-catalog.md](../../tasks/home-catalog.md). Baca guide/workflow/task template dan source sebelum perubahan behavior. Poster CSS wajib aspect-ratio 9/16; gambar raster mockup bukan bukti presisi. Copy English; light menjadi acuan visual utama, dark/system menggunakan semantic tokens existing. Responsive grid tidak bergantung pada screen width di SSR data selector.
+Dokumentasi feature pada folder ini, backlog pada [home-catalog.md](../../tasks/home-catalog.md). Baca guide/workflow/task template dan source sebelum perubahan behavior. Poster CSS wajib aspect-ratio 9/16; gambar raster mockup bukan bukti presisi. Copy English; light menjadi acuan visual utama, dark/system menggunakan semantic tokens existing. Responsive grid tidak bergantung pada screen width di SSR data selector. Refined infinite query memakai initialData pages/pageParams; QueryClient/router SSR existing direuse.
 
 Tidak hand-edit routeTree.gen.ts, mengganti auth guards, mengubah API, atau menambah shared package. Branch existing dipertahankan; commit setiap task setelah AC/checks lulus, dengan ID. Push/PR/merge tetap operasi tersendiri.
 
@@ -104,3 +104,7 @@ Semua path source di bawah direview terhadap base SHA di Snapshot; source runtim
 | Tests/tooling/gates                     | `apps/web/package.json`, `test/admin-theme.test.ts`, `test/admin-content-browser-worker.mjs`, root package and .husky |
 | Approved mockup plus limitations        | `docs/design/home-catalog.md`, `docs/tasks/home-catalog-design.md`, source images; approval user 7 October 2026       |
 | Main checkout new work is documentation | Git diff 313e31a…→4cf00a9…, APUB docs/index only                                                                      |
+
+## Refinement konteks TanStack Query — 7 Oktober 2026
+
+Snapshot teknis tambahan 509d3870f12ad5aa562342bcb6fee778c97cf602. Pengguna memperjelas useInfiniteQuery; state-only pagination sebelumnya merupakan proposal yang diganti. Source getContext membuat QueryClient per router; setupRouterSsrQueryIntegration mengintegrasikan SSR. Installed @tanstack/react-query 5.104.0 source useInfiniteQuery.ts/infiniteQueryOptions.ts dan query-core infiniteQueryBehavior.ts mendukung initialPageParam/getNextPageParam/data.pages/fetchNextPage. Tidak perlu dependency/provider baru. Adapter dummy membaca JSON lokal melalui Promise, bukan HTTP; initialData first page menjaga SSR deterministik. Detail refinement dimiliki [plan](implementation-plan.md#refinement-useinfinitequery--7-oktober-2026).

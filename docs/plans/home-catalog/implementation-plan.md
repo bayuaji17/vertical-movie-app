@@ -20,7 +20,7 @@ Mengganti starter route `/` dengan homepage/katalog sesuai [mockup approved](../
 
 Dalam scope: public header/nav/appearance, intro, featured Film, poster catalog Film/Series/Standalone, pencarian, filter jenis/genre, latest ordering, Load more, empty/fallback, detail dialog lokal, responsive/light-dark/system dan page metadata.
 
-Di luar scope: membaca API/Eden/gateway/TanStack Query untuk katalog, login pengunjung, database/migrasi, publication/admin, watch/HLS, signed URL, episode navigation/player, favorites/history/likes/rating, remote images dan hosted CI/deployment. Tidak membuat MSW/mock HTTP server karena JSON langsung cukup.
+Di luar scope: membaca API/Eden/gateway untuk katalog, login pengunjung, database/migrasi, publication/admin, watch/HLS, signed URL, episode navigation/player, favorites/history/likes/rating, remote images dan hosted CI/deployment. Tidak membuat MSW/mock HTTP server karena JSON langsung cukup.
 
 ## Current behavior
 
@@ -86,17 +86,27 @@ Contoh di atas parsial; fixture final berisi **18 items, masing-masing enam movi
 
 Validasi: kind discriminated union; movie/standalone durationMs positif, series episodeCount integer positif; field jenis yang tidak relevan ditolak; ID/slug unik, genre IDs tersedia, featuredId menunjuk movie, poster path lokal saja. Hindari casts `as CatalogItem[]` yang menutupi mismatch. Fixture tidak berisi token/credential/storage key, source URL, status worker atau metadata admin.
 
-`catalog-data.ts` mengexport parsed read-only items/genres/featured. Tidak membuat class repository/service dengan async wrapper palsu. Boundary ini dapat diganti adapter pada task integrasi API berikutnya, tanpa mengimplementasikan adapter sekarang.
+`catalog-data.ts` mengexport parsed read-only items/genres/featured. Selector halaman tetap pure. Adapter queryFn mengembalikan Promise dari hasil JSON lokal karena useInfiniteQuery memerlukan kontrak query; tanpa fetch, timeout atau simulasi latensi. Integrasi API dapat mengganti adapter pada task lanjutan, tanpa membuat HTTP mock sekarang.
 
 ### Query, filter, urutan dan Load more
 
-State React terpusat pada homepage: `query`, `kind`, `genreId`, `visibleCount`, `selectedItemId`. Dataset kecil; filtering lokal synchronous, tanpa debounce/timer/requests. State tidak dipersist ke URL atau storage dalam iterasi ini; reload kembali ke default, tema tetap mengikuti storage existing.
+Refinement pengguna 7 Oktober 2026: gunakan **TanStack Query useInfiniteQuery**, tetap dengan dummy JSON. Tombol Load more adalah pemicu fetchNextPage; tidak menambahkan IntersectionObserver atau automatic scroll trigger.
 
-Pipeline pure: normalisasi query trim/case-insensitive → match substring title/synopsis → kind predicate → genre membership → publishedAt descending → id ascending sebagai tie-break → slice visibleCount. Filter gabungan memakai AND. Search kosong/whitespace sama dengan tanpa search. Tidak melakukan fuzzy/AI search atau melabeli relevance ranking.
+State React hanya search/kind/genre/selectedItemId; halaman/loaded items dimiliki infinite query. Reuse QueryClient per router dan setupRouterSsrQueryIntegration existing. Buat catalog-queries.ts dengan infiniteQueryOptions dan hook useInfiniteQuery; tidak membuat QueryClient singleton atau provider baru.
 
-Default `kind=all`, `genreId=all`, query kosong, batch **6**. Enam di mobile maupun desktop: perbedaan dua kartu pada raster mobile merupakan contoh viewport, bukan page size dinamis. Load more menambah enam, tidak mengubah urutan, tidak duplikat, menjaga posisi scroll; hilang setelah semua hasil muncul. Mengubah search/kind/genre atau reset mengembalikan visibleCount ke enam. ToggleGroup harus single-selection dan tidak boleh meninggalkan kind kosong. Genre memakai NativeSelect dan All genres; pilihan berasal dari fixture, tidak berubah diam-diam saat kind berubah.
+Query key: ['catalog', 'dummy', schemaVersion, { search: normalizedSearch, kind, genreId, pageSize: 6 }]. Prefix publik terpisah dari admin/auth. pageParam merupakan offset numerik, initialPageParam=0. Pure getCatalogPage menerapkan title/synopsis search trim/case-insensitive, kind+genre AND, publishedAt descending/id ascending, lalu slice(offset, offset+6). Return { items, total, nextOffset }; nextOffset undefined bila habis, termasuk hasil kosong. getNextPageParam(lastPage) mengembalikan lastPage.nextOffset. UI meratakan data.pages.flatMap(page => page.items), tanpa visibleCount atau salinan array loaded items.
 
-Latest releases adalah **label urutan tetap**, bukan dropdown kosong/sort selector baru walau raster mobile menyerupai button. Semua genre/jenis tetap selectable untuk menguji hasil kosong. Empty memakai Empty primitive, teks No titles found dan Reset filters; reset mengembalikan query/kind/genre/batch serta fokus search yang aktif. Result count memakai live region polite dengan pesan ringkas, tanpa membanjiri announce saat mengetik.
+Adapter queryFn mengembalikan Promise dari JSON yang sudah diparse, membaca signal dan menghormati cancellation; tidak memanggil API atau mengambil JSON lewat HTTP. Gunakan networkMode='always' karena sumbernya lokal, staleTime=Infinity, retry=false, serta refetchOnMount/refetchOnWindowFocus/refetchOnReconnect=false. Tidak memakai maxPages yang membuang halaman awal. QueryClient existing tetap memiliki batas garbage collection existing untuk query tidak aktif.
+
+SSR dan initial render memakai initialData { pages: [getCatalogPage(filters, 0)], pageParams: [0] } yang dibangun dari fixture yang sama untuk setiap key. Shape InfiniteData dipertahankan; initialPageParam tidak undefined. Default server/client menampilkan enam kartu pada semua ukuran. Tidak menunggu API/server loader baru atau membuat skeleton/delay palsu.
+
+Load more memanggil fetchNextPage({ cancelRefetch: false }) hanya bila hasNextPage && !isFetching; button disabled saat isFetching dan memakai isFetchingNextPage untuk busy state yang nyata. Tetap pertahankan halaman lama saat memuat; button hilang ketika hasNextPage=false. Klik cepat ganda harus tidak menambah request halaman/duplikasi/cancel-restart.
+
+Perubahan search/kind/genre yang sudah dinormalisasi mengganti query key dan memulai dari offset0. Untuk menjaga requirement kembali ke enam termasuk saat kembali ke filter yang pernah memuat18, reset cache **key katalog tujuan saja**: cancelQueries({ queryKey: nextKey, exact: true }), seed first-page InfiniteData lewat setQueryData, lalu commit state filter. Ini dilakukan pada event, bukan render. Hook memakai options/key yang sama; jangan clear/reset seluruh QueryClient. Batalkan query lama yang sedang memuat agar hasil filter lama tidak masuk UI baru. Reset filters/Home menggunakan prosedur yang sama. Dialog, resize, theme dan Load more sendiri tidak mengganti key/reset pages.
+
+Search input tidak memakai debounce/timer atau persist URL/storage pada tahap ini. Query key memakai nilai query yang normal, sehingga perubahan case/whitespace yang tidak mengubah arti tidak mengulang reset. Genre All genres berasal dari fixture; ToggleGroup single selection tidak boleh kosong. Reload kembali default, preference tema tetap existing.
+
+Latest releases adalah **label urutan tetap**, bukan dropdown kosong/sort selector baru walau raster mobile menyerupai button. Semua genre/jenis tetap selectable untuk menguji hasil kosong. Empty memakai Empty primitive, teks No titles found dan Reset filters; reset mengembalikan query/kind/genre dan cache first-page serta fokus search yang aktif. Result count memakai live region polite dengan pesan ringkas, tanpa membanjiri announce saat mengetik.
 
 ### Poster, asset dan responsivitas
 
@@ -116,29 +126,30 @@ Data/UI/state entirely apps/web; docs mencatat approval dan batas dummy. Tidak a
 
 ## Affected files and symbols
 
-| Path                                                                           | Action | Symbols / hasil                       | Alasan dan evidence                                                 |
-| ------------------------------------------------------------------------------ | ------ | ------------------------------------- | ------------------------------------------------------------------- |
-| `apps/web/src/routes/index.tsx`                                                | modify | Route/Home/head                       | Entry starter pada context lines1–30; compose public page/metadata. |
-| `apps/web/tsconfig.json`                                                       | modify | compilerOptions.resolveJsonModule     | Import JSON typed; strict config existing.                          |
-| `apps/web/src/data/catalog.json`                                               | create | 18 fixture items, genres, featuredId  | Satu source dummy; tidak mempunyai API fetch.                       |
-| `apps/web/src/lib/catalog/catalog-schema.ts`                                   | create | CatalogDataSchema/CatalogItem         | Zod existing, local discriminated union.                            |
-| `apps/web/src/lib/catalog/catalog-data.ts`                                     | create | catalogData                           | Parse JSON; provide immutable data.                                 |
-| `apps/web/src/lib/catalog/catalog-selectors.ts`                                | create | filter/sort/paginate/metadata helpers | Pure local behavior, meaningful tests.                              |
-| `apps/web/src/components/catalog/public-shell.tsx`                             | create | PublicShell/Header/MobileNavigation   | Public UI composed from installed primitives.                       |
-| `apps/web/src/components/catalog/appearance-menu.tsx`                          | create | AppearanceMenu                        | Public theme menu uses useTheme, no admin import.                   |
-| `apps/web/src/components/catalog/featured-film.tsx`                            | create | FeaturedFilm                          | Approved hero/compact mobile.                                       |
-| `apps/web/src/components/catalog/poster.tsx`                                   | create | Poster                                | Aspect9/16, fallback, reserved space.                               |
-| `apps/web/src/components/catalog/catalog-card.tsx`                             | create | CatalogCard                           | Movie/Series/Standalone metadata; local detail action.              |
-| `apps/web/src/components/catalog/catalog-filters.tsx`                          | create | CatalogSearch/CatalogFilters          | InputGroup, ToggleGroup, NativeSelect.                              |
-| `apps/web/src/components/catalog/catalog-grid.tsx`                             | create | CatalogGrid/empty/loadMore            | Grid, results state and button, no async data logic.                |
-| `apps/web/src/components/catalog/catalog-detail-dialog.tsx`                    | create | CatalogDetailDialog                   | Installed Dialog; callback/focus return, no watch routing.          |
-| `apps/web/src/components/catalog/home-page.tsx`                                | create | HomePage/local reducer or state       | Own query/visibleCount/selectedItem and compose page.               |
-| `apps/web/public/images/catalog/*`                                             | create | Six PNG posters/fallback SVG          | Static local assets; folder absent at base.                         |
-| `apps/web/test/home-catalog-data.test.ts`                                      | create | Fixture/selector behavior tests       | bun:test conventions existing.                                      |
-| `apps/web/test/home-catalog-browser-worker.mjs`                                | create | DOM/network/SSR screenshots proof     | Existing host-module Playwright pattern.                            |
-| `docs/design/home-catalog.md`                                                  | modify | Approval/asset/runtime limits         | Canonical visual source.                                            |
-| `docs/product/prd.md`, `docs/product/global-rules.md`                          | modify | Scope/status update                   | Approved direction ≠ implemented MVP.                               |
-| `docs/plans/home-catalog/*.md`, `docs/tasks/home-catalog.md`, `docs/README.md` | modify | Plan/ledger/evidence/index            | Canonical planning and task closure.                                |
+| Path                                                                           | Action | Symbols / hasil                               | Alasan dan evidence                                                 |
+| ------------------------------------------------------------------------------ | ------ | --------------------------------------------- | ------------------------------------------------------------------- |
+| `apps/web/src/routes/index.tsx`                                                | modify | Route/Home/head                               | Entry starter pada context lines1–30; compose public page/metadata. |
+| `apps/web/tsconfig.json`                                                       | modify | compilerOptions.resolveJsonModule             | Import JSON typed; strict config existing.                          |
+| `apps/web/src/data/catalog.json`                                               | create | 18 fixture items, genres, featuredId          | Satu source dummy; tidak mempunyai API fetch.                       |
+| `apps/web/src/lib/catalog/catalog-schema.ts`                                   | create | CatalogDataSchema/CatalogItem                 | Zod existing, local discriminated union.                            |
+| `apps/web/src/lib/catalog/catalog-data.ts`                                     | create | catalogData                                   | Parse JSON; provide immutable data.                                 |
+| `apps/web/src/lib/catalog/catalog-selectors.ts`                                | create | filter/sort/paginate/metadata helpers         | Pure local behavior, meaningful tests.                              |
+| `apps/web/src/lib/catalog/catalog-queries.ts`                                  | create | catalogInfiniteOptions/query key/page adapter | useInfiniteQuery local JSON, installed React Query 5.104.0.         |
+| `apps/web/src/components/catalog/public-shell.tsx`                             | create | PublicShell/Header/MobileNavigation           | Public UI composed from installed primitives.                       |
+| `apps/web/src/components/catalog/appearance-menu.tsx`                          | create | AppearanceMenu                                | Public theme menu uses useTheme, no admin import.                   |
+| `apps/web/src/components/catalog/featured-film.tsx`                            | create | FeaturedFilm                                  | Approved hero/compact mobile.                                       |
+| `apps/web/src/components/catalog/poster.tsx`                                   | create | Poster                                        | Aspect9/16, fallback, reserved space.                               |
+| `apps/web/src/components/catalog/catalog-card.tsx`                             | create | CatalogCard                                   | Movie/Series/Standalone metadata; local detail action.              |
+| `apps/web/src/components/catalog/catalog-filters.tsx`                          | create | CatalogSearch/CatalogFilters                  | InputGroup, ToggleGroup, NativeSelect.                              |
+| `apps/web/src/components/catalog/catalog-grid.tsx`                             | create | CatalogGrid/empty/loadMore                    | Grid, results state and button, no async data logic.                |
+| `apps/web/src/components/catalog/catalog-detail-dialog.tsx`                    | create | CatalogDetailDialog                           | Installed Dialog; callback/focus return, no watch routing.          |
+| `apps/web/src/components/catalog/home-page.tsx`                                | create | HomePage/local reducer or state               | Own filters/selectedItem; useInfiniteQuery owns pages.              |
+| `apps/web/public/images/catalog/*`                                             | create | Six PNG posters/fallback SVG                  | Static local assets; folder absent at base.                         |
+| `apps/web/test/home-catalog-data.test.ts`                                      | create | Fixture/selector behavior tests               | bun:test conventions existing.                                      |
+| `apps/web/test/home-catalog-browser-worker.mjs`                                | create | DOM/network/SSR screenshots proof             | Existing host-module Playwright pattern.                            |
+| `docs/design/home-catalog.md`                                                  | modify | Approval/asset/runtime limits                 | Canonical visual source.                                            |
+| `docs/product/prd.md`, `docs/product/global-rules.md`                          | modify | Scope/status update                           | Approved direction ≠ implemented MVP.                               |
+| `docs/plans/home-catalog/*.md`, `docs/tasks/home-catalog.md`, `docs/README.md` | modify | Plan/ledger/evidence/index                    | Canonical planning and task closure.                                |
 
 No planned routeTree change because no routes are added. No planned package manifest/lock change; generated dist/.output/.turbo artifacts stay ignored. Source can co-locate smaller components if the ownership remains clear; update impact table before deviating.
 
@@ -170,24 +181,24 @@ DAG menunjukkan dependensi; tidak mewajibkan agent paralel. Commit per task sete
 
 Detail acceptance, affected files, requirements dan validation untuk setiap ID disimpan satu kali pada [backlog canonical](../../tasks/home-catalog.md). Tabel ini memetakan urutan/outcome tanpa menyalin checklist backlog.
 
-| Step       | Outcome                                            | Depends on  | Files/symbols                       | Validation/completion                                                                           |
-| ---------- | -------------------------------------------------- | ----------- | ----------------------------------- | ----------------------------------------------------------------------------------------------- |
-| HOMEFE-001 | Typed fixture18 + selector deterministik           | None        | data JSON/lib catalog/tsconfig/test | Fixture/AND filter/stable order/batch-boundary tests dan web types pass.                        |
-| HOMEFE-002 | Six separate local posters + fallback              | None        | public images/design evidence       | Native size,9:16 assets, local paths, no remote source, format/file review.                     |
-| HOMEFE-003 | Accessible header/nav/appearance                   | None        | public-shell/appearance-menu        | Reuse primitives/theme; shell web lint/types, pending browser flow on009.                       |
-| HOMEFE-004 | Featured desktop/mobile section                    | 001,002     | featured-film/poster                | Correct metadata/9:16 frame, action callback, selectors and types/lint pass.                    |
-| HOMEFE-005 | Three-kind poster cards/grid                       | 001,002,004 | poster/card/grid                    | Metadata count/duration + responsive grid, tests/types/lint pass.                               |
-| HOMEFE-006 | Search/AND filters/batch6/empty                    | 001,005     | catalog-filters/grid/home-page      | Selector tests show reset/boundary/no duplicate; types/lint.                                    |
-| HOMEFE-007 | Local metadata detail dialog                       | 001,004     | catalog-detail-dialog               | No API/watch import, title/focus return/viewport behavior planned on009.                        |
-| HOMEFE-008 | Replace route / and responsive polish              | 003–007     | index/home-page/catalog components  | Route head, coherent callbacks, web build/types/lint; visual/browser debug.                     |
-| HOMEFE-009 | Browser, SSR and API-independent proof             | 008         | browser worker/evidence             | Matrix below pass; console/network/ratio/layout assertions and screenshots.                     |
-| HOMEFE-010 | Full root gates, canonical status and final review | 009         | docs + only necessary fixes         | Relevant existing tests/types/lint/build/docs/format/diff + task commit, no source API changes. |
+| Step       | Outcome                                            | Depends on  | Files/symbols                                  | Validation/completion                                                                           |
+| ---------- | -------------------------------------------------- | ----------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| HOMEFE-001 | Typed fixture18 + selector deterministik           | None        | data JSON/lib catalog/tsconfig/test            | Fixture/AND filter/stable order/batch-boundary tests dan web types pass.                        |
+| HOMEFE-002 | Six separate local posters + fallback              | None        | public images/design evidence                  | Native size,9:16 assets, local paths, no remote source, format/file review.                     |
+| HOMEFE-003 | Accessible header/nav/appearance                   | None        | public-shell/appearance-menu                   | Reuse primitives/theme; shell web lint/types, pending browser flow on009.                       |
+| HOMEFE-004 | Featured desktop/mobile section                    | 001,002     | featured-film/poster                           | Correct metadata/9:16 frame, action callback, selectors and types/lint pass.                    |
+| HOMEFE-005 | Three-kind poster cards/grid                       | 001,002,004 | poster/card/grid                               | Metadata count/duration + responsive grid, tests/types/lint pass.                               |
+| HOMEFE-006 | Search/filters/local infinite query/empty          | 001,005     | catalog-queries/catalog-filters/grid/home-page | Selector + QueryClient tests: scoped reset/cancellation/rapid click; types/lint.                |
+| HOMEFE-007 | Local metadata detail dialog                       | 001,004     | catalog-detail-dialog                          | No API/watch import, title/focus return/viewport behavior planned on009.                        |
+| HOMEFE-008 | Replace route / and responsive polish              | 003–007     | index/home-page/catalog components             | Route head, coherent callbacks, web build/types/lint; visual/browser debug.                     |
+| HOMEFE-009 | Browser, SSR and API-independent proof             | 008         | browser worker/evidence                        | Matrix below pass; console/network/ratio/layout assertions and screenshots.                     |
+| HOMEFE-010 | Full root gates, canonical status and final review | 009         | docs + only necessary fixes                    | Relevant existing tests/types/lint/build/docs/format/diff + task commit, no source API changes. |
 
 ## Test requirements
 
 ### Unit behavior and fixture integrity
 
-Use bun:test in web/test; no snapshots/component test framework. Cases: unique IDs/slugs and local poster paths, referenced genre/featured kind, field exclusivity by kind, empty fixture allowed for pure selector, trim/case-insensitive title/synopsis search, AND filter combination, unknown genre gives zero results, equal timestamps tie-break, batch6→12→18 cap/no duplicate, visibleCount reset when filter/query changes, duration formatting versus episodeCount. Tests assert observable lists/metadata rather than duplicating implementation logic.
+Use bun:test in web/test; no snapshots/component test framework. Cases: unique IDs/slugs and local poster paths, referenced genre/featured kind, field exclusivity by kind, empty fixture allowed for pure selector, trim/case-insensitive title/synopsis search, AND filter combination, unknown genre gives zero results, equal timestamps tie-break, offset0→6→12, EOF/empty nextOffset, InfiniteQueryObserver/QueryClient integration pages6→12→18/no duplicate, scoped cache reset when filter/query changes, duration formatting versus episodeCount. Tests assert observable lists/metadata rather than duplicating implementation logic.
 
 Relevant existing theme tests must pass. Broad auth/browser database suites are not required solely because public components use the existing theme hook; run impacted suites if a shared/auth/provider file actually changes.
 
@@ -197,7 +208,7 @@ Development and built Bun/Nitro: no cookies or admin fixture, API upstream stopp
 
 Viewports320×800,390×844,768×1024,1024×900,1440×1000,1920×1080. Light and Dark on all sizes; System preference/persistence tested on one mobile and one desktop. At each size check no page horizontal overflow, all poster bounding boxes width/height9/16 within1CSSpx, controls visible, title/genre wrap, dialog/sheet safe bounds, viewport resize preserves query/results/theme and does not reset loaded count.
 
-Flows: default6; Load more12/18 and exhausted button; query by title/synopsis and whitespace; kind/genre AND; no results and reset; featured hidden on search/filter and restored on reset; Home reset and Browse focus; mobile drawer closes; details correct for movie/series/standalone; Escape/focus return; theme roundtrip/reload; keyboard-only search/filter/cards/menu; long title; failed image fallback once; zero page/hydration errors.
+Flows: initialData default6; fetchNextPage12/18 and hasNextPage=false; rapid double-click/cancellation; filterA18→filterB→filterA reset6 without affecting admin query cache; query by title/synopsis and whitespace; kind/genre AND; no results and reset; featured hidden on search/filter and restored on reset; Home reset and Browse focus; mobile drawer closes; details correct for movie/series/standalone; Escape/focus return; theme roundtrip/reload; keyboard-only search/filter/cards/menu; long title; failed image fallback once; zero page/hydration errors.
 
 SSR built proof: anonymous GET / yields brand/title/initial fixture content, no API dependency, matching initial six before/after hydration, no random dates/window-count mismatch. Page title/description identify Vertical Movie rather than starter. Network proof must cover HTML/server dependency via unreachable API, not only browser intercept. Capture light desktop/mobile and dark examples under docs/design with distinct implemented filenames; actual commands/harness args/results in backlog. Reuse available Playwright runtime, do not install browser dependencies into web for this proof.
 
@@ -219,7 +230,7 @@ Browser worker arguments mirror existing workers: base URL, host Playwright modu
 
 ## Constraints
 
-No request/API/session behind apparently static UI, including prefetch of /watch. No fake API errors/loading delay or global error pages for bundled JSON. Fixture parse error is a build/test authoring failure; valid data renders synchronously. User-visible recoverable states are empty results and image fallback. Reuse installed shadcn source and read version-matched component docs before coding. Keep theme/primitive dependencies explicit, no global state store/library unless concrete need emerges.
+No request/API/session behind apparently static UI, including prefetch of /watch. No fake API errors/loading delay or global error pages for bundled JSON. Fixture parse error is a build/test authoring failure; first page valid disediakan initialData secara sinkron; queryFn lokal tetap mengikuti Promise/cancellation contract. User-visible recoverable states are empty results and image fallback. Reuse installed shadcn source and read version-matched component docs before coding. Keep theme/primitive dependencies explicit, no global state store/library unless concrete need emerges.
 
 ## Acceptance criteria
 
@@ -240,7 +251,7 @@ No request/API/session behind apparently static UI, including prefetch of /watch
 | Raster ratios/copy do not map to real mobile CSS     | Lock9/16, deliberate breakpoint grid, wrap, measured DOM proof; raster is hierarchy reference.           |
 | Different counts between SSR/mobile hydration        | Batch6 at all widths; CSS handles columns, no viewport-based data selection.                             |
 | Photo asset depends on external service              | Bundle six local assets + fallback; generation/source proof tracked.                                     |
-| Filter excludes loaded cards but stale count remains | Single owner for query/filter/visibleCount, selectors plus transition tests.                             |
+| Filter excludes loaded cards but stale count remains | Normalized query key, Query-owned pages dan scoped reset/cancellation; cache/filter race tests.          |
 | Shared admin/theme regressions                       | Import hook/primitives directly, do not import admin shell/session; run theme test and scoped freshness. |
 | Main checkout changes during parallel work           | Keep worktree, pinned SHA, inspect affected diff before coding/delivery; no force merge.                 |
 | UI model mistaken for current public API             | Local catalog union documented; future API adapter/resource mapping is a separate task.                  |
@@ -257,7 +268,7 @@ Planning evidence and source index are in [context](repository-context.md). Desi
 
 Default proposal for missing CTA decision: local detail dialog and View film wording, playback outside this iteration. Optional question has been presented; no reply at plan authoring. If user chooses a local player, plan must be refined for fixture media, videojs skill, player action and playback tests before implementation. No choice is inferred to authorize API.
 
-Other choices above (batch6, exact selector semantics, fixed Latest releases label,18fixtures, local state) are proposed implementation details for this plan review. Mockup approval applies to visual direction; real API/production catalog order remains a later decision.
+Other choices above (batch6, exact selector semantics, fixed Latest releases label,18fixtures, useInfiniteQuery dengan queryFn lokal) adalah refinement teknis; detail UI lainnya merupakan proposal implementasi for this plan review. Mockup approval applies to visual direction; real API/production catalog order remains a later decision.
 
 ## Validation history
 
@@ -280,3 +291,9 @@ Other choices above (batch6, exact selector semantics, fixed Latest releases lab
 - Decision: context/plan tetap valid; recheck target/source lagi sebelum implementasi.
 
 Runtime tasks belum dimulai. Context disimpan sebelum plan. Commit planning HOMEFE-000: `ab15400d7f8eee9fa305d60cd4f155c639d10b6d`; branch `feat/home-catalog-mockup`, pre-write SHA `b90edaaaca83187726218286fdaf253958a483fe`. Delapan Markdown berubah; docs:check (62 Markdown/591 links), Prettier write/check, diff check dan hook docs/lint/types/Commitlint lulus. Lint/types melalui cache Turbo; tidak ada test/build runtime baru dalam task dokumentasi. Ledger pascacommit ini mencatat hasil nyata. Tidak ada push/PR/merge/deploy.
+
+## Refinement useInfiniteQuery — 7 Oktober 2026
+
+Pengguna memperjelas infinite query TanStack Query sebagai pola pengelolaan halaman. Ini mengganti proposal awal visibleCount/state-only; sumber tetap dummy JSON dan Load more manual. Installed package apps/web/node_modules/@tanstack/react-query 5.104.0 dan query-core bundled source diperiksa; useInfiniteQuery/infiniteQueryOptions/InfiniteData/pageParam/next-page contract tersedia. Acuan [Infinite Queries resmi](https://tanstack.com/query/latest/docs/framework/react/guides/infinite-queries). Tidak ada upgrade dependency atau perubahan runtime pada refinement plan ini.
+
+Freshness: SHA 509d3870f12ad5aa562342bcb6fee778c97cf602, source router/Query provider dan package installed diperiksa langsung; runtime belum berubah sejak base plan. HOMEFE-006 diperluas mencakup options/adapter/caching/SSRseed; HOMEFE-009 mencakup paginated-query race/zero-network proof. Evidence doc/commit refinement dicatat pada HOMEFE-011.

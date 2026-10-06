@@ -76,7 +76,7 @@ Affected files: `apps/web/src/data/catalog.json`; `apps/web/src/lib/catalog/{cat
 
 - [ ] 18 items (enam tiap kind), enam judul awal sesuai mockup, unique id/slug, references valid dan field-kind exclusivity; semua poster local path.
 - [ ] Sort publishedAt desc/id asc stabil, title/synopsis search trim/case-insensitive, kind+genre AND, slice batch 6 tanpa duplicate/cap overflow.
-- [ ] Transisi perubahan filter/query/reset mengembalikan visibleCount ke 6, tanpa fetch/async repository palsu atau import kontrak API.
+- [ ] Transisi perubahan filter/query/reset mengembalikan halaman pertama berisi enam; pure page selector menghasilkan items/total/nextOffset tanpa fetch/API.
 - [ ] Tes perilaku mencakup empty/unknown genre/timestamp tie/duration vs episodeCount dan web check-types lulus.
 
 ### Validasi
@@ -207,7 +207,7 @@ Affected files: `apps/web/src/components/catalog/featured-film.tsx`; `apps/web/s
 
 ### Validasi
 
-Fixture/selector tests existing; web types/lint; DOM ratio/visual matrix dibuktikan pada HOMEFE-009.
+Fixture/page-selector tests existing; web types/lint; DOM ratio/visual matrix dibuktikan pada HOMEFE-009.
 
 ### Hasil dan bukti
 
@@ -278,14 +278,17 @@ Ikuti dependency dan batas data lokal pada plan; browser acceptance lintas task 
 
 ### Ruang lingkup
 
-Wire satu state query/kind/genre/visibleCount pada pure selectors, InputGroup/ToggleGroup/NativeSelect dan Empty state.
+Wire filter/query dengan useInfiniteQuery dan infiniteQueryOptions existing; queryFn mengembalikan Promise halaman JSON lokal, InputGroup/ToggleGroup/NativeSelect dan Empty state. Tidak memakai visibleCount untuk pagination.
 
 Affected files: `apps/web/src/components/catalog/catalog-filters.tsx`; `apps/web/src/components/catalog/catalog-grid.tsx`; `apps/web/src/components/catalog/home-page.tsx`; `apps/web/src/components/catalog/lib/catalog/catalog-selectors.ts`; `apps/web/test/home-catalog-data.test.ts`.
 
 ### Acceptance criteria
 
 - [ ] Search synchronous title/synopsis, ToggleGroup single-selection all/movie/series/standalone dengan label Film dan genre All genres.
-- [ ] AND filters, latest stable, batch 6 → 12 → 18 tanpa duplikat; filter/query/reset kembali batch 6, tidak diubah resize.
+- [ ] useInfiniteQuery: key publik berisi normalized filters/pageSize/schemaVersion, initialPageParam0, nextOffset/getNextPageParam, data.pages; pages6→12→18 tanpa duplikat dan EOF hasNextPage=false.
+- [ ] First-page initialData pages/pageParams untuk SSR; networkMode always, staleTime Infinity, no automatic refetch/artificial delay/HTTP.
+- [ ] Load more fetchNextPage cancelRefetch=false diguard hasNextPage/!isFetching; busy state isFetchingNextPage, rapid-click dedup teruji.
+- [ ] AND filters/latest stable; query/filter/reset cancel dan seed cache exact key tujuan ke halaman pertama, termasuk cache revisit; tidak menyentuh cache admin/auth. Resize/detail/theme tidak reset pages.
 - [ ] Empty No titles found dan Reset filters bekerja serta fokus search; count announce polite, no fake spinner/error/timer.
 - [ ] Latest releases berupa label urutan tetap; Home reset dan Browse fokus tidak melahirkan URL/dummy route.
 
@@ -412,7 +415,7 @@ Affected files: `apps/web/test/home-catalog-browser-worker.mjs`; `docs/design/ho
 
 - [ ] API unreachable/block semua API paths/origin; zero attempted catalog/auth/playback requests, termasuk prefetch/interaction; SSR tetap mengirim konten.
 - [ ] Viewport 320/390/768/1024/1440/1920 light+dark tanpa horizontal overflow; poster frame 9/16 dengan toleransi 1 CSS px, semua UI berada dalam viewport.
-- [ ] Search/title/synopsis/AND/empty/reset/load 6 → 12 → 18/Home/Browse/detail tiga kind/keyboard/Escape-focus return/drawer/resize/theme persist lulus.
+- [ ] Search/title/synopsis/AND/empty/reset/infinite query load6→12→18/cache revisit reset6/rapid-click/Home/Browse/detail tiga kind/keyboard/Escape-focus return/drawer/resize/theme persist lulus.
 - [ ] Long title/failed poster fallback once, no page/hydration error; screenshot implemented light desktop/mobile+dark dan command/result/limitations nyata tersimpan.
 
 ### Validasi
@@ -475,3 +478,42 @@ Belum dikerjakan. Catat command/scope/result/limitations aktual; jangan menaikka
 ### Blocker atau tindak lanjut
 
 Integrasi real API/playback/production merupakan tahap lanjutan tersendiri.
+
+## Task: HOMEFE-011 — Refinement plan untuk TanStack infinite query
+
+- Status: Review
+- Owner: Codex
+- Prioritas: Planning refinement sebelum runtime001–010
+- Referensi: Klarifikasi pengguna 7 Oktober 2026; HOME-US-002; [plan](../plans/home-catalog/implementation-plan.md).
+- Diperbarui: 2026-10-07
+- Dependensi: HOMEFE-000 selesai.
+- Ukuran: Satu perubahan dokumentasi.
+
+### Ruang lingkup
+
+Ganti pagination visibleCount/state-only dengan useInfiniteQuery/queryFn dummy JSON, contract offset/pages, caching/cancel/reset, SSR initialData, nextpage/zeroHTTP proof; selaraskan context/backlog/design/index.
+
+### Acceptance criteria
+
+- [x] Version/source installed diverifikasi; provider/SSR reuse, tanpa API/dependency baru.
+- [x] Contract/query key/initialData/nextpage/guard/cache reset ditulis pada plan dan acceptance HOMEFE-006/009.
+- [ ] Canonical docs selaras, docs:check/Prettier/diff check dan task commit lulus.
+
+### Validasi
+
+Source installed @tanstack/react-query 5.104.0; docs:check, changed Markdown Prettier check, git diff --check dan hook.
+
+### Hasil dan bukti
+
+Refinement planning saja; runtime belum diubah. Checks final pending.
+
+### Commit task
+
+- Pesan: docs(web): plan local infinite query (HOMEFE-011)
+- SHA: Belum dibuat; record sesudah commit.
+- Hook/checks: Pending.
+- Ledger: Update dokumentasi berikutnya setelah task commit.
+
+### Blocker atau tindak lanjut
+
+Implementasi tetap menunggu instruksi pengguna; pemicu Load more tidak berubah menjadi automatic scroll.
