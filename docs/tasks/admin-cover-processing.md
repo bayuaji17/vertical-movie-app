@@ -549,9 +549,15 @@ Pengguna menyetujui fix pada 6 Oktober 2026. Pemeriksaan source base `1328958bb5
 ### Commit task
 
 - Pesan: `fix(web): prebundle upload hashing dependencies (ACOV-012)`
-- SHA: belum dibuat; dicatat pada update ledger berikutnya.
-- Hook/checks: relevant tests/browser, root gates, docs/format/diff lulus; normal hooks dijalankan saat commit tanpa bypass.
+- SHA: `c0a5f13d2da0c7a929b71f7f50f42bf4f98ff59f`.
+- Hook/checks: relevant tests/browser, root gates, docs/format/diff lulus; pre-commit docs:check (59/534), lint dan check-types cache hits serta commit-msg Commitlint lulus. Staged export checker lulus (52 Markdown / 515 links).
 
 ### Blocker atau tindak lanjut
 
 Tidak ada blocker implementasi. Optimasi ini mengatasi reload yang berasal dari lazy hashing imports; perubahan kode/server lain tetap dapat memicu HMR saat development.
+
+## Checkpoint delivery — 6 Oktober 2026
+
+Pengguna mengotorisasi commit, push, PR dan normal merge tanpa squash. Source checkpoint `c0a5f13d2da0c7a929b71f7f50f42bf4f98ff59f`; target `main` pada `d8417249de99611e1a661ade03bb4b03dd5f0538`. Fetch/current ancestry menunjukkan main adalah ancestor, 39 commit feature dan dry merge-tree tanpa konflik. Branch membawa ADUP-001–015 serta ACOV-001–012, karena uploader sebelumnya belum dikirim ke main. Repo mengizinkan merge commit dan tidak menghapus branch otomatis. Perubahan desain/build/docs lokal lain tetap di luar delivery.
+
+Commit task dan gates runtime sudah tercatat di atas; checkpoint ini hanya melengkapi receipt dokumentasi. Push/PR/merge belum dilakukan pada waktu penulisan. Branch feature akan dipertahankan; production rollout/R2 tidak dinyatakan terverifikasi dari delivery Git.

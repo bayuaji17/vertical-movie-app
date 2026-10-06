@@ -10,7 +10,7 @@
 - Context: [repository-context.md](repository-context.md), ditulis sebelum plan.
 - Backlog: [admin-cover-processing](../../tasks/admin-cover-processing.md); ACOV-001–012.
 - Keputusan pengguna: seluruh plan dan default teknis disetujui pada 6 Oktober 2026; ACOV-002 dapat memperbarui rincian bila proof menunjukkan batas native/browser.
-- Otorisasi: implementasikan task ACOV sesuai DAG dan acceptance criteria dengan commit lokal terpisah. Push/PR/merge/deployment tetap menunggu instruksi tersendiri.
+- Otorisasi: task ACOV dan local task commits disetujui; pada 6 Oktober 2026 pengguna mengotorisasi push, PR dan normal merge tanpa squash. Branch dipertahankan. Deployment tetap mengikuti rollout tersendiri.
 
 ## Objective
 
@@ -222,3 +222,5 @@ Tidak ada keputusan produk yang menunggu persetujuan awal; plan dan default dise
 - 2026-10-06: ACOV-011 commit receipt `1328958bb5ab6427e620b1f66a4c2f4f98544a2e`; normal pre-commit docs/lint/check-types dan Commitlint lulus. Pengguna mengotorisasi ACOV-012 untuk menyiapkan dependency hash di optimizer startup. Context refinement: fingerprint worker imports dan Vite8.3.1 config ditelusuri pada SHA tersebut; log development menemukan hashing dependencies lalu reload. Dua explicit include imports dan cold-cache browser proof direncanakan, tanpa perubahan guard/upload/backend. Dokumentasi Vite resmi: [pre-bundling](https://vite.dev/guide/dep-pre-bundling.html) dan [include](https://vite.dev/config/dep-optimization-options.html#optimizedeps-include).
 
 - 2026-10-06: ACOV-012 Done. Dua hashing imports dioptimasi saat startup Vite. Cold-cache baseline memicu satu full reload; proof konfigurasi final lulus hash pertama/berulang 5 MB, exact SHA-256, zero reload/navigation/dialog/page errors pada Worker asli dan modul panel upload. Test cache/port terpisah dan tanpa DB/storage. Unit hash/file/recovery 25/107, check-types3/3, lint1/1, build2/2 dan docs59/534 passed; beforeunload/route leave serta transport/API unchanged. Evidence/limitations ada pada backlog; task commit SHA dicatat pada update ledger berikutnya.
+
+- 2026-10-06: ACOV-012 commit receipt `c0a5f13d2da0c7a929b71f7f50f42bf4f98ff59f`; normal docs/lint/types/Commitlint hooks passed. Pengguna mengotorisasi delivery seluruh branch tanpa squash. Remote main `d8417249de99611e1a661ade03bb4b03dd5f0538` adalah ancestor dari source checkpoint; 39 commit feature meliputi ADUP uploader dan ACOV cover. Merge-tree tanpa konflik; allow_merge_commit=true dan delete_branch_on_merge=false. Local unrelated work tetap dipertahankan; remote actions belum berlangsung pada saat checkpoint ini ditulis.
