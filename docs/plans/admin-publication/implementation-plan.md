@@ -429,3 +429,7 @@ Publication card dipasang setelah record/metadata sebelum uploader Film/Standalo
 ### 2026-10-07 — APUB-008
 
 Publish action/dialog memakai manual preview checkbox lokal, saved-rights copy, fresh review/confirm dan controller exact version/key. Cancel/Escape sebelum submit tidak POST; pending controls disabled, live status dan popup scroll/gutters/focus Cancel/return ref tersedia. Recovery Check status/Retry publish explicit dan public watch link hanya untuk current published yang coherent. Source/dialog spot review selesai; keyboard/native browser proof APUB-012. Client/state13 tests65 assertions serta root types3/3/lint1/1/build2/2 lulus. Tidak menambah preview audit field atau publication metadata patch.
+
+### 2026-10-07 — APUB-009
+
+Archive hanya published Film/Standalone aktif, dengan dialog expectedVersion-only, single pending controller dan explicit retry/reconciliation. Copy menjelaskan no new playback access, old signature sampai expiry, file yang masih ada/retention dan no restore/republish. Current archived readonly; draft/archived/Series/episode tidak punya shortcut archive. Client/state13 tests65 assertions, source dialog keyboard/focus/scroll spot review serta root types3/3/lint1/1/build2/2 lulus. Native keyboard/visibility/retained object proof APUB-012; tidak mengarang request attribution atau menambah schema idempotency archive.

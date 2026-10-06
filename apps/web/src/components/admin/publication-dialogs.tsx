@@ -100,3 +100,79 @@ export function PublishVideoDialog({
     </AlertDialog>
   )
 }
+
+export function ArchiveVideoDialog({
+  controller,
+  state,
+  returnFocus,
+}: {
+  controller: PublicationController
+  state: PublicationState
+  returnFocus: RefObject<HTMLButtonElement | null>
+}) {
+  const cancel = useRef<HTMLButtonElement>(null),
+    pending = state.phase !== 'review'
+  return (
+    <AlertDialog
+      open
+      onOpenChange={(open, event) => {
+        if (pending) {
+          event.cancel()
+          return
+        }
+        if (!open) controller.cancel()
+      }}
+    >
+      <AlertDialogContent
+        initialFocus={cancel}
+        finalFocus={returnFocus}
+        className="max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] overflow-y-auto"
+      >
+        <AlertDialogHeader>
+          <AlertDialogTitle>Archive video?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Visitors will no longer be able to request new playback access for
+            this video. Previously issued media links may work until they
+            expire.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <div className="flex min-w-0 flex-col gap-3">
+          <p className="break-words font-medium">
+            {state.snapshot?.detail.data.title}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Valid files that are still available will be retained. A source file
+            already removed by retention will not be restored.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Restoring or republishing archived videos is not available.
+          </p>
+          <p role="status" aria-live="polite" className="text-sm">
+            {pending
+              ? state.phase === 'pending'
+                ? 'Archiving…'
+                : 'Checking current status…'
+              : ''}
+          </p>
+        </div>
+        <AlertDialogFooter>
+          <AlertDialogCancel
+            ref={cancel}
+            disabled={pending}
+            className="min-h-11"
+          >
+            Cancel
+          </AlertDialogCancel>
+          <AlertDialogAction
+            variant="destructive"
+            disabled={pending}
+            className="min-h-11"
+            onClick={() => void controller.confirm()}
+          >
+            {state.phase === 'pending' ? 'Archiving…' : 'Archive video'}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  )
+}

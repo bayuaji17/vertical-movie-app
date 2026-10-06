@@ -371,7 +371,7 @@ Publish action/dialog memakai manual preview checkbox lokal, saved-rights copy, 
 ### Commit task
 
 - Pesan: `feat(web): publish ready films and standalone videos (APUB-008)`
-- SHA: belum dibuat.
+- SHA: `d29889d4e422c894ea3e362c350e7c6202e9bdfd`.
 - Hook/checks: relevant tests, root types/lint/build, docs:check, Prettier/diff lulus sebelum commit; hasil hook normal dicatat setelah commit.
 - Ledger: SHA aktual dicatat setelah commit berhasil pada update task/dokumentasi berikutnya; tidak memakai self-referential SHA.
 
@@ -381,7 +381,7 @@ APUB-010 menyelesaikan integrated auth/upload/navigation; APUB-012 acceptance. T
 
 ## Task: APUB-009 — Archive published confirmation dan result
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1
 - Referensi: APUB-US-03; PRD-05/06/08/09, GR-01–09 yang relevan; [step plan](../plans/admin-publication/implementation-plan.md#apub-009--archive-confirmation-dan-result)
@@ -395,11 +395,11 @@ Implementasi Archive hanya untuk published Film/Standalone aktif, dengan expecte
 
 ### Acceptance criteria
 
-- [ ] Published active menampilkan Archive; draft/archived/series/episode tidak mendapat shortcut Archive dalam UI scope ini.
-- [ ] Dialog memakai Archive/Cancel, menjelaskan new access denied, old URL expiry, retained valid files dan no restore/republish; source deleted tidak dijanjikan kembali.
-- [ ] Fresh expectedVersion dan single pending request; tidak mengirim key, autopublish inverse, hard-delete atau optimistic archived badge.
-- [ ] Success/current archived menjadi readonly; lost response/409/version change menjalankan GET/review, bukan silent retry dengan version baru.
-- [ ] Konfirmasi final state tidak mengarang siapa/request mana yang archive; keyboard/cancel/focus/pending safe dan uploader existing mengikuti status.
+- [x] Published active menampilkan Archive; draft/archived/series/episode tidak mendapat shortcut Archive dalam UI scope ini.
+- [x] Dialog memakai Archive/Cancel, menjelaskan new access denied, old URL expiry, retained valid files dan no restore/republish; source deleted tidak dijanjikan kembali.
+- [x] Fresh expectedVersion dan single pending request; tidak mengirim key, autopublish inverse, hard-delete atau optimistic archived badge.
+- [x] Success/current archived menjadi readonly; lost response/409/version change menjalankan GET/review, bukan silent retry dengan version baru.
+- [x] Konfirmasi final state tidak mengarang siapa/request mana yang archive; keyboard/cancel/focus/pending safe dan uploader existing mengikuti status.
 
 ### Validasi
 
@@ -407,13 +407,13 @@ Archive success/cancel/current-archived/stale-version409/unconfirmed-response re
 
 ### Hasil dan bukti
 
-Belum dikerjakan; command di bagian Validasi merupakan rencana, bukan hasil aktual. Tidak ada commit/runtime proof untuk task ini.
+Archive hanya published Film/Standalone aktif, dengan dialog expectedVersion-only, single pending controller dan explicit retry/reconciliation. Copy menjelaskan no new playback access, old signature sampai expiry, file yang masih ada/retention dan no restore/republish. Current archived readonly; draft/archived/Series/episode tidak punya shortcut archive. Client/state13 tests65 assertions, source dialog keyboard/focus/scroll spot review serta root types3/3/lint1/1/build2/2 lulus. Native keyboard/visibility/retained object proof APUB-012; tidak mengarang request attribution atau menambah schema idempotency archive.
 
 ### Commit task
 
 - Pesan: `feat(web): archive published films and standalone videos (APUB-009)`
 - SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- Hook/checks: relevant tests, root types/lint/build, docs:check, Prettier/diff lulus sebelum commit; hasil hook normal dicatat setelah commit.
 - Ledger: SHA aktual dicatat setelah commit berhasil pada update task/dokumentasi berikutnya; tidak memakai self-referential SHA.
 
 ### Blocker atau tindak lanjut

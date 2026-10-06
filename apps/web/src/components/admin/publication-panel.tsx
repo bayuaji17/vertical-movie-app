@@ -21,7 +21,7 @@ import { Alert, AlertTitle, AlertDescription } from '#/components/ui/alert'
 import { Skeleton } from '#/components/ui/skeleton'
 import { MediaPanelView } from './media-panel'
 import { contentHref } from './content-resource'
-import { PublishVideoDialog } from './publication-dialogs'
+import { PublishVideoDialog, ArchiveVideoDialog } from './publication-dialogs'
 
 type SupportedType = Exclude<ContentType, 'series'>
 type Publication = ReturnType<typeof usePublication>
@@ -122,6 +122,11 @@ function PublicationPanel({
     publication,
   )
   const publishTrigger = useRef<HTMLButtonElement>(null)
+  const archiveTrigger = useRef<HTMLButtonElement>(null)
+  const archiveOpen =
+    state.action === 'archive' &&
+    !!state.snapshot &&
+    ['review', 'loading', 'pending'].includes(state.phase)
   const publishOpen =
     state.action === 'publish' &&
     !!state.snapshot &&
@@ -305,6 +310,27 @@ function PublicationPanel({
               Publish video
             </Button>
           )}
+          {status === 'published' && (
+            <Button
+              ref={archiveTrigger}
+              variant="destructive"
+              className="min-h-11 w-full sm:order-last sm:w-auto"
+              disabled={!canAct}
+              onClick={() => void controller.prepare('archive')}
+            >
+              Archive video
+            </Button>
+          )}
+          {state.phase === 'retryable' && state.action === 'archive' && (
+            <Button
+              variant="destructive"
+              className="min-h-11 w-full sm:w-auto"
+              disabled={busy}
+              onClick={() => void controller.retry()}
+            >
+              Retry archive
+            </Button>
+          )}
           {status === 'published' &&
             !stale &&
             r?.publicationStatus === detail.data.publicationStatus && (
@@ -340,6 +366,13 @@ function PublicationPanel({
           </Button>
         </CardFooter>
       </Card>
+      {archiveOpen && (
+        <ArchiveVideoDialog
+          controller={controller}
+          state={state}
+          returnFocus={archiveTrigger}
+        />
+      )}
       {publishOpen && (
         <PublishVideoDialog
           controller={controller}
