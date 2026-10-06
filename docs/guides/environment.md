@@ -1,6 +1,6 @@
 # Environment aplikasi
 
-> Diperbarui 4 Oktober 2026. API media/worker/HLS aktif pada development MinIO; production R2 melalui selector env tersedia tetapi proof staging belum dijalankan. Kontrak/command/batas evidence: [Media Operations](../operations/media.md).
+> Diperbarui 6 Oktober 2026. API media/worker/HLS dan poster request-path aktif pada development MinIO; built-browser MinIO proof poster lulus pada ACOV-009. Production R2 melalui selector env tersedia tetapi proof staging belum dijalankan. Variabel native poster aktif di API; kontrak/command/batas evidence: [Media Operations](../operations/media.md).
 
 ## Mulai dari root repo
 
@@ -29,6 +29,9 @@ Perintah `cp` cukup dijalankan sekali; jika `.env` sudah ada, tambahkan variabel
 | `FFMPEG_PATH`, `FFPROBE_PATH`              | Lokasi executable transcode dan pemeriksaan media; nilai contoh mengandalkan `PATH`.             | Aktif pada worker terpisah.                          |
 | `MEDIA_PLAYBACK_BASE_URL`                  | Origin/path delivery seluruh objek HLS setelah mekanisme akses ditetapkan.                       | Aktif; kosong = WEB_ORIGIN/api, wajib same origin.   |
 | `MEDIA_WORKER_CONCURRENCY`                 | Maksimal job video aktif per instance worker; default 1, dapat diatur melalui env server.        | Aktif pada worker, default1; command terpisah.       |
+| `MEDIA_POSTER_MAX_PIXELS`                  | Batas pixel decode poster; default 16.777.216, rentang 2.073.600–16.777.216.                     | Aktif pada endpoint request poster.                  |
+| `MEDIA_POSTER_PROCESS_CONCURRENCY`         | Maksimal proses poster aktif per instance API; default 1, rentang 1–4 tanpa queue menunggu.      | Aktif pada processor Bun.Image.                      |
+| `MEDIA_POSTER_PROCESS_TIMEOUT_SECONDS`     | Deadline logis proses; default 20 detik, rentang 1–120.                                          | Pembatas response; native terminal tetap ditunggu.   |
 
 Nilai database dalam sampel hanya contoh lokal. Menyalin env belum membuat database, tabel, bucket, akun admin, atau worker. Queue menggunakan PostgreSQL yang sama; tidak memerlukan Redis. Konfigurasi melalui env dan concurrency default 1 disetujui pada nomor 7 di bawah; angka retry 3 attempt/jeda 60–300 detik, encoding max(900 detik,3×durasi), stall 300 detik, heartbeat 15/lease 120/recovery 30 detik juga sudah disetujui. Worker runtime menerapkan parameter tersebut.
 
@@ -78,7 +81,7 @@ bun -e 'console.log(Array.from(crypto.getRandomValues(new Uint8Array(32)), byte 
 
 ## Upload multipart — parameter disetujui
 
-Parameter berikut disetujui 4 Oktober 2026. Loader dan session API aktif; scheduler dashboard upload lengkap belum dibuat. Kontrak lengkap pada [parameter upload](../plans/video/implementation-plan.md#nomor-2--parameter-upload-disetujui-4-oktober-2026).
+Parameter berikut disetujui 4 Oktober 2026. Loader, session API dan scheduler uploader admin aktif; proof lokal 6 Oktober 2026 pada [backlog ADUP](../tasks/admin-media-upload.md). Kontrak lengkap pada [parameter upload](../plans/video/implementation-plan.md#nomor-2--parameter-upload-disetujui-4-oktober-2026).
 
 | Variabel server aktif             | Default | Arti                                                                                 |
 | --------------------------------- | ------- | ------------------------------------------------------------------------------------ |
@@ -86,7 +89,13 @@ Parameter berikut disetujui 4 Oktober 2026. Loader dan session API aktif; schedu
 | MEDIA_UPLOAD_SESSION_TTL_SECONDS  | 86400   | Session 24 jam sejak initiate, tidak diperpanjang oleh retry                         |
 | MEDIA_UPLOAD_PART_URL_TTL_SECONDS | 900     | URL part maksimal 15 menit sejak signing, dibatasi sisa session                      |
 
-Runtime kelak menghitung partUrlTtlSeconds = min(900, floor((sessionExpiresAt - now)/1000)); sisa kurang dari 1 detik atau session non-pending ditolak. Renewal memeriksa admin/session/part dan tidak mengulang part yang sudah terverifikasi. MEDIA-CFG-001 menguji default/validasi positive integer tanpa storage I/O; MEDIA-PROOF/DESIGN/UPLOAD membuktikan native signing, expiry dan browser concurrency. Konfigurasi milik API, disampaikan sebagai nilai aman kepada browser tanpa VITE_ secret atau signed URL persisten.
+Runtime menghitung partUrlTtlSeconds = min(900, floor((sessionExpiresAt - now)/1000)); sisa kurang dari 1 detik atau session non-pending ditolak. Renewal memeriksa admin/session/part dan tidak mengulang part yang sudah terverifikasi. MEDIA-CFG-001 menguji default/validasi positive integer tanpa storage I/O; MEDIA-PROOF/DESIGN/UPLOAD membuktikan native signing, expiry dan browser concurrency. Konfigurasi milik API, disampaikan sebagai nilai aman kepada browser tanpa VITE_ secret atau signed URL persisten.
+
+## Pemrosesan poster — batas native
+
+Adapter poster menerima payload crop browser PNG/WebP statis tepat 1080×1920 (bukan source image asli), cocok dengan Content-Type dan SHA-256 yang diberikan, maksimal 5.000.000 byte. Ia memakai `Bun.Image` untuk decode/auto-orient dan encode ulang ke WebP quality 85, lalu memverifikasi codec, dimensi, dan hash hasilnya. Source untuk crop dapat berupa JPG/JPEG/PNG/WebP still, maksimal 5.000.000 byte dan 40 MP, serta boleh memiliki rasio lain. Area crop 1080×1920 atau lebih adalah rekomendasi kualitas; crop lebih kecil boleh di-resize browser ke output standar (keputusan pengguna 6 Oktober 2026, ACOV-011). Batas pixel default 16.777.216 melindungi decode sebelum alokasi; output 1080×1920 membutuhkan 2.073.600 pixel. `MEDIA_POSTER_PROCESS_CONCURRENCY` membatasi kerja tiap instance API; request saat sibuk ditolak segera tanpa antrean memori.
+
+`MEDIA_POSTER_PROCESS_TIMEOUT_SECONDS` membatasi waktu penggunaan hasil dan waktu jawaban. Terminal native `Bun.Image` tidak dapat dibatalkan secara paksa; bila masih berjalan saat deadline atau request abort, processor menolak hasil dan mempertahankan slot concurrency sampai terminal selesai. Jadi nilai ini tidak menjamin operasi CPU langsung berhenti. Endpoint admin `POST /admin/media/uploads/:id/process-poster` memakai adapter ini; same-origin gateway hanya mengalokasikan30 detik untuk exact POST route tersebut. Restart API setelah mengganti env.
 
 ## Worker — env aktif dan kandidat resource
 
@@ -138,3 +147,11 @@ Gateway memakai origin publik terkonfigurasi `VITE_API_URL` (runtime server jika
 - [FFmpeg HLS muxer](https://ffmpeg.org/ffmpeg-formats.html#hls-2)
 - [Vite environment variables](https://vite.dev/guide/env-and-mode) dan [env pada config Vite](https://vite.dev/config/#using-environment-variables-in-config)
 - [Better Auth installation](https://better-auth.com/docs/installation)
+
+## Uploader browser — konfigurasi dan proof lokal
+
+Update6 Oktober 2026: uploader memakai origin gateway existing dan safe config inventory dari API. Tidak ada env storage credential baru pada web atau VITE__. MinIO/R2 tetap dipilih oleh STORAGE_PROVIDER dan S3__ server; client tidak menyimpan URL/File/session privat di localStorage/IndexedDB. MEDIA_UPLOAD_PART_CONCURRENCY dibatasi client maksimum3 dengan satu file aktif per tab; MEDIA_WORKER_CONCURRENCY default1 tetap terpisah.
+
+Test fixture uploader menggunakan MEDIA_TEST_DATABASE_URL hanya loopback/vertical_movie_app_media_test serta MEDIA_STORAGE_TEST_ENDPOINT/ACCESS_KEY_ID/SECRET_ACCESS_KEY yang eksplisit untuk bucket fixture acak. Credential test perlu hak create/delete bucket; credential aplikasi scoped bucket tidak perlu hak tersebut. Jangan menaruh nilai credential pada docs/log.
+
+Browser harness menggunakan AUTH_BROWSER_PHASE=media, AUTH_BROWSER_RUNTIME=built, MEDIA_BROWSER_PHASE=full|layout|outage dan AUTH_BROWSER_NODE/AUTH_PLAYWRIGHT_MODULE/AUTH_BROWSER_EXECUTABLE untuk runner yang tersedia. Default worker dibaca dari checkout dan dievaluasi di runner; AUTH_BROWSER_WORKER_PATH hanya compatibility override. Auth fixture tidak membuktikan deployment Better Auth production. Root build dan suite reset DB harus serial terhadap browser proof; [runbook media](../operations/media.md#upload-media-admin--workflow-dan-proof-6-oktober-2026) memisahkan runtime dan test.

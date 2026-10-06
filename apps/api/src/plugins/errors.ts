@@ -11,8 +11,11 @@ export function createContentErrors() {
           errorDto("VALIDATION_ERROR", "Request input is invalid."),
         );
       const domain = mapContentError(error);
-      if (domain)
+      if (domain) {
+        if (domain.retryAfterSeconds !== undefined)
+          set.headers["retry-after"] = String(domain.retryAfterSeconds);
         return status(domain.httpStatus, errorDto(domain.code, domain.message));
+      }
       if (code === "NOT_FOUND")
         return status(
           404,

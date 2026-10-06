@@ -7,6 +7,7 @@ type GatewayDependencies = {
   getPublicOrigin?: () => string | undefined
   fetcher?: (request: Request) => Promise<Response>
   timeoutMs?: number
+  timeoutMsForRequest?: (request: Request) => number
   maxRequestBodyBytes?: number
 }
 
@@ -188,7 +189,7 @@ export function createAuthGateway(
     dependencies.getPublicOrigin ??
     (() => process.env.VITE_API_URL ?? import.meta.env.VITE_API_URL)
   const fetcher = dependencies.fetcher ?? ((request) => fetch(request))
-  const timeoutMs = dependencies.timeoutMs ?? 10_000
+  const defaultTimeoutMs = dependencies.timeoutMs ?? 10_000
   const maxRequestBodyBytes = dependencies.maxRequestBodyBytes ?? 1_048_576
 
   return async (request) => {
@@ -242,6 +243,8 @@ export function createAuthGateway(
       apiOrigin,
     )
     const abortController = new AbortController()
+    const timeoutMs =
+      dependencies.timeoutMsForRequest?.(request) ?? defaultTimeoutMs
     let cleanedUp = false
     const timeoutReason = new Error('Authentication gateway timed out.')
     const timeout = setTimeout(() => {

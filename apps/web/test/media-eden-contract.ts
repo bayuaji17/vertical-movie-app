@@ -5,6 +5,19 @@ export async function verifyMediaContract(
   client: ReturnType<typeof createApiClient>,
 ) {
   const id = '01900000-0000-7000-8000-000000000000'
+  const inventory = await client.admin.media
+    .owners({ ownerType: 'video' })({ ownerId: id })
+    .get()
+  if (inventory.data) {
+    const version: number = inventory.data.rowVersion
+    const preview: boolean = inventory.data.canPreview
+    const maxBytes: string = inventory.data.config.source.maxBytes
+    void [version, preview, maxBytes]
+    // @ts-expect-error Inventory must never expose private object identities.
+    void inventory.data.source?.current?.objectKey
+    // @ts-expect-error Descriptors never expose provider multipart upload IDs.
+    void inventory.data.source?.active?.uploadId
+  }
   const upload = await client.admin.media.uploads.post({
     ownerType: 'video',
     ownerId: id,
@@ -13,6 +26,7 @@ export async function verifyMediaContract(
     contentType: 'video/mp4',
     sizeBytes: '100',
     idempotencyKey: id,
+    expectedSha256: 'a'.repeat(64),
   })
   if (upload.data) {
     const size: string = upload.data.sizeBytes
@@ -23,6 +37,9 @@ export async function verifyMediaContract(
       .uploads({ id: upload.data.id })
       .parts.post({ partNumber: 1 })
     await client.admin.media.uploads({ id: upload.data.id }).complete.post()
+    await client.admin.media
+      .uploads({ id: upload.data.id })
+      ['process-poster'].post({})
     await client.admin.media.uploads({ id: upload.data.id }).abort.post()
   }
   await client.admin

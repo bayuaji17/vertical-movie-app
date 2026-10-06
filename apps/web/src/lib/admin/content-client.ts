@@ -1,3 +1,4 @@
+import { PrivateApiError, unwrapPrivateResult } from '../api/private-result'
 import { isUuid } from './content-identifiers'
 import { createPrivateApiClient, getBrowserApiBaseUrl } from '../api/client'
 import type { ApiFetcher } from '../api/client'
@@ -32,80 +33,21 @@ export type ContentFilters = {
   page: number
   pageSize: number
 }
-export class ContentApiError extends Error {
-  constructor(
-    public readonly status: number,
-    public readonly code: string,
-    message: string,
-  ) {
-    super(message)
-  }
-}
-function domainCode(value: unknown) {
-  if (
-    value &&
-    typeof value === 'object' &&
-    'error' in value &&
-    value.error &&
-    typeof value.error === 'object' &&
-    'code' in value.error &&
-    typeof value.error.code === 'string'
-  )
-    return value.error.code
-  return 'CONTENT_REQUEST_FAILED'
-}
-async function unwrap<T>(
+export class ContentApiError extends PrivateApiError {}
+const unwrap = <T>(
   request: Promise<{
     data: T | null
     error: { status: number; value: unknown } | null
   }>,
-): Promise<T> {
-  let result: Awaited<typeof request>
-  try {
-    result = await request
-  } catch (error) {
-    if (
-      error &&
-      typeof error === 'object' &&
-      'name' in error &&
-      error.name === 'AbortError'
-    )
-      throw error
-    throw new ContentApiError(
-      0,
-      'NETWORK_ERROR',
+) =>
+  unwrapPrivateResult(request, {
+    fallbackCode: 'CONTENT_REQUEST_FAILED',
+    failureMessage: 'Content request failed.',
+    networkMessage:
       'The request could not be confirmed. Check the content list before submitting again.',
-    )
-  }
-  if (
-    result.error &&
-    result.error.value &&
-    typeof result.error.value === 'object' &&
-    'name' in result.error.value &&
-    result.error.value.name === 'AbortError'
-  )
-    throw result.error.value
-  // Eden 1.4.10 wraps fetch exceptions in a synthetic 503 with the original Error.
-  if (result.error?.value instanceof Error)
-    throw new ContentApiError(
-      0,
-      'NETWORK_ERROR',
-      'The request could not be confirmed. Check the content list before submitting again.',
-    )
-  if (result.error)
-    throw new ContentApiError(
-      result.error.status,
-      domainCode(result.error.value),
-      'Content request failed.',
-    )
-  if (result.data === null)
-    throw new ContentApiError(
-      0,
-      'INVALID_RESPONSE',
-      'The response could not be confirmed.',
-    )
-  return result.data
-}
+    error: (status, code, message) =>
+      new ContentApiError(status, code, message),
+  })
 
 function invalidResponse(): never {
   throw new ContentApiError(

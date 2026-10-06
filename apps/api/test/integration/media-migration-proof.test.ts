@@ -15,7 +15,14 @@ test("publication migration preserves legacy metadata and audit while normalizin
     await client.unsafe("DROP SCHEMA IF EXISTS drizzle CASCADE");
     const migrations = join(import.meta.dir, "../../drizzle"),
       journal = await Bun.file(join(migrations, "meta/_journal.json")).json();
-    const previous = { ...journal, entries: journal.entries.slice(0, -1) };
+    const publication = journal.entries.findIndex(
+      (entry: { tag: string }) => entry.tag === "0008_media-publication",
+    );
+    if (publication < 0) throw new Error("Publication migration unavailable");
+    const previous = {
+      ...journal,
+      entries: journal.entries.slice(0, publication),
+    };
     await mkdir(join(dir, "meta"));
     await Bun.write(join(dir, "meta/_journal.json"), JSON.stringify(previous));
     for (const entry of previous.entries)
@@ -69,7 +76,7 @@ test("publication migration preserves legacy metadata and audit while normalizin
           "SELECT count(*)::int AS n FROM drizzle.__drizzle_migrations",
         )
       )[0].n,
-    ).toBe(9);
+    ).toBe(journal.entries.length);
   } finally {
     await client.close();
     if (!dir.startsWith(root)) throw new Error("Unsafe proof cleanup");

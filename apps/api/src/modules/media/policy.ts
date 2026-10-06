@@ -2,6 +2,27 @@ import { ContentError, invalid } from "../../shared/content-error";
 import type { UploadedPart } from "../../storage/multipart";
 export type Owner = { ownerType: "video" | "series"; ownerId: string };
 export type UploadKind = "source" | "poster";
+export const UPLOAD_FORMATS: Record<UploadKind, Record<string, string[]>> = {
+  poster: {
+    jpg: ["image/jpeg"],
+    jpeg: ["image/jpeg"],
+    png: ["image/png"],
+    webp: ["image/webp"],
+  },
+  source: {
+    mp4: ["video/mp4"],
+    mov: ["video/quicktime"],
+    mkv: ["video/x-matroska"],
+    webm: ["video/webm"],
+  },
+};
+export function uploadLimit(kind: UploadKind, videoKind?: string) {
+  return kind === "poster"
+    ? 5000000n
+    : videoKind === "episode"
+      ? 512000000n
+      : 1500000000n;
+}
 export function geometry(size: bigint) {
   if (size <= 0n || size > 1500000000n)
     invalid("File size is outside the supported limit.");
@@ -19,31 +40,13 @@ export function validateUpload(
   contentType: string,
   size: bigint,
 ) {
-  const limit =
-    kind === "poster"
-      ? 5000000n
-      : videoKind === "episode"
-        ? 512000000n
-        : 1500000000n;
+  const limit = uploadLimit(kind, videoKind);
   if (size <= 0n || size > limit)
     invalid("File exceeds the limit for this content kind.");
   if (!filename || filename.length > 255 || /[\\/\u0000-\u001f]/.test(filename))
     invalid("Filename is invalid.");
   const ext = filename.split(".").pop()?.toLowerCase();
-  const allowed: Record<string, string[]> =
-    kind === "poster"
-      ? {
-          jpg: ["image/jpeg"],
-          jpeg: ["image/jpeg"],
-          png: ["image/png"],
-          webp: ["image/webp"],
-        }
-      : {
-          mp4: ["video/mp4"],
-          mov: ["video/quicktime"],
-          mkv: ["video/x-matroska"],
-          webm: ["video/webm"],
-        };
+  const allowed = UPLOAD_FORMATS[kind];
   if (!ext || !allowed[ext]?.includes(contentType))
     invalid("Filename and media type are unsupported.");
 }

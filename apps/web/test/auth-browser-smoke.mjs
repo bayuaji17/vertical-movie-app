@@ -37,6 +37,26 @@ const contentFixture = includeContent
         : null
     })
   : undefined
+const mediaFixture =
+  process.env.AUTH_BROWSER_PHASE === 'media'
+    ? await (
+        await import('../../api/test/integration/admin-media-browser-fixture')
+      ).createAdminMediaBrowserFixture(async ({ headers }) => {
+        if (outage) throw Error('Fixture auth unavailable')
+        return (headers.get('cookie') ?? '').includes('browser-fixture=admin')
+          ? {
+              user: {
+                id: 'browser-admin',
+                name: 'Browser Admin',
+                email: 'browser@example.test',
+                role,
+                banned: false,
+              },
+              session: { expiresAt: new Date(Date.now() + 86400000) },
+            }
+          : null
+      })
+    : undefined
 if (process.env.AUTH_BROWSER_PHASE === 'content')
   assert.ok(
     contentFixture,
@@ -47,6 +67,27 @@ const api = Bun.serve({
   port: 0,
   fetch: async (request) => {
     const url = new URL(request.url)
+    if (url.pathname === '/control/media' && mediaFixture) {
+      await mediaFixture.control(await request.json())
+      return Response.json({ ok: true })
+    }
+    if (url.pathname === '/media-proof' && mediaFixture)
+      return Response.json(
+        await mediaFixture.proof({
+          verifyPosterObjects: url.searchParams.has('objects'),
+        }),
+      )
+    if (url.pathname === '/cover-screenshot' && mediaFixture) {
+      try {
+        const path = await mediaFixture.saveCoverScreenshot(
+          url.searchParams.get('name') ?? '',
+          new Uint8Array(await request.arrayBuffer()),
+        )
+        return Response.json({ path })
+      } catch {
+        return new Response('Invalid screenshot', { status: 400 })
+      }
+    }
     if (url.pathname === '/control/content' && contentFixture) {
       contentFixture.control(await request.json())
       return Response.json({ ok: true })
@@ -56,8 +97,8 @@ const api = Bun.serve({
         ids: contentFixture.ids,
         traces: contentFixture.traces,
       })
-    if (url.pathname.startsWith('/admin/') && contentFixture)
-      return contentFixture.handle(request)
+    if (url.pathname.startsWith('/admin/') && (mediaFixture || contentFixture))
+      return (mediaFixture ?? contentFixture).handle(request)
     if (url.pathname === '/control') {
       const body = await request.json()
       if (body.role) role = body.role
@@ -190,6 +231,7 @@ if (built) {
   if (code) {
     api.stop(true)
     await contentFixture?.close()
+    await mediaFixture?.close()
     throw new Error('Browser fixture build failed: ' + (out + err).slice(-4000))
   }
 }
@@ -224,19 +266,17 @@ try {
   for (const phase of phases) {
     const workerSource = await Bun.file(
       import.meta.dir +
-        (phase === 'content'
-          ? '/admin-content-browser-worker.mjs'
-          : phase === 'routes'
-            ? '/auth-routes-browser-worker.mjs'
-            : '/auth-browser-worker.mjs'),
+        (phase === 'media'
+          ? '/admin-media-upload-browser-worker.mjs'
+          : phase === 'content'
+            ? '/admin-content-browser-worker.mjs'
+            : phase === 'routes'
+              ? '/auth-routes-browser-worker.mjs'
+              : '/auth-browser-worker.mjs'),
     ).text()
     const workerPath = process.env.AUTH_BROWSER_WORKER_PATH
-    assert.ok(
-      workerPath,
-      'Provide AUTH_BROWSER_WORKER_PATH on a filesystem the runner can read',
-    )
-    await Bun.write(workerPath, workerSource)
-    const nativePath = workerPath.startsWith('/mnt/')
+    if (workerPath) await Bun.write(workerPath, workerSource)
+    const nativePath = workerPath?.startsWith('/mnt/')
       ? workerPath.replace(
           /^\/mnt\/([a-z])\//,
           (_all, drive) => drive.toUpperCase() + ':/',
@@ -245,14 +285,28 @@ try {
     const worker = Bun.spawn(
       [
         node,
-        nativePath,
+        ...(nativePath
+          ? [nativePath]
+          : [
+              '--input-type=module',
+              '--eval',
+              `process.argv.splice(1,0,'browser-worker.mjs');\n${workerSource}`,
+            ]),
         url,
         module,
         executable,
         'http://127.0.0.1:' + api.port,
         process.env.ADMIN_BROWSER_SCREENSHOT_PREFIX ?? '',
+        process.env.MEDIA_BROWSER_PHASE ?? 'full',
       ],
-      { stdout: 'pipe', stderr: 'pipe' },
+      {
+        stdout: 'pipe',
+        stderr: 'pipe',
+        env: {
+          ...process.env,
+          MEDIA_BROWSER_PHASE: process.env.MEDIA_BROWSER_PHASE ?? 'full',
+        },
+      },
     )
     const [code, stdout, stderr] = await Promise.all([
       worker.exited,
@@ -270,4 +324,5 @@ try {
   await child.exited
   api.stop(true)
   await contentFixture?.close()
+  await mediaFixture?.close()
 }

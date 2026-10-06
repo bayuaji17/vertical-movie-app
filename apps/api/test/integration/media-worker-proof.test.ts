@@ -1,4 +1,5 @@
 import { proveBrowserPlayback } from "./media-playback-fixture";
+import { createHash } from "node:crypto";
 import { PublicationService } from "../../src/modules/publication/service";
 import { PlaybackService } from "../../src/modules/playback/service";
 import { CatalogService } from "../../src/modules/catalog/service";
@@ -140,6 +141,25 @@ test(
         createdBy: "media-admin",
         updatedBy: "media-admin",
       });
+      async function putSource(
+        session: Awaited<ReturnType<MediaService["initiate"]>>,
+      ) {
+        for (let n = 1; n <= session.partCount; n++) {
+          const signed = await service.part(session.id, n, "media-admin");
+          const offset = (n - 1) * Number(session.partSizeBytes);
+          const response = await fetch(signed.url!, {
+            method: "PUT",
+            body: Bun.file(source).slice(
+              offset,
+              Math.min(
+                Bun.file(source).size,
+                offset + Number(session.partSizeBytes),
+              ),
+            ),
+          });
+          expect(response.ok).toBe(true);
+        }
+      }
       const session = await service.initiate(
         {
           ownerType: "video",
@@ -149,24 +169,13 @@ test(
           contentType: "video/mp4",
           sizeBytes: String(Bun.file(source).size),
           idempotencyKey: crypto.randomUUID(),
+          expectedSha256: createHash("sha256")
+            .update(new Uint8Array(await Bun.file(source).arrayBuffer()))
+            .digest("hex"),
         },
         "media-admin",
       );
-      for (let n = 1; n <= session.partCount; n++) {
-        const signed = await service.part(session.id, n, "media-admin");
-        const offset = (n - 1) * Number(session.partSizeBytes);
-        const response = await fetch(signed.url!, {
-          method: "PUT",
-          body: Bun.file(source).slice(
-            offset,
-            Math.min(
-              Bun.file(source).size,
-              offset + Number(session.partSizeBytes),
-            ),
-          ),
-        });
-        expect(response.ok).toBe(true);
-      }
+      await putSource(session);
       expect(
         (await service.status(session.id, "media-admin")).uploadedBytes,
       ).toBe(String(Bun.file(source).size));
@@ -285,9 +294,14 @@ test(
           contentType: "image/png",
           sizeBytes: String(Bun.file(posterFile).size),
           idempotencyKey: crypto.randomUUID(),
+          expectedSha256: createHash("sha256")
+            .update(new Uint8Array(await Bun.file(posterFile).arrayBuffer()))
+            .digest("hex"),
         },
         "media-admin",
       );
+      // Simulate a durable pre-ACOV session; new poster sessions default to request.
+      await database.client`UPDATE upload_sessions SET processing_mode='worker' WHERE id=${posterSession.id}::uuid`;
       const posterPart = await service.part(posterSession.id, 1, "media-admin");
       expect(
         (
@@ -311,9 +325,13 @@ test(
             contentType: "image/png",
             sizeBytes: String(Bun.file(posterFile).size),
             idempotencyKey: crypto.randomUUID(),
+            expectedSha256: createHash("sha256")
+              .update(new Uint8Array(await Bun.file(posterFile).arrayBuffer()))
+              .digest("hex"),
           },
           "media-admin",
         );
+        await database.client`UPDATE upload_sessions SET processing_mode='worker' WHERE id=${parentPoster.id}::uuid`;
         const url = await service.part(parentPoster.id, 1, "media-admin");
         expect(
           (await fetch(url.url!, { method: "PUT", body: Bun.file(posterFile) }))
@@ -433,21 +451,7 @@ test(
         },
         "media-admin",
       );
-      for (let n = 1; n <= upload2.partCount; n++) {
-        const part = await service.part(upload2.id, n, "media-admin"),
-          offset = (n - 1) * Number(upload2.partSizeBytes);
-        const response = await fetch(part.url!, {
-          method: "PUT",
-          body: Bun.file(source).slice(
-            offset,
-            Math.min(
-              Bun.file(source).size,
-              offset + Number(upload2.partSizeBytes),
-            ),
-          ),
-        });
-        expect(response.ok).toBe(true);
-      }
+      await putSource(upload2);
       await service.complete(upload2.id, "media-admin");
       const stale = (await queue.claim())!;
       await database.client`UPDATE media_jobs SET lease_until=now()-interval '1 second' WHERE id=${stale.id}::uuid`;
@@ -469,6 +473,61 @@ test(
       await queue.fail(last, "TRANSIENT");
       expect((await repo.store.job(stale.id))?.state).toBe("failed");
       expect((await repo.store.asset(upload2.assetId))?.state).toBe("failed");
+      const wrongOwner = crypto.randomUUID();
+      await database.db.insert(videos).values({
+        id: wrongOwner,
+        kind: "movie",
+        title: "Wrong file",
+        slug: wrongOwner,
+        createdBy: "media-admin",
+        updatedBy: "media-admin",
+      });
+      const wrong = await service.initiate(
+        {
+          ownerType: "video",
+          ownerId: wrongOwner,
+          kind: "source",
+          filename: "movie.mp4",
+          contentType: "video/mp4",
+          sizeBytes: String(Bun.file(source).size),
+          idempotencyKey: crypto.randomUUID(),
+          expectedSha256: "0".repeat(64),
+        },
+        "media-admin",
+      );
+      await putSource(wrong);
+      await service.complete(wrong.id, "media-admin");
+      const wrongJob = (await queue.claim())!;
+      const beforeProbe = createJobRunner({
+        repo,
+        queue,
+        native,
+        storage,
+        storageEnv: config,
+        workerEnv: {
+          ...workerEnv,
+          ffprobe: "missing-proof-ffprobe",
+          ffmpeg: "missing-proof-ffmpeg",
+        },
+      });
+      expect(await beforeProbe(wrongJob)).toEqual({
+        state: "failed",
+        code: "MEDIA_SOURCE_CHANGED",
+      });
+      expect((await repo.store.job(wrongJob.id))?.state).toBe("failed");
+      const rejected = await repo.store.asset(wrong.assetId);
+      expect(rejected?.state).toBe("failed");
+      expect(rejected?.readyJobId).toBeNull();
+      expect(rejected?.facts).toBeNull();
+      expect(await storage.listKeys(wrongJob.outputPrefix)).toEqual([]);
+      expect(
+        (
+          await service.ownerMedia(
+            { ownerType: "video", ownerId: wrongOwner },
+            "media-admin",
+          )
+        ).canPreview,
+      ).toBe(false);
     } finally {
       if (created) {
         const pending = await sdk.send(

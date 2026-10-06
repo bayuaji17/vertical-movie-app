@@ -4,6 +4,7 @@ export class ContentError extends Error {
     public readonly code: string,
     message: string,
     public readonly httpStatus: ContentErrorStatus = 409,
+    public readonly retryAfterSeconds?: number,
   ) {
     super(message);
   }

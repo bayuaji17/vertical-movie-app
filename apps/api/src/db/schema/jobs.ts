@@ -22,6 +22,10 @@ export const mediaJobs = pgTable(
       .references((): AnyPgColumn => mediaAssets.id, { onDelete: "restrict" }),
     generation: integer("generation").notNull(),
     kind: text("kind").$type<"source" | "poster">().notNull(),
+    executionMode: text("execution_mode")
+      .$type<"worker" | "request">()
+      .notNull()
+      .default("worker"),
     state: text("state")
       .$type<
         "queued" | "running" | "retry" | "succeeded" | "failed" | "cancelled"
@@ -57,6 +61,10 @@ export const mediaJobs = pgTable(
       sql`${t.state} IN ('queued','running','retry','succeeded','failed','cancelled')`,
     ),
     check("media_jobs_kind_check", sql`${t.kind} IN ('source','poster')`),
+    check(
+      "media_jobs_execution_mode_check",
+      sql`${t.executionMode} IN ('worker','request') AND (${t.executionMode}='worker' OR ${t.kind}='poster')`,
+    ),
     check(
       "media_jobs_attempt_check",
       sql`${t.attempts}>=0 AND ${t.failures}>=0 AND ${t.failures}<=${t.attempts} AND ${t.generation}>0 AND ${t.progressSeconds}>=0`,

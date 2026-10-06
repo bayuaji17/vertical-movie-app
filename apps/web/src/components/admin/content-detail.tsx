@@ -9,6 +9,7 @@ import { ContentStatus } from './content-status'
 import { Button } from '#/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '#/components/ui/card'
 import { Badge } from '#/components/ui/badge'
+import { OwnerMediaPanel } from './media-panel'
 
 function MetadataRows({
   rows,
@@ -154,21 +155,6 @@ export function ContentDetailView({ detail }: { detail: ContentDetail }) {
                   Source availability describes the original upload. HLS
                   playback readiness is managed separately.
                 </p>
-                {detail.data.sourceAvailability === 'available' && (
-                  <Button
-                    nativeButton={false}
-                    variant="outline"
-                    className="min-h-11"
-                    render={
-                      <Link
-                        to="/admin/videos/$id/preview"
-                        params={{ id: d.id }}
-                      />
-                    }
-                  >
-                    Preview video
-                  </Button>
-                )}
               </>
             )}
           </CardContent>
@@ -202,6 +188,15 @@ export function ContentDetailView({ detail }: { detail: ContentDetail }) {
           </CardContent>
         </Card>
       </div>
+      {(detail.type === 'series' || detail.data.kind !== 'episode') && (
+        <OwnerMediaPanel
+          owner={{
+            ownerType: detail.type === 'series' ? 'series' : 'video',
+            ownerId: d.id,
+          }}
+          type={detail.type}
+        />
+      )}
     </div>
   )
 }

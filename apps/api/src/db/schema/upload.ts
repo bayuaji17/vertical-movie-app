@@ -24,11 +24,16 @@ export const uploadSessions = pgTable(
     videoId: uuid("video_id"),
     seriesId: uuid("series_id"),
     kind: text("kind").$type<"source" | "poster">().notNull(),
+    processingMode: text("processing_mode")
+      .$type<"worker" | "request">()
+      .notNull()
+      .default("worker"),
     actorId: text("actor_id")
       .notNull()
       .references(() => user.id, { onDelete: "restrict" }),
     idempotencyKey: uuid("idempotency_key").notNull(),
     requestHash: text("request_hash").notNull(),
+    expectedSha256: text("expected_sha256"),
     filename: text("filename").notNull(),
     stagingKey: text("staging_key").notNull().unique(),
     uploadId: text("upload_id"),
@@ -85,6 +90,10 @@ export const uploadSessions = pgTable(
       sql`num_nonnulls(${t.videoId},${t.seriesId})=1`,
     ),
     check(
+      "upload_sessions_processing_mode_check",
+      sql`${t.processingMode} IN ('worker','request') AND (${t.processingMode}='worker' OR ${t.kind}='poster')`,
+    ),
+    check(
       "upload_sessions_state_check",
       sql`${t.status} IN ('initializing','pending','completing','completed','aborting','aborted','expired','failed')`,
     ),
@@ -95,6 +104,10 @@ export const uploadSessions = pgTable(
     check(
       "upload_sessions_hash_check",
       sql`${t.requestHash} ~ '^[a-f0-9]{64}$'`,
+    ),
+    check(
+      "upload_sessions_expected_sha256_check",
+      sql`${t.expectedSha256} IS NULL OR ${t.expectedSha256} ~ '^[a-f0-9]{64}$'`,
     ),
     check(
       "upload_sessions_claim_check",
