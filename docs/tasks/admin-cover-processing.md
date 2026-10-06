@@ -374,13 +374,13 @@ Built Bun/Nitro + Chromium 154 browser proof lulus pada fixture PostgreSQL khusu
 
 Command runner menggunakan env khusus `MEDIA_STORAGE_TEST_*` dan `MEDIA_TEST_DATABASE_URL` dari `apps/api/.env` yang di-ignore. Proof membuat lalu menghapus bucket acak; audit sesudahnya menunjukkan 1 user test, 1 policy khusus prefix, 0 bucket tersisa. Bucket aplikasi `vertical-movie-app` tidak diubah. Credential tetap lokal untuk proof selanjutnya dan nilainya tidak masuk log/commit.
 
-Validasi: web tests140/649, API media tests27/131, root `check-types`3/3, `lint`1/1, `build`2/2, `docs:check`59 Markdown/514 link-anchor, Prettier dan `git diff --check` lulus. Commit hook masih akan dijalankan bersama commit ACOV-008.
+Validasi: web tests140/649, API media tests27/131, root `check-types`3/3, `lint`1/1, `build`2/2, `docs:check`59 Markdown/514 link-anchor, Prettier dan `git diff --check` lulus. Commit hook docs:check59/514, lint1/1, check-types3/3 dan Commitlint Conventional Commit juga lulus.
 
 ### Commit task
 
 - Pesan: `feat(web): prepare and recover native cover uploads (ACOV-008)`
-- SHA: dicatat pada receipt setelah commit task.
-- Hook/checks: dijalankan sesudah semua acceptance criteria dan gates lulus.
+- SHA: `0f07d46b5a34c02dc33908e56c79a5412788363d`.
+- Hook/checks: pre-commit docs:check59/514, lint1/1, check-types3/3 dan commit-msg Commitlint lulus.
 - Ledger: SHA aktual dicatat pada update dokumentasi setelah commit, tanpa self-referential SHA.
 
 ### Blocker atau tindak lanjut
