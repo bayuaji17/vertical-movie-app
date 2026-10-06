@@ -2,7 +2,7 @@
 
 ## Plan metadata
 
-- Status: **executing — plan disetujui, desain untuk review** · 7 Oktober 2026. Pengguna menyetujui plan melalui “oke setuju”; APUB-002 menghasilkan empat mockup/state specification untuk review visual. Approval plan tidak menyatakan raster baru approved, runtime implemented atau production verified.
+- Status: **executing — plan dan desain disetujui** · 7 Oktober 2026. Pengguna menyetujui plan melalui “oke setuju”; APUB-002 menghasilkan empat mockup/state specification untuk review visual. Approval plan tidak menyatakan raster baru approved, runtime implemented atau production verified.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `feat/api-request-logging`; base SHA: `313e31a14891ac0f91265a3557576b44791309d7`.
 - Context: [repository-context.md](repository-context.md), ditulis lebih dahulu.
@@ -362,7 +362,7 @@ Base/context [evidence index](repository-context.md#evidence-index) memetakan cl
 
 ## Open decisions
 
-Pengguna menyetujui plan, termasuk placement section/actions, archive published-only dan preview acknowledgement checkbox per dialog. Tidak ada perubahan angka/retensi/policy produk. Empat raster baru dan state/dialog specification pada [desain Publication](../../design/admin-publication.md) siap direview; visual approval belum diberikan. Sesuai APUB-002, runtime UI memakai desain yang diterima. Approval tidak ditanya ulang untuk plan yang sudah disetujui.
+Pengguna menyetujui plan, termasuk placement section/actions, archive published-only dan preview acknowledgement checkbox per dialog. Tidak ada perubahan angka/retensi/policy produk. Empat raster dan state/dialog specification pada [desain Publication](../../design/admin-publication.md) disetujui pengguna melalui “ok setuju” pada 7 Oktober 2026. Sesuai APUB-002, runtime UI memakai desain yang diterima. Approval tidak ditanya ulang untuk plan yang sudah disetujui.
 
 ## Validation history
 
@@ -401,3 +401,11 @@ Context disimpan sebelum plan. Dokumen plan/backlog/index disusun sesuai permint
 Validasi aktual: `bun run docs:check` lulus 65 Markdown/601 links; Prettier empat dokumen dan `git diff --check` lulus. Staged-only checkout pada cache ignored lulus validator 58 Markdown/582 links, tanpa memasukkan desain untracked existing. Pemeriksaan DAG/backlog membuktikan dependency 13 task sama. Preservation SHA-256 membuktikan 22 unrelated path unchanged dan konten indeks existing identik setelah mengeluarkan dua addition admin publication. `bun run lint` lulus 1/1 task dan `bun run check-types` lulus 3/3 task, semuanya valid Turbo cache hit untuk source yang tidak berubah.
 
 Staging hanya context/plan/backlog baru serta dua navigasi indeks milik fitur. Local task commit menggunakan hook normal; actual SHA dan hasil hook dicatat pada update ledger task berikutnya setelah commit berhasil agar tidak self-referential. Runtime test/build/database/provider/browser belum dijalankan untuk delivery dokumentasi ini.
+
+### 2026-10-07 — Visual approval dan runtime freshness
+
+Pengguna menyetujui empat desain melalui “ok setuju”. APUB-002 Done; commit `9e11b221d1d244bc486bb2be0d9b029619b47a87`, docs66/617, staged59/598, Prettier/diff/preservation, hook lint1/types3 serta Commitlint lulus. Freshness base313e31a→target9e11b22 valid: tidak ada diff runtime apps/packages/manifests/lock. Runtime dimulai dengan APUB-003; tidak ada schema atau remote write.
+
+### 2026-10-07 — APUB-003
+
+Assessment/checks video diekstrak ke readiness.ts; command existing memakai predicate CatalogStore dan assessment setelah parent/owner lock. Replay/hash/version/series semantics dipertahankan. Native policy tests6/56 assertions dan suite API115/618 lulus; root check-types3/3, lint1/1 dan build2/2 lulus. Fake policy tests bukan PG provenance proof; concurrency/generation DB diperiksa APUB-011. Tidak ada schema/storage/process I/O baru.

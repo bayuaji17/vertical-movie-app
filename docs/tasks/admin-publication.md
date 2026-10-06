@@ -93,7 +93,7 @@ Pengguna menyetujui plan melalui “oke setuju” pada 7 Oktober 2026. APUB-002 
 
 ## Task: APUB-002 — Desain section Publication dan confirmation states
 
-- Status: Review
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1
 - Referensi: APUB-US-01; PRD-05/06/08/09, GR-01–09 yang relevan; [step plan](../plans/admin-publication/implementation-plan.md#apub-002--publication-ux-dan-state-specification)
@@ -119,7 +119,7 @@ Review four layout modes dan kedua dialog/state matrix terhadap plan serta dashb
 
 ### Hasil dan bukti
 
-7 Oktober 2026: freshness source base313e31a→target4cf00a9 valid, diff hanya dokumen planning. Branch feat/admin-publication dibuat dari approved planning SHA. Canonical [desain](../design/admin-publication.md) mencakup checklist, loading/stale/blocked/ready/published/archived/unknown states, confirmation Publish/Archive, retry/version/auth semantics, responsivitas dan accessibility specification. Lima built-in image_gen calls menghasilkan empat selected desktop/mobile light/dark PNG; mobile candidate dikoreksi menjadi source/cover satu kolom. Desktop light1150×1367/dark1150×1368, mobile light801×1962/dark801×1964. Inspeksi visual exact checklist labels/English coherent Draft+Ready/source+cover Ready/no Archive draft dan charcoal appearance selesai; header PNG/dimensi/SHA-256 diperiksa tanpa resize. Source/runtime/API/schema/dependency tetap tidak berubah. Visual approval belum diberikan pengguna; tests browser/device/contrast bukan hasil task desain. Checks aktual: bun run docs:check lulus66 Markdown/617 links, staged-only validator lulus59 Markdown/598 links, installed Prettier dan git diff --check lulus. SHA-256 preservation22 unrelated path dan pre-existing indeks setelah tiga fitur-only edits dinormalisasi lulus; staged diff hanya9 file milik desain/approval ledger. Local commit memakai hook normal; hasil hook/SHA dicatat update berikutnya setelah commit.
+7 Oktober 2026: freshness source base313e31a→target4cf00a9 valid, diff hanya dokumen planning. Branch feat/admin-publication dibuat dari approved planning SHA. Canonical [desain](../design/admin-publication.md) mencakup checklist, loading/stale/blocked/ready/published/archived/unknown states, confirmation Publish/Archive, retry/version/auth semantics, responsivitas dan accessibility specification. Lima built-in image_gen calls menghasilkan empat selected desktop/mobile light/dark PNG; mobile candidate dikoreksi menjadi source/cover satu kolom. Desktop light1150×1367/dark1150×1368, mobile light801×1962/dark801×1964. Inspeksi visual exact checklist labels/English coherent Draft+Ready/source+cover Ready/no Archive draft dan charcoal appearance selesai; header PNG/dimensi/SHA-256 diperiksa tanpa resize. Source/runtime/API/schema/dependency tetap tidak berubah. Visual approval diberikan pengguna melalui “ok setuju” pada 7 Oktober 2026; tests browser/device/contrast bukan hasil task desain. Checks aktual: bun run docs:check lulus66 Markdown/617 links, staged-only validator lulus59 Markdown/598 links, installed Prettier dan git diff --check lulus. SHA-256 preservation22 unrelated path dan pre-existing indeks setelah tiga fitur-only edits dinormalisasi lulus; staged diff hanya9 file milik desain/approval ledger. Local commit memakai hook normal; hasil hook/SHA dicatat update berikutnya setelah commit.
 
 ### Commit task
 
@@ -130,11 +130,11 @@ Review four layout modes dan kedua dialog/state matrix terhadap plan serta dashb
 
 ### Blocker atau tindak lanjut
 
-Plan approved. Empat mockup dan specification menunggu review visual pengguna sebelum UI APUB-007–009, sesuai APUB-002: runtime UI memakai desain yang diterima. API policy APUB-003 independen dan Ready. Tidak meminta approval ulang plan.
+Plan dan empat mockup/specification disetujui pengguna 7 Oktober 2026; runtime dilanjutkan. API policy APUB-003 independen dan Ready. Tidak meminta approval ulang plan.
 
 ## Task: APUB-003 — Shared video publication readiness assessment
 
-- Status: Ready
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1
 - Referensi: APUB-US-01; PRD-05/06/08/09, GR-01–09 yang relevan; [step plan](../plans/admin-publication/implementation-plan.md#apub-003--shared-video-publication-assessment)
@@ -148,11 +148,11 @@ Ekstrak assessment video existing dari PublicationService ke publication/readine
 
 ### Acceptance criteria
 
-- [ ] Checks active draft/title/synopsis/rights actor+timestamp/verified media-duration/upload-busy/parent sesuai policy existing dan memiliki status passed/blocked/not-applicable yang stabil.
-- [ ] Command dan read model memakai assessment sama; title/synopsis whitespace dan rights partial tidak lolos; original deleting/deleted dengan provenance/HLS sah tetap eligible.
-- [ ] Replay sebelum/sesudah lock, hash, parent→owner lock order, timestamps, persistent operation dan after-commit invalidation tidak berubah.
-- [ ] Existing domain error code/precedence dipertahankan; current active upload statuses tidak hilang; no storage/FFmpeg I/O ditambahkan.
-- [ ] Tests policy/command parity menguji episode/series boundary, salah generation/job readiness, duration integer-invalid/limit dan dependency failure, bukan mirror markup.
+- [x] Checks active draft/title/synopsis/rights actor+timestamp/verified media-duration/upload-busy/parent sesuai policy existing dan memiliki status passed/blocked/not-applicable yang stabil.
+- [x] Command dan read model memakai assessment sama; title/synopsis whitespace dan rights partial tidak lolos; original deleting/deleted dengan provenance/HLS sah tetap eligible.
+- [x] Replay sebelum/sesudah lock, hash, parent→owner lock order, timestamps, persistent operation dan after-commit invalidation tidak berubah.
+- [x] Existing domain error code/precedence dipertahankan; current active upload statuses tidak hilang; no storage/FFmpeg I/O ditambahkan.
+- [x] Tests policy/command parity menguji episode/series boundary, salah generation/job readiness, duration integer-invalid/limit dan dependency failure, bukan mirror markup.
 
 ### Validasi
 
@@ -160,13 +160,13 @@ bun test apps/api/src/modules/publication/readiness.test.ts; existing relevant A
 
 ### Hasil dan bukti
 
-Belum dikerjakan; command di bagian Validasi merupakan rencana, bukan hasil aktual. Tidak ada commit/runtime proof untuk task ini.
+Assessment/checks video diekstrak ke readiness.ts; command existing memakai predicate CatalogStore dan assessment setelah parent/owner lock. Replay/hash/version/series semantics dipertahankan. Native policy tests6/56 assertions dan suite API115/618 lulus; root check-types3/3, lint1/1 dan build2/2 lulus. Fake policy tests bukan PG provenance proof; concurrency/generation DB diperiksa APUB-011. Tidak ada schema/storage/process I/O baru.
 
 ### Commit task
 
 - Pesan: `refactor(api): share publication readiness policy (APUB-003)`
 - SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- Hook/checks: relevant tests, root types/lint/build, docs:check, Prettier/diff lulus sebelum commit; hasil hook normal dicatat setelah commit.
 - Ledger: SHA aktual dicatat setelah commit berhasil pada update task/dokumentasi berikutnya; tidak memakai self-referential SHA.
 
 ### Blocker atau tindak lanjut

@@ -1,12 +1,12 @@
 # Desain admin Publish & Archive
 
-> Status: **Proposal visual untuk review pengguna** · 7 Oktober 2026 · Plan disetujui pengguna melalui “oke setuju”; empat raster/state specification baru belum mendapat approval visual. Source baseline `4cf00a97dffe9568a966f8889ae798fed3acdb17`, runtime UI belum diimplementasikan.
+> Status: **Desain disetujui pengguna** · 7 Oktober 2026 · Plan disetujui pengguna melalui “oke setuju”; empat raster/state specification disetujui melalui “ok setuju” pada 7 Oktober 2026. Source baseline `4cf00a97dffe9568a966f8889ae798fed3acdb17`, runtime UI belum diimplementasikan.
 
 ## Scope dan sumber acuan
 
 Extension pada detail `/admin/content/:type/:id` untuk Film/Standalone non-episode. Acuan: [plan](../plans/admin-publication/implementation-plan.md), [context](../plans/admin-publication/repository-context.md), [backlog APUB](../tasks/admin-publication.md), [dashboard desktop](admin-content-desktop-light.md), [mobile](admin-content-mobile.md), [upload](admin-media-upload.md) dan [design system](design-system.md). Token runtime authoritative pada `apps/web/src/styles.css`, shadcn Base UI Rhea dari `apps/web/components.json`; English UI dan developer docs Indonesia.
 
-Approval plan tidak dipakai sebagai approval otomatis terhadap empat raster baru. Sesuai APUB-002, runtime UI memakai desain yang diterima. Aksi dan kontrak di bawah adalah desain untuk implementasi, bukan bukti endpoint/UI baru sudah aktif.
+Pengguna menyetujui keempat raster dan state specification melalui “ok setuju” setelah review visual. Sesuai APUB-002, runtime UI memakai desain yang diterima. Aksi dan kontrak di bawah adalah desain untuk implementasi, bukan bukti endpoint/UI baru sudah aktif.
 
 ## Layout acuan
 

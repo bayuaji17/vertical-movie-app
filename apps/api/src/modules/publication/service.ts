@@ -17,6 +17,7 @@ import {
   unavailable,
 } from "../../shared/content-error";
 import type { PublishInput, PublicationResult } from "./model";
+import { assertVideoPublication, PublicationEvidenceStore } from "./readiness";
 export class PublicationService {
   constructor(
     private readonly db?: ContentDatabase,
@@ -110,48 +111,34 @@ export class PublicationService {
           "PUBLICATION_NOT_READY",
           "Title and synopsis are required.",
         );
-      const busy =
-        (
-          await tx
-            .select({ id: uploadSessions.id })
-            .from(uploadSessions)
-            .where(
-              and(
-                type === "video"
-                  ? eq(uploadSessions.videoId, id)
-                  : eq(uploadSessions.seriesId, id),
-                inArray(uploadSessions.status, [
-                  "initializing",
-                  "pending",
-                  "completing",
-                  "aborting",
-                ]),
-              ),
-            )
-            .limit(1)
-        ).length > 0;
-      if (busy)
-        throw new ContentError(
-          "PUBLICATION_MEDIA_BUSY",
-          "Finish or abort the active upload before publishing.",
-        );
       const catalog = new CatalogStore(tx);
       if (type === "video") {
-        const ready = await catalog.readyForPublish(id);
-        if (
-          !ready ||
-          !ready.video.rightsConfirmedAt ||
-          !ready.video.rightsConfirmedBy ||
-          !Number.isSafeInteger(Number(ready.source.facts?.durationMs)) ||
-          Number(ready.source.facts?.durationMs) <= 0 ||
-          Number(ready.source.facts?.durationMs) >
-            (ready.video.kind === "episode" ? 600000 : 1800000)
-        )
-          throw new ContentError(
-            "PUBLICATION_NOT_READY",
-            "Verified HLS, poster and rights confirmation are required.",
-          );
+        const evidence = await new PublicationEvidenceStore(tx).read(
+          row as typeof videos.$inferSelect,
+          true,
+        );
+        assertVideoPublication(evidence, input.expectedVersion);
       } else {
+        const busy = await tx
+          .select({ id: uploadSessions.id })
+          .from(uploadSessions)
+          .where(
+            and(
+              eq(uploadSessions.seriesId, id),
+              inArray(uploadSessions.status, [
+                "initializing",
+                "pending",
+                "completing",
+                "aborting",
+              ]),
+            ),
+          )
+          .limit(1);
+        if (busy.length)
+          throw new ContentError(
+            "PUBLICATION_MEDIA_BUSY",
+            "Finish or abort the active upload before publishing.",
+          );
         const [poster] = await tx
           .select({ asset: mediaAssets, job: mediaJobs })
           .from(mediaAssets)
