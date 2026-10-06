@@ -12,7 +12,7 @@ Sebagai operator server, saya ingin melihat request API saat masuk dan setelah s
 
 ## Task: APILOG-001 — Plugin logging console
 
-- Status: Review
+- Status: Done
 - Owner: Codex/pengembang API
 - Prioritas: 1
 - Referensi: APILOG-STORY-001; APILOG-001 pada plan canonical
@@ -43,9 +43,9 @@ Buat `apps/api/src/plugins/logger.ts` dan test beside module. Event masuk/comple
 ### Commit task
 
 - Pesan rencana: `feat(api): add console request logger (APILOG-001)`
-- SHA: belum dibuat
-- Hook/checks: quality gates di atas lulus; hasil hook commit dicatat setelah commit
-- Ledger: catat SHA aktual pada update task berikutnya
+- SHA: `d4a45de45c61ab5b219b922f94d4a9dafd3c0651`
+- Hook/checks: docs:check, lint web, check-types tiga workspace dan Commitlint lulus pada commit
+- Ledger: dicatat pada update APILOG-002
 
 ### Blocker atau tindak lanjut
 
@@ -53,11 +53,11 @@ Scope telah disetujui pengguna; lanjut APILOG-002 setelah criteria/checks dan co
 
 ## Task: APILOG-002 — Logging seluruh komposisi API
 
-- Status: Backlog
+- Status: Review
 - Owner: Codex/pengembang API
 - Prioritas: 2
 - Referensi: APILOG-STORY-001; APILOG-002 pada plan canonical
-- Diperbarui: 2026-10-06
+- Diperbarui: 2026-10-07
 - Dependensi: APILOG-001
 - Ukuran: kecil, integrasi factory dan regression tests
 
@@ -67,11 +67,11 @@ Pasang logger paling awal pada chaining `createApp`, dengan dependency output te
 
 ### Acceptance criteria
 
-- [ ] Semua request yang mencapai factory tercatat tanpa filter/sampling.
-- [ ] Auth Response, admin early rejection, validation/error dan unknown route mencetak status aktual.
-- [ ] Header/body/cache/security/OpenAPI existing dan inferensi Eden tetap lulus.
-- [ ] Tidak ada completion ganda atau state campur antar-request/app.
-- [ ] Suite API dan root quality gates lulus.
+- [x] Semua request yang mencapai factory tercatat tanpa filter/sampling.
+- [x] Auth Response, admin early rejection, validation/error dan unknown route mencetak status aktual.
+- [x] Header/body/cache/security/OpenAPI existing dan inferensi Eden tetap lulus.
+- [x] Tidak ada completion ganda atau state campur antar-request/app.
+- [x] Suite API dan root quality gates lulus.
 
 ### Validasi
 
@@ -79,13 +79,13 @@ Focused logger/app tests, `bun run --cwd apps/api test`, root check-types/lint/b
 
 ### Hasil dan bukti
 
-Belum dikerjakan; runtime belum berubah.
+7 Oktober 2026: factory memasang logger sebelum seluruh route dan menerima `requestLogger` dependency untuk test. Focused app/logger suite lulus 11 tests/215 assertions, mencakup 13 request route-family dan guard 403/503. Header cookie auth, private/public cache dan payload tetap diperiksa. Integrasi menemukan edge case Elysia 1.4.30: komposisi dengan error-hook array kosong melewatkan afterResponse pada unmatched route. Plugin menambahkan global onError observer tanpa return untuk menjaga jalur default dan memicu completion; regression `/unknown` kini lulus tanpa log ganda. bun run --cwd apps/api test lulus 109 tests/562 assertions pada 24 files; bun run check-types (3 tasks), bun run lint (web), bun run build (API/web), docs:check (62 Markdown/552 links), Prettier dan git diff --check lulus.
 
 ### Commit task
 
 - Pesan rencana: `feat(api): log requests across app routes (APILOG-002)`
 - SHA: belum dibuat
-- Hook/checks: belum dijalankan untuk implementasi
+- Hook/checks: quality gates di atas lulus; hasil hook dicatat setelah commit
 - Ledger: catat SHA aktual pada update task berikutnya
 
 ### Blocker atau tindak lanjut

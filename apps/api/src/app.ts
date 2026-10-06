@@ -23,12 +23,17 @@ import type { SeriesService } from "./modules/series/service";
 import type { VideosService } from "./modules/videos/service";
 import type { GenresService } from "./modules/genres/service";
 import type { RequireAdminDependencies } from "./modules/auth/admin/guard";
+import {
+  createRequestLogger,
+  type RequestLoggerDependencies,
+} from "./plugins/logger";
 
 import type { S3Client } from "bun";
 import { createContentModule } from "./modules/content";
 import type { ContentPageService } from "./modules/content/service";
 
 type AppDependencies = {
+  requestLogger?: RequestLoggerDependencies;
   contentPageService?: ContentPageService;
   storage?: S3Client;
   mediaService?: MediaService;
@@ -63,6 +68,7 @@ function createAuthRoutes(auth?: AppDependencies["auth"]) {
 }
 
 export function createApp({
+  requestLogger,
   contentPageService,
   storage,
   mediaService,
@@ -81,6 +87,7 @@ export function createApp({
   genresService,
 }: AppDependencies = {}) {
   const app = new Elysia({ normalize: false })
+    .use(createRequestLogger(requestLogger))
     .decorate("storage", storage)
     .get("/", () => "Hello Elysia", {
       detail: {
