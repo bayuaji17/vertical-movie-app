@@ -18,7 +18,7 @@ Sebagai pengunjung ponsel/desktop, saya ingin menavigasi dengan sentuhan/keyboar
 
 ## Task: HOMEFE-000 — Repository context dan detailed plan
 
-- Status: Review
+- Status: Done
 - Owner: Codex
 - Prioritas: 0
 - Referensi: HOME-US-001/002/003; PRD-07/08; GR-02; permintaan pengguna 7 Oktober 2026.
@@ -35,7 +35,7 @@ Context pinned SHA sebelum plan, impact/DAG/fixture contract/behavior/matrix/bac
 - [x] Context ditulis lebih dahulu dan source path/DTO/theme/route boundaries traceable di snapshot.
 - [x] Plan FE-only dummy JSON menjelaskan struktur data/filter/actions/assets/responsivitas/SSR/network proof.
 - [x] Setiap task memiliki AC/dependency/validation; playback/API tidak masuk diam-diam.
-- [ ] Approval/index/product docs selaras; docs:check/format/diff check dan commit task lulus.
+- [x] Approval/index/product docs selaras; docs:check/format/diff check dan commit task lulus.
 
 ### Validasi
 
@@ -43,14 +43,14 @@ Prettier Markdown yang diubah; bun run docs:check; git diff --check; hook docs/l
 
 ### Hasil dan bukti
 
-7 Oktober 2026: snapshot b90edaaaca83187726218286fdaf253958a483fe; main 4cf00a9 docs APUB only, runtime paths identik. Context saved before plan. Planner/shadcn skill dibaca untuk planning. Mockup approved, detail action default proposal, JSON 18 items dan batch 6 ditetapkan untuk review. Pemeriksaan awal docs:check lulus (62 Markdown, 591 local links/anchors); Prettier write dan git diff --check lulus. Pemeriksaan final dan hook dicatat setelah dijalankan. Tidak ada implementasi/API/schema/script/dependency change.
+7 Oktober 2026: snapshot b90edaaaca83187726218286fdaf253958a483fe; main 4cf00a9 hanya menambah dokumen APUB, runtime paths identik. Context disimpan sebelum plan. Skill planner/shadcn dibaca untuk planning. Mockup disetujui; detail dialog, JSON 18 items dan batch enam merupakan proposal implementasi untuk review. Final docs:check lulus (62 Markdown, 591 local links/anchors); Prettier write/check pada delapan Markdown dan git diff --check lulus. Hook menjalankan docs:check, lint web (1/1) dan check-types API/auth/web (3/3), keduanya replay cache Turbo; Commitlint lulus. Tidak ada perubahan runtime/API/schema/script/dependency; build/test runtime tidak dijalankan pada task planning.
 
 ### Commit task
 
 - Pesan: docs(web): plan dummy homepage catalog (HOMEFE-000)
-- SHA: Belum dibuat; catat setelah commit berhasil.
-- Hook/checks: Pending.
-- Ledger: Update sesudah commit planning.
+- SHA planning: `ab15400d7f8eee9fa305d60cd4f155c639d10b6d`.
+- Hook/checks: docs:check, lint, check-types dan Commitlint lulus tanpa bypass; format/diff check lulus.
+- Ledger: Update sesudah commit planning; branch lokal `feat/home-catalog-mockup`, belum push/PR/merge.
 
 ### Blocker atau tindak lanjut
 

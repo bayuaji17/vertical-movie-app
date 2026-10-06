@@ -8,7 +8,7 @@
 - Base ref: `feat/home-catalog-mockup`.
 - Base SHA: `b90edaaaca83187726218286fdaf253958a483fe`.
 - Context: [repository-context.md](repository-context.md).
-- Last validated SHA: `b90edaaaca83187726218286fdaf253958a483fe`.
+- Last validated SHA: `ab15400d7f8eee9fa305d60cd4f155c639d10b6d`.
 - Backlog canonical: [HOMEFE-000–010](../../tasks/home-catalog.md).
 - Otorisasi pengguna: mockup disetujui dan plan detail diminta; seluruh data tahap ini dummy JSON, fokus FE. Persetujuan ini tidak berarti runtime sudah dibuat atau playback/API diotorisasi.
 
@@ -272,4 +272,11 @@ Other choices above (batch6, exact selector semantics, fixed Latest releases lab
 
 ## Execution log
 
-Runtime tasks not started. Planning/approval/index updates and documentation checks are recorded in HOMEFE-000. Git task SHA recorded after commit in a subsequent ledger update; no push/PR/merge/deploy performed.
+### 7 Oktober 2026 — planning closure freshness
+
+- Result: valid for planning; status tetap ready untuk review, bukan executing.
+- Current target SHA: `ab15400d7f8eee9fa305d60cd4f155c639d10b6d`.
+- Diff scoped apps/packages/manifests/lock/Turbo/AGENTS terhadap base: kosong; perubahan commit hanya delapan Markdown planning/approval/index.
+- Decision: context/plan tetap valid; recheck target/source lagi sebelum implementasi.
+
+Runtime tasks belum dimulai. Context disimpan sebelum plan. Commit planning HOMEFE-000: `ab15400d7f8eee9fa305d60cd4f155c639d10b6d`; branch `feat/home-catalog-mockup`, pre-write SHA `b90edaaaca83187726218286fdaf253958a483fe`. Delapan Markdown berubah; docs:check (62 Markdown/591 links), Prettier write/check, diff check dan hook docs/lint/types/Commitlint lulus. Lint/types melalui cache Turbo; tidak ada test/build runtime baru dalam task dokumentasi. Ledger pascacommit ini mencatat hasil nyata. Tidak ada push/PR/merge/deploy.
