@@ -1,6 +1,6 @@
 # Modul: admin cover processing
 
-- Status: **plan disetujui 6 Oktober 2026; ACOV-001–008 selesai; ACOV-009 menjadi task berikutnya** di `feat/admin-cover-processing`.
+- Status: **ACOV-001–010 selesai lokal** di `feat/admin-cover-processing`; R2/production belum diverifikasi.
 - Diperbarui: 6 Oktober 2026.
 - Persetujuan: pengguna menyetujui plan/default pada 6 Oktober 2026; feasibility gate menentukan guard native/browser. Rincian di [plan](../plans/admin-cover-processing/implementation-plan.md).
 - Snapshot source: `06e7ce75e9d3f87bbe501bac054711310e14e5a2`; [context](../plans/admin-cover-processing/repository-context.md).
@@ -105,7 +105,7 @@ Aturan hasil: crop sumber animasi ditolak di browser melalui pemeriksaan APNG `a
 ### Commit task
 
 - Pesan: `test(media): verify native poster feasibility (ACOV-002)`
-- SHA: `7111d524816d62f33882d2efbc967648c87a3e5a`.
+- SHA: `7111d522b0936f73b4b0746f14f3cce111382d92`.
 - Hook/checks: docs:check (59 Markdown/514 links), lint (web), check-types (api/web/auth) dan Commitlint lulus; task tests, build, Prettier dan diff check juga lulus sebelum commit.
 - Ledger: SHA task ini dicatat pada backlog dan execution log plan setelah task commit.
 
@@ -148,7 +148,7 @@ Existing migration regressions lulus serial: fingerprint proof 1/15 dan publicat
 ### Commit task
 
 - Pesan: `feat(api): persist poster execution mode (ACOV-003)`
-- SHA: `edd4d7e`.
+- SHA: `edd4d7ee4c818b860877149900b6a910e5f11f9c`.
 - Hook/checks: docs:check (59 Markdown/514 links), lint (web), check-types (api/web/auth) dan Commitlint lulus; integration/API tests, build, Prettier, diff dan migration preservation lulus sebelum commit.
 - Ledger: SHA task ini dicatat pada backlog dan execution log plan setelah task commit.
 
@@ -193,7 +193,7 @@ Hasil: test terarah 24 lulus/0 gagal (79 assertion); suite API 99 lulus/0 gagal 
 ### Commit task
 
 - Pesan: `feat(api): add bounded native poster adapter (ACOV-004)`
-- SHA: `0b7a6e2`.
+- SHA: `0b7a6e2c630a8b11c0a9d6a2faf807cc1625568d`.
 - Hook/checks: hook docs:check (59 Markdown/514 link-anchor), lint web, check-types api/web/auth dan Commitlint lulus; suite API 99/395, root check-types/build, Prettier dan diff check lulus.
 - Ledger: SHA task ini dicatat pada receipt plan dan backlog setelah task commit.
 
@@ -425,8 +425,8 @@ Serial API regressions lulus: `media-poster-processing-proof` 6/48; `media-reque
 ### Commit task
 
 - Pesan: `test(media): verify covers without media worker (ACOV-009)`
-- SHA: dicatat pada receipt ACOV-010 setelah commit.
-- Hook/checks: menunggu commit task; test API/Web, root check-types/lint/build dan browser acceptance di atas lulus.
+- SHA: `ad373c3153311142deb287d931268bce5cb8b42b`.
+- Hook/checks: pre-commit docs:check, lint, check-types dan commit-msg Commitlint lulus; serial API/Web regressions, root check-types/lint/build, built-browser layout/full MinIO proof, Prettier dan diff check lulus.
 - Ledger: receipt ACOV-010 mencatat SHA commit aktual, tanpa self-referential SHA.
 
 ### Blocker atau tindak lanjut
@@ -435,7 +435,7 @@ Tidak ada blocker lokal. R2 staging, Safari/native HLS, perangkat fisik, stress 
 
 ## Task: ACOV-010 — Finalisasi dokumen canonical dan ledger implementasi
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex / pengembang proyek
 - Prioritas: 10
 - Referensi: ACOV-US-01–03; PRD media/sampul dan GR lifecycle; [plan](../plans/admin-cover-processing/implementation-plan.md).
@@ -451,9 +451,9 @@ Target: `docs/product/{prd,global-rules}.md; docs/architecture/{media-upload-con
 
 ### Acceptance criteria
 
-- [ ] Proposal yang terimplementasi menjadi active/verified sesuai evidence; aturan video dan legacy retention tidak bertentangan; variable/commands/endpoints sesuai kode.
-- [ ] ACOV-002–009 mempunyai SHA/checks aktual; schema/provenance/recovery/rollback dan production limitations jelas.
-- [ ] docs:check, Prettier/diff dan preservation lulus; commit closure lokal tanpa push/PR/merge/deployment otomatis.
+- [x] Proposal yang terimplementasi menjadi active/verified sesuai evidence; aturan sampul, poster legacy dan source/HLS tidak bertentangan; variable/commands/endpoints sesuai kode.
+- [x] ACOV-002–009 mempunyai SHA/checks aktual; schema/provenance/recovery/rollback boundary dan production limitations jelas.
+- [x] docs:check, Prettier/diff dan preservation lulus; commit closure lokal tanpa push/PR/merge/deployment otomatis.
 
 ### Validasi
 
@@ -461,15 +461,15 @@ Canonical source/docs cross-check, bun run docs:check, Prettier changed Markdown
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau divalidasi; hasil runtime dan command aktual dicatat saat task dikerjakan.
+2026-10-06: dokumen kanonis diselaraskan dengan request-mode poster dan bukti ACOV-009. Menambahkan current schema/mode/provenance, crop policy, API/env/runbook behavior, batas rollback, status desain runtime, dan index. Hash commit task ACOV-009 diverifikasi dari repository log. `bun run docs:check` lulus (59 Markdown/529 local links dan anchors); Prettier Markdown terubah, `git diff --check`, staged documentation scope serta preservation dari perubahan unrelated lulus. Tidak ada perubahan runtime/schema/dependency pada ACOV-010.
 
 ### Commit task
 
 - Pesan: `docs(media): finalize native cover processing (ACOV-010)`
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- SHA: dicatat pada receipt dokumentasi setelah commit task.
+- Hook/checks: pre-commit docs:check, lint, check-types dan commit-msg Commitlint lulus; docs/Prettier/diff/preservation lulus.
 - Ledger: SHA aktual dicatat pada update dokumentasi setelah commit, tanpa self-referential SHA.
 
 ### Blocker atau tindak lanjut
 
-Persetujuan plan, freshness check dan dependensi task di atas; bukan izin untuk mulai runtime pada permintaan planning ini.
+Tidak ada blocker lokal. R2 staging, prosedur recovery request-mode untuk rollout production, dan verifikasi platform/perangkat di luar bukti task ini.

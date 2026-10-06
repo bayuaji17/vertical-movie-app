@@ -1,6 +1,6 @@
 # PRD — Vertical Movie App
 
-> Status: **Mendekati final — keputusan inti disetujui, rincian produk tersisa terbuka** · Review 5 Oktober 2026 · Pemilik keputusan produk: pengguna. Review repository pada commit `790e174a9fef748564450244d05038fce8e9bdbd`. Keputusan metadata/auth/media berasal dari persetujuan pengguna yang tercatat pada 1–4 Oktober 2026; review ini menyelaraskan dokumentasi tanpa menetapkan keputusan produk baru. Implementasi MVP lengkap dan kesiapan production belum dinyatakan selesai.
+> Status: **Mendekati final — keputusan inti disetujui, rincian produk tersisa terbuka** · Review repository 5 Oktober 2026; media cover diperbarui 6 Oktober 2026 · Pemilik keputusan produk: pengguna. Snapshot review awal `790e174a9fef748564450244d05038fce8e9bdbd` tetap historis. Pembaruan sampul mencatat keputusan crop dan bukti implementasi ACOV-009; tidak menetapkan keputusan produk baru. Implementasi MVP lengkap dan kesiapan production belum dinyatakan selesai.
 
 ## Gambaran produk
 
@@ -33,21 +33,23 @@ Rekomendasi personal/feed algoritmik, komentar, akun pengunjung, langganan/pemba
 
 ### Sumber video dan sampul
 
-| Parameter        | Ketentuan                                                                                                                                                             |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Rasio            | Video dan sampul portrait 9:16; sumber tidak sesuai ditolak tanpa crop/upscale. Rotasi dan pixel aspect ratio diperhitungkan pada validasi.                           |
-| Resolusi video   | Sisi pendek tampilan 480–1080 piksel dan sisi panjang maksimal 1920; sumber 1440p/4K ditolak. Hasil tidak melebihi sumber.                                            |
-| Format sumber    | MP4/MOV/MKV dengan H.264/H.265; WebM dengan VP8/VP9. Ekstensi/MIME merupakan validasi awal; container, codec, dimensi, durasi dan decode diperiksa worker.            |
-| Episode          | Maksimal 600 detik dan 512 MB (512.000.000 byte).                                                                                                                     |
-| Movie/standalone | Maksimal 1.800 detik dan 1,5 GB (1.500.000.000 byte), menggantikan batas 512 MB sebelumnya sesuai persetujuan 3 Oktober 2026.                                         |
-| Acuan ekspor     | H.264 SDR 1080p24–30, video 4–6 Mbps (default 6 Mbps), audio AAC 128 kbps; batas ukuran mencakup audio/container dan diutamakan atas acuan bitrate.                   |
-| Sampul           | Gambar diam JPG/JPEG/PNG/WebP maksimal 5 MB, sumber minimal 1080 × 1920 portrait 9:16; hasil WebP 1080 × 1920, sumber lebih besar diperkecil. Animasi tidak diterima. |
+| Parameter        | Ketentuan                                                                                                                                                                                                                                                             |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Rasio            | Sumber video wajib portrait 9:16; rotasi dan pixel aspect ratio diperhitungkan. Sumber gambar sampul boleh memiliki rasio lain, lalu admin memilih crop portrait 9:16 tanpa upscale.                                                                                  |
+| Resolusi video   | Sisi pendek tampilan 480–1080 piksel dan sisi panjang maksimal 1920; sumber 1440p/4K ditolak. Hasil tidak melebihi sumber.                                                                                                                                            |
+| Format sumber    | MP4/MOV/MKV dengan H.264/H.265; WebM dengan VP8/VP9. Ekstensi/MIME merupakan validasi awal; container, codec, dimensi, durasi dan decode diperiksa worker.                                                                                                            |
+| Episode          | Maksimal 600 detik dan 512 MB (512.000.000 byte).                                                                                                                                                                                                                     |
+| Movie/standalone | Maksimal 1.800 detik dan 1,5 GB (1.500.000.000 byte), menggantikan batas 512 MB sebelumnya sesuai persetujuan 3 Oktober 2026.                                                                                                                                         |
+| Acuan ekspor     | H.264 SDR 1080p24–30, video 4–6 Mbps (default 6 Mbps), audio AAC 128 kbps; batas ukuran mencakup audio/container dan diutamakan atas acuan bitrate.                                                                                                                   |
+| Sampul           | Gambar diam JPG/JPEG/PNG/WebP maksimal 5.000.000 byte dan 40 MP. Area crop harus sekurangnya 1080 × 1920 tanpa upscale. Browser mengirim hasil crop WebP (fallback PNG) tepat 1080 × 1920; API memverifikasi lalu menyimpan output WebP 1080 × 1920. Animasi ditolak. |
 
 ### Upload, storage dan pemrosesan
 
 Development memakai **MinIO**, production dirancang memakai **Cloudflare R2 melalui S3-compatible**, dipilih melalui env server. Satu bucket aplikasi privat per environment menyimpan sumber dan output pada prefix terpisah. Source asli tidak digunakan untuk streaming. Pergantian env tidak memindahkan objek yang sudah ada; konfigurasi aktif dimiliki [environment guide](../guides/environment.md).
 
 Upload memakai **S3 multipart**, termasuk sampul kecil satu part. Target part 2% ukuran aktual dengan minimum 5 MiB selain part terakhir, maksimal 3 part paralel per file, session 24 jam sejak dibuat dan URL part maksimal 15 menit dibatasi sisa session. Resume merekonsiliasi part sukses; completion membekukan source dan enqueue secara atomik. Status upload completed belum berarti media siap atau published. Uploader browser Film/Standalone source+cover dan Series cover tersedia pada detail draft: validasi awal, full-file SHA-256, progress multipart, pause/reselection resume serta status processing/Ready. Evidence lokal 6 Oktober 2026 pada [backlog ADUP](../tasks/admin-media-upload.md); upload episode tetap di luar iterasi ini.
+
+Sampul baru diproses melalui private API request setelah upload selesai; browser menunggu respons terminal dan hasil terverifikasi. Worker terpisah tetap memproses HLS video, legacy poster job bermode `worker`, dan cleanup. Cover baru tidak bergantung pada worker yang berjalan; alur, timeout dan batas recovery ada pada [runbook media](../operations/media.md#pemrosesan-poster-tanpa-worker--acov-005).
 
 Job disimpan pada PostgreSQL; worker Bun menjalankan FFmpeg di luar request HTTP dan transaksi database. Parameter worker melalui env, **concurrency default 1**. Retry/lease/timeout/recovery mengikuti keputusan dan implementasi yang dicatat pada [runbook media](../operations/media.md) serta [backlog worker](../tasks/media-worker.md); kapasitas production menunggu benchmark.
 

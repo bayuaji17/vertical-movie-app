@@ -1,6 +1,6 @@
 # Environment aplikasi
 
-> Diperbarui 6 Oktober 2026. API media/worker/HLS aktif pada development MinIO; production R2 melalui selector env tersedia tetapi proof staging belum dijalankan. Adapter pemrosesan poster native tersedia, sedangkan endpoint request-path akan di-wire pada ACOV-005. Kontrak/command/batas evidence: [Media Operations](../operations/media.md).
+> Diperbarui 6 Oktober 2026. API media/worker/HLS dan poster request-path aktif pada development MinIO; built-browser MinIO proof poster lulus pada ACOV-009. Production R2 melalui selector env tersedia tetapi proof staging belum dijalankan. Variabel native poster aktif di API; kontrak/command/batas evidence: [Media Operations](../operations/media.md).
 
 ## Mulai dari root repo
 
@@ -93,7 +93,7 @@ Runtime menghitung partUrlTtlSeconds = min(900, floor((sessionExpiresAt - now)/1
 
 ## Pemrosesan poster — batas native
 
-Adapter poster menggunakan `Bun.Image` untuk decode, auto-orient, resize tanpa memperbesar, lalu encode WebP quality 85 dan memverifikasi ulang codec, dimensi, dan hash hasilnya. Input harus PNG/WebP statis, cocok dengan Content-Type dan SHA-256 yang diberikan, berasio 9:16, sekurangnya 1080×1920, serta maksimal 5.000.000 byte. Batas pixel default 16.777.216 melindungi decode sebelum alokasi; output 1080×1920 membutuhkan 2.073.600 pixel. `MEDIA_POSTER_PROCESS_CONCURRENCY` membatasi kerja tiap instance API; request saat sibuk ditolak segera tanpa antrean memori.
+Adapter poster menerima payload crop browser PNG/WebP statis tepat 1080×1920 (bukan source image asli), cocok dengan Content-Type dan SHA-256 yang diberikan, maksimal 5.000.000 byte. Ia memakai `Bun.Image` untuk decode/auto-orient dan encode ulang ke WebP quality 85, lalu memverifikasi codec, dimensi, dan hash hasilnya. Source untuk crop dapat berupa JPG/JPEG/PNG/WebP still, maksimal 5.000.000 byte dan 40 MP, serta boleh memiliki rasio lain. Batas pixel default 16.777.216 melindungi decode sebelum alokasi; output 1080×1920 membutuhkan 2.073.600 pixel. `MEDIA_POSTER_PROCESS_CONCURRENCY` membatasi kerja tiap instance API; request saat sibuk ditolak segera tanpa antrean memori.
 
 `MEDIA_POSTER_PROCESS_TIMEOUT_SECONDS` membatasi waktu penggunaan hasil dan waktu jawaban. Terminal native `Bun.Image` tidak dapat dibatalkan secara paksa; bila masih berjalan saat deadline atau request abort, processor menolak hasil dan mempertahankan slot concurrency sampai terminal selesai. Jadi nilai ini tidak menjamin operasi CPU langsung berhenti. Endpoint admin `POST /admin/media/uploads/:id/process-poster` memakai adapter ini; same-origin gateway hanya mengalokasikan30 detik untuk exact POST route tersebut. Restart API setelah mengganti env.
 

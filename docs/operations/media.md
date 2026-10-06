@@ -1,6 +1,6 @@
 # Media Operations — development
 
-Implementasi development pada feat/media-backend berdasarkan base 4ce185d. Bukti lokal tidak mengesahkan rollout production. [Plan](../plans/video/implementation-plan.md), [model](../architecture/video-data-model.md), [upload contract](../architecture/media-upload-contract.md) dan [Environment](../guides/environment.md).
+Implementasi development media dan pemrosesan cover diverifikasi lokal sampai 6 Oktober 2026. Bukti lokal tidak mengesahkan rollout production. [Plan media](../plans/video/implementation-plan.md), [plan sampul](../plans/admin-cover-processing/implementation-plan.md), [model](../architecture/video-data-model.md), [upload contract](../architecture/media-upload-contract.md) dan [Environment](../guides/environment.md).
 
 ## Schema uploader dan executor — development
 
@@ -16,7 +16,11 @@ Pada 6 Oktober 2026, ACOV-003 menambahkan `processing_mode`/`execution_mode` non
 
 API membatasi concurrency per instance sesuai `MEDIA_POSTER_PROCESS_CONCURRENCY` (default1), menerima maksimal5.000.000 byte, mengambil source dan menulis output dengan Bun native S3, lalu memakai Bun.Image awaited. Claim durasi60 detik; gateway memberi POST ini30 detik. Image processor punya logical deadline default20 detik, namun Bun.Image tidak hard-cancellable. Request abort menolak hasil, menahan slot sampai terminal settle, dan job ditandai retry bila fence masih dimiliki. Satu job memiliki maksimal3 request attempt dengan backoff1/2 detik; busy lease mengembalikan409 serta `Retry-After`, retry setelah kegagalan sementara memberi503 serta header tersebut, sedangkan image/type/hash/dimension invalid terminal. POST ulang sesudah lost response aman: DTO status mengungkap hasil Ready atau capability melanjutkan request; claim expired dipulihkan dengan prefix attempt baru.
 
-Output berada dalam bucket private pada `outputs/<asset>/<job>/<token>/poster.webp`; API memverifikasi ukuran/MIME HEAD, membaca kembali bytes dan mencocokkan SHA-256 sebelum commit. `media_assets.sha256` tetap fingerprint original yang diunggah; `facts.outputSha256` mencatat output. Semua storage/native I/O di luar transaksi. Transaksi akhir mewajibkan session/actor, owner current pointer/draft, generation, token serta lease masih cocok. Worker claim dan recovery hanya memilih `execution_mode='worker'`; cleanup menunggu24 jam dan mengecualikan prefix job sukses/ready. Output gagal tetap orphan sampai cleanup. Proof dedicated PostgreSQL dengan processor Bun.Image nyata dan fake S3 membuktikan alur, recovery lease, parallel duplicate, replacement fence, successful-output cleanup dan worker exclusion. Jalur poster belum diuji end-to-end ke MinIO/R2.
+Output berada dalam bucket private pada `outputs/<asset>/<job>/<token>/poster.webp`; API memverifikasi ukuran/MIME HEAD, membaca kembali bytes dan mencocokkan SHA-256 sebelum commit. `media_assets.sha256` tetap fingerprint original yang diunggah; `facts.outputSha256` mencatat output. Semua storage/native I/O di luar transaksi. Transaksi akhir mewajibkan session/actor, owner current pointer/draft, generation, token serta lease masih cocok. Worker claim dan recovery hanya memilih `execution_mode='worker'`; cleanup menunggu24 jam dan mengecualikan prefix job sukses/ready. Output gagal tetap orphan sampai cleanup. Proof dedicated PostgreSQL dengan processor Bun.Image nyata dan fake S3 membuktikan alur, recovery lease, parallel duplicate, replacement fence, successful-output cleanup dan worker exclusion. Built-browser proof ACOV-009 memakai dedicated PostgreSQL serta bucket MinIO acak untuk membuktikan Film/Standalone/Series menghasilkan cover private WebP 1080×1920 Ready saat worker mati; HEAD/hash/provenance cocok dan unsigned GET mendapat403. Source tetap queued sampai worker dijalankan, lalu HLS berhasil. R2 staging dan production belum diuji.
+
+### Batas rollback
+
+Migration `0010_poster-execution-mode` additive dan production belum dijalankan. Jangan drop kolom atau mencoba membalik migration setelah request-mode upload/job tercatat. Poster request hanya dapat dilanjutkan oleh API yang mendukung processor; worker sengaja tidak mengambilnya. Rollback code tidak boleh memakai worker lama yang tidak memahami `execution_mode`. Belum ada prosedur drain/reconcile request-mode untuk production, sehingga rollout produksi harus mempertahankan code/schema kompatibel dan menyiapkan recovery khusus sebelum versi ini dipakai; tidak ada klaim rollback production yang telah diuji.
 
 ## Menjalankan API, web dan worker
 
@@ -114,7 +118,7 @@ Verifikasi delivery: built Bun/Nitro Chromium tiga-tier12s pada port3008 dengan 
 
 ## Upload Media admin — workflow dan proof 6 Oktober 2026
 
-Simpan metadata draft lalu buka detail Film/Standalone untuk source+cover, atau Series untuk cover. Choose file memvalidasi ekstensi/MIME/ukuran; Upload file menghitung fingerprint lalu mengirim part langsung ke bucket privat. API dan worker harus berjalan sebagai proses terpisah dengan profil storage yang sama. Pastikan endpoint S3 dapat dijangkau browser dan CORS mengizinkan PUT/GET/HEAD serta expose ETag.
+Simpan metadata draft lalu buka detail Film/Standalone untuk source+cover, atau Series untuk cover. Choose file memvalidasi ekstensi/MIME/ukuran; cover dibuka dalam crop 9:16 dan hasil crop dihitung fingerprint lalu dikirim sebagai multipart ke bucket privat. API memproses cover baru setelah complete; cover bisa mencapai Ready tanpa worker. Worker terpisah tetap diperlukan agar source menghasilkan HLS. Pastikan endpoint S3 dapat dijangkau browser dan CORS mengizinkan PUT/GET/HEAD serta expose ETag.
 
 Sent100% belum berarti upload completed atau media Ready. Tunggu finalization dan processing; source/cover masing-masing harus verified-ready sebelum Preview video tersedia. UI tidak melakukan publish. Failed media pada draft diperbaiki melalui file/session baru; manual reprocess belum tersedia.
 
