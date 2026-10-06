@@ -47,6 +47,8 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 
 Logging request API memakai console implemented/verified lokal 7 Oktober 2026; [panduan](guides/api-development.md#logging-request-http), [context baseline](plans/api-request-logging/repository-context.md) dan [plan/evidence](plans/api-request-logging/implementation-plan.md) menjelaskan scope serta batas gateway/storage.
 
+Publish & Archive admin Film/Standalone: [context snapshot](plans/admin-publication/repository-context.md) dan [implementation plan](plans/admin-publication/implementation-plan.md), ready untuk review 7 Oktober 2026. Scope mencakup readiness server, konfirmasi manual, version/idempotency/recovery dan proof akses publik; runtime UI belum dikerjakan.
+
 | Fitur              | Context                                                         | Plan                                                                                           | Penggunaan                                                                                                                                                                       |
 | ------------------ | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Auth               | [Snapshot](plans/auth/repository-context.md)                    | [Plan awal](plans/auth/implementation-plan.md), [refactor native](plans/auth/refactor-plan.md) | Riwayat; command aktif berada di runbook auth.                                                                                                                                   |
@@ -65,6 +67,7 @@ Logging request API memakai console implemented/verified lokal 7 Oktober 2026; [
 - [Media](tasks/media.md): konfigurasi, multipart, cleanup dan provider proof.
 - [Worker](tasks/media-worker.md): queue, lease/retry, FFmpeg, retensi dan benchmark.
 - [Publication/playback](tasks/media-publication.md): readiness, visibility, katalog, HLS dan player.
+- [Publish & Archive admin](tasks/admin-publication.md): APUB-001–013; plan detail Film/Standalone dan acceptance UI/API/DB/browser, runtime belum dimulai.
 - [Database tooling](tasks/database-tooling.md): Drizzle Studio development.
 - [Development verification](tasks/development-verification.md): quality gate, preservation migrasi dan upgrade Turbo 2.11.7 terverifikasi lokal.
 - [Build web](tasks/web-build.md): baseline warning directive, plan filter logging dan verifikasi build/SSR.
