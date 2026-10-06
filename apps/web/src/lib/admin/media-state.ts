@@ -31,14 +31,37 @@ export function sessionNeedsPolling(status?: UploadStatus) {
           workingJobs.has(status.processing.jobState ?? ''))))
   )
 }
-export function mediaState(role: RoleInventory) {
-  const current = role.current
+export function mediaState(
+  role: RoleInventory,
+  kind: 'source' | 'poster' = 'source',
+) {
+  const current = role.current,
+    requestPoster =
+      kind === 'poster' &&
+      (role.canProcessPoster ||
+        role.active?.processingMode === 'request' ||
+        role.lastAttempt?.processingMode === 'request')
   if (!current)
-    return { label: 'No attached media', ready: false, pending: false }
+    return {
+      label: kind === 'poster' ? 'No attached cover' : 'No attached media',
+      ready: false,
+      pending: false,
+    }
   if (current.state === 'ready' && current.verifiedReadyAt)
     return { label: 'Ready', ready: true, pending: false }
   if (current.state === 'failed')
-    return { label: 'Processing failed', ready: false, pending: false }
+    return {
+      label:
+        kind === 'poster' ? 'Cover processing failed' : 'Processing failed',
+      ready: false,
+      pending: false,
+    }
+  if (
+    requestPoster &&
+    (['uploaded', 'processing'].includes(current.state) ||
+      workingJobs.has(current.processing.jobState ?? ''))
+  )
+    return { label: 'Preparing cover', ready: false, pending: true }
   if (current.processing.jobState === 'queued')
     return {
       label: 'Upload completed · Waiting for processing',
@@ -46,22 +69,34 @@ export function mediaState(role: RoleInventory) {
       pending: true,
     }
   if (current.processing.jobState === 'retry')
-    return { label: 'Processing retry scheduled', ready: false, pending: true }
+    return {
+      label: requestPoster ? 'Preparing cover' : 'Processing retry scheduled',
+      ready: false,
+      pending: true,
+    }
   if (
     current.state === 'processing' ||
     current.processing.jobState === 'running'
   )
-    return { label: 'Processing', ready: false, pending: true }
+    return {
+      label: requestPoster ? 'Preparing cover' : 'Processing',
+      ready: false,
+      pending: true,
+    }
   if (current.state === 'uploaded')
     return {
-      label: 'Upload completed · Verification pending',
+      label: requestPoster
+        ? 'Preparing cover'
+        : 'Upload completed · Verification pending',
       ready: false,
       pending: true,
     }
   if (current.state === 'uploading')
     return { label: 'Uploading', ready: false, pending: true }
   return {
-    label: 'Status unavailable · Refresh media',
+    label: requestPoster
+      ? 'Cover status unavailable · Refresh media'
+      : 'Status unavailable · Refresh media',
     ready: false,
     pending: false,
   }

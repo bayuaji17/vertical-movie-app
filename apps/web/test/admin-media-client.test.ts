@@ -6,6 +6,7 @@ import {
   mediaKeys,
   ownerMediaOptions,
   initiateMediaOptions,
+  posterProcessingOptions,
   sessionControlOptions,
   invalidateMedia,
 } from '../src/lib/admin/media-queries'
@@ -82,6 +83,22 @@ test('failed controls never become cached success and never retry POST automatic
   )
   cache.clear()
 })
+test('cover failures give actionable guidance without surfacing private server text', () => {
+  for (const [code, phrase] of [
+    ['POSTER_INVALID_IMAGE', 'could not be decoded'],
+    ['POSTER_ANIMATED_IMAGE', 'Animated covers are not supported'],
+    ['POSTER_PROCESSING_BUSY', 'already running'],
+    ['POSTER_TIMEOUT', 'timed out'],
+    ['POSTER_PROCESSING_EXHAUSTED', 'retry limit'],
+  ]) {
+    const failure = mediaFailure(
+      new MediaApiError(503, code, 'private credentials and object URL'),
+    )
+    expect(failure.code).toBe(code)
+    expect(failure.message).toContain(phrase)
+    expect(failure.message).not.toContain('private credentials')
+  }
+})
 test('401 clears media reads and mutations while preserving public data', async () => {
   const cache = new QueryClient()
   cache.setQueryData(mediaKeys.owner('one', owner), inventory)
@@ -156,6 +173,60 @@ test('signed part authorization is transient and never enters Query or mutation 
   expect((await client.signPart(id, 2)).partNumber).toBe(2)
   expect(cache.getQueryCache().getAll()).toHaveLength(0)
   expect(cache.getMutationCache().getAll()).toHaveLength(0)
+  cache.clear()
+})
+test('Prepare cover uses the typed private command with empty body and forwards abort signal', async () => {
+  const cache = new QueryClient(),
+    abort = new AbortController(),
+    expected = {
+      id,
+      assetId: id,
+      processingMode: 'request',
+      canProcessPoster: false,
+      status: 'completed',
+      sizeBytes: '3',
+      partSizeBytes: '5242880',
+      partCount: 1,
+      partConcurrency: 3,
+      expiresAt: new Date(Date.now() + 86400000).toISOString(),
+      completedAt: new Date().toISOString(),
+      uploadedBytes: '3',
+      parts: [],
+      failureCode: null,
+      processing: {
+        state: 'ready',
+        jobState: 'succeeded',
+        progressSeconds: 0,
+        attempts: 1,
+        failureCode: null,
+        verifiedReadyAt: new Date().toISOString(),
+      },
+    }
+  const client = createMediaClient(
+    'http://localhost/api',
+    cache,
+    async (url, init) => {
+      const request = new Request(url, init)
+      expect(new URL(request.url).pathname).toBe(
+        `/api/admin/media/uploads/${id}/process-poster`,
+      )
+      expect(request.method).toBe('POST')
+      expect(await request.json()).toEqual({})
+      expect(request.credentials).toBe('include')
+      expect(request.cache).toBe('no-store')
+      expect(init?.signal).toBe(abort.signal)
+      return Response.json(expected)
+    },
+  )
+  expect((await client.processPoster(id, abort.signal)).processing.state).toBe(
+    'ready',
+  )
+  const options = posterProcessingOptions(client, 'one', owner)
+  expect(options.retry).toBe(false)
+  expect(options.mutationKey).toEqual([
+    ...mediaKeys.owner('one', owner),
+    'prepare-poster',
+  ])
   cache.clear()
 })
 test('confirmed completion invalidates owner, metadata detail and lists; cleanup includes every key', async () => {

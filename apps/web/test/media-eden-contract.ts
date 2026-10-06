@@ -37,6 +37,9 @@ export async function verifyMediaContract(
       .uploads({ id: upload.data.id })
       .parts.post({ partNumber: 1 })
     await client.admin.media.uploads({ id: upload.data.id }).complete.post()
+    await client.admin.media
+      .uploads({ id: upload.data.id })
+      ['process-poster'].post({})
     await client.admin.media.uploads({ id: upload.data.id }).abort.post()
   }
   await client.admin

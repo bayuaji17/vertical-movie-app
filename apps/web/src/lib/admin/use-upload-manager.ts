@@ -8,6 +8,7 @@ import type { ContentType } from './content-client'
 import {
   initiateMediaOptions,
   invalidateMedia,
+  posterProcessingOptions,
   sessionControlOptions,
 } from './media-queries'
 import { UploadCoordinator, UploadManager } from './upload-manager'
@@ -64,6 +65,14 @@ export function useUploadManager(
             mutationFn: () => client.abort(id, signal),
           })
           .execute({ id, action: 'abort' }),
+      processPoster: (id, signal) =>
+        cache
+          .getMutationCache()
+          .build(cache, {
+            ...posterProcessingOptions(client, user.id, target),
+            mutationFn: () => client.processPoster(id, signal),
+          })
+          .execute({ id }),
     }
     return new UploadManager({
       client: control,

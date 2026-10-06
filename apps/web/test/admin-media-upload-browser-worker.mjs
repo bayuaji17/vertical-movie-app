@@ -648,12 +648,24 @@ try {
         .getAttribute('src'),
       coverPreview,
     )
+    await mediaControl({ processPosterUnavailable: true })
     await card('poster')
       .getByRole('button', { name: 'Upload file', exact: true })
       .click()
     await card('poster')
-      .getByText('Upload completed', { exact: true })
+      .getByRole('button', { name: 'Finish cover', exact: true })
       .waitFor({ timeout: 30000 })
+    await page.reload()
+    await card('poster')
+      .getByRole('button', { name: 'Finish cover', exact: true })
+      .waitFor({ timeout: 30000 })
+    await mediaControl({ processPosterUnavailable: false })
+    await card('poster')
+      .getByRole('button', { name: 'Finish cover', exact: true })
+      .click()
+    await card('poster').getByText('Ready', { exact: true }).waitFor({
+      timeout: 30000,
+    })
     assert.equal(await page.locator('a[href*="/preview"]').count(), 0)
     await mediaControl({ runJobs: true })
     await page
@@ -682,6 +694,22 @@ try {
     assert.equal(
       verified.jobs.filter((j) => j.asset_id === session.asset_id).length,
       1,
+    )
+    const posterSession = verified.sessions.find(
+      (s) =>
+        s.owner_id === data.ids.filmDraft &&
+        s.kind === 'poster' &&
+        s.status === 'completed',
+    )
+    assert.ok(posterSession)
+    assert.deepEqual(
+      verified.traces
+        .filter((trace) =>
+          trace.path.endsWith('/' + posterSession.id + '/process-poster'),
+        )
+        .map((trace) => trace.status),
+      [503, 200],
+      'Prepare cover resumes after refresh without retransferring the crop',
     )
     const replay = await page.request.post(
       baseURL + '/api/admin/media/uploads/' + session.id + '/complete',
@@ -726,9 +754,13 @@ try {
     await card('poster')
       .getByRole('button', { name: 'Upload file', exact: true })
       .click()
-    await card('poster')
-      .getByText('Upload completed', { exact: true })
-      .waitFor()
+    await card('poster').getByText('Ready', { exact: true }).waitFor()
+    await page.goto(path('film') + '/edit')
+    await page.getByLabel('Title *', { exact: true }).fill('Changed elsewhere')
+    await page
+      .getByRole('button', { name: 'Save changes', exact: true })
+      .click()
+    await page.waitForURL(path('film'))
     await edit
       .getByRole('button', { name: 'Save changes', exact: true })
       .click()
@@ -744,9 +776,7 @@ try {
     await card('poster')
       .getByRole('button', { name: 'Upload file', exact: true })
       .click()
-    await card('poster')
-      .getByText('Upload completed', { exact: true })
-      .waitFor()
+    await card('poster').getByText('Ready', { exact: true }).waitFor()
     await mediaControl({ runJobs: true })
     await page
       .getByRole('button', { name: 'Refresh media', exact: true })
@@ -846,7 +876,11 @@ try {
     held = false
     await card('source')
       .locator('input[type=file]')
-      .setInputFiles(disk(data.files.source))
+      .setInputFiles({
+        name: 'source-after-cancel.mp4',
+        mimeType: 'video/mp4',
+        buffer: await readFile(disk(data.files.source)),
+      })
     await card('source')
       .getByRole('button', { name: 'Upload file', exact: true })
       .click()
@@ -892,7 +926,7 @@ try {
     await page.waitForURL(/\/admin\/login/)
     assert.deepEqual(errors, [])
     console.log(
-      'Browser: media uploader — 45 theme/viewport layouts, direct MinIO multipart, refresh/full-hash resume, wrong-file block, matching source hash and one-job completion replay, processing/ready, dirty 409 retention, series cover, authorized API-outage recovery, cross-tab exclusion, offline/resume, leave/pause/cancel, in-flight logout/back passed',
+      'Browser: media uploader — 45 theme/viewport layouts, direct MinIO multipart, refresh/full-hash resume, wrong-file block, matching source hash and one-job completion replay, request-based cover processing plus refresh/Finish cover without retransferring, processing/ready, dirty 409 retention, series cover, authorized API-outage recovery, cross-tab exclusion, offline/resume, leave/pause/cancel, in-flight logout/back passed',
     )
     await control({ outage: false, role: 'admin' })
   }

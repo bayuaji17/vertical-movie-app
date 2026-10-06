@@ -48,6 +48,8 @@ const phaseLabels: Record<UploadPhase, string> = {
   uploading: 'Uploading',
   paused: 'Paused',
   'needs-file': 'Select the same file to resume',
+  'needs-prepare': 'Cover upload complete · Finish cover',
+  preparing: 'Preparing cover',
   finalizing: 'Finalizing upload',
   completed: 'Upload completed',
   cancelling: 'Cancelling upload',
@@ -86,7 +88,7 @@ export function MediaUploadCard({
     setSelectionError(undefined)
   }, [ownerKey])
   const view = manager?.snapshot(kind) ?? emptyUpload(),
-    working = isUploadWorking(view),
+    working = manager?.busy(kind) ?? isUploadWorking(view),
     title = kind === 'source' ? 'Source video' : 'Cover image'
   const unavailable = role.busy && !role.active
   const canChoose =
@@ -95,6 +97,12 @@ export function MediaUploadCard({
     !unavailable &&
     (!role.active || role.active.canResume)
   const canStart = manager?.canStart(kind) ?? false
+  const canFinishCover =
+    kind === 'poster' &&
+    view.phase !== 'completed' &&
+    view.phase !== 'failed' &&
+    (role.canProcessPoster || view.phase === 'needs-prepare') &&
+    !working
   const percent = view.progress.total
     ? Math.floor((view.progress.sent / view.progress.total) * 100)
     : 0
@@ -126,7 +134,7 @@ export function MediaUploadCard({
         {role.current ? (
           <div className="flex flex-col gap-2">
             <p className="text-sm font-medium">Attached media</p>
-            <MediaProcessingStatus role={role} />
+            <MediaProcessingStatus role={role} kind={kind} />
           </div>
         ) : (
           <Empty className="border p-6">
@@ -210,7 +218,13 @@ export function MediaUploadCard({
           aria-live="polite"
           aria-atomic="true"
         >
-          <p className="text-sm font-medium">{phaseLabels[view.phase]}</p>
+          <p className="text-sm font-medium">
+            {kind === 'poster' && view.phase === 'completed'
+              ? 'Cover prepared'
+              : kind === 'poster' && view.phase === 'failed'
+                ? 'Cover preparation failed'
+                : phaseLabels[view.phase]}
+          </p>
           {view.filename && (
             <p className="break-all text-sm text-muted-foreground">
               {view.filename}
@@ -242,19 +256,26 @@ export function MediaUploadCard({
               </>
             )
           )}
-          {view.descriptor && (
+          {view.descriptor?.status === 'pending' && (
             <p className="break-words text-xs text-muted-foreground">
               Session expires:{' '}
               <time dateTime={view.descriptor.expiresAt}>
                 {new Date(view.descriptor.expiresAt).toLocaleString('en-US')}
               </time>
-              . Resume requires the same file.
+              .{' '}
+              {kind === 'poster' && view.descriptor.processingMode === 'request'
+                ? 'Resume requires the exact same cropped file. If it is unavailable after refresh, cancel this upload and crop again.'
+                : 'Resume requires the same file.'}
             </p>
           )}
         </div>
         {view.error && (
           <Alert variant="destructive">
-            <AlertTitle>Upload needs attention</AlertTitle>
+            <AlertTitle>
+              {kind === 'poster'
+                ? 'Cover needs attention'
+                : 'Upload needs attention'}
+            </AlertTitle>
             <AlertDescription>{view.error.message}</AlertDescription>
           </Alert>
         )}
@@ -293,7 +314,9 @@ export function MediaUploadCard({
           {!working &&
             (view.descriptor ||
               view.phase === 'unknown' ||
-              view.phase === 'completed') && (
+              view.phase === 'needs-prepare' ||
+              view.phase === 'preparing' ||
+              (kind === 'source' && view.phase === 'completed')) && (
               <Button
                 variant="outline"
                 className="min-h-11"
@@ -302,12 +325,22 @@ export function MediaUploadCard({
                 Check status
               </Button>
             )}
+          {canFinishCover && (
+            <Button
+              className="min-h-11"
+              onClick={() => void manager?.finishCover()}
+            >
+              Finish cover
+            </Button>
+          )}
           {inventory.canUpload &&
-            (view.descriptor ||
-              working ||
+            ((view.descriptor?.status === 'pending' &&
+              (view.descriptor.canResume ||
+                working ||
+                view.phase === 'unknown')) ||
               view.phase === 'selected' ||
-              view.phase === 'paused' ||
-              view.phase === 'unknown') &&
+              (view.phase === 'paused' && !view.descriptor) ||
+              (view.phase === 'unknown' && !view.descriptor)) &&
             view.phase !== 'cancelling' && (
               <Button
                 variant="outline"

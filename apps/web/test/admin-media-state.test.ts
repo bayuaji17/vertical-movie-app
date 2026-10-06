@@ -57,6 +57,72 @@ test('terminal failure and unknown state stop loops and use neutral labels', () 
   expect(mediaState(value.source!).label).toContain('Status unavailable')
   expect(inventoryNeedsPolling(value)).toBe(false)
 })
+test('request-processed covers report Preparing cover and become Ready only after verified output', () => {
+  const value = inventory(),
+    role = value.poster
+  role.canProcessPoster = true
+  role.current = {
+    id: mediaAssetId,
+    state: 'uploaded',
+    sizeBytes: '3',
+    contentType: 'image/webp',
+    originalAvailable: true,
+    verifiedReadyAt: null,
+    width: null,
+    height: null,
+    durationMs: null,
+    processing: {
+      ...uploadFixture().processing,
+      state: 'uploaded',
+      jobState: 'queued',
+    },
+  }
+  expect(mediaState(role, 'poster')).toEqual({
+    label: 'Preparing cover',
+    ready: false,
+    pending: true,
+  })
+  expect(inventoryNeedsPolling(value)).toBe(true)
+  role.current.state = 'ready'
+  role.current.verifiedReadyAt = new Date().toISOString()
+  expect(mediaState(role, 'poster')).toEqual({
+    label: 'Ready',
+    ready: true,
+    pending: false,
+  })
+})
+test('legacy worker posters keep their worker-processing status label', () => {
+  const value = inventory(),
+    role = value.poster
+  role.lastAttempt = {
+    ...uploadFixture(),
+    filename: 'legacy.webp',
+    contentType: 'image/webp',
+    expectedSha256: 'a'.repeat(64),
+    canResume: false,
+  }
+  role.current = {
+    id: mediaAssetId,
+    state: 'uploaded',
+    sizeBytes: '3',
+    contentType: 'image/webp',
+    originalAvailable: true,
+    verifiedReadyAt: null,
+    width: null,
+    height: null,
+    durationMs: null,
+    processing: {
+      ...uploadFixture().processing,
+      state: 'uploaded',
+      jobState: 'queued',
+    },
+  }
+  expect(mediaState(role, 'poster')).toEqual({
+    label: 'Upload completed · Waiting for processing',
+    ready: false,
+    pending: true,
+  })
+})
 test('poll interval stops while hidden/offline/terminal and completed jobs remain observed', () => {
   expect(mediaPollInterval(true, true, true)).toBe(5000)
   expect(mediaPollInterval(true, false, true)).toBe(false)

@@ -106,6 +106,19 @@ export function sessionControlOptions(
       configured(client)[command.action](command.id),
   })
 }
+export function posterProcessingOptions(
+  client: MediaClient | undefined,
+  identity: string,
+  owner: MediaOwner,
+) {
+  return mutationOptions({
+    mutationKey: [...mediaKeys.owner(identity, owner), 'prepare-poster'],
+    retry: false,
+    networkMode: 'always',
+    mutationFn: (command: { id: string }) =>
+      configured(client).processPoster(command.id),
+  })
+}
 export async function invalidateMedia(
   cache: QueryClient,
   identity: string,

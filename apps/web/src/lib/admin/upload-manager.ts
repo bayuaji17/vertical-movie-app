@@ -36,6 +36,34 @@ type BrowserLock = (
   name: string,
   operation: () => Promise<void>,
 ) => Promise<void>
+function coverPhase(status: UploadStatus): UploadView['phase'] {
+  if (status.processing.state === 'ready' && status.processing.verifiedReadyAt)
+    return 'completed'
+  if (status.processing.state === 'failed') return 'failed'
+  if (status.canProcessPoster) return 'needs-prepare'
+  if (
+    ['uploaded', 'processing'].includes(status.processing.state) ||
+    ['queued', 'running', 'retry'].includes(status.processing.jobState ?? '')
+  )
+    return 'preparing'
+  return 'unknown'
+}
+function statusDescriptor(
+  previous: UploadDescriptor | undefined,
+  status: UploadStatus,
+): UploadDescriptor | undefined {
+  if (!previous) return undefined
+  return {
+    ...previous,
+    status: status.status,
+    expiresAt: status.expiresAt,
+    completedAt: status.completedAt,
+    failureCode: status.failureCode,
+    canResume: false,
+    processingMode: status.processingMode,
+    canProcessPoster: status.canProcessPoster,
+  }
+}
 export const uploadBrowserLock: BrowserLock = async (name, operation) => {
   if (typeof navigator === 'undefined') return operation()
   const locks = (navigator as Partial<Navigator>).locks
@@ -83,7 +111,10 @@ export class UploadManager {
     this.slots[kind].view = { ...this.slots[kind].view, previewUrl: undefined }
   }
   working() {
-    return Object.values(this.slots).some((slot) => isUploadWorking(slot.view))
+    return (['source', 'poster'] as const).some((kind) => this.busy(kind))
+  }
+  busy(kind: MediaKind) {
+    return !!this.slots[kind].controller
   }
   private update(kind: MediaKind, patch: Partial<UploadView>) {
     if (this.disposed) return
@@ -97,34 +128,80 @@ export class UploadManager {
     for (const kind of ['source', 'poster'] as const) {
       const role = inventory[kind],
         slot = this.slots[kind]
-      if (isUploadWorking(slot.view)) continue
+      if (this.busy(kind)) continue
       const active = role?.active
+      const recoverablePoster =
+        kind === 'poster' &&
+        role?.canProcessPoster &&
+        !slot.file &&
+        slot.view.phase !== 'selected'
+          ? role.lastAttempt
+          : null
+      const candidate = active ?? recoverablePoster
       if (
-        active &&
-        (!slot.view.descriptor || slot.view.descriptor.id === active.id)
+        candidate &&
+        (!slot.view.descriptor || slot.view.descriptor.id === candidate.id)
       ) {
         this.update(kind, {
-          descriptor: active,
-          filename: active.filename,
+          descriptor: candidate,
+          filename: candidate.filename,
           phase:
-            slot.file && active.canResume
-              ? 'paused'
-              : active.canResume
-                ? 'needs-file'
-                : 'unknown',
-          progress: { ...slot.view.progress, total: Number(active.sizeBytes) },
+            candidate.status === 'completed'
+              ? 'needs-prepare'
+              : slot.file && candidate.canResume
+                ? 'paused'
+                : candidate.canResume
+                  ? 'needs-file'
+                  : 'unknown',
+          progress: {
+            ...slot.view.progress,
+            total: Number(candidate.sizeBytes),
+          },
         })
+      } else if (
+        kind === 'poster' &&
+        (role?.canProcessPoster ||
+          role?.active?.processingMode === 'request' ||
+          role?.lastAttempt?.processingMode === 'request') &&
+        slot.view.phase !== 'selected' &&
+        slot.view.phase !== 'needs-file' &&
+        !(slot.view.phase === 'paused' && slot.file) &&
+        role.current
+      ) {
+        const phase =
+          role.current.state === 'ready' && role.current.verifiedReadyAt
+            ? 'completed'
+            : role.current.state === 'failed'
+              ? 'failed'
+              : ['uploaded', 'processing'].includes(role.current.state) ||
+                  ['queued', 'running', 'retry'].includes(
+                    role.current.processing.jobState ?? '',
+                  )
+                ? 'preparing'
+                : undefined
+        if (phase)
+          this.update(kind, {
+            phase,
+            ...(phase === 'preparing' || phase === 'completed'
+              ? { error: undefined }
+              : {}),
+          })
       }
     }
   }
   select(kind: MediaKind, file: File) {
     const slot = this.slots[kind],
       inventory = this.inventory
-    if (this.disposed || !inventory?.canUpload || isUploadWorking(slot.view))
-      return
+    if (this.disposed || !inventory?.canUpload || this.busy(kind)) return
     try {
       describeMediaFile(file, kind, inventory)
       const active = inventory[kind]?.active
+      const descriptor =
+        active ??
+        (slot.view.descriptor?.status === 'pending'
+          ? slot.view.descriptor
+          : undefined)
+      if (slot.view.descriptor?.status === 'completed') slot.request = undefined
       // Preserve an ambiguous initiation key until the server confirms its outcome.
       slot.file = file
       this.releasePreview(kind)
@@ -134,7 +211,7 @@ export class UploadManager {
         previewUrl: kind === 'poster' ? URL.createObjectURL(file) : undefined,
         error: undefined,
         hashBytes: 0,
-        descriptor: active ?? slot.view.descriptor,
+        descriptor,
         progress: { sent: 0, verified: 0, total: file.size },
       })
     } catch (error) {
@@ -155,7 +232,7 @@ export class UploadManager {
     return (
       !!slot.file &&
       !!this.inventory?.canUpload &&
-      !isUploadWorking(slot.view) &&
+      !this.busy(kind) &&
       (!slot.view.descriptor || slot.view.descriptor.canResume)
     )
   }
@@ -197,7 +274,7 @@ export class UploadManager {
     const slot = this.slots[kind]
     if (
       this.disposed ||
-      isUploadWorking(slot.view) ||
+      this.busy(kind) ||
       !slot.file ||
       !this.inventory?.canUpload
     )
@@ -255,14 +332,30 @@ export class UploadManager {
       },
     }
     const descriptor = slot.view.descriptor
-    const digest = descriptor
-      ? await verifyReselectedFile(
-          file,
-          descriptor,
-          progress,
-          this.options.hash ?? hashFile,
+    let digest: string
+    try {
+      digest = descriptor
+        ? await verifyReselectedFile(
+            file,
+            descriptor,
+            progress,
+            this.options.hash ?? hashFile,
+          )
+        : await (this.options.hash ?? hashFile)(file, progress)
+    } catch (error) {
+      if (
+        kind === 'poster' &&
+        descriptor?.processingMode === 'request' &&
+        error instanceof MediaApiError &&
+        error.code === 'FILE_MISMATCH'
+      )
+        throw new MediaApiError(
+          422,
+          'COVER_CROP_MISMATCH',
+          'The selected crop differs from the uploaded cover.',
         )
-      : await (this.options.hash ?? hashFile)(file, progress)
+      throw error
+    }
     check()
     let status: UploadStatus
     if (descriptor)
@@ -324,7 +417,7 @@ export class UploadManager {
     }
     check()
     if (status.status === 'completed') {
-      await this.completed(kind, status)
+      await this.uploadCompleted(kind, status, epoch, signal)
       return
     }
     this.update(kind, { phase: 'uploading', status })
@@ -359,29 +452,126 @@ export class UploadManager {
       if (status.status !== 'completed') throw error
     }
     check()
-    await this.completed(kind, status)
+    await this.uploadCompleted(kind, status, epoch, signal)
   }
-  private async completed(kind: MediaKind, status: UploadStatus) {
+  private async uploadCompleted(
+    kind: MediaKind,
+    status: UploadStatus,
+    epoch: number,
+    signal: AbortSignal,
+  ) {
     const slot = this.slots[kind]
+    const coverStatusPhase =
+      kind === 'poster' && status.processingMode === 'request'
+        ? coverPhase(status)
+        : undefined
     this.releasePreview(kind)
     slot.file = undefined
     slot.request = undefined
     this.update(kind, {
-      phase: 'completed',
+      phase: coverStatusPhase ?? 'completed',
       status,
       error: undefined,
-      descriptor: undefined,
+      descriptor: coverStatusPhase
+        ? statusDescriptor(slot.view.descriptor, status)
+        : undefined,
       progress: {
         sent: Number(status.sizeBytes),
         verified: Number(status.sizeBytes),
         total: Number(status.sizeBytes),
       },
     })
-    await this.options.committed()
+    if (
+      coverStatusPhase &&
+      coverStatusPhase !== 'completed' &&
+      coverStatusPhase !== 'failed'
+    )
+      await this.processCover(status.id, epoch, signal, false)
+    if (this.alive(kind, epoch, signal)) await this.options.committed()
+  }
+  async finishCover() {
+    const slot = this.slots.poster,
+      status = slot.view.status,
+      role = this.inventory?.poster,
+      id = status?.canProcessPoster
+        ? status.id
+        : slot.view.descriptor?.canProcessPoster
+          ? slot.view.descriptor.id
+          : role?.canProcessPoster
+            ? role.lastAttempt?.id
+            : undefined
+    if (this.disposed || this.busy('poster') || !id) return
+    const controller = new AbortController(),
+      epoch = ++slot.epoch
+    slot.controller = controller
+    try {
+      await this.processCover(id, epoch, controller.signal)
+    } finally {
+      if (slot.controller === controller) slot.controller = undefined
+    }
+  }
+  private async processCover(
+    id: string,
+    epoch: number,
+    signal: AbortSignal,
+    invalidate = true,
+  ) {
+    const check = () => {
+      if (!this.alive('poster', epoch, signal))
+        throw new DOMException('Cover processing paused', 'AbortError')
+    }
+    check()
+    this.update('poster', { phase: 'preparing', error: undefined })
+    try {
+      const status = await this.options.client.processPoster(id, signal)
+      check()
+      this.presentCoverStatus(status)
+      if (invalidate) await this.options.committed()
+    } catch (error) {
+      if (!this.alive('poster', epoch, signal)) return
+      let status: UploadStatus | undefined
+      try {
+        status = await this.options.client.status(id, signal)
+        check()
+      } catch {
+        if (!this.alive('poster', epoch, signal)) return
+      }
+      if (!status) {
+        this.update('poster', {
+          phase: 'unknown',
+          error: mediaFailure(error),
+        })
+        if (invalidate) await this.options.committed()
+        return
+      }
+      this.presentCoverStatus(status, error)
+      if (invalidate) await this.options.committed()
+    }
+  }
+  private presentCoverStatus(status: UploadStatus, cause?: unknown) {
+    const slot = this.slots.poster,
+      phase = coverPhase(status),
+      descriptor = statusDescriptor(slot.view.descriptor, status),
+      processingFailure = status.processing.failureCode,
+      error =
+        phase === 'completed' || phase === 'preparing'
+          ? undefined
+          : cause
+            ? mediaFailure(cause)
+            : processingFailure
+              ? mediaFailure(new MediaApiError(422, processingFailure, ''))
+              : undefined
+    this.update('poster', {
+      status,
+      descriptor:
+        phase === 'failed' || phase === 'completed' ? undefined : descriptor,
+      phase,
+      error,
+    })
   }
   async checkStatus(kind: MediaKind) {
     const slot = this.slots[kind]
-    if (this.disposed || isUploadWorking(slot.view)) return
+    if (this.disposed || this.busy(kind)) return
     const controller = new AbortController(),
       epoch = ++slot.epoch
     slot.controller = controller
@@ -400,6 +590,9 @@ export class UploadManager {
         const last = fresh[kind]?.lastAttempt
         id =
           fresh[kind]?.active?.id ??
+          (kind === 'poster' && fresh.poster.canProcessPoster
+            ? fresh.poster.lastAttempt?.id
+            : undefined) ??
           (!slot.request || last?.expectedSha256 === slot.request.expectedSha256
             ? last?.id
             : undefined)
@@ -407,8 +600,23 @@ export class UploadManager {
       if (!id) return
       const status = await this.options.client.status(id, controller.signal)
       if (!this.alive(kind, epoch, controller.signal)) return
-      if (status.status === 'completed') await this.completed(kind, status)
-      else {
+      if (status.status === 'completed') {
+        if (kind === 'poster' && status.processingMode === 'request') {
+          this.releasePreview(kind)
+          slot.file = undefined
+          slot.request = undefined
+          this.update(kind, {
+            progress: {
+              sent: Number(status.sizeBytes),
+              verified: Number(status.sizeBytes),
+              total: Number(status.sizeBytes),
+            },
+          })
+          this.presentCoverStatus(status)
+          await this.options.committed()
+        } else
+          await this.uploadCompleted(kind, status, epoch, controller.signal)
+      } else {
         this.update(kind, {
           status,
           phase:
@@ -460,7 +668,8 @@ export class UploadManager {
         status = await this.options.client.status(id, controller.signal)
       }
       if (!this.alive(kind, epoch, controller.signal)) return
-      if (status.status === 'completed') await this.completed(kind, status)
+      if (status.status === 'completed')
+        await this.uploadCompleted(kind, status, epoch, controller.signal)
       else if (status.status === 'aborted' || status.status === 'expired') {
         this.releasePreview(kind)
         slot.file = undefined

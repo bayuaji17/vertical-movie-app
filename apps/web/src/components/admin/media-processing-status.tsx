@@ -4,8 +4,19 @@ import { Badge } from '#/components/ui/badge'
 import { Progress, ProgressLabel } from '#/components/ui/progress'
 import { Alert, AlertDescription, AlertTitle } from '#/components/ui/alert'
 
-export function MediaProcessingStatus({ role }: { role: RoleInventory }) {
-  const state = mediaState(role),
+export function MediaProcessingStatus({
+  role,
+  kind,
+}: {
+  role: RoleInventory
+  kind: 'source' | 'poster'
+}) {
+  const state = mediaState(role, kind),
+    requestPoster =
+      kind === 'poster' &&
+      (role.canProcessPoster ||
+        role.active?.processingMode === 'request' ||
+        role.lastAttempt?.processingMode === 'request'),
     processing = role.current?.processing
   return (
     <div className="flex flex-col gap-3" aria-live="polite">
@@ -14,12 +25,15 @@ export function MediaProcessingStatus({ role }: { role: RoleInventory }) {
       </Badge>
       {state.pending && (
         <Progress value={null}>
-          <ProgressLabel>Media processing</ProgressLabel>
+          <ProgressLabel>
+            {requestPoster ? 'Preparing cover' : 'Media processing'}
+          </ProgressLabel>
         </Progress>
       )}
       {processing?.jobState && (
         <p className="text-xs text-muted-foreground">
-          Job: {processing.jobState} · Attempt {processing.attempts}
+          {requestPoster ? 'Cover processing' : 'Job'}: {processing.jobState} ·
+          Attempt {processing.attempts}
           {processing.progressSeconds > 0
             ? ` · ${Math.floor(processing.progressSeconds)} seconds of media processed`
             : ''}
@@ -27,10 +41,15 @@ export function MediaProcessingStatus({ role }: { role: RoleInventory }) {
       )}
       {(role.current?.state === 'failed' || role.lastAttempt?.failureCode) && (
         <Alert variant="destructive">
-          <AlertTitle>Media processing needs attention</AlertTitle>
+          <AlertTitle>
+            {kind === 'poster'
+              ? 'Cover processing needs attention'
+              : 'Media processing needs attention'}
+          </AlertTitle>
           <AlertDescription>
-            Processing or file verification failed. On an active draft, cancel
-            any pending upload and choose a new supported file.
+            {kind === 'poster'
+              ? 'The cover could not be prepared. Choose a new supported image, crop it, and upload it again.'
+              : 'Processing or file verification failed. On an active draft, cancel any pending upload and choose a new supported file.'}
           </AlertDescription>
         </Alert>
       )}

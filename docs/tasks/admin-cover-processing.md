@@ -1,6 +1,6 @@
 # Modul: admin cover processing
 
-- Status: **plan disetujui 6 Oktober 2026; ACOV-001–006 selesai** pada `feat/admin-cover-processing`; implementasi dialog berlanjut.
+- Status: **plan disetujui 6 Oktober 2026; ACOV-001–008 selesai; ACOV-009 menjadi task berikutnya** di `feat/admin-cover-processing`.
 - Diperbarui: 6 Oktober 2026.
 - Persetujuan: pengguna menyetujui plan/default pada 6 Oktober 2026; feasibility gate menentukan guard native/browser. Rincian di [plan](../plans/admin-cover-processing/implementation-plan.md).
 - Snapshot source: `06e7ce75e9d3f87bbe501bac054711310e14e5a2`; [context](../plans/admin-cover-processing/repository-context.md).
@@ -329,8 +329,8 @@ Gerbang repo: `bun run check-types` 3/3, `bun run lint` 1/1, `bun run build` 2/2
 ### Commit task
 
 - Pesan: `feat(web): add accessible cover crop dialog (ACOV-007)`
-- SHA: dicatat pada receipt ACOV-008 setelah task commit.
-- Hook/checks: root gates dan pre-commit/commit-msg hook dicatat sesudah hasil diamati.
+- SHA: `291b7d172c6eb90ec2e4249b199933db2c1a9b9d`.
+- Hook/checks: hook commit lulus; root gates dan browser proof ACOV-007 tercatat di atas.
 - Ledger: simpan SHA aktual pada update dokumentasi berikutnya, tanpa self-referential SHA.
 
 ### Blocker atau tindak lanjut
@@ -339,7 +339,7 @@ Tidak ada blocker lokal. Exact-payload recovery setelah refresh dan upload/pemro
 
 ## Task: ACOV-008 — Eden/Query preparation, Finish cover dan refresh recovery
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex / pengembang proyek
 - Prioritas: 8
 - Referensi: ACOV-US-02, ACOV-US-03; PRD media/sampul dan GR lifecycle; [plan](../plans/admin-cover-processing/implementation-plan.md).
@@ -355,10 +355,10 @@ Target: `apps/web/src/lib/admin/{media-client,media-queries,media-errors,media-s
 
 ### Acceptance criteria
 
-- [ ] Cover <=5MB one-part multipart existing; complete dan Prepare cover terpisah, typed dan signal-aware tanpa unsafe casts atau automatic mutation retry.
-- [ ] Completed processing dapat Finish cover tanpa File setelah refresh/lost response; pending crop hanya resume exact uploaded payload atau explicit Cancel and crop again.
-- [ ] Legacy original reselect dan video resume tetap; role/expiry/logout/navigation menghapus private state dan late callbacks tidak menghidupkan UI lama.
-- [ ] Readonly metadata/version conflict dan Preview gate tetap benar; error permission/invalid/decode/busy/timeout actionable.
+- [x] Cover <=5MB one-part multipart existing; complete dan Prepare cover terpisah, typed dan signal-aware tanpa unsafe casts atau automatic mutation retry.
+- [x] Completed processing dapat Finish cover tanpa File setelah refresh/lost response; pending crop hanya resume exact uploaded payload atau explicit Cancel and crop again.
+- [x] Legacy original reselect dan video resume tetap; role/expiry/logout/navigation menghapus private state dan late callbacks tidak menghidupkan UI lama.
+- [x] Readonly metadata/version conflict dan Preview gate tetap benar; error permission/invalid/decode/busy/timeout actionable.
 
 ### Validasi
 
@@ -366,18 +366,26 @@ Manager/domain regression tests existing; browser refresh/offline/hash mismatch/
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau divalidasi; hasil runtime dan command aktual dicatat saat task dikerjakan.
+2026-10-06: Eden memiliki `processPoster` typed POST dengan body kosong, credentials, no-store dan `AbortSignal`; Query mutation menonaktifkan retry otomatis dan cache hanya memuat safe DTO. Upload manager memanggil Prepare sesudah poster multipart selesai, menyediakan Finish cover untuk capability completed yang pulih dari inventory setelah refresh, dan merekonsiliasi respons POST hilang lewat GET status tanpa mengulang command. Hash crop berbeda ditolak sebelum status/PUT; membatalkan uploaded crop melepas descriptor dan mengizinkan crop baru. Status processing request menjadi Ready hanya dari verified readiness; legacy worker status tetap memakai label worker. Status source yang confirmed completed serta poster request tidak menyimpan File/preview lagi, dan pengecekan status poster tidak otomatis memulai Prepare.
+
+Regression unit manager/client/state `bun test apps/web/test/admin-upload-recovery.test.ts apps/web/test/admin-media-state.test.ts apps/web/test/admin-media-client.test.ts`: **24 tests/137 assertions lulus**. Full web suite `bun test apps/web/test`: **140 tests/649 assertions lulus**; recovery-specific suite juga lulus (11/61). API media suite `bun test apps/api/src/modules/media`: **27 tests/131 assertions lulus**. `bun run check-types` lulus (3/3), `bun run lint` lulus (1/1), `bun run build` lulus (2/2), dan `bun run docs:check` lulus (59 Markdown/514 links-anchors); `git diff --check` lulus.
+
+Built Bun/Nitro + Chromium 154 browser proof lulus pada fixture PostgreSQL khusus `vertical_movie_app_media_test` dan MinIO lokal dengan bucket fixture privat berprefix khusus. Proof mencakup upload multipart source dan sampul langsung ke MinIO, hash serta completion, simulasi Prepare 503 kemudian Finish cover setelah refresh tanpa mengirim ulang crop, hasil sampul verified Ready, source diproses oleh worker fixture, sampul Series, replacement, konflik metadata 409 yang mempertahankan input, outage/recovery, mutex lintas tab, offline/resume/cancel, logout dan akses back. Fixture browser kini menginjeksi `PosterProcessingService` seperti bootstrap runtime. Uji version conflict memakai perubahan metadata konkuren yang benar-benar menaikkan row version; operasi media tetap terpisah dari versi metadata.
+
+Command runner menggunakan env khusus `MEDIA_STORAGE_TEST_*` dan `MEDIA_TEST_DATABASE_URL` dari `apps/api/.env` yang di-ignore. Proof membuat lalu menghapus bucket acak; audit sesudahnya menunjukkan 1 user test, 1 policy khusus prefix, 0 bucket tersisa. Bucket aplikasi `vertical-movie-app` tidak diubah. Credential tetap lokal untuk proof selanjutnya dan nilainya tidak masuk log/commit.
+
+Validasi: web tests140/649, API media tests27/131, root `check-types`3/3, `lint`1/1, `build`2/2, `docs:check`59 Markdown/514 link-anchor, Prettier dan `git diff --check` lulus. Commit hook masih akan dijalankan bersama commit ACOV-008.
 
 ### Commit task
 
 - Pesan: `feat(web): prepare and recover native cover uploads (ACOV-008)`
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- SHA: dicatat pada receipt setelah commit task.
+- Hook/checks: dijalankan sesudah semua acceptance criteria dan gates lulus.
 - Ledger: SHA aktual dicatat pada update dokumentasi setelah commit, tanpa self-referential SHA.
 
 ### Blocker atau tindak lanjut
 
-Persetujuan plan, freshness check dan dependensi task di atas; bukan izin untuk mulai runtime pada permintaan planning ini.
+Tidak ada blocker ACOV-008. ACOV-009 masih backlog untuk matriks kompatibilitas penuh ketiga owner type, worker mati/menyala, output provenance dan regression lama; R2/Safari/perangkat fisik/kapasitas production tidak diklaim dari proof lokal ini.
 
 ## Task: ACOV-009 — Buktikan cover Ready tanpa worker dan kompatibilitas video
 

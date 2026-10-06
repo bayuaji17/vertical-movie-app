@@ -134,6 +134,13 @@ export function createMediaClient(
       if (result.id !== id || result.status !== 'completed') invalidResponse()
       return result
     },
+    async processPoster(id: string, signal?: AbortSignal) {
+      const result = await unwrap(
+        uploads({ id })['process-poster'].post({}, { fetch: { signal } }),
+      )
+      if (result.id !== id || result.status !== 'completed') invalidResponse()
+      return result
+    },
     async abort(id: string, signal?: AbortSignal) {
       const result = await unwrap(
         uploads({ id }).abort.post(undefined, { fetch: { signal } }),

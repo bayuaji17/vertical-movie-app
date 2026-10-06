@@ -14,6 +14,8 @@ import { loadStorageEnv } from "../../src/config/storage-env";
 import { createStorageClient } from "../../src/storage/s3";
 import { createMultipartStorage } from "../../src/storage/multipart";
 import { MediaService } from "../../src/modules/media/service";
+import { PosterProcessingService } from "../../src/modules/media/poster-processing";
+import { loadPosterEnv } from "../../src/config/poster-env";
 import { createMediaRepository } from "../../src/modules/media/repository";
 import { VideosService } from "../../src/modules/videos/service";
 import { createVideosRepository } from "../../src/modules/videos/repository";
@@ -62,7 +64,19 @@ export async function createAdminMediaBrowserFixture(
   const storage = createMultipartStorage(config),
     native = createStorageClient(config),
     repo = createMediaRepository(database.db),
-    mediaService = new MediaService(repo, storage, config);
+    mediaService = new MediaService(
+      repo,
+      storage,
+      config,
+      undefined,
+      new PosterProcessingService(
+        repo,
+        storage,
+        native,
+        config,
+        loadPosterEnv(),
+      ),
+    );
   const storageProofEnabled = Bun.env.MEDIA_BROWSER_STORAGE !== "disabled";
   const dir = resolve(
       import.meta.dir,
@@ -212,7 +226,8 @@ export async function createAdminMediaBrowserFixture(
       status: number;
       partNumber?: number;
     }> = [];
-    let failureStatus = 0;
+    let failureStatus = 0,
+      processPosterUnavailable = false;
     const digest = createHash("sha256");
     for await (const chunk of Bun.file(source).stream()) digest.update(chunk);
     return {
@@ -244,9 +259,12 @@ export async function createAdminMediaBrowserFixture(
         failureStatus?: number;
         runJobs?: boolean;
         attachCurrentPoster?: boolean;
+        processPosterUnavailable?: boolean;
       }) {
         if (input.failureStatus !== undefined)
           failureStatus = input.failureStatus;
+        if (input.processPosterUnavailable !== undefined)
+          processPosterUnavailable = input.processPosterUnavailable;
         if (input.attachCurrentPoster) {
           const assetId = crypto.randomUUID();
           await database.db.insert(mediaAssets).values({
@@ -323,18 +341,31 @@ export async function createAdminMediaBrowserFixture(
               .catch(() => null)
           : null;
         const response =
-          failureStatus && mutation
+          processPosterUnavailable &&
+          request.method === "POST" &&
+          path.endsWith("/process-poster")
             ? Response.json(
                 {
                   error: {
-                    code: "CONTENT_DEPENDENCY_UNAVAILABLE",
-                    message: "Fixture unavailable",
+                    code: "POSTER_PROCESSING_BUSY",
+                    message: "Fixture cover processor is temporarily busy.",
                     requestId: crypto.randomUUID(),
                   },
                 },
-                { status: failureStatus },
+                { status: 503 },
               )
-            : await app.handle(request);
+            : failureStatus && mutation
+              ? Response.json(
+                  {
+                    error: {
+                      code: "CONTENT_DEPENDENCY_UNAVAILABLE",
+                      message: "Fixture unavailable",
+                      requestId: crypto.randomUUID(),
+                    },
+                  },
+                  { status: failureStatus },
+                )
+              : await app.handle(request);
         if (mutation)
           traces.push({
             path,

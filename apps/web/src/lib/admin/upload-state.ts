@@ -10,6 +10,8 @@ export type UploadPhase =
   | 'uploading'
   | 'paused'
   | 'needs-file'
+  | 'needs-prepare'
+  | 'preparing'
   | 'finalizing'
   | 'completed'
   | 'cancelling'
@@ -39,6 +41,7 @@ export function isUploadWorking(view: UploadView) {
     'starting',
     'uploading',
     'finalizing',
+    'preparing',
     'cancelling',
   ].includes(view.phase)
 }
