@@ -308,3 +308,18 @@ test('query invalidation is identity/owner scoped and mutation cannot pause into
   onlineManager.setOnline(true)
   cache.clear()
 })
+
+test('known command conflict remains visible after reconciliation and requires a new review', async () => {
+  const f = fixture()
+  f.outcome('conflict')
+  await f.controller.prepare('publish')
+  await f.controller.confirm(true)
+  expect(f.controller.snapshot().phase).toBe('conflict')
+  expect(f.controller.snapshot().message).toContain('changed')
+  expect(f.controller.snapshot().snapshot?.readiness.rowVersion).toBe(3)
+  await f.controller.retry()
+  expect(f.calls()).toBe(1)
+  f.outcome('ok')
+  await f.controller.prepare('publish')
+  expect(f.controller.snapshot().phase).toBe('review')
+})

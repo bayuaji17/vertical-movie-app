@@ -162,7 +162,9 @@ function PublicationPanel({
     <>
       <Card aria-label="Publication" aria-busy={busy}>
         <CardHeader>
-          <CardTitle>Publication</CardTitle>
+          <CardTitle role="heading" aria-level={2}>
+            Publication
+          </CardTitle>
           <CardDescription>
             {status === 'archived'
               ? 'This video is archived and read only.'

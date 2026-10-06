@@ -1,6 +1,6 @@
 # Modul: Admin Publish & Archive
 
-> Status: **Plan approved; desain APUB-002 untuk review visual** · 7 Oktober 2026 · Pengguna menyetujui plan melalui “oke setuju”. Empat raster/state specification baru belum approved; runtime belum implemented/verified. Base SHA `313e31a14891ac0f91265a3557576b44791309d7`.
+> Status: **Implementasi berjalan; plan dan desain disetujui pengguna** · 7 Oktober 2026 · APUB-001–011 Done; APUB-012 browser acceptance dan APUB-013 closure dilanjutkan. Plan disetujui melalui “oke setuju”; empat raster/state specification disetujui melalui “ok setuju”. Base historis `313e31a14891ac0f91265a3557576b44791309d7`.
 
 ## Tujuan modul
 
@@ -30,7 +30,7 @@ Sebagai admin dan pengembang, saya ingin status akhir dapat dipastikan saat netw
 
 ## Urutan dan aturan evidence
 
-Plan telah disetujui; runtime tasks menjadi Ready ketika dependency yang relevan tersedia. APUB-003 Ready dari APUB-001, sedangkan UI tasks masih menunggu dependency/desain diterima; status bukan Blocked hanya karena belum mulai. Task menjadi Ready ketika acceptance/dependencies tersedia sesuai workflow. APUB-001 documentation-only mendapat Done setelah checks dan commit berhasil. Tidak menyatakan runtime selesai dari plan/mockup.
+Plan dan empat desain telah disetujui pengguna. Task Done di bawah memiliki acceptance/evidence aktual; dependency dan status berlaku per task. Riwayat approval/desain tetap dibedakan dari runtime dan production proof.
 
 | Task     | Outcome                                                | Dependensi         |
 | -------- | ------------------------------------------------------ | ------------------ |
@@ -124,7 +124,7 @@ Review four layout modes dan kedua dialog/state matrix terhadap plan serta dashb
 ### Commit task
 
 - Pesan: `docs: specify publication states (APUB-002)`
-- SHA: dicatat pada update berikutnya setelah commit desain berhasil.
+- SHA: `9e11b221d1d244bc486bb2be0d9b029619b47a87`.
 - Hook/checks: docs66/617, staged59/598, PNG header/dimensi/hash, Prettier/diff dan preservation22 lulus. Hook/Commitlint dan SHA actual dicatat setelah commit, tanpa bypass.
 - Ledger: SHA aktual dicatat setelah commit berhasil pada update task/dokumentasi berikutnya; tidak memakai self-referential SHA.
 
@@ -494,7 +494,7 @@ Dedicated PostgreSQL vertical_movie_app_media_test: publication suite3 tests96 a
 ### Commit task
 
 - Pesan: `test(api): prove publication readiness and races (APUB-011)`
-- SHA: belum dibuat.
+- SHA: `c2e21fe2311d16f40d6252fb6af86a5b9ad6a858`.
 - Hook/checks: relevant tests, root types/lint/build, docs:check, Prettier/diff lulus sebelum commit; hasil hook normal dicatat setelah commit.
 - Ledger: SHA aktual dicatat setelah commit berhasil pada update task/dokumentasi berikutnya; tidak memakai self-referential SHA.
 
@@ -504,7 +504,7 @@ Tidak menandai seluruh media backlog Review/In Progress menjadi Done dari subset
 
 ## Task: APUB-012 — Browser acceptance dan real publication visibility
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1
 - Referensi: APUB-US-04; PRD-05/06/08/09, GR-01–09 yang relevan; [step plan](../plans/admin-publication/implementation-plan.md#apub-012--browser-acceptance-dengan-media-nyata)
@@ -518,12 +518,12 @@ Wire real PublicationService/CatalogService/invalidation pada media browser fixt
 
 ### Acceptance criteria
 
-- [ ] Film dan Standalone melalui create→upload source/cover→process→Preview→Publish→public watch→Archive; state final/rights/versions cocok API/DB.
-- [ ] Anonymous before-publish catalog/detail/playback hidden; after-publish available; after-archive catalog hidden/new playback/renewal denied; previously issued signed object masih mengikuti expiry.
-- [ ] Dropped/malformed response sesudah real server commit, double click, version/busy/readiness race, stale publish replay, confirmed command+failed refetch dan explicit Check status/retry terbukti.
-- [ ] Mobile320/390/768 + desktop1024/1440, Light/Dark/System, long content, dialog focus/Escape/44px/live status, list/page/search retention serta direct detail/preview refresh terbukti tanpa hydration errors.
-- [ ] Auth/native-versus-injected fixture boundary dicatat; session invalid/valid outage/private cleanup dan owner upload interlock teruji; no credential/signature/raw response leak.
-- [ ] Cleanup hanya dedicated DB/known random bucket/fixture artifacts; built runtime acceptance lulus, dev-specific behavior dicek bila relevan; screenshots chosen saja boleh masuk docs/design dengan status runtime evidence.
+- [x] Film dan Standalone melalui create→upload source/cover→process→Preview→Publish→public watch→Archive; state final/rights/versions cocok API/DB.
+- [x] Anonymous before-publish catalog/detail/playback hidden; after-publish available; after-archive catalog hidden/new playback/renewal denied; previously issued signed object masih mengikuti expiry.
+- [x] Dropped/malformed response sesudah real server commit, double click, version/busy/readiness race, stale publish replay, confirmed command+failed refetch dan explicit Check status/retry terbukti.
+- [x] Mobile320/390/768 + desktop1024/1440, Light/Dark/System, long content, dialog focus/Escape/44px/live status, list/page/search retention serta direct detail/preview refresh terbukti tanpa hydration errors.
+- [x] Auth/native-versus-injected fixture boundary dicatat; session invalid/valid outage/private cleanup dan owner upload interlock teruji; no credential/signature/raw response leak.
+- [x] Cleanup hanya dedicated DB/known random bucket/fixture artifacts; built runtime acceptance lulus, dev-specific behavior dicek bila relevan; screenshots chosen saja boleh masuk docs/design dengan status runtime evidence.
 
 ### Validasi
 
@@ -531,13 +531,21 @@ Finalisasi actual browser harness command dari existing fixtures dan dependencie
 
 ### Hasil dan bukti
 
-Belum dikerjakan; command di bagian Validasi merupakan rencana, bukan hasil aktual. Tidak ada commit/runtime proof untuk task ini.
+Verified lokal 7 Oktober 2026. Command actual: `bun --env-file=apps/api/.env .turbo/admin-publication-execution/run-proof.ts apps/web/test/auth-browser-smoke.mjs` memakai runner env `AUTH_BROWSER_PHASE=publication`, `AUTH_BROWSER_RUNTIME=built`, dedicated `MEDIA_TEST_DATABASE_URL`, loopback private random MinIO bucket dan Windows Node/Playwright/Chrome. Wrapper ignored hanya menyediakan guarded env; command reproducible harness: `AUTH_BROWSER_PHASE=publication AUTH_BROWSER_RUNTIME=built bun apps/web/test/auth-browser-smoke.mjs` setelah runner/test env dikonfigurasi. Result exit0, “Built Bun/Nitro Browser: publication … passed.”
+
+Actual UI Film/Standalone create→source multipart+SHA→cover crop/WebP→actual FFmpeg worker→direct preview refresh/play/back→manual publish→anonymous watch decoded currentTime>0→archive. PG whitelist membuktikan rights/firstPublishedAt/archivedAt preserved, publishedAt cleared, satu operation publish per owner serta dua ready assets yang tetap tersedia. Anonymous catalog/detail/playback hidden sebelum publish, available sesudah publish, hidden/new info/master/variant/renewal404 sesudah archive; same-cache invalidation observed. Signed poster200 sebelum/sesudah archive dan403 sesudah actual expiresAt; old persisted publish replay200 tidak mengubah archived DB/UI/catalog.
+
+15 combinations320/390/768/1024/1440 × Light/Dark/System; long title, no horizontal overflow, initial Cancel focus, Tab containment, checkbox retained through System color change, Escape/no POST/focus return,44px controls, live pending status. External actual pending upload created after review membuat fresh readiness blocked tanpa publication operation; native abort lalu refresh kembali ready. Metadata berubah setelah review membatalkan confirm; actual PATCH race tepat sebelum publish menghasilkan409 dan conflict copy dipertahankan. Lost-before-commit memungkinkan explicit Check status + exact-key/version Retry; double-click hanya satu real commit. Lost-after-real-commit serta malformed committed response dikonfirmasi GET tanpa publish baru. Confirmed archive+failed refetch mempertahankan acknowledgement/no resend. Hash File Worker held menunjukkan same-owner Publish disabled, read-only Refresh tidak membuang File; pause/offline/reconnect tidak auto POST.
+
+Archive POST real commit ditahan: pending Cancel disabled/Escape tidak dismiss; authoritative injected session role dicabut, private cache/effects cleared, late response tidak repopulate. Valid-admin business503 melakukan session recheck dan mempertahankan UI; revoked role membutuhkan admin lagi. Page2/search URL retained setelah reload, Series tidak memiliki Publication section; zero pageerrors/hydration errors dan browser storage tanpa operation key/signature. Screenshots inspected pada ignored `.turbo/admin-publication-execution/browser/publication-mobile-{light,dark}.png`; raster canonical tetap mockup. Fixture close menghapus known random bucket/output/temp artifacts dan menutup dedicated DB pool; tidak memakai database/bucket development. Browser auth injected; native Better Auth proof tetap milik runbook auth, bukan klaim dari fixture ini.
+
+Additional checks: `bun test apps/api/src`119 pass/641 assertions; `bun test apps/web/test`158 pass/779 assertions, termasuk controller conflict regression11/45; `bun run --cwd apps/web auth:import:proof` intentional illegal client import rejected and fixture restored (serialized sebelum final gates); root `bun run check-types`3/3, `bun run lint`1/1, `bun run build`2/2 pass. OpenAPI runtime read reports30 admin operations. Final gates memakai final source; perubahan APUB-012 runtime hanya conflict-message preservation dan semantic Publication heading. Tidak ada schema/dependency/script/env/player behavior change; dev hashing tetap existing ACOV-012 proof, bukan rerun baru. Dedicated PG parity/concurrency/generation proof3/96 dan series3/26/upload7/82 berada pada actual APUB-011 evidence. R2/Safari/physical-device/resource/full-restore/production gates existing tidak dinaikkan. Prettier/diff dan22 unrelated file SHA-256 preservation pass; docs/hook receipt normal dicatat setelah commit.
 
 ### Commit task
 
 - Pesan: `test(web): verify admin publication flow (APUB-012)`
 - SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- Hook/checks: relevant tests, root types/lint/build, docs:check, Prettier/diff lulus sebelum commit; hasil hook normal dicatat setelah commit.
 - Ledger: SHA aktual dicatat setelah commit berhasil pada update task/dokumentasi berikutnya; tidak memakai self-referential SHA.
 
 ### Blocker atau tindak lanjut

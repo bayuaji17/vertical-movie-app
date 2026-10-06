@@ -334,6 +334,10 @@ export class PublicationController {
       })
       return
     }
+    if (!intent && this.state.phase === 'conflict') {
+      this.update({ ...this.state, snapshot: s, refreshUnavailable: false })
+      return
+    }
     if (
       intent &&
       s.readiness.rowVersion === intent.expectedVersion &&
