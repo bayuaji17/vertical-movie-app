@@ -29,6 +29,8 @@ Aturan penamaan, ownership dan maintenance berada pada [Documentation rules](../
 - [Dashboard mobile light/dark](design/admin-content-mobile.md): lima layouts light/dark disetujui; cards/form/drawer dan pagination metadata diimplementasikan.
 - [Upload Media desktop/mobile light/dark](design/admin-media-upload.md): empat mockup disetujui pengguna 5 Oktober 2026; state/modal specification dan runtime responsif terverifikasi lokal 6 Oktober 2026.
 
+- [Homepage/katalog publik](design/home-catalog.md): usulan mockup light desktop/mobile 7 Oktober 2026; Film/Series/Standalone tanpa login, UX katalog belum disetujui. [Task dan evidence](tasks/home-catalog-design.md).
+
 Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dashboard dark](design/dashboard-dark-shadcn.prompt.md) dan [login](design/login-light-shadcn-redesign.prompt.md). Screenshot login: [desktop](design/login-implemented-desktop.png) dan [mobile](design/login-implemented-mobile.png). Data mockup bukan bukti fitur selesai.
 
 ## Panduan development dan runbook
