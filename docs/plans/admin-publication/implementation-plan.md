@@ -417,3 +417,7 @@ GET private publication-readiness memakai read-only repeatable-read snapshot den
 ### 2026-10-07 — APUB-005
 
 Eden-derived readiness/publish/archive client dan compile contract tersedia. Strict runtime validation memakai unknown record agar malformed responses tidak menjadi confirmed success; whitelist checks, lifecycle/id/version/dates diverifikasi. Tests client3/25 dan existing content/media client15/86 lulus. auth:import:proof membuktikan illegal server import ditolak dan fixture dipulihkan. Build awal bertabrakan dengan temporary import proof; proof di-serialize dan root build2/2, types3/3, lint1/1 rerun lulus. Domain copy aman; network/5xx/malformed dianggap unknown; no automatic POST retry.
+
+### 2026-10-07 — APUB-006
+
+Controller memory-only dengan single mutex, UUID setelah fresh review+ack, exact-key explicit retry, online guard, no reconnect queue dan no optimistic writes tersedia. Fresh snapshots membandingkan owner/kind/version/lifecycle/media fingerprint; server partial result tidak menjadi detail. Unknown/read reconciliation, old replay archived, confirmed POST+failed refresh, owner/identity late callback diuji. Controller tests10/40 dan session/route/client19/78 lulus; root types3/3/lint1/1/build2/2 lulus setelah memperbaiki union mutation inference. Identity/owner queries, invalidation empat family dan private-effects cleanup wired pada hook; owner upload selector/nav diselesaikan APUB-010.

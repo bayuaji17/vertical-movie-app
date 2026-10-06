@@ -247,7 +247,7 @@ Eden-derived readiness/publish/archive client dan compile contract tersedia. Str
 ### Commit task
 
 - Pesan: `feat(web): add typed publication client (APUB-005)`
-- SHA: belum dibuat.
+- SHA: `69fe2a59dda88630f5759151d273085de571fb56`.
 - Hook/checks: relevant tests, root types/lint/build, docs:check, Prettier/diff lulus sebelum commit; hasil hook normal dicatat setelah commit.
 - Ledger: SHA aktual dicatat setelah commit berhasil pada update task/dokumentasi berikutnya; tidak memakai self-referential SHA.
 
@@ -257,7 +257,7 @@ Query/intent/recovery APUB-006 menggunakan transport ini. Unsupported Series UI 
 
 ## Task: APUB-006 — Publication Query dan intent recovery controller
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1
 - Referensi: APUB-US-02, APUB-US-03, APUB-US-04; PRD-05/06/08/09, GR-01–09 yang relevan; [step plan](../plans/admin-publication/implementation-plan.md#apub-006--querystate-dan-intent-recovery)
@@ -271,12 +271,12 @@ Buat private identity/owner query keys, queries/state/use-publication. Pisahkan 
 
 ### Acceptance criteria
 
-- [ ] Single pending mutex, retry false, explicit online guard dan tanpa offline reconnect queue; one stable UUID/payload per publish intent; no optimistic lifecycle update.
-- [ ] Fresh GET sebelum confirm mengunci expectedVersion; perubahan snapshot memerlukan review/acknowledgement baru, tidak auto-bump version/resend.
-- [ ] Lost publish response→Check status→explicit exact-key retry hanya bila current draft/version cocok; old replay setelah archived tidak membuat UI published lagi.
-- [ ] Archive lost result direkonsiliasi dengan GET; archived mengonfirmasi final state, published same version boleh explicit retry expectedVersion lama; changed version harus review ulang.
-- [ ] Success dan unknown outcome invalidate list/detail/inventory/readiness; failed refetch tidak mengubah confirmed POST menjadi failed dan tidak memicu duplicate command.
-- [ ] Readiness polling hanya known pending/visible/online; auth/identity/owner generation mencegah stale callbacks memasukkan data; intent/key memory-only dan cleanup terdaftar.
+- [x] Single pending mutex, retry false, explicit online guard dan tanpa offline reconnect queue; one stable UUID/payload per publish intent; no optimistic lifecycle update.
+- [x] Fresh GET sebelum confirm mengunci expectedVersion; perubahan snapshot memerlukan review/acknowledgement baru, tidak auto-bump version/resend.
+- [x] Lost publish response→Check status→explicit exact-key retry hanya bila current draft/version cocok; old replay setelah archived tidak membuat UI published lagi.
+- [x] Archive lost result direkonsiliasi dengan GET; archived mengonfirmasi final state, published same version boleh explicit retry expectedVersion lama; changed version harus review ulang.
+- [x] Success dan unknown outcome invalidate list/detail/inventory/readiness; failed refetch tidak mengubah confirmed POST menjadi failed dan tidak memicu duplicate command.
+- [x] Readiness polling hanya known pending/visible/online; auth/identity/owner generation mencegah stale callbacks memasukkan data; intent/key memory-only dan cleanup terdaftar.
 
 ### Validasi
 
@@ -284,13 +284,13 @@ bun test apps/web/test/admin-publication-state.test.ts dengan delayed responses,
 
 ### Hasil dan bukti
 
-Belum dikerjakan; command di bagian Validasi merupakan rencana, bukan hasil aktual. Tidak ada commit/runtime proof untuk task ini.
+Controller memory-only dengan single mutex, UUID setelah fresh review+ack, exact-key explicit retry, online guard, no reconnect queue dan no optimistic writes tersedia. Fresh snapshots membandingkan owner/kind/version/lifecycle/media fingerprint; server partial result tidak menjadi detail. Unknown/read reconciliation, old replay archived, confirmed POST+failed refresh, owner/identity late callback diuji. Controller tests10/40 dan session/route/client19/78 lulus; root types3/3/lint1/1/build2/2 lulus setelah memperbaiki union mutation inference. Identity/owner queries, invalidation empat family dan private-effects cleanup wired pada hook; owner upload selector/nav diselesaikan APUB-010.
 
 ### Commit task
 
 - Pesan: `feat(web): reconcile publication intents safely (APUB-006)`
 - SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- Hook/checks: relevant tests, root types/lint/build, docs:check, Prettier/diff lulus sebelum commit; hasil hook normal dicatat setelah commit.
 - Ledger: SHA aktual dicatat setelah commit berhasil pada update task/dokumentasi berikutnya; tidak memakai self-referential SHA.
 
 ### Blocker atau tindak lanjut
