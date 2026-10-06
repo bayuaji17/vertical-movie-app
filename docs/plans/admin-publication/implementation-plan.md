@@ -413,3 +413,7 @@ Assessment/checks video diekstrak ke readiness.ts; command existing memakai pred
 ### 2026-10-07 — APUB-004
 
 GET private publication-readiness memakai read-only repeatable-read snapshot dengan shared assessment. Strict whitelist DTO, auth-before-I/O, UUID validation, no-store success/errors, missing404/dependency503 dan Scalar/public scope diuji melalui app.handle. Policy+HTTP10 tests/79 assertions dan suite API119/641 lulus. Root types3/3/build2/2 lulus; lint web dari source unchanged diperiksa hook normal. TypeBox union dibuat explicit agar inferred Eden tetap literal; failure type-check awal diselesaikan. Tidak ada schema migration.
+
+### 2026-10-07 — APUB-005
+
+Eden-derived readiness/publish/archive client dan compile contract tersedia. Strict runtime validation memakai unknown record agar malformed responses tidak menjadi confirmed success; whitelist checks, lifecycle/id/version/dates diverifikasi. Tests client3/25 dan existing content/media client15/86 lulus. auth:import:proof membuktikan illegal server import ditolak dan fixture dipulihkan. Build awal bertabrakan dengan temporary import proof; proof di-serialize dan root build2/2, types3/3, lint1/1 rerun lulus. Domain copy aman; network/5xx/malformed dianggap unknown; no automatic POST retry.

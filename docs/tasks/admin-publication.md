@@ -206,7 +206,7 @@ GET private publication-readiness memakai read-only repeatable-read snapshot den
 ### Commit task
 
 - Pesan: `feat(api): expose private publication readiness (APUB-004)`
-- SHA: belum dibuat.
+- SHA: `84acad1159541e9353821092a71d53585b4ab82a`.
 - Hook/checks: relevant tests, root types/lint/build, docs:check, Prettier/diff lulus sebelum commit; hasil hook normal dicatat setelah commit.
 - Ledger: SHA aktual dicatat setelah commit berhasil pada update task/dokumentasi berikutnya; tidak memakai self-referential SHA.
 
@@ -216,7 +216,7 @@ APUB-005 frontend memakai contract yang sudah dibekukan. Read snapshot bukan res
 
 ## Task: APUB-005 — Typed Eden client untuk readiness, publish dan archive
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1
 - Referensi: APUB-US-02, APUB-US-03; PRD-05/06/08/09, GR-01–09 yang relevan; [step plan](../plans/admin-publication/implementation-plan.md#apub-005--eden-publication-client)
@@ -230,11 +230,11 @@ Buat publication-client/errors dan publication-eden-contract.ts dengan types der
 
 ### Acceptance criteria
 
-- [ ] Readiness GET/publish/archive menuju same-origin private routes dan exact strict bodies; archive tidak membawa idempotencyKey.
-- [ ] PublicationDto divalidasi id/published status/positive version/dates; VideoDto archive id/archivedAt/status/version berbeda, tidak diasumsikan identical.
-- [ ] Publish replay boleh menghasilkan DTO older dari state current; validation tidak menjadikan DTO parsial sebagai full detail cache.
-- [ ] Malformed response/network/timeouts/5xx dikenali sebagai unconfirmed outcome; domain409/422/404 dan auth401/403 memiliki safe copy/action.
-- [ ] Types hanya dari api/types/Eden; tidak mengimpor runtime API/auth server/storage into browser, tidak mempersist raw responses/keys/signatures.
+- [x] Readiness GET/publish/archive menuju same-origin private routes dan exact strict bodies; archive tidak membawa idempotencyKey.
+- [x] PublicationDto divalidasi id/published status/positive version/dates; VideoDto archive id/archivedAt/status/version berbeda, tidak diasumsikan identical.
+- [x] Publish replay boleh menghasilkan DTO older dari state current; validation tidak menjadikan DTO parsial sebagai full detail cache.
+- [x] Malformed response/network/timeouts/5xx dikenali sebagai unconfirmed outcome; domain409/422/404 dan auth401/403 memiliki safe copy/action.
+- [x] Types hanya dari api/types/Eden; tidak mengimpor runtime API/auth server/storage into browser, tidak mempersist raw responses/keys/signatures.
 
 ### Validasi
 
@@ -242,13 +242,13 @@ bun test apps/web/test/admin-publication-client.test.ts; bun run --cwd apps/web 
 
 ### Hasil dan bukti
 
-Belum dikerjakan; command di bagian Validasi merupakan rencana, bukan hasil aktual. Tidak ada commit/runtime proof untuk task ini.
+Eden-derived readiness/publish/archive client dan compile contract tersedia. Strict runtime validation memakai unknown record agar malformed responses tidak menjadi confirmed success; whitelist checks, lifecycle/id/version/dates diverifikasi. Tests client3/25 dan existing content/media client15/86 lulus. auth:import:proof membuktikan illegal server import ditolak dan fixture dipulihkan. Build awal bertabrakan dengan temporary import proof; proof di-serialize dan root build2/2, types3/3, lint1/1 rerun lulus. Domain copy aman; network/5xx/malformed dianggap unknown; no automatic POST retry.
 
 ### Commit task
 
 - Pesan: `feat(web): add typed publication client (APUB-005)`
 - SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- Hook/checks: relevant tests, root types/lint/build, docs:check, Prettier/diff lulus sebelum commit; hasil hook normal dicatat setelah commit.
 - Ledger: SHA aktual dicatat setelah commit berhasil pada update task/dokumentasi berikutnya; tidak memakai self-referential SHA.
 
 ### Blocker atau tindak lanjut
