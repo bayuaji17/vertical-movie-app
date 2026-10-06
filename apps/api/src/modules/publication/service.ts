@@ -16,13 +16,45 @@ import {
   notFound,
   unavailable,
 } from "../../shared/content-error";
-import type { PublishInput, PublicationResult } from "./model";
-import { assertVideoPublication, PublicationEvidenceStore } from "./readiness";
+import type {
+  PublishInput,
+  PublicationResult,
+  PublicationReadiness,
+} from "./model";
+import {
+  assertVideoPublication,
+  assessVideoPublication,
+  PublicationEvidenceStore,
+} from "./readiness";
 export class PublicationService {
   constructor(
     private readonly db?: ContentDatabase,
     private readonly invalidate = () => {},
   ) {}
+  async readiness(id: string): Promise<PublicationReadiness> {
+    if (!this.db) unavailable();
+    try {
+      return await this.db.transaction(
+        async (tx) => {
+          const row = await new VideosStore(tx).get(id);
+          if (!row) notFound();
+          const evidence = await new PublicationEvidenceStore(tx).read(row);
+          return {
+            videoId: row.id,
+            kind: row.kind,
+            rowVersion: row.rowVersion,
+            publicationStatus: row.publicationStatus,
+            archivedAt: row.archivedAt?.toISOString() ?? null,
+            ...assessVideoPublication(evidence),
+          };
+        },
+        { isolationLevel: "repeatable read", accessMode: "read only" },
+      );
+    } catch (error) {
+      if (error instanceof ContentError) throw error;
+      unavailable();
+    }
+  }
   async publish(
     type: "video" | "series",
     id: string,

@@ -6,7 +6,7 @@ import {
 import { createContentErrors } from "../../plugins/errors";
 import { IdParams, ErrorResponses } from "../../shared/content-model";
 import { PublicationService } from "./service";
-import { PublishBody, PublicationDto } from "./model";
+import { PublishBody, PublicationDto, PublicationReadinessDto } from "./model";
 export function createPublicationModule({
   service = new PublicationService(),
   getSession,
@@ -17,6 +17,21 @@ export function createPublicationModule({
     .onBeforeHandle(({ set }) => {
       set.headers["cache-control"] = "private, no-store";
     })
+    .get(
+      "/admin/videos/:id/publication-readiness",
+      ({ params }) => service.readiness(params.id),
+      {
+        requireAdmin: true,
+        params: IdParams,
+        response: { 200: PublicationReadinessDto, ...ErrorResponses },
+        detail: {
+          tags: ["Publication"],
+          operationId: "videoPublicationReadiness",
+          summary: "Assess video publication readiness without side effects",
+          security: [{ betterAuthSessionCookie: [] }],
+        },
+      },
+    )
     .post(
       "/admin/videos/:id/publish",
       ({ params, body, adminSession }) =>

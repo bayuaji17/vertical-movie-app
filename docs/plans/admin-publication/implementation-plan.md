@@ -409,3 +409,7 @@ Pengguna menyetujui empat desain melalui “ok setuju”. APUB-002 Done; commit 
 ### 2026-10-07 — APUB-003
 
 Assessment/checks video diekstrak ke readiness.ts; command existing memakai predicate CatalogStore dan assessment setelah parent/owner lock. Replay/hash/version/series semantics dipertahankan. Native policy tests6/56 assertions dan suite API115/618 lulus; root check-types3/3, lint1/1 dan build2/2 lulus. Fake policy tests bukan PG provenance proof; concurrency/generation DB diperiksa APUB-011. Tidak ada schema/storage/process I/O baru.
+
+### 2026-10-07 — APUB-004
+
+GET private publication-readiness memakai read-only repeatable-read snapshot dengan shared assessment. Strict whitelist DTO, auth-before-I/O, UUID validation, no-store success/errors, missing404/dependency503 dan Scalar/public scope diuji melalui app.handle. Policy+HTTP10 tests/79 assertions dan suite API119/641 lulus. Root types3/3/build2/2 lulus; lint web dari source unchanged diperiksa hook normal. TypeBox union dibuat explicit agar inferred Eden tetap literal; failure type-check awal diselesaikan. Tidak ada schema migration.

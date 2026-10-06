@@ -165,7 +165,7 @@ Assessment/checks video diekstrak ke readiness.ts; command existing memakai pred
 ### Commit task
 
 - Pesan: `refactor(api): share publication readiness policy (APUB-003)`
-- SHA: belum dibuat.
+- SHA: `d94b5e9f38749445f83a90124ee33b6a85b66a04`.
 - Hook/checks: relevant tests, root types/lint/build, docs:check, Prettier/diff lulus sebelum commit; hasil hook normal dicatat setelah commit.
 - Ledger: SHA aktual dicatat setelah commit berhasil pada update task/dokumentasi berikutnya; tidak memakai self-referential SHA.
 
@@ -175,7 +175,7 @@ API DTO/GET APUB-004; regression transaction evidence APUB-011. Tidak membuat sc
 
 ## Task: APUB-004 — Private GET publication readiness dan contract
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1
 - Referensi: APUB-US-01; PRD-05/06/08/09, GR-01–09 yang relevan; [step plan](../plans/admin-publication/implementation-plan.md#apub-004--private-readiness-route-dan-dto)
@@ -189,11 +189,11 @@ Tambahkan GET /admin/videos/:id/publication-readiness ke module publication, mod
 
 ### Acceptance criteria
 
-- [ ] requireAdmin berjalan sebelum assessment/DB I/O; unauthorized/non-admin/expired diproses pipeline existing tanpa data exposure.
-- [ ] DTO videoId/kind/rowVersion/publicationStatus/archivedAt/canPublish/checks whitelist; tidak membawa private object keys, signed URLs atau rights actor detail.
-- [ ] GET menjalankan coherent repeatable-read snapshot, read-only tanpa mutation/upload enqueue/HEAD/signing/process.
-- [ ] Missing row404, UUID/body/query contract sesuai model, dependency503 dan no-store pada success/error teruji; failure tidak disamarkan blocked DTO.
-- [ ] Endpoint schemas/chaining inferred App/Scalar/Eden tersedia; summary archive mencerminkan draft/published API existing tanpa mengubah kontrak.
+- [x] requireAdmin berjalan sebelum assessment/DB I/O; unauthorized/non-admin/expired diproses pipeline existing tanpa data exposure.
+- [x] DTO videoId/kind/rowVersion/publicationStatus/archivedAt/canPublish/checks whitelist; tidak membawa private object keys, signed URLs atau rights actor detail.
+- [x] GET menjalankan coherent repeatable-read snapshot, read-only tanpa mutation/upload enqueue/HEAD/signing/process.
+- [x] Missing row404, UUID/body/query contract sesuai model, dependency503 dan no-store pada success/error teruji; failure tidak disamarkan blocked DTO.
+- [x] Endpoint schemas/chaining inferred App/Scalar/Eden tersedia; summary archive mencerminkan draft/published API existing tanpa mengubah kontrak.
 
 ### Validasi
 
@@ -201,13 +201,13 @@ bun test apps/api/src/modules/publication/index.test.ts memakai app.handle dan i
 
 ### Hasil dan bukti
 
-Belum dikerjakan; command di bagian Validasi merupakan rencana, bukan hasil aktual. Tidak ada commit/runtime proof untuk task ini.
+GET private publication-readiness memakai read-only repeatable-read snapshot dengan shared assessment. Strict whitelist DTO, auth-before-I/O, UUID validation, no-store success/errors, missing404/dependency503 dan Scalar/public scope diuji melalui app.handle. Policy+HTTP10 tests/79 assertions dan suite API119/641 lulus. Root types3/3/build2/2 lulus; lint web dari source unchanged diperiksa hook normal. TypeBox union dibuat explicit agar inferred Eden tetap literal; failure type-check awal diselesaikan. Tidak ada schema migration.
 
 ### Commit task
 
 - Pesan: `feat(api): expose private publication readiness (APUB-004)`
 - SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- Hook/checks: relevant tests, root types/lint/build, docs:check, Prettier/diff lulus sebelum commit; hasil hook normal dicatat setelah commit.
 - Ledger: SHA aktual dicatat setelah commit berhasil pada update task/dokumentasi berikutnya; tidak memakai self-referential SHA.
 
 ### Blocker atau tindak lanjut
