@@ -55,10 +55,11 @@ export function createCroppedCoverFile(
   })
 }
 
-export function describeMediaFile(
+function describeFile(
   file: Pick<File, 'name' | 'size' | 'type'>,
   kind: MediaKind,
   inventory: OwnerMedia,
+  enforceSizeLimit: boolean,
 ): SelectedFileDescriptor {
   if (kind === 'source' && inventory.ownerType === 'series')
     throw new MediaApiError(
@@ -91,7 +92,7 @@ export function describeMediaFile(
       'CONFIG_UNAVAILABLE',
       'Media limits are unavailable.',
     )
-  if (file.size > max)
+  if (enforceSizeLimit && file.size > max)
     throw new MediaApiError(
       422,
       'FILE_TOO_LARGE',
@@ -114,6 +115,22 @@ export function describeMediaFile(
     )
   // MIME/extension are hints only. The server worker verifies codecs, dimensions and duration.
   return { filename: file.name, contentType, sizeBytes: String(file.size) }
+}
+
+export function describeMediaFile(
+  file: Pick<File, 'name' | 'size' | 'type'>,
+  kind: MediaKind,
+  inventory: OwnerMedia,
+) {
+  return describeFile(file, kind, inventory, true)
+}
+
+/** Validate the original cover before cropping; the configured byte limit applies to the output. */
+export function describeCoverCropSource(
+  file: Pick<File, 'name' | 'size' | 'type'>,
+  inventory: OwnerMedia,
+) {
+  return describeFile(file, 'poster', inventory, false)
 }
 export async function verifyReselectedFile(
   file: File,

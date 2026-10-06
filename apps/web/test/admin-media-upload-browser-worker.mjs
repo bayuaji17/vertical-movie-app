@@ -52,6 +52,21 @@ try {
         )
       : file
   const card = (kind) => page.locator(`[data-media-kind="${kind}"]`)
+  const chooseAndCropCover = async (file = data.files.poster) => {
+    await card('poster').locator('input[type=file]').setInputFiles(disk(file))
+    const dialog = page.getByRole('dialog')
+    await dialog.waitFor()
+    await dialog.getByRole('button', { name: 'Use crop', exact: true }).click()
+    await dialog.waitFor({ state: 'hidden' })
+  }
+  const saveCropScreenshot = async (name) => {
+    const response = await fetch(
+      controlURL + '/cover-screenshot?name=' + encodeURIComponent(name),
+      { method: 'POST', body: await page.screenshot() },
+    )
+    assert.ok(response.ok)
+    return (await response.json()).path
+  }
   const theme = async (mode) => {
     await page
       .getByRole('button', { name: 'Account menu', exact: true })
@@ -134,9 +149,410 @@ try {
       .waitFor()
     console.log('Browser: outage recovery passed')
   } else if (phase === 'layout') {
+    stage = 'cover-crop-ui'
+    await page.goto(path('film'))
+    await page
+      .getByRole('heading', { name: 'Upload media', exact: true })
+      .waitFor()
+    await card('poster').waitFor()
+    let mobileScreenshot
+    for (const mode of ['Light', 'Dark', 'System']) {
+      await theme(mode)
+      for (const width of [320, 390, 768, 1024, 1440]) {
+        await page.setViewportSize({ width, height: 1000 })
+        const firstCrop = mode === 'Light' && width === 320
+        if (firstCrop) {
+          await page.evaluate(() => {
+            const original = window.createImageBitmap.bind(window)
+            Object.defineProperty(window, '__coverOriginalCreateImageBitmap', {
+              configurable: true,
+              value: original,
+            })
+            window.createImageBitmap = (...args) =>
+              new Promise((resolve, reject) =>
+                setTimeout(() => original(...args).then(resolve, reject), 250),
+              )
+          })
+          const [chooser] = await Promise.all([
+            page.waitForEvent('filechooser'),
+            card('poster')
+              .getByRole('button', { name: 'Choose file', exact: true })
+              .click(),
+          ])
+          await chooser.setFiles(disk(data.files.poster))
+        } else {
+          await card('poster')
+            .locator('input[type=file]')
+            .setInputFiles(disk(data.files.poster))
+        }
+        const dialog = page.getByRole('dialog'),
+          preview = dialog.locator('canvas[aria-label^="Cover crop preview"]')
+        if (firstCrop) await dialog.getByRole('status').waitFor()
+        await preview.waitFor()
+        if (firstCrop)
+          await page.evaluate(() => {
+            window.createImageBitmap = window.__coverOriginalCreateImageBitmap
+            delete window.__coverOriginalCreateImageBitmap
+          })
+        const bounds = await dialog.boundingBox()
+        assert.ok(bounds)
+        assert.ok(bounds.x >= 0 && bounds.x + bounds.width <= width + 1)
+        assert.equal(
+          await page.evaluate(
+            () => document.documentElement.scrollWidth <= innerWidth,
+          ),
+          true,
+          `Crop dialog overflows at ${mode}/${width}`,
+        )
+        if (firstCrop) {
+          await page.keyboard.press('Shift+Tab')
+          assert.equal(
+            await page.evaluate(() =>
+              Boolean(document.activeElement?.closest('[role="dialog"]')),
+            ),
+            true,
+            'Dialog focus must remain trapped while open',
+          )
+        }
+
+        if (mode === 'Light' && width === 320)
+          mobileScreenshot = await saveCropScreenshot('mobile-light')
+        if (mode === 'Dark' && width === 1440)
+          await saveCropScreenshot('desktop-dark')
+
+        if (mode === 'Light' && width === 1440) {
+          const slider = dialog.getByRole('slider')
+          await slider.focus()
+          await page.keyboard.press('End')
+          assert.ok(Number(await slider.getAttribute('aria-valuenow')) > 1.9)
+          await preview.focus()
+          await page.keyboard.press('ArrowRight')
+          await page.keyboard.press('ArrowUp')
+          await page.keyboard.press('Equal')
+          await page.keyboard.press('Home')
+          await slider.focus()
+          await page.keyboard.press('End')
+          const box = await preview.boundingBox()
+          assert.ok(box)
+          await page.mouse.move(box.x + box.width * 0.1, box.y + box.height / 2)
+          await page.mouse.down()
+          await page.mouse.move(
+            box.x + box.width * 0.98,
+            box.y + box.height / 2,
+          )
+          await page.mouse.up()
+          const leftPixel = await page.evaluate(() =>
+            Array.from(
+              document
+                .querySelector('canvas[aria-label^="Cover crop preview"]')
+                .getContext('2d')
+                .getImageData(270, 480, 1, 1).data,
+            ),
+          )
+          assert.ok(
+            leftPixel[0] > 160 && leftPixel[2] < 100,
+            `Pointer crop did not move to the red edge: ${leftPixel}`,
+          )
+        }
+
+        if (mode === 'Dark' && width === 390) {
+          const box = await preview.boundingBox()
+          assert.ok(box)
+          const cdp = await context.newCDPSession(page)
+          await cdp.send('Emulation.setTouchEmulationEnabled', {
+            enabled: true,
+            configuration: 'mobile',
+          })
+          await cdp.send('Input.dispatchTouchEvent', {
+            type: 'touchStart',
+            touchPoints: [
+              {
+                id: 1,
+                x: box.x + box.width * 0.95,
+                y: box.y + box.height / 2,
+              },
+            ],
+          })
+          await cdp.send('Input.dispatchTouchEvent', {
+            type: 'touchMove',
+            touchPoints: [
+              {
+                id: 1,
+                x: box.x + box.width * 0.05,
+                y: box.y + box.height / 2,
+              },
+            ],
+          })
+          await cdp.send('Input.dispatchTouchEvent', {
+            type: 'touchEnd',
+            touchPoints: [],
+          })
+          await cdp.send('Emulation.setTouchEmulationEnabled', {
+            enabled: false,
+          })
+          await cdp.detach()
+          const rightPixel = await page.evaluate(() =>
+            Array.from(
+              document
+                .querySelector('canvas[aria-label^="Cover crop preview"]')
+                .getContext('2d')
+                .getImageData(270, 480, 1, 1).data,
+            ),
+          )
+          assert.ok(
+            rightPixel[2] > 140 && rightPixel[0] < 120,
+            `Touch crop did not move to the blue edge: ${rightPixel}`,
+          )
+        }
+
+        if (mode === 'System') {
+          await page.emulateMedia({ colorScheme: 'dark' })
+          await page.waitForFunction(() =>
+            document.documentElement.classList.contains('dark'),
+          )
+          assert.equal(await preview.isVisible(), true)
+          await page.emulateMedia({ colorScheme: 'light' })
+          await page.waitForFunction(
+            () => !document.documentElement.classList.contains('dark'),
+          )
+          assert.equal(await preview.isVisible(), true)
+        }
+        await page.keyboard.press('Escape')
+        await dialog.waitFor({ state: 'hidden' })
+        if (firstCrop)
+          await page.waitForFunction(
+            () => document.activeElement?.textContent?.trim() === 'Choose file',
+          )
+      }
+    }
+    assert.ok(mobileScreenshot?.endsWith('mobile-light.png'))
+    await page.setViewportSize({ width: 1440, height: 1000 })
+    await theme('Light')
+    await chooseAndCropCover()
+    const selectedPreview = await card('poster')
+      .getByAltText('Selected cover preview')
+      .getAttribute('src')
+    assert.ok(selectedPreview?.startsWith('blob:'))
+    await card('poster').getByText('cover.webp', { exact: true }).waitFor()
+    const outputDimensions = await card('poster')
+      .getByAltText('Selected cover preview')
+      .evaluate((image) => [image.naturalWidth, image.naturalHeight])
+    assert.deepEqual(outputDimensions, [1080, 1920])
+
+    await card('poster')
+      .locator('input[type=file]')
+      .setInputFiles(disk(data.files.poster))
+    await page.keyboard.press('Escape')
+    await page.getByRole('dialog').waitFor({ state: 'hidden' })
+    assert.equal(
+      await card('poster')
+        .getByAltText('Selected cover preview')
+        .getAttribute('src'),
+      selectedPreview,
+      'Cancel must preserve the selected cover and its preview URL',
+    )
+
+    const makePng = async ({ width, height, noise }) =>
+      await page.evaluate(
+        async ({ width, height, noise }) => {
+          const canvas = document.createElement('canvas')
+          canvas.width = width
+          canvas.height = height
+          const context = canvas.getContext('2d')
+          if (noise) {
+            const pixels = new Uint8ClampedArray(width * height * 4)
+            let random = 0x12345678
+            for (let index = 0; index < pixels.length; index += 4) {
+              random ^= random << 13
+              random ^= random >>> 17
+              random ^= random << 5
+              pixels[index] = random & 255
+              pixels[index + 1] = (random >>> 8) & 255
+              pixels[index + 2] = (random >>> 16) & 255
+              pixels[index + 3] = 255
+            }
+            context.putImageData(new ImageData(pixels, width, height), 0, 0)
+          } else {
+            context.fillStyle = '#64748b'
+            context.fillRect(0, 0, width, height)
+          }
+          const blob = await new Promise((resolve) =>
+            canvas.toBlob(resolve, 'image/png'),
+          )
+          const bytes = new Uint8Array(await blob.arrayBuffer())
+          let binary = ''
+          for (let offset = 0; offset < bytes.length; offset += 32_768)
+            binary += String.fromCharCode(
+              ...bytes.subarray(offset, offset + 32_768),
+            )
+          canvas.width = 0
+          canvas.height = 0
+          return btoa(binary)
+        },
+        { width, height, noise },
+      )
+
+    const small = await makePng({ width: 640, height: 1138, noise: false })
+    await card('poster')
+      .locator('input[type=file]')
+      .setInputFiles({
+        name: 'small.png',
+        mimeType: 'image/png',
+        buffer: Buffer.from(small, 'base64'),
+      })
+    const smallDialog = page.getByRole('dialog')
+    await smallDialog
+      .getByRole('alert')
+      .getByText(/at least 1080 × 1920/i)
+      .waitFor()
+    assert.equal(
+      await smallDialog.getByRole('button', { name: 'Use crop' }).isDisabled(),
+      true,
+    )
+    await page.keyboard.press('Escape')
+    await smallDialog.waitFor({ state: 'hidden' })
+    assert.equal(
+      await card('poster')
+        .getByAltText('Selected cover preview')
+        .getAttribute('src'),
+      selectedPreview,
+    )
+
+    const noisy = await makePng({ width: 1080, height: 1920, noise: true })
+    await card('poster')
+      .locator('input[type=file]')
+      .setInputFiles({
+        name: 'noise.png',
+        mimeType: 'image/png',
+        buffer: Buffer.from(noisy, 'base64'),
+      })
+    const largeDialog = page.getByRole('dialog')
+    await largeDialog
+      .locator('canvas[aria-label^="Cover crop preview"]')
+      .waitFor()
+    await page.evaluate(() => {
+      const prototype = HTMLCanvasElement.prototype
+      Object.defineProperty(prototype, '__coverNativeToBlob', {
+        configurable: true,
+        value: prototype.toBlob,
+      })
+      prototype.toBlob = function (callback, _type, quality) {
+        return this.__coverNativeToBlob.call(
+          this,
+          callback,
+          'image/png',
+          quality,
+        )
+      }
+    })
+    try {
+      await largeDialog.getByRole('button', { name: 'Use crop' }).click()
+      await largeDialog
+        .getByRole('alert')
+        .getByText(/larger than the allowed/i)
+        .waitFor()
+      assert.equal(
+        await largeDialog
+          .getByRole('button', { name: 'Use crop' })
+          .isDisabled(),
+        true,
+      )
+    } finally {
+      await page.evaluate(() => {
+        const prototype = HTMLCanvasElement.prototype
+        prototype.toBlob = prototype.__coverNativeToBlob
+        delete prototype.__coverNativeToBlob
+      })
+    }
+    await page.keyboard.press('Escape')
+    await largeDialog.waitFor({ state: 'hidden' })
+    assert.equal(
+      await card('poster')
+        .getByAltText('Selected cover preview')
+        .getAttribute('src'),
+      selectedPreview,
+      'Rejected oversize crop must preserve the previous selected cover',
+    )
+
+    for (const type of ['standalone', 'series']) {
+      await page.goto(path(type))
+      await page
+        .getByRole('heading', { name: 'Upload media', exact: true })
+        .waitFor()
+      await card('poster')
+        .locator('input[type=file]')
+        .setInputFiles(disk(data.files.poster))
+      const ownerDialog = page.getByRole('dialog')
+      await ownerDialog.waitFor()
+      assert.equal(await card('source').count(), type === 'series' ? 0 : 1)
+      await ownerDialog
+        .getByRole('button', { name: 'Use crop', exact: true })
+        .click()
+      await ownerDialog.waitFor({ state: 'hidden' })
+      await card('poster').getByText('cover.webp', { exact: true }).waitFor()
+    }
+
+    await page.goto(path('film'))
+    await page
+      .getByRole('heading', { name: 'Upload media', exact: true })
+      .waitFor()
+    await card('source')
+      .locator('input[type=file]')
+      .setInputFiles(disk(data.files.source))
+    await card('source').getByText('source.mp4', { exact: true }).waitFor()
+    assert.equal(await page.getByRole('dialog').count(), 0)
+    await card('source')
+      .getByRole('button', { name: 'Cancel upload', exact: true })
+      .click()
+    await page
+      .getByRole('alertdialog')
+      .getByRole('button', { name: 'Cancel upload', exact: true })
+      .click()
+    await card('source')
+      .getByText('No upload selected', { exact: true })
+      .waitFor()
+
+    await mediaControl({ attachCurrentPoster: true })
+    await page.reload()
+    await card('poster').getByText('Ready', { exact: true }).waitFor()
+    await card('poster')
+      .getByRole('button', { name: 'Replace file', exact: true })
+      .click()
+    await page
+      .getByRole('alertdialog')
+      .getByRole('button', { name: 'Choose replacement', exact: true })
+      .click()
+    await card('poster')
+      .locator('input[type=file]')
+      .setInputFiles(disk(data.files.poster))
+    const replacementDialog = page.getByRole('dialog')
+    await replacementDialog.waitFor()
+    await replacementDialog.getByRole('button', { name: 'Cancel' }).click()
+    await replacementDialog.waitFor({ state: 'hidden' })
+    await card('poster').getByText('Ready', { exact: true }).waitFor()
+    assert.equal(await card('poster').getByText('cover.webp').count(), 0)
+
+    await card('poster')
+      .getByRole('button', { name: 'Replace file', exact: true })
+      .click()
+    await page
+      .getByRole('alertdialog')
+      .getByRole('button', { name: 'Choose replacement', exact: true })
+      .click()
+    await card('poster')
+      .locator('input[type=file]')
+      .setInputFiles(disk(data.files.poster))
+    const confirmedReplacement = page.getByRole('dialog')
+    await confirmedReplacement.waitFor()
+    await confirmedReplacement
+      .getByRole('button', { name: 'Use crop', exact: true })
+      .click()
+    await confirmedReplacement.waitFor({ state: 'hidden' })
+    await card('poster').getByText('Ready', { exact: true }).waitFor()
+    await card('poster').getByText('cover.webp', { exact: true }).waitFor()
     assert.deepEqual(errors, [])
     console.log(
-      'Browser: media layout — three kinds, draft/published/archived, 45 light/dark/system viewport checks passed',
+      `Browser: cover crop UI — Film/Standalone/Series, source bypass, all themes and five widths, focus trap/return, keyboard/pointer/touch pan, System theme changes, replacement/cancel preservation, too-small and >5 MB errors passed; screenshots ${mobileScreenshot}, .turbo/admin-cover-processing/acov-007/desktop-dark.png`,
     )
   } else {
     stage = 'resume'
@@ -219,9 +635,7 @@ try {
       .waitFor({ timeout: 30000 })
     assert.equal(await page.locator('a[href*="/preview"]').count(), 0)
     stage = 'processing'
-    await card('poster')
-      .locator('input[type=file]')
-      .setInputFiles(disk(data.files.poster))
+    await chooseAndCropCover()
     const coverPreview = await card('poster')
       .getByAltText('Selected cover preview')
       .getAttribute('src')
@@ -306,11 +720,9 @@ try {
       .click()
     await page.getByRole('alertdialog').waitFor()
     await page
-      .getByRole('button', { name: 'Keep current upload', exact: true })
+      .getByRole('button', { name: 'Choose replacement', exact: true })
       .click()
-    await card('poster')
-      .locator('input[type=file]')
-      .setInputFiles(disk(data.files.poster))
+    await chooseAndCropCover()
     await card('poster')
       .getByRole('button', { name: 'Upload file', exact: true })
       .click()
@@ -328,9 +740,7 @@ try {
     await edit.close()
     stage = 'series-cover'
     await page.goto(path('series'))
-    await card('poster')
-      .locator('input[type=file]')
-      .setInputFiles(disk(data.files.poster))
+    await chooseAndCropCover()
     await card('poster')
       .getByRole('button', { name: 'Upload file', exact: true })
       .click()

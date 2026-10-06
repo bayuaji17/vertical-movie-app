@@ -1,6 +1,7 @@
 import { test, expect } from 'bun:test'
 import { createHash } from 'node:crypto'
 import {
+  describeCoverCropSource,
   describeMediaFile,
   verifyReselectedFile,
 } from '../src/lib/admin/media-file'
@@ -45,6 +46,43 @@ test('selection follows server limits and rejects empty, oversized and contradic
     ),
   ).toThrow()
 })
+
+test('cover source may exceed the upload limit before a bounded crop is created', () => {
+  const inventory = inventoryFixture(),
+    max = Number(inventory.config.poster.maxBytes)
+  expect(
+    describeCoverCropSource(
+      { name: 'original.jpg', type: 'image/jpeg', size: max + 1 },
+      inventory,
+    ).sizeBytes,
+  ).toBe(String(max + 1))
+  expect(() =>
+    describeCoverCropSource(
+      { name: 'cover.gif', type: 'image/gif', size: 100 },
+      inventory,
+    ),
+  ).toThrow()
+  expect(() =>
+    describeCoverCropSource(
+      { name: 'cover.jpg', type: 'image/png', size: 100 },
+      inventory,
+    ),
+  ).toThrow()
+  expect(() =>
+    describeCoverCropSource(
+      { name: 'cover.jpg', type: 'image/jpeg', size: 0 },
+      inventory,
+    ),
+  ).toThrow()
+  expect(() =>
+    describeMediaFile(
+      { name: 'cover.jpg', type: 'image/jpeg', size: max + 1 },
+      'poster',
+      inventory,
+    ),
+  ).toThrow()
+})
+
 test('reselection verifies all bytes even when name, size and media type are identical', async () => {
   const descriptor = descriptorFixture(),
     correct = new File(['abc'], 'video.mp4', { type: 'video/mp4' })

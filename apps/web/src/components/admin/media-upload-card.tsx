@@ -1,4 +1,4 @@
-import { useId, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import type {
   MediaKind,
   OwnerMedia,
@@ -36,6 +36,8 @@ import {
 } from '#/components/ui/empty'
 import { MediaConfirmDialog } from './media-confirm-dialog'
 import { MediaProcessingStatus } from './media-processing-status'
+import { CoverCropDialog } from './cover-crop-dialog'
+import { describeCoverCropSource } from '#/lib/admin/media-file'
 
 const phaseLabels: Record<UploadPhase, string> = {
   idle: 'No upload selected',
@@ -70,7 +72,19 @@ export function MediaUploadCard({
 }) {
   const id = useId(),
     input = useRef<HTMLInputElement>(null),
-    [dialog, setDialog] = useState<'replace' | 'cancel'>()
+    [dialog, setDialog] = useState<'replace' | 'cancel'>(),
+    [pendingCover, setPendingCover] = useState<
+      { ownerKey: string; file: File } | undefined
+    >(),
+    [selectionError, setSelectionError] = useState<string>()
+  const ownerKey = `${inventory.ownerType}:${inventory.ownerId}`
+  const cropSource =
+    pendingCover?.ownerKey === ownerKey ? pendingCover.file : undefined
+
+  useEffect(() => {
+    setPendingCover(undefined)
+    setSelectionError(undefined)
+  }, [ownerKey])
   const view = manager?.snapshot(kind) ?? emptyUpload(),
     working = isUploadWorking(view),
     title = kind === 'source' ? 'Source video' : 'Cover image'
@@ -148,14 +162,34 @@ export function MediaUploadCard({
               onChange={(event) => {
                 const file = event.target.files?.[0]
                 event.target.value = ''
-                if (file) manager?.select(kind, file)
+                setSelectionError(undefined)
+                if (!file) return
+                if (kind === 'poster') {
+                  try {
+                    describeCoverCropSource(file, inventory)
+                    setPendingCover({ ownerKey, file })
+                  } catch (cause) {
+                    setSelectionError(
+                      cause instanceof Error
+                        ? cause.message
+                        : 'This image cannot be used as a cover.',
+                    )
+                  }
+                  return
+                }
+                manager?.select(kind, file)
               }}
             />
             <FieldDescription>
               {kind === 'source'
                 ? `${inventory.config.source.formats.map((f) => f.extension.toUpperCase()).join(', ')} · Max ${bytes(Number(inventory.config.source.maxBytes))} · ${inventory.config.maxDurationSeconds / 60} minutes · 480–1080p, 9:16. Codec, duration and dimensions are verified after upload.`
-                : `JPG, PNG, WebP · Max ${bytes(Number(inventory.config.poster.maxBytes))} · Minimum 1080 × 1920, 9:16. Animated images are not supported.`}
+                : `Still JPG, PNG, or WebP · Crop to 1080 × 1920 · Output max ${bytes(Number(inventory.config.poster.maxBytes))}. Animated images are not supported.`}
             </FieldDescription>
+            {selectionError && (
+              <p className="text-sm text-destructive" role="alert">
+                {selectionError}
+              </p>
+            )}
             {canChoose && (
               <Button
                 variant="outline"
@@ -309,6 +343,22 @@ export function MediaUploadCard({
             else void manager?.cancel(kind)
           }}
         />
+        {kind === 'poster' && (
+          <CoverCropDialog
+            open={!!cropSource}
+            onOpenChange={(open) => {
+              if (!open) setPendingCover(undefined)
+            }}
+            sourceFile={cropSource}
+            ownerKey={ownerKey}
+            maxBytes={Number(inventory.config.poster.maxBytes)}
+            onUse={(file) => {
+              manager?.select('poster', file)
+              setPendingCover(undefined)
+              setSelectionError(undefined)
+            }}
+          />
+        )}
       </CardContent>
     </Card>
   )

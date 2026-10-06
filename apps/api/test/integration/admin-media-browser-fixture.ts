@@ -3,7 +3,7 @@ import {
   CreateBucketCommand,
   DeleteBucketCommand,
 } from "@aws-sdk/client-s3";
-import { mkdir, rm } from "node:fs/promises";
+import { mkdir, rm, writeFile } from "node:fs/promises";
 import { resolve, join } from "node:path";
 import { createHash } from "node:crypto";
 import { eq } from "drizzle-orm";
@@ -26,7 +26,7 @@ import { createGenresRepository } from "../../src/modules/genres/repository";
 import { PlaybackService } from "../../src/modules/playback/service";
 import { CatalogStore } from "../../src/modules/catalog/repository";
 import { runMediaProcess } from "../../src/workers/process";
-import { videos, series } from "../../src/db/schema";
+import { mediaAssets, videos, series } from "../../src/db/schema";
 
 // Only the guarded dedicated DB and a random private bucket are modified.
 // Authentication is injected by the existing auth harness; all media/content I/O is real.
@@ -63,10 +63,15 @@ export async function createAdminMediaBrowserFixture(
     native = createStorageClient(config),
     repo = createMediaRepository(database.db),
     mediaService = new MediaService(repo, storage, config);
+  const storageProofEnabled = Bun.env.MEDIA_BROWSER_STORAGE !== "disabled";
   const dir = resolve(
       import.meta.dir,
       "../../../../.turbo/admin-media-upload-implementation/browser-" +
         crypto.randomUUID(),
+    ),
+    screenshotDir = resolve(
+      import.meta.dir,
+      "../../../../.turbo/admin-cover-processing/acov-007",
     ),
     source = join(dir, "source.mp4"),
     poster = join(dir, "cover.jpg");
@@ -93,8 +98,10 @@ export async function createAdminMediaBrowserFixture(
     await rm(dir, { recursive: true, force: true });
   };
   try {
-    await sdk.send(new CreateBucketCommand({ Bucket: config.bucket }));
-    created = true;
+    if (storageProofEnabled) {
+      await sdk.send(new CreateBucketCommand({ Bucket: config.bucket }));
+      created = true;
+    }
     await runMediaProcess(
       [
         "ffmpeg",
@@ -128,7 +135,9 @@ export async function createAdminMediaBrowserFixture(
         "-f",
         "lavfi",
         "-i",
-        "color=blue:size=1080x1920",
+        "color=red:size=2160x3840",
+        "-vf",
+        "drawbox=x=1080:y=0:w=1080:h=3840:color=blue:t=fill",
         "-frames:v",
         "1",
         "-threads",
@@ -223,9 +232,44 @@ export async function createAdminMediaBrowserFixture(
           jobs: await database.client`SELECT id,asset_id,state FROM media_jobs`,
         };
       },
-      async control(input: { failureStatus?: number; runJobs?: boolean }) {
+      async saveCoverScreenshot(name: string, bytes: Uint8Array) {
+        if (!/^[a-z0-9-]{1,80}$/.test(name) || bytes.byteLength > 8_000_000)
+          throw Error("Invalid cover crop screenshot");
+        await mkdir(screenshotDir, { recursive: true, mode: 0o700 });
+        const path = join(screenshotDir, name + ".png");
+        await writeFile(path, bytes, { mode: 0o600 });
+        return path;
+      },
+      async control(input: {
+        failureStatus?: number;
+        runJobs?: boolean;
+        attachCurrentPoster?: boolean;
+      }) {
         if (input.failureStatus !== undefined)
           failureStatus = input.failureStatus;
+        if (input.attachCurrentPoster) {
+          const assetId = crypto.randomUUID();
+          await database.db.insert(mediaAssets).values({
+            id: assetId,
+            videoId: ids.filmDraft,
+            seriesId: null,
+            kind: "poster",
+            provider: config.provider,
+            bucket: config.bucket,
+            objectKey: `test/${assetId}.webp`,
+            state: "ready",
+            sizeBytes: 100n,
+            contentType: "image/webp",
+            sha256: "a".repeat(64),
+            facts: { width: 1080, height: 1920 },
+            verifiedReadyAt: new Date(),
+            createdBy: "browser-admin",
+          });
+          await database.db
+            .update(videos)
+            .set({ posterAssetId: assetId })
+            .where(eq(videos.id, ids.filmDraft));
+        }
         if (input.runJobs) {
           // Run the actual worker entry point separately; FFmpeg is outside the HTTP process.
           const worker = Bun.spawn([process.execPath, "src/workers/index.ts"], {

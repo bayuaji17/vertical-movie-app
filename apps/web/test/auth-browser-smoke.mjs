@@ -73,6 +73,17 @@ const api = Bun.serve({
     }
     if (url.pathname === '/media-proof' && mediaFixture)
       return Response.json(await mediaFixture.proof())
+    if (url.pathname === '/cover-screenshot' && mediaFixture) {
+      try {
+        const path = await mediaFixture.saveCoverScreenshot(
+          url.searchParams.get('name') ?? '',
+          new Uint8Array(await request.arrayBuffer()),
+        )
+        return Response.json({ path })
+      } catch {
+        return new Response('Invalid screenshot', { status: 400 })
+      }
+    }
     if (url.pathname === '/control/content' && contentFixture) {
       contentFixture.control(await request.json())
       return Response.json({ ok: true })

@@ -41,37 +41,37 @@ Light mempertahankan white/neutral dan lime; dark memakai background#1E201E, car
 
 Raster utama menunjukkan Film. Perbedaan Standalone/Series/read-only adalah specification di atas; tidak mengklaim empat PNG telah memperlihatkan seluruh variant.
 
-Aturan awal source: MP4/MOV/MKV/WebM,9:16,480–1080 sisi pendek, sisi panjang≤1920; worker authoritative untuk codec, durasi, geometry dan decode. Cover: still JPG/JPEG/PNG/WebP,≤5.000.000byte,9:16,min1080×1920; hasilWebP1080×1920. MB/GB pada copy batas adalah unit desimal, bukan MiB/GiB. Tidak menambah quality/provider selector atau cropper.
+Aturan awal source: MP4/MOV/MKV/WebM,9:16,480–1080 sisi pendek, sisi panjang≤1920; worker authoritative untuk codec, durasi, geometry dan decode. Cover mentah berupa still JPG/JPEG/PNG/WebP, maksimum40MP dan tidak dikirim ke server. Crop harus menyisakan sedikitnya1080×1920 piksel tanpa upscale; browser menghasilkan WebP1080×1920 quality0.95 atau PNG bila Canvas mengembalikan format itu, dengan batas byte mengikuti konfigurasi poster (default5.000.000byte). MB/GB pada copy batas adalah unit desimal, bukan MiB/GiB. Tidak menambah quality/provider selector.
 
 ## State utama pada raster
 
 Source sedang Uploading: `after-the-rain.mp4`,600MB. **Sent62% =372MB**; **Verified60% =360MB,30of50parts**. Dua angka berbeda karena byte in-flight belum authoritative. Pause dan Cancel upload aktif; tidak ada Upload/Complete kedua yang bisa diklik saat attempt aktif.
 
-Cover Not uploaded: choose native file tetap tersedia selain drag/drop. Tidak ada gambar preview fiktif sebelum file dipilih. Choose cover masih dapat memilih/memeriksa file, lalu mengantre karena satu file upload aktif per tab. Jangan menambahkan dua scheduler masing-masing3PUT yang melampaui total cap.
+Cover Not uploaded: choose native file tetap tersedia selain drag/drop. Pilihan membuka dialog crop 9:16; hanya hasil setelah Use crop masuk ke upload manager. Cancel/Escape menutup dialog tanpa mengubah pilihan atau pointer file sebelumnya. Preview cover di card baru muncul sesudah hasil crop dipilih. Choose cover masih dapat memilih/memeriksa file, lalu mengantre karena satu file upload aktif per tab. Jangan menambahkan dua scheduler masing-masing3PUT yang melampaui total cap.
 
 Media readiness menunjukkan Source: uploading / Cover: not uploaded; Preview HLS disabled. Editorial Draft tetap terpisah. Tidak menampilkan publish, player original, transcode percentage atau ETA. HLS preview hanya diaktifkan berdasarkan capability server setelah current source+cover/output/provenance eligible; copy ringkas raster bukan pengganti semua server checks.
 
 ## State specification untuk implementasi
 
-| State                  | Copy/action English                             | Perilaku                                                                       |
-| ---------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------ |
-| Empty                  | Choose video / Choose cover                     | Rules terlihat; browser validation tidak mengklaim codec valid.                |
-| Selected               | File name/size · Upload video/Upload cover      | Memulai pemeriksaan file; poster selection dapat memakai temporary object URL. |
-| Checking file          | Checking file · Cancel check                    | Hash progress nyata dari byte diperiksa; bukan network progress.               |
-| Queued locally         | Waiting for the current upload                  | Source/cover tidak dikirim paralel sebagai dua file aktif.                     |
-| Uploading              | Sent / Verified · Pause · Cancel upload         | Sent termasuk in-flight, Verified dari server; percent dapat direconcile.      |
-| Paused                 | Upload paused · Resume · Cancel upload          | Session tetap ada dan expiry tidak diperpanjang.                               |
-| Reselect after reload  | Select the same file to resume                  | Full digest harus cocok sebelum PUT; memilih ulang bukan auto-upload.          |
-| Wrong file             | This file does not match the upload             | Choose the same file / Cancel upload; tidak mengirim byte campuran.            |
-| Expired/legacy pending | Upload expired / Restart required               | Explicit new attempt atau abort/restart sesuai capability; tidak fake resume.  |
-| Finalizing             | Finalizing upload · Checking status             | 100% sent belum completed; unknown response direconcile.                       |
-| Upload completed       | Upload complete · Waiting for processing        | Completed bukan Ready atau Published.                                          |
-| Queued/running/retry   | Processing source / Processing cover            | Indeterminate; progressSeconds bukan persen/ETA.                               |
-| Processing failed      | Processing failed · Choose a new file           | Kode aman; tidak menawarkan manual reprocess API yang belum tersedia.          |
-| Ready per role         | Source ready / Cover ready                      | Current media readiness authoritative; satu role ready belum cukup preview.    |
-| All eligible           | Media ready · Preview HLS                       | Existing preview route, tanpa player baru pada panel.                          |
-| Unknown/error          | Could not check upload status · Check again     | Actions unsafe disabled; storage403 bukan auth logout.                         |
-| Read-only              | Uploads are unavailable for this content status | Tidak ada upload/replace; existing media info dipertahankan.                   |
+| State                  | Copy/action English                             | Perilaku                                                                                                                                                  |
+| ---------------------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Empty                  | Choose video / Choose cover                     | Rules terlihat; browser validation tidak mengklaim codec valid.                                                                                           |
+| Selected               | File name/size · Upload video/Upload cover      | Source langsung diperiksa; cover masuk ke manager sebagai exact File hasil crop setelah Use crop. Cancel mempertahankan file/pointer terpilih sebelumnya. |
+| Checking file          | Checking file · Cancel check                    | Hash progress nyata dari byte diperiksa; bukan network progress.                                                                                          |
+| Queued locally         | Waiting for the current upload                  | Source/cover tidak dikirim paralel sebagai dua file aktif.                                                                                                |
+| Uploading              | Sent / Verified · Pause · Cancel upload         | Sent termasuk in-flight, Verified dari server; percent dapat direconcile.                                                                                 |
+| Paused                 | Upload paused · Resume · Cancel upload          | Session tetap ada dan expiry tidak diperpanjang.                                                                                                          |
+| Reselect after reload  | Select the same file to resume                  | Full digest harus cocok sebelum PUT; memilih ulang bukan auto-upload.                                                                                     |
+| Wrong file             | This file does not match the upload             | Choose the same file / Cancel upload; tidak mengirim byte campuran.                                                                                       |
+| Expired/legacy pending | Upload expired / Restart required               | Explicit new attempt atau abort/restart sesuai capability; tidak fake resume.                                                                             |
+| Finalizing             | Finalizing upload · Checking status             | 100% sent belum completed; unknown response direconcile.                                                                                                  |
+| Upload completed       | Upload complete · Waiting for processing        | Completed bukan Ready atau Published.                                                                                                                     |
+| Queued/running/retry   | Processing source / Processing cover            | Indeterminate; progressSeconds bukan persen/ETA.                                                                                                          |
+| Processing failed      | Processing failed · Choose a new file           | Kode aman; tidak menawarkan manual reprocess API yang belum tersedia.                                                                                     |
+| Ready per role         | Source ready / Cover ready                      | Current media readiness authoritative; satu role ready belum cukup preview.                                                                               |
+| All eligible           | Media ready · Preview HLS                       | Existing preview route, tanpa player baru pada panel.                                                                                                     |
+| Unknown/error          | Could not check upload status · Check again     | Actions unsafe disabled; storage403 bukan auth logout.                                                                                                    |
+| Read-only              | Uploads are unavailable for this content status | Tidak ada upload/replace; existing media info dipertahankan.                                                                                              |
 
 State table bukan evidence runtime atau semua variant raster. Auth loss menghentikan hash/XHR/queue dan clear private state; perubahan theme mempertahankan selected File/attempt. Retry hanya bounded missing parts dengan reconcile; error inline tetap tersedia setelah toast.
 
@@ -79,12 +79,13 @@ State table bukan evidence runtime atau semua variant raster. Auth loss menghent
 
 | Trigger                | Title/body English                                                                                                                                      | Actions                               |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| Choose/replace cover   | Crop cover · Position the image inside a 9:16 frame. The saved cover is 1080 × 1920 pixels.                                                             | Cancel / Use crop                     |
 | Cancel active attempt  | Cancel upload? · Stop this upload and discard its unfinished attempt? Your content metadata will stay.                                                  | Keep uploading / Cancel upload        |
 | Replace current source | Replace source video? · The new file will replace this draft's source when the upload completes. It must finish processing before preview is available. | Keep current file / Choose new video  |
 | Replace current cover  | Replace cover image? · The new image will replace this draft's cover when the upload completes.                                                         | Keep current cover / Choose new cover |
 | Leave during hash/PUT  | Leave this upload? · Pause before leaving. Select the same file when you return to resume.                                                              | Stay / Pause and leave                |
 
-Tidak membuat dialog tambahan saat logout/auth loss, dan tidak membuat upload navigation prompt kedua bila metadata guard sudah memiliki pending transition. Dialog di atas adalah specification, belum raster terpisah atau behavior tested. Mobile width320px memakai full-width/wrapping controls, focus return/Escape, tidak ada sticky footer menutup button. Minimum touch target44CSSpx, labels dan throttled aria-live saat implementasi; respect reduced motion.
+Replace cover yang sudah attached menampilkan konfirmasi replacement terlebih dahulu; setelah Choose replacement, crop dialog hanya menyerahkan hasil ke manager jika Use crop dipilih. Cancel/Escape mempertahankan selection dan preview URL lama. Dialog crop memakai focus trap/focus return, keyboard pan/zoom/reset, pointer dan touch drag; System mengikuti perubahan color scheme sambil crop tetap terbuka. Error decode, sumber terlalu kecil dan output melebihi batas mencegah Use crop. Browser proof lokal mencakup320/390/768/1024/1440px pada Light/Dark/System; screenshot aktual berada di `.turbo/admin-cover-processing/acov-007/`. Dialog upload lainnya tetap specification, belum diuji ulang di setiap kombinasi viewport. Mobile memakai wrapping controls, tidak ada sticky footer menutup button; respect reduced motion.
 
 ## Metode, prompts dan evidence
 

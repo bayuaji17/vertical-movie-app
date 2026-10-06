@@ -282,8 +282,8 @@ Unit crop/raster: 12 tests/105 assertions; root web suite:129/579. Chrome154 Hea
 ### Commit task
 
 - Pesan: `feat(web): add cover crop raster primitives (ACOV-006)`
-- SHA: dicatat pada receipt ACOV-007 setelah task commit.
-- Hook/checks: gates di atas lulus; hook commit dan SHA dicatat pada receipt task berikutnya.
+- SHA: `5f33bd63e8960a6f2270c22bc13c379c22764694`.
+- Hook/checks: gates di atas lulus; hook docs/lint/check-types/Commitlint ACOV-006 lulus pada commit.
 - Ledger: SHA aktual dicatat pada update dokumentasi setelah commit, tanpa self-referential SHA.
 
 ### Blocker atau tindak lanjut
@@ -292,7 +292,7 @@ Tidak ada blocker. Dialog dan integrasi card Film/Standalone/Series menjadi ACOV
 
 ## Task: ACOV-007 — Modal crop dengan preview pada seluruh cover owner
 
-- Status: In Progress
+- Status: Done
 - Owner: Codex / pengembang proyek
 - Prioritas: 7
 - Referensi: ACOV-US-01; PRD media/sampul dan GR lifecycle; [plan](../plans/admin-cover-processing/implementation-plan.md).
@@ -304,32 +304,38 @@ Tidak ada blocker. Dialog dan integrasi card Film/Standalone/Series menjadi ACOV
 
 Integrasikan Crop cover pada card Film/Standalone/Series sebelum File masuk manager. Drag/zoom/reset/keyboard + touch dan preview; Use crop dan cancel/replacement semantics. Ikuti installed shadcn skill/primitives dan tokens existing; tidak menambah halaman.
 
-Target: `apps/web/src/components/admin/cover-crop-dialog.tsx; UI dialog primitive bila dibutuhkan; media-upload-card.tsx; docs/design/admin-media-upload.md.`
+Target: `apps/web/src/components/admin/cover-crop-dialog.tsx; apps/web/src/components/ui/{dialog,slider}.tsx; apps/web/src/components/admin/media-upload-card.tsx; apps/web/test/admin-media-file.test.ts; apps/web/test/admin-media-upload-browser-worker.mjs; apps/web/test/auth-browser-smoke.mjs; apps/api/test/integration/admin-media-browser-fixture.ts; docs/design/admin-media-upload.md.`
 
 ### Acceptance criteria
 
-- [ ] Choose/Replace cover membuka preview crop; Cancel mempertahankan selection/pointer lama; Use crop menyerahkan exact File hasil crop.
-- [ ] English labels, focus trap/Escape/focus restore, keyboard position/zoom/reset, touch dan error/loading terbukti pada desktop/mobile.
-- [ ] Light/Dark/System sesuai shell dan perubahan tema tidak menghilangkan crop; source video card tidak mendapat crop flow.
+- [x] Choose/Replace cover membuka preview crop; Cancel mempertahankan selection/pointer lama; Use crop menyerahkan exact File hasil crop.
+- [x] English labels, focus trap/Escape/focus restore, keyboard position/zoom/reset, touch dan error/loading terbukti pada desktop/mobile.
+- [x] Light/Dark/System sesuai shell dan perubahan tema tidak menghilangkan crop; source video card tidak mendapat crop flow.
 
 ### Validasi
 
-Browser 320/390/768/1024/1440, light/dark/system, keyboard dan pointer/touch emulation; screenshot aktual dan replacement/cancel/oversize tests; root gates dan docs checks.
+Browser built Bun/Nitro pada 320/390/768/1024/1440, Light/Dark/System, keyboard dan pointer/touch emulation; screenshot aktual serta replacement/cancel/sumber-kecil/output-oversize tests; root gates dan docs checks.
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau divalidasi; hasil runtime dan command aktual dicatat saat task dikerjakan.
+2026-10-06: `CoverCropDialog` shadcn/Base UI mem-preview source yang di-decode dengan EXIF, menggambar crop 9:16 tanpa object URL, menyediakan pointer/touch drag, Slider zoom, keyboard pan/zoom/reset, tombol reset, loading/error dan batas output konfigurasi. Film, Standalone dan Series memakai dialog yang sama; source video tetap langsung menuju upload manager. `Use crop` menyerahkan instance File raster tepat 1080×1920 dengan nama/MIME sesuai hasil Canvas; raw cover dapat melampaui batas upload, sedangkan batas byte tetap berlaku pada output. Cancel/Escape, kegagalan dimensi/ukuran dan pergantian owner tidak mengubah File/pointer terpilih.
+
+`bun test apps/web/test`: 130 tests/584 assertions lulus. Built Bun/Nitro + Chromium154 browser proof: layout ketiga owner type/status pada45 theme/viewport combinations; crop dialog pada15 combinations (320/390/768/1024/1440 × Light/Dark/System); loading status, focus trap dan fokus kembali ke tombol Choose file, keyboard zoom/pan/reset, pointer pan ke tepi merah, touch pan ke tepi biru, dan perubahan color scheme System tanpa kehilangan selection. Use crop menghasilkan `cover.webp` dengan dimensi natural1080×1920. Browser membuktikan Replace confirmation membuka crop, Escape menjaga preview URL lama, source video tidak membuka crop, gambar di bawah1080×1920 menonaktifkan Use crop, dan PNG hasil >5.000.000byte menampilkan error serta tetap menjaga cover terpilih. Screenshot aktual lokal: `.turbo/admin-cover-processing/acov-007/mobile-light.png` dan `desktop-dark.png` (ignored, tidak masuk Git).
+
+Browser proof mereset hanya dedicated `vertical_movie_app_media_test`; `MEDIA_BROWSER_STORAGE=disabled` sehingga tidak membuat bucket atau mengubah objek MinIO. Dedicated DB fixture memakai content/media API aktual, sementara tahap crop berhenti sebelum upload/network. Safari/iOS/perangkat fisik dan upload hasil crop ke MinIO/R2 belum diverifikasi.
+
+Gerbang repo: `bun run check-types` 3/3, `bun run lint` 1/1, `bun run build` 2/2, `bun run docs:check` 59 Markdown/514 links-anchors, seluruh web tests130/584, Prettier check dan `git diff --check` lulus. Build menghasilkan API dan web; Bun/Nitro+Chromium proof built juga lulus.
 
 ### Commit task
 
 - Pesan: `feat(web): add accessible cover crop dialog (ACOV-007)`
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
-- Ledger: SHA aktual dicatat pada update dokumentasi setelah commit, tanpa self-referential SHA.
+- SHA: dicatat pada receipt ACOV-008 setelah task commit.
+- Hook/checks: root gates dan pre-commit/commit-msg hook dicatat sesudah hasil diamati.
+- Ledger: simpan SHA aktual pada update dokumentasi berikutnya, tanpa self-referential SHA.
 
 ### Blocker atau tindak lanjut
 
-Persetujuan plan, freshness check dan dependensi task di atas; bukan izin untuk mulai runtime pada permintaan planning ini.
+Tidak ada blocker lokal. Exact-payload recovery setelah refresh dan upload/pemrosesan output cover tetap berada di ACOV-008/009; sesi aktif yang crop custom tidak mengklaim bisa direkonstruksi sebelum implementasi recovery tersebut.
 
 ## Task: ACOV-008 — Eden/Query preparation, Finish cover dan refresh recovery
 
