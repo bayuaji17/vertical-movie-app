@@ -140,6 +140,7 @@ export class PublicationController {
   }
   private async run(
     task: (signal: AbortSignal, live: () => boolean) => Promise<void>,
+    readOnly = false,
   ) {
     if (this.stopped || this.working) return
     this.working = true
@@ -149,7 +150,10 @@ export class PublicationController {
     const live = () =>
       !this.stopped && generation === this.generation && !abort.signal.aborted
     try {
-      this.guard()
+      if (readOnly) {
+        if (!this.options.online())
+          throw new PublicationApiError(0, 'OFFLINE', 'Offline')
+      } else this.guard()
       await task(abort.signal, live)
     } catch (error) {
       if (live())
@@ -366,7 +370,7 @@ export class PublicationController {
             refreshUnavailable: true,
           })
       }
-    })
+    }, true)
   }
   async retry() {
     if (this.state.phase !== 'retryable' || !this.intent) return

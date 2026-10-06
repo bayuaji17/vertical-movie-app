@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useReducer } from 'react'
+import { useEffect, useMemo, useReducer, useSyncExternalStore } from 'react'
 import { onlineManager, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAdminPrincipal } from '../auth/session-context'
 import { registerPrivateEffect } from '../auth/private-effects'
@@ -10,6 +10,8 @@ import { ownerMediaOptions, mediaPollInterval } from './media-queries'
 import { browserPublicationClient } from './publication-client'
 import {
   invalidatePublication,
+  publicationKeys,
+  scopePublicationRead,
   publicationMutationOptions,
   publicationReadinessOptions,
 } from './publication-queries'
@@ -26,6 +28,11 @@ export function usePublication(
   const cache = useQueryClient(),
     { user } = useAdminPrincipal(),
     [, changed] = useReducer((n: number) => n + 1, 0)
+  const online = useSyncExternalStore(
+    (notify) => onlineManager.subscribe(notify),
+    () => onlineManager.isOnline(),
+    () => true,
+  )
   const clients = useMemo(
     () => ({
       publication: browserPublicationClient(cache),
@@ -126,26 +133,25 @@ export function usePublication(
               ...detailOptions,
               staleTime: 0,
               queryFn: ({ signal: querySignal }) =>
-                clients.content!.detail(
-                  type,
-                  id,
-                  AbortSignal.any([signal, querySignal]),
+                scopePublicationRead(signal, querySignal, (scoped) =>
+                  clients.content!.detail(type, id, scoped),
                 ),
             }),
             cache.fetchQuery({
               ...mediaOptions,
               queryFn: ({ signal: querySignal }) =>
-                clients.media!.owner(
-                  { ownerType: 'video', ownerId: id },
-                  AbortSignal.any([signal, querySignal]),
+                scopePublicationRead(signal, querySignal, (scoped) =>
+                  clients.media!.owner(
+                    { ownerType: 'video', ownerId: id },
+                    scoped,
+                  ),
                 ),
             }),
             cache.fetchQuery({
               ...readinessOptions,
               queryFn: ({ signal: querySignal }) =>
-                clients.publication!.readiness(
-                  id,
-                  AbortSignal.any([signal, querySignal]),
+                scopePublicationRead(signal, querySignal, (scoped) =>
+                  clients.publication!.readiness(id, scoped),
                 ),
             }),
           ])
@@ -154,6 +160,27 @@ export function usePublication(
       }),
     [cache, clients, id, type, user.id, uploadBusy],
   )
+  const mediaSignature = media.data
+    ? JSON.stringify([
+        media.data.rowVersion,
+        media.data.status,
+        media.data.source?.current?.id,
+        media.data.source?.current?.state,
+        media.data.source?.current?.verifiedReadyAt,
+        media.data.source?.busy,
+        media.data.poster.current?.id,
+        media.data.poster.current?.state,
+        media.data.poster.current?.verifiedReadyAt,
+        media.data.poster.busy,
+      ])
+    : undefined
+  useEffect(() => {
+    if (mediaSignature)
+      void cache.invalidateQueries({
+        queryKey: publicationKeys.video(user.id, id),
+        exact: true,
+      })
+  }, [cache, id, user.id, mediaSignature])
   useEffect(() => {
     controller.activate()
     const release = registerPrivateEffect(cache, () => controller.dispose())
@@ -162,5 +189,5 @@ export function usePublication(
       controller.dispose()
     }
   }, [cache, controller])
-  return { controller, state: controller.snapshot(), readiness, media }
+  return { controller, state: controller.snapshot(), readiness, media, online }
 }

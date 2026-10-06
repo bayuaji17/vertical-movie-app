@@ -412,7 +412,7 @@ Archive hanya published Film/Standalone aktif, dengan dialog expectedVersion-onl
 ### Commit task
 
 - Pesan: `feat(web): archive published films and standalone videos (APUB-009)`
-- SHA: belum dibuat.
+- SHA: `b8cff1db325121067b2fd26869f957461bdb2bd8`.
 - Hook/checks: relevant tests, root types/lint/build, docs:check, Prettier/diff lulus sebelum commit; hasil hook normal dicatat setelah commit.
 - Ledger: SHA aktual dicatat setelah commit berhasil pada update task/dokumentasi berikutnya; tidak memakai self-referential SHA.
 
@@ -422,7 +422,7 @@ API archive draft/episode existing tetap regression-safe tetapi UI tambahan ditu
 
 ## Task: APUB-010 — Integrasi owner upload, auth dan Preview navigation
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1
 - Referensi: APUB-US-04; PRD-05/06/08/09, GR-01–09 yang relevan; [step plan](../plans/admin-publication/implementation-plan.md#apub-010--integrasi-auth-upload-dan-navigation)
@@ -436,11 +436,11 @@ Hubungkan intent/private-effects, owner-specific upload work selector dan cache 
 
 ### Acceptance criteria
 
-- [ ] Local owner hash/preparation/initiate/transfer/finalizing mengunci Publish; uploader resource lain tidak mengunci secara global dan local File/progress tidak dibuang oleh readiness refresh.
-- [ ] Upload completions/POST publish/archive membuat appropriate current list/detail/inventory/readiness stale; editor unsaved-input/version-conflict behavior existing terjaga.
-- [ ] Logout/invalid session/resource change membersihkan key/intent/effects dan stale response tidak memasukkan private data; 5xx dengan valid admin tidak memaksa logout atau menghilangkan state prematurely.
-- [ ] Detail→Preview→detail return link memakai type/id tervalidasi; direct Preview refresh tanpa type tidak membuat URL salah atau membawa arbitrary return URL.
-- [ ] Skill videojs dan installed instructions/docs dibaca sebelum menyentuh preview route; player source/control/renewal tidak diganti; routeTree hanya generator bila perlu.
+- [x] Local owner hash/preparation/initiate/transfer/finalizing mengunci Publish; uploader resource lain tidak mengunci secara global dan local File/progress tidak dibuang oleh readiness refresh.
+- [x] Upload completions/POST publish/archive membuat appropriate current list/detail/inventory/readiness stale; editor unsaved-input/version-conflict behavior existing terjaga.
+- [x] Logout/invalid session/resource change membersihkan key/intent/effects dan stale response tidak memasukkan private data; 5xx dengan valid admin tidak memaksa logout atau menghilangkan state prematurely.
+- [x] Detail→Preview→detail return link memakai type/id tervalidasi; direct Preview refresh tanpa type tidak membuat URL salah atau membawa arbitrary return URL.
+- [x] Skill videojs dan installed instructions/docs dibaca sebelum menyentuh preview route; player source/control/renewal tidak diganti; routeTree hanya generator bila perlu.
 
 ### Validasi
 
@@ -448,13 +448,13 @@ Relevant existing admin content/media/session/import tests dan browser spot chec
 
 ### Hasil dan bukti
 
-Belum dikerjakan; command di bagian Validasi merupakan rencana, bukan hasil aktual. Tidak ada commit/runtime proof untuk task ini.
+Owner-specific upload selector membatasi hash/initiate/transfer/finalizing pada konten yang sama; manager/File/progress dipertahankan saat readiness refresh. Upload completion dan terminal media signature invalidate publication readiness tanpa poll terminal. Hook menjaga stable controller, online state, scoped cancellation setelah ignored abort dan private-effects cleanup; business auth policy existing dipertahankan. Preview type context whitelisted Film/Standalone+UUID, Back details/direct fallback dan private fetcher wired; player/control/renewal tidak diganti. Skill Video.js, CLI latest mismatch lalu pinned10.0.0-rc.4 dan bundled errors docs dibaca; tsr generate dijalankan, routeTree tidak berubah. Integration/intent/upload/auth30 tests145 assertions dan root types3/3/lint1/1/build2/2 lulus. Browser/two-tabs/theme masih proof APUB-012; no deps/schema changes.
 
 ### Commit task
 
 - Pesan: `feat(web): integrate publication with private lifecycle (APUB-010)`
 - SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- Hook/checks: relevant tests, root types/lint/build, docs:check, Prettier/diff lulus sebelum commit; hasil hook normal dicatat setelah commit.
 - Ledger: SHA aktual dicatat setelah commit berhasil pada update task/dokumentasi berikutnya; tidak memakai self-referential SHA.
 
 ### Blocker atau tindak lanjut

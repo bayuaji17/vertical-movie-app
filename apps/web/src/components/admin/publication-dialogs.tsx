@@ -21,10 +21,14 @@ export function PublishVideoDialog({
   controller,
   state,
   returnFocus,
+  fallbackFocus,
+  canConfirm = true,
 }: {
   controller: PublicationController
   state: PublicationState
   returnFocus: RefObject<HTMLButtonElement | null>
+  fallbackFocus?: RefObject<HTMLButtonElement | null>
+  canConfirm?: boolean
 }) {
   const [acknowledged, setAcknowledged] = useState(false),
     checkboxId = useId(),
@@ -43,7 +47,7 @@ export function PublishVideoDialog({
     >
       <AlertDialogContent
         initialFocus={cancel}
-        finalFocus={returnFocus}
+        finalFocus={() => returnFocus.current ?? fallbackFocus?.current ?? true}
         className="max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] overflow-y-auto"
       >
         <AlertDialogHeader>
@@ -89,7 +93,7 @@ export function PublishVideoDialog({
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction
-            disabled={pending || !acknowledged}
+            disabled={pending || !acknowledged || !canConfirm}
             className="min-h-11"
             onClick={() => void controller.confirm(acknowledged)}
           >
@@ -105,10 +109,14 @@ export function ArchiveVideoDialog({
   controller,
   state,
   returnFocus,
+  fallbackFocus,
+  canConfirm = true,
 }: {
   controller: PublicationController
   state: PublicationState
   returnFocus: RefObject<HTMLButtonElement | null>
+  fallbackFocus?: RefObject<HTMLButtonElement | null>
+  canConfirm?: boolean
 }) {
   const cancel = useRef<HTMLButtonElement>(null),
     pending = state.phase !== 'review'
@@ -125,7 +133,7 @@ export function ArchiveVideoDialog({
     >
       <AlertDialogContent
         initialFocus={cancel}
-        finalFocus={returnFocus}
+        finalFocus={() => returnFocus.current ?? fallbackFocus?.current ?? true}
         className="max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] overflow-y-auto"
       >
         <AlertDialogHeader>
@@ -165,7 +173,7 @@ export function ArchiveVideoDialog({
           </AlertDialogCancel>
           <AlertDialogAction
             variant="destructive"
-            disabled={pending}
+            disabled={pending || !canConfirm}
             className="min-h-11"
             onClick={() => void controller.confirm()}
           >

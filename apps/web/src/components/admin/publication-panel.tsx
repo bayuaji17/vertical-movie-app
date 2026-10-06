@@ -1,4 +1,10 @@
-import { useRef } from 'react'
+import { useRef, useCallback, useSyncExternalStore } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import {
+  hasWorkingUploads,
+  subscribeUploads,
+  uploadRevision,
+} from '#/lib/admin/upload-session-registry'
 import { Link } from '@tanstack/react-router'
 import { RiCheckLine, RiErrorWarningLine } from '@remixicon/react'
 import type { ContentDetail, ContentType } from '#/lib/admin/content-client'
@@ -53,7 +59,17 @@ export function VideoPublicationMedia({
   metadataStale: boolean
 }) {
   const id = detail.data.id,
-    publication = usePublication(type, id)
+    cache = useQueryClient()
+  useSyncExternalStore(
+    (notify) => subscribeUploads(cache, notify),
+    () => uploadRevision(cache),
+    () => 0,
+  )
+  const uploadBusy = useCallback(
+    () => hasWorkingUploads(cache, { ownerType: 'video', ownerId: id }),
+    [cache, id],
+  )
+  const publication = usePublication(type, id, uploadBusy)
   const owner = { ownerType: 'video' as const, ownerId: id }
   const { manager } = useUploadManager(owner, type, publication.media.data)
   return (
@@ -63,6 +79,7 @@ export function VideoPublicationMedia({
         type={type}
         metadataStale={metadataStale}
         publication={publication}
+        localBusy={uploadBusy()}
       />
       <MediaPanelView
         owner={owner}
@@ -77,12 +94,16 @@ export function publicationViewState(
   detail: ContentDetail,
   metadataStale: boolean,
   p: Publication,
+  localBusy = false,
 ) {
   const { readiness, media, state } = p,
     r = readiness.data
   const busy = ['loading', 'pending'].includes(state.phase)
   const stale =
     metadataStale ||
+    !p.online ||
+    readiness.isFetching ||
+    media.isFetching ||
     readiness.isError ||
     media.isError ||
     !!state.refreshUnavailable ||
@@ -97,6 +118,7 @@ export function publicationViewState(
     busy,
     stale,
     canAct:
+      !localBusy &&
       !stale &&
       !busy &&
       !['unknown', 'retryable', 'conflict', 'error'].includes(state.phase) &&
@@ -109,18 +131,22 @@ function PublicationPanel({
   type,
   metadataStale,
   publication,
+  localBusy,
 }: {
   detail: ContentDetail
   type: SupportedType
   metadataStale: boolean
   publication: Publication
+  localBusy: boolean
 }) {
   const { controller, state, readiness, media } = publication
   const { r, busy, stale, canAct } = publicationViewState(
     detail,
     metadataStale,
     publication,
+    localBusy,
   )
+  const refreshFocus = useRef<HTMLButtonElement>(null)
   const publishTrigger = useRef<HTMLButtonElement>(null)
   const archiveTrigger = useRef<HTMLButtonElement>(null)
   const archiveOpen =
@@ -157,6 +183,22 @@ function PublicationPanel({
           </CardAction>
         </CardHeader>
         <CardContent className="flex flex-col gap-5">
+          {localBusy && (
+            <Alert>
+              <AlertTitle>Upload in progress</AlertTitle>
+              <AlertDescription>
+                Finish or pause the current upload before continuing.
+              </AlertDescription>
+            </Alert>
+          )}
+          {!publication.online && (
+            <Alert>
+              <AlertTitle>You are offline</AlertTitle>
+              <AlertDescription>
+                Reconnect, then check status before continuing.
+              </AlertDescription>
+            </Alert>
+          )}
           {(readiness.isPending || media.isPending) && (
             <div role="status">
               <Skeleton className="h-32" />
@@ -294,6 +336,7 @@ function PublicationPanel({
                 <Link
                   to="/admin/videos/$id/preview"
                   params={{ id: detail.data.id }}
+                  search={{ type }}
                 />
               }
             >
@@ -355,9 +398,10 @@ function PublicationPanel({
             </Button>
           )}
           <Button
+            ref={refreshFocus}
             variant="outline"
             className="min-h-11 w-full sm:w-auto"
-            disabled={busy}
+            disabled={busy || !publication.online}
             onClick={() => void controller.check()}
           >
             {['unknown', 'retryable'].includes(state.phase)
@@ -371,6 +415,8 @@ function PublicationPanel({
           controller={controller}
           state={state}
           returnFocus={archiveTrigger}
+          fallbackFocus={refreshFocus}
+          canConfirm={!localBusy && publication.online && !stale}
         />
       )}
       {publishOpen && (
@@ -378,6 +424,8 @@ function PublicationPanel({
           controller={controller}
           state={state}
           returnFocus={publishTrigger}
+          fallbackFocus={refreshFocus}
+          canConfirm={!localBusy && publication.online && !stale}
         />
       )}
     </>

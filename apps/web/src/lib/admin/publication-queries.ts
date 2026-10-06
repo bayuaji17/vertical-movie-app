@@ -79,3 +79,14 @@ export async function invalidatePublication(
     ),
   )
 }
+
+export async function scopePublicationRead<T>(
+  ownerSignal: AbortSignal,
+  querySignal: AbortSignal,
+  read: (signal: AbortSignal) => Promise<T>,
+) {
+  const signal = AbortSignal.any([ownerSignal, querySignal]),
+    value = await read(signal)
+  if (signal.aborted) throw new DOMException('Aborted', 'AbortError')
+  return value
+}
