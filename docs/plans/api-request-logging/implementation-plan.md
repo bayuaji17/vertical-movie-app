@@ -2,7 +2,7 @@
 
 ## Plan Metadata
 
-- Status: executing; implementasi dan runtime lokal terverifikasi, finalisasi dokumentasi/commit APILOG-003.
+- Status: completed; APILOG-001–003 Done, implemented/verified lokal 7 Oktober 2026.
 - Tanggal: 7 Oktober 2026; proposal awal 6 Oktober 2026.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `main`.
@@ -124,12 +124,12 @@ Gunakan Bun dan existing Elysia `1.4.30`, chaining, private-only auth serta kont
 
 ## Acceptance Criteria
 
-- [ ] Setiap request yang mencapai API langsung terlihat, semua route tanpa sampling.
-- [ ] Request selesai mendapat satu log hasil dengan status HTTP aktual, durasi nonnegatif dan ID korelasi start/finish.
-- [ ] Semua output memakai native console.log; tidak ada library logging.
-- [ ] Tidak mencetak body/header/query/response/raw error atau mengubah kontrak HTTP/auth/Eden.
-- [ ] Test lifecycle/isolation/redaksi/sink failure, suite API dan quality gates lulus.
-- [ ] Panduan, backlog dan ledger mencatat bukti serta commit task aktual.
+- [x] Setiap request yang mencapai API langsung terlihat, semua route tanpa sampling.
+- [x] Request selesai mendapat satu log hasil dengan status HTTP aktual, durasi nonnegatif dan ID korelasi start/finish.
+- [x] Semua output memakai native console.log; tidak ada library logging.
+- [x] Tidak mencetak body/header/query/response/raw error atau mengubah kontrak HTTP/auth/Eden.
+- [x] Test lifecycle/isolation/redaksi/sink failure, suite API dan quality gates lulus.
+- [x] Panduan, backlog dan ledger mencatat bukti serta commit task aktual.
 
 ## Risks and Mitigations
 
@@ -183,3 +183,4 @@ Format JSON satu baris, dua event, ID log internal dan default semua request dis
 - APILOG-002: factory memasang logger paling awal. Focused tests lulus 11 tests/215 assertions. Proof app nyata menemukan kebutuhan hook observasi tambahan yang diizinkan plan: global onError observer tanpa return supaya unmatched route tetap menjalankan afterResponse pada Elysia 1.4.30 ketika app.event.error berupa array kosong. Pemetaan response existing dipertahankan; full gates sebelum commit ada pada backlog.
 - APILOG-002 commit: `17fc66f622a9296c973bb1d5470e96ccc7471b2f`; API suite 109 tests/562 assertions, root check-types/lint/build dan docs/format/diff serta hook/Commitlint lulus. Task Done.
 - APILOG-003 demo 7 Oktober 2026: `bun .turbo/request-logging-smoke.mjs` menjalankan root `bun run dev --filter=api` dan `bun run --cwd apps/api start` secara berurutan pada port ephemeral. Masing-masing menerima GET root 200 dan unknown route 404, menghasilkan tepat 4 event dengan ID korelasi sama per pair, durasi nonnegatif dan query sentinel tidak tercetak. Hanya request read-only; subprocess demo dihentikan. Harness/result sementara ignored pada `.turbo`, tidak masuk Git. Ini proof lokal development dan executable hasil build, bukan deployment production.
+- APILOG-003 commit: `beb5fa288b2c8d52c07ee98e13d3133559c52ad4`; API guide/index/evidence diperbarui, Prettier, docs:check (62 Markdown/555 links), diff check dan Husky/Commitlint lulus. Source tidak berubah setelah code gates APILOG-002. SHA aktual dan status Done dicatat pada finalisasi ledger berikutnya; tidak ada push/PR/merge/deploy.

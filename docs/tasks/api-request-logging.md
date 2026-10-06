@@ -2,7 +2,7 @@
 
 ## Tujuan modul
 
-Operator dapat melihat setiap request yang mencapai API dan hasilnya pada console server memakai `console.log`, tanpa library logging. Plan disetujui pengguna 7 Oktober 2026; implementasi bertahap pada branch `feat/api-request-logging`.
+Operator dapat melihat setiap request yang mencapai API dan hasilnya pada console server memakai `console.log`, tanpa library logging. Disetujui pengguna dan implemented/verified lokal 7 Oktober 2026 pada branch `feat/api-request-logging`; APILOG-001–003 Done. Batas production/gateway/storage tetap mengikuti panduan.
 
 Acuan: [plan](../plans/api-request-logging/implementation-plan.md), [context](../plans/api-request-logging/repository-context.md), [API Development](../guides/api-development.md), [workflow](../guides/development-workflow.md) dan [Architecture](../architecture/overview.md). Ini kebutuhan operasional langsung dari pengguna; tidak mengklaim requirement produk PRD baru.
 
@@ -94,7 +94,7 @@ APILOG-001; lanjut APILOG-003 setelah criteria/checks dan commit lulus.
 
 ## Task: APILOG-003 — Panduan dan verifikasi output server
 
-- Status: Review
+- Status: Done
 - Owner: Codex/pengembang API
 - Prioritas: 3
 - Referensi: APILOG-STORY-001; APILOG-003 pada plan canonical
@@ -125,10 +125,10 @@ Update API guide, indeks, plan/backlog dengan logging aktif, contoh/cara melihat
 ### Commit task
 
 - Pesan rencana: `docs(api): document verified request logging (APILOG-003)`
-- SHA: belum dibuat
-- Hook/checks: format/docs/diff lulus; code gates APILOG-002 pada source yang sama lulus; hasil hook dicatat setelah commit
-- Ledger: SHA terakhir dicatat pada update dokumentasi berikutnya; jangan menebak SHA commit sendiri
+- SHA: `beb5fa288b2c8d52c07ee98e13d3133559c52ad4`
+- Hook/checks: docs:check, lint web, check-types tiga workspace dan Commitlint lulus; demo development/build-start serta code gates APILOG-002 pada source yang sama lulus
+- Ledger: SHA task dicatat setelah commit berhasil pada finalisasi dokumentasi
 
 ### Blocker atau tindak lanjut
 
-APILOG-002. Push/PR/merge/deploy di luar otorisasi plan.
+Tidak ada blocker implementasi. Push/PR/merge/deploy di luar otorisasi plan.

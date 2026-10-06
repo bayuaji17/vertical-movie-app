@@ -2,6 +2,8 @@
 
 ## Snapshot
 
+Snapshot ini adalah baseline analisis sebelum implementasi 6 Oktober 2026. Pengguna menyetujui scope pada 7 Oktober 2026; source/perilaku sekarang dan hasil verifikasi berada pada [plan/evidence](implementation-plan.md) serta [API guide](../../guides/api-development.md#logging-request-http). Pernyataan runtime belum memiliki access logger di bawah berlaku pada base SHA.
+
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `main`.
 - Base SHA: `4f3c9141017ac85e5e999e3ce72b66c6d45aea30`.
