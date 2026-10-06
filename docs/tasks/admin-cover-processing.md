@@ -1,6 +1,6 @@
 # Modul: admin cover processing
 
-- Status: **ACOV-001–011 selesai lokal** di `feat/admin-cover-processing`; R2/production belum diverifikasi.
+- Status: **ACOV-001–012 selesai lokal** di `feat/admin-cover-processing`; R2/production belum diverifikasi.
 - Diperbarui: 6 Oktober 2026.
 - Persetujuan: pengguna menyetujui plan/default pada 6 Oktober 2026; feasibility gate menentukan guard native/browser. Rincian di [plan](../plans/admin-cover-processing/implementation-plan.md).
 - Snapshot source: `06e7ce75e9d3f87bbe501bac054711310e14e5a2`; [context](../plans/admin-cover-processing/repository-context.md).
@@ -509,9 +509,49 @@ Root `bun run check-types`: 3/3 passed (api/auth cache hits, web fresh), `bun ru
 ### Commit task
 
 - Pesan: `fix(web): allow smaller cover crops (ACOV-011)`
-- SHA: belum dibuat; receipt dicatat pada pembaruan ledger berikutnya.
-- Hook/checks: relevant tests/browser/root gates dan docs/format/diff lulus; hook commit akan dijalankan tanpa bypass.
+- SHA: `1328958bb5ab6427e620b1f66a4c2f4f98544a2e`.
+- Hook/checks: relevant tests/browser/root gates dan docs/format/diff lulus; pre-commit docs/lint/check-types dan commit-msg Commitlint lulus.
 
 ### Blocker atau tindak lanjut
 
 Tidak ada blocker implementasi. Resolusi rendah mungkin menghasilkan gambar lembut; rekomendasi kualitas tidak menjadi syarat upload.
+
+## Task: ACOV-012 — Cegah reload saat hash upload pertama di development
+
+- Status: Done
+- Owner: Codex / pengembang proyek
+- Prioritas: 12
+- Referensi: ACOV-US-03; [plan](../plans/admin-cover-processing/implementation-plan.md), [operasi media](../operations/media.md).
+- Diperbarui: 2026-10-06
+- Dependensi: ACOV-011
+- Ukuran: Kecil, konfigurasi Vite dan proof browser
+
+### Ruang lingkup
+
+Pengguna menyetujui fix pada 6 Oktober 2026. Pemeriksaan source base `1328958bb5ab6427e620b1f66a4c2f4f98544a2e`: fingerprint worker memakai `@noble/hashes/sha2.js` dan `@noble/hashes/utils.js`; keduanya baru ditemukan optimizer saat upload pertama. Log development menunjukkan optimized dependencies changed/reloading. Tambahkan dua import tersebut pada `optimizeDeps.include` Vite. Pertahankan beforeunload/route blocker untuk upload aktif, algoritme SHA-256 dan transport/media API. Gunakan cache/port fixture terpisah untuk proof agar cache development pengguna tidak dihapus.
+
+### Acceptance criteria
+
+- [x] Hash pertama dan berikutnya pada cold Vite cache menghasilkan digest yang benar tanpa full reload/document navigation/dialog browser.
+- [x] Pengaman leaving/reload selama upload aktif dan jalur hash di worker tetap tersedia.
+- [x] Relevant hash tests, check-types/lint/build, docs/format/diff lulus; commit lokal hanya perubahan task.
+
+### Validasi
+
+`bun apps/web/test/admin-media-dev-hash-proof.mjs` dengan runner env, `bun test apps/web/test/admin-media-fingerprint.test.ts apps/web/test/admin-media-file.test.ts`; root check-types/lint/build/docs:check, Prettier dan diff/staged preservation.
+
+### Hasil dan bukti
+
+6 Oktober 2026: baseline cold-cache pada konfigurasi lama mereproduksi log discovery dua imports hashing, optimized dependencies changed/reloading, dan satu full-reload event; assertion zero reload gagal sesuai regresi. Setelah dua explicit imports masuk `optimizeDeps.include`, proof terakhir lulus pada cache temporary dan port ephemeral terpisah. Fixture memakai konfigurasi/plugin Vite asli, imports panel upload dan Worker hashing asli; SHA-256 file 5.000.000 byte pertama/berulang cocok dengan oracle Node crypto, zero full reload/document navigation/dialog dan zero page errors. Proof berfokus pada hashing development; tidak menjalankan multipart/storage atau menggantikan built-browser media proof sebelumnya.
+
+`bun test apps/web/test/admin-media-fingerprint.test.ts apps/web/test/admin-media-file.test.ts apps/web/test/admin-upload-recovery.test.ts` lulus 25 tests / 107 expectations. Root build lulus 2/2 (API cache hit, web fresh; warning chunk >500 kB existing). Root `bun run check-types` lulus 3/3 (API/auth cache hits, web fresh) dan `bun run lint` lulus 1/1 (web fresh). `bun run docs:check` lulus 59 Markdown / 534 local links dan anchors; Prettier changed files dan `git diff --check` lulus. Source guard beforeunload/route leave, fingerprint algorithm/worker, API/schema/manifests/lock/env samples tetap sama. Tidak ada dependency atau env produk baru. Log lokal ignored di `.turbo/admin-cover-processing/acov-012/`; cache test dibersihkan setelah proof.
+
+### Commit task
+
+- Pesan: `fix(web): prebundle upload hashing dependencies (ACOV-012)`
+- SHA: belum dibuat; dicatat pada update ledger berikutnya.
+- Hook/checks: relevant tests/browser, root gates, docs/format/diff lulus; normal hooks dijalankan saat commit tanpa bypass.
+
+### Blocker atau tindak lanjut
+
+Tidak ada blocker implementasi. Optimasi ini mengatasi reload yang berasal dari lazy hashing imports; perubahan kode/server lain tetap dapat memicu HMR saat development.

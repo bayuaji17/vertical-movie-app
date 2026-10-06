@@ -2,13 +2,13 @@
 
 ## Plan metadata
 
-- Status: **ACOV-001–011 selesai lokal** pada 6 Oktober 2026; R2/production belum diverifikasi.
+- Status: **ACOV-001–012 selesai lokal** pada 6 Oktober 2026; R2/production belum diverifikasi.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `feat/admin-media-upload`.
 - Planning base SHA: `06e7ce75e9d3f87bbe501bac054711310e14e5a2`; execution evidence diperbarui melalui commit ACOV-009 `ad373c3153311142deb287d931268bce5cb8b42b`.
 - Implementation branch dibuat 6 Oktober 2026 dari planning receipt `8367f1781d9dba618f0117dfd0273ab0662d051d`: `feat/admin-cover-processing`.
 - Context: [repository-context.md](repository-context.md), ditulis sebelum plan.
-- Backlog: [admin-cover-processing](../../tasks/admin-cover-processing.md); ACOV-001–011.
+- Backlog: [admin-cover-processing](../../tasks/admin-cover-processing.md); ACOV-001–012.
 - Keputusan pengguna: seluruh plan dan default teknis disetujui pada 6 Oktober 2026; ACOV-002 dapat memperbarui rincian bila proof menunjukkan batas native/browser.
 - Otorisasi: implementasikan task ACOV sesuai DAG dan acceptance criteria dengan commit lokal terpisah. Push/PR/merge/deployment tetap menunggu instruksi tersendiri.
 
@@ -218,3 +218,7 @@ Tidak ada keputusan produk yang menunggu persetujuan awal; plan dan default dise
 - 2026-10-06: ACOV-010 canonical documentation closure completed in task commit `ff526c2a89b7deaa2f4a2fd03fc71ed92301ecdc`; docs checker (59 Markdown/529 links/anchors), Prettier, diff and preservation checks passed. Pre-commit docs/lint/check-types and commit-msg Commitlint passed; task SHA is recorded in the backlog receipt.
 
 - 2026-10-06: ACOV-011 Done, refinement pada source base `0d9577e8bf36cdf3205d05ba73a50c0cebad7940` setelah persetujuan pengguna. Crop resolution adalah rekomendasi; small portrait/landscape boleh di-zoom 1–4×, crop 9:16 dan upscale ke output 1080×1920. Invalid geometry/format/animation/byte/pixel/owner guards tetap. Enam web test files 51/335, focused built-browser media/layout, check-types3/3, lint1/1, build2/2 dan docs59/531 lulus. Evidence aktif pada backlog ACOV-011; minimum/no-upscale dalam log ACOV-001–010 adalah history. Commit SHA dicatat setelah commit pada update ledger berikutnya.
+
+- 2026-10-06: ACOV-011 commit receipt `1328958bb5ab6427e620b1f66a4c2f4f98544a2e`; normal pre-commit docs/lint/check-types dan Commitlint lulus. Pengguna mengotorisasi ACOV-012 untuk menyiapkan dependency hash di optimizer startup. Context refinement: fingerprint worker imports dan Vite8.3.1 config ditelusuri pada SHA tersebut; log development menemukan hashing dependencies lalu reload. Dua explicit include imports dan cold-cache browser proof direncanakan, tanpa perubahan guard/upload/backend. Dokumentasi Vite resmi: [pre-bundling](https://vite.dev/guide/dep-pre-bundling.html) dan [include](https://vite.dev/config/dep-optimization-options.html#optimizedeps-include).
+
+- 2026-10-06: ACOV-012 Done. Dua hashing imports dioptimasi saat startup Vite. Cold-cache baseline memicu satu full reload; proof konfigurasi final lulus hash pertama/berulang 5 MB, exact SHA-256, zero reload/navigation/dialog/page errors pada Worker asli dan modul panel upload. Test cache/port terpisah dan tanpa DB/storage. Unit hash/file/recovery 25/107, check-types3/3, lint1/1, build2/2 dan docs59/534 passed; beforeunload/route leave serta transport/API unchanged. Evidence/limitations ada pada backlog; task commit SHA dicatat pada update ledger berikutnya.

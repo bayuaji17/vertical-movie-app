@@ -23,6 +23,11 @@ const config = defineConfig(({ mode }) => {
 
   return {
     resolve: { tsconfigPaths: true },
+    optimizeDeps: {
+      // The hash worker is loaded on first upload, after the initial page scan.
+      // Prebundle its imports so file checking does not trigger a dev reload.
+      include: ['@noble/hashes/sha2.js', '@noble/hashes/utils.js'],
+    },
     build: { rolldownOptions: { onLog: filterBuildLog } },
     server: {
       port,
