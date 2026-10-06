@@ -118,7 +118,7 @@ Verifikasi delivery: built Bun/Nitro Chromium tiga-tier12s pada port3008 dengan 
 
 ## Upload Media admin — workflow dan proof 6 Oktober 2026
 
-Simpan metadata draft lalu buka detail Film/Standalone untuk source+cover, atau Series untuk cover. Choose file memvalidasi ekstensi/MIME/ukuran; cover dibuka dalam crop 9:16 dan hasil crop dihitung fingerprint lalu dikirim sebagai multipart ke bucket privat. API memproses cover baru setelah complete; cover bisa mencapai Ready tanpa worker. Worker terpisah tetap diperlukan agar source menghasilkan HLS. Pastikan endpoint S3 dapat dijangkau browser dan CORS mengizinkan PUT/GET/HEAD serta expose ETag.
+Simpan metadata draft lalu buka detail Film/Standalone untuk source+cover, atau Series untuk cover. Choose file memvalidasi ekstensi/MIME/ukuran; cover dibuka dalam crop 9:16 dengan zoom 1–4×. Resolusi crop 1080×1920 atau lebih direkomendasikan; gambar kecil tetap bisa dicrop dan diperbesar saat export menjadi 1080×1920. Hasil crop dihitung fingerprint lalu dikirim sebagai multipart ke bucket privat. API memproses cover baru setelah complete; cover bisa mencapai Ready tanpa worker. Worker terpisah tetap diperlukan agar source menghasilkan HLS. Pastikan endpoint S3 dapat dijangkau browser dan CORS mengizinkan PUT/GET/HEAD serta expose ETag.
 
 Sent100% belum berarti upload completed atau media Ready. Tunggu finalization dan processing; source/cover masing-masing harus verified-ready sebelum Preview video tersedia. UI tidak melakukan publish. Failed media pada draft diperbaiki melalui file/session baru; manual reprocess belum tersedia.
 

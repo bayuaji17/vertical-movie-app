@@ -383,7 +383,7 @@ try {
     await page.setViewportSize({ width: 1440, height: 1000 })
     await theme('Light')
     await chooseAndCropCover()
-    const selectedPreview = await card('poster')
+    let selectedPreview = await card('poster')
       .getByAltText('Selected cover preview')
       .getAttribute('src')
     assert.ok(selectedPreview?.startsWith('blob:'))
@@ -446,31 +446,59 @@ try {
         { width, height, noise },
       )
 
-    const small = await makePng({ width: 640, height: 1138, noise: false })
-    await card('poster')
-      .locator('input[type=file]')
-      .setInputFiles({
-        name: 'small.png',
-        mimeType: 'image/png',
-        buffer: Buffer.from(small, 'base64'),
+    for (const [width, height] of [
+      [640, 1138],
+      [1920, 1080],
+    ]) {
+      const small = await makePng({ width, height, noise: false })
+      const chooseSmall = () =>
+        card('poster')
+          .locator('input[type=file]')
+          .setInputFiles({
+            name: 'small.png',
+            mimeType: 'image/png',
+            buffer: Buffer.from(small, 'base64'),
+          })
+      await chooseSmall()
+      const smallDialog = page.getByRole('dialog')
+      await smallDialog
+        .locator('canvas[aria-label^="Cover crop preview"]')
+        .waitFor()
+      await smallDialog.getByText(/Recommended crop resolution:/i).waitFor()
+      assert.equal(await smallDialog.getByRole('alert').count(), 0)
+      assert.equal(
+        await smallDialog.getByRole('button', { name: 'Use crop' }).isEnabled(),
+        true,
+      )
+      const slider = smallDialog.getByRole('slider')
+      await slider.focus()
+      await page.keyboard.press('ArrowRight')
+      assert.ok(Number(await slider.getAttribute('aria-valuenow')) > 1)
+      await page.keyboard.press('Escape')
+      await smallDialog.waitFor({ state: 'hidden' })
+      assert.equal(
+        await card('poster')
+          .getByAltText('Selected cover preview')
+          .getAttribute('src'),
+        selectedPreview,
+      )
+      await chooseSmall()
+      await smallDialog
+        .locator('canvas[aria-label^="Cover crop preview"]')
+        .waitFor()
+      await smallDialog.getByRole('button', { name: 'Use crop' }).click()
+      await smallDialog.waitFor({ state: 'hidden' })
+      await card('poster').getByText('small.webp', { exact: true }).waitFor()
+      await page.waitForFunction(() => {
+        const image = document.querySelector(
+          'img[alt="Selected cover preview"]',
+        )
+        return image?.naturalWidth === 1080 && image.naturalHeight === 1920
       })
-    const smallDialog = page.getByRole('dialog')
-    await smallDialog
-      .getByRole('alert')
-      .getByText(/at least 1080 × 1920/i)
-      .waitFor()
-    assert.equal(
-      await smallDialog.getByRole('button', { name: 'Use crop' }).isDisabled(),
-      true,
-    )
-    await page.keyboard.press('Escape')
-    await smallDialog.waitFor({ state: 'hidden' })
-    assert.equal(
-      await card('poster')
+      selectedPreview = await card('poster')
         .getByAltText('Selected cover preview')
-        .getAttribute('src'),
-      selectedPreview,
-    )
+        .getAttribute('src')
+    }
 
     const noisy = await makePng({ width: 1080, height: 1920, noise: true })
     await card('poster')
@@ -606,7 +634,7 @@ try {
     await card('poster').getByText('cover.webp', { exact: true }).waitFor()
     assert.deepEqual(errors, [])
     console.log(
-      `Browser: cover crop UI — Film/Standalone/Series, source bypass, all themes and five widths, focus trap/return, keyboard/pointer/touch pan, System theme changes, replacement/cancel preservation, too-small and >5 MB errors passed; screenshots ${mobileScreenshot}, .turbo/admin-cover-processing/acov-007/desktop-dark.png`,
+      `Browser: cover crop UI — Film/Standalone/Series, source bypass, all themes and five widths, focus trap/return, keyboard/pointer/touch pan, System theme changes, replacement/cancel preservation, small portrait/landscape crop and upscale, recommendation-only resolution, and >5 MB error passed; screenshots ${mobileScreenshot}, .turbo/admin-cover-processing/acov-007/desktop-dark.png`,
     )
   } else {
     stage = 'resume'

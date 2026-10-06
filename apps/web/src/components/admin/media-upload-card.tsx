@@ -191,7 +191,7 @@ export function MediaUploadCard({
             <FieldDescription>
               {kind === 'source'
                 ? `${inventory.config.source.formats.map((f) => f.extension.toUpperCase()).join(', ')} · Max ${bytes(Number(inventory.config.source.maxBytes))} · ${inventory.config.maxDurationSeconds / 60} minutes · 480–1080p, 9:16. Codec, duration and dimensions are verified after upload.`
-                : `Still JPG, PNG, or WebP · Crop to 1080 × 1920 · Output max ${bytes(Number(inventory.config.poster.maxBytes))}. Animated images are not supported.`}
+                : `Still JPG, PNG, or WebP · Crop to vertical 9:16 · Recommended crop resolution: 1080 × 1920 or higher · Saved at 1080 × 1920 · Output max ${bytes(Number(inventory.config.poster.maxBytes))}. Animated images are not supported.`}
             </FieldDescription>
             {selectionError && (
               <p className="text-sm text-destructive" role="alert">

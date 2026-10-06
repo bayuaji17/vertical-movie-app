@@ -2,6 +2,7 @@ export const COVER_ASPECT_WIDTH = 9
 export const COVER_ASPECT_HEIGHT = 16
 export const COVER_OUTPUT_WIDTH = 1080
 export const COVER_OUTPUT_HEIGHT = 1920
+export const COVER_MAX_ZOOM = 4
 
 export type CoverCrop = {
   sourceWidth: number
@@ -16,7 +17,7 @@ export type CoverCrop = {
 
 export class CoverCropError extends Error {
   constructor(
-    readonly code: 'INVALID_DIMENSIONS' | 'SOURCE_TOO_SMALL',
+    readonly code: 'INVALID_DIMENSIONS',
     message: string,
   ) {
     super(message)
@@ -44,25 +45,12 @@ export function calculateCoverCrop(
     )
 
   const baseWidth = Math.min(
-      sourceWidth,
-      (sourceHeight * COVER_ASPECT_WIDTH) / COVER_ASPECT_HEIGHT,
-    ),
-    baseHeight = (baseWidth * COVER_ASPECT_HEIGHT) / COVER_ASPECT_WIDTH,
-    availableZoom = Math.min(
-      baseWidth / COVER_OUTPUT_WIDTH,
-      baseHeight / COVER_OUTPUT_HEIGHT,
-    )
-
-  if (availableZoom < 1 - Number.EPSILON * 16)
-    throw new CoverCropError(
-      'SOURCE_TOO_SMALL',
-      'Choose an image with at least 1080 × 1920 pixels in the selected crop.',
-    )
-
-  // Keep a tiny pixel margin below the theoretical limit. IEEE-754 division can
-  // otherwise turn a valid 1080 × 1920 edge crop into a sub-pixel upscale.
-  const maxZoom =
-    availableZoom <= 1 ? 1 : Math.max(1, availableZoom * (1 - 1e-9))
+    sourceWidth,
+    (sourceHeight * COVER_ASPECT_WIDTH) / COVER_ASPECT_HEIGHT,
+  )
+  // Source resolution is a quality recommendation. Export resizes this crop to
+  // the standard output, so zoom stays available even for smaller images.
+  const maxZoom = COVER_MAX_ZOOM
 
   const requestedZoom = options.zoom ?? 1
   if (!Number.isFinite(requestedZoom))
@@ -102,12 +90,14 @@ export function isCoverCropCurrent(
   return (
     crop.sourceWidth === sourceWidth &&
     crop.sourceHeight === sourceHeight &&
+    validDimension(sourceWidth) &&
+    validDimension(sourceHeight) &&
     Number.isFinite(crop.x) &&
     Number.isFinite(crop.y) &&
     Number.isFinite(crop.width) &&
     Number.isFinite(crop.height) &&
-    crop.width >= COVER_OUTPUT_WIDTH &&
-    crop.height >= COVER_OUTPUT_HEIGHT &&
+    crop.width > 0 &&
+    crop.height > 0 &&
     Math.abs(
       crop.width * COVER_ASPECT_HEIGHT - crop.height * COVER_ASPECT_WIDTH,
     ) <=

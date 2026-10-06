@@ -2,13 +2,13 @@
 
 ## Plan metadata
 
-- Status: **ACOV-001–010 selesai lokal** pada 6 Oktober 2026; R2/production belum diverifikasi.
+- Status: **ACOV-001–011 selesai lokal** pada 6 Oktober 2026; R2/production belum diverifikasi.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `feat/admin-media-upload`.
 - Planning base SHA: `06e7ce75e9d3f87bbe501bac054711310e14e5a2`; execution evidence diperbarui melalui commit ACOV-009 `ad373c3153311142deb287d931268bce5cb8b42b`.
 - Implementation branch dibuat 6 Oktober 2026 dari planning receipt `8367f1781d9dba618f0117dfd0273ab0662d051d`: `feat/admin-cover-processing`.
 - Context: [repository-context.md](repository-context.md), ditulis sebelum plan.
-- Backlog: [admin-cover-processing](../../tasks/admin-cover-processing.md); ACOV-001–010.
+- Backlog: [admin-cover-processing](../../tasks/admin-cover-processing.md); ACOV-001–011.
 - Keputusan pengguna: seluruh plan dan default teknis disetujui pada 6 Oktober 2026; ACOV-002 dapat memperbarui rincian bila proof menunjukkan batas native/browser.
 - Otorisasi: implementasikan task ACOV sesuai DAG dan acceptance criteria dengan commit lokal terpisah. Push/PR/merge/deployment tetap menunggu instruksi tersendiri.
 
@@ -47,13 +47,13 @@ Bun 1.4.2 sudah berhasil diuji untuk resize/WebP, tetapi tidak mempunyai crop/ex
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | Source browser | JPG/JPEG/PNG/WebP statis, <=5 MB; rasio awal bebas. UI menolak input animasi/invalid lewat pemeriksaan format.                 |
 | Crop           | Exact 9:16, dikonfirmasi admin; bukan center-crop otomatis tanpa preview.                                                      |
-| Kualitas       | Crop area natural minimal 1080×1920; tanpa upscale default. Gambar terlalu kecil mendapat penjelasan sebelum upload.           |
+| Kualitas       | Resolusi crop 1080×1920 atau lebih direkomendasikan; gambar kecil tetap diterima, zoom 1–4× dan upscale ke output standar.     |
 | Output browser | Raster 1080×1920, WebP 0.95 atau PNG fallback, <=5 MB, File baru dengan filename/MIME aktual.                                  |
 | Output resmi   | Bun.Image decode/autoOrient/resize/encode, WebP 1080×1920 quality 85, alpha dipertahankan; pixel/type verified setelah encode. |
 | Pixel budget   | Usulan maxPixels 16.777.216 pada browser input dan API decode; output 2.073.600. Batas byte tidak menggantikan batas pixel.    |
 | Executor       | Poster session baru request; source/legacy session worker. Discriminator server-owned, bukan pilihan user/browser.             |
 
-Crop mengubah syarat sumber sampul yang dulu wajib 9:16. Syarat video tetap. Crop tidak menjadikan gambar kecil tajam; penurunan minimum/upscale bukan bagian default plan ini. Server memverifikasi **payload crop yang diterima**, bukan original browser yang tidak pernah dikirim. Pemeriksaan file browser menolak PNG/WebP animasi sebelum crop; server memeriksa agar payload PNG/WebP yang diterima statis, lalu mencocokkan format byte dengan Content-Type. Itu menjaga jalur server dari file animasi yang dikirim langsung. Bun.Image metadata tidak melaporkan frame count, jadi API memerlukan pemeriksaan container ringan untuk acTL dan flag/chunk WebP animasi. Detail parser dan malformed-container tests menjadi bagian ACOV-004/006.
+Crop mengubah syarat sumber sampul yang dulu wajib 9:16. Syarat video tetap. Keputusan pengguna 6 Oktober 2026 (ACOV-011) menggantikan minimum/no-upscale sampul: resolusi hanya rekomendasi, seluruh gambar statis valid dapat dicrop 9:16 dan diperbesar. Upscale tidak menambah detail sumber. Evidence ACOV-001–010 yang memakai minimum adalah history. Server memverifikasi **payload crop yang diterima**, bukan original browser yang tidak pernah dikirim. Pemeriksaan file browser menolak PNG/WebP animasi sebelum crop; server memeriksa agar payload PNG/WebP yang diterima statis, lalu mencocokkan format byte dengan Content-Type. Itu menjaga jalur server dari file animasi yang dikirim langsung. Bun.Image metadata tidak melaporkan frame count, jadi API memerlukan pemeriksaan container ringan untuk acTL dan flag/chunk WebP animasi. Detail parser dan malformed-container tests menjadi bagian ACOV-004/006.
 
 ### Kontrak dan pemisahan executor
 
@@ -140,7 +140,7 @@ Rincian target/requirements/AC/validasi masing-masing task menggunakan template 
 ## Test requirements
 
 - Native feasibility: JPEG/PNG/WebP valid; orientation/alpha, cropped dimensions, hash mismatch, byte/pixel limits, unsupported actual MIME, APNG/animated WebP, truncated/damaged files. Document Bun permissive behavior; bounded parser/policy checks if native lacks animation info, without claiming original-browser server proof.
-- Crop: portrait/landscape/square area math 9:16, bounds/minimum/no-upscale; actual Canvas encode/MIME fallback/dimensions, real preview/cancel/reset, replacement kept, wrong payload fingerprint rejected, late callback after owner/auth change ignored.
+- Crop: portrait/landscape/square area math 9:16, bounds/positive geometry/recommendation-only resolution; actual Canvas encode/MIME fallback/dimensions, real preview/cancel/reset, replacement kept, wrong payload fingerprint rejected, late callback after owner/auth change ignored.
 - HTTP/DB: admin actor/UUID/profile/owner/status, source rejected by process route, exactly one processing record, simultaneous process/complete/abort/new replacement, active/expired lease, crash after output-beforecommit, failed output HEAD/hash, transient retries exhausted, stale fence, readonly GET. Worker never claims/recover request records.
 - Compatibility: existing request hash replay and pending sessions stay worker; old Ready posters/catalog/publish/HLS remain usable; pending/failed legacy jobs unaffected. No job backfill/downgrade or source/HLS rule changes.
 - Built browser PG/MinIO: all 3 cover owners with worker stopped → Ready; video source queued until worker starts; source/legacy worker proof then passes. Verify output WebP 1080×1920/hash/HEAD/provenance/private GET, header/gateway budget, no bytes in gateway/control cache.
@@ -163,7 +163,7 @@ Prefer Bun native; no automatic dependency upgrade, lock churn or hand-edited ro
 
 ## Risks and mitigations
 
-Native API misses crop/animation/cancellation: browser crop, server payload format guards, targeted feasibility gate, await terminals and fence late results. CPU/RAM in API: pixel/input/concurrency caps and measured limits; no whole-video decode in API. Double encoding: browser high-quality raster then final WebP 85; visual comparison on real covers before closure. Small originals still fail quality: explain crop minimum/no-upscale before network. Refresh cannot reproduce bytes reliably: exact payload resume only or explicit cancel/restart, completed processing recover without File. Legacy/provenance coupling: additive executor mode with historical rows retained and catalog regression. Gateway 10s: scoped request budget with ambiguous result reconciliation, no auth timeout expansion.
+Native API misses crop/animation/cancellation: browser crop, server payload format guards, targeted feasibility gate, await terminals and fence late results. CPU/RAM in API: pixel/input/concurrency caps and measured limits; no whole-video decode in API. Double encoding: browser high-quality raster then final WebP 85; visual comparison on real covers before closure. Small originals may look softer after export: show a nonblocking resolution recommendation while keeping preview, zoom and Use crop available. Refresh cannot reproduce bytes reliably: exact payload resume only or explicit cancel/restart, completed processing recover without File. Legacy/provenance coupling: additive executor mode with historical rows retained and catalog regression. Gateway 10s: scoped request budget with ambiguous result reconciliation, no auth timeout expansion.
 
 ## Rollback or recovery
 
@@ -216,3 +216,5 @@ Tidak ada keputusan produk yang menunggu persetujuan awal; plan dan default dise
 
 - 2026-10-06: ACOV-009 Done, task commit `ad373c3153311142deb287d931268bce5cb8b42b`; pre-commit docs/lint/check-types and Commitlint passed. Built-browser proof against dedicated PostgreSQL/random private MinIO bucket established all three cover owners Ready with worker stopped, correct output HEAD/hash/dimensions/job provenance, and unsigned 403; source remained queued until worker start and then produced verified HLS. Serial API/Web regressions, check-types, lint, build, Prettier and diff passed. R2/Safari/device/VPS remain unverified.
 - 2026-10-06: ACOV-010 canonical documentation closure completed in task commit `ff526c2a89b7deaa2f4a2fd03fc71ed92301ecdc`; docs checker (59 Markdown/529 links/anchors), Prettier, diff and preservation checks passed. Pre-commit docs/lint/check-types and commit-msg Commitlint passed; task SHA is recorded in the backlog receipt.
+
+- 2026-10-06: ACOV-011 Done, refinement pada source base `0d9577e8bf36cdf3205d05ba73a50c0cebad7940` setelah persetujuan pengguna. Crop resolution adalah rekomendasi; small portrait/landscape boleh di-zoom 1–4×, crop 9:16 dan upscale ke output 1080×1920. Invalid geometry/format/animation/byte/pixel/owner guards tetap. Enam web test files 51/335, focused built-browser media/layout, check-types3/3, lint1/1, build2/2 dan docs59/531 lulus. Evidence aktif pada backlog ACOV-011; minimum/no-upscale dalam log ACOV-001–010 adalah history. Commit SHA dicatat setelah commit pada update ledger berikutnya.

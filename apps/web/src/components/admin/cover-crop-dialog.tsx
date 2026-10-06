@@ -380,6 +380,11 @@ export function CoverCropDialog({
               px
               {' · '}Output: {COVER_OUTPUT_WIDTH} × {COVER_OUTPUT_HEIGHT} px
             </p>
+            <p className="text-sm text-muted-foreground">
+              Recommended crop resolution: {COVER_OUTPUT_WIDTH} ×{' '}
+              {COVER_OUTPUT_HEIGHT} pixels or higher. Smaller crops are resized
+              to fit and may look softer.
+            </p>
           </div>
         </div>
 

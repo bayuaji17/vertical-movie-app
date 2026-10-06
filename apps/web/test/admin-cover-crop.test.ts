@@ -2,6 +2,7 @@ import { test, expect } from 'bun:test'
 import { createHash } from 'node:crypto'
 import {
   calculateCoverCrop,
+  COVER_MAX_ZOOM,
   COVER_OUTPUT_HEIGHT,
   COVER_OUTPUT_WIDTH,
   isCoverCropCurrent,
@@ -91,11 +92,15 @@ test('crop math covers portrait, landscape, square, pan bounds and maximum zoom'
     [2160, 3840],
     [3840, 2160],
     [1920, 1920],
+    [720, 1280],
+    [1920, 1080],
+    [640, 1138],
+    [1, 1],
   ]) {
     const crop = calculateCoverCrop(width, height)
     expect(crop.width / crop.height).toBe(9 / 16)
-    expect(crop.width).toBeGreaterThanOrEqual(COVER_OUTPUT_WIDTH)
-    expect(crop.height).toBeGreaterThanOrEqual(COVER_OUTPUT_HEIGHT)
+    expect(crop.width).toBeGreaterThan(0)
+    expect(crop.height).toBeGreaterThan(0)
     expect(isCoverCropCurrent(crop, width, height)).toBe(true)
     const leftTop = calculateCoverCrop(width, height, {
         zoom: crop.maxZoom,
@@ -119,32 +124,28 @@ test('crop math covers portrait, landscape, square, pan bounds and maximum zoom'
   })
   expect(zoomed.zoom).toBe(1.5)
   expect(zoomed.y + zoomed.height).toBeCloseTo(3840, 8)
-  expect(calculateCoverCrop(2160, 3840, { zoom: 99 }).zoom).toBeLessThan(2)
-  expect(calculateCoverCrop(2160, 3840, { zoom: 99 }).zoom).toBeGreaterThan(
-    1.99,
-  )
+  expect(calculateCoverCrop(2160, 3840, { zoom: 99 }).zoom).toBe(COVER_MAX_ZOOM)
+  expect(calculateCoverCrop(640, 1138, { zoom: 2 }).zoom).toBe(2)
+  expect(calculateCoverCrop(640, 1138, { zoom: 0 }).zoom).toBe(1)
   for (const [width, height] of [
     [1087, 1933],
     [4370, 7770],
     [3001, 5000],
   ]) {
     const edge = calculateCoverCrop(width, height, { zoom: 1e12 })
-    expect(edge.width).toBeGreaterThanOrEqual(COVER_OUTPUT_WIDTH)
-    expect(edge.height).toBeGreaterThanOrEqual(COVER_OUTPUT_HEIGHT)
+    expect(edge.width).toBeGreaterThan(0)
+    expect(edge.height).toBeGreaterThan(0)
     expect(edge.width / edge.height).toBeCloseTo(9 / 16, 12)
     expect(isCoverCropCurrent(edge, width, height)).toBe(true)
   }
 })
 
-test('crop math rejects images that require upscale and invalid dimensions', () => {
-  expect(() => calculateCoverCrop(1079, 1920)).toThrow(
-    expect.objectContaining({ code: 'SOURCE_TOO_SMALL' }),
-  )
-  expect(() => calculateCoverCrop(1080, 1919)).toThrow(
-    expect.objectContaining({ code: 'SOURCE_TOO_SMALL' }),
-  )
+test('crop validation rejects invalid dimensions, empty or out-of-bounds crops and stale sources', () => {
   for (const [width, height] of [
     [0, 1920],
+    [-1, 1920],
+    [1080, 0],
+    [1080.5, 1920],
     [Number.NaN, 1920],
     [1080, Number.POSITIVE_INFINITY],
   ])
@@ -153,7 +154,35 @@ test('crop math rejects images that require upscale and invalid dimensions', () 
     )
   const valid = calculateCoverCrop(2160, 3840)
   expect(isCoverCropCurrent({ ...valid, width: 1079 }, 2160, 3840)).toBe(false)
+  expect(
+    isCoverCropCurrent({ ...valid, width: 0, height: 0 }, 2160, 3840),
+  ).toBe(false)
+  expect(isCoverCropCurrent({ ...valid, x: 1 }, 2160, 3840)).toBe(false)
+  expect(isCoverCropCurrent({ ...valid, y: -1 }, 2160, 3840)).toBe(false)
   expect(isCoverCropCurrent(valid, 3840, 2160)).toBe(false)
+})
+
+test('small portrait and landscape crops can be enlarged to the standard export', async () => {
+  for (const [width, height] of [
+    [640, 1138],
+    [1920, 1080],
+  ]) {
+    const image = { width, height } as ImageBitmap,
+      crop = calculateCoverCrop(width, height, {
+        zoom: 2,
+        centerX: 1,
+        centerY: 1,
+      }),
+      draws: unknown[][] = []
+    await exportCoverCrop(image, 'small.png', crop, {
+      createCanvas: () => fakeCanvas((args) => draws.push(args)),
+    })
+    expect(crop.width).toBeLessThan(COVER_OUTPUT_WIDTH)
+    expect(crop.height).toBeLessThan(COVER_OUTPUT_HEIGHT)
+    expect(draws).toEqual([
+      [image, crop.x, crop.y, crop.width, crop.height, 0, 0, 1080, 1920],
+    ])
+  }
 })
 
 test('static image inspection permits JPEG, PNG and still WebP but rejects animation', async () => {

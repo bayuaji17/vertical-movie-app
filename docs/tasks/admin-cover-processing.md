@@ -1,6 +1,6 @@
 # Modul: admin cover processing
 
-- Status: **ACOV-001–010 selesai lokal** di `feat/admin-cover-processing`; R2/production belum diverifikasi.
+- Status: **ACOV-001–011 selesai lokal** di `feat/admin-cover-processing`; R2/production belum diverifikasi.
 - Diperbarui: 6 Oktober 2026.
 - Persetujuan: pengguna menyetujui plan/default pada 6 Oktober 2026; feasibility gate menentukan guard native/browser. Rincian di [plan](../plans/admin-cover-processing/implementation-plan.md).
 - Snapshot source: `06e7ce75e9d3f87bbe501bac054711310e14e5a2`; [context](../plans/admin-cover-processing/repository-context.md).
@@ -473,3 +473,45 @@ Canonical source/docs cross-check, bun run docs:check, Prettier changed Markdown
 ### Blocker atau tindak lanjut
 
 Tidak ada blocker lokal. R2 staging, prosedur recovery request-mode untuk rollout production, dan verifikasi platform/perangkat di luar bukti task ini.
+
+## Task: ACOV-011 — Resolusi sampul sebagai rekomendasi
+
+- Status: Done
+- Owner: Codex / pengembang proyek
+- Prioritas: 11
+- Referensi: ACOV-US-01; [PRD](../product/prd.md), [plan](../plans/admin-cover-processing/implementation-plan.md).
+- Diperbarui: 2026-10-06
+- Dependensi: ACOV-010
+- Ukuran: Kecil, perbaikan crop web
+
+### Ruang lingkup
+
+Pengguna menyetujui resolusi sumber sebagai rekomendasi saja pada 6 Oktober 2026. Base pemeriksaan source: `0d9577e8bf36cdf3205d05ba73a50c0cebad7940`. Aturan lama minimum/no-upscale sampul pada ACOV-001–010 adalah history. Hilangkan guard resolusi pada crop/validator; gunakan zoom 1–4×, preview 9:16 dan export 1080×1920 untuk gambar statis valid. Tampilkan rekomendasi kualitas tanpa memblokir Use crop. Format, pixel/byte budget, animation/decode/abort/stale owner guards tetap berlaku. API tetap memvalidasi payload crop standar; tidak ada perubahan schema/backend.
+
+### Acceptance criteria
+
+- [x] Gambar kecil portrait/landscape tampil dan dapat diposisikan/zoom/crop tanpa error minimum; output 1080×1920 dan ratio 9:16.
+- [x] Invalid dimensions/empty/out-of-bounds/stale crops dan file invalid/animasi/oversize tetap ditolak; Cancel mempertahankan selection sebelumnya.
+- [x] Browser focused layout dan relevant tests, check-types/lint/build, docs/format/diff lulus; dokumen aktif sesuai keputusan pengguna dan perubahan unrelated dipertahankan.
+
+### Validasi
+
+`bun test apps/web/test/admin-cover-crop.test.ts`; browser harness built/media/layout memakai dedicated DB dan bucket random; root `bun run check-types`, `bun run lint`, `bun run build`, `bun run docs:check`; Prettier changed files dan `git diff --check`.
+
+### Hasil dan bukti
+
+6 Oktober 2026: minimum resolusi/no-upscale dihapus dari crop math dan validator; geometry positif, exact 9:16 dan bounds tetap wajib. Zoom 1–4× tersedia untuk seluruh gambar valid. UI menampilkan rekomendasi kualitas tanpa error minimum. Gambar 640×1138 dan landscape 1920×1080 terbukti dapat di-zoom, dibatalkan tanpa kehilangan preview lama, dicrop dan diekspor sebagai WebP 1080×1920 di Chrome 154.
+
+`bun test` pada enam file cover/file/state/fingerprint/recovery/client lulus: 51 tests / 335 expectations. Built-browser harness (`AUTH_BROWSER_RUNTIME=built AUTH_BROWSER_PHASE=media MEDIA_BROWSER_PHASE=layout`, runner Windows melalui `AUTH_BROWSER_WORKER_PATH`) lulus Film/Standalone/Series, Light/Dark/System, lima widths 320/390/768/1024/1440, focus trap/return, keyboard/pointer/touch, source bypass, cancel/replacement, small-source/upscale dan oversize PNG rejection. Harness memakai DB dedicated dan bucket fixture random; ini focused layout proof, bukan klaim proof upload/Ready baru. Screenshot crop aktual tetap di `.turbo/admin-cover-processing/acov-007/`; log task di `.turbo/admin-cover-processing/acov-011/`.
+
+Root `bun run check-types`: 3/3 passed (api/auth cache hits, web fresh), `bun run lint`: 1/1 passed (web fresh), `bun run build`: 2/2 passed (api cache hit, web fresh; warning chunk >500 kB existing), `bun run docs:check`: 59 Markdown / 531 links passed. Prettier changed files dan `git diff --check` passed. Staged export docs checker lulus (52 Markdown / 512 local links dan anchors); staging hanya 14 path milik task, README di-stage parsial agar perubahan desain lokal tetap di luar commit. API/schema/dependency tidak berubah; R2/production tetap belum diverifikasi.
+
+### Commit task
+
+- Pesan: `fix(web): allow smaller cover crops (ACOV-011)`
+- SHA: belum dibuat; receipt dicatat pada pembaruan ledger berikutnya.
+- Hook/checks: relevant tests/browser/root gates dan docs/format/diff lulus; hook commit akan dijalankan tanpa bypass.
+
+### Blocker atau tindak lanjut
+
+Tidak ada blocker implementasi. Resolusi rendah mungkin menghasilkan gambar lembut; rekomendasi kualitas tidak menjadi syarat upload.
