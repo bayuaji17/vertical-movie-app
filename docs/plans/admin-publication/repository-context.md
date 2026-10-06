@@ -143,4 +143,6 @@ Semua source tracked berikut diperiksa pada `313e31a14891ac0f91265a3557576b44791
 
 ## Freshness
 
-Valid pada base SHA untuk source yang dianalisis. Sebelum APUB-002–013, resolve target ref dan diff seluruh affected source/test/docs dependency terhadap base. Perubahan hanya pada dokumen planning/receipt tidak otomatis membuat plan stale; perubahan policy/routes/schema/auth/cache/design harus ditinjau dan dicatat pada validation history plan.
+Valid pada base SHA untuk source yang dianalisis. Pada 7 Oktober 2026 sebelum APUB-002, target `4cf00a97dffe9568a966f8889ae798fed3acdb17` direvalidasi: diff base→target hanya empat dokumen planning, dan worktree source aplikasi/packages/root runtime config tidak berubah. Pengguna telah menyetujui plan; desain APUB-002 baru masih menunggu review visual. Snapshot kode di atas tetap current, bukan diganti oleh status eksekusi/desain.
+
+Sebelum APUB-003–013, resolve target ref dan diff seluruh affected source/test/docs dependency terhadap base. Perubahan hanya pada dokumen planning/receipt tidak otomatis membuat plan stale; perubahan policy/routes/schema/auth/cache/design harus ditinjau dan dicatat pada validation history plan.

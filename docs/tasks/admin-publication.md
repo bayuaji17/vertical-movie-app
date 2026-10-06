@@ -1,6 +1,6 @@
 # Modul: Admin Publish & Archive
 
-> Status: **Planning untuk review** · 7 Oktober 2026 · Prioritas fitur dan pembuatan plan disetujui pengguna; rincian UX/plan/runtime belum dianggap approved/implemented/verified. Base SHA `313e31a14891ac0f91265a3557576b44791309d7`.
+> Status: **Plan approved; desain APUB-002 untuk review visual** · 7 Oktober 2026 · Pengguna menyetujui plan melalui “oke setuju”. Empat raster/state specification baru belum approved; runtime belum implemented/verified. Base SHA `313e31a14891ac0f91265a3557576b44791309d7`.
 
 ## Tujuan modul
 
@@ -30,7 +30,7 @@ Sebagai admin dan pengembang, saya ingin status akhir dapat dipastikan saat netw
 
 ## Urutan dan aturan evidence
 
-Semua runtime tasks masih **Backlog** sampai eksekusi diminta dan dependencies/approval yang relevan tersedia; status bukan Blocked hanya karena belum mulai. Task menjadi Ready ketika acceptance/dependencies tersedia sesuai workflow. APUB-001 documentation-only mendapat Done setelah checks dan commit berhasil. Tidak menyatakan runtime selesai dari plan/mockup.
+Plan telah disetujui; runtime tasks menjadi Ready ketika dependency yang relevan tersedia. APUB-003 Ready dari APUB-001, sedangkan UI tasks masih menunggu dependency/desain diterima; status bukan Blocked hanya karena belum mulai. Task menjadi Ready ketika acceptance/dependencies tersedia sesuai workflow. APUB-001 documentation-only mendapat Done setelah checks dan commit berhasil. Tidak menyatakan runtime selesai dari plan/mockup.
 
 | Task     | Outcome                                                | Dependensi         |
 | -------- | ------------------------------------------------------ | ------------------ |
@@ -83,17 +83,17 @@ Planning: bun run docs:check; installed Prettier untuk context/plan/backlog/inde
 ### Commit task
 
 - Pesan: `docs: plan admin publication (APUB-001)`
-- SHA: dicatat pada update ledger task berikutnya setelah commit ini berhasil.
-- Hook/checks: docs65/601, staged docs58/582, Prettier/diff/preservation dan lint1/1/types3/3 lulus; automatic hook/Commitlint receipt dicatat setelah commit tanpa bypass.
+- SHA: `4cf00a97dffe9568a966f8889ae798fed3acdb17`.
+- Hook/checks: docs65/601, staged docs58/582, Prettier/diff/preservation dan hook lint1/1/types3/3 valid cache serta Commitlint lulus; tidak ada hook dilewati.
 - Ledger: SHA aktual dicatat setelah commit berhasil pada update task/dokumentasi berikutnya; tidak memakai self-referential SHA.
 
 ### Blocker atau tindak lanjut
 
-Detail UX/plan masih proposal untuk review pengguna. Runtime/push/PR/merge/deploy tidak dikerjakan pada task planning.
+Pengguna menyetujui plan melalui “oke setuju” pada 7 Oktober 2026. APUB-002 desain untuk review; source runtime/push/PR/merge/deploy belum dikerjakan.
 
 ## Task: APUB-002 — Desain section Publication dan confirmation states
 
-- Status: Backlog
+- Status: Review
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1
 - Referensi: APUB-US-01; PRD-05/06/08/09, GR-01–09 yang relevan; [step plan](../plans/admin-publication/implementation-plan.md#apub-002--publication-ux-dan-state-specification)
@@ -107,11 +107,11 @@ Buat canonical docs/design/admin-publication.md dengan extension layout detail e
 
 ### Acceptance criteria
 
-- [ ] Layout menggunakan current semantic tokens/styles, shared avatar/theme/navigation, English copy serta section placement yang konsisten.
-- [ ] Loading/blocked/ready/stale/pending/unknown/published/archived, rights/media-busy/version conflict dan readonly unsupported resource terspesifikasi.
-- [ ] Publish dialog menyatakan preview acknowledgement lokal, rights tersimpan dan konsekuensi public availability; archive menjelaskan expiry, preservation dan no restore.
-- [ ] Dialog/focus/Escape/Cancel/pending/live-region, ukuran target 44 px, 320/390/768/1024/1440 px dan theme switch tanpa reset intent dibahas.
-- [ ] Status proposed versus visual approval/runtime proof dibedakan; approval dicatat hanya bila pengguna memberikan.
+- [x] Layout menggunakan current semantic tokens/styles, shared avatar/theme/navigation, English copy serta section placement yang konsisten.
+- [x] Loading/blocked/ready/stale/pending/unknown/published/archived, rights/media-busy/version conflict dan readonly unsupported resource terspesifikasi.
+- [x] Publish dialog menyatakan preview acknowledgement lokal, rights tersimpan dan konsekuensi public availability; archive menjelaskan expiry, preservation dan no restore.
+- [x] Dialog/focus/Escape/Cancel/pending/live-region, ukuran target 44 px, 320/390/768/1024/1440 px dan theme switch tanpa reset intent dibahas.
+- [x] Status proposed versus visual approval/runtime proof dibedakan; approval dicatat hanya bila pengguna memberikan.
 
 ### Validasi
 
@@ -119,22 +119,22 @@ Review four layout modes dan kedua dialog/state matrix terhadap plan serta dashb
 
 ### Hasil dan bukti
 
-Belum dikerjakan; command di bagian Validasi merupakan rencana, bukan hasil aktual. Tidak ada commit/runtime proof untuk task ini.
+7 Oktober 2026: freshness source base313e31a→target4cf00a9 valid, diff hanya dokumen planning. Branch feat/admin-publication dibuat dari approved planning SHA. Canonical [desain](../design/admin-publication.md) mencakup checklist, loading/stale/blocked/ready/published/archived/unknown states, confirmation Publish/Archive, retry/version/auth semantics, responsivitas dan accessibility specification. Lima built-in image_gen calls menghasilkan empat selected desktop/mobile light/dark PNG; mobile candidate dikoreksi menjadi source/cover satu kolom. Desktop light1150×1367/dark1150×1368, mobile light801×1962/dark801×1964. Inspeksi visual exact checklist labels/English coherent Draft+Ready/source+cover Ready/no Archive draft dan charcoal appearance selesai; header PNG/dimensi/SHA-256 diperiksa tanpa resize. Source/runtime/API/schema/dependency tetap tidak berubah. Visual approval belum diberikan pengguna; tests browser/device/contrast bukan hasil task desain. Checks aktual: bun run docs:check lulus66 Markdown/617 links, staged-only validator lulus59 Markdown/598 links, installed Prettier dan git diff --check lulus. SHA-256 preservation22 unrelated path dan pre-existing indeks setelah tiga fitur-only edits dinormalisasi lulus; staged diff hanya9 file milik desain/approval ledger. Local commit memakai hook normal; hasil hook/SHA dicatat update berikutnya setelah commit.
 
 ### Commit task
 
 - Pesan: `docs: specify publication states (APUB-002)`
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- SHA: dicatat pada update berikutnya setelah commit desain berhasil.
+- Hook/checks: docs66/617, staged59/598, PNG header/dimensi/hash, Prettier/diff dan preservation22 lulus. Hook/Commitlint dan SHA actual dicatat setelah commit, tanpa bypass.
 - Ledger: SHA aktual dicatat setelah commit berhasil pada update task/dokumentasi berikutnya; tidak memakai self-referential SHA.
 
 ### Blocker atau tindak lanjut
 
-UI tasks APUB-007–009 mengikuti desain yang diterima. Scope/visual approval bukan implicit karena sebuah mockup telah dibuat.
+Plan approved. Empat mockup dan specification menunggu review visual pengguna sebelum UI APUB-007–009, sesuai APUB-002: runtime UI memakai desain yang diterima. API policy APUB-003 independen dan Ready. Tidak meminta approval ulang plan.
 
 ## Task: APUB-003 — Shared video publication readiness assessment
 
-- Status: Backlog
+- Status: Ready
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1
 - Referensi: APUB-US-01; PRD-05/06/08/09, GR-01–09 yang relevan; [step plan](../plans/admin-publication/implementation-plan.md#apub-003--shared-video-publication-assessment)
@@ -587,9 +587,11 @@ Actual APUB-013 SHA dicatat pada receipt update/task berikutnya setelah commit; 
 
 ## Ledger dan keputusan
 
-| Tanggal    | Task/keputusan | Status/evidence                                                                                                                                   | Commit                              |
-| ---------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| 2026-10-07 | Scope priority | Pengguna menyetujui Publish & Archive Film/Standalone sebagai fitur berikutnya dan meminta plan; detail proposal belum approval runtime.          | Tidak berlaku.                      |
-| 2026-10-07 | APUB-001       | Done dokumentasi: context-before-plan, dependency13, docs65/601, staged58/582, format/diff/preservation, lint1/1/types3/3; runtime belum dimulai. | Receipt SHA pada update berikutnya. |
+| Tanggal    | Task/keputusan | Status/evidence                                                                                                                          | Commit                                     |
+| ---------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| 2026-10-07 | Scope priority | Pengguna menyetujui Publish & Archive Film/Standalone sebagai fitur berikutnya dan meminta plan; detail proposal belum approval runtime. | Tidak berlaku.                             |
+| 2026-10-07 | APUB-001       | Done: planning artifacts, observed gates/hooks/Commitlint, preservation; plan kini approved.                                             | `4cf00a97dffe9568a966f8889ae798fed3acdb17` |
 
-Receipt APUB-001 akan dicatat pada task berikutnya setelah commit planning berhasil. Final task SHA tidak ditulis sebagai self-reference; final response Git history atau receipt update berikutnya menyediakan actual SHA. Semua approval/task status harus dibedakan dari gerbang production.
+| 2026-10-07 | Plan approval / APUB-002 | Pengguna menyetujui plan; desain empat layout/state siap review visual, belum approval raster/runtime. | Commit desain dicatat update berikutnya. |
+
+Receipt APUB-001 dicatat pada delivery desain ini setelah planning commit berhasil. APUB-002 Review; empat PNG dan specification siap visual review, bukan runtime proof. Final task SHA tidak ditulis sebagai self-reference; final response Git history atau receipt update berikutnya menyediakan actual SHA. Semua approval/task status harus dibedakan dari gerbang production.

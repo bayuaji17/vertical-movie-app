@@ -28,6 +28,7 @@ Aturan penamaan, ownership dan maintenance berada pada [Documentation rules](../
 - [Dashboard desktop light/dark](design/admin-content-desktop-light.md): v2 English/avatar, tiga jenis dan pagination custom; desain disetujui, metadata dashboard diimplementasikan.
 - [Dashboard mobile light/dark](design/admin-content-mobile.md): lima layouts light/dark disetujui; cards/form/drawer dan pagination metadata diimplementasikan.
 - [Upload Media desktop/mobile light/dark](design/admin-media-upload.md): empat mockup disetujui pengguna 5 Oktober 2026; state/modal specification dan runtime responsif terverifikasi lokal 6 Oktober 2026.
+- [Publish & Archive desktop/mobile light/dark](design/admin-publication.md): empat mockup readiness dan state/dialog specification untuk review visual 7 Oktober 2026; plan disetujui, runtime belum diimplementasikan.
 
 Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dashboard dark](design/dashboard-dark-shadcn.prompt.md) dan [login](design/login-light-shadcn-redesign.prompt.md). Screenshot login: [desktop](design/login-implemented-desktop.png) dan [mobile](design/login-implemented-mobile.png). Data mockup bukan bukti fitur selesai.
 
@@ -47,7 +48,7 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 
 Logging request API memakai console implemented/verified lokal 7 Oktober 2026; [panduan](guides/api-development.md#logging-request-http), [context baseline](plans/api-request-logging/repository-context.md) dan [plan/evidence](plans/api-request-logging/implementation-plan.md) menjelaskan scope serta batas gateway/storage.
 
-Publish & Archive admin Film/Standalone: [context snapshot](plans/admin-publication/repository-context.md) dan [implementation plan](plans/admin-publication/implementation-plan.md), ready untuk review 7 Oktober 2026. Scope mencakup readiness server, konfirmasi manual, version/idempotency/recovery dan proof akses publik; runtime UI belum dikerjakan.
+Publish & Archive admin Film/Standalone: [context snapshot](plans/admin-publication/repository-context.md) dan [implementation plan](plans/admin-publication/implementation-plan.md), disetujui pengguna 7 Oktober 2026. Scope mencakup readiness server, konfirmasi manual, version/idempotency/recovery dan proof akses publik; empat mockup/state specification APUB-002 siap review visual, runtime UI belum dikerjakan.
 
 | Fitur              | Context                                                         | Plan                                                                                           | Penggunaan                                                                                                                                                                       |
 | ------------------ | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -67,7 +68,7 @@ Publish & Archive admin Film/Standalone: [context snapshot](plans/admin-publicat
 - [Media](tasks/media.md): konfigurasi, multipart, cleanup dan provider proof.
 - [Worker](tasks/media-worker.md): queue, lease/retry, FFmpeg, retensi dan benchmark.
 - [Publication/playback](tasks/media-publication.md): readiness, visibility, katalog, HLS dan player.
-- [Publish & Archive admin](tasks/admin-publication.md): APUB-001–013; plan detail Film/Standalone dan acceptance UI/API/DB/browser, runtime belum dimulai.
+- [Publish & Archive admin](tasks/admin-publication.md): APUB-001–013; plan approved, APUB-002 desain untuk review visual, acceptance UI/API/DB/browser masih lanjutan.
 - [Database tooling](tasks/database-tooling.md): Drizzle Studio development.
 - [Development verification](tasks/development-verification.md): quality gate, preservation migrasi dan upgrade Turbo 2.11.7 terverifikasi lokal.
 - [Build web](tasks/web-build.md): baseline warning directive, plan filter logging dan verifikasi build/SSR.

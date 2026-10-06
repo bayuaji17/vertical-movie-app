@@ -2,15 +2,15 @@
 
 ## Plan metadata
 
-- Status: **ready untuk review** · 7 Oktober 2026. Kesiapan teknis planning tidak berarti approval rincian UX, runtime implemented atau production verified.
+- Status: **executing — plan disetujui, desain untuk review** · 7 Oktober 2026. Pengguna menyetujui plan melalui “oke setuju”; APUB-002 menghasilkan empat mockup/state specification untuk review visual. Approval plan tidak menyatakan raster baru approved, runtime implemented atau production verified.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `feat/api-request-logging`; base SHA: `313e31a14891ac0f91265a3557576b44791309d7`.
 - Context: [repository-context.md](repository-context.md), ditulis lebih dahulu.
-- Last validated SHA: `313e31a14891ac0f91265a3557576b44791309d7`.
+- Last validated SHA: `4cf00a97dffe9568a966f8889ae798fed3acdb17`.
 - Backlog canonical: [admin-publication](../../tasks/admin-publication.md); APUB-001–013, lima user story.
-- Pengguna menyetujui prioritas Publish & Archive Film/Standalone dan meminta plan detail pada 7 Oktober 2026. Rincian plan berikut merupakan proposal untuk review; source belum diubah.
+- Pengguna menyetujui prioritas Publish & Archive Film/Standalone, meminta plan detail dan menyetujui plan melalui “oke setuju” pada 7 Oktober 2026. Plan menjadi acuan eksekusi; source belum diubah pada delivery desain APUB-002.
 - Local documentation task commit mengikuti otorisasi standing di root AGENTS; implementation/push/PR/merge/deployment bukan hasil atau otorisasi baru dari dokumen ini.
-- Branch planning: `chore/admin-publication-plan`, dibuat lokal dari base SHA pada 7 Oktober 2026. Branch runtime setelah implementasi diotorisasi: `feat/admin-publication`; base actual dipilih dari target yang direvalidasi, bukan otomatis main remote.
+- Branch planning: `chore/admin-publication-plan`, dibuat lokal dari base SHA. Branch eksekusi `feat/admin-publication` dibuat dari planning commit `4cf00a97dffe9568a966f8889ae798fed3acdb17` setelah approval dan freshness review. APUB-002 saat ini hanya mengubah desain/dokumentasi.
 
 ## Objective
 
@@ -362,9 +362,7 @@ Base/context [evidence index](repository-context.md#evidence-index) memetakan cl
 
 ## Open decisions
 
-Tidak ada blocker untuk menulis plan teknis ini. Proposal yang perlu direview sebelum UI runtime: placement section/actions, archive published-only, preview acknowledgement checkbox per dialog, serta empat layout/state specification. Tidak ada perubahan angka/retensi/policy produk yang diusulkan.
-
-Approval pengguna atas **prioritas fitur dan pembuatan plan** sudah tercatat; approval rinci plan/desain dan perintah implementasi belum diberikan pada turn ini. Pembuatan raster mockup adalah hasil task desain saat dikerjakan, bukan bagian otomatis dari permintaan dokumen planning sekarang.
+Pengguna menyetujui plan, termasuk placement section/actions, archive published-only dan preview acknowledgement checkbox per dialog. Tidak ada perubahan angka/retensi/policy produk. Empat raster baru dan state/dialog specification pada [desain Publication](../../design/admin-publication.md) siap direview; visual approval belum diberikan. Sesuai APUB-002, runtime UI memakai desain yang diterima. Approval tidak ditanya ulang untuk plan yang sudah disetujui.
 
 ## Validation history
 
@@ -376,7 +374,25 @@ Approval pengguna atas **prioritas fitur dan pembuatan plan** sudah tercatat; ap
 - Changed relevant runtime paths: tidak ada pada initial git status. 23 existing dirty paths adalah dokumentasi/desain/build receipt; overlay indeks/design-system diidentifikasi terpisah.
 - Decision: source snapshot cukup untuk planning; runtime belum dimulai. Revalidate target dan any affected diff sebelum implementasi.
 
+### 2026-10-07 — Freshness sebelum desain APUB-002
+
+- Result: **valid**.
+- Plan base SHA: `313e31a14891ac0f91265a3557576b44791309d7`.
+- Current target SHA: `4cf00a97dffe9568a966f8889ae798fed3acdb17`.
+- Checked paths: `apps`, `packages`, `AGENTS.md`, root manifests/lock/Turbo serta empat dokumen planning.
+- Changed relevant runtime paths: tidak ada; diff hanya dokumen planning, existing worktree source tetap bersih.
+- Decision: source evidence tetap current; desain baru belum mengubah implementation atau memperoleh approval visual.
+
 ## Execution log
+
+### 2026-10-07 — Approval dan freshness APUB-002
+
+- Approval: pengguna memberi “oke setuju” setelah delivery plan APUB-001; plan approved dan desain APUB-002 dimulai.
+- Result: **valid**; base SHA `313e31a14891ac0f91265a3557576b44791309d7`, current target `4cf00a97dffe9568a966f8889ae798fed3acdb17`.
+- Checked paths: `apps`, `packages`, root `AGENTS.md`, manifest/lock/Turbo; diff base→HEAD hanya empat dokumen planning. Worktree runtime paths tidak dirty. Existing 23 desain/build/index path dipertahankan.
+- Decision: evidence policy/routes/schema/auth/cache tetap current; context tidak perlu diganti. Branch `feat/admin-publication` dibuat dari current planning SHA tanpa reset worktree.
+- APUB-001 receipt: `4cf00a97dffe9568a966f8889ae798fed3acdb17`, `docs: plan admin publication (APUB-001)`; hook docs65/601, lint1/1/types3/3 valid cache dan Commitlint lulus, tanpa bypass.
+- APUB-002 output: [canonical desain](../../design/admin-publication.md) + desktop/mobile light/dark PNG, lima built-in image_gen calls termasuk targeted mobile stack correction. Runtime belum berubah; visual approval pending. Hasil checks/commit baru dicatat pada backlog setelah observasi, bukan diasumsikan dari receipt APUB-001.
 
 ### 2026-10-07 — Planning
 
