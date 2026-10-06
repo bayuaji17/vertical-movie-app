@@ -294,9 +294,14 @@ test(
           contentType: "image/png",
           sizeBytes: String(Bun.file(posterFile).size),
           idempotencyKey: crypto.randomUUID(),
+          expectedSha256: createHash("sha256")
+            .update(new Uint8Array(await Bun.file(posterFile).arrayBuffer()))
+            .digest("hex"),
         },
         "media-admin",
       );
+      // Simulate a durable pre-ACOV session; new poster sessions default to request.
+      await database.client`UPDATE upload_sessions SET processing_mode='worker' WHERE id=${posterSession.id}::uuid`;
       const posterPart = await service.part(posterSession.id, 1, "media-admin");
       expect(
         (
@@ -320,9 +325,13 @@ test(
             contentType: "image/png",
             sizeBytes: String(Bun.file(posterFile).size),
             idempotencyKey: crypto.randomUUID(),
+            expectedSha256: createHash("sha256")
+              .update(new Uint8Array(await Bun.file(posterFile).arrayBuffer()))
+              .digest("hex"),
           },
           "media-admin",
         );
+        await database.client`UPDATE upload_sessions SET processing_mode='worker' WHERE id=${parentPoster.id}::uuid`;
         const url = await service.part(parentPoster.id, 1, "media-admin");
         expect(
           (await fetch(url.url!, { method: "PUT", body: Bun.file(posterFile) }))

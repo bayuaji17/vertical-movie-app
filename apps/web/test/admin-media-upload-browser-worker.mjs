@@ -24,8 +24,62 @@ try {
     errors = []
   page.on('pageerror', (error) => errors.push(error.message))
   page.on('dialog', (dialog) => dialog.accept())
-  const proof = async () =>
-    await (await fetch(controlURL + '/media-proof')).json()
+  const proof = async (verifyPosterObjects = false) =>
+    await (
+      await fetch(
+        controlURL + '/media-proof' + (verifyPosterObjects ? '?objects=1' : ''),
+      )
+    ).json()
+  const assertReadyCover = async (ownerId) => {
+    const result = await proof(true)
+    const session = result.sessions.find(
+        (item) =>
+          item.owner_id === ownerId &&
+          item.kind === 'poster' &&
+          item.status === 'completed',
+      ),
+      asset = result.assets.find((item) => item.id === session?.asset_id),
+      job = result.jobs.find((item) => item.id === asset?.ready_job_id),
+      object = result.posterObjects.find((item) => item.assetId === asset?.id)
+    assert.ok(session, `Completed cover upload must exist for ${ownerId}`)
+    assert.ok(asset)
+    assert.equal(asset.state, 'ready')
+    assert.ok(asset.verified_ready_at)
+    assert.equal(asset.content_type, 'image/webp')
+    assert.deepEqual([asset.facts.width, asset.facts.height], [1080, 1920])
+    assert.equal(session.expected_sha256, asset.sha256)
+    assert.ok(job)
+    assert.ok(object)
+    assert.equal(job.execution_mode, 'request')
+    assert.equal(job.state, 'succeeded')
+    assert.equal(job.attempts, 1)
+    assert.ok(object.sizeBytes > 0 && object.sizeBytes <= 5_000_000)
+    assert.equal(object.headSizeBytes, object.sizeBytes)
+    assert.equal(
+      result.attempts.filter((item) => item.job_id === job.id).length,
+      1,
+    )
+    assert.deepEqual(object, {
+      ownerId,
+      assetId: asset.id,
+      state: 'ready',
+      sizeBytes: object.sizeBytes,
+      headSizeBytes: object.headSizeBytes,
+      contentType: 'image/webp',
+      dimensions: [1080, 1920],
+      webp: true,
+      outputSha256: asset.facts.outputSha256,
+      inputSha256: asset.sha256,
+      factsOutputSha256: asset.facts.outputSha256,
+      outputMatchesReadyJob: true,
+      processingMode: 'request',
+      jobState: 'succeeded',
+      attempts: 1,
+      attemptRows: 1,
+      unsignedStatus: 403,
+    })
+    return result
+  }
   const mediaControl = async (input) => {
     const result = await fetch(controlURL + '/control/media', {
       method: 'POST',
@@ -667,7 +721,45 @@ try {
       timeout: 30000,
     })
     assert.equal(await page.locator('a[href*="/preview"]').count(), 0)
+    await assertReadyCover(data.ids.filmDraft)
+
+    for (const type of ['standalone', 'series']) {
+      await page.goto(path(type))
+      await card('poster').waitFor()
+      await chooseAndCropCover()
+      await card('poster')
+        .getByRole('button', { name: 'Upload file', exact: true })
+        .click()
+      await card('poster').getByText('Ready', { exact: true }).waitFor({
+        timeout: 30000,
+      })
+      await assertReadyCover(data.ids[type + 'Draft'])
+    }
+
+    let beforeWorker = await proof()
+    const sourceSession = beforeWorker.sessions.find(
+      (item) =>
+        item.owner_id === data.ids.filmDraft &&
+        item.kind === 'source' &&
+        item.status === 'completed',
+    )
+    assert.ok(sourceSession)
+    const sourceAsset = beforeWorker.assets.find(
+        (item) => item.id === sourceSession.asset_id,
+      ),
+      sourceJob = beforeWorker.jobs.find(
+        (item) => item.asset_id === sourceSession.asset_id,
+      )
+    assert.ok(sourceAsset)
+    assert.equal(sourceAsset.state, 'uploaded')
+    assert.ok(sourceJob)
+    assert.equal(sourceJob.execution_mode, 'worker')
+    assert.equal(sourceJob.state, 'queued')
+    assert.equal(sourceJob.attempts, 0)
+    assert.equal(beforeWorker.workerStarts, 0)
+
     await mediaControl({ runJobs: true })
+    await page.goto(path('film'))
     await page
       .getByRole('button', { name: 'Refresh media', exact: true })
       .click()
@@ -678,7 +770,7 @@ try {
       .getByText('Ready', { exact: true })
       .waitFor({ timeout: 30000 })
     await page.locator('a[href*="/preview"]').waitFor()
-    const verified = await proof(),
+    const verified = await proof(true),
       session = verified.sessions.find(
         (s) =>
           s.owner_id === data.ids.filmDraft &&
@@ -695,6 +787,16 @@ try {
       verified.jobs.filter((j) => j.asset_id === session.asset_id).length,
       1,
     )
+    const sourceJobAfterWorker = verified.jobs.find(
+      (item) => item.asset_id === session.asset_id,
+    )
+    assert.equal(sourceJobAfterWorker?.execution_mode, 'worker')
+    assert.equal(sourceJobAfterWorker?.state, 'succeeded')
+    assert.ok(sourceJobAfterWorker?.output_files?.includes('master.m3u8'))
+    assert.ok(
+      sourceJobAfterWorker?.output_files?.some((file) => file.endsWith('.m4s')),
+    )
+    assert.equal(verified.workerStarts, 1)
     const posterSession = verified.sessions.find(
       (s) =>
         s.owner_id === data.ids.filmDraft &&
@@ -772,16 +874,11 @@ try {
     await edit.close()
     stage = 'series-cover'
     await page.goto(path('series'))
-    await chooseAndCropCover()
-    await card('poster')
-      .getByRole('button', { name: 'Upload file', exact: true })
-      .click()
-    await card('poster').getByText('Ready', { exact: true }).waitFor()
-    await mediaControl({ runJobs: true })
     await page
       .getByRole('button', { name: 'Refresh media', exact: true })
       .click()
     await card('poster').getByText('Ready', { exact: true }).waitFor()
+    await assertReadyCover(data.ids.seriesDraft)
     assert.equal(await card('source').count(), 0)
     assert.equal(await page.locator('a[href*="/preview"]').count(), 0)
     stage = 'leave-auth'
@@ -926,7 +1023,7 @@ try {
     await page.waitForURL(/\/admin\/login/)
     assert.deepEqual(errors, [])
     console.log(
-      'Browser: media uploader — 45 theme/viewport layouts, direct MinIO multipart, refresh/full-hash resume, wrong-file block, matching source hash and one-job completion replay, request-based cover processing plus refresh/Finish cover without retransferring, processing/ready, dirty 409 retention, series cover, authorized API-outage recovery, cross-tab exclusion, offline/resume, leave/pause/cancel, in-flight logout/back passed',
+      'Browser: media uploader — Film/Standalone/Series covers private WebP 1080×1920 Ready with stored-object hash/HEAD/job provenance while worker stopped, source remains queued until HLS worker starts, direct MinIO multipart and resume/recovery, legacy worker HLS, 45 theme/viewport layouts, dirty 409, outage, cross-tab, offline, leave/cancel/logout passed',
     )
     await control({ outage: false, role: 'admin' })
   }

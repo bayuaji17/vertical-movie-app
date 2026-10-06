@@ -72,7 +72,11 @@ const api = Bun.serve({
       return Response.json({ ok: true })
     }
     if (url.pathname === '/media-proof' && mediaFixture)
-      return Response.json(await mediaFixture.proof())
+      return Response.json(
+        await mediaFixture.proof({
+          verifyPosterObjects: url.searchParams.has('objects'),
+        }),
+      )
     if (url.pathname === '/cover-screenshot' && mediaFixture) {
       try {
         const path = await mediaFixture.saveCoverScreenshot(

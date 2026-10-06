@@ -227,24 +227,112 @@ export async function createAdminMediaBrowserFixture(
       partNumber?: number;
     }> = [];
     let failureStatus = 0,
-      processPosterUnavailable = false;
+      processPosterUnavailable = false,
+      workerStarts = 0;
     const digest = createHash("sha256");
     for await (const chunk of Bun.file(source).stream()) digest.update(chunk);
     return {
       ids,
       traces,
       files: { source, poster, sourceSize: Bun.file(source).size },
-      async proof() {
+      async proof(options: { verifyPosterObjects?: boolean } = {}) {
+        type ProofAsset = {
+          id: string;
+          owner_id: string;
+          kind: string;
+          state: string;
+          object_key: string;
+          size_bytes: string;
+          content_type: string;
+          sha256: string | null;
+          ready_job_id: string | null;
+          facts: Record<string, unknown> | null;
+          verified_ready_at: Date | null;
+        };
+        type ProofJob = {
+          id: string;
+          asset_id: string;
+          execution_mode: string;
+          state: string;
+          attempts: number;
+          output_prefix: string | null;
+          output_files: string[] | null;
+        };
+        type ProofAttempt = {
+          job_id: string;
+          attempt: number;
+          stopped_at: Date | null;
+          failure_code: string | null;
+        };
+        const assets =
+            (await database.client`SELECT id,coalesce(video_id,series_id) AS owner_id,kind,state,object_key,size_bytes::text AS size_bytes,content_type,sha256,ready_job_id,facts,verified_ready_at FROM media_assets ORDER BY created_at`) as ProofAsset[],
+          jobs =
+            (await database.client`SELECT id,asset_id,execution_mode,state,attempts,output_prefix,output_files FROM media_jobs ORDER BY created_at`) as ProofJob[],
+          attempts =
+            (await database.client`SELECT job_id,attempt,stopped_at,failure_code FROM media_job_attempts ORDER BY attempt`) as ProofAttempt[],
+          posterObjects = [] as Array<Record<string, unknown>>;
+        for (const asset of options.verifyPosterObjects ? assets : []) {
+          if (asset.kind !== "poster" || asset.state !== "ready") continue;
+          const job = jobs.find((item) => item.id === asset.ready_job_id);
+          if (!job?.output_prefix) continue;
+          try {
+            const outputKey = job.output_prefix + "poster.webp";
+            const bytes = new Uint8Array(
+                await native.file(outputKey).arrayBuffer(),
+              ),
+              stat = await storage.stat(outputKey),
+              metadata = await new Bun.Image(bytes, {
+                maxPixels: 16_777_216,
+              }).metadata(),
+              outputSha256 = createHash("sha256").update(bytes).digest("hex"),
+              unsigned = await fetch(
+                `${config.endpoint}/${config.bucket}/${outputKey}`,
+              );
+            posterObjects.push({
+              ownerId: asset.owner_id,
+              assetId: asset.id,
+              state: asset.state,
+              sizeBytes: bytes.byteLength,
+              headSizeBytes: stat.sizeBytes,
+              contentType: stat.contentType,
+              dimensions: [metadata.width, metadata.height],
+              webp:
+                Buffer.from(bytes).toString("ascii", 0, 4) === "RIFF" &&
+                Buffer.from(bytes).toString("ascii", 8, 12) === "WEBP",
+              outputSha256,
+              inputSha256: asset.sha256,
+              factsOutputSha256: asset.facts?.outputSha256,
+              outputMatchesReadyJob:
+                job.state === "succeeded" &&
+                outputKey === job.output_prefix + "poster.webp" &&
+                job.output_files?.includes("poster.webp"),
+              processingMode: job.execution_mode,
+              jobState: job.state,
+              attempts: job.attempts,
+              attemptRows: attempts.filter((row) => row.job_id === job.id)
+                .length,
+              unsignedStatus: unsigned.status,
+            });
+          } catch {
+            posterObjects.push({
+              ownerId: asset.owner_id,
+              assetId: asset.id,
+              verificationFailed: true,
+            });
+          }
+        }
         return {
           ids,
           traces,
+          workerStarts,
           files: { source, poster, sourceSize: Bun.file(source).size },
           sourceSha256: digest.copy().digest("hex"),
           sessions:
             await database.client`SELECT id,coalesce(video_id,series_id) AS owner_id,kind,status,asset_id,expected_sha256 FROM upload_sessions ORDER BY created_at`,
-          assets:
-            await database.client`SELECT id,state,sha256,ready_job_id,verified_ready_at FROM media_assets`,
-          jobs: await database.client`SELECT id,asset_id,state FROM media_jobs`,
+          assets,
+          jobs,
+          attempts,
+          posterObjects,
         };
       },
       async saveCoverScreenshot(name: string, bytes: Uint8Array) {
@@ -289,6 +377,7 @@ export async function createAdminMediaBrowserFixture(
             .where(eq(videos.id, ids.filmDraft));
         }
         if (input.runJobs) {
+          workerStarts += 1;
           // Run the actual worker entry point separately; FFmpeg is outside the HTTP process.
           const worker = Bun.spawn([process.execPath, "src/workers/index.ts"], {
             cwd: resolve(import.meta.dir, "../.."),

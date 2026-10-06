@@ -389,7 +389,7 @@ Tidak ada blocker ACOV-008. ACOV-009 masih backlog untuk matriks kompatibilitas 
 
 ## Task: ACOV-009 — Buktikan cover Ready tanpa worker dan kompatibilitas video
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex / pengembang proyek
 - Prioritas: 9
 - Referensi: ACOV-US-01–03; PRD media/sampul dan GR lifecycle; [plan](../plans/admin-cover-processing/implementation-plan.md).
@@ -405,10 +405,10 @@ Target: `Existing guarded API media integration suite/browser harness; fixture e
 
 ### Acceptance criteria
 
-- [ ] Ketiga owner memperoleh private WebP 1080×1920 dan verified Ready saat worker fixture mati; source tetap queued sampai worker berjalan.
-- [ ] Old Ready/pending/failed posters, source/HLS, catalog/publication/preview dan cleanup successful output lulus regression.
-- [ ] Race/crash/lost response/invalid inputs/busy deadline serta theme/responsive/accessibility/refresh/auth matriks memiliki hasil aktual; gap production/device dinyatakan.
-- [ ] Relevant tests, check-types/lint/build, migration preservation bila relevan dan docs/diff lulus; artifacts privat atau secrets tidak masuk Git.
+- [x] Ketiga owner memperoleh private WebP 1080×1920 dan verified Ready saat worker fixture mati; source tetap queued sampai worker berjalan.
+- [x] Old Ready/pending/failed posters, source/HLS, catalog/publication/preview dan cleanup successful output lulus regression.
+- [x] Race/crash/lost response/invalid inputs/busy deadline serta theme/responsive/accessibility/refresh/auth matriks memiliki hasil aktual; gap production/device dinyatakan.
+- [x] Relevant tests, check-types/lint/build, migration preservation bila relevan dan docs/diff lulus; artifacts privat atau secrets tidak masuk Git.
 
 ### Validasi
 
@@ -416,18 +416,22 @@ Serial guarded integration dedicated targets; built browser fixture; HEAD/hash/o
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau divalidasi; hasil runtime dan command aktual dicatat saat task dikerjakan.
+Fixture integration diisolasi pada `vertical_movie_app_media_test` dan bucket MinIO privat acak; tidak memakai atau menghapus bucket aplikasi. Built Bun/Nitro Chromium mengunggah crop Film, Standalone dan Series, lalu sebelum worker dimulai membaca ulang output `outputs/<asset>/<job>/<token>/poster.webp`. Tiap output didecode ulang dengan Bun.Image sebagai WebP 1080×1920, HEAD size/MIME cocok, SHA-256 cocok dengan `facts.outputSha256`, job request succeeded memiliki satu attempt/prefix provenance, dan akses unsigned ditolak 403. Source Film terverifikasi masih berstatus uploaded dengan job worker queued/attempts 0 dan `workerStarts=0`; setelah worker fixture dijalankan, job source succeeded dengan HLS master/segment dan Preview menjadi tersedia. Screenshot/layout dan bukti browser disimpan hanya di `.turbo/` yang ignored.
+
+Built browser layout: Film/Standalone/Series, source bypass, Light/Dark/System pada 320/390/768/1024/1440px, crop focus trap/return, keyboard/pointer/touch, replacement/cancel, input kecil dan output >5 MB lulus. Built browser full: direct multipart MinIO, full-hash refresh/reselection, Finish cover setelah busy response dan refresh tanpa retransmit, tiga owner Ready tanpa worker, source/HLS sesudah worker, dirty metadata 409, offline/cross-tab/pause/cancel/logout/back/auth denial lulus. Tidak ada screenshot atau credential private yang dilacak.
+
+Serial API regressions lulus: `media-poster-processing-proof` 6/48; `media-request-worker-proof` 1/5; `media-upload-proof` 7/82; `media-series-proof` 3/26; `media-worker-proof` 1/63; `media-format-proof` 3/41; `media-hls-proof` 4/12; `media-cover-executor-migration-proof` 1/14; `modules/media/index.test.ts` 5/41; `poster-image.test.ts` 8/22; `poster-image-processing.test.ts` 10/51. Web crop/recovery/state/client suites lulus 12/105, 11/61, 5/22, 8/54. Worker compatibility fixture kini memberi fingerprint wajib pada poster baru lalu mengatur durable `processing_mode='worker'` sebelum complete untuk memodelkan legacy session. Root check-types 3/3, lint 1/1 dan build 2/2 lulus; migration preservation test lulus, tidak ada perubahan schema. `docs:check`, Prettier dan diff check dicatat pada ACOV-010 closure.
 
 ### Commit task
 
 - Pesan: `test(media): verify covers without media worker (ACOV-009)`
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
-- Ledger: SHA aktual dicatat pada update dokumentasi setelah commit, tanpa self-referential SHA.
+- SHA: dicatat pada receipt ACOV-010 setelah commit.
+- Hook/checks: menunggu commit task; test API/Web, root check-types/lint/build dan browser acceptance di atas lulus.
+- Ledger: receipt ACOV-010 mencatat SHA commit aktual, tanpa self-referential SHA.
 
 ### Blocker atau tindak lanjut
 
-Persetujuan plan, freshness check dan dependensi task di atas; bukan izin untuk mulai runtime pada permintaan planning ini.
+Tidak ada blocker lokal. R2 staging, Safari/native HLS, perangkat fisik, stress OOM/disk dan kapasitas VPS 4 core/4 GB belum diverifikasi; proof lokal tidak menyatakan production readiness.
 
 ## Task: ACOV-010 — Finalisasi dokumen canonical dan ledger implementasi
 
