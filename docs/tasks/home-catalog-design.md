@@ -10,7 +10,7 @@ Sebagai pengunjung tanpa akun, saya ingin menemukan Film, Series dan Standalone 
 
 ## Task: HOMEDES-001 — Mockup desktop dan mobile light
 
-- Status: Review
+- Status: Done
 - Owner: Codex
 - Prioritas: 1
 - Referensi: HOMEDES-US-001; PRD-07/08; GR-02; [design system](../design/design-system.md).
@@ -27,7 +27,7 @@ Dua mockup raster light, prompt exact, spesifikasi proposal dan index. Worktree 
 - [x] Desktop/mobile tersedia di docs/design dengan prompt yang dapat ditinjau.
 - [x] Brand neutral/lime, poster portrait, Film/Series/Standalone, akses tanpa login dan hierarki konten terlihat.
 - [x] Usulan featured/search/filter/urutan dibedakan dari kontrak API dan persetujuan produk.
-- [ ] Review visual, format Markdown, docs:check dan diff check lulus; commit task dibuat tanpa perubahan aplikasi.
+- [x] Review visual, format Markdown, docs:check dan diff check lulus; commit task dibuat tanpa perubahan aplikasi.
 
 ### Validasi
 
@@ -44,9 +44,9 @@ Worktree terisolasi; frozen install Bun 1.4.2 lulus (760 packages) tanpa perubah
 ### Commit task
 
 - Pesan: `docs(design): add public catalog mockups (HOMEDES-001)`
-- SHA: Belum dibuat; SHA aktual dicatat pada update ledger berikutnya.
-- Hook/checks: Belum dijalankan.
-- Ledger: Update task ini setelah commit selesai.
+- SHA artefak: `67ad290ccb0f8ada34b51f2455df4eae97eba607`.
+- Hook/checks: docs:check lulus (59 Markdown/553 links), lint web 1/1 dan check-types API/auth/web 3/3 lulus melalui cache Turbo; Commitlint lulus. Tidak bypass hook.
+- Ledger: Update sesudah commit artefak, termasuk normalisasi mode PNG ke 100644. Branch lokal saja; belum push/PR/merge.
 
 ### Blocker atau tindak lanjut
 
