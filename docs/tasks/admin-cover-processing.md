@@ -466,9 +466,9 @@ Canonical source/docs cross-check, bun run docs:check, Prettier changed Markdown
 ### Commit task
 
 - Pesan: `docs(media): finalize native cover processing (ACOV-010)`
-- SHA: dicatat pada receipt dokumentasi setelah commit task.
-- Hook/checks: pre-commit docs:check, lint, check-types dan commit-msg Commitlint lulus; docs/Prettier/diff/preservation lulus.
-- Ledger: SHA aktual dicatat pada update dokumentasi setelah commit, tanpa self-referential SHA.
+- SHA: `ff526c2a89b7deaa2f4a2fd03fc71ed92301ecdc`.
+- Hook/checks: pre-commit docs:check (59 Markdown/529 links), lint (web, cache hit), check-types (api/web/auth, cache hits) dan commit-msg Commitlint lulus; Prettier/diff/preservation lulus.
+- Ledger: receipt ini mencatat commit task ACOV-010; tidak mencatat SHA commit receipt itu sendiri.
 
 ### Blocker atau tindak lanjut
 
