@@ -2,7 +2,7 @@
 
 ## Tujuan modul
 
-Operator dapat melihat setiap request yang mencapai API dan hasilnya pada console server memakai `console.log`, tanpa library logging. Status 6 Oktober 2026: proposed, menunggu persetujuan plan oleh pengguna; belum ada implementasi/evidence runtime.
+Operator dapat melihat setiap request yang mencapai API dan hasilnya pada console server memakai `console.log`, tanpa library logging. Plan disetujui pengguna 7 Oktober 2026; implementasi bertahap pada branch `feat/api-request-logging`.
 
 Acuan: [plan](../plans/api-request-logging/implementation-plan.md), [context](../plans/api-request-logging/repository-context.md), [API Development](../guides/api-development.md), [workflow](../guides/development-workflow.md) dan [Architecture](../architecture/overview.md). Ini kebutuhan operasional langsung dari pengguna; tidak mengklaim requirement produk PRD baru.
 
@@ -12,12 +12,12 @@ Sebagai operator server, saya ingin melihat request API saat masuk dan setelah s
 
 ## Task: APILOG-001 — Plugin logging console
 
-- Status: Backlog
+- Status: Review
 - Owner: Codex/pengembang API
 - Prioritas: 1
 - Referensi: APILOG-STORY-001; APILOG-001 pada plan canonical
-- Diperbarui: 2026-10-06
-- Dependensi: persetujuan scope plan dan pemeriksaan freshness
+- Diperbarui: 2026-10-07
+- Dependensi: scope disetujui dan freshness valid pada HEAD `1afa736`
 - Ukuran: kecil, satu plugin dan behavior tests
 
 ### Ruang lingkup
@@ -26,11 +26,11 @@ Buat `apps/api/src/plugins/logger.ts` dan test beside module. Event masuk/comple
 
 ### Acceptance criteria
 
-- [ ] Event masuk langsung terlihat sebelum handler lambat selesai.
-- [ ] Completion tunggal dengan status aktual dan durasi nonnegatif untuk matriks lifecycle plan.
-- [ ] ID/state request paralel dan instance terisolasi.
-- [ ] Tidak mencetak credential/payload/query/raw error; event tetap satu baris.
-- [ ] Sink failure tidak mengubah HTTP; tests dan quality gates lulus.
+- [x] Event masuk langsung terlihat sebelum handler lambat selesai.
+- [x] Completion tunggal dengan status aktual dan durasi nonnegatif untuk matriks lifecycle plan.
+- [x] ID/state request paralel dan instance terisolasi.
+- [x] Tidak mencetak credential/payload/query/raw error; event tetap satu baris.
+- [x] Sink failure tidak mengubah HTTP; tests dan quality gates lulus.
 
 ### Validasi
 
@@ -38,18 +38,18 @@ Buat `apps/api/src/plugins/logger.ts` dan test beside module. Event masuk/comple
 
 ### Hasil dan bukti
 
-Belum dikerjakan; belum ada test/check implementasi yang dijalankan.
+7 Oktober 2026: plugin dan tests dibuat; focused `bun test ./apps/api/src/plugins/logger.test.ts` lulus 6 tests/61 assertions. Matriks meliputi raw/custom/set/override status, guard early return, 404, handled/unhandled/parse/validation errors, nested plugin, Promise handler, concurrency/app isolation, body/response streams, encoded/truncated path dan sink failure synchronous/asynchronous. Root bun run check-types (3 tasks), bun run lint (web) dan bun run build (API/web) lulus; Prettier, bun run docs:check (62 Markdown/552 links) dan git diff --check lulus. Commit task dilakukan setelah review diff.
 
 ### Commit task
 
 - Pesan rencana: `feat(api): add console request logger (APILOG-001)`
 - SHA: belum dibuat
-- Hook/checks: belum dijalankan untuk implementasi
+- Hook/checks: quality gates di atas lulus; hasil hook commit dicatat setelah commit
 - Ledger: catat SHA aktual pada update task berikutnya
 
 ### Blocker atau tindak lanjut
 
-Menunggu persetujuan proposal; lanjut APILOG-002 setelah criteria/checks dan commit lulus.
+Scope telah disetujui pengguna; lanjut APILOG-002 setelah criteria/checks dan commit lulus.
 
 ## Task: APILOG-002 — Logging seluruh komposisi API
 

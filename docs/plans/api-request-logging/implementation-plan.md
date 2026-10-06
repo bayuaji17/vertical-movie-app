@@ -2,14 +2,14 @@
 
 ## Plan Metadata
 
-- Status: draft; diajukan untuk persetujuan pengguna, belum diimplementasikan.
-- Tanggal: 6 Oktober 2026.
+- Status: executing; disetujui pengguna 7 Oktober 2026, implementasi bertahap.
+- Tanggal: 7 Oktober 2026; proposal awal 6 Oktober 2026.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `main`.
 - Base SHA: `4f3c9141017ac85e5e999e3ce72b66c6d45aea30`.
 - Context: [repository-context.md](repository-context.md).
-- Last validated SHA: `4f3c9141017ac85e5e999e3ce72b66c6d45aea30`.
-- Otorisasi: pengguna meminta logging sederhana tanpa library dan pembuatan plan. Format/event berikut adalah proposal; runtime belum diubah.
+- Last validated SHA: `1afa736a620d9cf072a4d3cf8b33a8f1ff534815`.
+- Otorisasi: pengguna menyetujui plan melalui "oke approve" pada 7 Oktober 2026; mencakup implementasi dan local task commits sesuai workflow. Push/PR/merge/deploy belum diotorisasi.
 
 ## Objective
 
@@ -152,8 +152,7 @@ Lepas registrasi logger dan dependency test pada `createApp`, atau revert commit
 
 ## Open Decisions
 
-- Proposal format JSON satu baris, dua event, ID log internal dan default semua request belum disetujui pengguna.
-- Tidak ada blocker dependency; rincian lifecycle/status harus dibuktikan APILOG-001, bukan diasumsikan dari docs.
+Format JSON satu baris, dua event, ID log internal dan default semua request disetujui pengguna 7 Oktober 2026. Tidak ada keputusan scope yang masih terbuka.
 
 ## Validation History
 
@@ -169,3 +168,5 @@ Lepas registrasi logger dan dependency test pada `createApp`, atau revert commit
 
 - 6 Oktober 2026: source/panduan dan dependency lifecycle dibaca; context ditulis sebelum plan/backlog. Hanya dokumentasi rencana dibuat; runtime logging belum diimplementasikan. Hasil checks dokumentasi dicatat setelah benar-benar dijalankan.
 - 6 Oktober 2026: Prettier pada tiga dokumen rencana/backlog dan indeks lulus; `bun run docs:check` lulus (62 Markdown, 552 local links/anchors); `git diff --check` lulus. Checks ini hanya memvalidasi dokumentasi. Commit plan lokal memakai pesan `docs(api): plan console request logging (APILOG-PLAN)`; SHA aktual dilaporkan setelah commit berhasil, bukan ditulis sebagai self-reference.
+- 7 Oktober 2026: commit plan `1afa736a620d9cf072a4d3cf8b33a8f1ff534815` menjadi HEAD pre-write; source API/auth/gateway, manifest/lock dan API guide tidak berubah dari base plan. Freshness valid. Branch implementasi `feat/api-request-logging` dibuat; semua perubahan desain/build-docs existing dipertahankan.
+- APILOG-001: plugin dibuat, 6 behavior tests/61 assertions lulus pada `bun test ./apps/api/src/plugins/logger.test.ts`. Native `onRequest` tidak menerima options scope; hook ini global secara native. Completion menunggu raw Promise handler yang belum selesai sebelum mencetak, tanpa membaca stream. Status mengikuti merge Elysia: Response non-200 dipertahankan, Response 200 memakai `set.status`. Proof mencakup override 202, nested/error/404, request paralel/app terpisah, redaksi dan sync/async sink failure. Gate sebelum commit dicatat pada backlog.
