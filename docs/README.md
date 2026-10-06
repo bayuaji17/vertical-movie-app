@@ -45,7 +45,7 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 
 ## Context dan plan per fitur
 
-Proposal 6 Oktober 2026: logging request API memakai console; [context](plans/api-request-logging/repository-context.md) dan [plan](plans/api-request-logging/implementation-plan.md) tersedia untuk review, runtime belum diubah.
+Logging request API memakai console implemented/verified lokal 7 Oktober 2026; [panduan](guides/api-development.md#logging-request-http), [context baseline](plans/api-request-logging/repository-context.md) dan [plan/evidence](plans/api-request-logging/implementation-plan.md) menjelaskan scope serta batas gateway/storage.
 
 | Fitur              | Context                                                         | Plan                                                                                           | Penggunaan                                                                                                                                                                       |
 | ------------------ | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -59,7 +59,7 @@ Proposal 6 Oktober 2026: logging request API memakai console; [context](plans/ap
 
 ## Backlog dan evidence
 
-- [Logging request API](tasks/api-request-logging.md): APILOG-001–003; proposal logging console, belum diimplementasikan.
+- [Logging request API](tasks/api-request-logging.md): APILOG-001–003; dua event console per request, suite API dan demo development/build-start terverifikasi lokal.
 - [Auth](tasks/auth.md): AUTH/AUTH-REF dan evidence lokal.
 - [Video](tasks/videos.md): metadata dan compatibility lifecycle.
 - [Media](tasks/media.md): konfigurasi, multipart, cleanup dan provider proof.

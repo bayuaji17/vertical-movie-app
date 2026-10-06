@@ -53,7 +53,7 @@ Scope telah disetujui pengguna; lanjut APILOG-002 setelah criteria/checks dan co
 
 ## Task: APILOG-002 — Logging seluruh komposisi API
 
-- Status: Review
+- Status: Done
 - Owner: Codex/pengembang API
 - Prioritas: 2
 - Referensi: APILOG-STORY-001; APILOG-002 pada plan canonical
@@ -84,9 +84,9 @@ Focused logger/app tests, `bun run --cwd apps/api test`, root check-types/lint/b
 ### Commit task
 
 - Pesan rencana: `feat(api): log requests across app routes (APILOG-002)`
-- SHA: belum dibuat
-- Hook/checks: quality gates di atas lulus; hasil hook dicatat setelah commit
-- Ledger: catat SHA aktual pada update task berikutnya
+- SHA: `17fc66f622a9296c973bb1d5470e96ccc7471b2f`
+- Hook/checks: docs:check, lint web, check-types tiga workspace dan Commitlint lulus
+- Ledger: dicatat pada update APILOG-003
 
 ### Blocker atau tindak lanjut
 
@@ -94,11 +94,11 @@ APILOG-001; lanjut APILOG-003 setelah criteria/checks dan commit lulus.
 
 ## Task: APILOG-003 — Panduan dan verifikasi output server
 
-- Status: Backlog
+- Status: Review
 - Owner: Codex/pengembang API
 - Prioritas: 3
 - Referensi: APILOG-STORY-001; APILOG-003 pada plan canonical
-- Diperbarui: 2026-10-06
+- Diperbarui: 2026-10-07
 - Dependensi: APILOG-002
 - Ukuran: kecil, panduan dan bukti akhir
 
@@ -108,11 +108,11 @@ Update API guide, indeks, plan/backlog dengan logging aktif, contoh/cara melihat
 
 ### Acceptance criteria
 
-- [ ] Start/completion nyata terlihat pada stdout development dan hasil build/start.
-- [ ] Format, status/durasi, scope dan batas traffic dijelaskan dalam API guide.
-- [ ] Native API tests, root check-types/lint/build, format/docs:check/diff check lulus dan dicatat.
-- [ ] Commit per task beserta SHA yang sudah tersedia dicatat tanpa self-reference.
-- [ ] Tidak ada dependency/env/schema atau perubahan unrelated dalam commit.
+- [x] Start/completion nyata terlihat pada stdout development dan hasil build/start.
+- [x] Format, status/durasi, scope dan batas traffic dijelaskan dalam API guide.
+- [x] Native API tests, root check-types/lint/build, format/docs:check/diff check lulus dan dicatat.
+- [x] Commit per task beserta SHA yang sudah tersedia dicatat tanpa self-reference.
+- [x] Tidak ada dependency/env/schema atau perubahan unrelated dalam commit.
 
 ### Validasi
 
@@ -120,13 +120,13 @@ Update API guide, indeks, plan/backlog dengan logging aktif, contoh/cara melihat
 
 ### Hasil dan bukti
 
-Belum dikerjakan. Checks plan-only tidak membuktikan runtime logger.
+7 Oktober 2026: API guide/index diperbarui. `bun .turbo/request-logging-smoke.mjs` menjalankan root `bun run dev --filter=api` dan start hasil build dari `apps/api` pada port ephemeral, secara berurutan. Keduanya lulus: GET `/` 200 dan `/logging-smoke-missing` 404, tepat 2 start + 2 completion, ID/path/status sesuai, durasi nonnegatif dan query sentinel tidak tercetak. Subprocess demo dihentikan; harness/output ignored pada `.turbo`, tidak masuk commit. Source sama dengan APILOG-002 yang telah lulus 109 API tests/562 assertions, root check-types/lint/build. Final Prettier, bun run docs:check (62 Markdown/555 links) dan git diff --check lulus; hook diperiksa saat commit dokumentasi. Tidak ada perubahan dependency/env/schema atau migrasi; production deployment belum diuji.
 
 ### Commit task
 
 - Pesan rencana: `docs(api): document verified request logging (APILOG-003)`
 - SHA: belum dibuat
-- Hook/checks: belum dijalankan untuk implementasi
+- Hook/checks: format/docs/diff lulus; code gates APILOG-002 pada source yang sama lulus; hasil hook dicatat setelah commit
 - Ledger: SHA terakhir dicatat pada update dokumentasi berikutnya; jangan menebak SHA commit sendiri
 
 ### Blocker atau tindak lanjut

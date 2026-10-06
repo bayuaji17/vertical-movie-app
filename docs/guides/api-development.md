@@ -12,6 +12,40 @@ Instruksi agent tetap berada di [AGENTS.md](../../AGENTS.md). Ikuti [Global Work
 
 Kontrak aktif metadata, runbook migrasi dan proof ada pada [Video Operations](../operations/video-metadata.md). Module series/genres/videos mempunyai `index.ts`, `model.ts`, `service.ts`, `repository.ts`, dan test HTTP; series memiliki season. `createApp` memasang modul secara statis sebelum OpenAPI; bootstrap menyuntikkan dependency DB/service/auth eksplisit. Body konten memakai `normalize:false` dan schema strict untuk menolak field tak dikenal.
 
+## Logging request HTTP
+
+> Disetujui pengguna dan implemented/verified lokal 7 Oktober 2026. Bukti dan commit per task: [API Request Logging](../tasks/api-request-logging.md).
+
+`createApp` memasang `createRequestLogger` dari `apps/api/src/plugins/logger.ts` sebelum semua route/module/OpenAPI. Logging selalu aktif pada development dan hasil build/start; tidak memerlukan library logging, env tambahan atau konfigurasi frontend. Setiap request yang mencapai proses API mencetak dua record JSON satu baris melalui `console.log`:
+
+```json
+{"timestamp":"2026-10-07T00:00:00.000Z","event":"http.request","requestId":"server-generated-uuid","method":"GET","path":"/admin/videos"}
+{"timestamp":"2026-10-07T00:00:00.018Z","event":"http.response","requestId":"server-generated-uuid","method":"GET","path":"/admin/videos","status":200,"durationMs":18}
+```
+
+`http.request` langsung keluar sebelum handler berjalan; `http.response` memuat status HTTP akhir dan `durationMs` nonnegatif dengan maksimal dua desimal. Timestamp memakai ISO 8601 UTC; durasi memakai `performance.now()` agar tidak terpengaruh perubahan wall clock. Request bersamaan memiliki UUID/state sendiri. ID ini hanya untuk korelasi log; `error.requestId` existing tetap terpisah dan logger tidak menambahkan header response.
+
+Logger mencakup root, Better Auth, endpoint admin, katalog/playback publik, Scalar/OpenAPI dan route tidak ditemukan, termasuk response 4xx/5xx. Semua record memakai console.log dan dapat dibedakan melalui `event`/`status`. Path adalah pathname API tanpa query/hash, tetap encoded dan dibatasi 512 karakter; JSON serialization menjaga record satu baris. Body, header/cookie/authorization, response payload, raw error/stack, signed URL dan IP tidak dicetak. Logger tidak membaca request body atau response stream untuk mengambil payload. Kegagalan output sink diisolasi dari HTTP.
+
+Untuk melihat output dari terminal root:
+
+```sh
+bun run dev --filter=api
+# Setelah bun run build, jalankan API hasil build:
+bun run --cwd apps/api start
+```
+
+Jangan menjalankan kedua server pada port yang sama secara bersamaan. Contoh request read-only ke port default API:
+
+```sh
+curl -i http://localhost:3001/
+curl -i http://localhost:3001/route-yang-tidak-ada
+```
+
+Browser business gateway menghapus prefix `/api`; request browser `/api/admin/videos` tercatat sebagai `/admin/videos`. Request yang ditolak gateway sebelum mencapai API, transfer part upload dan objek media yang langsung menuju MinIO/R2 tidak tercatat oleh logger API. Log hanya menuju console/stdout; penyimpanan atau rotasinya mengikuti process manager deployment. Jika proses berhenti sebelum request selesai, completion bisa tidak ada. `durationMs` adalah waktu proses sampai hook completion, bukan jaminan durasi transfer atau penerimaan seluruh byte oleh client.
+
+Test menginjeksi `requestLogger.write`, clock monotonic dan timestamp melalui factory/plugin serta menunggu event completion asynchronous. Test memakai `app.handle` tanpa port; demo terminal terpisah membuktikan development dan build/start. Tidak ada perubahan schema/migrasi untuk logging.
+
 ## Struktur folder tujuan
 
 ```text

@@ -2,13 +2,13 @@
 
 ## Plan Metadata
 
-- Status: executing; disetujui pengguna 7 Oktober 2026, implementasi bertahap.
+- Status: executing; implementasi dan runtime lokal terverifikasi, finalisasi dokumentasi/commit APILOG-003.
 - Tanggal: 7 Oktober 2026; proposal awal 6 Oktober 2026.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `main`.
 - Base SHA: `4f3c9141017ac85e5e999e3ce72b66c6d45aea30`.
 - Context: [repository-context.md](repository-context.md).
-- Last validated SHA: `1afa736a620d9cf072a4d3cf8b33a8f1ff534815`.
+- Last validated SHA: `17fc66f622a9296c973bb1d5470e96ccc7471b2f`.
 - Otorisasi: pengguna menyetujui plan melalui "oke approve" pada 7 Oktober 2026; mencakup implementasi dan local task commits sesuai workflow. Push/PR/merge/deploy belum diotorisasi.
 
 ## Objective
@@ -23,7 +23,7 @@ Di luar scope: library logger, file log/rotation, collector/dashboard/analytics,
 
 ## Current Behavior
 
-API mencetak startup/shutdown tetapi belum memiliki access logger. `createApp` menyusun root, auth, modul bisnis/publik/playback dan OpenAPI. Error mapper serta guard mengembalikan beragam status; native auth mengembalikan `Response`. Web gateway menghapus prefix `/api` untuk bisnis. Seluruh bukti berada pada [context](repository-context.md#evidence-index).
+Baseline analisis 6 Oktober 2026: API mencetak startup/shutdown tetapi belum memiliki access logger. `createApp` menyusun root, auth, modul bisnis/publik/playback dan OpenAPI. Error mapper serta guard mengembalikan beragam status; native auth mengembalikan `Response`. Web gateway menghapus prefix `/api` untuk bisnis. Bukti baseline berada pada [context](repository-context.md#evidence-index). Setelah APILOG-002, seluruh factory memiliki logging aktif; perilaku saat ini dijelaskan pada [API guide](../../guides/api-development.md#logging-request-http).
 
 ## Desired Behavior
 
@@ -36,7 +36,7 @@ Gunakan `console.log(JSON.stringify(record))` dengan field allowlist, tanpa warn
 
 - `timestamp`: ISO 8601 UTC dari clock; `durationMs`: clock monotonic `performance.now()`, angka nonnegatif, dibulatkan maksimal dua desimal.
 - `requestId`: UUID dibuat server khusus korelasi log; tidak mengambil header client dan tidak mengubah DTO/header response.
-- `method` dan `path`: method HTTP dan URL pathname API; query/hash tidak dicetak dan pathname tetap encoded, dibatasi panjangnya (usulan 512 karakter). JSON serialization meng-escape control character agar event tetap satu baris.
+- `method` dan `path`: method HTTP dan URL pathname API; query/hash tidak dicetak dan pathname tetap encoded, dibatasi panjangnya 512 karakter. JSON serialization meng-escape control character agar event tetap satu baris.
 - `status`: status response aktual; pertimbangkan `Response.status`, custom status Elysia dan `set.status`, termasuk error serta early return. Urutan pemilihan dibuktikan pada versi terpasang.
 - Semua event memakai `console.log`, termasuk 4xx/5xx; status menjadi penanda kegagalan. Tidak mencetak raw error, message/cause, body, response payload, header, cookie, password, token, signed URL atau IP.
 - Request yang belum selesai tetap memiliki `http.request`. Bila proses mati sebelum completion, `http.response` dapat tidak ada; plan tidak menjanjikan durable logging.
@@ -45,7 +45,7 @@ Gunakan `console.log(JSON.stringify(record))` dengan field allowlist, tanpa warn
 
 Logger dipasang di awal chaining `createApp`, sebelum root/modul/auth/OpenAPI, dengan lifecycle global. Injeksi dependency terbatas output dan clock memudahkan test; default tetap native console/waktu. State request disimpan pada `WeakMap<Request, ...>` milik instance plugin supaya tidak bercampur antar-request/factory; hapus setelah completion.
 
-`onRequest` mencatat event masuk dan metadata. `onAfterResponse` menjadi titik completion awal sesuai [dokumentasi lifecycle resmi](https://elysiajs.com/essential/life-cycle#after-response). Handler logging mengembalikan `undefined`, tidak mengubah status/header/body dan tidak menggantikan error mapper. Jangan menambah log kedua dari `onError` yang menyebabkan completion ganda. Jika lifecycle versi terpasang membutuhkan hook observasi tambahan untuk coverage, buktikan dahulu dengan test dan gunakan satu emitter completion idempoten.
+`onRequest` mencatat event masuk dan metadata. `onAfterResponse` menjadi titik completion sesuai [dokumentasi lifecycle resmi](https://elysiajs.com/essential/life-cycle#after-response). Handler logging mengembalikan `undefined`, tidak mengubah status/header/body dan tidak menggantikan error mapper. Global `onError` observer tanpa return diperlukan untuk coverage unmatched route pada komposisi Elysia 1.4.30; tidak mencetak log tambahan. WeakMap state dihapus saat completion sehingga satu request tidak mendapat completion ganda. Bila responseValue masih Promise, logger menunggu settlement tanpa membaca payload/stream.
 
 Factory output tidak boleh diberi return type `Elysia` umum. Body/stream auth/upload/playback tidak dibaca, di-clone atau ditunggu untuk memperoleh payload. Error dari sink logging tidak boleh menggagalkan request atau menghasilkan unhandled rejection.
 
@@ -156,6 +156,15 @@ Format JSON satu baris, dua event, ID log internal dan default semua request dis
 
 ## Validation History
 
+### 2026-10-07 — implementasi
+
+- Result: valid.
+- Plan base SHA: `4f3c9141017ac85e5e999e3ce72b66c6d45aea30`.
+- Current target SHA: `17fc66f622a9296c973bb1d5470e96ccc7471b2f` pada branch `feat/api-request-logging`.
+- Checked paths: logger/tests, factory/app tests, API guide, plan/backlog/index, gateway/auth serta manifests.
+- Changed relevant paths: perubahan plugin/factory/tests pada APILOG-001/002 sesuai scope; tidak ada drift unrelated pada source.
+- Decision: implementasi valid; code gates APILOG-002 tetap berlaku pada source yang sama. APILOG-003 hanya memperbarui dokumentasi dan demo read-only.
+
 ### 2026-10-06T21:42:06+07:00
 
 - Result: valid untuk evidence rencana.
@@ -172,3 +181,5 @@ Format JSON satu baris, dua event, ID log internal dan default semua request dis
 - APILOG-001: plugin dibuat, 6 behavior tests/61 assertions lulus pada `bun test ./apps/api/src/plugins/logger.test.ts`. Native `onRequest` tidak menerima options scope; hook ini global secara native. Completion menunggu raw Promise handler yang belum selesai sebelum mencetak, tanpa membaca stream. Status mengikuti merge Elysia: Response non-200 dipertahankan, Response 200 memakai `set.status`. Proof mencakup override 202, nested/error/404, request paralel/app terpisah, redaksi dan sync/async sink failure. Gate sebelum commit dicatat pada backlog.
 - APILOG-001 commit: `d4a45de45c61ab5b219b922f94d4a9dafd3c0651`; focused tests, root check-types/lint/build, format/docs/diff dan Husky/Commitlint lulus. Task Done; logger belum dipasang pada factory di commit ini.
 - APILOG-002: factory memasang logger paling awal. Focused tests lulus 11 tests/215 assertions. Proof app nyata menemukan kebutuhan hook observasi tambahan yang diizinkan plan: global onError observer tanpa return supaya unmatched route tetap menjalankan afterResponse pada Elysia 1.4.30 ketika app.event.error berupa array kosong. Pemetaan response existing dipertahankan; full gates sebelum commit ada pada backlog.
+- APILOG-002 commit: `17fc66f622a9296c973bb1d5470e96ccc7471b2f`; API suite 109 tests/562 assertions, root check-types/lint/build dan docs/format/diff serta hook/Commitlint lulus. Task Done.
+- APILOG-003 demo 7 Oktober 2026: `bun .turbo/request-logging-smoke.mjs` menjalankan root `bun run dev --filter=api` dan `bun run --cwd apps/api start` secara berurutan pada port ephemeral. Masing-masing menerima GET root 200 dan unknown route 404, menghasilkan tepat 4 event dengan ID korelasi sama per pair, durasi nonnegatif dan query sentinel tidak tercetak. Hanya request read-only; subprocess demo dihentikan. Harness/result sementara ignored pada `.turbo`, tidak masuk Git. Ini proof lokal development dan executable hasil build, bukan deployment production.
