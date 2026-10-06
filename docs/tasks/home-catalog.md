@@ -481,7 +481,7 @@ Integrasi real API/playback/production merupakan tahap lanjutan tersendiri.
 
 ## Task: HOMEFE-011 — Refinement plan untuk TanStack infinite query
 
-- Status: Review
+- Status: Done
 - Owner: Codex
 - Prioritas: Planning refinement sebelum runtime001–010
 - Referensi: Klarifikasi pengguna 7 Oktober 2026; HOME-US-002; [plan](../plans/home-catalog/implementation-plan.md).
@@ -497,7 +497,7 @@ Ganti pagination visibleCount/state-only dengan useInfiniteQuery/queryFn dummy J
 
 - [x] Version/source installed diverifikasi; provider/SSR reuse, tanpa API/dependency baru.
 - [x] Contract/query key/initialData/nextpage/guard/cache reset ditulis pada plan dan acceptance HOMEFE-006/009.
-- [ ] Canonical docs selaras, docs:check/Prettier/diff check dan task commit lulus.
+- [x] Canonical docs selaras, docs:check/Prettier/diff check dan task commit lulus.
 
 ### Validasi
 
@@ -505,14 +505,14 @@ Source installed @tanstack/react-query 5.104.0; docs:check, changed Markdown Pre
 
 ### Hasil dan bukti
 
-Refinement planning saja; runtime belum diubah. Checks final pending.
+Refinement planning saja; runtime belum diubah. docs:check lulus (62 Markdown, 593 links/anchors), Prettier write/check dan git diff --check lulus. Hook docs/lint web1/1/check-types3/3/Commitlint lulus; lint/types memakai cache Turbo. Tidak menjalankan test/build runtime untuk perubahan lima Markdown ini.
 
 ### Commit task
 
 - Pesan: docs(web): plan local infinite query (HOMEFE-011)
-- SHA: Belum dibuat; record sesudah commit.
-- Hook/checks: Pending.
-- Ledger: Update dokumentasi berikutnya setelah task commit.
+- SHA refinement: `b48d05e2d5f84fc5094704e0f19b5be7010ed212`.
+- Hook/checks: docs:check, lint, check-types dan Commitlint lulus tanpa bypass.
+- Ledger: Update ini sesudah commit refinement; branch lokal, belum push/PR/merge.
 
 ### Blocker atau tindak lanjut
 
