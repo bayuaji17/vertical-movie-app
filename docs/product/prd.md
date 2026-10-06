@@ -127,7 +127,7 @@ Tidak menetapkan angka SLO, persentase keberhasilan atau biaya sebagai keputusan
 
 ## Keputusan produk yang masih terbuka
 
-1. **UX katalog/navigasi:** daftar/grid atau scroll/swipe, filter/pencarian dan aturan urutan final. API saat ini memakai createdAt/id descending serta next episode berdasarkan season/episode ascending; ini perilaku kode, belum persetujuan UX produk.
+1. **UX katalog/navigasi:** arah grid homepage, featured dan search/filter pada mockup desktop/mobile disetujui pengguna 7 Oktober 2026. Tahap berikutnya direncanakan FE dummy JSON, belum mengambil API; [desain](../design/home-catalog.md), [plan](../plans/home-catalog/implementation-plan.md) dan [backlog](../tasks/home-catalog.md). Semantik interaksi/CTA dalam plan masih untuk review; urutan katalog nyata/integrasi API belum ditetapkan. API saat ini memakai createdAt/id descending serta next episode berdasarkan season/episode ascending; perilaku kode tersebut bukan persetujuan urutan produksi.
 2. **Konfigurasi situs:** field yang boleh diedit admin, validasi dan tampilan publiknya. Rahasia infrastruktur tetap konfigurasi server.
 3. **Kebijakan konten:** hak cipta, konten terlarang, pelaporan/penanganan laporan serta pengindeksan halaman publik.
 4. **Subtitle opsional:** format, bahasa, timing dan alur penyediaan/validasi. Ketidakadaan subtitle tidak menghalangi MVP atau publish.

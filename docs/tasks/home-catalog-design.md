@@ -50,4 +50,4 @@ Worktree terisolasi; frozen install Bun 1.4.2 lulus (760 packages) tanpa perubah
 
 ### Blocker atau tindak lanjut
 
-Persetujuan arah visual, UX katalog dan integrasi backend/web masih pekerjaan lanjutan.
+Update 7 Oktober 2026: arah visual disetujui pengguna. Pengguna meminta [plan FE dummy JSON](../plans/home-catalog/implementation-plan.md); [HOMEFE backlog](home-catalog.md) menjadi tindak lanjut. Runtime homepage, integrasi API dan playback belum diimplementasikan pada task desain ini.

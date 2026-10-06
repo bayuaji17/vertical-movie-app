@@ -1,6 +1,6 @@
 # Homepage dan katalog publik
 
-> Status: **Usulan visual v1 — belum disetujui sebagai UX produk** · 7 Oktober 2026 · Pemilik keputusan: pengguna; pembuat mockup: Codex. Snapshot source `313e31a14891ac0f91265a3557576b44791309d7`.
+> Status: **Arah visual v1 disetujui pengguna — tahap FE dummy direncanakan, belum implemented** · Persetujuan 7 Oktober 2026 · Pemilik keputusan: pengguna; pembuat mockup/plan: Codex. Snapshot generasi source `313e31a14891ac0f91265a3557576b44791309d7` tetap historis.
 
 ## Tujuan dan acuan
 
@@ -14,7 +14,11 @@ Desktop: header brand/Home/Browse/search/appearance; judul editorial singkat; sa
 
 Film/Standalone membuka detail/tonton; Series mengarah ke detail series/daftar episode. Poster Series memakai jumlah episode, bukan durasi total. Tidak menampilkan status editorial atau data admin.
 
-Featured placement, search, filter jenis/genre, urutan katalog dan tujuan navigasi adalah usulan untuk review pengguna. DTO katalog saat snapshot hanya menerima limit/cursor; API video/series terpisah. Pencarian/filter maupun featured selection memerlukan keputusan dan task implementasi tersendiri. Episode tidak dijanjikan sebagai kartu top-level terpisah.
+Grid, featured placement serta search/filter adalah arah visual yang disetujui pengguna 7 Oktober 2026. Semantik interaksi, jumlah fixture/batch dan CTA dummy dijabarkan untuk review pada [implementation plan](../plans/home-catalog/implementation-plan.md); bukan seluruh detail runtime dianggap disetujui melalui raster. DTO katalog saat snapshot hanya menerima limit/cursor; API video/series terpisah. Integrasi API/featured selection nyata menjadi tahap lanjutan. Episode tidak dijanjikan sebagai kartu top-level terpisah.
+
+## Keputusan tahap frontend — 7 Oktober 2026
+
+Pengguna meminta fokus FE dengan dummy JSON dan belum memakai API. [Context](../plans/home-catalog/repository-context.md), [plan detail](../plans/home-catalog/implementation-plan.md) dan [backlog HOMEFE](../tasks/home-catalog.md) menjadi pemilik rincian implementasi. Usulan default: 18 fixture items, batch enam tanpa perbedaan SSR/mobile, detail dialog lokal dan CTA View film. Dua kartu pada raster mobile hanya contoh tampilan; source fixture tetap sama di semua viewport. Playback/real published data bukan hasil tahap ini.
 
 ## Artefak
 

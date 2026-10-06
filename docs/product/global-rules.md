@@ -54,7 +54,7 @@ Usulan antarmuka dari dokumen sebelumnya berikut dipertahankan sebagai **proposa
 - Pemutaran dengan suara memerlukan tindakan pengguna; default autoplay/audio final belum ditetapkan oleh review ini.
 - Target audit aksesibilitas menyeluruh WCAG 2.2 AA dan rincian caption/assistive technology ditinjau bersama fitur yang dikerjakan. Tidak ada klaim audit kepatuhan aplikasi lengkap.
 
-UX katalog/navigasi, field konfigurasi situs dan rincian subtitle opsional tetap mengikuti [keputusan terbuka PRD](prd.md#keputusan-produk-yang-masih-terbuka). User melewati pembahasannya untuk melanjutkan review dokumen; status kebutuhan tersebut tetap dipertahankan.
+UX katalog/navigasi, field konfigurasi situs dan rincian subtitle opsional mengikuti [keputusan terbuka PRD](prd.md#keputusan-produk-yang-masih-terbuka). Update keputusan 7 Oktober 2026: pengguna menyetujui arah visual homepage grid/featured/search/filter dan meminta [plan frontend dummy JSON](../plans/home-catalog/implementation-plan.md), belum integrasi API. Homepage runtime masih starter pada planning ini; persetujuan desain bukan bukti GR-02/PRD-07 selesai. Urutan/data published nyata, playback dan rincian interaksi plan tetap mempunyai batas review/implementasi tersendiri.
 
 ## Sumber keputusan dan status evidence
 
