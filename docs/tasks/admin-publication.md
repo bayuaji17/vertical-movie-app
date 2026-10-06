@@ -289,7 +289,7 @@ Controller memory-only dengan single mutex, UUID setelah fresh review+ack, exact
 ### Commit task
 
 - Pesan: `feat(web): reconcile publication intents safely (APUB-006)`
-- SHA: belum dibuat.
+- SHA: `d7c407cfe74ba0e523e26394cea2bd5633926092`.
 - Hook/checks: relevant tests, root types/lint/build, docs:check, Prettier/diff lulus sebelum commit; hasil hook normal dicatat setelah commit.
 - Ledger: SHA aktual dicatat setelah commit berhasil pada update task/dokumentasi berikutnya; tidak memakai self-referential SHA.
 
@@ -299,7 +299,7 @@ Panel APUB-007, dialogs APUB-008/009 dan owner upload/private-effects integratio
 
 ## Task: APUB-007 — Publication readiness panel pada detail konten
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1
 - Referensi: APUB-US-01; PRD-05/06/08/09, GR-01–09 yang relevan; [step plan](../plans/admin-publication/implementation-plan.md#apub-007--checklist-publication-pada-detail)
@@ -313,11 +313,11 @@ Tambahkan publication-panel di content-detail, dengan freshness dari resource/qu
 
 ### Acceptance criteria
 
-- [ ] Panel hanya Film/Standalone non-episode; Series/episode detail tidak memperoleh action unsupported.
-- [ ] Checklist server membedakan Draft/Ready to publish/Published/Archived, dengan blocker/correction link Edit metadata/Upload media; sourceAvailability bukan proxy canPublish.
-- [ ] canPublish dan canPreview berbeda; preview action mengikuti inventory, rights saved di backend dan generic VERIFIED_MEDIA tidak dibuat menjadi detail granular palsu.
-- [ ] Initial/error/stale/cache mismatch menonaktifkan mutations dan memberi Refresh; previously loaded read data jelas stale, bukan capability authoritative.
-- [ ] Desktop/mobile light/dark/System, long titles/status wraps, target44px, focus/aria/live-region dan placement sebelum uploader mengikuti design.
+- [x] Panel hanya Film/Standalone non-episode; Series/episode detail tidak memperoleh action unsupported.
+- [x] Checklist server membedakan Draft/Ready to publish/Published/Archived, dengan blocker/correction link Edit metadata/Upload media; sourceAvailability bukan proxy canPublish.
+- [x] canPublish dan canPreview berbeda; preview action mengikuti inventory, rights saved di backend dan generic VERIFIED_MEDIA tidak dibuat menjadi detail granular palsu.
+- [x] Initial/error/stale/cache mismatch menonaktifkan mutations dan memberi Refresh; previously loaded read data jelas stale, bukan capability authoritative.
+- [x] Desktop/mobile light/dark/System, long titles/status wraps, target44px, focus/aria/live-region dan placement sebelum uploader mengikuti design.
 
 ### Validasi
 
@@ -325,13 +325,13 @@ Manual/component spot checks matriks state dan layouts sebelum dialog integratio
 
 ### Hasil dan bukti
 
-Belum dikerjakan; command di bagian Validasi merupakan rencana, bukan hasil aktual. Tidak ada commit/runtime proof untuk task ini.
+Publication card dipasang setelah record/metadata sebelum uploader Film/Standalone non-episode. Checklist enam server checks, correction links, distinct canPreview/canPublish, error/stale/loading/read-only copy dan Refresh tersedia. MediaPanelView memakai inventory Query dan uploader/controller yang sama melalui wrapper, tanpa duplicate fetch/controller/Preview; Series workflow dipertahankan. Source spot review membuktikan semantic tokens, responsive grid/stack, min44px targets, no sticky footer dan status/alert semantics. Runtime browser/theme/focus proof lengkap tetap APUB-012. Publication/media state15 tests62 assertions dan root types3/3/lint1/1/build2/2 lulus. Cached metadata read error dipropagasikan sebagai stale untuk mutation guard.
 
 ### Commit task
 
 - Pesan: `feat(web): show publication readiness on details (APUB-007)`
 - SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- Hook/checks: relevant tests, root types/lint/build, docs:check, Prettier/diff lulus sebelum commit; hasil hook normal dicatat setelah commit.
 - Ledger: SHA aktual dicatat setelah commit berhasil pada update task/dokumentasi berikutnya; tidak memakai self-referential SHA.
 
 ### Blocker atau tindak lanjut

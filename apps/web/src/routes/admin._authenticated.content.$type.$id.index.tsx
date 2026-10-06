@@ -17,7 +17,9 @@ function ContentDetailsPage() {
   const { type, id } = Route.useParams()
   return (
     <ContentResource type={type} id={id}>
-      {(detail) => <ContentDetailView detail={detail} />}
+      {(detail, stale) => (
+        <ContentDetailView detail={detail} metadataStale={stale} />
+      )}
     </ContentResource>
   )
 }
