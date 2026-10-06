@@ -453,7 +453,7 @@ Owner-specific upload selector membatasi hash/initiate/transfer/finalizing pada 
 ### Commit task
 
 - Pesan: `feat(web): integrate publication with private lifecycle (APUB-010)`
-- SHA: belum dibuat.
+- SHA: `6276bee0ac0900603da1534abbd1f20400f2649e`.
 - Hook/checks: relevant tests, root types/lint/build, docs:check, Prettier/diff lulus sebelum commit; hasil hook normal dicatat setelah commit.
 - Ledger: SHA aktual dicatat setelah commit berhasil pada update task/dokumentasi berikutnya; tidak memakai self-referential SHA.
 
@@ -463,7 +463,7 @@ Browser acceptance APUB-012 membutuhkan real fixture/catalog invalidation. Tidak
 
 ## Task: APUB-011 — PostgreSQL parity, replay dan concurrency proof
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1
 - Referensi: APUB-US-04; PRD-05/06/08/09, GR-01–09 yang relevan; [step plan](../plans/admin-publication/implementation-plan.md#apub-011--postgresql-publication-regression)
@@ -477,11 +477,11 @@ Buat media-publication-proof.test.ts menggunakan dedicated media fixture/guard, 
 
 ### Acceptance criteria
 
-- [ ] Readiness canPublish dan publish decision cocok untuk setiap existing gate, retained original, wrong job/asset generation dan busy upload cases; GET snapshot coherent.
-- [ ] Concurrent same-key publish satu persistent operation/version/timestamp; replay sama tidak mengubah original timestamp; same key/different video/version conflict.
-- [ ] Stale readiness atau rowVersion tidak bypass transaction validation; metadata/upload-completion/generation changes antara GET/POST menghasilkan current decision benar.
-- [ ] Publish/archive races final row/version/visibility konsisten; archive exact old version tidak dianggap idempotency key replay; GET confirms current state.
-- [ ] Series/episode parent visibility/locks dan firstPublishedAt/source-retention behavior existing tetap lulus; test tidak reset development DB/bucket atau memerlukan production migration.
+- [x] Readiness canPublish dan publish decision cocok untuk setiap existing gate, retained original, wrong job/asset generation dan busy upload cases; GET snapshot coherent.
+- [x] Concurrent same-key publish satu persistent operation/version/timestamp; replay sama tidak mengubah original timestamp; same key/different video/version conflict.
+- [x] Stale readiness atau rowVersion tidak bypass transaction validation; metadata/upload-completion/generation changes antara GET/POST menghasilkan current decision benar.
+- [x] Publish/archive races final row/version/visibility konsisten; archive exact old version tidak dianggap idempotency key replay; GET confirms current state.
+- [x] Series/episode parent visibility/locks dan firstPublishedAt/source-retention behavior existing tetap lulus; test tidak reset development DB/bucket atau memerlukan production migration.
 
 ### Validasi
 
@@ -489,13 +489,13 @@ bun test apps/api/test/integration/media-publication-proof.test.ts; bun run --cw
 
 ### Hasil dan bukti
 
-Belum dikerjakan; command di bagian Validasi merupakan rencana, bukan hasil aktual. Tidak ada commit/runtime proof untuk task ini.
+Dedicated PostgreSQL vertical_movie_app_media_test: publication suite3 tests96 assertions lulus; canonical gates, four busy statuses, retained original, generation/job/duration readiness, stale version, same-key concurrency (4 commands→1 operation/version/timestamp), cross-owner/payload conflicts, archive races/old replay/current visibility dan repeatable-read interleaving terverifikasi. Fixture awal duplicate auto slug diperbaiki menjadi unique slug, suite rerun lulus. Existing media:series proof3/26 dan media:upload proof7/82 dijalankan serial dengan guard dedicated; parent visibility/retention/owner inventory tetap lulus. Root types3/3/lint1/1/build2/2 lulus. Deterministic assets/jobs pada publication suite merupakan SQL fixtures, bukan object verification; real browser/storage/FFmpeg APUB-012. Tidak reset development DB/bucket atau membuat schema/migration.
 
 ### Commit task
 
 - Pesan: `test(api): prove publication readiness and races (APUB-011)`
 - SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- Hook/checks: relevant tests, root types/lint/build, docs:check, Prettier/diff lulus sebelum commit; hasil hook normal dicatat setelah commit.
 - Ledger: SHA aktual dicatat setelah commit berhasil pada update task/dokumentasi berikutnya; tidak memakai self-referential SHA.
 
 ### Blocker atau tindak lanjut
