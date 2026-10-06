@@ -425,3 +425,7 @@ Controller memory-only dengan single mutex, UUID setelah fresh review+ack, exact
 ### 2026-10-07 — APUB-007
 
 Publication card dipasang setelah record/metadata sebelum uploader Film/Standalone non-episode. Checklist enam server checks, correction links, distinct canPreview/canPublish, error/stale/loading/read-only copy dan Refresh tersedia. MediaPanelView memakai inventory Query dan uploader/controller yang sama melalui wrapper, tanpa duplicate fetch/controller/Preview; Series workflow dipertahankan. Source spot review membuktikan semantic tokens, responsive grid/stack, min44px targets, no sticky footer dan status/alert semantics. Runtime browser/theme/focus proof lengkap tetap APUB-012. Publication/media state15 tests62 assertions dan root types3/3/lint1/1/build2/2 lulus. Cached metadata read error dipropagasikan sebagai stale untuk mutation guard.
+
+### 2026-10-07 — APUB-008
+
+Publish action/dialog memakai manual preview checkbox lokal, saved-rights copy, fresh review/confirm dan controller exact version/key. Cancel/Escape sebelum submit tidak POST; pending controls disabled, live status dan popup scroll/gutters/focus Cancel/return ref tersedia. Recovery Check status/Retry publish explicit dan public watch link hanya untuk current published yang coherent. Source/dialog spot review selesai; keyboard/native browser proof APUB-012. Client/state13 tests65 assertions serta root types3/3/lint1/1/build2/2 lulus. Tidak menambah preview audit field atau publication metadata patch.

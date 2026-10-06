@@ -330,7 +330,7 @@ Publication card dipasang setelah record/metadata sebelum uploader Film/Standalo
 ### Commit task
 
 - Pesan: `feat(web): show publication readiness on details (APUB-007)`
-- SHA: belum dibuat.
+- SHA: `9ffb6cceed6c5350280b4e339933ad571ebb0aef`.
 - Hook/checks: relevant tests, root types/lint/build, docs:check, Prettier/diff lulus sebelum commit; hasil hook normal dicatat setelah commit.
 - Ledger: SHA aktual dicatat setelah commit berhasil pada update task/dokumentasi berikutnya; tidak memakai self-referential SHA.
 
@@ -340,7 +340,7 @@ APUB-008/009 menambahkan action handlers/dialog. Dirty metadata form tetap di ha
 
 ## Task: APUB-008 — Manual Publish confirmation dan result
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1
 - Referensi: APUB-US-02; PRD-05/06/08/09, GR-01–09 yang relevan; [step plan](../plans/admin-publication/implementation-plan.md#apub-008--publish-confirmation-dan-result)
@@ -354,11 +354,11 @@ Implementasi publish confirmation dialog/handler memakai controller, fresh readi
 
 ### Acceptance criteria
 
-- [ ] Ready draft + Preview tersedia membuka confirmation; Cancel tidak mengirim POST; checkbox review preview direset per intent dan bukan audit DB.
-- [ ] Fresh metadata/readiness/inventory version dan capability tidak cocok menunda confirmation; readiness change/active upload/media-busy menampilkan blocker.
-- [ ] Confirm mengirim satu POST exact version/key, semua repeat submit disabled; no autopublish dan no request inferred from merely opening dialog.
-- [ ] Response success atau reconciliation displayed sebagai current server state; domain conflict dan unknown result memberi safe review/Check status/exact-retry actions.
-- [ ] Open public video hanya setelah confirmed current published; copy tidak menjanjikan homepage catalog already implemented; focus/pending/error accessible.
+- [x] Ready draft + Preview tersedia membuka confirmation; Cancel tidak mengirim POST; checkbox review preview direset per intent dan bukan audit DB.
+- [x] Fresh metadata/readiness/inventory version dan capability tidak cocok menunda confirmation; readiness change/active upload/media-busy menampilkan blocker.
+- [x] Confirm mengirim satu POST exact version/key, semua repeat submit disabled; no autopublish dan no request inferred from merely opening dialog.
+- [x] Response success atau reconciliation displayed sebagai current server state; domain conflict dan unknown result memberi safe review/Check status/exact-retry actions.
+- [x] Open public video hanya setelah confirmed current published; copy tidak menjanjikan homepage catalog already implemented; focus/pending/error accessible.
 
 ### Validasi
 
@@ -366,13 +366,13 @@ Publish happy/cancel/blocker/double-click/version409/busy/not-ready/network-afte
 
 ### Hasil dan bukti
 
-Belum dikerjakan; command di bagian Validasi merupakan rencana, bukan hasil aktual. Tidak ada commit/runtime proof untuk task ini.
+Publish action/dialog memakai manual preview checkbox lokal, saved-rights copy, fresh review/confirm dan controller exact version/key. Cancel/Escape sebelum submit tidak POST; pending controls disabled, live status dan popup scroll/gutters/focus Cancel/return ref tersedia. Recovery Check status/Retry publish explicit dan public watch link hanya untuk current published yang coherent. Source/dialog spot review selesai; keyboard/native browser proof APUB-012. Client/state13 tests65 assertions serta root types3/3/lint1/1/build2/2 lulus. Tidak menambah preview audit field atau publication metadata patch.
 
 ### Commit task
 
 - Pesan: `feat(web): publish ready films and standalone videos (APUB-008)`
 - SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- Hook/checks: relevant tests, root types/lint/build, docs:check, Prettier/diff lulus sebelum commit; hasil hook normal dicatat setelah commit.
 - Ledger: SHA aktual dicatat setelah commit berhasil pada update task/dokumentasi berikutnya; tidak memakai self-referential SHA.
 
 ### Blocker atau tindak lanjut
