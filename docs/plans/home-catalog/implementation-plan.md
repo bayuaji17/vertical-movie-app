@@ -327,3 +327,7 @@ HOMEFE-010 commit393b1b11e186d4a23e5f87c2208fed492341ef1f. Relevant tests10pass/
 ### Refinement skeleton — 7 Oktober 2026
 
 Pengguna meminta skeleton setelah klik Load more. Freshness sebelum edit:7a05240cdde1dc556ac86b364dc17ce2b95b0e2c, worktree clean. HOMEFE-012 hanya mengubah CatalogGrid dan docs: Skeleton existing ditambahkan di akhir grid saat isFetchingNextPage, maksimal6 dibatasi hasil tersisa, kartu lama dipertahankan dan tombol disabled. Loading tetap mengikuti query asli tanpa artificial delay/API. Browser menahan Promise query pada observer khusus proof, bukan source runtime, untuk memverifikasi pending→success/EOF,9:16/nooverflow320/1440 dan reduced-motion. [Evidence](../../tasks/home-catalog.md#task-homefe-012--skeleton-halaman-berikutnya).
+
+### Delivery disetujui — 7 Oktober 2026
+
+Pengguna mengotorisasi commit/push/merge tanpa squash. Main `f74a76a986ffd36096b6408e59abb9bf5b9f744c` (publication admin PR #9) diselaraskan tanpa rewrite histori; konflik index/PRD mempertahankan kedua fitur. Source gabungan lulus285 API/web tests/1455 assertions, types3/3/lint1/1/build2/2, docs/format/diff, built homepage matrix12 serta development skeleton proof. [HOMEFE-013](../../tasks/home-catalog.md#task-homefe-013--sinkronisasi-main-dan-validasi-delivery) menyimpan evidence dan batas; remote diverifikasi setelah push/PR/merge, branch dipertahankan. Homepage tetap JSON dummy tanpa API.

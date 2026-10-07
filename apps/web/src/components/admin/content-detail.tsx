@@ -10,6 +10,7 @@ import { Button } from '#/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '#/components/ui/card'
 import { Badge } from '#/components/ui/badge'
 import { OwnerMediaPanel } from './media-panel'
+import { VideoPublicationMedia } from './publication-panel'
 
 function MetadataRows({
   rows,
@@ -29,7 +30,13 @@ function MetadataRows({
     </dl>
   )
 }
-export function ContentDetailView({ detail }: { detail: ContentDetail }) {
+export function ContentDetailView({
+  detail,
+  metadataStale = false,
+}: {
+  detail: ContentDetail
+  metadataStale?: boolean
+}) {
   const d = detail.data
   const editable = isEditableContent(detail)
   const names =
@@ -188,15 +195,19 @@ export function ContentDetailView({ detail }: { detail: ContentDetail }) {
           </CardContent>
         </Card>
       </div>
-      {(detail.type === 'series' || detail.data.kind !== 'episode') && (
+      {detail.type === 'series' ? (
         <OwnerMediaPanel
-          owner={{
-            ownerType: detail.type === 'series' ? 'series' : 'video',
-            ownerId: d.id,
-          }}
+          owner={{ ownerType: 'series', ownerId: d.id }}
           type={detail.type}
         />
-      )}
+      ) : detail.data.kind !== 'episode' ? (
+        <VideoPublicationMedia
+          key={detail.type + ':' + d.id}
+          detail={detail}
+          type={detail.type}
+          metadataStale={metadataStale}
+        />
+      ) : null}
     </div>
   )
 }

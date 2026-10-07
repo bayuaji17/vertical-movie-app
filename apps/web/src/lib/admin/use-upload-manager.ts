@@ -1,3 +1,4 @@
+import { publicationKeys } from './publication-queries'
 import { useEffect, useMemo, useReducer } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import type { QueryClient } from '@tanstack/react-query'
@@ -81,7 +82,19 @@ export function useUploadManager(
         changed()
         notifyUploadState(cache)
       },
-      committed: () => invalidateMedia(cache, user.id, target, type),
+      committed: async () => {
+        await Promise.all([
+          invalidateMedia(cache, user.id, target, type),
+          ...(target.ownerType === 'video'
+            ? [
+                cache.invalidateQueries({
+                  queryKey: publicationKeys.video(user.id, target.ownerId),
+                  exact: true,
+                }),
+              ]
+            : []),
+        ])
+      },
     })
   }, [cache, client, user.id, owner.ownerId, owner.ownerType, type])
   useEffect(() => {

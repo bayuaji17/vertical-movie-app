@@ -589,3 +589,31 @@ Browser result passed: retainedCards6, skeletons6, viewports[320,1440], reducedM
 ### Blocker atau tindak lanjut
 
 Tidak ada untuk scope ini; integrasi API tetap tahap terpisah.
+
+## Task: HOMEFE-013 — Sinkronisasi main dan validasi delivery
+
+- Status: Done (validasi lokal; remote mengikuti receipt Git/PR)
+- Owner: Codex
+- Prioritas: P1
+- Diperbarui: 2026-10-07
+- Dependensi: HOMEFE-010/012 dan instruksi pengguna commit/push/merge tanpa squash.
+
+### Ruang lingkup dan acceptance criteria
+
+- [x] Integrasikan live main `f74a76a986ffd36096b6408e59abb9bf5b9f744c` (PR #9) dengan homepage head `ec83869e462b28066080140877394bad5d177973` tanpa rewrite histori.
+- [x] Selesaikan konflik index/PRD dengan mempertahankan status kedua fitur; GR-01 mencatat publication Film/Standalone tersedia. Homepage tetap JSON lokal tanpa API.
+- [x] Validasi source gabungan; perubahan lokal checkout utama tetap di luar staging.
+
+### Validasi dan evidence
+
+`bun test apps/web/test apps/api/src`:285 pass/0fail/1455 assertions pada52files. Root `bun run check-types`:3/3; `bun run lint`:1/1; `bun run build`:2/2. Sebelum ledger, `bun run docs:check`:66 Markdown/669 links; Prettier seluruh supported changed files dan diffcheck pass. Final docs/hooks normal dijalankan saat commit.
+
+Built Bun/Nitro3148 memakai `apps/web/test/home-catalog-browser-worker.mjs`:matrix12,SSR6,pages6→12→18,forbiddenRequests0/errors0,source/fallback retry bounded. API_INTERNAL_URL loopback59999 tidak menyediakan API; screenshot baru pada ignored `.turbo/home-delivery-browser/`. Proof sementara di luar repository `home-skeleton-proof.mjs` terhadap development3147:retainedCards6/skeletons6,widths320/1440,reducedMotion=true,pages6→12→18,errors0. Penahanan query hanya pada browser proof, tanpa source delay.
+
+### Commit dan remote delivery
+
+Pesan sinkronisasi: `chore(web): sync main before homepage delivery (HOMEFE-013)`; SHA aktual pada Git history setelah commit, tanpa self-reference. Receipt sebelumnya: runtime HOMEFE-012 `df5273756ab69bbe3d80750f9711bd87e3351ed2`, ledger `ec83869e462b28066080140877394bad5d177973`. Pengguna mengotorisasi push/PR/merge 7 Oktober 2026:source `feat/home-catalog-mockup`,target `main`,normal merge tanpa squash/penghapusan branch. Nomor PR/head/merge aktual dilaporkan setelah GitHub diverifikasi.
+
+### Batas
+
+Tidak mengulang DB/storage publication integration: source publication berasal dari verified main; homepage tidak mengubah schema/API/publication runtime. Integrasi katalog nyata serta R2/Safari/perangkat fisik/resource/full-restore/production tetap tahap terpisah.

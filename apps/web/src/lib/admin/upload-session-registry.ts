@@ -1,3 +1,4 @@
+import type { MediaOwner } from './media-client'
 import type { QueryClient } from '@tanstack/react-query'
 import type { UploadManager } from './upload-manager'
 
@@ -40,9 +41,9 @@ export function subscribeUploads(cache: QueryClient, notify: () => void) {
 export function uploadRevision(cache: QueryClient) {
   return registry(cache).revision
 }
-export function hasWorkingUploads(cache: QueryClient) {
-  return Array.from(registry(cache).managers).some((manager) =>
-    manager.working(),
+export function hasWorkingUploads(cache: QueryClient, owner?: MediaOwner) {
+  return Array.from(registry(cache).managers).some(
+    (manager) => (!owner || manager.owns(owner)) && manager.working(),
   )
 }
 export function pauseUploads(cache: QueryClient) {

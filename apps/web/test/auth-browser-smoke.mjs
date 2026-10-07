@@ -37,26 +37,27 @@ const contentFixture = includeContent
         : null
     })
   : undefined
-const mediaFixture =
-  process.env.AUTH_BROWSER_PHASE === 'media'
-    ? await (
-        await import('../../api/test/integration/admin-media-browser-fixture')
-      ).createAdminMediaBrowserFixture(async ({ headers }) => {
-        if (outage) throw Error('Fixture auth unavailable')
-        return (headers.get('cookie') ?? '').includes('browser-fixture=admin')
-          ? {
-              user: {
-                id: 'browser-admin',
-                name: 'Browser Admin',
-                email: 'browser@example.test',
-                role,
-                banned: false,
-              },
-              session: { expiresAt: new Date(Date.now() + 86400000) },
-            }
-          : null
-      })
-    : undefined
+const mediaFixture = ['media', 'publication'].includes(
+  process.env.AUTH_BROWSER_PHASE,
+)
+  ? await (
+      await import('../../api/test/integration/admin-media-browser-fixture')
+    ).createAdminMediaBrowserFixture(async ({ headers }) => {
+      if (outage) throw Error('Fixture auth unavailable')
+      return (headers.get('cookie') ?? '').includes('browser-fixture=admin')
+        ? {
+            user: {
+              id: 'browser-admin',
+              name: 'Browser Admin',
+              email: 'browser@example.test',
+              role,
+              banned: false,
+            },
+            session: { expiresAt: new Date(Date.now() + 86400000) },
+          }
+        : null
+    })
+  : undefined
 if (process.env.AUTH_BROWSER_PHASE === 'content')
   assert.ok(
     contentFixture,
@@ -97,7 +98,12 @@ const api = Bun.serve({
         ids: contentFixture.ids,
         traces: contentFixture.traces,
       })
-    if (url.pathname.startsWith('/admin/') && (mediaFixture || contentFixture))
+    if (
+      (url.pathname.startsWith('/admin/') ||
+        (mediaFixture &&
+          /^\/(videos|series|playback)(\/|$)/.test(url.pathname))) &&
+      (mediaFixture || contentFixture)
+    )
       return (mediaFixture ?? contentFixture).handle(request)
     if (url.pathname === '/control') {
       const body = await request.json()
@@ -266,13 +272,15 @@ try {
   for (const phase of phases) {
     const workerSource = await Bun.file(
       import.meta.dir +
-        (phase === 'media'
-          ? '/admin-media-upload-browser-worker.mjs'
-          : phase === 'content'
-            ? '/admin-content-browser-worker.mjs'
-            : phase === 'routes'
-              ? '/auth-routes-browser-worker.mjs'
-              : '/auth-browser-worker.mjs'),
+        (phase === 'publication'
+          ? '/admin-publication-browser-worker.mjs'
+          : phase === 'media'
+            ? '/admin-media-upload-browser-worker.mjs'
+            : phase === 'content'
+              ? '/admin-content-browser-worker.mjs'
+              : phase === 'routes'
+                ? '/auth-routes-browser-worker.mjs'
+                : '/auth-browser-worker.mjs'),
     ).text()
     const workerPath = process.env.AUTH_BROWSER_WORKER_PATH
     if (workerPath) await Bun.write(workerPath, workerSource)

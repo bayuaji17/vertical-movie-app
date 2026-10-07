@@ -1,5 +1,6 @@
 import type {
   MediaClient,
+  MediaOwner,
   MediaInitiate,
   MediaKind,
   OwnerMedia,
@@ -109,6 +110,12 @@ export class UploadManager {
     const url = this.slots[kind].view.previewUrl
     if (url) URL.revokeObjectURL(url)
     this.slots[kind].view = { ...this.slots[kind].view, previewUrl: undefined }
+  }
+  owns(owner: MediaOwner) {
+    return (
+      this.inventory?.ownerType === owner.ownerType &&
+      this.inventory.ownerId === owner.ownerId
+    )
   }
   working() {
     return (['source', 'poster'] as const).some((kind) => this.busy(kind))

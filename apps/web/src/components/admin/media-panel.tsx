@@ -1,9 +1,11 @@
+import type { UseQueryResult } from '@tanstack/react-query'
+import type { UploadManager } from '#/lib/admin/upload-manager'
 import { useMemo } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAdminPrincipal } from '#/lib/auth/session-context'
 import { browserMediaClient } from '#/lib/admin/media-client'
-import type { MediaOwner } from '#/lib/admin/media-client'
+import type { MediaOwner, OwnerMedia } from '#/lib/admin/media-client'
 import type { ContentType } from '#/lib/admin/content-client'
 import { ownerMediaOptions } from '#/lib/admin/media-queries'
 import { useUploadManager } from '#/lib/admin/use-upload-manager'
@@ -25,8 +27,25 @@ export function OwnerMediaPanel({
     client = useMemo(() => browserMediaClient(cache), [cache])
   const query = useQuery(ownerMediaOptions(client, user.id, owner)),
     { manager } = useUploadManager(owner, type, query.data)
+  return <MediaPanelView owner={owner} query={query} manager={manager} />
+}
+export function MediaPanelView({
+  owner,
+  query,
+  manager,
+  showPreview = true,
+}: {
+  owner: MediaOwner
+  query: UseQueryResult<OwnerMedia>
+  manager?: UploadManager
+  showPreview?: boolean
+}) {
   return (
-    <section aria-label="Upload media" className="flex min-w-0 flex-col gap-5">
+    <section
+      id="upload-media"
+      aria-label="Upload media"
+      className="flex min-w-0 flex-col gap-5"
+    >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <h2 className="text-xl font-semibold">Upload media</h2>
@@ -35,21 +54,23 @@ export function OwnerMediaPanel({
             publication are separate steps.
           </p>
         </div>
-        {query.data?.canPreview && owner.ownerType === 'video' && (
-          <Button
-            nativeButton={false}
-            variant="outline"
-            className="min-h-11"
-            render={
-              <Link
-                to="/admin/videos/$id/preview"
-                params={{ id: owner.ownerId }}
-              />
-            }
-          >
-            Preview video
-          </Button>
-        )}
+        {showPreview &&
+          query.data?.canPreview &&
+          owner.ownerType === 'video' && (
+            <Button
+              nativeButton={false}
+              variant="outline"
+              className="min-h-11"
+              render={
+                <Link
+                  to="/admin/videos/$id/preview"
+                  params={{ id: owner.ownerId }}
+                />
+              }
+            >
+              Preview video
+            </Button>
+          )}
         <Button
           variant="outline"
           className="min-h-11"

@@ -1,6 +1,6 @@
 # Dokumentasi proyek
 
-Indeks utama dokumentasi Vertical Movie App. Mulai dari [AGENTS.md root](../AGENTS.md) untuk aturan kerja, lalu baca spesifikasi, panduan dan backlog yang relevan. [README root](../README.md) berisi quick start. Struktur diperbarui 7 Oktober 2026.
+Indeks utama dokumentasi Vertical Movie App. Mulai dari [AGENTS.md root](../AGENTS.md) untuk aturan kerja, lalu baca spesifikasi, panduan dan backlog yang relevan. [README root](../README.md) berisi quick start. Struktur/status homepage dan publication diperbarui 7 Oktober 2026.
 
 ## Struktur dan sumber acuan
 
@@ -28,6 +28,7 @@ Aturan penamaan, ownership dan maintenance berada pada [Documentation rules](../
 - [Dashboard desktop light/dark](design/admin-content-desktop-light.md): v2 English/avatar, tiga jenis dan pagination custom; desain disetujui, metadata dashboard diimplementasikan.
 - [Dashboard mobile light/dark](design/admin-content-mobile.md): lima layouts light/dark disetujui; cards/form/drawer dan pagination metadata diimplementasikan.
 - [Upload Media desktop/mobile light/dark](design/admin-media-upload.md): empat mockup disetujui pengguna 5 Oktober 2026; state/modal specification dan runtime responsif terverifikasi lokal 6 Oktober 2026.
+- [Publish & Archive desktop/mobile light/dark](design/admin-publication.md): empat mockup disetujui pengguna 7 Oktober 2026; readiness, konfirmasi manual dan recovery runtime verified lokal, evidence APUB.
 
 - [Homepage/katalog publik](design/home-catalog.md): arah mockup light desktop/mobile disetujui pengguna 7 Oktober 2026; FE dummy JSON + TanStack useInfiniteQuery diimplementasikan dan diverifikasi lokal 7 Oktober 2026; integrasi API katalog masih lanjutan. [Evidence desain](tasks/home-catalog-design.md), [context](plans/home-catalog/repository-context.md), [plan detail](plans/home-catalog/implementation-plan.md) dan [backlog HOMEFE](tasks/home-catalog.md).
 
@@ -49,6 +50,8 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 
 Logging request API memakai console implemented/verified lokal 7 Oktober 2026; [panduan](guides/api-development.md#logging-request-http), [context baseline](plans/api-request-logging/repository-context.md) dan [plan/evidence](plans/api-request-logging/implementation-plan.md) menjelaskan scope serta batas gateway/storage.
 
+Publish & Archive admin Film/Standalone: [context snapshot](plans/admin-publication/repository-context.md) dan [implementation plan](plans/admin-publication/implementation-plan.md), disetujui pengguna 7 Oktober 2026. Scope mencakup readiness server, konfirmasi manual, version/idempotency/recovery dan proof akses publik; plan/empat desain approved, APUB-001–013 implemented/verified lokal; actual API/DB/MinIO/FFmpeg/built-browser proof dan local receipts pada backlog.
+
 | Fitur              | Context                                                         | Plan                                                                                           | Penggunaan                                                                                                                                                                       |
 | ------------------ | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Auth               | [Snapshot](plans/auth/repository-context.md)                    | [Plan awal](plans/auth/implementation-plan.md), [refactor native](plans/auth/refactor-plan.md) | Riwayat; command aktif berada di runbook auth.                                                                                                                                   |
@@ -67,6 +70,7 @@ Logging request API memakai console implemented/verified lokal 7 Oktober 2026; [
 - [Media](tasks/media.md): konfigurasi, multipart, cleanup dan provider proof.
 - [Worker](tasks/media-worker.md): queue, lease/retry, FFmpeg, retensi dan benchmark.
 - [Publication/playback](tasks/media-publication.md): readiness, visibility, katalog, HLS dan player.
+- [Publish & Archive admin](tasks/admin-publication.md): APUB-001–013 Done lokal; plan/desain approved, readiness/Publish/Archive Film/Standalone dan recovery verified API/DB/browser.
 - [Database tooling](tasks/database-tooling.md): Drizzle Studio development.
 - [Development verification](tasks/development-verification.md): quality gate, preservation migrasi dan upgrade Turbo 2.11.7 terverifikasi lokal.
 - [Build web](tasks/web-build.md): baseline warning directive, plan filter logging dan verifikasi build/SSR.
@@ -79,4 +83,4 @@ Logging request API memakai console implemented/verified lokal 7 Oktober 2026; [
 
 `apps/api` memiliki API Elysia, metadata, storage/upload, native poster request processing, publication/catalog/playback dan worker Bun/FFmpeg terpisah. `apps/web` memiliki TanStack Start, auth admin, metadata dashboard, uploader Eden/Query responsif light/dark serta primitive crop Canvas 9:16, gateway same-origin, Video.js 10 RC, watch dan preview minimal. `packages/auth` memiliki Better Auth dengan entry server/client/types terpisah. Homepage/katalog publik memakai JSON dummy lokal dan useInfiniteQuery dengan Load more manual; integrasi API katalog masih lanjutan. Workspace diatur oleh `turbo.json`; env samples berada pada masing-masing app.
 
-Media telah di-merge melalui [PR #3](https://github.com/bayuaji17/vertical-movie-app/pull/3). Development memakai MinIO dan production dirancang memakai Cloudflare R2 melalui env. Playback memakai HLS hasil transcoding dan lifecycle draft → published → archived. Bukti lokal serta fixture 10/30 menit ada pada runbook/backlog. R2 staging, Safari/native HLS, kapasitas 4 core/4 GB, full restore dan matriks stress yang belum terverifikasi tetap gerbang terpisah. Uploader Film/Standalone source+cover dan Series cover terverifikasi lokal; publication UI, editor/upload episode dan subtitle merupakan pekerjaan lanjutan.
+Media telah di-merge melalui [PR #3](https://github.com/bayuaji17/vertical-movie-app/pull/3). Development memakai MinIO dan production dirancang memakai Cloudflare R2 melalui env. Playback memakai HLS hasil transcoding dan lifecycle draft → published → archived. Bukti lokal serta fixture 10/30 menit ada pada runbook/backlog. R2 staging, Safari/native HLS, kapasitas 4 core/4 GB, full restore dan matriks stress yang belum terverifikasi tetap gerbang terpisah. Uploader Film/Standalone source+cover dan Series cover terverifikasi lokal; readiness/Publish/Archive Film/Standalone terverifikasi lokal 7 Oktober 2026. Publication Series/episode, editor/upload episode dan subtitle merupakan pekerjaan lanjutan.
