@@ -1,6 +1,6 @@
 # Modul: Admin Publish & Archive
 
-> Status: **Implementasi berjalan; plan dan desain disetujui pengguna** · 7 Oktober 2026 · APUB-001–011 Done; APUB-012 browser acceptance dan APUB-013 closure dilanjutkan. Plan disetujui melalui “oke setuju”; empat raster/state specification disetujui melalui “ok setuju”. Base historis `313e31a14891ac0f91265a3557576b44791309d7`.
+> Status: **Implemented dan verified lokal — APUB-001–013** · 7 Oktober 2026 · Plan disetujui melalui “oke setuju”; empat raster/state specification disetujui melalui “ok setuju”. API/DB/browser evidence dan local task commits berada di bawah. Base historis `313e31a14891ac0f91265a3557576b44791309d7`; bukan approval production.
 
 ## Tujuan modul
 
@@ -544,8 +544,8 @@ Additional checks: `bun test apps/api/src`119 pass/641 assertions; `bun test app
 ### Commit task
 
 - Pesan: `test(web): verify admin publication flow (APUB-012)`
-- SHA: belum dibuat.
-- Hook/checks: relevant tests, root types/lint/build, docs:check, Prettier/diff lulus sebelum commit; hasil hook normal dicatat setelah commit.
+- SHA: `ba50f216c245b2bfb94430a0fcc73458a3243d74`.
+- Hook/checks: docs66/618, lint1/1, types3/3 dan Commitlint lulus melalui hook normal; staged snapshot docs59/599, Prettier/diff/preservation lulus.
 - Ledger: SHA aktual dicatat setelah commit berhasil pada update task/dokumentasi berikutnya; tidak memakai self-referential SHA.
 
 ### Blocker atau tindak lanjut
@@ -554,7 +554,7 @@ Jika environment tidak tersedia, catat actual blocker dan acceptance belum Done.
 
 ## Task: APUB-013 — Dokumentasi current behavior dan module closure
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1
 - Referensi: APUB-US-04; PRD-05/06/08/09, GR-01–09 yang relevan; [step plan](../plans/admin-publication/implementation-plan.md#apub-013--documentation-dan-closure)
@@ -568,11 +568,11 @@ Perbarui PRD-06, runbook media, overview dan index untuk actual verified fronten
 
 ### Acceptance criteria
 
-- [ ] Current UI/routes/readiness/confirmation/recovery dan exact scope Film/Standalone tercatat; PRD tidak dinaikkan menjadi whole-MVP complete.
-- [ ] Source/runtime versus mockup/history/production evidence tetap dibedakan; Series/episode/catalog/settings/subtitle dan external verification gates dipertahankan.
-- [ ] Semua mandatory story/task AC memiliki actual command/result evidence, local commit receipt dan limitations; any implementation deviation ditulis di execution history.
-- [ ] Freshness validated terhadap final target SHA/source; all applicable existing tests/check-types/lint/build evidence valid untuk source final, tanpa rerun tidak perlu jika docs-only setelah root gates.
-- [ ] docs:check/Prettier/diff/staged review/hooks lulus; commit setiap task tidak self-referential; push/PR/merge/deployment hanya bila later user authorization ada.
+- [x] Current UI/routes/readiness/confirmation/recovery dan exact scope Film/Standalone tercatat; PRD tidak dinaikkan menjadi whole-MVP complete.
+- [x] Source/runtime versus mockup/history/production evidence tetap dibedakan; Series/episode/catalog/settings/subtitle dan external verification gates dipertahankan.
+- [x] Semua mandatory story/task AC memiliki actual command/result evidence, local commit receipt dan limitations; any implementation deviation ditulis di execution history.
+- [x] Freshness validated terhadap final target SHA/source; all applicable existing tests/check-types/lint/build evidence valid untuk source final, tanpa rerun tidak perlu jika docs-only setelah root gates.
+- [x] docs:check/Prettier/diff/staged review/hooks lulus; commit setiap task tidak self-referential; push/PR/merge/deployment hanya bila later user authorization ada.
 
 ### Validasi
 
@@ -580,13 +580,17 @@ Review ledger dan final-source checks dari APUB-012; docs:check/Prettier/git dif
 
 ### Hasil dan bukti
 
-Belum dikerjakan; command di bagian Validasi merupakan rencana, bukan hasil aktual. Tidak ada commit/runtime proof untuk task ini.
+Implemented/verified lokal 7 Oktober 2026. PRD-06 dan MVP matrix, global rules, overview, media runbook, desain Publication dan index kini menyatakan scope readiness/Preview/manual Publish/Archive published Film/Standalone beserta recovery/current-state semantics. Series/episode publication/editor/upload, visitor catalog/settings/subtitle dan provider/platform/resource/restore/production gates existing tetap terpisah. Baseline/history/mockup approved dibedakan dari actual source/browser; tidak mengubah schema/env/dependency/player/worker atau menjalankan production migration. Runtime freshness rechecked terhadap APUB-012 commit `ba50f21`; APUB-013 hanya dokumentasi. Semua APUB-001–012 receipts aktual tercatat per task, APUB-013 receipt final tersedia di Git history/delivery sesudah commit (tanpa self-referential SHA).
+
+APUB-012 final source evidence berlaku:119 API/641 assertions,158 web/779 assertions, real dedicated PG parity/concurrency3/96 dari APUB-011, final built Bun/Nitro Chromium acceptance Film/Standalone/15 theme-width/fault/auth/expiry, serialized auth import boundary proof, root types3/3/lint1/1/build2/2. Browser final PG/API versions Film7 dan Standalone5 beserta status/firstPublishedAt/archivedAt identik, satu persisted publish operation per owner; final signed poster expired403. Tidak mengulang runtime gates untuk docs-only closure; hook normal tetap memeriksa lint/types.
+
+Observed documentation validation: installed Prettier changed8 Markdown files, `bun run docs:check`66 Markdown/624 local links/anchors dan `git diff --check`pass sebelum ledger closure. Original22 unrelated files cocok SHA-256 manifest, README user overlay dipertahankan dengan partial staging berdasarkan HEAD+owned replacements. Staged docs validator dan final hooks dijalankan sebelum commit; hasil final tersedia di delivery/Git receipt. Tidak ada push/PR/merge/deployment.
 
 ### Commit task
 
 - Pesan: `docs: record verified admin publication (APUB-013)`
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk task ini.
+- SHA: lihat commit `docs: record verified admin publication (APUB-013)` pada Git history; SHA final dilaporkan setelah commit, tanpa self-reference.
+- Hook/checks: relevant tests, root types/lint/build, docs:check, Prettier/diff lulus sebelum commit; hasil hook normal dicatat setelah commit.
 - Ledger: SHA aktual dicatat setelah commit berhasil pada update task/dokumentasi berikutnya; tidak memakai self-referential SHA.
 
 ### Blocker atau tindak lanjut
@@ -600,6 +604,6 @@ Actual APUB-013 SHA dicatat pada receipt update/task berikutnya setelah commit; 
 | 2026-10-07 | Scope priority | Pengguna menyetujui Publish & Archive Film/Standalone sebagai fitur berikutnya dan meminta plan; detail proposal belum approval runtime. | Tidak berlaku.                             |
 | 2026-10-07 | APUB-001       | Done: planning artifacts, observed gates/hooks/Commitlint, preservation; plan kini approved.                                             | `4cf00a97dffe9568a966f8889ae798fed3acdb17` |
 
-| 2026-10-07 | Plan approval / APUB-002 | Pengguna menyetujui plan; desain empat layout/state siap review visual, belum approval raster/runtime. | Commit desain dicatat update berikutnya. |
+| 2026-10-07 | Plan/desain approval | Pengguna menyetujui plan “oke setuju” dan empat layout/state “ok setuju”; APUB-002 Done. | `9e11b221d1d244bc486bb2be0d9b029619b47a87` |
 
-Receipt APUB-001 dicatat pada delivery desain ini setelah planning commit berhasil. APUB-002 Review; empat PNG dan specification siap visual review, bukan runtime proof. Final task SHA tidak ditulis sebagai self-reference; final response Git history atau receipt update berikutnya menyediakan actual SHA. Semua approval/task status harus dibedakan dari gerbang production.
+Receipt APUB-001–012 aktual berada pada bagian Commit task masing-masing; empat PNG adalah desain approved, bukan screenshot runtime. APUB-013 documentation-only menutup current behavior dan evidence lokal. Final APUB-013 SHA tersedia di Git history/delivery setelah commit, tanpa self-reference di source commit itu sendiri. Approval plan/desain dan verified lokal tetap dibedakan dari gerbang production.

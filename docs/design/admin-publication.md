@@ -1,12 +1,12 @@
 # Desain admin Publish & Archive
 
-> Status: **Desain disetujui pengguna** · 7 Oktober 2026 · Plan disetujui pengguna melalui “oke setuju”; empat raster/state specification disetujui melalui “ok setuju” pada 7 Oktober 2026. Source baseline `4cf00a97dffe9568a966f8889ae798fed3acdb17`, runtime UI belum diimplementasikan.
+> Status: **Desain disetujui pengguna** · 7 Oktober 2026 · Plan disetujui pengguna melalui “oke setuju”; empat raster/state specification disetujui melalui “ok setuju” pada 7 Oktober 2026. Source baseline desain historis `4cf00a97dffe9568a966f8889ae798fed3acdb17`; runtime Film/Standalone implemented dan verified lokal 7 Oktober 2026, dengan evidence pada [backlog APUB](../tasks/admin-publication.md).
 
 ## Scope dan sumber acuan
 
 Extension pada detail `/admin/content/:type/:id` untuk Film/Standalone non-episode. Acuan: [plan](../plans/admin-publication/implementation-plan.md), [context](../plans/admin-publication/repository-context.md), [backlog APUB](../tasks/admin-publication.md), [dashboard desktop](admin-content-desktop-light.md), [mobile](admin-content-mobile.md), [upload](admin-media-upload.md) dan [design system](design-system.md). Token runtime authoritative pada `apps/web/src/styles.css`, shadcn Base UI Rhea dari `apps/web/components.json`; English UI dan developer docs Indonesia.
 
-Pengguna menyetujui keempat raster dan state specification melalui “ok setuju” setelah review visual. Sesuai APUB-002, runtime UI memakai desain yang diterima. Aksi dan kontrak di bawah adalah desain untuk implementasi, bukan bukti endpoint/UI baru sudah aktif.
+Pengguna menyetujui keempat raster dan state specification melalui “ok setuju” setelah review visual. Sesuai APUB-002, runtime UI memakai desain yang diterima. Aksi/state di bawah menjadi acuan implementasi yang diterima. Empat raster adalah mockup; bukti runtime API/DB/browser, dialog dan batas provider/platform dimiliki backlog APUB.
 
 ## Layout acuan
 
@@ -115,7 +115,7 @@ Built-in **image_gen**, transparent_background=false, digunakan untuk lima pangg
 
 Inspeksi visual selected outputs: enam check labels correct, Draft + Ready to publish coherent, source/cover Ready, rights Confirmed, no Archive on draft, English copy, primary lime dan secondary outline, desktop sidebar/footer, mobile tanpa sidebar, correct single-column media/cards, closed avatar menus. Dark pasangan mempertahankan komposisi/text dengan charcoal appearance. Metadata ringkasan/placement yang berbeda dari exact runtime dijelaskan di atas; implementasi memakai source/contract, bukan menghapus field berdasarkan raster.
 
-Magic PNG/dimensi/ukuran/SHA-256 divalidasi via Bun tanpa image editing/resize. Documentation/format/preservation/hook receipts dimiliki [APUB-002](../tasks/admin-publication.md), bukan test screenshot application. Belum ada approval visual pengguna atau perubahan runtime/API/schema/dependency.
+Magic PNG/dimensi/ukuran/SHA-256 divalidasi via Bun tanpa image editing/resize. Documentation/format/preservation/hook receipts dimiliki [APUB-002](../tasks/admin-publication.md), bukan test screenshot application. Delivery desain historis tidak mengubah runtime/API/schema/dependency. Pengguna kemudian menyetujui empat visual melalui “ok setuju”; runtime/API Film/Standalone kini implemented/verified lokal pada APUB-003–012 tanpa schema/dependency change.
 
 ## Prompt set aktual
 

@@ -2,14 +2,14 @@
 
 ## Plan metadata
 
-- Status: **executing — plan dan empat desain disetujui pengguna** · 7 Oktober 2026. Approval plan “oke setuju” dan desain “ok setuju” tercatat pada execution history. APUB-003–011 implemented/verified lokal; APUB-012 acceptance dan APUB-013 closure dilanjutkan.
+- Status: **implemented dan verified lokal — APUB-001–013** · 7 Oktober 2026. Plan dan empat desain disetujui pengguna; actual runtime/DB/browser evidence dan local task commits tercatat pada backlog. Production rollout tidak termasuk.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `feat/api-request-logging`; base SHA: `313e31a14891ac0f91265a3557576b44791309d7`.
 - Context: [repository-context.md](repository-context.md), ditulis lebih dahulu.
-- Last validated SHA: `4cf00a97dffe9568a966f8889ae798fed3acdb17`.
+- Last validated SHA: `ba50f216c245b2bfb94430a0fcc73458a3243d74` (APUB-012 final runtime/source; APUB-013 documentation-only).
 - Backlog canonical: [admin-publication](../../tasks/admin-publication.md); APUB-001–013, lima user story.
 - Pengguna menyetujui prioritas Publish & Archive Film/Standalone, meminta plan detail dan menyetujui plan melalui “oke setuju” pada 7 Oktober 2026. Plan menjadi acuan eksekusi; source belum diubah pada delivery desain APUB-002.
-- Local documentation task commit mengikuti otorisasi standing di root AGENTS; implementation/push/PR/merge/deployment bukan hasil atau otorisasi baru dari dokumen ini.
+- User approval plan/desain mengotorisasi implementasi. Local task commits mengikuti standing AGENTS; push/PR/merge/deployment memerlukan otorisasi terpisah.
 - Branch planning: `chore/admin-publication-plan`, dibuat lokal dari base SHA. Branch eksekusi `feat/admin-publication` dibuat dari planning commit `4cf00a97dffe9568a966f8889ae798fed3acdb17` setelah approval dan freshness review. APUB-002 historis hanya mengubah desain/dokumentasi; perubahan runtime dan evidence per task berada di execution history.
 
 ## Objective
@@ -28,7 +28,7 @@ Series/episode publication UI, season/episode editor/upload, katalog pengunjung,
 
 Auth, metadata, uploader/source+cover, processing dan Preview tersedia. POST publish dan archive sudah ada. Belum ada client publish/archive, readiness publication read model, dialogs atau mutation recovery di detail. `canPreview` bukan `canPublish`; DTO metadata hanya memberi rights timestamp sementara API juga memerlukan actor. Publish menghasilkan DTO parsial dan persistent replay; archive menghasilkan VideoDto dengan version check. [Context](repository-context.md#runtime-and-data-flow) menjelaskan jalurnya.
 
-## Desired behavior
+## Implemented behavior
 
 ### Halaman dan states
 
@@ -53,7 +53,7 @@ Copy UI English; developer docs Indonesia. Theme switcher Light/Dark/System, she
 
 ### Checklist dan batas authoritative
 
-Tambahkan private `GET /admin/videos/:id/publication-readiness` pada publication module. Proposal DTO strict:
+Tambahkan private `GET /admin/videos/:id/publication-readiness` pada publication module. DTO strict aktif:
 
 ```ts
 type PublicationReadiness = {
@@ -447,3 +447,7 @@ Dedicated PostgreSQL vertical_movie_app_media_test: publication suite3 tests96 a
 Built Bun/Nitro Chromium acceptance memakai real dedicated PostgreSQL, random private MinIO bucket dan FFmpeg subprocess: Film/Standalone create/upload/process/preview/publish/anonymous watch/archive; 15 width/theme cases, keyboard/focus/44px, owner hashing/offline and active-upload race, version conflict, same-intent explicit retry, committed lost/malformed responses, failed refetch, pending archive session revocation, current archived state despite old persisted replay, catalog invalidation dan actual signed URL expiry lulus. Auth browser fixture injected; native auth evidence tetap terpisah. Screenshots runtime inspected dan ignored; mockup canonical tidak menjadi screenshot proof.
 
 Runtime correction dari acceptance: preserve known conflict copy sesudah successful GET reconciliation dan semantic heading Publication. Tidak mengubah player/schema/dependencies/env/scripts. API unit119/641 dan seluruh web158/779 lulus; auth import boundary proof rejected intentional client server import/restored; final root types3/lint1/build2 lulus. OpenAPI runtime read30 admin operations. Full command/result/limitations/cleanup berada pada [APUB-012 backlog](../../tasks/admin-publication.md); existing22 unrelated paths utuh. APUB-013 memperbarui current canonical docs dan local commit receipts tanpa remote write.
+
+### 2026-10-07 — APUB-013
+
+Current PRD-06/rules/overview/runbook/design/index dan backlog status/receipts diperbarui setelah APUB-012 `ba50f21` selesai. Runtime final source verified lokal; closure documentation-only memakai applicable final gates APUB-012 dan docs/format/diff/staged/hook checks. Scope Film/Standalone, auth fixture/native boundary, provider/device/production limitations tetap eksplisit. Semua APUB tasks Done lokal; runtime tidak berubah setelah last validated SHA. Detailed closure evidence dimiliki [backlog APUB](../../tasks/admin-publication.md). APUB-013 actual SHA tersedia pada Git history/delivery setelah commit; unrelated work preserved, tanpa remote write.
