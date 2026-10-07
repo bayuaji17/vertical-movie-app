@@ -582,9 +582,9 @@ Browser result passed: retainedCards6, skeletons6, viewports[320,1440], reducedM
 ### Commit task
 
 - Pesan: feat(web): show skeletons while loading more titles (HOMEFE-012)
-- SHA: Dicatat setelah commit berhasil.
+- SHA: df5273756ab69bbe3d80750f9711bd87e3351ed2.
 - Hook/checks: docs/lint/types/Commitlint tanpa bypass.
-- Ledger: SHA task dicatat pada update berikutnya.
+- Ledger: Dicatat setelah commit task berhasil; docs:check62files/601links, Prettier dan diffcheck lulus. Worktree terpisah, belum push/PR/merge.
 
 ### Blocker atau tindak lanjut
 
