@@ -192,8 +192,8 @@ Public detail Film/Standalone dan Series, grouped episode rows, initial/append s
 ### Commit task
 
 - Pesan: Conventional Commit scoped PCW-004
-- SHA: receipt aktual dicatat pada task berikutnya setelah commit.
-- Hook/checks: normal docs/lint/types/commitlint wajib tanpa bypass.
+- SHA: `015182a3b92f590e3a4ab247b4c60a9bde13e328`.
+- Hook/checks: docs:check, lint, check-types dan commitlint normal pass tanpa bypass.
 
 ### Blocker atau tindak lanjut
 
@@ -201,7 +201,7 @@ Dependency menurut DAG. Tidak menambah progress/autoplay/editor/production atau 
 
 ## Task: PCW-005 — Watch metadata, Next dan player recovery
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent
 - Prioritas: P1, dependency order
 - Referensi: PCW-US-001/002; PRD-07/08, GR-02; [plan](../plans/public-content-watch/implementation-plan.md#implementation-steps)
@@ -215,8 +215,8 @@ Current video HLS with metadata/Series context/backlinks/manual Next and explici
 
 ### Acceptance criteria
 
-- [ ] Movie/Standalone/Episode plays on user action, no autoplay/auto-next, currentTime progresses; switchidentity resets position/error/source and stops old media; archivefreshcapability denied, no auth effects.
-- [ ] Applicable gates/evidence dan compatibility diperiksa sebelum Done.
+- [x] Movie/Standalone/Episode plays on user action, no autoplay/auto-next, currentTime progresses; switchidentity resets position/error/source and stops old media; archivefreshcapability denied, no auth effects.
+- [x] Applicable gates/evidence dan compatibility diperiksa sebelum Done.
 
 ### Validasi
 
@@ -224,12 +224,12 @@ relevant type/unit callbacks/races plus actual HLS/preview browser007.
 
 ### Hasil dan bukti
 
-Belum diimplementasikan/diverifikasi; isi command/result/batas dan receipt aktual saat task selesai.
+Watch SSR unsigned metadata dan per-video UUID player, backlinks Film/Standalone/Series/catalog, manual ordered Next dengan localized Retry503/EOF404 selesai. AbortController/epoch guard, loader-owned source, explicit Retry fresh capability dan bounded singleinflight renewal ditambahkan tanpa upgrade/skin changes; preview callback tanpa argumen tetap compatible. Root types/lint/build pass. Actual HLS/race/privatepreview proof ditutup PCW-007.
 
 ### Commit task
 
 - Pesan: Conventional Commit scoped PCW-005
-- SHA: belum dibuat.
+- SHA: receipt aktual dicatat pada task berikutnya setelah commit.
 - Hook/checks: normal docs/lint/types/commitlint wajib tanpa bypass.
 
 ### Blocker atau tindak lanjut
