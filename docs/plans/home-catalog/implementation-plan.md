@@ -303,3 +303,5 @@ Freshness: SHA 509d3870f12ad5aa562342bcb6fee778c97cf602, source router/Query pro
 Pengguna menyetujui plan setelah klarifikasi useInfiniteQuery. Default detail dialog lokal diterima. Freshness pada SHA 24a591885194c21458841a5f705323596748d1e9: diff apps/packages/manifests/lock/AGENTS terhadap base kosong; worktree clean sebelum edit. Checkout utama terpisah tetap dipertahankan.
 
 - HOMEFE-001: bun test apps/web/test/home-catalog-data.test.ts: 5 pass, 0 fail; web check-types lulus. Schema strict, fixture immutable, 18 judul dan selector batch6; reset cache UI ditutup pada HOMEFE-006/009. SHA task sebelumnya: `24a591885194c21458841a5f705323596748d1e9`.
+
+- HOMEFE-002: Enam native PNG 941x1672 dilihat satu per satu; scene sesuai, file lokal plus fallback SVG 900x1600. Ukuran source mendekati9:16 dicatat pada design; frame CSS exact9:16 diuji browser009. Source original dipertahankan; tidak ada runtime remote images. SHA task sebelumnya: `06bf4f0c8e910efa7f14620567646bc70505158c`.

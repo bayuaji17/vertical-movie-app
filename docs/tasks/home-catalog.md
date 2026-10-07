@@ -90,7 +90,7 @@ bun test apps/web/test/home-catalog-data.test.ts: 5 pass, 0 fail; web check-type
 ### Commit task
 
 - Pesan: `feat(web): dummy json typed dan selector katalog (HOMEFE-001)`.
-- SHA: Belum dibuat.
+- SHA: `06bf4f0c8e910efa7f14620567646bc70505158c`.
 - Hook/checks: Gate relevan lulus; hook docs/lint/types/Commitlint dijalankan saat commit tanpa bypass.
 - Ledger: SHA aktual dicatat pada update dokumentasi task berikutnya setelah commit, tanpa self-referential SHA.
 
@@ -100,7 +100,7 @@ Ikuti dependency dan batas data lokal pada plan; browser acceptance lintas task 
 
 ## Task: HOMEFE-002 — Enam poster source lokal dan fallback
 
-- Status: Ready
+- Status: Done
 - Owner: Codex
 - Prioritas: 2
 - Referensi: HOME-US-001; PRD-07/08; GR-02; [plan](../plans/home-catalog/implementation-plan.md).
@@ -116,10 +116,10 @@ Affected files: `apps/web/public/images/catalog/*.png`; `apps/web/public/images/
 
 ### Acceptance criteria
 
-- [ ] Enam PNG portrait 9:16 mandiri, local paths sesuai JSON, source/proses terdokumentasi dan tanpa remote CDN/API.
-- [ ] Scene sesuai enam judul awal; imagegen bila belum ada source. Frame output/dimensi diperiksa; resolusi cukup untuk lebar kartu/hero.
-- [ ] Fallback SVG netral tersedia dan tidak mengandung label/metadata admin; file image mode 100644, ukuran/format wajar.
-- [ ] Tidak overwrite mockup approved atau source/image unrelated.
+- [x] Enam PNG portrait 9:16 mandiri, local paths sesuai JSON, source/proses terdokumentasi dan tanpa remote CDN/API.
+- [x] Scene sesuai enam judul awal; imagegen bila belum ada source. Frame output/dimensi diperiksa; resolusi cukup untuk lebar kartu/hero.
+- [x] Fallback SVG netral tersedia dan tidak mengandung label/metadata admin; file image mode 100644, ukuran/format wajar.
+- [x] Tidak overwrite mockup approved atau source/image unrelated.
 
 ### Validasi
 
@@ -127,13 +127,13 @@ Review native image/dimensi/aspect/header; file path/permission checks; docs:che
 
 ### Hasil dan bukti
 
-Belum dikerjakan. Catat command/scope/result/limitations aktual; jangan menaikkan status dari checklist rencana saja.
+Enam native PNG 941x1672 dilihat satu per satu; scene sesuai, file lokal plus fallback SVG 900x1600. Ukuran source mendekati9:16 dicatat pada design; frame CSS exact9:16 diuji browser009. Source original dipertahankan; tidak ada runtime remote images.
 
 ### Commit task
 
 - Pesan: `feat(web): enam poster source lokal dan fallback (HOMEFE-002)`.
 - SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan.
+- Hook/checks: Gate relevan lulus; hook docs/lint/types/Commitlint dijalankan saat commit tanpa bypass.
 - Ledger: SHA aktual dicatat pada update dokumentasi task berikutnya setelah commit, tanpa self-referential SHA.
 
 ### Blocker atau tindak lanjut
