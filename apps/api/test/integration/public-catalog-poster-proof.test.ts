@@ -60,6 +60,14 @@ test("published private MinIO WebP is served and fresh visibility/profile/size f
         )
       ).status,
     ).toBe(503);
+    await s.native.delete(second);
+    expect(
+      (
+        await app.handle(
+          new Request(`http://localhost/catalog/movie/${f.videoIds[1]}/poster`),
+        )
+      ).status,
+    ).toBe(503);
     await expect(
       new CatalogPosterService(f.store, s.native, {
         ...s.config,

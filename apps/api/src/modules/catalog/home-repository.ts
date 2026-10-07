@@ -152,7 +152,7 @@ export class CatalogHomeStore implements HomeStore {
         ...(q.kind ? [sql`kind=${q.kind}`] : []),
         ...(q.genreId
           ? [
-              sql`data->'genres' @> ${JSON.stringify([{ id: q.genreId }])}::jsonb`,
+              sql`data->'genres' @> ${JSON.stringify([{ id: q.genreId }])}::text::jsonb`,
             ]
           : []),
         ...(q.search

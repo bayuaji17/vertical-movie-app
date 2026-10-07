@@ -367,7 +367,7 @@ Dependency terpenuhi. Bukti lint/types/docs/commitlint dicatat setelah commit; p
 
 ## Task: PCAT-009 — Proof PG/storage dan performance
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1, urutan/dependency menurut DAG plan.
 - Referensi: PCAT-US-004; PRD-07/08, GR-02; step PCAT-009 pada [plan](../plans/public-catalog-api/implementation-plan.md#implementation-steps).
@@ -381,8 +381,8 @@ Dedicated mixed dataset/precision/UUID ties/genre count/>100boundary/invalidatio
 
 ### Acceptance criteria
 
-- [ ] Real query cursor/count/parity, fresh poster denial/bytes/error dan no N+1 dibuktikan; actual results dicatat.
-- [ ] DBreset/storagecleanup hanya dedicated; jika schema/index berubah migration proof dan development migrate/preservation wajib.
+- [x] Real query cursor/count/parity, fresh poster denial/bytes/error dan no N+1 dibuktikan; actual results dicatat.
+- [x] DBreset/storagecleanup hanya dedicated; jika schema/index berubah migration proof dan development migrate/preservation wajib.
 
 ### Validasi
 
@@ -390,18 +390,24 @@ New public-catalog-proof suite dan existing media publication/series serial; opt
 
 ### Hasil dan bukti
 
-Belum diimplementasikan/diverifikasi. Catat command aktual, hasil, decision/deviation dan batas pada task ini saat dieksekusi; existing HOMEFE/APUB proof tidak menutup task PCAT.
+Command aktual: `bun test apps/api/test/integration/public-catalog-proof.test.ts apps/api/test/integration/public-catalog-poster-proof.test.ts` dengan guarded `MEDIA_TEST_DATABASE_URL` dan loopback MinIO test env; 4 pass, 0 fail, 74 assertions. Existing publication/series suites dijalankan serial: 6 pass, 0 fail, 122 assertions. Dedicated DB `vertical_movie_app_media_test` dan bucket privat acak saja; cleanup known objects/bucket selesai, primary checkout masih mempunyai23 unrelated dirty paths.
+
+127 judul (121 Series), 101 genre: pages100+27 dan genres100+1, satu owner101genres tetap satu card, UUID collision/µs/literal search/no genres/globalcount lolos. Satu statement per page/genre/poster identity, bukan query per Series. `EXPLAIN (ANALYZE,BUFFERS)` execution default103.644ms, Series104.869ms, genre114.992ms, search110.388ms; planning7.421–8.776ms. Ini pengukuran fixture lokal, bukan SLA/capacity proof. Index/schema tidak ditambah; ukuran ini belum membenarkan migration baru.
+
+Snapshot mengecualikan publish baru; unseen archive mengubah eligibility/count; parent season/generation/output-files gates dan rejected-write cache diuji. DB menolak wrong source owner lewat composite FK; test tidak menonaktifkan constraint. Perbaikan runtime: Bun SQL JSONB parameter genre harus melalui `::text::jsonb` supaya filter UUID benar. Actual production poster transcode menghasilkan WebP1080×1920/306422bytes; private unsigned GET403, public owner GET200, new archived GET404, missing/oversized/profile mismatch503. Metadata/HLS-ready facts di-seed melalui dedicated SQL fixture; test ini tidak mengklaim pemrosesan source HLS nyata atau R2.
+
+Root `bun run check-types`, `bun run lint`, `bun run build` pass. Large fixture timeout dinaikkan180s untuk setup121 Series, tanpa delay runtime. Bun SQL lazy thenable dimaterialisasi sebagai Promise pada test rejected owner; snapshot20assertions lulus sebelum full suite.
 
 ### Commit task
 
 - Pesan: `test(api): prove public catalog visibility and paging (PCAT-009)`
-- SHA: belum dibuat.
+- SHA: dicatat pada ledger task berikutnya setelah commit.
 - Hook/checks: diwajibkan tanpa bypass, hasil belum ada.
 - Ledger: actual SHA dicatat pada task berikutnya/delivery setelah commit, bukan self-reference.
 
 ### Blocker atau tindak lanjut
 
-Menunggu approval plan dan dependency di atas. Paths/symbols exact, risiko dan completion per step berada pada canonical plan; jangan memperluas ke watch/editor/production.
+Dependency dan runtime gates terpenuhi. Browser acceptance lengkap dilanjutkan pada PCAT-010; remote delivery belum diotorisasi.
 
 ## Task: PCAT-010 — Acceptance browser actual API
 
@@ -515,3 +521,5 @@ Menunggu approval plan dan dependency di atas. Paths/symbols exact, risiko dan c
 - Previous verified task commit before PCAT-007: 15ad7b94d4a6ae285a94d36d1c9f8f8dd614fb21 feat(web): load public catalog with Eden and SSR (PCAT-006).
 
 - Previous verified task commit before PCAT-008: 1bedafe8334605fbd64a84ad7d6a9d4ba12d908c feat(web): paginate API catalog with infinite query (PCAT-007).
+
+- Previous verified task commit before PCAT-009: e6cd801eed6c6d561019788a7c4aaca36c504a31 feat(web): connect homepage to public catalog API (PCAT-008).

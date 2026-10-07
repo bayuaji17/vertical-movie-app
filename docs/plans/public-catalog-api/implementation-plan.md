@@ -356,6 +356,8 @@ Persetujuan diperlukan untuk paket rekomendasi tiga jenis/episode exclusion, pub
 
 ## Execution Log
 
+- PCAT-009: 4 native PG/private MinIO tests/74 assertions pass; legacy publication/Series6/122 pass serial. Dataset127 judul/121 Series/101 genres, page100+27/genre100+1, many-genres cardinality, exact µs/cross-table UUID, snapshot/new publish/unseen archive, current poster/parent gates dan after-commit invalidation proved. Genre JSON parameter diperbaiki menjadi text→jsonb berdasarkan actual DB failure. One statement per read; EXPLAIN execution103.644–114.992ms pada fixture lokal; tidak menambah index/schema atau mengklaim SLA. Actual native poster306422bytes/1080×1920 dari production transcode, private unsigned403, public200, archived404, missing/oversize/profile503. Roottypes/lint/build pass; detailed boundaries/commands pada backlog.
+
 - 2026-10-07 / PCAT-000: Pengguna memilih point1 dan meminta plan detail. Context disimpan sebelum plan. Branch lokal `feat/public-catalog-api` dibuat dari base main untuk memisahkan artifact planning dari source branch homepage yang telah di-merge. Perubahan planning hanya context/plan/backlog/index Markdown. Observed planning checks: docs69/689, Prettier empat Markdown/diff pass; structural18 sections/11 steps/12 backlog tasks/15 dependency edges konsisten. Local commit receipt tersedia di Git setelah hook normal; tidak ada runtime API/FE, push/PR/merge baru atau deployment pada task planning.
 
 - 2026-10-07: Pengguna menyetujui plan (oke approve); freshness main tetap ba42d00728e66dd9cbeb0f3d916ae8ddea339f4b, branch clean sebelum edit. PCAT-000 actual SHA2130a75fd85a1f8db9ac5af4fc9e97cf64d7b7c3. Mulai kontrak/cursor PCAT-001, tanpa push/PR/merge baru.
