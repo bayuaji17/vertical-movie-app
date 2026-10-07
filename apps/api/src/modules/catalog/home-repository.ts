@@ -61,7 +61,7 @@ const output = (
 export class CatalogHomeStore implements HomeStore {
   constructor(private readonly db: ContentDatabase) {}
   /** Shared editorial/asset gates stay identical to legacy; homepage additionally requires canonical outputs. */
-  private eligible() {
+  eligible() {
     const playable = this.db
       .select({
         id: videos.id,

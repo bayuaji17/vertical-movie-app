@@ -5,6 +5,9 @@ import type { PublicVideo } from "./model";
 import type { HomeStore } from "./home-repository";
 import { parseHome, type HomeInput } from "./home-pagination";
 import type { PublicHomeItem } from "./home-model";
+import type { PublicContentReader } from "./content-repository";
+import { parseEpisodes } from "./content-pagination";
+import type { HomeKind } from "./home-pagination";
 export class CatalogService {
   private readonly cache = new Map<string, { until: number; value: unknown }>();
   private generation = 0;
@@ -12,6 +15,7 @@ export class CatalogService {
     private readonly store?: CatalogStore,
     private readonly now = () => Date.now(),
     private readonly homeStore?: HomeStore,
+    private readonly contentStore?: PublicContentReader,
   ) {}
   invalidate = () => {
     this.generation++;
@@ -37,6 +41,29 @@ export class CatalogService {
   }
   private freshness(until: number) {
     return Math.max(0, Math.min(60000, Math.floor(until - this.now())));
+  }
+  async detail(kind: HomeKind, slug: string) {
+    const entry = await this.entry(
+      `content:detail:${kind}:${slug}`,
+      async () => {
+        const item = await (this.contentStore ?? unavailable()).detail(
+          kind,
+          slug,
+          new Date(this.now()),
+        );
+        if (!item) notFound();
+        return item;
+      },
+    );
+    return { item: entry.value, freshForMs: this.freshness(entry.until) };
+  }
+  async episodes(slug: string, input: { limit?: string; cursor?: string }) {
+    const query = parseEpisodes(slug, input, new Date(this.now()));
+    const entry = await this.entry(
+      `content:episodes:${query.filter}:${input.cursor ?? ""}`,
+      () => (this.contentStore ?? unavailable()).episodes(query),
+    );
+    return { ...entry.value, freshForMs: this.freshness(entry.until) };
   }
   async home(input: HomeInput) {
     const q = parseHome(input, new Date(this.now()));

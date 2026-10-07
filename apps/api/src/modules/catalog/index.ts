@@ -4,6 +4,12 @@ import { ErrorResponses } from "../../shared/content-model";
 import { CatalogService } from "./service";
 import { CatalogPosterService } from "./poster-service";
 import {
+  DetailParams,
+  EpisodeQuery,
+  ContentDetailDto,
+  EpisodesDto,
+} from "./content-model";
+import {
   HomeQuerySchema,
   HomeGenresQuery,
   HomePageDto,
@@ -62,6 +68,25 @@ export function createCatalogModule(
             },
           },
         },
+      },
+    )
+    .get(
+      "/catalog/details/:kind/:slug",
+      ({ params }) => service.detail(params.kind, params.slug),
+      {
+        params: DetailParams,
+        response: { 200: ContentDetailDto, ...ErrorResponses },
+        detail: { tags: ["Catalog"], operationId: "getPublicContentDetail" },
+      },
+    )
+    .get(
+      "/catalog/series/:slug/episodes",
+      ({ params, query }) => service.episodes(params.slug, query),
+      {
+        params: SlugParams,
+        query: EpisodeQuery,
+        response: { 200: EpisodesDto, ...ErrorResponses },
+        detail: { tags: ["Catalog"], operationId: "listPublicSeriesEpisodes" },
       },
     )
     .get("/videos", ({ query }) => service.list(query), {

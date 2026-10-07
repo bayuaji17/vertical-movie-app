@@ -81,8 +81,8 @@ Kontrak DTO detail/episode strict dan cursor scope Series/limit/order/asOf/hiera
 ### Commit task
 
 - Pesan: Conventional Commit scoped PCW-001
-- SHA: receipt aktual dicatat pada task berikutnya setelah commit.
-- Hook/checks: normal docs/lint/types/commitlint wajib tanpa bypass.
+- SHA: `92d0ff68b796b695ce49b0a5feb606cfc4b7ecde`.
+- Hook/checks: docs:check, lint, check-types dan commitlint normal pass tanpa bypass.
 
 ### Blocker atau tindak lanjut
 
@@ -90,7 +90,7 @@ Dependency menurut DAG. Tidak menambah progress/autoplay/editor/production atau 
 
 ## Task: PCW-002 — Server detail/episodes dan cache
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent
 - Prioritas: P1, dependency order
 - Referensi: PCW-US-001/002; PRD-07/08, GR-02; [plan](../plans/public-content-watch/implementation-plan.md#implementation-steps)
@@ -104,8 +104,8 @@ Published parents/children read directly with one statement/page, no N+1/list100
 
 ### Acceptance criteria
 
-- [ ] anonymous200, missing404/invalid422/dependency503; hidden parent/child excluded; legacy routes regressions pass.
-- [ ] Applicable gates/evidence dan compatibility diperiksa sebelum Done.
+- [x] anonymous200, missing404/invalid422/dependency503; hidden parent/child excluded; legacy routes regressions pass.
+- [x] Applicable gates/evidence dan compatibility diperiksa sebelum Done.
 
 ### Validasi
 
@@ -113,12 +113,12 @@ injected HTTP/cache unit plus query type/build; later native006 verifies SQL.
 
 ### Hasil dan bukti
 
-Belum diimplementasikan/diverifikasi; isi command/result/batas dan receipt aktual saat task selesai.
+Detail direct kind/slug dan episode SQL one-statement dengan parent eligibility, hierarchy cursor/asOf/count/cache selesai. Catalog suite 18 pass 125 assertions; dedicated PostgreSQL direct detail/page smoke 5 assertions pass, API types/build pass. Constructor legacy compatible dan callback invalidate existing reused; routes additive, no schema or legacy order change. Full native boundary proof pada PCW-006.
 
 ### Commit task
 
 - Pesan: Conventional Commit scoped PCW-002
-- SHA: belum dibuat.
+- SHA: receipt aktual dicatat pada task berikutnya setelah commit.
 - Hook/checks: normal docs/lint/types/commitlint wajib tanpa bypass.
 
 ### Blocker atau tindak lanjut
