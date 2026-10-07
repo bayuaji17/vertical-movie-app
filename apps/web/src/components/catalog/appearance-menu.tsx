@@ -31,15 +31,23 @@ export function AppearanceMenu() {
           value={mode}
           onValueChange={(value) => setMode(themeMode(value))}
         >
-          <DropdownMenuRadioItem value="light" className="min-h-11">
+          <DropdownMenuRadioItem
+            closeOnClick
+            value="light"
+            className="min-h-11"
+          >
             <RiSunLine aria-hidden="true" />
             Light
           </DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="dark" className="min-h-11">
+          <DropdownMenuRadioItem closeOnClick value="dark" className="min-h-11">
             <RiMoonLine aria-hidden="true" />
             Dark
           </DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="system" className="min-h-11">
+          <DropdownMenuRadioItem
+            closeOnClick
+            value="system"
+            className="min-h-11"
+          >
             <RiComputerLine aria-hidden="true" />
             System
           </DropdownMenuRadioItem>

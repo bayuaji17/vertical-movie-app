@@ -345,7 +345,7 @@ Dialog lokal memakai primitive Dialog, Title/Description, close44px, Escape/focu
 ### Commit task
 
 - Pesan: `feat(web): dialog detail metadata dummy (HOMEFE-007)`.
-- SHA: Belum dibuat.
+- SHA: `bdb8b34f1e50dfb3863d0f73260166bb2179c32f`.
 - Hook/checks: Gate relevan lulus; hook docs/lint/types/Commitlint dijalankan saat commit tanpa bypass.
 - Ledger: SHA aktual dicatat pada update dokumentasi task berikutnya setelah commit, tanpa self-referential SHA.
 
@@ -371,10 +371,10 @@ Affected files: `apps/web/src/routes/index.tsx`; `apps/web/src/components/catalo
 
 ### Acceptance criteria
 
-- [ ] GET/route / menampilkan catalog dan metadata brand; starter button/Mux video demo tidak dimuat.
-- [ ] Tidak menambah route; root/provider/watch/admin/api unchanged, source data tunggal dan prop boundaries jelas.
-- [ ] Light faithful hierarchy/mockup; dark/system memakai semantic palette existing, min-width/gutters/touch/focus/reduced-motion ditinjau.
-- [ ] Batch awal 6 pada SSR/hydration/semua width; search/filter/feature/dialog/menu saling konsisten dan tidak reload state saat resize.
+- [x] GET/route / menampilkan catalog dan metadata brand; starter button/Mux video demo tidak dimuat.
+- [x] Tidak menambah route; root/provider/watch/admin/api unchanged, source data tunggal dan prop boundaries jelas.
+- [x] Light faithful hierarchy/mockup; dark/system memakai semantic palette existing, min-width/gutters/touch/focus/reduced-motion ditinjau.
+- [x] Batch awal 6 pada SSR/hydration/semua width; search/filter/feature/dialog/menu saling konsisten dan tidak reload state saat resize.
 
 ### Validasi
 
@@ -382,13 +382,13 @@ Bun test selectors/theme; bun run check-types --filter=web; bun run lint --filte
 
 ### Hasil dan bukti
 
-Belum dikerjakan. Catat command/scope/result/limitations aktual; jangan menaikkan status dari checklist rencana saja.
+Route / mengganti starter/Mux dengan HomePage. Metadata public,18fixtures/useInfiniteQuery/manualLoadMore, featured conditional, state filter/selection, Home reset/Browse focus terhubung. Development browser matrix12 lulus: SSR6,pages6-12-18,zero API/auth/playback/external requests,zero hydrationerrors,theme/nav/dialog/ratio/targets/empty/cache revisit/long title/resize/fallback. Polish: menu tema closeOnClick, search sebelumappearance desktop, image failure sebelumhydration ditangani melalui image.complete. Root build lulus; watch/admin/API source tidak berubah.
 
 ### Commit task
 
 - Pesan: `feat(web): integrasi route home, metadata dan responsive polish (HOMEFE-008)`.
 - SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan.
+- Hook/checks: Gate relevan lulus; hook docs/lint/types/Commitlint dijalankan saat commit tanpa bypass.
 - Ledger: SHA aktual dicatat pada update dokumentasi task berikutnya setelah commit, tanpa self-referential SHA.
 
 ### Blocker atau tindak lanjut

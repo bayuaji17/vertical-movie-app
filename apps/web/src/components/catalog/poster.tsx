@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { cn } from 'cn'
 import type { CatalogItem } from '#/lib/catalog/catalog-schema'
 
@@ -13,6 +13,13 @@ export function Poster({
   className?: string
 }) {
   const [failedSource, setFailedSource] = useState<string | null>(null)
+  const imageRef = useRef<HTMLImageElement>(null)
+  // A server-rendered image can fail before React installs its error handler.
+  useEffect(() => {
+    const image = imageRef.current
+    if (image?.complete && image.naturalWidth === 0)
+      setFailedSource(item.poster)
+  }, [item.poster])
   const failed = failedSource === item.poster
   return (
     <div
@@ -23,6 +30,7 @@ export function Poster({
       )}
     >
       <img
+        ref={imageRef}
         src={failed ? fallback : item.poster}
         alt={`Poster for ${item.title}`}
         width={900}

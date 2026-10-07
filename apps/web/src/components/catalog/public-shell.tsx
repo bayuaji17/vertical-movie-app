@@ -62,7 +62,7 @@ export function PublicShell({
               Browse
             </Button>
           </nav>
-          <div className="ml-auto flex items-center gap-2 md:ml-0">
+          <div className="ml-auto flex items-center gap-2 md:order-last md:ml-0">
             <AppearanceMenu />
             <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger
