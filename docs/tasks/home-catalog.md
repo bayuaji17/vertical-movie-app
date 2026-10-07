@@ -387,7 +387,7 @@ Route / mengganti starter/Mux dengan HomePage. Metadata public,18fixtures/useInf
 ### Commit task
 
 - Pesan: `feat(web): integrasi route home, metadata dan responsive polish (HOMEFE-008)`.
-- SHA: Belum dibuat.
+- SHA: `0d379a4766ab06adda17247c88ef32f1ab3c7054`.
 - Hook/checks: Gate relevan lulus; hook docs/lint/types/Commitlint dijalankan saat commit tanpa bypass.
 - Ledger: SHA aktual dicatat pada update dokumentasi task berikutnya setelah commit, tanpa self-referential SHA.
 
@@ -413,10 +413,10 @@ Affected files: `apps/web/test/home-catalog-browser-worker.mjs`; `docs/design/ho
 
 ### Acceptance criteria
 
-- [ ] API unreachable/block semua API paths/origin; zero attempted catalog/auth/playback requests, termasuk prefetch/interaction; SSR tetap mengirim konten.
-- [ ] Viewport 320/390/768/1024/1440/1920 light+dark tanpa horizontal overflow; poster frame 9/16 dengan toleransi 1 CSS px, semua UI berada dalam viewport.
-- [ ] Search/title/synopsis/AND/empty/reset/infinite query load6→12→18/cache revisit reset6/rapid-click/Home/Browse/detail tiga kind/keyboard/Escape-focus return/drawer/resize/theme persist lulus.
-- [ ] Long title/failed poster fallback once, no page/hydration error; screenshot implemented light desktop/mobile+dark dan command/result/limitations nyata tersimpan.
+- [x] API unreachable/block semua API paths/origin; zero attempted catalog/auth/playback requests, termasuk prefetch/interaction; SSR tetap mengirim konten.
+- [x] Viewport 320/390/768/1024/1440/1920 light+dark tanpa horizontal overflow; poster frame 9/16 dengan toleransi 1 CSS px, semua UI berada dalam viewport.
+- [x] Search/title/synopsis/AND/empty/reset/infinite query load6→12→18/cache revisit reset6/rapid-click/Home/Browse/detail tiga kind/keyboard/Escape-focus return/drawer/resize/theme persist lulus.
+- [x] Long title/failed poster fallback once, no page/hydration error; screenshot implemented light desktop/mobile+dark dan command/result/limitations nyata tersimpan.
 
 ### Validasi
 
@@ -424,13 +424,13 @@ Jalankan host Playwright worker dengan baseURL/module/executable/screenshot pref
 
 ### Hasil dan bukti
 
-Belum dikerjakan. Catat command/scope/result/limitations aktual; jangan menaikkan status dari checklist rencana saja.
+Development3147 dan built Bun/Nitro3148 browser worker lulus; API_INTERNAL_URL diarahkan ke127.0.0.1:59999 yang unreachable. Masing-masing matrix12 (320/390/768/1024/1440/1920 Light/Dark), SSR6, pages6-12-18, zero API/auth/playback/externalrequests, zero console/hydrationerrors. Filter/cache/rapidclick/keyboard/focus trap/focusreturn/mobileBrowse/themepersistence/System/resize/longtitle/empty/imagefallback lulus. Source failures2,fallback1,tidakloop. Delapan screenshotdilihat, enamfoto terload sebelumcapture. Exact invocation dan batas Chromium dicatat di bawah.
 
 ### Commit task
 
 - Pesan: `feat(web): proof browser, ssr dan independensi api (HOMEFE-009)`.
 - SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan.
+- Hook/checks: Gate relevan lulus; hook docs/lint/types/Commitlint dijalankan saat commit tanpa bypass.
 - Ledger: SHA aktual dicatat pada update dokumentasi task berikutnya setelah commit, tanpa self-referential SHA.
 
 ### Blocker atau tindak lanjut
