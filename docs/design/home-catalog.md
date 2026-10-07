@@ -1,12 +1,12 @@
 # Homepage dan katalog publik
 
-> Status: **Arah visual v1 disetujui pengguna — tahap FE dummy direncanakan, belum implemented** · Persetujuan 7 Oktober 2026 · Pemilik keputusan: pengguna; pembuat mockup/plan: Codex. Snapshot generasi source `313e31a14891ac0f91265a3557576b44791309d7` tetap historis.
+> Status: **Arah visual v1 dan FE dummy disetujui — implemented/verified lokal 7 Oktober 2026** · Persetujuan 7 Oktober 2026 · Pemilik keputusan: pengguna; pembuat mockup/plan: Codex. Snapshot generasi source `313e31a14891ac0f91265a3557576b44791309d7` tetap historis.
 
 ## Tujuan dan acuan
 
 Beranda yang membantu pengunjung menemukan Film, Series dan Standalone published tanpa akun. Acuan: [PRD-07/08 dan keputusan katalog terbuka](../product/prd.md#keputusan-produk-yang-masih-terbuka), [aturan publik](../product/global-rules.md), [design system](design-system.md) dan token runtime `apps/web/src/styles.css`.
 
-Mockup memakai light neutral/lime, Inter/Space Grotesk dan sampul portrait 9:16. Copy English mengikuti mockup admin terbaru. Semua judul, foto, genre, durasi dan jumlah episode adalah fixture fiktif. Ini permintaan desain; tidak mengubah route homepage atau player.
+Mockup memakai light neutral/lime, Inter/Space Grotesk dan sampul portrait 9:16. Copy English mengikuti mockup admin terbaru. Semua judul, foto, genre, durasi dan jumlah episode adalah fixture fiktif. Raster awal adalah evidence desain historis. Runtime homepage kini memakai fixture lokal; player/watch tetap di luar tahap FE dummy.
 
 ## Usulan tata letak
 
@@ -14,11 +14,11 @@ Desktop: header brand/Home/Browse/search/appearance; judul editorial singkat; sa
 
 Film/Standalone membuka detail/tonton; Series mengarah ke detail series/daftar episode. Poster Series memakai jumlah episode, bukan durasi total. Tidak menampilkan status editorial atau data admin.
 
-Grid, featured placement serta search/filter adalah arah visual yang disetujui pengguna 7 Oktober 2026. Semantik interaksi, jumlah fixture/batch dan CTA dummy dijabarkan untuk review pada [implementation plan](../plans/home-catalog/implementation-plan.md); bukan seluruh detail runtime dianggap disetujui melalui raster. DTO katalog saat snapshot hanya menerima limit/cursor; API video/series terpisah. Integrasi API/featured selection nyata menjadi tahap lanjutan. Episode tidak dijanjikan sebagai kartu top-level terpisah.
+Grid, featured placement serta search/filter adalah arah visual yang disetujui pengguna 7 Oktober 2026. Semantik interaksi, jumlah fixture/batch dan CTA dummy disetujui lalu diimplementasikan menurut [implementation plan](../plans/home-catalog/implementation-plan.md); bukan seluruh detail runtime dianggap disetujui melalui raster. DTO katalog saat snapshot hanya menerima limit/cursor; API video/series terpisah. Integrasi API/featured selection nyata menjadi tahap lanjutan. Episode tidak dijanjikan sebagai kartu top-level terpisah.
 
 ## Keputusan tahap frontend — 7 Oktober 2026
 
-Pengguna meminta fokus FE dengan dummy JSON dan belum memakai API. [Context](../plans/home-catalog/repository-context.md), [plan detail](../plans/home-catalog/implementation-plan.md) dan [backlog HOMEFE](../tasks/home-catalog.md) menjadi pemilik rincian implementasi. Usulan default: 18 fixture items, batch enam tanpa perbedaan SSR/mobile, detail dialog lokal dan CTA View film. Refinement pengguna 7 Oktober 2026 memakai useInfiniteQuery TanStack Query, queryFn JSON lokal dan Load more manual; detail caching/SSR/page contract berada pada plan. Dua kartu pada raster mobile hanya contoh tampilan; source fixture tetap sama di semua viewport. Playback/real published data bukan hasil tahap ini.
+Pengguna meminta fokus FE dengan dummy JSON dan belum memakai API. [Context](../plans/home-catalog/repository-context.md), [plan detail](../plans/home-catalog/implementation-plan.md) dan [backlog HOMEFE](../tasks/home-catalog.md) menjadi pemilik rincian implementasi. Implementasi: 18 fixture items, batch enam tanpa perbedaan SSR/mobile, detail dialog lokal dan CTA View film. Refinement pengguna 7 Oktober 2026 memakai useInfiniteQuery TanStack Query, queryFn JSON lokal dan Load more manual; detail caching/SSR/page contract berada pada plan. Dua kartu pada raster mobile hanya contoh tampilan; source fixture tetap sama di semua viewport. Playback/real published data bukan hasil tahap ini.
 
 ## Artefak
 
@@ -47,3 +47,9 @@ Enam foto dibuat terpisah dengan ImageGen, memakai mockup approved sebagai refer
 Semua output native PNG 941×1672 (rasio 0.5628, mendekati 9:16), telah dilihat satu per satu; enam scene sesuai dan tidak mengandung UI. Penyesuaian teknis terhadap ukuran source plan: output native dipertahankan tanpa resize/crop, sedangkan frame CSS menggunakan exact 9:16 + object-cover. Selisih lebar native dari rasio tepat hanya 0.5 pixel. Hero eager, kartu lazy, dimensi reservasi 900×1600, fallback SVG lokal 900×1600. Batas fallback satu perpindahan source mencegah retry loop.
 
 Tidak ada external CDN atau network image service pada runtime. Native copy menjaga file regular; permission 100644 diverifikasi melalui Git. Browser rasio/failed-image proof ditutup di HOMEFE-009.
+
+## Runtime FE terverifikasi — 7 Oktober 2026
+
+HOMEFE-001–010 selesai lokal sesuai [backlog](../tasks/home-catalog.md). Katalog memakai JSON18 judul dengan useInfiniteQuery, batch6 dan Load more manual, featured default, search/jenis/genre dan dialog metadata. Screenshot built [desktop light](home-catalog-implemented-light-1440.png), [mobile light](home-catalog-implemented-light-390.png), [desktop dark](home-catalog-implemented-dark-1440.png) dan [mobile dark](home-catalog-implemented-dark-390.png). Screenshot mempertahankan ring fokus keyboard setelah dialog sebagai bukti state focus-visible.
+
+Development dan build Bun/Nitro lulus matrix Chromium 320–1920px Light/Dark, System/persistence, exact CSS9:16, no overflow, 44px targets, keyboard/nav/dialog/fallback. SSR mengirim6 kartu, query memuat6→12→18. Observer mencatat0 API/auth/playback/external requests dan0 console/hydration errors. [Worker proof](../../apps/web/test/home-catalog-browser-worker.mjs) dan command aktual berada di backlog. Semua data masih fiktif; API published/playback dan deployment belum menjadi hasil tahap ini.

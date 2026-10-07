@@ -2,15 +2,15 @@
 
 ## Plan metadata
 
-- Status: **executing — disetujui pengguna 7 Oktober 2026**.
+- Status: **implemented/verified lokal — 7 Oktober 2026**.
 - Tanggal: 7 Oktober 2026.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `feat/home-catalog-mockup`.
 - Base SHA: `b90edaaaca83187726218286fdaf253958a483fe`.
 - Context: [repository-context.md](repository-context.md).
-- Last validated SHA: `24a591885194c21458841a5f705323596748d1e9`.
+- Last validated SHA: `f03030e3a009a2ad41c659d509640fc434f4f513`.
 - Backlog canonical: [HOMEFE-000–010](../../tasks/home-catalog.md).
-- Otorisasi pengguna: mockup disetujui dan plan detail diminta; seluruh data tahap ini dummy JSON, fokus FE. Persetujuan ini tidak berarti runtime sudah dibuat atau playback/API diotorisasi.
+- Otorisasi pengguna: mockup disetujui dan plan detail diminta; seluruh data tahap ini dummy JSON, fokus FE. Pengguna menyetujui implementasi setelah klarifikasi useInfiniteQuery. Runtime FE selesai dan terverifikasi lokal; playback/API tetap di luar tahap ini.
 
 ## Objective
 
@@ -24,7 +24,7 @@ Di luar scope: membaca API/Eden/gateway untuk katalog, login pengunjung, databas
 
 ## Current behavior
 
-Home masih starter dengan demo MP4 eksternal. Theme root sudah tersedia. Watch existing memanggil API playback. Komponen public catalogue belum ada; primitive shadcn sudah mencukupi. Tabel evidence/fakta berada pada [context](repository-context.md#evidence-index).
+Pada baseline planning, home masih starter dengan demo MP4 eksternal. Theme root sudah tersedia. Watch existing memanggil API playback. Pada baseline, komponen public catalogue belum ada; primitive shadcn sudah mencukupi. Tabel evidence/fakta berada pada [context](repository-context.md#evidence-index).
 
 ## Desired behavior
 
@@ -234,14 +234,14 @@ No request/API/session behind apparently static UI, including prefetch of /watch
 
 ## Acceptance criteria
 
-- [ ] Approved light visual reproduced using real components, not a full-page raster background.
-- [ ] Typed local JSON18 items drives all visible metadata/search/filter/details; no duplicated hardcoded item arrays.
-- [ ] No API/auth/playback requests; dev and SSR/build remain functional with API down.
-- [ ] All/Film/Series/Standalone + genre/search + stable latest + Load more work according to specifications.
-- [ ] Empty/reset, image fallback, focus/nav/dialog and appearance behave correctly.
-- [ ] Exact CSS9/16 poster ratio, responsive matrix, no overflow, meaningful targets/contrast verified.
-- [ ] No starter/Mux demo on homepage; watch/admin/auth behavior not redirected or replaced.
-- [ ] Tests, root gates, browser proof, screenshots, canonical docs and per-task local commits have actual evidence.
+- [x] Approved light visual reproduced using real components, not a full-page raster background.
+- [x] Typed local JSON18 items drives all visible metadata/search/filter/details; no duplicated hardcoded item arrays.
+- [x] No API/auth/playback requests; dev and SSR/build remain functional with API down.
+- [x] All/Film/Series/Standalone + genre/search + stable latest + Load more work according to specifications.
+- [x] Empty/reset, image fallback, focus/nav/dialog and appearance behave correctly.
+- [x] Exact CSS9/16 poster ratio, responsive matrix, no overflow, meaningful targets/contrast verified.
+- [x] No starter/Mux demo on homepage; watch/admin/auth behavior not redirected or replaced.
+- [x] Tests, root gates, browser proof, screenshots, canonical docs and per-task local commits have actual evidence.
 
 ## Risks and mitigations
 
@@ -266,9 +266,7 @@ Planning evidence and source index are in [context](repository-context.md). Desi
 
 ## Open decisions
 
-Default proposal for missing CTA decision: local detail dialog and View film wording, playback outside this iteration. Optional question has been presented; no reply at plan authoring. If user chooses a local player, plan must be refined for fixture media, videojs skill, player action and playback tests before implementation. No choice is inferred to authorize API.
-
-Other choices above (batch6, exact selector semantics, fixed Latest releases label,18fixtures, useInfiniteQuery dengan queryFn lokal) adalah refinement teknis; detail UI lainnya merupakan proposal implementasi for this plan review. Mockup approval applies to visual direction; real API/production catalog order remains a later decision.
+Pengguna menyetujui plan setelah refinement useInfiniteQuery. CTA View film dan View details membuka dialog metadata lokal; fixture18, batch6 dan Load more manual telah diimplementasikan. Integrasi API, pemilihan featured/data published nyata dan alur katalog ke playback adalah tahap lanjutan.
 
 ## Validation history
 
@@ -319,3 +317,5 @@ Pengguna menyetujui plan setelah klarifikasi useInfiniteQuery. Default detail di
 - HOMEFE-008: Route / mengganti starter/Mux dengan HomePage. Metadata public,18fixtures/useInfiniteQuery/manualLoadMore, featured conditional, state filter/selection, Home reset/Browse focus terhubung. Development browser matrix12 lulus: SSR6,pages6-12-18,zero API/auth/playback/external requests,zero hydrationerrors,theme/nav/dialog/ratio/targets/empty/cache revisit/long title/resize/fallback. Polish: menu tema closeOnClick, search sebelumappearance desktop, image failure sebelumhydration ditangani melalui image.complete. Root build lulus; watch/admin/API source tidak berubah. SHA task sebelumnya: `bdb8b34f1e50dfb3863d0f73260166bb2179c32f`.
 
 - HOMEFE-009: Development3147 dan built Bun/Nitro3148 browser worker lulus; API_INTERNAL_URL diarahkan ke127.0.0.1:59999 yang unreachable. Masing-masing matrix12 (320/390/768/1024/1440/1920 Light/Dark), SSR6, pages6-12-18, zero API/auth/playback/externalrequests, zero console/hydrationerrors. Filter/cache/rapidclick/keyboard/focus trap/focusreturn/mobileBrowse/themepersistence/System/resize/longtitle/empty/imagefallback lulus. Source failures2,fallback1,tidakloop. Delapan screenshotdilihat, enamfoto terload sebelumcapture. Exact invocation dan batas Chromium dicatat di bawah. SHA task sebelumnya: `0d379a4766ab06adda17247c88ef32f1ab3c7054`.
+
+- HOMEFE-010: Final gates:10 tests/63assertions pass; root check-types3packages pass (web fresh,API/auth cached unchanged); lintweb fresh pass; buildAPI/web pass (webfresh,APIcached); docs:check62files593links pass. Browser development+build matrix12 each pass. Scoped diff API/auth/admin/watch/routeTree/manifests/lock kosong. Canonical PRD/globalrules/design/index/plan diperbarui; real API/production limits tetap jelas. Prettier dan diffcheck final dicatat setelah update ini. SHA task sebelumnya: `f03030e3a009a2ad41c659d509640fc434f4f513`.

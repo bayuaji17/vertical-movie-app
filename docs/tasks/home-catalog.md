@@ -184,7 +184,7 @@ Ikuti dependency dan batas data lokal pada plan; browser acceptance lintas task 
 
 ## Task: HOMEFE-004 — Featured film responsif
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: 4
 - Referensi: HOME-US-001; PRD-07/08; GR-02; [plan](../plans/home-catalog/implementation-plan.md).
@@ -226,7 +226,7 @@ Ikuti dependency dan batas data lokal pada plan; browser acceptance lintas task 
 
 ## Task: HOMEFE-005 — Poster card dan grid tiga jenis
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: 5
 - Referensi: HOME-US-001; PRD-07/08; GR-02; [plan](../plans/home-catalog/implementation-plan.md).
@@ -268,7 +268,7 @@ Ikuti dependency dan batas data lokal pada plan; browser acceptance lintas task 
 
 ## Task: HOMEFE-006 — Search, filter, urutan dan Load more lokal
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: 6
 - Referensi: HOME-US-002; PRD-07/08; GR-02; [plan](../plans/home-catalog/implementation-plan.md).
@@ -313,7 +313,7 @@ Ikuti dependency dan batas data lokal pada plan; browser acceptance lintas task 
 
 ## Task: HOMEFE-007 — Dialog detail metadata dummy
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: 7
 - Referensi: HOME-US-001; PRD-07/08; GR-02; [plan](../plans/home-catalog/implementation-plan.md).
@@ -355,7 +355,7 @@ Ikuti dependency dan batas data lokal pada plan; browser acceptance lintas task 
 
 ## Task: HOMEFE-008 — Integrasi route home, metadata dan responsive polish
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: 8
 - Referensi: HOME-US-001/003; PRD-07/08; GR-02; [plan](../plans/home-catalog/implementation-plan.md).
@@ -397,7 +397,7 @@ Ikuti dependency dan batas data lokal pada plan; browser acceptance lintas task 
 
 ## Task: HOMEFE-009 — Proof browser, SSR dan independensi API
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: 9
 - Referensi: HOME-US-002/003; PRD-07/08; GR-02; [plan](../plans/home-catalog/implementation-plan.md).
@@ -426,10 +426,38 @@ Jalankan host Playwright worker dengan baseURL/module/executable/screenshot pref
 
 Development3147 dan built Bun/Nitro3148 browser worker lulus; API_INTERNAL_URL diarahkan ke127.0.0.1:59999 yang unreachable. Masing-masing matrix12 (320/390/768/1024/1440/1920 Light/Dark), SSR6, pages6-12-18, zero API/auth/playback/externalrequests, zero console/hydrationerrors. Filter/cache/rapidclick/keyboard/focus trap/focusreturn/mobileBrowse/themepersistence/System/resize/longtitle/empty/imagefallback lulus. Source failures2,fallback1,tidakloop. Delapan screenshotdilihat, enamfoto terload sebelumcapture. Exact invocation dan batas Chromium dicatat di bawah.
 
+### Browser invocation dan hasil final — HOMEFE-009
+
+Server dijalankan dari root worktree Debian dengan Bun 1.4.2:
+
+```sh
+API_INTERNAL_URL=http://127.0.0.1:59999 PORT=3147 HOST=0.0.0.0 bun run --cwd apps/web dev
+bun run build
+API_INTERNAL_URL=http://127.0.0.1:59999 PORT=3148 HOST=0.0.0.0 bun run --cwd apps/web start
+```
+
+Port 59999 tidak mempunyai listener; SSR development dan built GET / berhasil 200 dan mempunyai enam data-catalog-card. Source route publik tidak mengimpor API/session/player. Browser context juga menolak dan mencatat setiap attempted /api/auth/playback/external-origin request, bukan hanya menerima failed request.
+
+Invocation aktual pada host Windows, ulang untuk port3148 dan prefix tanpa -dev:
+
+```powershell
+node '\\wsl.localhost\Debian\home\bandev\.codex\worktrees\home-catalog-mockup\vertical-movie-app\apps\web\test\home-catalog-browser-worker.mjs' 'http://localhost:3147' 'file:///C:/Users/bayua/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright/index.mjs' 'C:\Users\bayua\AppData\Local\ms-playwright\chromium-1228\chrome-win64\chrome.exe' '\\wsl.localhost\Debian\home\bandev\.codex\worktrees\home-catalog-mockup\vertical-movie-app\docs\design\home-catalog-implemented-dev'
+```
+
+Hasil masing-masing: result passed, matrix12, SSR6, pages[6,12,18], forbiddenRequests0, console/hydrationErrors0, fallback sourceAttempts2/fallbackAttempts1. Matrix Light/Dark: 320×800,390×844,768×1024,1024×900,1440×1000,1920×1080. DOM tidak overflow, poster deviation dari9:16 <1CSSpx, grid2/3/4/6 kolom, target44px. System dan persisted theme/reload diuji pada390/1440.
+
+Flow lolos: exact metadata Film/Series/Standalone, long Unicode title, dialog safe bounds/Escape/focus trap/focus return, mobile Sheet Browse menutup dan fokus katalog, Home reset, genre+kind AND, title/synopsis/case/whitespace search, empty+reset/search focus, rapid same-loop Load more dedup, cache revisit reset6, resize tetap18, keyboard input/ArrowRight+Space/NativeSelect/Enter/appearance radio dan Load more. Image source serta fallback sengaja dibatalkan: satu perpindahan fallback tanpa retry loop, termasuk error sebelum hidrasi.
+
+Fix browser: closeOnClick radio menu (default Base UI false), dan image.complete/naturalWidth saat mount untuk error SSR sebelum onError terpasang. Trap assertion menunggu focus-guard redirect sebelum membaca activeElement. Tidak melemahkan assertion ke force-click.
+
+Delapan screenshot disimpan dengan prefix home-catalog-implemented dan home-catalog-implemented-dev; Light/Dark desktop1440/mobile390. Capture menunggu semua lazy images dan font siap; ring pada kartu pertama adalah fokus keyboard yang dipertahankan setelah dialog. Keempat screenshot built telah dilihat satu per satu, layout/copy/foto sesuai arah approved. Development memiliki launcher devtools existing; build menghapusnya melalui plugin existing.
+
+Batas bukti: Chromium lokal, JSON fiktif. Tidak mengklaim integrasi katalog API, real published data, playback dari kartu, Safari/perangkat fisik atau deployment.
+
 ### Commit task
 
 - Pesan: `feat(web): proof browser, ssr dan independensi api (HOMEFE-009)`.
-- SHA: Belum dibuat.
+- SHA: `f03030e3a009a2ad41c659d509640fc434f4f513`.
 - Hook/checks: Gate relevan lulus; hook docs/lint/types/Commitlint dijalankan saat commit tanpa bypass.
 - Ledger: SHA aktual dicatat pada update dokumentasi task berikutnya setelah commit, tanpa self-referential SHA.
 
@@ -439,7 +467,7 @@ Ikuti dependency dan batas data lokal pada plan; browser acceptance lintas task 
 
 ## Task: HOMEFE-010 — Quality gates, dokumentasi dan closure
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: 10
 - Referensi: HOME-US-001/002/003; PRD-07/08; GR-02; [plan](../plans/home-catalog/implementation-plan.md).
@@ -455,10 +483,10 @@ Affected files: `docs/{README,design/home-catalog,product/prd,product/global-rul
 
 ### Acceptance criteria
 
-- [ ] Relevant selector/theme tests, root check-types/lint/build, docs:check/Prettier/diff check lulus dengan command/results dicatat.
-- [ ] Design/PRD/global/index menyatakan implemented+verified lokal dummy JSON, bukan integrasi API/playback/published nyata/production ready.
-- [ ] Task commits memiliki ID dan SHA ledger; changes limited to approved path, generated cache/secrets/unrelated work preserved.
-- [ ] Worktree ready untuk review; push/PR/merge/deploy belum dilakukan tanpa otorisasi sendiri.
+- [x] Relevant selector/theme tests, root check-types/lint/build, docs:check/Prettier/diff check lulus dengan command/results dicatat.
+- [x] Design/PRD/global/index menyatakan implemented+verified lokal dummy JSON, bukan integrasi API/playback/published nyata/production ready.
+- [x] Task commits memiliki ID dan SHA ledger; changes limited to approved path, generated cache/secrets/unrelated work preserved.
+- [x] Worktree ready untuk review; push/PR/merge/deploy belum dilakukan tanpa otorisasi sendiri.
 
 ### Validasi
 
@@ -466,13 +494,13 @@ bun test apps/web/test/home-catalog-data.test.ts apps/web/test/admin-theme.test.
 
 ### Hasil dan bukti
 
-Belum dikerjakan. Catat command/scope/result/limitations aktual; jangan menaikkan status dari checklist rencana saja.
+Final gates:10 tests/63assertions pass; root check-types3packages pass (web fresh,API/auth cached unchanged); lintweb fresh pass; buildAPI/web pass (webfresh,APIcached); docs:check62files593links pass. Browser development+build matrix12 each pass. Scoped diff API/auth/admin/watch/routeTree/manifests/lock kosong. Canonical PRD/globalrules/design/index/plan diperbarui; real API/production limits tetap jelas. Prettier dan diffcheck final dicatat setelah update ini.
 
 ### Commit task
 
 - Pesan: `docs(web): quality gates, dokumentasi dan closure (HOMEFE-010)`.
 - SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan.
+- Hook/checks: Gate relevan lulus; hook docs/lint/types/Commitlint dijalankan saat commit tanpa bypass.
 - Ledger: SHA aktual dicatat pada update dokumentasi task berikutnya setelah commit, tanpa self-referential SHA.
 
 ### Blocker atau tindak lanjut
