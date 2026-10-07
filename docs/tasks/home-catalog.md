@@ -132,7 +132,7 @@ Enam native PNG 941x1672 dilihat satu per satu; scene sesuai, file lokal plus fa
 ### Commit task
 
 - Pesan: `feat(web): enam poster source lokal dan fallback (HOMEFE-002)`.
-- SHA: Belum dibuat.
+- SHA: `c13c674ec0696d2ef932fbd6e9f21fe497bcc797`.
 - Hook/checks: Gate relevan lulus; hook docs/lint/types/Commitlint dijalankan saat commit tanpa bypass.
 - Ledger: SHA aktual dicatat pada update dokumentasi task berikutnya setelah commit, tanpa self-referential SHA.
 
@@ -142,7 +142,7 @@ Ikuti dependency dan batas data lokal pada plan; browser acceptance lintas task 
 
 ## Task: HOMEFE-003 — Shell publik, menu mobile dan appearance
 
-- Status: Ready
+- Status: Done
 - Owner: Codex
 - Prioritas: 3
 - Referensi: HOME-US-003; PRD-07/08; GR-02; [plan](../plans/home-catalog/implementation-plan.md).
@@ -158,10 +158,10 @@ Affected files: `apps/web/src/components/catalog/public-shell.tsx`; `apps/web/sr
 
 ### Acceptance criteria
 
-- [ ] Public shell tanpa identity/login/session/API; Home/Browse mempunyai callback/target yang jelas dan SheetTitle aksesibel.
-- [ ] Appearance memakai useTheme existing dengan Light/Dark/System, tanpa provider/storage key baru atau import admin-shell/theme-menu.
-- [ ] Satu search aktif pada tiap breakpoint, state lewat props; hidden control tidak focusable; aksi mobile 44 CSS px.
-- [ ] Semantic landmarks/skip link/focus visible, desktop nav dan mobile drawer konsisten; checks web lulus.
+- [x] Public shell tanpa identity/login/session/API; Home/Browse mempunyai callback/target yang jelas dan SheetTitle aksesibel.
+- [x] Appearance memakai useTheme existing dengan Light/Dark/System, tanpa provider/storage key baru atau import admin-shell/theme-menu.
+- [x] Satu search aktif pada tiap breakpoint, state lewat props; hidden control tidak focusable; aksi mobile 44 CSS px.
+- [x] Semantic landmarks/skip link/focus visible, desktop nav dan mobile drawer konsisten; checks web lulus.
 
 ### Validasi
 
@@ -169,13 +169,13 @@ bun run lint --filter=web; bun run check-types --filter=web; review installed Ba
 
 ### Hasil dan bukti
 
-Belum dikerjakan. Catat command/scope/result/limitations aktual; jangan menaikkan status dari checklist rencana saja.
+Public shell memakai Button/Sheet dan appearance radio menu dengan ThemeProvider existing; tidak ada import admin/session. Web lint dan types lulus pada hook HOMEFE-002. Browser focus/nav/theme diuji HOMEFE-009.
 
 ### Commit task
 
 - Pesan: `feat(web): shell publik, menu mobile dan appearance (HOMEFE-003)`.
 - SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan.
+- Hook/checks: Gate relevan lulus; hook docs/lint/types/Commitlint dijalankan saat commit tanpa bypass.
 - Ledger: SHA aktual dicatat pada update dokumentasi task berikutnya setelah commit, tanpa self-referential SHA.
 
 ### Blocker atau tindak lanjut
