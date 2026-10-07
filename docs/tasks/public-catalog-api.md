@@ -101,7 +101,7 @@ Menunggu approval plan dan dependency di atas. Paths/symbols exact, risiko dan c
 
 ## Task: PCAT-002 — Query unified dan visibility
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1, urutan/dependency menurut DAG plan.
 - Referensi: PCAT-US-001/004; PRD-07/08, GR-02; step PCAT-002 pada [plan](../plans/public-catalog-api/implementation-plan.md#implementation-steps).
@@ -115,8 +115,8 @@ UNION movie/standalone + Series, effective visibility/parentposter, global sort/
 
 ### Acceptance criteria
 
-- [ ] Feed tidak menampilkan episode individual atau konten hidden; genre joins tidak menggandakan card/count.
-- [ ] Tidak ada per-card/N+1 query; fresh poster identity lookup dan legacy playable/preview/next semantics dipertahankan.
+- [x] Feed tidak menampilkan episode individual atau konten hidden; genre joins tidak menggandakan card/count.
+- [x] Tidak ada per-card/N+1 query; fresh poster identity lookup dan legacy playable/preview/next semantics dipertahankan.
 
 ### Validasi
 
@@ -124,18 +124,18 @@ Unit/types sesuai perubahan; mandatory real PG parity/performance pada PCAT-009.
 
 ### Hasil dan bukti
 
-Belum diimplementasikan/diverifikasi. Catat command aktual, hasil, decision/deviation dan batas pada task ini saat dieksekusi; existing HOMEFE/APUB proof tidak menutup task PCAT.
+Unified one-statement PostgreSQL reads implemented. Dedicated media DB proof passes 1 test/21 assertions: 18 mixed titles, six-per-page, cross-table UUID collision, literal search/no genres, microsecond ordering, archive-last-episode parity and fresh poster identity. Catalog unit tests 5/29 and API types pass. Full performance/storage matrix remains PCAT-009.
 
 ### Commit task
 
 - Pesan: `feat(api): query unified published catalog (PCAT-002)`
-- SHA: belum dibuat.
+- SHA: dicatat pada ledger task berikutnya setelah commit.
 - Hook/checks: diwajibkan tanpa bypass, hasil belum ada.
 - Ledger: actual SHA dicatat pada task berikutnya/delivery setelah commit, bukan self-reference.
 
 ### Blocker atau tindak lanjut
 
-Menunggu approval plan dan dependency di atas. Paths/symbols exact, risiko dan completion per step berada pada canonical plan; jangan memperluas ke watch/editor/production.
+Dependency terpenuhi. Bukti lint/types/docs/commitlint dicatat setelah commit; proof lanjutan sesuai DAG tetap wajib.
 
 ## Task: PCAT-003 — Public endpoint dan cache
 
@@ -501,3 +501,5 @@ Menunggu approval plan dan dependency di atas. Paths/symbols exact, risiko dan c
 - Git/runtime delivery baru: belum dilakukan; local planning branch/artifacts tidak berarti endpoint/API sudah tersedia.
 
 - 2026-10-07: Approval implementasi PCAT diterima; PCAT-000 commit2130a75fd85a1f8db9ac5af4fc9e97cf64d7b7c3. Remote delivery fitur baru tetap belum diotorisasi.
+
+- Previous verified task commit before PCAT-002: 038d5f90e8be5890d52f46f53f84aac7037ef3cc feat(api): define public home catalog contract (PCAT-001).
