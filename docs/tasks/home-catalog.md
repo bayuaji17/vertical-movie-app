@@ -549,3 +549,43 @@ Implementasi tetap menunggu instruksi pengguna; pemicu Load more tidak berubah m
 ### Ledger penutup HOMEFE-010 — 7 Oktober 2026
 
 Commit closure aktual393b1b11e186d4a23e5f87c2208fed492341ef1f. Seluruh HOMEFE-001–010 Done dan mempunyai commit task terpisah; ledger commit ini mencatat SHA yang sudah ada. Worktree clean sesudah closure, source API/auth/admin/watch/routeTree/manifests/lock tidak berubah. Perubahan paralel design-system/build docs di checkout utama tetap terpisah. Built proof server3148 dihentikan; development3147 dipertahankan untuk preview, API internal tetap unreachable. Tidak ada push/PR/merge/deployment.
+
+## Task: HOMEFE-012 — Skeleton halaman berikutnya
+
+- Status: Done
+- Owner: Codex
+- Prioritas: Refinement FE setelah HOMEFE-010
+- Referensi: HOME-US-002; permintaan pengguna menambahkan skeleton setelah klik Load more.
+- Diperbarui: 2026-10-07
+- Dependensi: HOMEFE-006/008 selesai.
+- Ukuran: Satu perubahan UI lokal.
+
+### Ruang lingkup
+
+CatalogGrid menambahkan placeholder poster9:16, judul dan metadata di akhir grid selama busy dari isFetchingNextPage. Memakai Skeleton existing dan catalogPageSize shared; kartu lama dipertahankan. Jumlah placeholder maksimal6, dibatasi total minus items.length; tidak ditampilkan setelah EOF. Grid aria-busy dan live status loading, placeholder dekoratif aria-hidden dan animasi menghormati reduced-motion. Tidak menambahkan delay/API atau state pagination terpisah.
+
+### Acceptance criteria
+
+- [x] Klik Load more saat query pending mempertahankan6 kartu awal dan menambahkan6 skeleton dalam grid responsif.
+- [x] Tombol loading disabled; skeleton hilang ketika12 hasil tersedia dan tidak tersisa setelah18/EOF.
+- [x] Frame placeholder9:16, viewport320/1440 tidak overflow, reduced-motion tidak animate.
+- [x] Tests existing, types/lint/build, docs/format/diff gates lulus.
+
+### Validasi
+
+Bun1.4.2: bun test apps/web/test/home-catalog-data.test.ts apps/web/test/admin-theme.test.ts; bun run check-types; bun run lint; bun run build. Browser proof sementara di luar repo: node //wsl.localhost/Debian/home/bandev/.codex/home-skeleton-proof.mjs memakai Playwright/Chromium host existing pada http://localhost:3147. Pending Promise hanya disisipkan pada query observer dalam browser proof untuk menahan query sampai release; source queryFn tetap lokal tanpa delay.
+
+### Hasil dan bukti
+
+Browser result passed: retainedCards6, skeletons6, viewports[320,1440], reducedMotion true, pages[6,12,18], errors0. aria-busy true→false, loading button disabled, skeleton count6→0 dan EOF button absent. Existing10 tests/63assertions lulus; root types3packages lulus (webfresh/APIauthcachedunchanged); available lint/build lulus. Tidak menambah test framework/dependency, tidak mengubah QueryClient/fixture/API. JSON lokal dapat resolve sebelum frame skeleton terlihat; tidak memaksakan durasi loading.
+
+### Commit task
+
+- Pesan: feat(web): show skeletons while loading more titles (HOMEFE-012)
+- SHA: Dicatat setelah commit berhasil.
+- Hook/checks: docs/lint/types/Commitlint tanpa bypass.
+- Ledger: SHA task dicatat pada update berikutnya.
+
+### Blocker atau tindak lanjut
+
+Tidak ada untuk scope ini; integrasi API tetap tahap terpisah.

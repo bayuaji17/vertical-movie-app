@@ -323,3 +323,7 @@ Pengguna menyetujui plan setelah klarifikasi useInfiniteQuery. Default detail di
 ### Final closure audit — 7 Oktober 2026
 
 HOMEFE-010 commit393b1b11e186d4a23e5f87c2208fed492341ef1f. Relevant tests10pass/63assertions; types/lint/build/docs/Prettier/diff checks pass. Browser dev+build masing-masing matrix12, SSR6 dan query6→12→18,0 forbidden requests/console errors. Scoped source review terhadap approved base24a5918 menunjukkan perubahan sesuai plan dan tidak menyentuh API/auth/admin/watch/routeTree/manifest/lock. Canonical status dan ledger konsisten; data published nyata/playback/API belum diimplementasikan dalam tahap ini. Branch lokal feat/home-catalog-mockup, belum push/PR/merge/deploy.
+
+### Refinement skeleton — 7 Oktober 2026
+
+Pengguna meminta skeleton setelah klik Load more. Freshness sebelum edit:7a05240cdde1dc556ac86b364dc17ce2b95b0e2c, worktree clean. HOMEFE-012 hanya mengubah CatalogGrid dan docs: Skeleton existing ditambahkan di akhir grid saat isFetchingNextPage, maksimal6 dibatasi hasil tersisa, kartu lama dipertahankan dan tombol disabled. Loading tetap mengikuti query asli tanpa artificial delay/API. Browser menahan Promise query pada observer khusus proof, bukan source runtime, untuk memverifikasi pending→success/EOF,9:16/nooverflow320/1440 dan reduced-motion. [Evidence](../../tasks/home-catalog.md#task-homefe-012--skeleton-halaman-berikutnya).
