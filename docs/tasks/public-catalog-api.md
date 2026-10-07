@@ -1,6 +1,6 @@
 # Modul: Integrasi katalog API ke homepage
 
-> Status: draft planning · 7 Oktober 2026 · Baseline `ba42d00728e66dd9cbeb0f3d916ae8ddea339f4b`. Plan belum merupakan bukti implementasi.
+> Status: plan approved / executing · 7 Oktober 2026 · Baseline `ba42d00728e66dd9cbeb0f3d916ae8ddea339f4b`. Plan belum merupakan bukti implementasi.
 
 ## Tujuan modul
 
@@ -63,7 +63,7 @@ Persetujuan plan diperlukan untuk menjalankan PCAT-001–011. Pilihan teknis rek
 
 ## Task: PCAT-001 — Kontrak typed dan cursor
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1, urutan/dependency menurut DAG plan.
 - Referensi: PCAT-US-001/002; PRD-07/08, GR-02; step PCAT-001 pada [plan](../plans/public-catalog-api/implementation-plan.md#implementation-steps).
@@ -77,8 +77,8 @@ DTO public3jenis, query strict, cursor scope/filter/asOf dan precision; tidak me
 
 ### Acceptance criteria
 
-- [ ] DTO menerima UUID/genre kosong/featured null dan menolak private fields atau query invalid.
-- [ ] Cursor round-trip lossless pada timestamp mikrodetik; scope/filter/limit/kind mismatch ditolak422.
+- [x] DTO menerima UUID/genre kosong/featured null dan menolak private fields atau query invalid.
+- [x] Cursor round-trip lossless pada timestamp mikrodetik; scope/filter/limit/kind mismatch ditolak422.
 
 ### Validasi
 
@@ -86,7 +86,7 @@ Bun cursor/model unit tests; compile-only Eden/API/web types.
 
 ### Hasil dan bukti
 
-Belum diimplementasikan/diverifikasi. Catat command aktual, hasil, decision/deviation dan batas pada task ini saat dieksekusi; existing HOMEFE/APUB proof tidak menutup task PCAT.
+Implemented7 Oktober2026: separate home-model/home-pagination preserve legacy contract, strict cursor scope/filter/asOf/microseconds. Bun5tests/29assertions pass; APItypes/rootbuild pass, hooks root lint/types/docs/Commitlint required at commit. DTO HTTP schema tests permit three kinds/no-genre/nullablefeatured and reject episode/privatefields/invalidduration.
 
 ### Commit task
 
@@ -497,5 +497,7 @@ Menunggu approval plan dan dependency di atas. Paths/symbols exact, risiko dan c
 ## Ledger dan approval
 
 - 2026-10-07: pengguna memilih rekomendasi point1, meminta plan detail; tidak meminta implementasi baru.
-- Contract/UX order/featured/debounce/poster recommendation: belum approved. Setelah persetujuan, tandai langkah dengan dependency terpenuhi sebagai Ready, bukan semua task Done.
+- Contract/UX tiga jenis/order/featured/debounce300/poster disetujui pengguna7 Oktober2026 (oke approve). Setelah persetujuan, tandai langkah dengan dependency terpenuhi sebagai Ready, bukan semua task Done.
 - Git/runtime delivery baru: belum dilakukan; local planning branch/artifacts tidak berarti endpoint/API sudah tersedia.
+
+- 2026-10-07: Approval implementasi PCAT diterima; PCAT-000 commit2130a75fd85a1f8db9ac5af4fc9e97cf64d7b7c3. Remote delivery fitur baru tetap belum diotorisasi.

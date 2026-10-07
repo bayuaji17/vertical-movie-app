@@ -2,14 +2,14 @@
 
 ## Plan Metadata
 
-- Status: **draft — lengkap untuk review, menunggu persetujuan proposal kontrak/UX**.
+- Status: **executing — plan disetujui pengguna 7 Oktober 2026**.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `main` / `origin/main`.
 - Base SHA: `ba42d00728e66dd9cbeb0f3d916ae8ddea339f4b`.
 - Context: [repository-context.md](repository-context.md).
 - Backlog: [PCAT](../../tasks/public-catalog-api.md).
 - Last validated SHA: `ba42d00728e66dd9cbeb0f3d916ae8ddea339f4b`, 7 Oktober 2026.
-- Approval: pengguna memilih point1 dan meminta plan detail. Detail di bawah adalah rekomendasi untuk disetujui; API/FE runtime belum diimplementasikan oleh task planning.
+- Approval: pengguna menyetujui seluruh plan melalui "oke approve" pada7 Oktober2026. Implementasi PCAT-001–011 diotorisasi; remote delivery belum diotorisasi untuk fitur baru.
 
 ## Objective
 
@@ -50,7 +50,7 @@ API internal memakai path di tabel; browser mengakses prefix `/api` melalui gate
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `GET /catalog`                  | limit(default6,max100), cursor(optional), search(max200 code points), kind(optional movie/standalone/series), genreId(optional UUID) | 200 `{ items, total, nextCursor, freshForMs }`; valid kosong `{items:[],total:0,nextCursor:null}`.422 invalid query/cursor;503 dependency; gateway502/504.                                           |
 | `GET /catalog/genres`           | limit(default100,max100), cursor(optional)                                                                                           | 200 `{items:[{id,slug,name}],nextCursor,freshForMs}` dari genre terkait item publik; empty sah. Cursor scope sendiri; semua halaman dibaca adapter sebelum dropdown lengkap, tanpa cap100 diam-diam. |
-| `GET /catalog/featured`         | Tidak ada filter/cursor                                                                                                              | 200 `{item: MovieItem                                                                                                                                                                                | null,freshForMs}`; tidak menciptakan fallback fiktif. |
+| `GET /catalog/featured`         | Tidak ada filter/cursor                                                                                                              | 200 `{item:MovieItem-or-null,freshForMs}`; nullable featured tanpa fallback fiktif.                                                                                                                  |
 | `GET /catalog/:kind/:id/poster` | kind movie/standalone/series dan UUID                                                                                                | 200 WebP;404 hidden/missing,503 storage/profile/provenance failure. GET saja; tidak menerima storage key/URL dari pengunjung, tidak redirect.                                                        |
 
 `freshForMs` integer0–60000 mengungkap sisa umur cache unsigned saat respons diberikan, bukan signature expiry. FE memakai ini untuk menghitung deadline lokal; backend/frontend tidak menumpuk staleTime60 baru di atas cache server yang hampir expired. List/genre/featured memakai contract metadata TTL60; poster private,no-store. Error tetap DTO aman existing, tanpa raw DB/provider diagnosis.
@@ -353,3 +353,7 @@ Persetujuan diperlukan untuk paket rekomendasi tiga jenis/episode exclusion, pub
 ## Execution Log
 
 - 2026-10-07 / PCAT-000: Pengguna memilih point1 dan meminta plan detail. Context disimpan sebelum plan. Branch lokal `feat/public-catalog-api` dibuat dari base main untuk memisahkan artifact planning dari source branch homepage yang telah di-merge. Perubahan planning hanya context/plan/backlog/index Markdown. Observed planning checks: docs69/689, Prettier empat Markdown/diff pass; structural18 sections/11 steps/12 backlog tasks/15 dependency edges konsisten. Local commit receipt tersedia di Git setelah hook normal; tidak ada runtime API/FE, push/PR/merge baru atau deployment pada task planning.
+
+- 2026-10-07: Pengguna menyetujui plan (oke approve); freshness main tetap ba42d00728e66dd9cbeb0f3d916ae8ddea339f4b, branch clean sebelum edit. PCAT-000 actual SHA2130a75fd85a1f8db9ac5af4fc9e97cf64d7b7c3. Mulai kontrak/cursor PCAT-001, tanpa push/PR/merge baru.
+
+- PCAT-001: separate DTO/cursor modules,5tests/29assertions pass; APItypes/rootbuild pass. Precision/filter/Unicode/strictDTO coverage observed. SHA task dicatat setelah commit; legacy routes belum berubah.
