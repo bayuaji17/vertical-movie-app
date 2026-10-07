@@ -303,7 +303,7 @@ Tests katalog/query dan tema:10 pass,0fail,63assertions. QueryClient/InfiniteQue
 ### Commit task
 
 - Pesan: `feat(web): search, filter, urutan dan load more lokal (HOMEFE-006)`.
-- SHA: Belum dibuat.
+- SHA: `0e291c7fa5947236d92b7321c475fc44f1f09295`.
 - Hook/checks: Gate relevan lulus; hook docs/lint/types/Commitlint dijalankan saat commit tanpa bypass.
 - Ledger: SHA aktual dicatat pada update dokumentasi task berikutnya setelah commit, tanpa self-referential SHA.
 
@@ -329,10 +329,10 @@ Affected files: `apps/web/src/components/catalog/catalog-detail-dialog.tsx`; `ap
 
 ### Acceptance criteria
 
-- [ ] Poster/title/synopsis/genres/duration atau episodeCount item terpilih tepat untuk ketiga kind.
-- [ ] DialogTitle/Description, close/Escape, focus trap/return ke trigger dan batas viewport tersedia.
-- [ ] Klik tidak memakai fetch/Eden/API/route watch, tidak menjanjikan playback aktif atau episode API.
-- [ ] Query/filter/loadedcount tetap setelah dialog close; long content scroll dalam modal.
+- [x] Poster/title/synopsis/genres/duration atau episodeCount item terpilih tepat untuk ketiga kind.
+- [x] DialogTitle/Description, close/Escape, focus trap/return ke trigger dan batas viewport tersedia.
+- [x] Klik tidak memakai fetch/Eden/API/route watch, tidak menjanjikan playback aktif atau episode API.
+- [x] Query/filter/loadedcount tetap setelah dialog close; long content scroll dalam modal.
 
 ### Validasi
 
@@ -340,13 +340,13 @@ Web types/lint; keyboard/focus/network/long content browser proof pada HOMEFE-00
 
 ### Hasil dan bukti
 
-Belum dikerjakan. Catat command/scope/result/limitations aktual; jangan menaikkan status dari checklist rencana saja.
+Dialog lokal memakai primitive Dialog, Title/Description, close44px, Escape/focus return dan max-height85svh dengan internal scroll. Film/Series/Standalone memakai metadata fixture; tidak ada router watch/API. Browser matrix12 ukuran-tema serta long-title dialog sudah melewati assertion bounds/focus pada development; proof lengkap009 masih berjalan.
 
 ### Commit task
 
 - Pesan: `feat(web): dialog detail metadata dummy (HOMEFE-007)`.
 - SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan.
+- Hook/checks: Gate relevan lulus; hook docs/lint/types/Commitlint dijalankan saat commit tanpa bypass.
 - Ledger: SHA aktual dicatat pada update dokumentasi task berikutnya setelah commit, tanpa self-referential SHA.
 
 ### Blocker atau tindak lanjut
