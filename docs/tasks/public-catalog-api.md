@@ -215,7 +215,7 @@ Dependency terpenuhi. Bukti lint/types/docs/commitlint dicatat setelah commit; p
 
 ## Task: PCAT-005 — Gateway katalog same-origin
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1, urutan/dependency menurut DAG plan.
 - Referensi: PCAT-US-003/004; PRD-07/08, GR-02; step PCAT-005 pada [plan](../plans/public-catalog-api/implementation-plan.md#implementation-steps).
@@ -229,8 +229,8 @@ Allowlist catalog, poster-specific response limit terpisah dari request/private 
 
 ### Acceptance criteria
 
-- [ ] Anonymous catalog dan valid WebP diteruskan; size/MIME/path/redirect invalid ditolak bounded.
-- [ ] Request-body1MiB dan private/auth behaviors tidak dilonggarkan; abort/timeout tidak meninggalkan pending resource.
+- [x] Anonymous catalog dan valid WebP diteruskan; size/MIME/path/redirect invalid ditolak bounded.
+- [x] Request-body1MiB dan private/auth behaviors tidak dilonggarkan; abort/timeout tidak meninggalkan pending resource.
 
 ### Validasi
 
@@ -238,18 +238,18 @@ Bun business-gateway/auth-gateway tests; types/lint/build.
 
 ### Hasil dan bukti
 
-Belum diimplementasikan/diverifikasi. Catat command aktual, hasil, decision/deviation dan batas pada task ini saat dieksekusi; existing HOMEFE/APUB proof tidak menutup task PCAT.
+Exact public GET catalog allowlist and poster-specific 5 MB response limit implemented; request/private limits unchanged. Credential stripping, MIME/status/redirect denial, JSON errors and stream timeout/cancel pass gateway regression: 15 tests/80 assertions. Web types/root build pass; normal hooks required.
 
 ### Commit task
 
 - Pesan: `feat(web): proxy public catalog and posters (PCAT-005)`
-- SHA: belum dibuat.
+- SHA: dicatat pada ledger task berikutnya setelah commit.
 - Hook/checks: diwajibkan tanpa bypass, hasil belum ada.
 - Ledger: actual SHA dicatat pada task berikutnya/delivery setelah commit, bukan self-reference.
 
 ### Blocker atau tindak lanjut
 
-Menunggu approval plan dan dependency di atas. Paths/symbols exact, risiko dan completion per step berada pada canonical plan; jangan memperluas ke watch/editor/production.
+Dependency terpenuhi. Bukti lint/types/docs/commitlint dicatat setelah commit; proof lanjutan sesuai DAG tetap wajib.
 
 ## Task: PCAT-006 — Eden adapter dan SSR
 
@@ -507,3 +507,5 @@ Menunggu approval plan dan dependency di atas. Paths/symbols exact, risiko dan c
 - Previous verified task commit before PCAT-003: 70dfa4422a0d8f4d7c268bc5ad56ce997fd05142 feat(api): query unified published catalog (PCAT-002).
 
 - Previous verified task commit before PCAT-004: 4db433cc3a5afb7de2e7e569ef82bfc6909fc29a feat(api): expose cached public home catalog (PCAT-003).
+
+- Previous verified task commit before PCAT-005: 916172cd6f03134517c1259361c79484c324d6a4 feat(api): serve published catalog posters (PCAT-004).

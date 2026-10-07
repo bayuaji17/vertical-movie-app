@@ -9,6 +9,7 @@ type GatewayDependencies = {
   timeoutMs?: number
   timeoutMsForRequest?: (request: Request) => number
   maxRequestBodyBytes?: number
+  maxResponseBodyBytesForRequest?: (request: Request) => number
 }
 
 type RequestBodyRead =
@@ -16,11 +17,23 @@ type RequestBodyRead =
 
 const targetPaths: Record<GatewayTarget, (pathname: string) => boolean> = {
   business: (pathname) =>
-    /^\/api\/(?:admin\/(?:videos|series|seasons|genres|media|content)(?:\/|$)|videos(?:\/|$)|series(?:\/|$)|playback\/videos\/)/.test(
+    (/^\/api\/(?:admin\/(?:videos|series|seasons|genres|media|content)(?:\/|$)|videos(?:\/|$)|series(?:\/|$)|playback\/videos\/)/.test(
       pathname,
-    ) && !/%|\\/.test(pathname),
+    ) ||
+      publicCatalogPath.test(pathname)) &&
+    !/%|\\/.test(pathname),
   auth: (pathname) =>
     pathname === '/api/auth' || pathname.startsWith('/api/auth/'),
+}
+const publicCatalogPath =
+  /^\/api\/catalog(?:\/(?:genres|featured)|\/(?:movie|standalone|series)\/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}\/poster)?$/i
+export function isPublicCatalogPoster(request: Request) {
+  return (
+    request.method === 'GET' &&
+    /^\/api\/catalog\/(?:movie|standalone|series)\/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}\/poster$/i.test(
+      new URL(request.url).pathname,
+    )
+  )
 }
 
 const requestHeaderAllowlist = new Set([
@@ -201,6 +214,16 @@ export function createAuthGateway(
         'The requested route is unavailable.',
       )
     }
+    if (
+      target === 'business' &&
+      publicCatalogPath.test(incomingUrl.pathname) &&
+      request.method !== 'GET'
+    )
+      return errorResponse(
+        405,
+        'METHOD_NOT_ALLOWED',
+        'This operation is unavailable.',
+      )
 
     if (
       target === 'auth' &&
@@ -292,6 +315,25 @@ export function createAuthGateway(
       if (body !== null) requestInit.body = body
       const upstreamRequest = new Request(upstreamUrl, requestInit)
       const upstreamResponse = await fetcher(upstreamRequest)
+      if (
+        target === 'business' &&
+        isPublicCatalogPoster(request) &&
+        (![200, 404, 422, 500, 503].includes(upstreamResponse.status) ||
+          (upstreamResponse.status === 200 &&
+            upstreamResponse.headers
+              .get('content-type')
+              ?.split(';')[0]
+              .trim()
+              .toLowerCase() !== 'image/webp'))
+      ) {
+        await upstreamResponse.body?.cancel().catch(() => undefined)
+        cleanup()
+        return errorResponse(
+          502,
+          'BUSINESS_GATEWAY_INVALID_RESPONSE',
+          'Poster response is unavailable.',
+        )
+      }
       const headers = forwardedResponseHeaders(
         upstreamResponse,
         apiOrigin,
@@ -328,9 +370,11 @@ export function createAuthGateway(
           new Request('http://response.invalid', {
             method: 'POST',
             body: upstreamResponse.body,
+            headers: upstreamResponse.headers,
             duplex: 'half',
           } as RequestInit),
-          maxRequestBodyBytes,
+          dependencies.maxResponseBodyBytesForRequest?.(request) ??
+            maxRequestBodyBytes,
           abortController.signal,
         )
         if (abortController.signal.aborted) throw abortController.signal.reason
