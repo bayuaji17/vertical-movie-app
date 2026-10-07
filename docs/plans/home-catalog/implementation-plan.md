@@ -307,3 +307,5 @@ Pengguna menyetujui plan setelah klarifikasi useInfiniteQuery. Default detail di
 - HOMEFE-002: Enam native PNG 941x1672 dilihat satu per satu; scene sesuai, file lokal plus fallback SVG 900x1600. Ukuran source mendekati9:16 dicatat pada design; frame CSS exact9:16 diuji browser009. Source original dipertahankan; tidak ada runtime remote images. SHA task sebelumnya: `06bf4f0c8e910efa7f14620567646bc70505158c`.
 
 - HOMEFE-003: Public shell memakai Button/Sheet dan appearance radio menu dengan ThemeProvider existing; tidak ada import admin/session. Web lint dan types lulus pada hook HOMEFE-002. Browser focus/nav/theme diuji HOMEFE-009. SHA task sebelumnya: `c13c674ec0696d2ef932fbd6e9f21fe497bcc797`.
+
+- HOMEFE-004: FeaturedFilm dan Poster menggunakan satu item fixture, callback detail lokal, frame aspect9/16, reservasi dimensi, eager hero/lazy grid dan fallback sekali. Tests10, root types/lint serta build lulus; DOM ratio difinalisasi HOMEFE-009. SHA task sebelumnya: `94737b5f3ca03abcc668a7eaa316bad107a28c37`.

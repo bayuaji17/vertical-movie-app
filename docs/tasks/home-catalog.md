@@ -174,7 +174,7 @@ Public shell memakai Button/Sheet dan appearance radio menu dengan ThemeProvider
 ### Commit task
 
 - Pesan: `feat(web): shell publik, menu mobile dan appearance (HOMEFE-003)`.
-- SHA: Belum dibuat.
+- SHA: `94737b5f3ca03abcc668a7eaa316bad107a28c37`.
 - Hook/checks: Gate relevan lulus; hook docs/lint/types/Commitlint dijalankan saat commit tanpa bypass.
 - Ledger: SHA aktual dicatat pada update dokumentasi task berikutnya setelah commit, tanpa self-referential SHA.
 
@@ -200,10 +200,10 @@ Affected files: `apps/web/src/components/catalog/featured-film.tsx`; `apps/web/s
 
 ### Acceptance criteria
 
-- [ ] After the Rain/synopsis/genre/duration diambil dari fixture, thumbnail tidak keluar panel dan frame 9/16 tanpa stretch.
-- [ ] Desktop text+poster, mobile compact/stack pada 320 px; long labels/safe spacing tidak overlap.
-- [ ] View film/View details memakai callback detail lokal sesuai usulan plan, tidak mengarahkan/prefetch watch/API.
-- [ ] Feature muncul hanya default query/kind/genre; controls/labels/focus terbaca di kedua tema.
+- [x] After the Rain/synopsis/genre/duration diambil dari fixture, thumbnail tidak keluar panel dan frame 9/16 tanpa stretch.
+- [x] Desktop text+poster, mobile compact/stack pada 320 px; long labels/safe spacing tidak overlap.
+- [x] View film/View details memakai callback detail lokal sesuai usulan plan, tidak mengarahkan/prefetch watch/API.
+- [x] Feature muncul hanya default query/kind/genre; controls/labels/focus terbaca di kedua tema.
 
 ### Validasi
 
@@ -211,13 +211,13 @@ Fixture/page-selector tests existing; web types/lint; DOM ratio/visual matrix di
 
 ### Hasil dan bukti
 
-Belum dikerjakan. Catat command/scope/result/limitations aktual; jangan menaikkan status dari checklist rencana saja.
+FeaturedFilm dan Poster menggunakan satu item fixture, callback detail lokal, frame aspect9/16, reservasi dimensi, eager hero/lazy grid dan fallback sekali. Tests10, root types/lint serta build lulus; DOM ratio difinalisasi HOMEFE-009.
 
 ### Commit task
 
 - Pesan: `feat(web): featured film responsif (HOMEFE-004)`.
 - SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan.
+- Hook/checks: Gate relevan lulus; hook docs/lint/types/Commitlint dijalankan saat commit tanpa bypass.
 - Ledger: SHA aktual dicatat pada update dokumentasi task berikutnya setelah commit, tanpa self-referential SHA.
 
 ### Blocker atau tindak lanjut
