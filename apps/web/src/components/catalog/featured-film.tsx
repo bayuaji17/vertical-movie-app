@@ -1,4 +1,5 @@
 import { RiPlayFill } from '@remixicon/react'
+import { Link } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import {
@@ -37,7 +38,14 @@ export function FeaturedFilm({
         <div className="flex flex-wrap gap-2 sm:gap-3">
           <Button
             className="min-h-11"
-            onClick={(event) => onDetails(item, event.currentTarget)}
+            nativeButton={false}
+            render={
+              <Link
+                to="/watch/$slug"
+                params={{ slug: item.slug }}
+                preload={false}
+              />
+            }
           >
             <RiPlayFill data-icon="inline-start" aria-hidden="true" />
             View film

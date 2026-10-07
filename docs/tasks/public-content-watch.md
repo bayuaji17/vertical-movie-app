@@ -155,8 +155,8 @@ Public Eden adapter, strict DTO, abort/timeout, same-origin GET-only gateway dan
 ### Commit task
 
 - Pesan: Conventional Commit scoped PCW-003
-- SHA: receipt aktual dicatat pada task berikutnya setelah commit.
-- Hook/checks: normal docs/lint/types/commitlint wajib tanpa bypass.
+- SHA: `0fa16870d57984dc2e117c1cea5c66b6c05793e3`.
+- Hook/checks: docs:check, lint, check-types dan commitlint normal pass tanpa bypass.
 
 ### Blocker atau tindak lanjut
 
@@ -164,7 +164,7 @@ Dependency menurut DAG. Tidak menambah progress/autoplay/editor/production atau 
 
 ## Task: PCW-004 — Detail/Series halaman dan CTA
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent
 - Prioritas: P1, dependency order
 - Referensi: PCW-US-001/002; PRD-07/08, GR-02; [plan](../plans/public-content-watch/implementation-plan.md#implementation-steps)
@@ -178,8 +178,8 @@ Anonymous deep links, metadata/currentposter and grouped ordered playable episod
 
 ### Acceptance criteria
 
-- [ ] allthreekindCTA correct, directURL/refresh works, typed relative links, theme/portrait/keyboard/focus preserved, hidden child never clickable.
-- [ ] Applicable gates/evidence dan compatibility diperiksa sebelum Done.
+- [x] allthreekindCTA correct, directURL/refresh works, typed relative links, theme/portrait/keyboard/focus preserved, hidden child never clickable.
+- [x] Applicable gates/evidence dan compatibility diperiksa sebelum Done.
 
 ### Validasi
 
@@ -187,12 +187,12 @@ types/lint/build + generatedroute/source audit; browser007.
 
 ### Hasil dan bukti
 
-Belum diimplementasikan/diverifikasi; isi command/result/batas dan receipt aktual saat task selesai.
+Public detail Film/Standalone dan Series, grouped episode rows, initial/append skeleton, same-cursor Retry dan resetQueries untuk cursor422 selesai. Dialog Open details/Watch dan featured directwatch berupa typed Link, tanpa capability preload. Route tree dihasilkan tsr. Root types/lint/build pass; actual URL/hydration/theme/playback proof dijalankan bersama PCW-007.
 
 ### Commit task
 
 - Pesan: Conventional Commit scoped PCW-004
-- SHA: belum dibuat.
+- SHA: receipt aktual dicatat pada task berikutnya setelah commit.
 - Hook/checks: normal docs/lint/types/commitlint wajib tanpa bypass.
 
 ### Blocker atau tindak lanjut

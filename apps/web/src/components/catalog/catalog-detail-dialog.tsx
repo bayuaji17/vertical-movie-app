@@ -1,4 +1,5 @@
 import { RiCloseLine } from '@remixicon/react'
+import { Link } from '@tanstack/react-router'
 import { Button } from '#/components/ui/button'
 import { Badge } from '#/components/ui/badge'
 import {
@@ -63,6 +64,40 @@ export function CatalogDetailDialog({
               <Badge variant="secondary">{kindLabels[item.kind]}</Badge>
               <span>{genreLabels(item)}</span>
               <span>{itemLength(item)}</span>
+            </div>
+            <div className="flex flex-wrap justify-center gap-3">
+              <Button
+                className="min-h-11"
+                nativeButton={false}
+                render={
+                  item.kind === 'series' ? (
+                    <Link to="/series/$slug" params={{ slug: item.slug }} />
+                  ) : (
+                    <Link
+                      to="/titles/$kind/$slug"
+                      params={{ kind: item.kind, slug: item.slug }}
+                    />
+                  )
+                }
+              >
+                Open details
+              </Button>
+              {item.kind !== 'series' && (
+                <Button
+                  variant="outline"
+                  className="min-h-11"
+                  nativeButton={false}
+                  render={
+                    <Link
+                      to="/watch/$slug"
+                      params={{ slug: item.slug }}
+                      preload={false}
+                    />
+                  }
+                >
+                  Watch now
+                </Button>
+              )}
             </div>
           </>
         )}
