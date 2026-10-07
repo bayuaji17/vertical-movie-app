@@ -13,6 +13,7 @@ import {
   catalogPageSize,
   catalogSort,
   defaultCatalogFilters,
+  sameFilters,
 } from './public-catalog-model'
 import type { CatalogFilters } from './public-catalog-model'
 
@@ -120,5 +121,58 @@ export async function loadPublicCatalog(
     catalogFailed: results[0].status === 'rejected',
     genresFailed: results[1].status === 'rejected',
     featuredFailed: results[2].status === 'rejected',
+  }
+}
+
+/** Cancel only public exact keys; clearing the destination starts a new traversal. */
+export function createCatalogTransition(
+  client: QueryClient,
+  commit: (filters: CatalogFilters) => void,
+) {
+  let current = defaultCatalogFilters,
+    requested = current,
+    revision = 0
+  return async (next: CatalogFilters, force = false) => {
+    const normalized = normalizeFilters(next)
+    if (!force && sameFilters(requested, normalized)) return
+    requested = normalized
+    const request = ++revision
+    await client.cancelQueries({
+      queryKey: catalogQueryKey(current),
+      exact: true,
+    })
+    if (request !== revision) return
+    await client.cancelQueries({
+      queryKey: catalogQueryKey(normalized),
+      exact: true,
+    })
+    if (request !== revision) return
+    client.removeQueries({ queryKey: catalogQueryKey(normalized), exact: true })
+    current = normalized
+    commit(normalized)
+  }
+}
+/** Search waits 300 ms; type/genre/reset flush immediately with the latest text. */
+export function createCatalogDebounce(
+  apply: (filters: CatalogFilters, force?: boolean) => Promise<void>,
+) {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const cancel = () => {
+    if (timer !== undefined) clearTimeout(timer)
+    timer = undefined
+  }
+  return {
+    search(next: CatalogFilters) {
+      cancel()
+      timer = setTimeout(() => {
+        timer = undefined
+        void apply(next)
+      }, 300)
+    },
+    immediate(next: CatalogFilters, force = false) {
+      cancel()
+      return apply(next, force)
+    },
+    cancel,
   }
 }

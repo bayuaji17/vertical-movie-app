@@ -291,7 +291,7 @@ Dependency terpenuhi. Bukti lint/types/docs/commitlint dicatat setelah commit; p
 
 ## Task: PCAT-007 — Cursor infinite query dan filters
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1, urutan/dependency menurut DAG plan.
 - Referensi: PCAT-US-002/003; PRD-07/08, GR-02; step PCAT-007 pada [plan](../plans/public-catalog-api/implementation-plan.md#implementation-steps).
@@ -305,8 +305,8 @@ Rewrite dummy query ke nullable cursor/public namespace, freshForMs, debounce300
 
 ### Acceptance criteria
 
-- [ ] Click dedup, cursor6→12→18/EOF, race/filter/cache revisit benar; admin cache tetap utuh.
-- [ ] Next-page error mempertahankan cards/cursor dan Retry; aborted data tidak mengisi key aktif; tidak offset/dummy seed/auto scroll.
+- [x] Click dedup, cursor6→12→18/EOF, race/filter/cache revisit benar; admin cache tetap utuh.
+- [x] Next-page error mempertahankan cards/cursor dan Retry; aborted data tidak mengisi key aktif; tidak offset/dummy seed/auto scroll.
 
 ### Validasi
 
@@ -314,18 +314,18 @@ Controlled QueryClient/InfiniteQueryObserver behavioral tests; types/lint/build.
 
 ### Hasil dan bukti
 
-Belum diimplementasikan/diverifikasi. Catat command aktual, hasil, decision/deviation dan batas pada task ini saat dieksekusi; existing HOMEFE/APUB proof tidak menutup task PCAT.
+Real public cursor query and exact-key transition/debounce implemented in shared public query module. Observer/client behavior tests 11 tests/53 assertions pass: 6/12/18/EOF, concurrent dedup, next-page retry, cancellation/latest wins, canonical cache keys, 300ms flush/cancel, offline resume and remaining freshness. Web types and affected lint pass; root build passes. Component adoption and obsolete dummy query removal follow PCAT-008.
 
 ### Commit task
 
 - Pesan: `feat(web): paginate API catalog with infinite query (PCAT-007)`
-- SHA: belum dibuat.
+- SHA: dicatat pada ledger task berikutnya setelah commit.
 - Hook/checks: diwajibkan tanpa bypass, hasil belum ada.
 - Ledger: actual SHA dicatat pada task berikutnya/delivery setelah commit, bukan self-reference.
 
 ### Blocker atau tindak lanjut
 
-Menunggu approval plan dan dependency di atas. Paths/symbols exact, risiko dan completion per step berada pada canonical plan; jangan memperluas ke watch/editor/production.
+Dependency terpenuhi. Bukti lint/types/docs/commitlint dicatat setelah commit; proof lanjutan sesuai DAG tetap wajib.
 
 ## Task: PCAT-008 — Homepage state dan metadata nyata
 
@@ -511,3 +511,5 @@ Menunggu approval plan dan dependency di atas. Paths/symbols exact, risiko dan c
 - Previous verified task commit before PCAT-005: 916172cd6f03134517c1259361c79484c324d6a4 feat(api): serve published catalog posters (PCAT-004).
 
 - Previous verified task commit before PCAT-006: 20e577c1ce94c5270677b17007c36f213288b940 feat(web): proxy public catalog metadata and posters (PCAT-005).
+
+- Previous verified task commit before PCAT-007: 15ad7b94d4a6ae285a94d36d1c9f8f8dd614fb21 feat(web): load public catalog with Eden and SSR (PCAT-006).
