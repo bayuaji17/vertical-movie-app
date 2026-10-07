@@ -118,8 +118,8 @@ Detail direct kind/slug dan episode SQL one-statement dengan parent eligibility,
 ### Commit task
 
 - Pesan: Conventional Commit scoped PCW-002
-- SHA: receipt aktual dicatat pada task berikutnya setelah commit.
-- Hook/checks: normal docs/lint/types/commitlint wajib tanpa bypass.
+- SHA: `a6876c9e34644eb6189627f0421688a6f3d7d1e7`.
+- Hook/checks: docs:check, lint, check-types dan commitlint normal pass tanpa bypass.
 
 ### Blocker atau tindak lanjut
 
@@ -127,7 +127,7 @@ Dependency menurut DAG. Tidak menambah progress/autoplay/editor/production atau 
 
 ## Task: PCW-003 — Public adapter, SSR dan query
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent
 - Prioritas: P1, dependency order
 - Referensi: PCW-US-001/002; PRD-07/08, GR-02; [plan](../plans/public-content-watch/implementation-plan.md#implementation-steps)
@@ -141,8 +141,8 @@ Safe typed reads for detail/watch/episodes, independent sections and identity re
 
 ### Acceptance criteria
 
-- [ ] browser sameorigin with VITE_API_URL absent; no cookie/internalURL/private fields; detail doesn't seed homepage item.
-- [ ] Applicable gates/evidence dan compatibility diperiksa sebelum Done.
+- [x] browser sameorigin with VITE_API_URL absent; no cookie/internalURL/private fields; detail doesn't seed homepage item.
+- [x] Applicable gates/evidence dan compatibility diperiksa sebelum Done.
 
 ### Validasi
 
@@ -150,12 +150,12 @@ Eden compile + client/query/gateway tests partial/abort/race/binding/offline/cac
 
 ### Hasil dan bukti
 
-Belum diimplementasikan/diverifikasi; isi command/result/batas dan receipt aktual saat task selesai.
+Public Eden adapter, strict DTO, abort/timeout, same-origin GET-only gateway dan unsigned SSR loader selesai. Endpoint tambahan /catalog/watch/:slug membawa remaining freshForMs karena legacy /videos/:slug tidak menyediakan TTL. Catalog/client/gateway tests: 36 pass, 228 assertions. Root check-types pass; final lint/build dan normal hooks diverifikasi sebelum commit. Signed playback reader hanya mengembalikan capability ke component state.
 
 ### Commit task
 
 - Pesan: Conventional Commit scoped PCW-003
-- SHA: belum dibuat.
+- SHA: receipt aktual dicatat pada task berikutnya setelah commit.
 - Hook/checks: normal docs/lint/types/commitlint wajib tanpa bypass.
 
 ### Blocker atau tindak lanjut

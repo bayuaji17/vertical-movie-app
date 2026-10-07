@@ -1,7 +1,14 @@
 import { t } from "elysia";
 import { Uuid, NextCursor } from "../../shared/content-model";
 import { HomeKindSchema, HomeItem } from "./home-model";
-import { SlugParams } from "./model";
+import { SlugParams, PublicVideoDto } from "./model";
+export const WatchMetadataDto = t.Object(
+  {
+    item: PublicVideoDto,
+    freshForMs: t.Integer({ minimum: 0, maximum: 60000 }),
+  },
+  { additionalProperties: false },
+);
 
 export const DetailParams = t.Object(
   { kind: HomeKindSchema, slug: SlugParams.properties.slug },

@@ -16,8 +16,48 @@ const item: PublicHomeItem = {
   durationMs: 1000,
 };
 const empty = { items: [], total: 0, nextCursor: null };
+test("watch metadata is unsigned, uses remaining freshness and invalidates after publication", async () => {
+  let clock = 0,
+    reads = 0;
+  const video = {
+    id,
+    kind: "movie" as const,
+    slug: item.slug,
+    title: item.title,
+    synopsis: item.synopsis,
+    durationMs: 1000,
+    seasonNumber: null,
+    episodeNumber: null,
+    seriesSlug: null,
+  };
+  const reader: PublicContentReader = {
+    watch: async (slug) => {
+      reads++;
+      return slug === item.slug ? video : undefined;
+    },
+    detail: async () => item,
+    episodes: async () => empty,
+  };
+  const service = new CatalogService(undefined, () => clock, undefined, reader);
+  const app = createCatalogModule(service);
+  const first = await app.handle(
+    new Request("http://test/catalog/watch/a-film"),
+  );
+  expect(first.status).toBe(200);
+  expect(await first.json()).toEqual({ item: video, freshForMs: 60000 });
+  clock = 59000;
+  expect((await service.watchMetadata("a-film")).freshForMs).toBe(1000);
+  expect(reads).toBe(1);
+  service.invalidate();
+  await service.watchMetadata("a-film");
+  expect(reads).toBe(2);
+  expect(
+    (await app.handle(new Request("http://test/catalog/watch/missing"))).status,
+  ).toBe(404);
+});
 test("public detail has unsigned DTO, wrong kind/slug404 and unavailable503", async () => {
   const reader: PublicContentReader = {
+    watch: async () => undefined,
     detail: async (kind, slug) =>
       kind === item.kind && slug === item.slug ? item : undefined,
     episodes: async () => empty,
@@ -51,6 +91,7 @@ test("public detail has unsigned DTO, wrong kind/slug404 and unavailable503", as
 test("strict detail/episode query validation happens before store I/O", async () => {
   let reads = 0;
   const reader: PublicContentReader = {
+    watch: async () => undefined,
     detail: async () => {
       reads++;
       return item;
@@ -87,6 +128,7 @@ test("remaining freshness and successful invalidation apply to details and episo
   let clock = 0,
     reads = 0;
   const reader: PublicContentReader = {
+    watch: async () => undefined,
     detail: async () => {
       reads++;
       return item;
@@ -111,6 +153,7 @@ test("a late detail read cannot refill metadata cache after invalidation", async
   let complete!: (v: PublicHomeItem) => void,
     reads = 0;
   const reader: PublicContentReader = {
+    watch: async () => undefined,
     detail: async () => {
       reads++;
       return reads === 1

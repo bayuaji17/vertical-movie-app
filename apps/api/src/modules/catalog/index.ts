@@ -8,6 +8,7 @@ import {
   EpisodeQuery,
   ContentDetailDto,
   EpisodesDto,
+  WatchMetadataDto,
 } from "./content-model";
 import {
   HomeQuerySchema,
@@ -87,6 +88,15 @@ export function createCatalogModule(
         query: EpisodeQuery,
         response: { 200: EpisodesDto, ...ErrorResponses },
         detail: { tags: ["Catalog"], operationId: "listPublicSeriesEpisodes" },
+      },
+    )
+    .get(
+      "/catalog/watch/:slug",
+      ({ params }) => service.watchMetadata(params.slug),
+      {
+        params: SlugParams,
+        response: { 200: WatchMetadataDto, ...ErrorResponses },
+        detail: { tags: ["Catalog"], operationId: "getPublicWatchMetadata" },
       },
     )
     .get("/videos", ({ query }) => service.list(query), {

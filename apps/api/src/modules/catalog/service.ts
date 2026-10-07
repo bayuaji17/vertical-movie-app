@@ -57,6 +57,17 @@ export class CatalogService {
     );
     return { item: entry.value, freshForMs: this.freshness(entry.until) };
   }
+  async watchMetadata(slug: string) {
+    const entry = await this.entry(`content:watch:${slug}`, async () => {
+      const item = await (this.contentStore ?? unavailable()).watch(
+        slug,
+        new Date(this.now()),
+      );
+      if (!item) notFound();
+      return item;
+    });
+    return { item: entry.value, freshForMs: this.freshness(entry.until) };
+  }
   async episodes(slug: string, input: { limit?: string; cursor?: string }) {
     const query = parseEpisodes(slug, input, new Date(this.now()));
     const entry = await this.entry(

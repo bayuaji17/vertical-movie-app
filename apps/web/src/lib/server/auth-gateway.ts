@@ -20,13 +20,16 @@ const targetPaths: Record<GatewayTarget, (pathname: string) => boolean> = {
     (/^\/api\/(?:admin\/(?:videos|series|seasons|genres|media|content)(?:\/|$)|videos(?:\/|$)|series(?:\/|$)|playback\/videos\/)/.test(
       pathname,
     ) ||
-      publicCatalogPath.test(pathname)) &&
+      publicCatalogPath.test(pathname) ||
+      publicContentPath.test(pathname)) &&
     !/%|\\/.test(pathname),
   auth: (pathname) =>
     pathname === '/api/auth' || pathname.startsWith('/api/auth/'),
 }
 const publicCatalogPath =
   /^\/api\/catalog(?:\/(?:genres|featured)|\/(?:movie|standalone|series)\/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}\/poster)?$/i
+const publicContentPath =
+  /^\/api\/catalog\/(?:details\/(?:movie|standalone|series)\/[a-z0-9]+(?:-[a-z0-9]+)*|series\/[a-z0-9]+(?:-[a-z0-9]+)*\/episodes|watch\/[a-z0-9]+(?:-[a-z0-9]+)*)$/
 export function isPublicCatalogPoster(request: Request) {
   return (
     request.method === 'GET' &&
@@ -216,7 +219,8 @@ export function createAuthGateway(
     }
     if (
       target === 'business' &&
-      publicCatalogPath.test(incomingUrl.pathname) &&
+      (publicCatalogPath.test(incomingUrl.pathname) ||
+        publicContentPath.test(incomingUrl.pathname)) &&
       request.method !== 'GET'
     )
       return errorResponse(

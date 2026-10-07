@@ -10,7 +10,8 @@ import {
   type EpisodesQuery,
   type EpisodePosition,
 } from "./content-pagination";
-import { videos, seasons } from "../../db/schema";
+import { videos, seasons, series } from "../../db/schema";
+import type { PublicVideo } from "./model";
 
 export type EpisodeRead = {
   items: PublicEpisode[];
@@ -18,6 +19,7 @@ export type EpisodeRead = {
   nextCursor: string | null;
 };
 export interface PublicContentReader {
+  watch(slug: string, now: Date): Promise<PublicVideo | undefined>;
   detail(
     kind: HomeKind,
     slug: string,
@@ -34,6 +36,17 @@ export class PublicContentStore implements PublicContentReader {
     const [row] = await this.db.execute<{ item: PublicHomeItem }>(sql`
       ${this.home.eligible()} SELECT data item FROM home
       WHERE kind=${kind} AND data->>'slug'=${slug} AND at<=${sqlInstant(now)}::timestamptz LIMIT 1`);
+    return row?.item;
+  }
+  async watch(slug: string, now: Date) {
+    const [row] = await this.db.execute<{ item: PublicVideo }>(sql`
+      ${this.home.eligible()} SELECT jsonb_build_object(
+        'id',p.id,'slug',v.slug,'title',p.title,'synopsis',p.synopsis,'kind',p.kind,'durationMs',p.duration_ms,
+        'seasonNumber',s.season_number,'episodeNumber',v.episode_number,'seriesSlug',parent.slug) item
+      FROM playable p JOIN ${videos} v ON v.id=p.id
+      LEFT JOIN ${seasons} s ON s.id=v.season_id LEFT JOIN ${series} parent ON parent.id=s.series_id
+      WHERE v.slug=${slug} AND p.at<=${sqlInstant(now)}::timestamptz
+        AND (p.kind IN ('movie','standalone') OR EXISTS(SELECT 1 FROM parents WHERE parents.id=p.series_id)) LIMIT 1`);
     return row?.item;
   }
   statement(q: EpisodesQuery) {
