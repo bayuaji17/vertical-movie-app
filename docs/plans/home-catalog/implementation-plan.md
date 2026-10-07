@@ -309,3 +309,5 @@ Pengguna menyetujui plan setelah klarifikasi useInfiniteQuery. Default detail di
 - HOMEFE-003: Public shell memakai Button/Sheet dan appearance radio menu dengan ThemeProvider existing; tidak ada import admin/session. Web lint dan types lulus pada hook HOMEFE-002. Browser focus/nav/theme diuji HOMEFE-009. SHA task sebelumnya: `c13c674ec0696d2ef932fbd6e9f21fe497bcc797`.
 
 - HOMEFE-004: FeaturedFilm dan Poster menggunakan satu item fixture, callback detail lokal, frame aspect9/16, reservasi dimensi, eager hero/lazy grid dan fallback sekali. Tests10, root types/lint serta build lulus; DOM ratio difinalisasi HOMEFE-009. SHA task sebelumnya: `94737b5f3ca03abcc668a7eaa316bad107a28c37`.
+
+- HOMEFE-005: CatalogCard/Grid merender Film, Series dan Standalone, metadata duration/count, wrapping judul dan grid2/3/4/6cols. Callback detail lokal, empty melalui primitive Empty, Load more manual dengan busy guard. Tests10/types/lint/build lulus; browser009 menutup flow/viewport. SHA task sebelumnya: `130465ffc88545ccfa2b6d6d02581bb2c931459b`.

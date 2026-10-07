@@ -216,7 +216,7 @@ FeaturedFilm dan Poster menggunakan satu item fixture, callback detail lokal, fr
 ### Commit task
 
 - Pesan: `feat(web): featured film responsif (HOMEFE-004)`.
-- SHA: Belum dibuat.
+- SHA: `130465ffc88545ccfa2b6d6d02581bb2c931459b`.
 - Hook/checks: Gate relevan lulus; hook docs/lint/types/Commitlint dijalankan saat commit tanpa bypass.
 - Ledger: SHA aktual dicatat pada update dokumentasi task berikutnya setelah commit, tanpa self-referential SHA.
 
@@ -242,10 +242,10 @@ Affected files: `apps/web/src/components/catalog/{poster,catalog-card,catalog-gr
 
 ### Acceptance criteria
 
-- [ ] Film/Standalone memakai duration, Series episodeCount; tidak menampilkan worker/editorial/admin metadata.
-- [ ] Semua frame CSS 9/16 dengan reserved space dan image fallback once; tidak memakai video/player/circle play pada Series.
-- [ ] Card open action memiliki accessible title, no nested interactive duplication; long title/genre dapat wrap.
-- [ ] Grid 2/3/4/6 mengikuti width plan; results dapat 0 tanpa crash, Load more menerima props/callback tanpa data fetch.
+- [x] Film/Standalone memakai duration, Series episodeCount; tidak menampilkan worker/editorial/admin metadata.
+- [x] Semua frame CSS 9/16 dengan reserved space dan image fallback once; tidak memakai video/player/circle play pada Series.
+- [x] Card open action memiliki accessible title, no nested interactive duplication; long title/genre dapat wrap.
+- [x] Grid 2/3/4/6 mengikuti width plan; results dapat 0 tanpa crash, Load more menerima props/callback tanpa data fetch.
 
 ### Validasi
 
@@ -253,13 +253,13 @@ Unit metadata/fixture tests; web types/lint; fallback/ratio/overflow checks fina
 
 ### Hasil dan bukti
 
-Belum dikerjakan. Catat command/scope/result/limitations aktual; jangan menaikkan status dari checklist rencana saja.
+CatalogCard/Grid merender Film, Series dan Standalone, metadata duration/count, wrapping judul dan grid2/3/4/6cols. Callback detail lokal, empty melalui primitive Empty, Load more manual dengan busy guard. Tests10/types/lint/build lulus; browser009 menutup flow/viewport.
 
 ### Commit task
 
 - Pesan: `feat(web): poster card dan grid tiga jenis (HOMEFE-005)`.
 - SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan.
+- Hook/checks: Gate relevan lulus; hook docs/lint/types/Commitlint dijalankan saat commit tanpa bypass.
 - Ledger: SHA aktual dicatat pada update dokumentasi task berikutnya setelah commit, tanpa self-referential SHA.
 
 ### Blocker atau tindak lanjut
