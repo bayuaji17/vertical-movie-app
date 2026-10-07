@@ -1,0 +1,186 @@
+import { useId, useRef, useState } from 'react'
+import type { RefObject } from 'react'
+import type {
+  PublicationController,
+  PublicationState,
+} from '#/lib/admin/publication-state'
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '#/components/ui/alert-dialog'
+import { Checkbox } from '#/components/ui/checkbox'
+import { Field, FieldGroup, FieldLabel } from '#/components/ui/field'
+
+export function PublishVideoDialog({
+  controller,
+  state,
+  returnFocus,
+  fallbackFocus,
+  canConfirm = true,
+}: {
+  controller: PublicationController
+  state: PublicationState
+  returnFocus: RefObject<HTMLButtonElement | null>
+  fallbackFocus?: RefObject<HTMLButtonElement | null>
+  canConfirm?: boolean
+}) {
+  const [acknowledged, setAcknowledged] = useState(false),
+    checkboxId = useId(),
+    cancel = useRef<HTMLButtonElement>(null)
+  const pending = state.phase !== 'review'
+  return (
+    <AlertDialog
+      open
+      onOpenChange={(open, event) => {
+        if (pending) {
+          event.cancel()
+          return
+        }
+        if (!open) controller.cancel()
+      }}
+    >
+      <AlertDialogContent
+        initialFocus={cancel}
+        finalFocus={() => returnFocus.current ?? fallbackFocus?.current ?? true}
+        className="max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] overflow-y-auto"
+      >
+        <AlertDialogHeader>
+          <AlertDialogTitle>Publish video?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This video will be available to visitors without signing in.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <div className="flex min-w-0 flex-col gap-3">
+          <p className="break-words font-medium">
+            {state.snapshot?.detail.data.title}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Content rights: Confirmed
+          </p>
+          <FieldGroup>
+            <Field orientation="horizontal" data-disabled={pending}>
+              <Checkbox
+                id={checkboxId}
+                checked={acknowledged}
+                onCheckedChange={setAcknowledged}
+                disabled={pending}
+              />
+              <FieldLabel htmlFor={checkboxId} className="min-h-11">
+                I have reviewed the preview and want to publish this video.
+              </FieldLabel>
+            </Field>
+          </FieldGroup>
+          <p role="status" aria-live="polite" className="text-sm">
+            {pending
+              ? state.phase === 'pending'
+                ? 'Publishing…'
+                : 'Checking current status…'
+              : ''}
+          </p>
+        </div>
+        <AlertDialogFooter>
+          <AlertDialogCancel
+            ref={cancel}
+            disabled={pending}
+            className="min-h-11"
+          >
+            Cancel
+          </AlertDialogCancel>
+          <AlertDialogAction
+            disabled={pending || !acknowledged || !canConfirm}
+            className="min-h-11"
+            onClick={() => void controller.confirm(acknowledged)}
+          >
+            {state.phase === 'pending' ? 'Publishing…' : 'Publish video'}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  )
+}
+
+export function ArchiveVideoDialog({
+  controller,
+  state,
+  returnFocus,
+  fallbackFocus,
+  canConfirm = true,
+}: {
+  controller: PublicationController
+  state: PublicationState
+  returnFocus: RefObject<HTMLButtonElement | null>
+  fallbackFocus?: RefObject<HTMLButtonElement | null>
+  canConfirm?: boolean
+}) {
+  const cancel = useRef<HTMLButtonElement>(null),
+    pending = state.phase !== 'review'
+  return (
+    <AlertDialog
+      open
+      onOpenChange={(open, event) => {
+        if (pending) {
+          event.cancel()
+          return
+        }
+        if (!open) controller.cancel()
+      }}
+    >
+      <AlertDialogContent
+        initialFocus={cancel}
+        finalFocus={() => returnFocus.current ?? fallbackFocus?.current ?? true}
+        className="max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] overflow-y-auto"
+      >
+        <AlertDialogHeader>
+          <AlertDialogTitle>Archive video?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Visitors will no longer be able to request new playback access for
+            this video. Previously issued media links may work until they
+            expire.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <div className="flex min-w-0 flex-col gap-3">
+          <p className="break-words font-medium">
+            {state.snapshot?.detail.data.title}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Valid files that are still available will be retained. A source file
+            already removed by retention will not be restored.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Restoring or republishing archived videos is not available.
+          </p>
+          <p role="status" aria-live="polite" className="text-sm">
+            {pending
+              ? state.phase === 'pending'
+                ? 'Archiving…'
+                : 'Checking current status…'
+              : ''}
+          </p>
+        </div>
+        <AlertDialogFooter>
+          <AlertDialogCancel
+            ref={cancel}
+            disabled={pending}
+            className="min-h-11"
+          >
+            Cancel
+          </AlertDialogCancel>
+          <AlertDialogAction
+            variant="destructive"
+            disabled={pending || !canConfirm}
+            className="min-h-11"
+            onClick={() => void controller.confirm()}
+          >
+            {state.phase === 'pending' ? 'Archiving…' : 'Archive video'}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  )
+}

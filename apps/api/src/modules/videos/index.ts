@@ -86,7 +86,7 @@ export function createVideosModule({
         response: { 200: VideoDto, ...ErrorResponses },
         detail: {
           tags: ["Videos"],
-          summary: "Archive draft content",
+          summary: "Archive draft or published video",
           operationId: "archiveVideo",
           security: [{ betterAuthSessionCookie: [] }],
         },

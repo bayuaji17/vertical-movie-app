@@ -34,7 +34,7 @@ export function ContentResource({
 }: {
   type: string
   id: string
-  children: (detail: ContentDetail) => ReactNode
+  children: (detail: ContentDetail, stale: boolean) => ReactNode
 }) {
   if (!isContentType(type) || !isUuid(id))
     return (
@@ -59,7 +59,7 @@ function ResourceQuery({
 }: {
   type: ContentType
   id: string
-  children: (detail: ContentDetail) => ReactNode
+  children: (detail: ContentDetail, stale: boolean) => ReactNode
 }) {
   const { client, identity } = useContentApi()
   const query = useQuery(contentDetailOptions(client, identity, type, id))
@@ -96,7 +96,7 @@ function ResourceQuery({
           </AlertDescription>
         </Alert>
       )}
-      {query.data && children(query.data)}
+      {query.data && children(query.data, query.isError || query.isFetching)}
     </>
   )
 }

@@ -27,6 +27,8 @@ import { GenresService } from "../../src/modules/genres/service";
 import { createGenresRepository } from "../../src/modules/genres/repository";
 import { PlaybackService } from "../../src/modules/playback/service";
 import { CatalogStore } from "../../src/modules/catalog/repository";
+import { CatalogService } from "../../src/modules/catalog/service";
+import { PublicationService } from "../../src/modules/publication/service";
 import { runMediaProcess } from "../../src/workers/process";
 import { mediaAssets, videos, series } from "../../src/db/schema";
 
@@ -85,13 +87,25 @@ export async function createAdminMediaBrowserFixture(
     ),
     screenshotDir = resolve(
       import.meta.dir,
-      "../../../../.turbo/admin-cover-processing/acov-007",
+      Bun.env.AUTH_BROWSER_PHASE === "publication"
+        ? "../../../../.turbo/admin-publication-execution/browser"
+        : "../../../../.turbo/admin-cover-processing/acov-007",
     ),
     source = join(dir, "source.mp4"),
     poster = join(dir, "cover.jpg");
   await mkdir(dir, { recursive: true, mode: 0o700 });
-  const videoService = new VideosService(createVideosRepository(database.db)),
-    seriesService = new SeriesService(createSeriesRepository(database.db));
+  const catalogStore = new CatalogStore(database.db),
+    catalogService = new CatalogService(catalogStore),
+    videoService = new VideosService(
+      createVideosRepository(database.db),
+      undefined,
+      catalogService.invalidate,
+    ),
+    seriesService = new SeriesService(
+      createSeriesRepository(database.db),
+      undefined,
+      catalogService.invalidate,
+    );
   let created = false;
   const close = async () => {
     if (created) {
@@ -204,6 +218,17 @@ export async function createAdminMediaBrowserFixture(
         }
       }
     }
+    if (Bun.env.AUTH_BROWSER_PHASE === "publication") {
+      for (let i = 0; i < 16; i++)
+        await videoService.create(
+          {
+            title: `Publication list ${i + 1}`,
+            kind: "movie",
+            rightsConfirmed: true,
+          },
+          "browser-admin",
+        );
+    }
     const app = createApp({
       getSession,
       mediaService,
@@ -213,6 +238,11 @@ export async function createAdminMediaBrowserFixture(
         createContentPageRepository(database.db),
       ),
       genresService: new GenresService(createGenresRepository(database.db)),
+      catalogService,
+      publicationService: new PublicationService(
+        database.db,
+        catalogService.invalidate,
+      ),
       playbackService: new PlaybackService(
         new CatalogStore(database.db),
         native,
@@ -333,6 +363,10 @@ export async function createAdminMediaBrowserFixture(
           jobs,
           attempts,
           posterObjects,
+          publications:
+            await database.client`SELECT id,kind,slug,publication_status,row_version,first_published_at,published_at,archived_at,rights_confirmed_at FROM videos ORDER BY created_at`,
+          operations:
+            await database.client`SELECT video_id,series_id,action FROM content_operations ORDER BY created_at`,
         };
       },
       async saveCoverScreenshot(name: string, bytes: Uint8Array) {
