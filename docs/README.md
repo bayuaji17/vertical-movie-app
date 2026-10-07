@@ -48,6 +48,8 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 
 ## Context dan plan per fitur
 
+Detail dan tonton dari katalog: [context](plans/public-content-watch/repository-context.md), [plan detail](plans/public-content-watch/implementation-plan.md) dan [backlog PCW](tasks/public-content-watch.md). Pengguna meminta lanjut dan memilih Film/Standalone/Series beserta season/episode 7 Oktober 2026. Scope dan langkah implementasi tersedia; runtime baru belum diverifikasi. Dependency PCAT masih commit lokal, belum remote delivery; progress/autoplay/editor/production bukan scope.
+
 Logging request API memakai console implemented/verified lokal 7 Oktober 2026; [panduan](guides/api-development.md#logging-request-http), [context baseline](plans/api-request-logging/repository-context.md) dan [plan/evidence](plans/api-request-logging/implementation-plan.md) menjelaskan scope serta batas gateway/storage.
 
 Publish & Archive admin Film/Standalone: [context snapshot](plans/admin-publication/repository-context.md) dan [implementation plan](plans/admin-publication/implementation-plan.md), disetujui pengguna 7 Oktober 2026. Scope mencakup readiness server, konfirmasi manual, version/idempotency/recovery dan proof akses publik; plan/empat desain approved, APUB-001–013 implemented/verified lokal; actual API/DB/MinIO/FFmpeg/built-browser proof dan local receipts pada backlog.
