@@ -2,25 +2,73 @@ import { notFound, unavailable } from "../../shared/content-error";
 import { parseList, page } from "../../shared/content-pagination";
 import type { CatalogStore, PlayableRow } from "./repository";
 import type { PublicVideo } from "./model";
+import type { HomeStore } from "./home-repository";
+import { parseHome, type HomeInput } from "./home-pagination";
+import type { PublicHomeItem } from "./home-model";
 export class CatalogService {
   private readonly cache = new Map<string, { until: number; value: unknown }>();
+  private generation = 0;
   constructor(
     private readonly store?: CatalogStore,
     private readonly now = () => Date.now(),
+    private readonly homeStore?: HomeStore,
   ) {}
   invalidate = () => {
+    this.generation++;
     this.cache.clear();
   };
   private repository() {
     return this.store ?? unavailable();
   }
-  private async cached<T>(key: string, read: () => Promise<T>): Promise<T> {
+  private async entry<T>(key: string, read: () => Promise<T>) {
     const entry = this.cache.get(key);
-    if (entry && entry.until > this.now()) return entry.value as T;
+    if (entry && entry.until > this.now())
+      return { value: entry.value as T, until: entry.until };
+    const generation = this.generation,
+      until = this.now() + 60000;
     const value = await read();
+    if (generation !== this.generation) return { value, until: this.now() };
     if (this.cache.size >= 100) this.cache.clear();
-    this.cache.set(key, { until: this.now() + 60000, value });
-    return value;
+    this.cache.set(key, { until, value });
+    return { value, until };
+  }
+  private async cached<T>(key: string, read: () => Promise<T>): Promise<T> {
+    return (await this.entry(key, read)).value;
+  }
+  private freshness(until: number) {
+    return Math.max(0, Math.min(60000, Math.floor(until - this.now())));
+  }
+  async home(input: HomeInput) {
+    const q = parseHome(input, new Date(this.now()));
+    const entry = await this.entry(
+      "home:" + q.filter + ":" + (input.cursor ?? ""),
+      () => (this.homeStore ?? unavailable()).page(q),
+    );
+    return { ...entry.value, freshForMs: this.freshness(entry.until) };
+  }
+  async genres(input: Pick<HomeInput, "limit" | "cursor">) {
+    const q = parseHome(input, new Date(this.now()), "catalog-genres");
+    const entry = await this.entry(
+      "home-genres:" + q.filter + ":" + (input.cursor ?? ""),
+      () => (this.homeStore ?? unavailable()).genres(q),
+    );
+    return { ...entry.value, freshForMs: this.freshness(entry.until) };
+  }
+  async featured() {
+    const entry = await this.entry("home-featured", async () => {
+      const page = await (this.homeStore ?? unavailable()).page(
+        parseHome({ limit: "1", kind: "movie" }, new Date(this.now())),
+      );
+      const item = page.items[0];
+      if (item && item.kind !== "movie") unavailable();
+      return {
+        item: item as Extract<PublicHomeItem, { kind: "movie" }> | undefined,
+      };
+    });
+    return {
+      item: entry.value.item ?? null,
+      freshForMs: this.freshness(entry.until),
+    };
   }
   private video(row: PlayableRow): PublicVideo {
     return {

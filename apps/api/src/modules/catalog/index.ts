@@ -3,6 +3,13 @@ import { createContentErrors } from "../../plugins/errors";
 import { ErrorResponses } from "../../shared/content-model";
 import { CatalogService } from "./service";
 import {
+  HomeQuerySchema,
+  HomeGenresQuery,
+  HomePageDto,
+  HomeGenresDto,
+  HomeFeaturedDto,
+} from "./home-model";
+import {
   CatalogQuery,
   SlugParams,
   PublicVideoDto,
@@ -15,6 +22,20 @@ export function createCatalogModule(service = new CatalogService()) {
     .use(createContentErrors())
     .onBeforeHandle(({ set }) => {
       set.headers["cache-control"] = "private, max-age=60";
+    })
+    .get("/catalog", ({ query }) => service.home(query), {
+      query: HomeQuerySchema,
+      response: { 200: HomePageDto, ...ErrorResponses },
+      detail: { tags: ["Catalog"], operationId: "listPublicHomeCatalog" },
+    })
+    .get("/catalog/genres", ({ query }) => service.genres(query), {
+      query: HomeGenresQuery,
+      response: { 200: HomeGenresDto, ...ErrorResponses },
+      detail: { tags: ["Catalog"], operationId: "listPublicHomeGenres" },
+    })
+    .get("/catalog/featured", () => service.featured(), {
+      response: { 200: HomeFeaturedDto, ...ErrorResponses },
+      detail: { tags: ["Catalog"], operationId: "getPublicFeaturedFilm" },
     })
     .get("/videos", ({ query }) => service.list(query), {
       query: CatalogQuery,

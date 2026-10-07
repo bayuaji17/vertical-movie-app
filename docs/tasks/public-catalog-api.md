@@ -139,7 +139,7 @@ Dependency terpenuhi. Bukti lint/types/docs/commitlint dicatat setelah commit; p
 
 ## Task: PCAT-003 — Public endpoint dan cache
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1, urutan/dependency menurut DAG plan.
 - Referensi: PCAT-US-001/004; PRD-07/08, GR-02; step PCAT-003 pada [plan](../plans/public-catalog-api/implementation-plan.md#implementation-steps).
@@ -153,8 +153,8 @@ Route list/genres/featured, additive bootstrap/DI, bounded unsigned TTL60 cache,
 
 ### Acceptance criteria
 
-- [ ] Anonymous200 termasuk empty/null; invalid422 dan outage503 tanpa false empty/session requirement.
-- [ ] Invalidate tidak diikuti stale cache fill; legacy routes/order/constructor/DTO dan private guards tetap kompatibel.
+- [x] Anonymous200 termasuk empty/null; invalid422 dan outage503 tanpa false empty/session requirement.
+- [x] Invalidate tidak diikuti stale cache fill; legacy routes/order/constructor/DTO dan private guards tetap kompatibel.
 
 ### Validasi
 
@@ -162,18 +162,18 @@ Native app.handle/cache race/OpenAPI tests; relevant API tests/types/build; Eden
 
 ### Hasil dan bukti
 
-Belum diimplementasikan/diverifikasi. Catat command aktual, hasil, decision/deviation dan batas pada task ini saat dieksekusi; existing HOMEFE/APUB proof tidak menutup task PCAT.
+Public catalog/genres/featured routes and additive bootstrap enabled. Cache canonicalization, remaining TTL, bounded entries, slow-fill generation fence and validation-before-I/O pass native tests (catalog 8 tests/51 assertions). Genres create now invalidates after success. Root build and full API tests recorded in execution log; hooks validate root docs/lint/types.
 
 ### Commit task
 
 - Pesan: `feat(api): expose public home catalog (PCAT-003)`
-- SHA: belum dibuat.
+- SHA: dicatat pada ledger task berikutnya setelah commit.
 - Hook/checks: diwajibkan tanpa bypass, hasil belum ada.
 - Ledger: actual SHA dicatat pada task berikutnya/delivery setelah commit, bukan self-reference.
 
 ### Blocker atau tindak lanjut
 
-Menunggu approval plan dan dependency di atas. Paths/symbols exact, risiko dan completion per step berada pada canonical plan; jangan memperluas ke watch/editor/production.
+Dependency terpenuhi. Bukti lint/types/docs/commitlint dicatat setelah commit; proof lanjutan sesuai DAG tetap wajib.
 
 ## Task: PCAT-004 — Poster output privat
 
@@ -503,3 +503,5 @@ Menunggu approval plan dan dependency di atas. Paths/symbols exact, risiko dan c
 - 2026-10-07: Approval implementasi PCAT diterima; PCAT-000 commit2130a75fd85a1f8db9ac5af4fc9e97cf64d7b7c3. Remote delivery fitur baru tetap belum diotorisasi.
 
 - Previous verified task commit before PCAT-002: 038d5f90e8be5890d52f46f53f84aac7037ef3cc feat(api): define public home catalog contract (PCAT-001).
+
+- Previous verified task commit before PCAT-003: 70dfa4422a0d8f4d7c268bc5ad56ce997fd05142 feat(api): query unified published catalog (PCAT-002).

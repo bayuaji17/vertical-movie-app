@@ -1,5 +1,6 @@
 import { CatalogService } from "./modules/catalog/service";
 import { CatalogStore } from "./modules/catalog/repository";
+import { CatalogHomeStore } from "./modules/catalog/home-repository";
 import { PublicationService } from "./modules/publication/service";
 import { PlaybackService } from "./modules/playback/service";
 import { loadPlaybackBaseUrl } from "./config/playback-env";
@@ -28,7 +29,11 @@ const env = loadApiEnv();
 const storage = env.storage ? createStorageClient(env.storage) : undefined;
 const database = createDatabase(env.databaseUrl);
 const catalogStore = new CatalogStore(database.db),
-  catalogService = new CatalogService(catalogStore);
+  catalogService = new CatalogService(
+    catalogStore,
+    undefined,
+    new CatalogHomeStore(database.db),
+  );
 const multipart = env.storage ? createMultipartStorage(env.storage) : undefined;
 const auth = createAdminAuthServer({
   database: database.db,
@@ -87,7 +92,11 @@ const app = createApp({
     undefined,
     catalogService.invalidate,
   ),
-  genresService: new GenresService(createGenresRepository(database.db)),
+  genresService: new GenresService(
+    createGenresRepository(database.db),
+    undefined,
+    catalogService.invalidate,
+  ),
 })
   .onStop(() => multipart?.close())
   .listen(env.port);

@@ -26,6 +26,7 @@ export class GenresService {
   constructor(
     private readonly repository?: GenresRepository,
     private readonly runtime: RuntimeDependencies = defaultRuntime,
+    private readonly invalidate = () => {},
   ) {}
   private repo() {
     return this.repository ?? unavailable();
@@ -34,7 +35,7 @@ export class GenresService {
     const name = cleanText(input.name, true) ?? invalid("Name is required."),
       id = this.runtime.id(),
       now = this.runtime.now();
-    return genreDto(
+    const result = genreDto(
       await this.repo().insert({
         id,
         name,
@@ -43,6 +44,8 @@ export class GenresService {
         updatedAt: now,
       }),
     );
+    this.invalidate();
+    return result;
   }
   async list(input: ListInput) {
     const q = parseList(input, "genres"),
