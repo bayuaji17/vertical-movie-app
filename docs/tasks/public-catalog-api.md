@@ -1,6 +1,6 @@
 # Modul: Integrasi katalog API ke homepage
 
-> Status: plan approved / executing · 7 Oktober 2026 · Baseline `ba42d00728e66dd9cbeb0f3d916ae8ddea339f4b`. Plan belum merupakan bukti implementasi.
+> Status: implemented / verified lokal — PCAT-000–011 Done · 7 Oktober 2026 · Baseline `ba42d00728e66dd9cbeb0f3d916ae8ddea339f4b`. Runtime source proof pada PCAT-010; PCAT-011 docs closure. Remote delivery belum dilakukan.
 
 ## Tujuan modul
 
@@ -24,7 +24,7 @@ Sebagai pemilik sistem, saya ingin katalog/poster mengikuti eligibility dan arch
 
 ## Task: PCAT-000 — Repository context dan plan detail
 
-- Status: Done (planning; approval/runtime task001–011 tetap Backlog)
+- Status: Done (planning; task001–011 saat snapshot planning belum diimplementasikan, kini ditutup oleh receipts berikut)
 - Owner: Codex
 - Prioritas: P1
 - Referensi: seluruh PCAT stories; permintaan pengguna memilih point1 dan meminta plan detail.
@@ -53,8 +53,8 @@ Analisis pinned base `ba42d00`, tree homepage lama identik; branch lokal `feat/p
 ### Commit task
 
 - Pesan: `docs(web): plan public catalog API integration (PCAT-000)`
-- SHA: lihat actual commit PCAT-000 pada Git history/final receipt setelah commit; ledger berikutnya mencatat SHA tanpa self-reference.
-- Hook/checks: docs/format/diff lulus; hooks normal lint/types/docs/Commitlint dijalankan saat commit dan receipt final tersedia pada hasil Git.
+- SHA: `2130a75fd85a1f8db9ac5af4fc9e97cf64d7b7c3`.
+- Hook/checks: normal docs:check, lint, check-types dan commitlint pass tanpa bypass; runtime checks/evidence di atas.
 - Ledger: standing AGENTS mengotorisasi local task commits; push/PR/merge fitur baru tidak dilakukan dari planning request.
 
 ### Blocker atau tindak lanjut
@@ -91,13 +91,13 @@ Implemented7 Oktober2026: separate home-model/home-pagination preserve legacy co
 ### Commit task
 
 - Pesan: `feat(api): define public home catalog contract (PCAT-001)`
-- SHA: belum dibuat.
-- Hook/checks: diwajibkan tanpa bypass, hasil belum ada.
+- SHA: `038d5f90e8be5890d52f46f53f84aac7037ef3cc`.
+- Hook/checks: normal docs:check, lint, check-types dan commitlint pass tanpa bypass; runtime checks/evidence di atas.
 - Ledger: actual SHA dicatat pada task berikutnya/delivery setelah commit, bukan self-reference.
 
 ### Blocker atau tindak lanjut
 
-Menunggu approval plan dan dependency di atas. Paths/symbols exact, risiko dan completion per step berada pada canonical plan; jangan memperluas ke watch/editor/production.
+Approval/dependency dan normal hooks terpenuhi; downstream mandatory proof ditutup pada PCAT-009/010.
 
 ## Task: PCAT-002 — Query unified dan visibility
 
@@ -129,13 +129,13 @@ Unified one-statement PostgreSQL reads implemented. Dedicated media DB proof pas
 ### Commit task
 
 - Pesan: `feat(api): query unified published catalog (PCAT-002)`
-- SHA: dicatat pada ledger task berikutnya setelah commit.
-- Hook/checks: diwajibkan tanpa bypass, hasil belum ada.
+- SHA: `70dfa4422a0d8f4d7c268bc5ad56ce997fd05142`.
+- Hook/checks: normal docs:check, lint, check-types dan commitlint pass tanpa bypass; runtime checks/evidence di atas.
 - Ledger: actual SHA dicatat pada task berikutnya/delivery setelah commit, bukan self-reference.
 
 ### Blocker atau tindak lanjut
 
-Dependency terpenuhi. Bukti lint/types/docs/commitlint dicatat setelah commit; proof lanjutan sesuai DAG tetap wajib.
+Dependency dan normal hooks terpenuhi; downstream mandatory proof ditutup pada PCAT-009/010.
 
 ## Task: PCAT-003 — Public endpoint dan cache
 
@@ -167,13 +167,13 @@ Public catalog/genres/featured routes and additive bootstrap enabled. Cache cano
 ### Commit task
 
 - Pesan: `feat(api): expose public home catalog (PCAT-003)`
-- SHA: dicatat pada ledger task berikutnya setelah commit.
-- Hook/checks: diwajibkan tanpa bypass, hasil belum ada.
+- SHA: `4db433cc3a5afb7de2e7e569ef82bfc6909fc29a`.
+- Hook/checks: normal docs:check, lint, check-types dan commitlint pass tanpa bypass; runtime checks/evidence di atas.
 - Ledger: actual SHA dicatat pada task berikutnya/delivery setelah commit, bukan self-reference.
 
 ### Blocker atau tindak lanjut
 
-Dependency terpenuhi. Bukti lint/types/docs/commitlint dicatat setelah commit; proof lanjutan sesuai DAG tetap wajib.
+Dependency dan normal hooks terpenuhi; downstream mandatory proof ditutup pada PCAT-009/010.
 
 ## Task: PCAT-004 — Poster output privat
 
@@ -205,13 +205,13 @@ Native poster service bounds reads to 5 MB, checks owner/job/generation/provenan
 ### Commit task
 
 - Pesan: `feat(api): serve published catalog posters (PCAT-004)`
-- SHA: dicatat pada ledger task berikutnya setelah commit.
-- Hook/checks: diwajibkan tanpa bypass, hasil belum ada.
+- SHA: `916172cd6f03134517c1259361c79484c324d6a4`.
+- Hook/checks: normal docs:check, lint, check-types dan commitlint pass tanpa bypass; runtime checks/evidence di atas.
 - Ledger: actual SHA dicatat pada task berikutnya/delivery setelah commit, bukan self-reference.
 
 ### Blocker atau tindak lanjut
 
-Dependency terpenuhi. Bukti lint/types/docs/commitlint dicatat setelah commit; proof lanjutan sesuai DAG tetap wajib.
+Dependency dan normal hooks terpenuhi; downstream mandatory proof ditutup pada PCAT-009/010.
 
 ## Task: PCAT-005 — Gateway katalog same-origin
 
@@ -243,13 +243,13 @@ Exact public GET catalog allowlist and poster-specific 5 MB response limit imple
 ### Commit task
 
 - Pesan: `feat(web): proxy public catalog and posters (PCAT-005)`
-- SHA: dicatat pada ledger task berikutnya setelah commit.
-- Hook/checks: diwajibkan tanpa bypass, hasil belum ada.
+- SHA: `20e577c1ce94c5270677b17007c36f213288b940`.
+- Hook/checks: normal docs:check, lint, check-types dan commitlint pass tanpa bypass; runtime checks/evidence di atas.
 - Ledger: actual SHA dicatat pada task berikutnya/delivery setelah commit, bukan self-reference.
 
 ### Blocker atau tindak lanjut
 
-Dependency terpenuhi. Bukti lint/types/docs/commitlint dicatat setelah commit; proof lanjutan sesuai DAG tetap wajib.
+Dependency dan normal hooks terpenuhi; downstream mandatory proof ditutup pada PCAT-009/010.
 
 ## Task: PCAT-006 — Eden adapter dan SSR
 
@@ -281,13 +281,13 @@ Validated public Eden adapter, typed UUID/union view model, safe errors and isom
 ### Commit task
 
 - Pesan: `feat(web): load public catalog with Eden and SSR (PCAT-006)`
-- SHA: dicatat pada ledger task berikutnya setelah commit.
-- Hook/checks: diwajibkan tanpa bypass, hasil belum ada.
+- SHA: `15ad7b94d4a6ae285a94d36d1c9f8f8dd614fb21`.
+- Hook/checks: normal docs:check, lint, check-types dan commitlint pass tanpa bypass; runtime checks/evidence di atas.
 - Ledger: actual SHA dicatat pada task berikutnya/delivery setelah commit, bukan self-reference.
 
 ### Blocker atau tindak lanjut
 
-Dependency terpenuhi. Bukti lint/types/docs/commitlint dicatat setelah commit; proof lanjutan sesuai DAG tetap wajib.
+Dependency dan normal hooks terpenuhi; downstream mandatory proof ditutup pada PCAT-009/010.
 
 ## Task: PCAT-007 — Cursor infinite query dan filters
 
@@ -319,13 +319,13 @@ Real public cursor query and exact-key transition/debounce implemented in shared
 ### Commit task
 
 - Pesan: `feat(web): paginate API catalog with infinite query (PCAT-007)`
-- SHA: dicatat pada ledger task berikutnya setelah commit.
-- Hook/checks: diwajibkan tanpa bypass, hasil belum ada.
+- SHA: `1bedafe8334605fbd64a84ad7d6a9d4ba12d908c`.
+- Hook/checks: normal docs:check, lint, check-types dan commitlint pass tanpa bypass; runtime checks/evidence di atas.
 - Ledger: actual SHA dicatat pada task berikutnya/delivery setelah commit, bukan self-reference.
 
 ### Blocker atau tindak lanjut
 
-Dependency terpenuhi. Bukti lint/types/docs/commitlint dicatat setelah commit; proof lanjutan sesuai DAG tetap wajib.
+Dependency dan normal hooks terpenuhi; downstream mandatory proof ditutup pada PCAT-009/010.
 
 ## Task: PCAT-008 — Homepage state dan metadata nyata
 
@@ -357,13 +357,13 @@ Home production now uses real API UUID/composite identities, genres/nullable fea
 ### Commit task
 
 - Pesan: `feat(web): integrate live public catalog UI (PCAT-008)`
-- SHA: dicatat pada ledger task berikutnya setelah commit.
-- Hook/checks: diwajibkan tanpa bypass, hasil belum ada.
+- SHA: `e6cd801eed6c6d561019788a7c4aaca36c504a31`.
+- Hook/checks: normal docs:check, lint, check-types dan commitlint pass tanpa bypass; runtime checks/evidence di atas.
 - Ledger: actual SHA dicatat pada task berikutnya/delivery setelah commit, bukan self-reference.
 
 ### Blocker atau tindak lanjut
 
-Dependency terpenuhi. Bukti lint/types/docs/commitlint dicatat setelah commit; proof lanjutan sesuai DAG tetap wajib.
+Dependency dan normal hooks terpenuhi; downstream mandatory proof ditutup pada PCAT-009/010.
 
 ## Task: PCAT-009 — Proof PG/storage dan performance
 
@@ -401,8 +401,8 @@ Root `bun run check-types`, `bun run lint`, `bun run build` pass. Large fixture 
 ### Commit task
 
 - Pesan: `test(api): prove public catalog visibility and paging (PCAT-009)`
-- SHA: dicatat pada ledger task berikutnya setelah commit.
-- Hook/checks: diwajibkan tanpa bypass, hasil belum ada.
+- SHA: `6ce16dbaf1e6e079d0a2d6f1f045ceeeaf797133`.
+- Hook/checks: normal docs:check, lint, check-types dan commitlint pass tanpa bypass; runtime checks/evidence di atas.
 - Ledger: actual SHA dicatat pada task berikutnya/delivery setelah commit, bukan self-reference.
 
 ### Blocker atau tindak lanjut
@@ -445,8 +445,8 @@ Observer mencatat0 public auth reads,0 Cookie/Authorization ke upstream,0 auth/a
 ### Commit task
 
 - Pesan: `test(web): verify live public catalog in browser (PCAT-010)`
-- SHA: dicatat pada ledger task berikutnya setelah commit.
-- Hook/checks: diwajibkan tanpa bypass, hasil belum ada.
+- SHA: `73c6c93f5477af359a2071de2425d744a6b15e4c`.
+- Hook/checks: normal docs:check, lint, check-types dan commitlint pass tanpa bypass; runtime checks/evidence di atas.
 - Ledger: actual SHA dicatat pada task berikutnya/delivery setelah commit, bukan self-reference.
 
 ### Blocker atau tindak lanjut
@@ -455,7 +455,7 @@ Dependency dan dev/built browser gates terpenuhi. PCAT-011 menyinkronkan canonic
 
 ## Task: PCAT-011 — Canonical docs dan closure
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1, urutan/dependency menurut DAG plan.
 - Referensi: PCAT-US-001/002/003/004; PRD-07/08, GR-02; step PCAT-011 pada [plan](../plans/public-catalog-api/implementation-plan.md#implementation-steps).
@@ -469,8 +469,8 @@ Approved choices/actual runtime/evidence/receipt dalam PRD/globalrules/overview/
 
 ### Acceptance criteria
 
-- [ ] Seluruh mandatory AC mempunyai proof aktual; no whole PRD-07/playback/editor/production claim.
-- [ ] Scoped commits/hooks/gates lengkap; runtime fresh terhadap target; delivery baru hanya dengan user authorization.
+- [x] Seluruh mandatory AC mempunyai proof aktual; no whole PRD-07/playback/editor/production claim.
+- [x] Scoped commits/hooks/gates lengkap; runtime fresh terhadap target; delivery baru hanya dengan user authorization.
 
 ### Validasi
 
@@ -478,18 +478,18 @@ Relevant tests, roottypes/lint/build, docscheck/Prettier/diff/normalhooks; rerun
 
 ### Hasil dan bukti
 
-Belum diimplementasikan/diverifikasi. Catat command aktual, hasil, decision/deviation dan batas pada task ini saat dieksekusi; existing HOMEFE/APUB proof tidak menutup task PCAT.
+PRD/GR-02/architecture/media runbook/design/index/context/plan disinkronkan dengan approved/verified runtime-source SHA 73c6c93f5477af359a2071de2425d744a6b15e4c. Seluruh mandatory AC ditautkan ke dedicated/native/dev+built proof, dummy/raster/history tetap dipertahankan. Full API130/712, web178/899, PG/storage4/74, legacy6/122, roottypes/lint/build pass sebelum docs-only closure. No schema/index/dependency/env policy change; tidak perlu migration/development data reset. Docs:check/changed Markdown Prettier/diff dan normal hooks wajib sebelum commit final; actual closure SHA dibaca dari Git sesudah commit dan dilaporkan pada delivery, bukan self-reference. Branch feat/public-catalog-api, remote delivery fitur baru belum diotorisasi. Primary checkout23 unrelated dirty paths tetap dipertahankan.
 
 ### Commit task
 
 - Pesan: `docs: record verified public catalog integration (PCAT-011)`
-- SHA: belum dibuat.
-- Hook/checks: diwajibkan tanpa bypass, hasil belum ada.
+- SHA: final closure receipt dibaca dari Git sesudah commit, dilaporkan pada delivery; PCAT-010 73c6c93f5477af359a2071de2425d744a6b15e4c.
+- Hook/checks: docs:check/Prettier/diff sebelum commit; normal docs/lint/types/commitlint gate dan actual receipt dikonfirmasi sesudah commit tanpa bypass.
 - Ledger: actual SHA dicatat pada task berikutnya/delivery setelah commit, bukan self-reference.
 
 ### Blocker atau tindak lanjut
 
-Menunggu approval plan dan dependency di atas. Paths/symbols exact, risiko dan completion per step berada pada canonical plan; jangan memperluas ke watch/editor/production.
+Mandatory scope selesai lokal. Watch/detail/Series editor/R2/Safari/perangkat fisik/production tidak diklaim; push/PR/merge memerlukan instruksi pengguna berikutnya.
 
 ## Traceability acceptance
 
@@ -510,7 +510,7 @@ Menunggu approval plan dan dependency di atas. Paths/symbols exact, risiko dan c
 
 - 2026-10-07: pengguna memilih rekomendasi point1, meminta plan detail; tidak meminta implementasi baru.
 - Contract/UX tiga jenis/order/featured/debounce300/poster disetujui pengguna7 Oktober2026 (oke approve). Setelah persetujuan, tandai langkah dengan dependency terpenuhi sebagai Ready, bukan semua task Done.
-- Git/runtime delivery baru: belum dilakukan; local planning branch/artifacts tidak berarti endpoint/API sudah tersedia.
+- Runtime fitur baru implemented/verified lokal PCAT-001–011. Git remote delivery belum dilakukan; planning artifacts saja tidak dipakai sebagai proof runtime.
 
 - 2026-10-07: Approval implementasi PCAT diterima; PCAT-000 commit2130a75fd85a1f8db9ac5af4fc9e97cf64d7b7c3. Remote delivery fitur baru tetap belum diotorisasi.
 
@@ -531,3 +531,6 @@ Menunggu approval plan dan dependency di atas. Paths/symbols exact, risiko dan c
 - Previous verified task commit before PCAT-009: e6cd801eed6c6d561019788a7c4aaca36c504a31 feat(web): connect homepage to public catalog API (PCAT-008).
 
 - Previous verified task commit before PCAT-010: 6ce16dbaf1e6e079d0a2d6f1f045ceeeaf797133 test(api): prove public catalog visibility and paging (PCAT-009).
+
+- Previous verified task commit before PCAT-011: 73c6c93f5477af359a2071de2425d744a6b15e4c test(web): verify live public catalog in browser (PCAT-010).
+- Closure: PCAT-000–010 actual SHA dan normal hook results telah dibaca dari Git/log; final docs-only PCAT-011 SHA dilaporkan sesudah commit. No push/PR/merge/deploy baru.

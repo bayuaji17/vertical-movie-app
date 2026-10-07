@@ -2,13 +2,13 @@
 
 ## Plan Metadata
 
-- Status: **executing — plan disetujui pengguna 7 Oktober 2026**.
+- Status: **implemented / verified lokal — disetujui pengguna 7 Oktober 2026; PCAT-001–011 selesai**.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `main` / `origin/main`.
 - Base SHA: `ba42d00728e66dd9cbeb0f3d916ae8ddea339f4b`.
 - Context: [repository-context.md](repository-context.md).
 - Backlog: [PCAT](../../tasks/public-catalog-api.md).
-- Last validated SHA: `ba42d00728e66dd9cbeb0f3d916ae8ddea339f4b`, 7 Oktober 2026.
+- Last validated runtime-source SHA: `73c6c93f5477af359a2071de2425d744a6b15e4c` (PCAT-010), 7 Oktober 2026; PCAT-011 docs-only closure.
 - Approval: pengguna menyetujui seluruh plan melalui "oke approve" pada7 Oktober2026. Implementasi PCAT-001–011 diotorisasi; remote delivery belum diotorisasi untuk fitur baru.
 
 ## Objective
@@ -21,7 +21,7 @@ Goals: satu feed lintas jenis, genre publik, featured nyata, poster9:16 dari out
 
 Non-goals: route detail baru, tombol/alur watch baru, perubahan player/HLS/signing playback, editor/upload/publication Series/Episode, autoplay/automatic infinite scroll, ranking personal, konfigurasi situs/subtitle dan deployment production. Series card tetap memakai dialog metadata; browser proof menyiapkan published Series melalui backend/test fixture existing tanpa membangun editor.
 
-## Current Behavior
+## Current Behavior (historical base snapshot)
 
 Home memakai18 fixture lokal; SSR6, offset pagination6→12→18, search/filter langsung, initialData dummy, staleTime Infinity. CatalogGrid belum menangani initial pending/error. Genre, featured dan card labels terikat catalogData. Backend `/videos` hanya limit/cursor; `/series` terpisah/max100/N+1 count; public metadata tidak menyediakan poster/genre/publishedAt/total. Gateway belum menerima namespace catalog dan membatasi buffered responses1MiB. Detail evidence ada pada context, bukan asumsi dari mockup.
 
@@ -40,7 +40,7 @@ Home memakai18 fixture lokal; SSR6, offset pagination6→12→18, search/filter 
 | Poster          | URL same-origin menuju output WebP dari bucket privat, response binary no-store                                                | Metadata tetap unsigned; tidak memakai playback endpoint per card atau signed URL dalam catalog cache.         |
 | Detail          | Dialog existing dengan metadata API item                                                                                       | Integrasi route detail/watch tetap tahap berikutnya.                                                           |
 
-Jika proposal disetujui, catat approval pengguna pada plan/backlog lalu jadikan tugas implementasi Ready. Jangan menyebut pilihan order/featured/poster sudah disetujui hanya karena point1 dipilih.
+Seluruh pilihan tabel disetujui pengguna melalui oke approve pada7 Oktober2026, lalu implemented/verified pada PCAT-001–011. Baseline dummy tetap history.
 
 ### Kontrak HTTP yang diusulkan
 
@@ -317,16 +317,16 @@ Same-origin publik, request-only SSR, native Bun/typed Eden, no new dependencies
 
 ## Acceptance Criteria
 
-- [ ] AC-01: Real eligible Movie/Standalone/Series only; no dummy import/fallback, no individual episode card.
-- [ ] AC-02: Global server filters/order/count/cursor exact and stable; search/genre IDs validated, no N+1/cap100 loss.
-- [ ] AC-03: Real featured nullable + public genre metadata + same-origin private-bucket poster9:16/fallback; unsigned DTO.
-- [ ] AC-04: SSR first6 or actualempty/error, no cross-request cache/cookie/env leakage or duplicate hydration request.
-- [ ] AC-05: Manual infinite query cursor paging/skeleton/dedup/EOF; next-page failure retains cards and can retry.
-- [ ] AC-06: Debounce/IME/filter races/cancel/reset/cache expiry/refetch and offline behave correctly without clearing admin data.
-- [ ] AC-07: Initial/background/supplementary/poster errors clear, keyboard/focus/theme/layout preserved.
-- [ ] AC-08: Effective visibility/invalidation/poster denial and legacy publication/playback/DTO parity proved with guarded dependencies.
-- [ ] AC-09: Tests/types/lint/build/docs/hooks/conditional migration gates pass, actual evidence committed per task.
-- [ ] AC-10: Point1 closure excludes watch/editor/production claims; approved decisions/history preserved.
+- [x] AC-01: Real eligible Movie/Standalone/Series only; no dummy import/fallback, no individual episode card.
+- [x] AC-02: Global server filters/order/count/cursor exact and stable; search/genre IDs validated, no N+1/cap100 loss.
+- [x] AC-03: Real featured nullable + public genre metadata + same-origin private-bucket poster9:16/fallback; unsigned DTO.
+- [x] AC-04: SSR first6 or actualempty/error, no cross-request cache/cookie/env leakage or duplicate hydration request.
+- [x] AC-05: Manual infinite query cursor paging/skeleton/dedup/EOF; next-page failure retains cards and can retry.
+- [x] AC-06: Debounce/IME/filter races/cancel/reset/cache expiry/refetch and offline behave correctly without clearing admin data.
+- [x] AC-07: Initial/background/supplementary/poster errors clear, keyboard/focus/theme/layout preserved.
+- [x] AC-08: Effective visibility/invalidation/poster denial and legacy publication/playback/DTO parity proved with guarded dependencies.
+- [x] AC-09: Tests/types/lint/build/docs/hooks/conditional migration gates pass, actual evidence committed per task.
+- [x] AC-10: Point1 closure excludes watch/editor/production claims; approved decisions/history preserved.
 
 ## Risks and Mitigations
 
@@ -338,11 +338,11 @@ Development rollout additive backend/gateway first, then FE. Jika integrasi belu
 
 ## Evidence
 
-Material conclusions/targets ditelusuri pada [Evidence Index](repository-context.md#evidence-index) terhadap full base SHA. API `/catalog`/poster/routes/tests baru adalah proposal; historical HOMEFE/APUB proof tidak membuktikan PCAT.
+Material conclusions/targets ditelusuri pada [Evidence Index](repository-context.md#evidence-index) terhadap full base SHA. Snapshot context tetap baseline; routes `/catalog`/poster/SSR/UI kini implemented/verified dengan evidence khusus PCAT-009/010. Historical HOMEFE/APUB proof tidak dipakai sebagai proof integrasi baru.
 
 ## Open Decisions
 
-Persetujuan diperlukan untuk paket rekomendasi tiga jenis/episode exclusion, publishedAt order, latest Film featured, debounce300ms, same-origin binary poster dan scope dialog tanpa watch. Tidak ada keputusan tambahan database schema sebelum query measurement. Jika pengguna mengganti salah satu pilihan, refresh impacted steps/contracts/tests sebelum runtime.
+Paket rekomendasi disetujui pengguna7 Oktober2026 dan verified lokal. Query measurement tidak memerlukan index/schema baru. Remote push/PR/merge dan production rollout belum diotorisasi untuk fitur baru ini; watch/Series editor tetap lanjutan.
 
 ## Validation History
 
@@ -365,3 +365,9 @@ Persetujuan diperlukan untuk paket rekomendasi tiga jenis/episode exclusion, pub
 - 2026-10-07: Pengguna menyetujui plan (oke approve); freshness main tetap ba42d00728e66dd9cbeb0f3d916ae8ddea339f4b, branch clean sebelum edit. PCAT-000 actual SHA2130a75fd85a1f8db9ac5af4fc9e97cf64d7b7c3. Mulai kontrak/cursor PCAT-001, tanpa push/PR/merge baru.
 
 - PCAT-001: separate DTO/cursor modules,5tests/29assertions pass; APItypes/rootbuild pass. Precision/filter/Unicode/strictDTO coverage observed. SHA task dicatat setelah commit; legacy routes belum berubah.
+
+### 7 Oktober 2026 — Closure freshness
+
+Runtime source `73c6c93f5477af359a2071de2425d744a6b15e4c` (PCAT-010) diverifikasi development dan built Bun/Nitro; full API130/712, web178/899, guarded PG/storage4/74, legacy6/122 pass. Root check-types (API/web/auth), lint (web) dan build (API/web) pass; docs:check/Prettier/diff pass, normal task hooks tidak dibypass. Runtime source audit bebas fixture imports; HTML/bundle bebas server config/storage fields, public upstream bebas cookies/auth. No schema/index/dependency change. PCAT-011 hanya memperbarui canonical docs; validasi runtime tidak diulang untuk docs-only. Primary checkout23 unrelated paths preserved. Delivery lokal, tidak push/PR/merge/deploy.
+
+AC-01/02/03/08: contract+native PG/private storage; AC-04/05/06/07: Query/adapter/gateway unit dan actual browser dev+built; AC-09: full suites/root gates/normal hooks; AC-10: canonical docs/history/scope. Per-task results dan actual SHA berada pada backlog.
