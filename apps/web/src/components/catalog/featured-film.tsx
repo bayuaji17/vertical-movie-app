@@ -23,7 +23,7 @@ export function FeaturedFilm({
     >
       <div className="flex min-w-0 flex-col items-start gap-3 lg:gap-5">
         <Badge variant="outline">Featured film</Badge>
-        <h2 className="font-heading text-2xl leading-tight font-bold tracking-tight sm:text-4xl lg:text-5xl">
+        <h2 className="max-w-full font-heading text-2xl leading-tight font-bold tracking-tight break-words sm:text-4xl lg:text-5xl">
           {item.title}
         </h2>
         <p className="hidden max-w-xl text-base text-muted-foreground sm:block lg:text-lg">

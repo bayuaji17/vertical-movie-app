@@ -411,7 +411,7 @@ Dependency dan runtime gates terpenuhi. Browser acceptance lengkap dilanjutkan p
 
 ## Task: PCAT-010 — Acceptance browser actual API
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1, urutan/dependency menurut DAG plan.
 - Referensi: PCAT-US-001/002/003/004; PRD-07/08, GR-02; step PCAT-010 pada [plan](../plans/public-catalog-api/implementation-plan.md#implementation-steps).
@@ -425,8 +425,8 @@ Existing harness public-catalog phase, actualElysia/PG/MinIO, dev+built, respons
 
 ### Acceptance criteria
 
-- [ ] Matrix320–1920 dan Light/Dark/System, SSRfirst6 tanpa duplicate hydrationfetch, paging/errorretry/IME/nullfeatured/empty/longUnicode/fallback lulus.
-- [ ] Publicrequests hanya catalog/poster, tanpa auth/admin/watch/playback; no hydration/page errors; API outage tidak fallback dummy.
+- [x] Matrix320–1920 dan Light/Dark/System, SSRfirst6 tanpa duplicate hydrationfetch, paging/errorretry/IME/nullfeatured/empty/longUnicode/fallback lulus.
+- [x] Publicrequests hanya catalog/poster, tanpa auth/admin/watch/playback; no hydration/page errors; API outage tidak fallback dummy.
 
 ### Validasi
 
@@ -434,18 +434,24 @@ Implemented new phase melalui bun apps/web/test/auth-browser-smoke.mjs setelah f
 
 ### Hasil dan bukti
 
-Belum diimplementasikan/diverifikasi. Catat command aktual, hasil, decision/deviation dan batas pada task ini saat dieksekusi; existing HOMEFE/APUB proof tidak menutup task PCAT.
+Command root `bun apps/web/test/auth-browser-smoke.mjs` dengan `AUTH_BROWSER_PHASE=public-catalog`, `AUTH_BROWSER_RUNTIME=dev` lalu `built`, guarded `MEDIA_TEST_DATABASE_URL` dan loopback `MEDIA_STORAGE_TEST_*`; launcher Node/Playwright/Chromium existing. Keduanya pass dengan actual Elysia, PostgreSQL dan native private MinIO WebP306422bytes. Fixtures SQL menyiapkan published/ready metadata; fault/hold/restore/empty/longtitle controls hanya harness dedicated, tidak tersedia pada aplikasi atau development data.
+
+SSR6 actual cards, no duplicate first browser fetch, no internal-origin/private fields dalam HTML; initial503 menampilkan Retry bukan empty/dummy, partial genre/featured recovery dan nonempty Series dengan featurednull sah. Paging6→12→18/EOF/composite UUID, skeleton6/aria-busy/reduced-motion/disabled, same-cursor503 retry, 422first-page reset, background failed refresh mempertahankan cards. Semua jenis/genre combo/literal wildcard+Unicode/search300ms/IME, confirmed in-flight old search lalu newer search, initial pending skeleton, offline pause/reconnect lulus. Archive owner lewat actual service memberi fresh poster404; already-received18 cards dengan count17 memakai safe label lalu whole traversal refresh17. Poster503 fallbackSVG tidak retry loop; actualWebP decode1080×1920 lulus.
+
+Keyboard dialog/Escape/focus return dan mobile Sheet/focus lulus. Width320/390/768/1024/1440/1920 dalam Light/Dark, System mengikuti OS scheme; exact CSS9:16/no horizontal overflow termasuk unbroken182-character title. Hero wrapping diperbaiki untuk judul panjang. Import plugin development diberi extension `.ts` agar sesuai native Vite config loader; routing built tidak memakai workaround development. Screenshot Light/Dark390/1440 tersimpan sebagai artifact lokal untuk dev/built; screenshot dev telah direview visual.
+
+Observer mencatat0 public auth reads,0 Cookie/Authorization ke upstream,0 auth/admin/playback/watch/external requests,0 page/hydration errors. Source import audit tidak menemukan fixture di runtime; built assets audit tidak menemukan server origin/secret/env/storage fields. Suite API130/712 dan web178/899 pass. Roottypes/lint/build serta normal hooks pass pada source ini; R2/Safari/physical/capacity/playback/editor tetap di luar proof.
 
 ### Commit task
 
 - Pesan: `test(web): verify live public catalog in browser (PCAT-010)`
-- SHA: belum dibuat.
+- SHA: dicatat pada ledger task berikutnya setelah commit.
 - Hook/checks: diwajibkan tanpa bypass, hasil belum ada.
 - Ledger: actual SHA dicatat pada task berikutnya/delivery setelah commit, bukan self-reference.
 
 ### Blocker atau tindak lanjut
 
-Menunggu approval plan dan dependency di atas. Paths/symbols exact, risiko dan completion per step berada pada canonical plan; jangan memperluas ke watch/editor/production.
+Dependency dan dev/built browser gates terpenuhi. PCAT-011 menyinkronkan canonical docs dan receipt lokal; remote delivery belum diotorisasi.
 
 ## Task: PCAT-011 — Canonical docs dan closure
 
@@ -523,3 +529,5 @@ Menunggu approval plan dan dependency di atas. Paths/symbols exact, risiko dan c
 - Previous verified task commit before PCAT-008: 1bedafe8334605fbd64a84ad7d6a9d4ba12d908c feat(web): paginate API catalog with infinite query (PCAT-007).
 
 - Previous verified task commit before PCAT-009: e6cd801eed6c6d561019788a7c4aaca36c504a31 feat(web): connect homepage to public catalog API (PCAT-008).
+
+- Previous verified task commit before PCAT-010: 6ce16dbaf1e6e079d0a2d6f1f045ceeeaf797133 test(api): prove public catalog visibility and paging (PCAT-009).

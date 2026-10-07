@@ -44,7 +44,7 @@ export async function createPublicCatalogBrowserFixture() {
       requestLogger: { write: () => {} },
     });
     const originalVideos = await f.db
-        .client`SELECT id,published_at::text at,row_version FROM videos`,
+        .client`SELECT id,title,synopsis,published_at::text at,row_version FROM videos`,
       originalSeries = await f.db
         .client`SELECT id,published_at::text at,row_version FROM series`;
     const flags = {
@@ -67,7 +67,7 @@ export async function createPublicCatalogBrowserFixture() {
     async function restore() {
       for (const row of originalVideos)
         await f.db
-          .client`UPDATE videos SET publication_status='published',published_at=${row.at}::timestamptz,archived_at=null,row_version=${row.row_version} WHERE id=${row.id}::uuid`;
+          .client`UPDATE videos SET title=${row.title},synopsis=${row.synopsis},publication_status='published',published_at=${row.at}::timestamptz,archived_at=null,row_version=${row.row_version} WHERE id=${row.id}::uuid`;
       for (const row of originalSeries)
         await f.db
           .client`UPDATE series SET publication_status='published',published_at=${row.at}::timestamptz,archived_at=null,row_version=${row.row_version} WHERE id=${row.id}::uuid`;
@@ -107,6 +107,20 @@ export async function createPublicCatalogBrowserFixture() {
         )
           await videoAdmin.archive(id!, 2, "media-admin");
         else throw Error("Refusing non-fixture owner");
+      }
+      if (body.seriesOnly === true) {
+        await f.db
+          .client`UPDATE videos SET publication_status='draft',published_at=null WHERE kind IN ('movie','standalone')`;
+        service.invalidate();
+      }
+      if (
+        typeof body.title === "string" &&
+        body.title.length > 0 &&
+        body.title.length <= 200
+      ) {
+        await f.db
+          .client`UPDATE videos SET title=${body.title} WHERE id=${f.videoIds[0]}::uuid`;
+        service.invalidate();
       }
       if (body.clearTraces === true) traces.length = 0;
     }
