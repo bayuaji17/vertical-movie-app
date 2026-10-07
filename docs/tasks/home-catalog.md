@@ -2,7 +2,7 @@
 
 ## Tujuan modul
 
-Implementasi frontend beranda/katalog yang disetujui pengguna 7 Oktober 2026, memakai dummy JSON lokal sesuai [implementation plan](../plans/home-catalog/implementation-plan.md). Acuan fakta pada [repository context](../plans/home-catalog/repository-context.md), visual pada [design homepage](../design/home-catalog.md). Runtime belum dimulai.
+Implementasi frontend beranda/katalog yang disetujui pengguna 7 Oktober 2026, memakai dummy JSON lokal sesuai [implementation plan](../plans/home-catalog/implementation-plan.md). Acuan fakta pada [repository context](../plans/home-catalog/repository-context.md), visual pada [design homepage](../design/home-catalog.md). Runtime diotorisasi pengguna 7 Oktober 2026 setelah refinement useInfiniteQuery; pelaksanaan pada worktree terpisah.
 
 ## User story: HOME-US-001
 
@@ -54,16 +54,16 @@ Prettier Markdown yang diubah; bun run docs:check; git diff --check; hook docs/l
 
 ### Blocker atau tindak lanjut
 
-Plan untuk review, runtime belum diotorisasi. Pertanyaan opsional CTA dikirim; default dialog metadata, refine bila pengguna memilih player dummy.
+Plan disetujui pengguna; default CTA View film membuka dialog metadata lokal.
 
 ## Task: HOMEFE-001 — Dummy JSON typed dan selector katalog
 
-- Status: Ready
+- Status: Done
 - Owner: Codex
 - Prioritas: 1
 - Referensi: HOME-US-001; PRD-07/08; GR-02; [plan](../plans/home-catalog/implementation-plan.md).
 - Diperbarui: 2026-10-07
-- Dependensi: Tidak ada setelah plan direview; pelaksanaan menunggu instruksi implementasi.
+- Dependensi: Tidak ada; plan disetujui pengguna 7 Oktober 2026.
 - Ukuran: Satu hasil review dengan commit terpisah.
 
 ### Ruang lingkup
@@ -74,10 +74,10 @@ Affected files: `apps/web/src/data/catalog.json`; `apps/web/src/lib/catalog/{cat
 
 ### Acceptance criteria
 
-- [ ] 18 items (enam tiap kind), enam judul awal sesuai mockup, unique id/slug, references valid dan field-kind exclusivity; semua poster local path.
-- [ ] Sort publishedAt desc/id asc stabil, title/synopsis search trim/case-insensitive, kind+genre AND, slice batch 6 tanpa duplicate/cap overflow.
-- [ ] Transisi perubahan filter/query/reset mengembalikan halaman pertama berisi enam; pure page selector menghasilkan items/total/nextOffset tanpa fetch/API.
-- [ ] Tes perilaku mencakup empty/unknown genre/timestamp tie/duration vs episodeCount dan web check-types lulus.
+- [x] 18 items (enam tiap kind), enam judul awal sesuai mockup, unique id/slug, references valid dan field-kind exclusivity; semua poster local path.
+- [x] Sort publishedAt desc/id asc stabil, title/synopsis search trim/case-insensitive, kind+genre AND, slice batch 6 tanpa duplicate/cap overflow.
+- [x] Transisi perubahan filter/query/reset mengembalikan halaman pertama berisi enam; pure page selector menghasilkan items/total/nextOffset tanpa fetch/API.
+- [x] Tes perilaku mencakup empty/unknown genre/timestamp tie/duration vs episodeCount dan web check-types lulus.
 
 ### Validasi
 
@@ -85,13 +85,13 @@ bun test apps/web/test/home-catalog-data.test.ts; bun run check-types --filter=w
 
 ### Hasil dan bukti
 
-Belum dikerjakan. Catat command/scope/result/limitations aktual; jangan menaikkan status dari checklist rencana saja.
+bun test apps/web/test/home-catalog-data.test.ts: 5 pass, 0 fail; web check-types lulus. Schema strict, fixture immutable, 18 judul dan selector batch6; reset cache UI ditutup pada HOMEFE-006/009.
 
 ### Commit task
 
 - Pesan: `feat(web): dummy json typed dan selector katalog (HOMEFE-001)`.
 - SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan.
+- Hook/checks: Gate relevan lulus; hook docs/lint/types/Commitlint dijalankan saat commit tanpa bypass.
 - Ledger: SHA aktual dicatat pada update dokumentasi task berikutnya setelah commit, tanpa self-referential SHA.
 
 ### Blocker atau tindak lanjut
@@ -105,7 +105,7 @@ Ikuti dependency dan batas data lokal pada plan; browser acceptance lintas task 
 - Prioritas: 2
 - Referensi: HOME-US-001; PRD-07/08; GR-02; [plan](../plans/home-catalog/implementation-plan.md).
 - Diperbarui: 2026-10-07
-- Dependensi: Tidak ada setelah plan direview; pelaksanaan menunggu instruksi implementasi.
+- Dependensi: Tidak ada; plan disetujui pengguna 7 Oktober 2026.
 - Ukuran: Satu hasil review dengan commit terpisah.
 
 ### Ruang lingkup
@@ -147,7 +147,7 @@ Ikuti dependency dan batas data lokal pada plan; browser acceptance lintas task 
 - Prioritas: 3
 - Referensi: HOME-US-003; PRD-07/08; GR-02; [plan](../plans/home-catalog/implementation-plan.md).
 - Diperbarui: 2026-10-07
-- Dependensi: Tidak ada setelah plan direview; pelaksanaan menunggu instruksi implementasi.
+- Dependensi: Tidak ada; plan disetujui pengguna 7 Oktober 2026.
 - Ukuran: Satu hasil review dengan commit terpisah.
 
 ### Ruang lingkup

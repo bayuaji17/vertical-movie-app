@@ -2,13 +2,13 @@
 
 ## Plan metadata
 
-- Status: **ready — siap direview, belum executing**.
+- Status: **executing — disetujui pengguna 7 Oktober 2026**.
 - Tanggal: 7 Oktober 2026.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `feat/home-catalog-mockup`.
 - Base SHA: `b90edaaaca83187726218286fdaf253958a483fe`.
 - Context: [repository-context.md](repository-context.md).
-- Last validated SHA: `ab15400d7f8eee9fa305d60cd4f155c639d10b6d`.
+- Last validated SHA: `24a591885194c21458841a5f705323596748d1e9`.
 - Backlog canonical: [HOMEFE-000–010](../../tasks/home-catalog.md).
 - Otorisasi pengguna: mockup disetujui dan plan detail diminta; seluruh data tahap ini dummy JSON, fokus FE. Persetujuan ini tidak berarti runtime sudah dibuat atau playback/API diotorisasi.
 
@@ -297,3 +297,9 @@ Runtime tasks belum dimulai. Context disimpan sebelum plan. Commit planning HOME
 Pengguna memperjelas infinite query TanStack Query sebagai pola pengelolaan halaman. Ini mengganti proposal awal visibleCount/state-only; sumber tetap dummy JSON dan Load more manual. Installed package apps/web/node_modules/@tanstack/react-query 5.104.0 dan query-core bundled source diperiksa; useInfiniteQuery/infiniteQueryOptions/InfiniteData/pageParam/next-page contract tersedia. Acuan [Infinite Queries resmi](https://tanstack.com/query/latest/docs/framework/react/guides/infinite-queries). Tidak ada upgrade dependency atau perubahan runtime pada refinement plan ini.
 
 Freshness: SHA 509d3870f12ad5aa562342bcb6fee778c97cf602, source router/Query provider dan package installed diperiksa langsung; runtime belum berubah sejak base plan. HOMEFE-006 diperluas mencakup options/adapter/caching/SSRseed; HOMEFE-009 mencakup paginated-query race/zero-network proof. Evidence doc/commit refinement dicatat pada HOMEFE-011.
+
+### Implementation approval — 7 Oktober 2026
+
+Pengguna menyetujui plan setelah klarifikasi useInfiniteQuery. Default detail dialog lokal diterima. Freshness pada SHA 24a591885194c21458841a5f705323596748d1e9: diff apps/packages/manifests/lock/AGENTS terhadap base kosong; worktree clean sebelum edit. Checkout utama terpisah tetap dipertahankan.
+
+- HOMEFE-001: bun test apps/web/test/home-catalog-data.test.ts: 5 pass, 0 fail; web check-types lulus. Schema strict, fixture immutable, 18 judul dan selector batch6; reset cache UI ditutup pada HOMEFE-006/009. SHA task sebelumnya: `24a591885194c21458841a5f705323596748d1e9`.
