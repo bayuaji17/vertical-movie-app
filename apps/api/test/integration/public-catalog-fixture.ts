@@ -95,6 +95,8 @@ export async function publicCatalogFixture(
     i: number,
     kind: "movie" | "standalone" | "episode",
     seasonId?: string,
+    episodeNumber = 1,
+    historical = true,
   ) {
     const id = crypto.randomUUID();
     await db.db.insert(videos).values({
@@ -106,7 +108,7 @@ export async function publicCatalogFixture(
           ? "Rain % _ \\ 🎬"
           : `${kind === "movie" ? "Film" : kind === "standalone" ? "Standalone" : "Episode"} ${i + 1}`,
       synopsis: "A portrait story",
-      ...(seasonId ? { seasonId, episodeNumber: 1 } : {}),
+      ...(seasonId ? { seasonId, episodeNumber } : {}),
       rightsConfirmedAt: new Date(),
       rightsConfirmedBy: "media-admin",
       ...actor,
@@ -123,7 +125,8 @@ export async function publicCatalogFixture(
       { expectedVersion: 1, idempotencyKey: crypto.randomUUID() },
       "media-admin",
     );
-    await db.client`UPDATE videos SET published_at=${`2026-10-01T03:00:${String(59 - (i % 60)).padStart(2, "0")}.123456Z`}::timestamptz WHERE id=${id}::uuid`;
+    if (historical)
+      await db.client`UPDATE videos SET published_at=${`2026-10-01T03:00:${String(59 - (i % 60)).padStart(2, "0")}.123456Z`}::timestamptz WHERE id=${id}::uuid`;
     return id;
   }
   for (let i = 0; i < (options.videoCount ?? 12); i++)
@@ -159,6 +162,8 @@ export async function publicCatalogFixture(
     await db.client`UPDATE series SET published_at=${`2026-10-01T03:00:${String(59 - (i % 60)).padStart(2, "0")}.123456Z`}::timestamptz WHERE id=${id}::uuid`;
   }
   return {
+    createEpisode: (i: number, seasonId: string, number: number) =>
+      video(i, "episode", seasonId, number, false),
     db,
     store,
     legacy,

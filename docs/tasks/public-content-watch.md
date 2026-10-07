@@ -229,8 +229,8 @@ Watch SSR unsigned metadata dan per-video UUID player, backlinks Film/Standalone
 ### Commit task
 
 - Pesan: Conventional Commit scoped PCW-005
-- SHA: receipt aktual dicatat pada task berikutnya setelah commit.
-- Hook/checks: normal docs/lint/types/commitlint wajib tanpa bypass.
+- SHA: `0c18eae307e8a9115651f44acc70c66cbd038aaa`.
+- Hook/checks: docs:check, lint, check-types dan commitlint normal pass tanpa bypass.
 
 ### Blocker atau tindak lanjut
 
@@ -238,7 +238,7 @@ Dependency menurut DAG. Tidak menambah progress/autoplay/editor/production atau 
 
 ## Task: PCW-006 — Native hierarchy dan access proof
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent
 - Prioritas: P1, dependency order
 - Referensi: PCW-US-001/002; PRD-07/08, GR-02; [plan](../plans/public-content-watch/implementation-plan.md#implementation-steps)
@@ -252,8 +252,8 @@ SQL and private actual HLS ownership/order/cursor/fresh access verified. >100 Se
 
 ### Acceptance criteria
 
-- [ ] first/next/end cross-season stable, singlequery/page, actual signed objects playable, afterarchive new404; object/facts fixture limitations honest.
-- [ ] Applicable gates/evidence dan compatibility diperiksa sebelum Done.
+- [x] first/next/end cross-season stable, singlequery/page, actual signed objects playable, afterarchive new404; object/facts fixture limitations honest.
+- [x] Applicable gates/evidence dan compatibility diperiksa sebelum Done.
 
 ### Validasi
 
@@ -261,12 +261,12 @@ native guarded tests serial; legacy tests per impacted predicate; EXPLAIN only i
 
 ### Hasil dan bukti
 
-Belum diimplementasikan/diverifikasi; isi command/result/batas dan receipt aktual saat task selesai.
+Dedicated native public-content-proof.test.ts: 4 pass, 57 assertions, 159.59s. Proven >100 Series directlookup satu SQL/read; 103 sparse episodes dua season, count/cursor/asOf/new publish/hidden child/wrong parent; stale source/parent generation disembunyikan dan foreign owner ditolak FK. Native video Archive memakai actual VideosService; parent hidden state adalah SQL fixture, bukan published-Series archive command. Actual production FFmpeg 12s portrait HLS dipasang pada owned private MinIO outputs; signed init/segments/poster200, unsigned403, fresh capability/master404 setelah archive. Cleanup known objects/bucket selesai. Fixture SQL readiness bukan full upload/worker provenance proof. Relevant units43 pass/258 assertions dan root build pass; normal hooks memverifikasi source terkini.
 
 ### Commit task
 
 - Pesan: Conventional Commit scoped PCW-006
-- SHA: belum dibuat.
+- SHA: receipt aktual dicatat pada task berikutnya setelah commit.
 - Hook/checks: normal docs/lint/types/commitlint wajib tanpa bypass.
 
 ### Blocker atau tindak lanjut
