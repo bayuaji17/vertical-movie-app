@@ -253,7 +253,7 @@ Dependency terpenuhi. Bukti lint/types/docs/commitlint dicatat setelah commit; p
 
 ## Task: PCAT-006 — Eden adapter dan SSR
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1, urutan/dependency menurut DAG plan.
 - Referensi: PCAT-US-001/003; PRD-07/08, GR-02; step PCAT-006 pada [plan](../plans/public-catalog-api/implementation-plan.md#implementation-steps).
@@ -267,8 +267,8 @@ Public DTO/view model/client dan server-only transport; request-scoped first6/ge
 
 ### Acceptance criteria
 
-- [ ] No dummy imports/false empty, real UUID/no-genre/nullfeatured valid; malformed/error response dilempar aman.
-- [ ] SSR tidak memakai cookie/inboundhost/internal env di browser; genre pagination tidak berhenti diam-diam pada100.
+- [x] No dummy imports/false empty, real UUID/no-genre/nullfeatured valid; malformed/error response dilempar aman.
+- [x] SSR tidak memakai cookie/inboundhost/internal env di browser; genre pagination tidak berhenti diam-diam pada100.
 
 ### Validasi
 
@@ -276,18 +276,18 @@ Client/AbortSignal/config/genre tests + Eden compile contract; actual SSR/bundle
 
 ### Hasil dan bukti
 
-Belum diimplementasikan/diverifikasi. Catat command aktual, hasil, decision/deviation dan batas pada task ini saat dieksekusi; existing HOMEFE/APUB proof tidak menutup task PCAT.
+Validated public Eden adapter, typed UUID/union view model, safe errors and isomorphic server-only transport implemented. SSR loader calls installed Query5.104 APIs with request-scoped client and parallel first6/genres/featured; safe boolean error bootstrap, no fake data. Client tests 5/30 pass including 101 genres/repeated-cursor/cancel/request isolation. Eden/web types and affected lint pass. Actual browser SSR and no duplicate hydration acceptance remain PCAT-010.
 
 ### Commit task
 
 - Pesan: `feat(web): load public catalog with Eden and SSR (PCAT-006)`
-- SHA: belum dibuat.
+- SHA: dicatat pada ledger task berikutnya setelah commit.
 - Hook/checks: diwajibkan tanpa bypass, hasil belum ada.
 - Ledger: actual SHA dicatat pada task berikutnya/delivery setelah commit, bukan self-reference.
 
 ### Blocker atau tindak lanjut
 
-Menunggu approval plan dan dependency di atas. Paths/symbols exact, risiko dan completion per step berada pada canonical plan; jangan memperluas ke watch/editor/production.
+Dependency terpenuhi. Bukti lint/types/docs/commitlint dicatat setelah commit; proof lanjutan sesuai DAG tetap wajib.
 
 ## Task: PCAT-007 — Cursor infinite query dan filters
 
@@ -509,3 +509,5 @@ Menunggu approval plan dan dependency di atas. Paths/symbols exact, risiko dan c
 - Previous verified task commit before PCAT-004: 4db433cc3a5afb7de2e7e569ef82bfc6909fc29a feat(api): expose cached public home catalog (PCAT-003).
 
 - Previous verified task commit before PCAT-005: 916172cd6f03134517c1259361c79484c324d6a4 feat(api): serve published catalog posters (PCAT-004).
+
+- Previous verified task commit before PCAT-006: 20e577c1ce94c5270677b17007c36f213288b940 feat(web): proxy public catalog metadata and posters (PCAT-005).

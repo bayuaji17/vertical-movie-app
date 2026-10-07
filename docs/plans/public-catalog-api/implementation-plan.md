@@ -166,6 +166,8 @@ Evidence setiap row mengacu context pada base SHA; path baru adalah proposal.
 
 ## Implementation DAG
 
+Execution impact refresh (PCAT-006): `public-catalog-queries.ts` owns the shared isomorphic transport and typed query options used by SSR and observers. `catalog-queries.ts` will retain the filter transition entrypoint. This separates the public runtime from retained dummy fixture selectors and enables injected transport tests without server request context. No dependency, environment, schema or product scope expansion.
+
 ```mermaid
 flowchart TD
   P001[PCAT-001 Contract and cursor] --> P002[PCAT-002 Unified query]
