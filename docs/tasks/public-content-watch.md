@@ -44,8 +44,8 @@ Changed Markdown Prettier, docs:check, diff dan normal task hooks sebelum commit
 ### Commit task
 
 - Pesan: docs: plan public details and watch flow (PCW-000)
-- SHA: dicatat pada task berikutnya setelah commit.
-- Hook/checks: normal hooks wajib tanpa bypass.
+- SHA: `80cc7e240b88a3d37d5917274759ca612e740fcc`.
+- Hook/checks: docs:check, lint, check-types dan commitlint normal pass tanpa bypass.
 
 ### Blocker atau tindak lanjut
 
@@ -53,7 +53,7 @@ PCW-001–008 dilaksanakan menurut DAG; remote delivery baru belum diotorisasi.
 
 ## Task: PCW-001 — Kontrak detail dan daftar episode
 
-- Status: Ready
+- Status: Done
 - Owner: Pengembang/agent
 - Prioritas: P1, dependency order
 - Referensi: PCW-US-001/002; PRD-07/08, GR-02; [plan](../plans/public-content-watch/implementation-plan.md#implementation-steps)
@@ -67,8 +67,8 @@ DTO/strict scoped keyset cursor/type boundaries frozen. unionexistingHomeItem; p
 
 ### Acceptance criteria
 
-- [ ] invalid422 before store; no scope reuse or offset fallback; >100 pagination supported.
-- [ ] Applicable gates/evidence dan compatibility diperiksa sebelum Done.
+- [x] invalid422 before store; no scope reuse or offset fallback; >100 pagination supported.
+- [x] Applicable gates/evidence dan compatibility diperiksa sebelum Done.
 
 ### Validasi
 
@@ -76,12 +76,12 @@ bun:test invalid/tampered/parent/limit/order, sparsepositions/nullEOF/type compi
 
 ### Hasil dan bukti
 
-Belum diimplementasikan/diverifikasi; isi command/result/batas dan receipt aktual saat task selesai.
+Kontrak DTO detail/episode strict dan cursor scope Series/limit/order/asOf/hierarchy selesai. Bun test content-pagination.test.ts: 3 pass, 31 assertions; API check-types pass, root build pass. Invalid slug, foreign cursor, extra fields, future date dan numeric overflow ditolak. No schema change.
 
 ### Commit task
 
 - Pesan: Conventional Commit scoped PCW-001
-- SHA: belum dibuat.
+- SHA: receipt aktual dicatat pada task berikutnya setelah commit.
 - Hook/checks: normal docs/lint/types/commitlint wajib tanpa bypass.
 
 ### Blocker atau tindak lanjut

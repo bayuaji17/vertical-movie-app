@@ -2,7 +2,7 @@
 
 ## Plan Metadata
 
-- Status: ready — user meminta lanjut dan memilih semua jenis, termasuk Series/episode, 7 Oktober 2026.
+- Status: executing — user meminta lanjut dan memilih semua jenis, termasuk Series/episode, 7 Oktober 2026.
 - Repository: bayuaji17/vertical-movie-app.
 - Base ref: feat/public-catalog-api, dependency lokal belum merged.
 - Base SHA / last validated SHA: `c75080f6febf07312b90a6d79ef945b7a96ab84d`.
@@ -225,3 +225,5 @@ Alltypes/Seriesepisodes scopeconfirmedbyuser7October2026. Technicalrecommendatio
 ## Execution Log
 
 - PCW-000: User askedcontinue andconfirmedalltypes/Seriesepisodes. Branchfeat/public-content-watch createdfromPCATclosure; repositorycontextsavedbeforeplan. Planningonlychecks/commitreceipt recordedinbacklogafteractualcompletion. No remote mutation/deployment.
+
+- PCW-001: Kontrak DTO detail/episode strict dan cursor scope Series/limit/order/asOf/hierarchy selesai. Bun test content-pagination.test.ts: 3 pass, 31 assertions; API check-types pass, root build pass. Invalid slug, foreign cursor, extra fields, future date dan numeric overflow ditolak. No schema change. Previous verified commit: 80cc7e240b88a3d37d5917274759ca612e740fcc docs: plan public details and watch flow (PCW-000).
