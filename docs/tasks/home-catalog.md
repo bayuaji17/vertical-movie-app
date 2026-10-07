@@ -258,7 +258,7 @@ CatalogCard/Grid merender Film, Series dan Standalone, metadata duration/count, 
 ### Commit task
 
 - Pesan: `feat(web): poster card dan grid tiga jenis (HOMEFE-005)`.
-- SHA: Belum dibuat.
+- SHA: `435cfc486921c883d0b568f3c6cd2b1fba2555de`.
 - Hook/checks: Gate relevan lulus; hook docs/lint/types/Commitlint dijalankan saat commit tanpa bypass.
 - Ledger: SHA aktual dicatat pada update dokumentasi task berikutnya setelah commit, tanpa self-referential SHA.
 
@@ -284,13 +284,13 @@ Affected files: `apps/web/src/components/catalog/catalog-filters.tsx`; `apps/web
 
 ### Acceptance criteria
 
-- [ ] Search synchronous title/synopsis, ToggleGroup single-selection all/movie/series/standalone dengan label Film dan genre All genres.
-- [ ] useInfiniteQuery: key publik berisi normalized filters/pageSize/schemaVersion, initialPageParam0, nextOffset/getNextPageParam, data.pages; pages6→12→18 tanpa duplikat dan EOF hasNextPage=false.
-- [ ] First-page initialData pages/pageParams untuk SSR; networkMode always, staleTime Infinity, no automatic refetch/artificial delay/HTTP.
-- [ ] Load more fetchNextPage cancelRefetch=false diguard hasNextPage/!isFetching; busy state isFetchingNextPage, rapid-click dedup teruji.
-- [ ] AND filters/latest stable; query/filter/reset cancel dan seed cache exact key tujuan ke halaman pertama, termasuk cache revisit; tidak menyentuh cache admin/auth. Resize/detail/theme tidak reset pages.
-- [ ] Empty No titles found dan Reset filters bekerja serta fokus search; count announce polite, no fake spinner/error/timer.
-- [ ] Latest releases berupa label urutan tetap; Home reset dan Browse fokus tidak melahirkan URL/dummy route.
+- [x] Search synchronous title/synopsis, ToggleGroup single-selection all/movie/series/standalone dengan label Film dan genre All genres.
+- [x] useInfiniteQuery: key publik berisi normalized filters/pageSize/schemaVersion, initialPageParam0, nextOffset/getNextPageParam, data.pages; pages6→12→18 tanpa duplikat dan EOF hasNextPage=false.
+- [x] First-page initialData pages/pageParams untuk SSR; networkMode always, staleTime Infinity, no automatic refetch/artificial delay/HTTP.
+- [x] Load more fetchNextPage cancelRefetch=false diguard hasNextPage/!isFetching; busy state isFetchingNextPage, rapid-click dedup teruji.
+- [x] AND filters/latest stable; query/filter/reset cancel dan seed cache exact key tujuan ke halaman pertama, termasuk cache revisit; tidak menyentuh cache admin/auth. Resize/detail/theme tidak reset pages.
+- [x] Empty No titles found dan Reset filters bekerja serta fokus search; count announce polite, no fake spinner/error/timer.
+- [x] Latest releases berupa label urutan tetap; Home reset dan Browse fokus tidak melahirkan URL/dummy route.
 
 ### Validasi
 
@@ -298,13 +298,13 @@ bun test apps/web/test/home-catalog-data.test.ts; web types/lint; interactive fl
 
 ### Hasil dan bukti
 
-Belum dikerjakan. Catat command/scope/result/limitations aktual; jangan menaikkan status dari checklist rencana saja.
+Tests katalog/query dan tema:10 pass,0fail,63assertions. QueryClient/InfiniteQueryObserver membuktikan6-12-18, concurrent dedup, AbortSignal cancellation, cache revisit reset dan latest filter wins; cache admin tetap utuh. Canonical key, initialData SSR, networkMode always dan filter primitives tersedia; wiring HomePage disimpan pada task008 setelah dialog007.
 
 ### Commit task
 
 - Pesan: `feat(web): search, filter, urutan dan load more lokal (HOMEFE-006)`.
 - SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan.
+- Hook/checks: Gate relevan lulus; hook docs/lint/types/Commitlint dijalankan saat commit tanpa bypass.
 - Ledger: SHA aktual dicatat pada update dokumentasi task berikutnya setelah commit, tanpa self-referential SHA.
 
 ### Blocker atau tindak lanjut
