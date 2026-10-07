@@ -494,12 +494,12 @@ bun test apps/web/test/home-catalog-data.test.ts apps/web/test/admin-theme.test.
 
 ### Hasil dan bukti
 
-Final gates:10 tests/63assertions pass; root check-types3packages pass (web fresh,API/auth cached unchanged); lintweb fresh pass; buildAPI/web pass (webfresh,APIcached); docs:check62files593links pass. Browser development+build matrix12 each pass. Scoped diff API/auth/admin/watch/routeTree/manifests/lock kosong. Canonical PRD/globalrules/design/index/plan diperbarui; real API/production limits tetap jelas. Prettier dan diffcheck final dicatat setelah update ini.
+Final gates:10 tests/63assertions pass; root check-types3packages pass (web fresh,API/auth cached unchanged); lintweb fresh pass; buildAPI/web pass (webfresh,APIcached); docs:check62files593links pass. Browser development+build matrix12 each pass. Scoped diff API/auth/admin/watch/routeTree/manifests/lock kosong. Canonical PRD/globalrules/design/index/plan diperbarui; real API/production limits tetap jelas. Prettier seluruh file berubah lulus, docs:check final62Markdown/599links lulus, git diff/check staged lulus. Hook docs/lint/types/Commitlint lulus tanpa bypass; cache digunakan setelah gate fresh sebelumnya.
 
 ### Commit task
 
 - Pesan: `docs(web): quality gates, dokumentasi dan closure (HOMEFE-010)`.
-- SHA: Belum dibuat.
+- SHA: `393b1b11e186d4a23e5f87c2208fed492341ef1f`.
 - Hook/checks: Gate relevan lulus; hook docs/lint/types/Commitlint dijalankan saat commit tanpa bypass.
 - Ledger: SHA aktual dicatat pada update dokumentasi task berikutnya setelah commit, tanpa self-referential SHA.
 
@@ -545,3 +545,7 @@ Refinement planning saja; runtime belum diubah. docs:check lulus (62 Markdown, 5
 ### Blocker atau tindak lanjut
 
 Implementasi tetap menunggu instruksi pengguna; pemicu Load more tidak berubah menjadi automatic scroll.
+
+### Ledger penutup HOMEFE-010 — 7 Oktober 2026
+
+Commit closure aktual393b1b11e186d4a23e5f87c2208fed492341ef1f. Seluruh HOMEFE-001–010 Done dan mempunyai commit task terpisah; ledger commit ini mencatat SHA yang sudah ada. Worktree clean sesudah closure, source API/auth/admin/watch/routeTree/manifests/lock tidak berubah. Perubahan paralel design-system/build docs di checkout utama tetap terpisah. Built proof server3148 dihentikan; development3147 dipertahankan untuk preview, API internal tetap unreachable. Tidak ada push/PR/merge/deployment.

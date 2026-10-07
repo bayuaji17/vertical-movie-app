@@ -8,7 +8,7 @@
 - Base ref: `feat/home-catalog-mockup`.
 - Base SHA: `b90edaaaca83187726218286fdaf253958a483fe`.
 - Context: [repository-context.md](repository-context.md).
-- Last validated SHA: `f03030e3a009a2ad41c659d509640fc434f4f513`.
+- Last validated SHA: `393b1b11e186d4a23e5f87c2208fed492341ef1f`.
 - Backlog canonical: [HOMEFE-000–010](../../tasks/home-catalog.md).
 - Otorisasi pengguna: mockup disetujui dan plan detail diminta; seluruh data tahap ini dummy JSON, fokus FE. Pengguna menyetujui implementasi setelah klarifikasi useInfiniteQuery. Runtime FE selesai dan terverifikasi lokal; playback/API tetap di luar tahap ini.
 
@@ -319,3 +319,7 @@ Pengguna menyetujui plan setelah klarifikasi useInfiniteQuery. Default detail di
 - HOMEFE-009: Development3147 dan built Bun/Nitro3148 browser worker lulus; API_INTERNAL_URL diarahkan ke127.0.0.1:59999 yang unreachable. Masing-masing matrix12 (320/390/768/1024/1440/1920 Light/Dark), SSR6, pages6-12-18, zero API/auth/playback/externalrequests, zero console/hydrationerrors. Filter/cache/rapidclick/keyboard/focus trap/focusreturn/mobileBrowse/themepersistence/System/resize/longtitle/empty/imagefallback lulus. Source failures2,fallback1,tidakloop. Delapan screenshotdilihat, enamfoto terload sebelumcapture. Exact invocation dan batas Chromium dicatat di bawah. SHA task sebelumnya: `0d379a4766ab06adda17247c88ef32f1ab3c7054`.
 
 - HOMEFE-010: Final gates:10 tests/63assertions pass; root check-types3packages pass (web fresh,API/auth cached unchanged); lintweb fresh pass; buildAPI/web pass (webfresh,APIcached); docs:check62files593links pass. Browser development+build matrix12 each pass. Scoped diff API/auth/admin/watch/routeTree/manifests/lock kosong. Canonical PRD/globalrules/design/index/plan diperbarui; real API/production limits tetap jelas. Prettier dan diffcheck final dicatat setelah update ini. SHA task sebelumnya: `f03030e3a009a2ad41c659d509640fc434f4f513`.
+
+### Final closure audit — 7 Oktober 2026
+
+HOMEFE-010 commit393b1b11e186d4a23e5f87c2208fed492341ef1f. Relevant tests10pass/63assertions; types/lint/build/docs/Prettier/diff checks pass. Browser dev+build masing-masing matrix12, SSR6 dan query6→12→18,0 forbidden requests/console errors. Scoped source review terhadap approved base24a5918 menunjukkan perubahan sesuai plan dan tidak menyentuh API/auth/admin/watch/routeTree/manifest/lock. Canonical status dan ledger konsisten; data published nyata/playback/API belum diimplementasikan dalam tahap ini. Branch lokal feat/home-catalog-mockup, belum push/PR/merge/deploy.
