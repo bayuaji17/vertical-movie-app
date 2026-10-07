@@ -5,8 +5,8 @@ import {
   genreLabels,
   itemLength,
   kindLabels,
-} from '#/lib/catalog/catalog-selectors'
-import type { CatalogItem } from '#/lib/catalog/catalog-schema'
+} from '#/lib/catalog/public-catalog-model'
+import type { CatalogItem } from '#/lib/catalog/public-catalog-model'
 import { Poster } from './poster'
 
 export function FeaturedFilm({

@@ -7,15 +7,21 @@ import {
 import { ToggleGroup, ToggleGroupItem } from '#/components/ui/toggle-group'
 import { Field, FieldLabel } from '#/components/ui/field'
 import { NativeSelect, NativeSelectOption } from '#/components/ui/native-select'
-import { catalogData } from '#/lib/catalog/catalog-data'
-import type { CatalogFilters as Filters } from '#/lib/catalog/catalog-selectors'
+import type {
+  CatalogFilters as Filters,
+  PublicGenre,
+} from '#/lib/catalog/public-catalog-model'
 
 export function CatalogSearch({
   value,
   onChange,
+  onCompositionStart,
+  onCompositionEnd,
 }: {
   value: string
   onChange: (value: string) => void
+  onCompositionStart: () => void
+  onCompositionEnd: (value: string) => void
 }) {
   return (
     <InputGroup className="h-11">
@@ -27,6 +33,10 @@ export function CatalogSearch({
         placeholder="Search titles..."
         value={value}
         onChange={(event) => onChange(event.target.value)}
+        onCompositionStart={onCompositionStart}
+        onCompositionEnd={(event) =>
+          onCompositionEnd(event.currentTarget.value)
+        }
       />
       <InputGroupAddon>
         <RiSearchLine aria-hidden="true" />
@@ -37,9 +47,11 @@ export function CatalogSearch({
 export function CatalogFilters({
   filters,
   onChange,
+  genres,
 }: {
   filters: Filters
   onChange: (filters: Filters) => void
+  genres: Array<PublicGenre>
 }) {
   return (
     <div className="flex flex-wrap items-center gap-3 rounded-2xl bg-muted/60 p-2">
@@ -78,9 +90,9 @@ export function CatalogFilters({
           className="[&_select]:h-11"
         >
           <NativeSelectOption value="all">All genres</NativeSelectOption>
-          {catalogData.genres.map((genre) => (
+          {genres.map((genre) => (
             <NativeSelectOption value={genre.id} key={genre.id}>
-              {genre.label}
+              {genre.name}
             </NativeSelectOption>
           ))}
         </NativeSelect>

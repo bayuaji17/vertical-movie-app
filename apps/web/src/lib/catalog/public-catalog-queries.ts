@@ -132,7 +132,7 @@ export function createCatalogTransition(
   let current = defaultCatalogFilters,
     requested = current,
     revision = 0
-  return async (next: CatalogFilters, force = false) => {
+  const change = async (next: CatalogFilters, force = false) => {
     const normalized = normalizeFilters(next)
     if (!force && sameFilters(requested, normalized)) return
     requested = normalized
@@ -151,6 +151,11 @@ export function createCatalogTransition(
     current = normalized
     commit(normalized)
   }
+  return Object.assign(change, {
+    dispose: () => {
+      revision++
+    },
+  })
 }
 /** Search waits 300 ms; type/genre/reset flush immediately with the latest text. */
 export function createCatalogDebounce(

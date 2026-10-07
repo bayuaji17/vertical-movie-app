@@ -168,6 +168,8 @@ Evidence setiap row mengacu context pada base SHA; path baru adalah proposal.
 
 Execution impact refresh (PCAT-006): `public-catalog-queries.ts` owns the shared isomorphic transport and typed query options used by SSR and observers. `catalog-queries.ts` will retain the filter transition entrypoint. This separates the public runtime from retained dummy fixture selectors and enables injected transport tests without server request context. No dependency, environment, schema or product scope expansion.
 
+Execution impact refresh (PCAT-008): actual browser poster GETs exposed Nitro development middleware skipping `Sec-Fetch-Dest: image` requests (`nitro/dist/_build/vite.dev.mjs`, installed version). Add `tooling/catalog-poster-dev.ts`, its behavior test and Vite plugin registration before Nitro: only canonical public poster GET image destinations use the existing Nitro/gateway path. This changes development routing only, with no body-limit/auth/storage scope expansion; built behavior must still pass PCAT-010. Browser fixtures/worker scaffolding is introduced with this UI task so its native API/storage proof is reproducible; PCAT-010 extends the full matrix.
+
 ```mermaid
 flowchart TD
   P001[PCAT-001 Contract and cursor] --> P002[PCAT-002 Unified query]

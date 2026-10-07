@@ -205,6 +205,8 @@ test('offline query pauses and reconnect resumes; freshness is limited to server
   await observer.refetch()
   expect(calls).toBe(1)
   await Bun.sleep(5)
+  // Bun has no browser stale timer; reevaluate the observer against its actual deadline.
+  observer.setOptions(options)
   expect(observer.getCurrentResult().isStale).toBe(true)
   unsub()
   client.unmount()

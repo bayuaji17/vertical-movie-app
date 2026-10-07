@@ -14,5 +14,5 @@ export const Route = createFileRoute('/')({
       },
     ],
   }),
-  component: HomePage,
+  component: () => <HomePage bootstrap={Route.useLoaderData()} />,
 })

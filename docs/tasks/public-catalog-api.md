@@ -329,7 +329,7 @@ Dependency terpenuhi. Bukti lint/types/docs/commitlint dicatat setelah commit; p
 
 ## Task: PCAT-008 — Homepage state dan metadata nyata
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1, urutan/dependency menurut DAG plan.
 - Referensi: PCAT-US-001/002/003; PRD-07/08, GR-02; step PCAT-008 pada [plan](../plans/public-catalog-api/implementation-plan.md#implementation-steps).
@@ -343,8 +343,8 @@ Prop-driven genres/featured/cards/dialog/poster; initial/nextpage/background/par
 
 ### Acceptance criteria
 
-- [ ] APIempty/down tidak menampilkan fixture, nullable featured/genres kosong sah; pending/error Load more mempertahankan cards.
-- [ ] Poster9:16/fallback bounded, keyboard/live status/theme/reduced-motion dan safe total changes; no auth/watch/playback requests.
+- [x] APIempty/down tidak menampilkan fixture, nullable featured/genres kosong sah; pending/error Load more mempertahankan cards.
+- [x] Poster9:16/fallback bounded, keyboard/live status/theme/reduced-motion dan safe total changes; no auth/watch/playback requests.
 
 ### Validasi
 
@@ -352,18 +352,18 @@ Source import audit, types/lint/build; full browser AC PCAT-010.
 
 ### Hasil dan bukti
 
-Belum diimplementasikan/diverifikasi. Catat command aktual, hasil, decision/deviation dan batas pada task ini saat dieksekusi; existing HOMEFE/APUB proof tidak menutup task PCAT.
+Home production now uses real API UUID/composite identities, genres/nullable featured, initial and appended skeletons, safe error/retry/refresh/paused states, IME-aware search and bounded poster fallback. Runtime source has zero fixture imports. Native Elysia+dedicated PG+private MinIO Vite browser passes SSR6/no duplicate hydration, actual decoded WebP, 6/12/18/EOF, next-page retry, dialog focus and six widths. Web178/899 and API130/712 tests, root build and web types pass. Nitro image-destination dev routing fix narrowly scoped and behavior-tested; full built/error/theme matrix remains PCAT-010.
 
 ### Commit task
 
 - Pesan: `feat(web): integrate live public catalog UI (PCAT-008)`
-- SHA: belum dibuat.
+- SHA: dicatat pada ledger task berikutnya setelah commit.
 - Hook/checks: diwajibkan tanpa bypass, hasil belum ada.
 - Ledger: actual SHA dicatat pada task berikutnya/delivery setelah commit, bukan self-reference.
 
 ### Blocker atau tindak lanjut
 
-Menunggu approval plan dan dependency di atas. Paths/symbols exact, risiko dan completion per step berada pada canonical plan; jangan memperluas ke watch/editor/production.
+Dependency terpenuhi. Bukti lint/types/docs/commitlint dicatat setelah commit; proof lanjutan sesuai DAG tetap wajib.
 
 ## Task: PCAT-009 — Proof PG/storage dan performance
 
@@ -513,3 +513,5 @@ Menunggu approval plan dan dependency di atas. Paths/symbols exact, risiko dan c
 - Previous verified task commit before PCAT-006: 20e577c1ce94c5270677b17007c36f213288b940 feat(web): proxy public catalog metadata and posters (PCAT-005).
 
 - Previous verified task commit before PCAT-007: 15ad7b94d4a6ae285a94d36d1c9f8f8dd614fb21 feat(web): load public catalog with Eden and SSR (PCAT-006).
+
+- Previous verified task commit before PCAT-008: 1bedafe8334605fbd64a84ad7d6a9d4ba12d908c feat(web): paginate API catalog with infinite query (PCAT-007).

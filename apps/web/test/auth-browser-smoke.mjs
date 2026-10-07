@@ -58,6 +58,12 @@ const mediaFixture = ['media', 'publication'].includes(
         : null
     })
   : undefined
+const catalogFixture =
+  process.env.AUTH_BROWSER_PHASE === 'public-catalog'
+    ? await (
+        await import('../../api/test/integration/public-catalog-browser-fixture')
+      ).createPublicCatalogBrowserFixture()
+    : undefined
 if (process.env.AUTH_BROWSER_PHASE === 'content')
   assert.ok(
     contentFixture,
@@ -68,6 +74,16 @@ const api = Bun.serve({
   port: 0,
   fetch: async (request) => {
     const url = new URL(request.url)
+    if (catalogFixture) {
+      if (url.pathname === '/control/catalog') {
+        await catalogFixture.control(await request.json())
+        return Response.json({ ok: true })
+      }
+      if (url.pathname === '/catalog-proof')
+        return Response.json(catalogFixture.proof())
+      if (/^\/catalog(?:\/|$)/.test(url.pathname))
+        return catalogFixture.handle(request)
+    }
     if (url.pathname === '/control/media' && mediaFixture) {
       await mediaFixture.control(await request.json())
       return Response.json({ ok: true })
@@ -238,6 +254,7 @@ if (built) {
     api.stop(true)
     await contentFixture?.close()
     await mediaFixture?.close()
+    await catalogFixture?.close()
     throw new Error('Browser fixture build failed: ' + (out + err).slice(-4000))
   }
 }
@@ -272,15 +289,17 @@ try {
   for (const phase of phases) {
     const workerSource = await Bun.file(
       import.meta.dir +
-        (phase === 'publication'
-          ? '/admin-publication-browser-worker.mjs'
-          : phase === 'media'
-            ? '/admin-media-upload-browser-worker.mjs'
-            : phase === 'content'
-              ? '/admin-content-browser-worker.mjs'
-              : phase === 'routes'
-                ? '/auth-routes-browser-worker.mjs'
-                : '/auth-browser-worker.mjs'),
+        (phase === 'public-catalog'
+          ? '/public-catalog-browser-worker.mjs'
+          : phase === 'publication'
+            ? '/admin-publication-browser-worker.mjs'
+            : phase === 'media'
+              ? '/admin-media-upload-browser-worker.mjs'
+              : phase === 'content'
+                ? '/admin-content-browser-worker.mjs'
+                : phase === 'routes'
+                  ? '/auth-routes-browser-worker.mjs'
+                  : '/auth-browser-worker.mjs'),
     ).text()
     const workerPath = process.env.AUTH_BROWSER_WORKER_PATH
     if (workerPath) await Bun.write(workerPath, workerSource)
@@ -333,4 +352,5 @@ try {
   api.stop(true)
   await contentFixture?.close()
   await mediaFixture?.close()
+  await catalogFixture?.close()
 }

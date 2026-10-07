@@ -9,12 +9,12 @@ import {
   DialogDescription,
   DialogClose,
 } from '#/components/ui/dialog'
-import type { CatalogItem } from '#/lib/catalog/catalog-schema'
+import type { CatalogItem } from '#/lib/catalog/public-catalog-model'
 import {
   genreLabels,
   itemLength,
   kindLabels,
-} from '#/lib/catalog/catalog-selectors'
+} from '#/lib/catalog/public-catalog-model'
 import { Poster } from './poster'
 
 export function CatalogDetailDialog({

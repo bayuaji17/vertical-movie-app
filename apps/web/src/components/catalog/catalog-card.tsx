@@ -3,8 +3,8 @@ import {
   genreLabels,
   itemLength,
   kindLabels,
-} from '#/lib/catalog/catalog-selectors'
-import type { CatalogItem } from '#/lib/catalog/catalog-schema'
+} from '#/lib/catalog/public-catalog-model'
+import type { CatalogItem } from '#/lib/catalog/public-catalog-model'
 import { Poster } from './poster'
 
 export function CatalogCard({
@@ -15,7 +15,11 @@ export function CatalogCard({
   onDetails: (item: CatalogItem, trigger: HTMLElement) => void
 }) {
   return (
-    <article data-catalog-card className="min-w-0">
+    <article
+      data-catalog-card
+      data-catalog-id={`${item.kind}:${item.id}`}
+      className="min-w-0"
+    >
       <button
         type="button"
         aria-label={`View details for ${item.title}`}

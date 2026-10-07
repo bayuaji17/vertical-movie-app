@@ -102,7 +102,7 @@ export const kindLabels = {
 } as const
 export function itemLength(item: CatalogItem) {
   return item.kind === 'series'
-    ? `${item.episodeCount} episodes`
+    ? `${item.episodeCount} ${item.episodeCount === 1 ? 'episode' : 'episodes'}`
     : `${Math.ceil(item.durationMs / 60_000)} min`
 }
 export function genreLabels(item: CatalogItem) {
