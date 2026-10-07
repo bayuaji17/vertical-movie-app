@@ -177,7 +177,7 @@ Dependency terpenuhi. Bukti lint/types/docs/commitlint dicatat setelah commit; p
 
 ## Task: PCAT-004 — Poster output privat
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1, urutan/dependency menurut DAG plan.
 - Referensi: PCAT-US-004; PRD-07/08, GR-02; step PCAT-004 pada [plan](../plans/public-catalog-api/implementation-plan.md#implementation-steps).
@@ -191,8 +191,8 @@ Fresh owner lookup dan bounded WebP response melalui nativeS3/profile/owner/gene
 
 ### Acceptance criteria
 
-- [ ] Actual published poster200, hidden/archive GET baru404, storage/profile/oversize failure503 aman.
-- [ ] Tidak menerima storage key/URL publik, tidak redirect atau mengubah playback signing; limit/proxy bytes terukur.
+- [x] Actual published poster200, hidden/archive GET baru404, storage/profile/oversize failure503 aman.
+- [x] Tidak menerima storage key/URL publik, tidak redirect atau mengubah playback signing; limit/proxy bytes terukur.
 
 ### Validasi
 
@@ -200,18 +200,18 @@ Injected storage + app.handle MIME/limit/cancel tests; actual MinIO proof PCAT-0
 
 ### Hasil dan bukti
 
-Belum diimplementasikan/diverifikasi. Catat command aktual, hasil, decision/deviation dan batas pada task ini saat dieksekusi; existing HOMEFE/APUB proof tidak menutup task PCAT.
+Native poster service bounds reads to 5 MB, checks owner/job/generation/provenance/profile and fresh visibility, sends WebP no-store. Catalog 11 tests/71 assertions and dedicated PG/private MinIO 1 test/12 assertions pass. Actual production transcodePoster output 1080x1920, unsigned object403, archive404, oversize503 and profile failure verified. Root build passes; further storage/performance matrix remains PCAT-009.
 
 ### Commit task
 
 - Pesan: `feat(api): serve published catalog posters (PCAT-004)`
-- SHA: belum dibuat.
+- SHA: dicatat pada ledger task berikutnya setelah commit.
 - Hook/checks: diwajibkan tanpa bypass, hasil belum ada.
 - Ledger: actual SHA dicatat pada task berikutnya/delivery setelah commit, bukan self-reference.
 
 ### Blocker atau tindak lanjut
 
-Menunggu approval plan dan dependency di atas. Paths/symbols exact, risiko dan completion per step berada pada canonical plan; jangan memperluas ke watch/editor/production.
+Dependency terpenuhi. Bukti lint/types/docs/commitlint dicatat setelah commit; proof lanjutan sesuai DAG tetap wajib.
 
 ## Task: PCAT-005 — Gateway katalog same-origin
 
@@ -505,3 +505,5 @@ Menunggu approval plan dan dependency di atas. Paths/symbols exact, risiko dan c
 - Previous verified task commit before PCAT-002: 038d5f90e8be5890d52f46f53f84aac7037ef3cc feat(api): define public home catalog contract (PCAT-001).
 
 - Previous verified task commit before PCAT-003: 70dfa4422a0d8f4d7c268bc5ad56ce997fd05142 feat(api): query unified published catalog (PCAT-002).
+
+- Previous verified task commit before PCAT-004: 4db433cc3a5afb7de2e7e569ef82bfc6909fc29a feat(api): expose cached public home catalog (PCAT-003).

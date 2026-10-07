@@ -2,6 +2,7 @@ import { createCatalogModule } from "./modules/catalog";
 import { createPublicationModule } from "./modules/publication";
 import { createPlaybackModule } from "./modules/playback";
 import type { CatalogService } from "./modules/catalog/service";
+import type { CatalogPosterService } from "./modules/catalog/poster-service";
 import type { PublicationService } from "./modules/publication/service";
 import type { PlaybackService } from "./modules/playback/service";
 import { createMediaModule } from "./modules/media";
@@ -38,6 +39,7 @@ type AppDependencies = {
   storage?: S3Client;
   mediaService?: MediaService;
   catalogService?: CatalogService;
+  catalogPosterService?: CatalogPosterService;
   publicationService?: PublicationService;
   playbackService?: PlaybackService;
   database?: Pick<ReturnType<typeof createDatabase>, "client">;
@@ -73,6 +75,7 @@ export function createApp({
   storage,
   mediaService,
   catalogService,
+  catalogPosterService,
   publicationService,
   playbackService,
   database,
@@ -102,7 +105,7 @@ export function createApp({
     .use(createGenresModule({ service: genresService, getSession }))
     .use(createContentModule({ service: contentPageService, getSession }))
     .use(createMediaModule({ service: mediaService, getSession }))
-    .use(createCatalogModule(catalogService))
+    .use(createCatalogModule(catalogService, catalogPosterService))
     .use(createPublicationModule({ service: publicationService, getSession }))
     .use(createPlaybackModule({ service: playbackService, getSession }));
 

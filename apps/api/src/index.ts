@@ -1,6 +1,7 @@
 import { CatalogService } from "./modules/catalog/service";
 import { CatalogStore } from "./modules/catalog/repository";
 import { CatalogHomeStore } from "./modules/catalog/home-repository";
+import { CatalogPosterService } from "./modules/catalog/poster-service";
 import { PublicationService } from "./modules/publication/service";
 import { PlaybackService } from "./modules/playback/service";
 import { loadPlaybackBaseUrl } from "./config/playback-env";
@@ -29,11 +30,8 @@ const env = loadApiEnv();
 const storage = env.storage ? createStorageClient(env.storage) : undefined;
 const database = createDatabase(env.databaseUrl);
 const catalogStore = new CatalogStore(database.db),
-  catalogService = new CatalogService(
-    catalogStore,
-    undefined,
-    new CatalogHomeStore(database.db),
-  );
+  homeStore = new CatalogHomeStore(database.db),
+  catalogService = new CatalogService(catalogStore, undefined, homeStore);
 const multipart = env.storage ? createMultipartStorage(env.storage) : undefined;
 const auth = createAdminAuthServer({
   database: database.db,
@@ -48,6 +46,10 @@ const app = createApp({
   ),
   storage,
   catalogService,
+  catalogPosterService:
+    env.storage && storage
+      ? new CatalogPosterService(homeStore, storage, env.storage)
+      : undefined,
   publicationService: new PublicationService(
     database.db,
     catalogService.invalidate,

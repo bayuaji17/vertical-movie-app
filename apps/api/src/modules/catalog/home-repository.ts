@@ -86,6 +86,13 @@ export class CatalogHomeStore implements HomeStore {
         and(
           ready,
           own,
+          eq(source.videoId, videos.id),
+          eq(poster.videoId, videos.id),
+          isNull(source.seriesId),
+          isNull(poster.seriesId),
+          eq(hls.kind, "source"),
+          eq(posterJob.kind, "poster"),
+          sql`${poster.sha256} IS NOT NULL AND ${poster.verifiedReadyAt} IS NOT NULL`,
           or(
             isNull(videos.seasonId),
             and(isNull(seasons.archivedAt), publishedParent),
@@ -112,11 +119,15 @@ export class CatalogHomeStore implements HomeStore {
         and(
           publishedParent,
           eq(parentPoster.kind, "poster"),
+          eq(parentPoster.seriesId, series.id),
+          isNull(parentPoster.videoId),
+          eq(parentJob.kind, "poster"),
           eq(parentPoster.state, "ready"),
           eq(parentJob.state, "succeeded"),
           eq(parentJob.assetId, parentPoster.id),
           eq(parentJob.generation, parentPoster.generation),
           sql`${parentPoster.facts} IS NOT NULL`,
+          sql`${parentPoster.sha256} IS NOT NULL AND ${parentPoster.verifiedReadyAt} IS NOT NULL`,
           output(parentPoster, parentJob),
         ),
       );

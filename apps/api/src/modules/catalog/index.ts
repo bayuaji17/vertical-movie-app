@@ -2,12 +2,14 @@ import { Elysia } from "elysia";
 import { createContentErrors } from "../../plugins/errors";
 import { ErrorResponses } from "../../shared/content-model";
 import { CatalogService } from "./service";
+import { CatalogPosterService } from "./poster-service";
 import {
   HomeQuerySchema,
   HomeGenresQuery,
   HomePageDto,
   HomeGenresDto,
   HomeFeaturedDto,
+  HomePosterParams,
 } from "./home-model";
 import {
   CatalogQuery,
@@ -17,7 +19,10 @@ import {
   PublicSeriesDto,
   PublicSeriesListDto,
 } from "./model";
-export function createCatalogModule(service = new CatalogService()) {
+export function createCatalogModule(
+  service = new CatalogService(),
+  posters = new CatalogPosterService(),
+) {
   return new Elysia({ name: "api.catalog", normalize: false })
     .use(createContentErrors())
     .onBeforeHandle(({ set }) => {
@@ -37,6 +42,28 @@ export function createCatalogModule(service = new CatalogService()) {
       response: { 200: HomeFeaturedDto, ...ErrorResponses },
       detail: { tags: ["Catalog"], operationId: "getPublicFeaturedFilm" },
     })
+    .get(
+      "/catalog/:kind/:id/poster",
+      ({ params, request, set }) => {
+        set.headers["cache-control"] = "private, no-store";
+        return posters.get(params.kind, params.id, request.signal);
+      },
+      {
+        params: HomePosterParams,
+        detail: {
+          tags: ["Catalog"],
+          operationId: "getPublicCatalogPoster",
+          responses: {
+            200: {
+              description: "Bounded WebP image",
+              content: {
+                "image/webp": { schema: { type: "string", format: "binary" } },
+              },
+            },
+          },
+        },
+      },
+    )
     .get("/videos", ({ query }) => service.list(query), {
       query: CatalogQuery,
       response: { 200: PublicVideoListDto, ...ErrorResponses },
