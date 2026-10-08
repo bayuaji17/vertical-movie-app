@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from '#/components/ui/card'
 import { Badge } from '#/components/ui/badge'
-import { useAdminPrincipal } from '#/lib/auth/session-context'
+import { useAdminPrincipal } from '#/hooks/use-admin-principal'
 import { AdminPageHeading } from '#/components/admin/page-heading'
 import { Button } from '#/components/ui/button'
 import { contentSearch } from '#/lib/admin/content-list-state'

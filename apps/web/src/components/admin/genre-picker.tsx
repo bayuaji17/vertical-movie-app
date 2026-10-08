@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { genreOptions } from '#/lib/admin/content-queries'
-import { useContentApi } from '#/lib/admin/use-content-api'
+import { useContentApi } from '#/hooks/use-content-api'
 import { contentErrorMessage } from '#/lib/admin/content-errors'
 import { Button } from '#/components/ui/button'
 import { Checkbox } from '#/components/ui/checkbox'

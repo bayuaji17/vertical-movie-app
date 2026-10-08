@@ -10,7 +10,7 @@ import {
   patchContentCommand,
 } from '#/lib/admin/content-form-state'
 import { patchContentOptions, contentKeys } from '#/lib/admin/content-queries'
-import { useContentEditor } from '#/lib/admin/use-content-editor'
+import { useContentEditor } from '#/hooks/use-content-editor'
 import { ContentApiError } from '#/lib/admin/content-client'
 import { ContentForm } from './content-form'
 import { ContentDetailView } from './content-detail'

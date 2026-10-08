@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from '@tanstack/react-router'
-import type { ContentType } from './content-client'
-import { invalidateContent } from './content-queries'
-import { useContentApi } from './use-content-api'
+import type { ContentType } from '#/lib/admin/content-client'
+import { invalidateContent } from '#/lib/admin/content-queries'
+import { useContentApi } from '#/hooks/use-content-api'
 import { toast } from '#/components/ui/toast'
 
 export function useContentEditor() {

@@ -25,8 +25,9 @@ import {
   SheetTitle,
   SheetDescription,
 } from '#/components/ui/sheet'
-import { useAdminPrincipal } from '#/lib/auth/session-context'
-import { AdminLogout, useAdminLogout } from './admin-logout'
+import { useAdminPrincipal } from '#/hooks/use-admin-principal'
+import { AdminLogout } from './admin-logout'
+import { useAdminLogout } from '#/hooks/use-admin-logout'
 import { contentSearch } from '#/lib/admin/content-list-state'
 
 function Brand() {

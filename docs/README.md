@@ -85,6 +85,8 @@ Publish & Archive admin Film/Standalone: [context snapshot](plans/admin-publicat
 
 ## Gambaran implementasi saat ini
 
+Custom React hooks aplikasi web berada pada `apps/web/src/hooks/use-*.ts`; provider/context, client/query factories dan domain helpers tetap pada owner di `lib/`, komponen pada `components/`. Konvensi naming/import dimiliki root AGENTS; bukti refactor pada [WHOOK](tasks/web-hooks-organization.md).
+
 `apps/api` memiliki API Elysia, metadata, storage/upload, native poster request processing, publication/catalog/playback dan worker Bun/FFmpeg terpisah. `apps/web` memiliki TanStack Start, auth admin, metadata dashboard, uploader Eden/Query responsif light/dark serta primitive crop Canvas 9:16, gateway same-origin, Video.js 10 RC, watch dan preview minimal. `packages/auth` memiliki Better Auth dengan entry server/client/types terpisah. Workspace diatur oleh `turbo.json`; env samples berada pada masing-masing app.
 
 Media telah di-merge melalui [PR #3](https://github.com/bayuaji17/vertical-movie-app/pull/3). Development memakai MinIO dan production dirancang memakai Cloudflare R2 melalui env. Playback memakai HLS hasil transcoding dan lifecycle draft → published → archived. Bukti lokal serta fixture 10/30 menit ada pada runbook/backlog. R2 staging, Safari/native HLS, kapasitas 4 core/4 GB, full restore dan matriks stress yang belum terverifikasi tetap gerbang terpisah. Uploader Film/Standalone source+cover dan Series cover terverifikasi lokal; readiness/Publish/Archive Film/Standalone terverifikasi lokal 7 Oktober 2026. Publication Series/episode, editor/upload episode dan subtitle merupakan pekerjaan lanjutan.

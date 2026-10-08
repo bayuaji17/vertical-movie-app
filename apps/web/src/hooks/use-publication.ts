@@ -1,23 +1,23 @@
 import { useEffect, useMemo, useReducer, useSyncExternalStore } from 'react'
 import { onlineManager, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useAdminPrincipal } from '../auth/session-context'
-import { registerPrivateEffect } from '../auth/private-effects'
-import { browserContentClient } from './content-client'
-import type { ContentType } from './content-client'
-import { contentDetailOptions } from './content-queries'
-import { browserMediaClient } from './media-client'
-import { ownerMediaOptions, mediaPollInterval } from './media-queries'
-import { browserPublicationClient } from './publication-client'
+import { useAdminPrincipal } from '#/hooks/use-admin-principal'
+import { registerPrivateEffect } from '#/lib/auth/private-effects'
+import { browserContentClient } from '#/lib/admin/content-client'
+import type { ContentType } from '#/lib/admin/content-client'
+import { contentDetailOptions } from '#/lib/admin/content-queries'
+import { browserMediaClient } from '#/lib/admin/media-client'
+import { ownerMediaOptions, mediaPollInterval } from '#/lib/admin/media-queries'
+import { browserPublicationClient } from '#/lib/admin/publication-client'
 import {
   invalidatePublication,
   publicationKeys,
   scopePublicationRead,
   publicationMutationOptions,
   publicationReadinessOptions,
-} from './publication-queries'
-import { PublicationController } from './publication-state'
-import { PublicationApiError } from './publication-errors'
-import { inventoryNeedsPolling } from './media-state'
+} from '#/lib/admin/publication-queries'
+import { PublicationController } from '#/lib/admin/publication-state'
+import { PublicationApiError } from '#/lib/admin/publication-errors'
+import { inventoryNeedsPolling } from '#/lib/admin/media-state'
 
 const noUploads = () => false
 export function usePublication(
