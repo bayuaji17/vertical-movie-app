@@ -140,7 +140,7 @@ Agregasi SQL lima bounded queries dalam transaksi repeatable-read/read-only; sat
 ### Commit task
 
 - Pesan: feat(api): aggregate dashboard summary (DASH-003)
-- SHA: Belum dibuat; receipt dicatat pada update dokumentasi berikutnya sesudah commit berhasil.
+- SHA: `dbbcea869123e9b45173b35d18ce4fc69f9bb52b`.
 - Hook/checks: API163 pass, root types3/lint1/build2 pass, scoped Prettier/docs/diff/preservation; normal hooks wajib tanpa bypass.
 - Ledger: Jangan menulis SHA commit sendiri sebelum tersedia.
 
@@ -150,7 +150,7 @@ Menunggu approval proposal dan dependency task di atas; tidak menganggap scope a
 
 ## Task: DASH-004 — Private endpoint, DI dan OpenAPI
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: P0
 - Referensi: DASH-US-01/03, PRD-02/05/09; [implementation steps](../plans/admin-dashboard/implementation-plan.md#implementation-steps).
@@ -168,8 +168,8 @@ Requirements: Guard before repository, strict query/DTO/errors, private no-store
 
 ### Acceptance criteria
 
-- [ ] Both Eden contract and authorized request paths remain correct; no authentication expansion to public routes.
-- [ ] Definisi/state/invariants terkait pada plan terbukti; actual validation serta scope preservation dan commit tercatat sesuai workflow.
+- [x] Both Eden contract and authorized request paths remain correct; no authentication expansion to public routes.
+- [x] Definisi/state/invariants terkait pada plan terbukti; actual validation serta scope preservation dan commit tercatat sesuai workflow.
 
 ### Validasi
 
@@ -177,13 +177,13 @@ Requirements: Guard before repository, strict query/DTO/errors, private no-store
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement, bukan hasil actual.
+Static chained dashboard endpoint + bootstrap DI + unique secured OpenAPI operation. Native app.handle tests cover200/401/403/422/503, guard before repository, private/no-store on all responses and public health access. Unknown query keys rejected. API167 tests/971 assertions pass; existing gateway already allows canonical admin prefix.
 
 ### Commit task
 
-- Pesan: Conventional Commit dengan ID task setelah acceptance criteria dan relevant gates lulus.
+- Pesan: feat(api): expose private dashboard summary (DASH-004)
 - SHA: Belum dibuat; receipt dicatat pada update dokumentasi berikutnya sesudah commit berhasil.
-- Hook/checks: Belum dijalankan untuk task ini.
+- Hook/checks: API167 pass, root types3/lint1/build2 pass, docs/Prettier/diff/preservation; normal hooks wajib tanpa bypass.
 - Ledger: Jangan menulis SHA commit sendiri sebelum tersedia.
 
 ### Blocker atau tindak lanjut

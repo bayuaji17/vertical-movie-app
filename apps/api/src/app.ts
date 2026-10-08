@@ -1,3 +1,5 @@
+import { createDashboardModule } from "./modules/dashboard";
+import type { DashboardService } from "./modules/dashboard/service";
 import { createCatalogModule } from "./modules/catalog";
 import { createPublicationModule } from "./modules/publication";
 import { createPlaybackModule } from "./modules/playback";
@@ -34,6 +36,7 @@ import { createContentModule } from "./modules/content";
 import type { ContentPageService } from "./modules/content/service";
 
 type AppDependencies = {
+  dashboardService?: DashboardService;
   requestLogger?: RequestLoggerDependencies;
   contentPageService?: ContentPageService;
   storage?: S3Client;
@@ -70,6 +73,7 @@ function createAuthRoutes(auth?: AppDependencies["auth"]) {
 }
 
 export function createApp({
+  dashboardService,
   requestLogger,
   contentPageService,
   storage,
@@ -104,6 +108,7 @@ export function createApp({
     .use(createVideosModule({ service: videosService, getSession }))
     .use(createGenresModule({ service: genresService, getSession }))
     .use(createContentModule({ service: contentPageService, getSession }))
+    .use(createDashboardModule({ service: dashboardService, getSession }))
     .use(createMediaModule({ service: mediaService, getSession }))
     .use(createCatalogModule(catalogService, catalogPosterService))
     .use(createPublicationModule({ service: publicationService, getSession }))
