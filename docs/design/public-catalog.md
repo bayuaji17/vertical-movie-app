@@ -1,6 +1,6 @@
 # Katalog publik Film/Standalone — PCAT-002
 
-> Status: **disetujui pengguna; implementasi runtime berlangsung** · 8 Oktober 2026 · plan yang dipilih: `chore/public-catalog-plan` pada `68a0053`; runtime baseline main `65127a1`, working branch `feat/public-catalog`. Pengguna menyetujui desain dengan “ok, setuju”; bukan bukti API/HLS production.
+> Status: **disetujui pengguna; runtime implemented/verified lokal** · 8 Oktober 2026 · plan yang dipilih: `chore/public-catalog-plan` pada `68a0053`; runtime baseline main `65127a1`, working branch `feat/public-catalog`. Pengguna menyetujui desain dengan “ok, setuju”; bukan bukti API/HLS production.
 
 ## Artefak review
 
@@ -41,10 +41,12 @@ Watch design memakai identity/title/type/duration/back dan stage9:16. Implementa
 
 ## Keputusan desain yang disetujui
 
-Current main approved implementation memiliki Movie/Standalone/Series, search/genre, page6/publishedAt, filter state lokal, `/titles/$kind/$slug`, dan binary private poster. Plan yang dipilih pengguna mengusulkan scope Film/Standalone, page20/createdAt, URL filter, `/videos/$slug`, dan signed poster DTO. Prototype memperlihatkan scope visual **plan yang dipilih**, tidak menghapus current Series/search/genre atau mengganti kontrak runtime.
+Baseline main65127a1 sebelum execution memiliki Movie/Standalone/Series, search/genre, page6/publishedAt, filter state lokal, `/titles/$kind/$slug`, dan binary private poster. Plan yang dipilih pengguna mengusulkan scope Film/Standalone, page20/createdAt, URL filter, `/videos/$slug`, dan signed poster DTO. Prototype memperlihatkan scope visual **plan yang dipilih**, tidak menghapus current Series/search/genre atau mengganti kontrak runtime.
 
 Pengguna menyetujui Film/Standalone, grid20/Load more, URL type, detail `/videos/$slug`, English dan noindex/nofollow sementara pada alur baru. Implementasi berlangsung sesuai DAG; API/rute Series dan direct episode watch existing tetap compatible. Cache fence, unsigned SSR, public client dan player identity guards direuse. Kebijakan indexing jangka panjang tetap keputusan produk terpisah. Lihat [freshness context](../plans/public-catalog/repository-context.md#freshness-untuk-plan-yang-dipilih-pengguna) dan [plan](../plans/public-catalog/implementation-plan.md).
 
 ## Evidence dan batas
 
 Command/results prototype/browser/docs serta local commit dicatat pada [PCAT-002](../tasks/public-catalog.md#task-pcat-002--spesifikasi-dan-desain-katalogdetailwatch). Pengguna menyetujui desain pada 8 Oktober 2026 dengan “ok, setuju”. Preview tidak membuktikan SQL/cursor, SSR hydration production, access/archive, signed expiry, networking atau playback nyata. Bukti WHOOK/API/PCW sebelumnya tetap evidence dari task/runtime masing-masing.
+
+Runtime verification8 Oktober2026: homepage/detail/watch aktual mengikuti approval dengan API/poster queue/unsigned SSR dan real built browser evidence pada PCAT-013. Artefak HTML/PNG di atas tetap prototype approval, bukan screenshot runtime; backend dan production limitations tetap pada backlog/runbook.

@@ -1,6 +1,6 @@
 # Modul: Katalog publik Film/Standalone
 
-> Status: **active — PCAT-001–006 Done, query/state PCAT-007 berikutnya** · 8 Oktober 2026 · pengguna menetapkan plan `chore/public-catalog-plan` untuk dilanjutkan. Working branch `feat/public-catalog` dari main65127a1; desain plan awal disetujui pengguna sebelum implementasi UI. Baseline awal634f7d4 tetap historis.
+> Status: **PCAT-001–014 Done — implemented/verified lokal** · 8 Oktober 2026 · pengguna menetapkan plan `chore/public-catalog-plan` untuk dilanjutkan. Working branch `feat/public-catalog` dari main65127a1; desain plan awal disetujui pengguna sebelum implementasi UI. Baseline awal634f7d4 tetap historis.
 
 ## Tujuan modul
 
@@ -558,7 +558,7 @@ SQL/storage acceptance selesai lokal. Tidak membuktikan browser UI/HLS/productio
 
 Reuse guarded DB/private random MinIO bucket/worker FFmpeg dan Node/Playwright env existing; public browser tanpa injected admin session.
 
-Paths/symbol owners: `apps/api/test/integration/public-catalog-browser-proof.test.ts, apps/web/test/public-catalog-browser-worker.mjs, business-gateway.test.ts dan auth-import-boundary-proof.mjs`. Rincian simbol dan kontrak di affected-files/implementation steps plan.
+Paths/symbol owners: `apps/api/test/integration/public-content-browser-fixture.ts, apps/web/test/{auth-browser-smoke,public-film-catalog-browser-worker}.mjs; existing gateway/import proofs reused`. Rincian simbol dan kontrak di affected-files/implementation steps plan.
 
 ### Acceptance criteria
 
@@ -568,7 +568,7 @@ Paths/symbol owners: `apps/api/test/integration/public-catalog-browser-proof.tes
 
 ### Validasi
 
-Build artifact terbaru, bun test apps/api/test/integration/public-catalog-browser-proof.test.ts serial; browser/gateway/import proofs dan root gates. R2/Safari unavailable dicatat, bukan lolos.
+Build artifact terbaru, AUTH_BROWSER_PHASE=public-film AUTH_BROWSER_RUNTIME=built bun --env-file=apps/api/.env apps/web/test/auth-browser-smoke.mjs serial; browser/gateway/import proofs dan root gates. R2/Safari unavailable dicatat, bukan lolos.
 
 ### Hasil dan bukti
 
@@ -581,8 +581,8 @@ API151/883, web193/1039, root types3/lint1 pass; built web artifact used for bro
 ### Commit task
 
 - Pesan usulan: `test: acceptance anonymous built-browser nyata (PCAT-013)`.
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk commit ini.
+- SHA: `bf881cd1b9b33bc58ec829a78b0b961fa9ec40a7`.
+- Hook/checks: actual built browser + native auth, API151/883 web193/1039 root types/lint/build/docs/format/diff dan normal Husky/Commitlint pass.
 - Ledger: receipt aktual dicatat pada update sesudah commit berhasil.
 
 ### Blocker atau tindak lanjut
@@ -591,7 +591,7 @@ Lanjut PCAT-014 canonical current/history docs dan quality gate closure.
 
 ## Task: PCAT-014 — Dokumentasi canonical dan penutupan modul
 
-- Status: Backlog
+- Status: Done — canonical docs dan local module closure.
 - Owner: Codex/pengembang
 - Prioritas: P1 — urutan dependency DAG pada plan
 - Referensi: PCAT-US-01/02/03; PRD-07/08/09, GR-02/03/05/06/08; [plan](../plans/public-catalog/implementation-plan.md)
@@ -607,9 +607,9 @@ Paths/symbol owners: `docs/product/prd.md, architecture/overview.md, operations/
 
 ### Acceptance criteria
 
-- [ ] Semua mandatory tasks/AC terpenuhi actual proof dan commit; pending production/device matrix terpisah.
-- [ ] Tests relevant, root types/lint/build/docs/format/whitespace pass, unrelated work preserved, no generated artifacts committed.
-- [ ] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
+- [x] Semua mandatory tasks/AC terpenuhi actual proof dan commit; pending production/device matrix terpisah.
+- [x] Tests relevant, root types/lint/build/docs/format/whitespace pass, unrelated work preserved, no generated artifacts committed.
+- [x] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
 
 ### Validasi
 
@@ -617,15 +617,15 @@ Final relevant tests dan bun run check-types/lint/build/docs:check; scoped Prett
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau divalidasi. Commands di atas merupakan rencana, bukan hasil.
+8 Oktober 2026: canonical PRD/global rules/architecture/runbook/index/spec/context/plan/backlog diperbarui bersama; keputusan approved Film/Standalone dan runtime20/type/detail/signed cover/watch/current proof dibedakan dari homepage PCAT/PCW lama dan production/device gates. Actual files/harness refinement dicatat tanpa scaffold atau tambahan dependency/env/schema. API151/883, web193/1039, dedicated SQL/MinIO1/30, actual built Chromium public-film + native Better Auth, root types3/lint1/build2, docs:check86 Markdown/824 links, scoped Prettier dan git diff --check lulus. Working overlay23 paths tetap di luar commits;22 non-index byte-identical, README user design overlay preserved dengan selective index staging. Generated route tree dibuat generator, dist/output/turbo/screenshots tidak di-stage.
 
 ### Commit task
 
 - Pesan usulan: `docs: dokumentasi canonical dan penutupan modul (PCAT-014)`.
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk commit ini.
+- SHA: commit PCAT-014 memuat closure ini; receipt final dilaporkan setelah hook berhasil, tanpa SHA self-referential.
+- Hook/checks: final quality gates di atas; normal Husky/Commitlint wajib berhasil sebelum closure dilaporkan.
 - Ledger: receipt aktual dicatat pada update sesudah commit berhasil.
 
 ### Blocker atau tindak lanjut
 
-Menunggu PCAT-013. Approval/hasil proof tidak diasumsikan tersedia.
+Module selesai lokal. Remote delivery/production serta R2/Safari/perangkat fisik/resource/full restore tetap tahap terpisah.

@@ -151,3 +151,7 @@ Seluruh source berikut dibaca pada SHA snapshot di atas; dokumen desain disebut 
 ## Validation history
 
 2026-10-08: HEAD/source snapshot diperiksa lokal; source target tidak mempunyai diff terhadap base. Overlay docs dipisahkan dari facts source. Context ditulis sebelum plan. Freshness execution belum dilakukan karena implementasi belum diminta.
+
+## Execution freshness — 8 Oktober 2026
+
+Source/proof head `bf881cd1b9b33bc58ec829a78b0b961fa9ec40a7` pada feat/public-catalog memakai baseline main65127a1 dan plan pilihan chore/public-catalog-plan68a0053. Desain/kelanjutan disetujui pengguna8 Oktober 2026; Film/Standalone homepage20/type, unsigned SSR/detail dan signed cover queue/browser watch implemented/verified lokal. API/Series/episode direct routes dan custom hooks convention dipertahankan. Snapshot awal dan PCAT/PCW3-kind behavior di atas tetap sejarah; current contracts pada PRD/architecture/runbook, evidence dan receipts pada backlog/plan. Remote delivery/production tidak diambil dari local proof.
