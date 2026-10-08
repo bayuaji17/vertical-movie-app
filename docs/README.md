@@ -46,6 +46,8 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 
 ## Context dan plan per fitur
 
+Katalog publik Film/Standalone: [context snapshot](plans/public-catalog/repository-context.md), [implementation plan](plans/public-catalog/implementation-plan.md) dan [backlog PCAT-001–014](tasks/public-catalog.md), draft untuk review 8 Oktober 2026. Scope proposal homepage grid → detail → watch, filter server/cursor dan signed cover terpisah. UX/desain dan implementasi belum disetujui; source belum diubah.
+
 Logging request API memakai console implemented/verified lokal 7 Oktober 2026; [panduan](guides/api-development.md#logging-request-http), [context baseline](plans/api-request-logging/repository-context.md) dan [plan/evidence](plans/api-request-logging/implementation-plan.md) menjelaskan scope serta batas gateway/storage.
 
 Publish & Archive admin Film/Standalone: [context snapshot](plans/admin-publication/repository-context.md) dan [implementation plan](plans/admin-publication/implementation-plan.md), disetujui pengguna 7 Oktober 2026. Scope mencakup readiness server, konfirmasi manual, version/idempotency/recovery dan proof akses publik; plan/empat desain approved, APUB-001–013 implemented/verified lokal; actual API/DB/MinIO/FFmpeg/built-browser proof dan local receipts pada backlog.
@@ -62,6 +64,7 @@ Publish & Archive admin Film/Standalone: [context snapshot](plans/admin-publicat
 
 ## Backlog dan evidence
 
+- [Katalog publik Film/Standalone](tasks/public-catalog.md): PCAT-001–014; planning draft, discover/detail/watch tanpa login dan acceptance lokal, tidak mencakup rollout production.
 - [Logging request API](tasks/api-request-logging.md): APILOG-001–003; dua event console per request, suite API dan demo development/build-start terverifikasi lokal.
 - [Auth](tasks/auth.md): AUTH/AUTH-REF dan evidence lokal.
 - [Video](tasks/videos.md): metadata dan compatibility lifecycle.
