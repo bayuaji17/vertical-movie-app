@@ -69,9 +69,7 @@ export function VerticalVideoPlayer({
     if (!loadPlayback || busy.current || terminal.current) return
     if (attempts.current >= 2) {
       terminal.current = true
-      setError(
-        'Video tidak dapat diputar. Tekan Retry video untuk mencoba kembali.',
-      )
+      setError('Playback failed. Choose Retry playback to try again.')
       return
     }
     const currentEpoch = epoch.current,
@@ -106,9 +104,7 @@ export function VerticalVideoPlayer({
       ) {
         terminal.current = true
         media.current?.pause()
-        setError(
-          'Video tidak tersedia. Tekan Retry video untuk mencoba kembali.',
-        )
+        setError('Playback unavailable. Choose Retry playback to try again.')
       }
     } finally {
       if (busy.current === request) busy.current = null
@@ -184,7 +180,7 @@ export function VerticalVideoPlayer({
         {loadPlayback && (
           <PlaybackObserver onQuality={checkExpiry} onFailure={failed} />
         )}
-        <VideoSkin className="aspect-[9/16] w-full" aria-label="Pemutar video">
+        <VideoSkin className="aspect-[9/16] w-full" aria-label="Video player">
           {loadPlayback ? (
             <HlsJsVideo
               ref={media}
@@ -228,7 +224,7 @@ export function VerticalVideoPlayer({
             className="mt-3 block min-h-11 rounded-xl border px-4 focus-visible:ring-2 focus-visible:ring-ring"
             onClick={retry}
           >
-            Retry video
+            Retry playback
           </button>
         </p>
       )}

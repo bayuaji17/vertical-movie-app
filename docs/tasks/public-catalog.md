@@ -442,8 +442,8 @@ Generate routes, typed/behavior tests, SSR status/HTML and browser navigation; r
 ### Commit task
 
 - Pesan usulan: `feat: detail publik film/standalone (PCAT-010)`.
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk commit ini.
+- SHA: `a70b07d7c8e6604ee7e9f57db2e7486883ab1c74`.
+- Hook/checks: web193/1039, root types3/lint1/build2, docs/format/diff dan normal Husky/Commitlint pass.
 - Ledger: receipt aktual dicatat pada update sesudah commit berhasil.
 
 ### Blocker atau tindak lanjut
@@ -452,7 +452,7 @@ Lanjut PCAT-011 watch wrapper; browser acceptance ditutup PCAT-013.
 
 ## Task: PCAT-011 — Integrasi metadata dan navigasi watch existing
 
-- Status: Backlog
+- Status: Implemented — real HLS browser acceptance PCAT-013 berikutnya.
 - Owner: Codex/pengembang
 - Prioritas: P1 — urutan dependency DAG pada plan
 - Referensi: PCAT-US-02; PRD-07/08/09, GR-02/03/05/06/08; [plan](../plans/public-catalog/implementation-plan.md)
@@ -478,7 +478,7 @@ Videojs rc.4 bundled docs/skill; real HLS renewal/seek/quality proof affected, d
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau divalidasi. Commands di atas merupakan rencana, bukan hasil.
+8 Oktober 2026: watch existing dibungkus PublicShell, canonical URL type dan Back to details /videos/$slug + Back to browse filter. Direct episode/Back to series/Next tetap tersedia. Video.js rc.4 CLI print-only dan installed bundled autoplay guide dibaca; player keyed id dan callback slug/id, cancellation/renewal/seek/no-autoplay tetap existing. Shared player copy English dan explicit Retry playback; legacy worker locator disesuaikan. Offline watch metadata memakai cached fallback/networkMode always dan disabled observer. Observed: web193/1039, root types3/lint1/build2 pass. Browser real HLS/renewal/seek/race/episode PCAT-013 berikutnya.
 
 ### Commit task
 
@@ -489,7 +489,7 @@ Belum diimplementasikan atau divalidasi. Commands di atas merupakan rencana, buk
 
 ### Blocker atau tindak lanjut
 
-Menunggu PCAT-010. Approval/hasil proof tidak diasumsikan tersedia.
+PCAT-012 sudah Done; lanjut actual built-browser PCAT-013.
 
 ## Task: PCAT-012 — Proof SQL visibility, cursor dan poster
 

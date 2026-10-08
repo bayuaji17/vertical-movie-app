@@ -88,6 +88,7 @@ export function watchMetadataOptions(
     queryKey: ['catalog', 'public', 'content', 'watch', 1, slug] as const,
     queryFn: ({ signal }) => api.watch(slug, signal),
     retry: false,
+    networkMode: 'always',
     staleTime: (q) =>
       remaining(q.state.data?.expiresAt ?? 0, q.state.dataUpdatedAt),
   })
@@ -147,6 +148,12 @@ export async function loadContent(
   }
 }
 export async function loadWatchMetadata(client: QueryClient, slug: string) {
+  if (typeof window !== 'undefined' && !navigator.onLine)
+    return {
+      status: client.getQueryData(watchMetadataOptions(slug).queryKey)
+        ? null
+        : 503,
+    }
   const [result] = await Promise.allSettled([
     client.query(watchMetadataOptions(slug)),
   ])
