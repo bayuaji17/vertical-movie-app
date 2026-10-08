@@ -1,6 +1,6 @@
 # Dashboard admin — layout dan state
 
-> Status: specification approved melalui approval plan pengguna 8 Oktober 2026; runtime belum diimplementasikan. Rhea shell/token existing dipakai; tidak mengklaim mockup lama sebagai approval metrik baru. [Plan](../plans/admin-dashboard/implementation-plan.md), [backlog](../tasks/admin-dashboard.md).
+> Status: specification approved melalui approval plan pengguna 8 Oktober 2026; runtime implemented dan verified lokal melalui DASH-010 pada built Bun/Nitro/Chromium dengan real dedicated PostgreSQL.15 width/theme cases lulus; empty/large synthetic UI fixtures dan SQL publication/job fixtures dibedakan dari native auth/media regression. Rhea shell/token existing dipakai; tidak mengklaim mockup lama sebagai approval metrik baru. [Plan](../plans/admin-dashboard/implementation-plan.md), [backlog](../tasks/admin-dashboard.md).
 
 ## Struktur halaman
 

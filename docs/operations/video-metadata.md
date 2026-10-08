@@ -1,6 +1,6 @@
 # Video Operations — metadata
 
-> Status aktif: metadata dashboard diimplementasikan lokal 5 Oktober 2026 pada `feat/admin-content-dashboard`, sesuai persetujuan pengguna. Evidence pada [backlog admin content](../tasks/admin-content.md). Runbook [media](media.md) memiliki upload/worker/HLS/publication yang ditambahkan setelah tahap A. Bagian 3–4 Oktober di bawah adalah sejarah; klaim belum tersedia pada snapshot tersebut bukan kondisi runtime saat ini.
+> Status aktif: ringkasan dashboard verified lokal 8 Oktober 2026 ([DASH](../tasks/admin-dashboard.md)); metadata dashboard diimplementasikan lokal 5 Oktober 2026 pada `feat/admin-content-dashboard`, sesuai persetujuan pengguna. Evidence pada [backlog admin content](../tasks/admin-content.md). Runbook [media](media.md) memiliki upload/worker/HLS/publication yang ditambahkan setelah tahap A. Bagian 3–4 Oktober di bawah adalah sejarah; klaim belum tersedia pada snapshot tersebut bukan kondisi runtime saat ini.
 
 ## Dashboard metadata aktif — 5 Oktober 2026
 
@@ -167,3 +167,18 @@ Implemented locally 5 Oktober 2026: `GET /admin/content?type=film|standalone|ser
 Page defaults 1, pageSize 10; page integer 1–1000000, pageSize integer 1–100. Empty result has totalPages 0; a page beyond the last returns empty items with the requested page and actual total. Search is trimmed and SQL wildcard characters are escaped. Include archived includes active and archived. Count and rows use identical filters in a read-only repeatable-read transaction; order createdAt/id descending. Across separate page requests concurrent changes can still move items; there is no persistent catalog snapshot.
 
 No schema migration. Dedicated proof: `bun test apps/api/test/integration/content-pages-proof.test.ts` with `CONTENT_TEST_DATABASE_URL` restricted to local `vertical_movie_app_content_test`; fixture resets that database only. Evidence/commit: [ADMC-013](../tasks/admin-content.md#task-admc-013--kontrak-pagination-server).
+
+## Ringkasan dashboard admin — 8 Oktober 2026
+
+Status implemented/verified lokal setelah approval plan pengguna. /admin menampilkan inventori editorial empat jenis/status, current source/cover jobs Queued/Running/Retry/Failed, latest8 top-level owners serta failed5 owner links. Published bukan public-playable/health/readiness. Series unpublished ditampilkan bila >0; archived owner rows tetap dihitung pada inventori, sedangkan jobs pada archived owner/parent dikecualikan. Detail metrik/order/DTO dimiliki [plan approved](../plans/admin-dashboard/implementation-plan.md#api-contract); layout dimiliki [spec](../design/admin-dashboard.md).
+
+Browser memakai GET /api/admin/dashboard/summary → exact gateway GET → guarded Elysia /admin/dashboard/summary, private/no-store. Refresh manual deduplicated; data lama dan generatedAt tetap tampil saat pending/error/offline. Tanpa success tampil unavailable/skeleton, bukan fabricated0. Poll30s hanya mounted visible online setelah success; failure memerlukan Retry atau focus/reconnect recovery. Confirmed metadata/season/episode/media/publication memakai session-specific cancellation/invalidation, tanpa automatic POST replay atau hidden summary request. Session loss menghapus private data/effects. Worker/external writes teramati via poll/Refresh, bukan realtime subscription.
+
+Proof commands existing environment contract:
+
+- `bun test apps/api/src` dan `bun test apps/web/test`, root `bun run check-types`, `bun run lint`, `bun run build`.
+- `bun test apps/api/test/integration/admin-dashboard-proof.test.ts` dengan guarded CONTENT_TEST_DATABASE_URL loopback vertical_movie_app_content_test. Fixture mereset hanya dedicated DB tersebut; jangan gunakan development/production dan jangan jalankan DB-reset suites bersamaan.
+- `AUTH_BROWSER_PHASE=dashboard AUTH_BROWSER_RUNTIME=built bun apps/web/test/auth-browser-smoke.mjs`, dengan dedicated DB serta AUTH_BROWSER_NODE/AUTH_PLAYWRIGHT_MODULE/AUTH_BROWSER_EXECUTABLE/AUTH_BROWSER_WORKER_PATH seperti proof metadata. Jalankan setelah build dan serialize dengan browser lain. Optional screenshot prefix tetap absolut dan host-readable.
+- `bun run --cwd apps/web auth:ssr:smoke` dan `bun run --cwd apps/web auth:import:proof`. Import-boundary proof memasang temporary illegal import lalu memulihkan source; rebuild sesudah negative proof.
+
+Bukti native Better Auth cookies terpisah dari browser injected session. Dashboard browser memakai SQL publication/job transitions untuk membuktikan observasi state; empty/large modes hanya UI fixtures. Itu bukan bukti worker/publication baru. Existing Series/Film upload/publication regressions memakai dedicated PostgreSQL/MinIO/FFmpeg. No development migration karena schema tidak berubah. Query EXPLAIN hanya fixture scale; deployment/R2/device/production benchmark dan settings tetap di luar delivery lokal. Actual commands/results dan commit receipts dimiliki backlog.

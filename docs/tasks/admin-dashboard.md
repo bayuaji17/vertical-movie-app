@@ -1,6 +1,6 @@
 # Modul: Ringkasan dashboard admin
 
-> Status: proposal untuk review pengguna · 8 Oktober 2026 · Pengguna memilih dashboard terlebih dahulu dan meminta plan. Context berbasis main `65fcc2b58d5b316e8c44b2d99e28baf2e90e4f8c`. Planning tidak mengimplementasikan API/UI; task runtime menunggu approval scope.
+> Status: implemented/verified lokal · 8 Oktober 2026 · Pengguna menyetujui detailed plan; context berbasis main `65fcc2b58d5b316e8c44b2d99e28baf2e90e4f8c`, implementation branch feat/admin-dashboard-summary. Mandatory DASH-001–011 selesai; push/PR/merge dan production rollout belum dilakukan.
 
 ## Tujuan modul
 
@@ -20,7 +20,7 @@ Sebagai admin, saya ingin ringkasan yang dapat direfresh serta hilang saat sesi 
 
 ## Aturan scope dan evidence
 
-Runtime tasks tetap Backlog sampai proposal disetujui pengguna. Task planning dapat Done setelah docs/gates/local commit; itu bukan approval produk. Type counts editorial berbeda dari public playable, job counts bukan owner/attempt counts. API read-only tanpa S3/FFmpeg dan no new schema/env/dependency teridentifikasi. DB resets hanya dedicated test; migration development hanya jika schema change diotorisasi scope berikutnya. Commit setiap completed task sesudah gates dengan ID DASH; remote operations memerlukan izin tersendiri.
+Proposal disetujui pengguna 8 Oktober 2026; status tasks mencerminkan actual evidence berikut. Task planning dapat Done setelah docs/gates/local commit; itu bukan approval produk. Type counts editorial berbeda dari public playable, job counts bukan owner/attempt counts. API read-only tanpa S3/FFmpeg dan no new schema/env/dependency teridentifikasi. DB resets hanya dedicated test; migration development hanya jika schema change diotorisasi scope berikutnya. Commit setiap completed task sesudah gates dengan ID DASH; remote operations memerlukan izin tersendiri.
 
 ## Task: DASH-001 — Context, plan dan backlog
 
@@ -104,7 +104,7 @@ Layout/state specification tersedia untuk4 jenis, current-job units, bounded8/5 
 
 ### Blocker atau tindak lanjut
 
-Menunggu approval proposal dan dependency task di atas; tidak menganggap scope atau hasil runtime sudah disetujui/verified.
+Tidak ada blocker implementasi lokal. Remote delivery memerlukan otorisasi terpisah.
 
 ## Task: DASH-003 — Repository dan domain aggregate
 
@@ -146,7 +146,7 @@ Agregasi SQL lima bounded queries dalam transaksi repeatable-read/read-only; sat
 
 ### Blocker atau tindak lanjut
 
-Menunggu approval proposal dan dependency task di atas; tidak menganggap scope atau hasil runtime sudah disetujui/verified.
+Tidak ada blocker implementasi lokal. Remote delivery memerlukan otorisasi terpisah.
 
 ## Task: DASH-004 — Private endpoint, DI dan OpenAPI
 
@@ -177,7 +177,7 @@ Requirements: Guard before repository, strict query/DTO/errors, private no-store
 
 ### Hasil dan bukti
 
-Static chained dashboard endpoint + bootstrap DI + unique secured OpenAPI operation. Native app.handle tests cover200/401/403/422/503, guard before repository, private/no-store on all responses and public health access. Unknown query keys rejected. API167 tests/971 assertions pass; existing gateway already allows canonical admin prefix.
+Static chained dashboard endpoint + bootstrap DI + unique secured OpenAPI operation. Native app.handle tests cover200/401/403/422/503, guard before repository, private/no-store on all responses and public health access. Unknown query keys rejected. API167 tests/971 assertions pass; Historical DASH-004 gateway assumption was incomplete; exact GET path/testing corrected in DASH-010 after built-browser404.
 
 ### Commit task
 
@@ -188,7 +188,7 @@ Static chained dashboard endpoint + bootstrap DI + unique secured OpenAPI operat
 
 ### Blocker atau tindak lanjut
 
-Menunggu approval proposal dan dependency task di atas; tidak menganggap scope atau hasil runtime sudah disetujui/verified.
+Tidak ada blocker implementasi lokal. Remote delivery memerlukan otorisasi terpisah.
 
 ## Task: DASH-005 — Private client, query dan hook
 
@@ -230,7 +230,7 @@ Eden-derived DTO validated strictly with existing Zod: safe counts/partitions, U
 
 ### Blocker atau tindak lanjut
 
-Menunggu approval proposal dan dependency task di atas; tidak menganggap scope atau hasil runtime sudah disetujui/verified.
+Tidak ada blocker implementasi lokal. Remote delivery memerlukan otorisasi terpisah.
 
 ## Task: DASH-006 — Content overview dan latest list
 
@@ -272,7 +272,7 @@ Admin route now renders four editorial inventories/partitions, truthful Episode 
 
 ### Blocker atau tindak lanjut
 
-Menunggu approval proposal dan dependency task di atas; tidak menganggap scope atau hasil runtime sudah disetujui/verified.
+Tidak ada blocker implementasi lokal. Remote delivery memerlukan otorisasi terpisah.
 
 ## Task: DASH-007 — Current media dan needs attention
 
@@ -314,7 +314,7 @@ Current-media four counters with explicit job units/stored Running helper. Faile
 
 ### Blocker atau tindak lanjut
 
-Menunggu approval proposal dan dependency task di atas; tidak menganggap scope atau hasil runtime sudah disetujui/verified.
+Tidak ada blocker implementasi lokal. Remote delivery memerlukan otorisasi terpisah.
 
 ## Task: DASH-008 — Mutation invalidation integration
 
@@ -356,7 +356,7 @@ Owner/session-confirmed existing invalidation helpers now cancel/fence exact mat
 
 ### Blocker atau tindak lanjut
 
-Menunggu approval proposal dan dependency task di atas; tidak menganggap scope atau hasil runtime sudah disetujui/verified.
+Tidak ada blocker implementasi lokal. Remote delivery memerlukan otorisasi terpisah.
 
 ## Task: DASH-009 — PostgreSQL/native auth proof
 
@@ -398,7 +398,7 @@ Dedicated loopback vertical_movie_app_content_test reset/migrated only. Real Bun
 
 ### Blocker atau tindak lanjut
 
-Menunggu approval proposal dan dependency task di atas; tidak menganggap scope atau hasil runtime sudah disetujui/verified.
+Tidak ada blocker implementasi lokal. Remote delivery memerlukan otorisasi terpisah.
 
 ## Task: DASH-010 — Built-browser acceptance dan regressions
 
@@ -434,17 +434,17 @@ Built dashboard phase passes15 width/theme cases320/390/768/1024/1440 Light/Dark
 ### Commit task
 
 - Pesan: test: verify dashboard browser flow and regressions (DASH-010)
-- SHA: Belum dibuat; receipt dicatat pada update dokumentasi berikutnya sesudah commit berhasil.
+- SHA: `858e38510a69491baf1224a7019035da0ce51cdb`.
 - Hook/checks: API168/web233 pass; native SQL7 and HTTP5 pass; dashboard/Series/media/publication/auth browser phases, auth SSR/import proof and root types3/lint1/build2 pass; docs/format/diff/preservation; normal hooks wajib tanpa bypass.
 - Ledger: Jangan menulis SHA commit sendiri sebelum tersedia.
 
 ### Blocker atau tindak lanjut
 
-Menunggu approval proposal dan dependency task di atas; tidak menganggap scope atau hasil runtime sudah disetujui/verified.
+Tidak ada blocker implementasi lokal. Remote delivery memerlukan otorisasi terpisah.
 
 ## Task: DASH-011 — Canonical docs dan closure
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: P1
 - Referensi: DASH-US-02/03, PRD-02/05/09; [implementation steps](../plans/admin-dashboard/implementation-plan.md#implementation-steps).
@@ -462,8 +462,8 @@ Requirements: PRD-02 summary status updated while settings remains open; actual 
 
 ### Acceptance criteria
 
-- [ ] All mandatory DASH tasks verified and committed separately; remaining rollout/features accurately identified.
-- [ ] Definisi/state/invariants terkait pada plan terbukti; actual validation serta scope preservation dan commit tercatat sesuai workflow.
+- [x] All mandatory DASH tasks verified and committed separately; remaining rollout/features accurately identified.
+- [x] Definisi/state/invariants terkait pada plan terbukti; actual validation serta scope preservation dan commit tercatat sesuai workflow.
 
 ### Validasi
 
@@ -471,15 +471,15 @@ Fresh source/mandatory AC audit, docs:check, targeted Prettier/diff, relevant fi
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement, bukan hasil actual.
+Canonical PRD-02 now reflects verified editorial/current-job summary while site settings stays open. Architecture/runbook/design/index own current behavior, exact gateway GET, five-query snapshot, safe count/DTO, browser-only cleanup/refresh, active proof commands and fixture/production limitations. Plan/backlog close mandatory001–011 with actual prior receipts; historical gateway assumption corrected. Fresh source accepted at DASH-010 head858e385 after API168/web233, PostgreSQL7/43, HTTP5/107, all requested browser/auth/import regressions and root gates. Original23 unrelated paths preserved; no schema/env/dependency change, development/production migration, push/PR/merge/deployment.
 
 ### Commit task
 
-- Pesan: Conventional Commit dengan ID task setelah acceptance criteria dan relevant gates lulus.
+- Pesan: docs: close verified dashboard implementation (DASH-011)
 - SHA: Belum dibuat; receipt dicatat pada update dokumentasi berikutnya sesudah commit berhasil.
-- Hook/checks: Belum dijalankan untuk task ini.
+- Hook/checks: DASH-010 runtime gates/regressions passed; scoped docs formatting, docs:check, staged-tree/diff and preservation; normal hooks required; normal hooks wajib tanpa bypass.
 - Ledger: Jangan menulis SHA commit sendiri sebelum tersedia.
 
 ### Blocker atau tindak lanjut
 
-Menunggu approval proposal dan dependency task di atas; tidak menganggap scope atau hasil runtime sudah disetujui/verified.
+Tidak ada blocker implementasi lokal. Remote delivery memerlukan otorisasi terpisah.

@@ -19,7 +19,7 @@ Aturan penamaan, ownership dan maintenance berada pada [Documentation rules](../
 
 ## Produk, arsitektur dan desain
 
-- [Ringkasan dashboard admin](design/admin-dashboard.md): layout dan state approved melalui plan, runtime/proof mengikuti DASH.
+- [Ringkasan dashboard admin](design/admin-dashboard.md): layout/state implemented dan verified lokal8Oct melalui DASH.
 
 - [Admin Series/season/episode](design/admin-series-episodes.md): route dan state specification editor memakai admin Rhea existing; implementasi diminta pengguna 8 Oktober 2026.
 
@@ -54,7 +54,7 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 
 ## Context dan plan per fitur
 
-Ringkasan dashboard admin: [context](plans/admin-dashboard/repository-context.md), [plan](plans/admin-dashboard/implementation-plan.md) dan [backlog DASH](tasks/admin-dashboard.md). Pengguna memilih dashboard dan meminta plan 8 Oktober 2026; plan/metrik disetujui pengguna 8 Oktober 2026; runtime DASH bertahap. Pengaturan situs tetap modul terpisah.
+Ringkasan dashboard admin: [context](plans/admin-dashboard/repository-context.md), [plan](plans/admin-dashboard/implementation-plan.md) dan [backlog DASH](tasks/admin-dashboard.md). Pengguna memilih dashboard dan meminta plan 8 Oktober 2026; plan/metrik disetujui pengguna dan ringkasan editorial/current jobs/latest/failures verified lokal8Oct; remote delivery belum dilakukan. Pengaturan situs tetap modul terpisah.
 
 Admin Series/season/episode: [context](plans/admin-series-episodes/repository-context.md), [plan](plans/admin-series-episodes/implementation-plan.md) dan [backlog ASER](tasks/admin-series-episodes.md). Modul dipilih pengguna 8 Oktober 2026; ASER-001–012 Done dan verified lokal: season/episode editor, upload/crop/Preview, Series/Episode Publish dan Episode Archive; native API/SQL serta built-browser journeys/regression lulus. Remote delivery disetujui pengguna 8 Oktober 2026 dan sedang diproses melalui normal merge dengan source branch dipertahankan; production belum dijalankan.
 
@@ -82,7 +82,7 @@ Integrasi katalog API ke homepage: [context](plans/public-catalog-api/repository
 
 ## Backlog dan evidence
 
-- [Ringkasan dashboard admin](tasks/admin-dashboard.md): DASH-001–011; plan disetujui; inventori/media/latest dan private refresh dikerjakan bertahap.
+- [Ringkasan dashboard admin](tasks/admin-dashboard.md): DASH-001–011 implemented/verified lokal; inventori/media/latest, private refresh, native SQL/auth dan built-browser15 width/theme proof.
 
 - [Admin Series/season/episode](tasks/admin-series-episodes.md): ASER-001–012 Done; kontrak/editor/media/publication, API/SQL/browser proof dan local task receipts.
 
@@ -108,6 +108,6 @@ Integrasi katalog API ke homepage: [context](plans/public-catalog-api/repository
 
 Custom React hooks aplikasi web berada di `apps/web/src/hooks/use-*.ts`; provider/context, query factories dan domain helpers tetap pada owner di `lib/`, komponen pada `components/`. Konvensi berada di root AGENTS; evidence pada [WHOOK](tasks/web-hooks-organization.md).
 
-`apps/api` memiliki API Elysia, metadata, storage/upload, native poster request processing, publication/catalog/playback dan worker Bun/FFmpeg terpisah. `apps/web` memiliki TanStack Start, auth admin, metadata dashboard, uploader Eden/Query responsif light/dark serta primitive crop Canvas 9:16, gateway same-origin, Video.js 10 RC, detail Film/Standalone, Series/episode dan watch kontekstual, serta preview admin. `packages/auth` memiliki Better Auth dengan entry server/client/types terpisah. Setelah merge PR #13, homepage memakai unsigned /videos SSR20, All/Films/Standalone URL type, cursor/Load more, browser-only signed poster queue, detail /videos/$slug dan filter-aware watch; verified lokal PCAT-001–014. Katalog tiga jenis/search/genre/binary poster pada main sebelumnya tetap riwayat dan API/rute Series existing tetap tersedia. Workspace diatur oleh `turbo.json`; env samples berada pada masing-masing app.
+`apps/api` memiliki API Elysia, metadata, storage/upload, native poster request processing, publication/catalog/playback dan worker Bun/FFmpeg terpisah. `apps/web` memiliki TanStack Start, auth admin, ringkasan editorial/current jobs/latest dashboard, metadata editor, uploader Eden/Query responsif light/dark serta primitive crop Canvas 9:16, gateway same-origin, Video.js 10 RC, detail Film/Standalone, Series/episode dan watch kontekstual, serta preview admin. `packages/auth` memiliki Better Auth dengan entry server/client/types terpisah. Setelah merge PR #13, homepage memakai unsigned /videos SSR20, All/Films/Standalone URL type, cursor/Load more, browser-only signed poster queue, detail /videos/$slug dan filter-aware watch; verified lokal PCAT-001–014. Katalog tiga jenis/search/genre/binary poster pada main sebelumnya tetap riwayat dan API/rute Series existing tetap tersedia. Workspace diatur oleh `turbo.json`; env samples berada pada masing-masing app.
 
 Media telah di-merge melalui [PR #3](https://github.com/bayuaji17/vertical-movie-app/pull/3). Development memakai MinIO dan production dirancang memakai Cloudflare R2 melalui env. Playback memakai HLS hasil transcoding dan lifecycle draft → published → archived. Bukti lokal serta fixture 10/30 menit ada pada runbook/backlog. R2 staging, Safari/native HLS, kapasitas 4 core/4 GB, full restore dan matriks stress yang belum terverifikasi tetap gerbang terpisah. Uploader Film/Standalone source+cover dan Series cover terverifikasi lokal; readiness/Publish/Archive Film/Standalone terverifikasi lokal 7 Oktober 2026. Editor season/episode, source/cover/Preview episode, Series/Episode Publish dan Episode Archive terverifikasi lokal 8 Oktober 2026 pada ASER. Subtitle dan acceptance production tetap lanjutan.

@@ -2,13 +2,13 @@
 
 ## Plan metadata
 
-- Status: approved/executing; pengguna menyetujui plan pada 8 Oktober 2026. Runtime dikerjakan bertahap.
+- Status: implemented/verified lokal; pengguna menyetujui plan pada 8 Oktober 2026. Seluruh mandatory DASH task selesai; remote delivery dan production rollout belum dilakukan.
 - Tanggal: 2026-10-08. Pengguna memilih dashboard terlebih dahulu dan meminta plan; metrik/layout rinci disetujui melalui approval plan pengguna.
 - Repository: `bayuaji17/vertical-movie-app`; base ref `main`.
-- Base SHA dan last validated SHA: `65fcc2b58d5b316e8c44b2d99e28baf2e90e4f8c`.
+- Historical base SHA: `65fcc2b58d5b316e8c44b2d99e28baf2e90e4f8c`.
 - Context: [repository-context.md](repository-context.md), disimpan sebelum plan.
 - Backlog: [admin-dashboard](../../tasks/admin-dashboard.md), task DASH-001–011.
-- Planning branch: `chore/admin-dashboard-plan`; candidate implementation branch setelah approval/freshness: `feat/admin-dashboard-summary`.
+- Planning branch: `chore/admin-dashboard-plan`; implementation branch: `feat/admin-dashboard-summary`.
 
 ## Objective
 
@@ -41,13 +41,13 @@ Dashboard tidak memanggil data bisnis; endpoint content list hanya satu jenis pe
 
 Job state merupakan snapshot database; Running tidak menjanjikan proses masih hidup/lease sehat. Succeeded tidak diberi label Ready/Publishable dari hitungan sederhana. Tidak memanggil readiness/presign/HEAD/FFmpeg untuk setiap owner. Tidak memfilter hanya public-visible rows pada private inventory.
 
-### Proposed API contract
+### API contract
 
 `GET /admin/dashboard/summary`, tanpa query filter/pagination. Response200 berbentuk `{ generatedAt, content, media, latestContent, failedMedia }`: `content` berisi empat named kinds dengan status counters, `media` empat job counters, latest maksimal8 dan failed maksimal5. Timestamp ISO UTC dari snapshot server. Counts integer nonnegative dan safe untuk JSON/JavaScript; hasil database di luar safe range menyebabkan safe503, bukan silent rounding. `film` adalah tipe UI untuk `videos.kind=movie`.
 
 Latest item whitelist: type/id/title/publicationStatus/createdAt; failure item whitelist: owner type/id/title, kind, role dan Series UUID untuk episode route. Web menyusun typed canonical Link dari IDs; tidak menerima arbitrary URL dari server. API model strict dan derived types melalui Eden. Client memvalidasi bounds/identity/timestamp/counter invariants sebelum caching success.
 
-Native admin guard sebelum repository; 401 missing/expired/revoked,403 wrong role/banned,422 invalid query,503 auth/database/config unavailable. Header semua paths `private, no-store`. Module mengembalikan typed200 melalui service tanpa global payload wrapper; OpenAPI security/unique operationId. Fixed gateway `/api/admin/dashboard/summary` memakai allowlist admin existing (verify dalam DASH-004), tidak menambah open proxy.
+Native admin guard sebelum repository; 401 missing/expired/revoked,403 wrong role/banned,422 invalid query,503 auth/database/config unavailable. Header semua paths `private, no-store`. Module mengembalikan typed200 melalui service tanpa global payload wrapper; OpenAPI security/unique operationId. Fixed gateway `/api/admin/dashboard/summary` ditambahkan sebagai exact GET pada allowlist bisnis (DASH-010; corrected after built-browser404), tidak menambah open proxy.
 
 Agregasi dan dua bounded lists dibaca dalam satu repeatable-read/read-only transaction pada existing pool, tanpa row locks/writes/network storage. Counts dilakukan SQL sebelum limit; jumlah statement fixed tanpa per-row/per-page scan dari browser. Query plan dan data >100 dibuktikan; index/migration hanya jika bukti memerlukan refinement terpisah.
 
@@ -219,7 +219,7 @@ Each step has one outcome, paths, requirements, validation and acceptance criter
 | UI/navigation        | Four cards, truthful labels, bounded latest/failed, existing canonical type/episode links, empty/loading/offline                           | DASH-006/007/010 |
 | Layout/accessibility | 15 width/theme cases, long title/counts, keyboard/focus/44px/no overflow                                                                   | DASH-002/010     |
 
-Runtime tasks use `bun test apps/api/src`, `bun test apps/web/test`, `bun run check-types`, `bun run lint`, `bun run build` as applicable plus dedicated SQL/browser proof. Existing `bun run --cwd apps/web auth:ssr:smoke` and `auth:import:proof` validate SSR/import boundaries. New dashboard phase is planned, not an existing runnable command: DASH-010 must add `AUTH_BROWSER_PHASE=dashboard` before using `bun apps/web/test/auth-browser-smoke.mjs`, with configured runner and dedicated test DB. Do not reset DB/build concurrently with browser.
+Runtime tasks use `bun test apps/api/src`, `bun test apps/web/test`, `bun run check-types`, `bun run lint`, `bun run build` as applicable plus dedicated SQL/browser proof. Existing `bun run --cwd apps/web auth:ssr:smoke` and `auth:import:proof` validate SSR/import boundaries. DASH-010 added the explicit `AUTH_BROWSER_PHASE=dashboard` phase for `bun apps/web/test/auth-browser-smoke.mjs`, with configured runner and dedicated test DB. Do not reset DB/build concurrently with browser.
 
 ## Constraints
 
@@ -252,7 +252,7 @@ Read-only summary introduces no new durable state. Web can return to existing we
 
 ## Evidence
 
-[Context evidence index](repository-context.md#evidence-index) at pinned SHA and [backlog](../../tasks/admin-dashboard.md) own actual commands/results. No SQL/browser/API feature test has run for unimplemented dashboard code.
+[Context evidence index](repository-context.md#evidence-index) at pinned SHA and [backlog](../../tasks/admin-dashboard.md) own actual commands/results. Historical planning did not run dashboard feature proof. Current SQL/API/browser proof and receipts are in the backlog.
 
 ## Open decisions
 
@@ -280,7 +280,7 @@ User review of this proposal covers counter semantics/layout, latest8/failed5 an
 
 - 2026-10-08 DASH-003: Agregasi SQL lima bounded queries dalam transaksi repeatable-read/read-only; satu current-jobs predicate untuk count/failures, pointer-owner-role-generation checks, archive parent exclusions dan request/worker parity. Service menjaga safe-integer counters, UTC timestamp, whitelist response dan safe503. Native API163 tests/937 assertions pass; PostgreSQL semantics/performance diperiksa di DASH-009. Checks: API163 pass, root types3/lint1/build2 pass, scoped Prettier/docs/diff/preservation. Previous task head `ef1c1a03815592675a816d506c94b761d7af47df`; own receipt recorded next task after successful normal hooks.
 
-- 2026-10-08 DASH-004: Static chained dashboard endpoint + bootstrap DI + unique secured OpenAPI operation. Native app.handle tests cover200/401/403/422/503, guard before repository, private/no-store on all responses and public health access. Unknown query keys rejected. API167 tests/971 assertions pass; existing gateway already allows canonical admin prefix. Checks: API167 pass, root types3/lint1/build2 pass, docs/Prettier/diff/preservation. Previous task head `dbbcea869123e9b45173b35d18ce4fc69f9bb52b`; own receipt recorded next task after successful normal hooks.
+- 2026-10-08 DASH-004: Static chained dashboard endpoint + bootstrap DI + unique secured OpenAPI operation. Native app.handle tests cover200/401/403/422/503, guard before repository, private/no-store on all responses and public health access. Unknown query keys rejected. API167 tests/971 assertions pass; Historical DASH-004 gateway assumption was incomplete; exact dashboard GET allowlist and gateway tests were added after built-browser404 during DASH-010. Checks: API167 pass, root types3/lint1/build2 pass, docs/Prettier/diff/preservation. Previous task head `dbbcea869123e9b45173b35d18ce4fc69f9bb52b`; own receipt recorded next task after successful normal hooks.
 
 - 2026-10-08 DASH-005: Eden-derived DTO validated strictly with existing Zod: safe counts/partitions, UUIDs/UTC dates, owner-role-parent invariants, bounded unique/stably sorted lists. Browser-only identity key, signal fence, private-effect cleanup, visible/online successful-read30s polling, retry:false and deduplicated manual refresh. Web6 tests/28 assertions including auth-loss and stale invalidation races pass; runtime hook/browser proof follows DASH-010. Checks: Web6/API167 pass, root types3/lint1/build2 pass, scoped formatting/docs/diff/preservation. Previous task head `f93785a8883466a3e8c731f17767b355e14f74fb`; own receipt recorded next task after successful normal hooks.
 
@@ -293,3 +293,5 @@ User review of this proposal covers counter semantics/layout, latest8/failed5 an
 - 2026-10-08 DASH-009: Dedicated loopback vertical_movie_app_content_test reset/migrated only. Real Bun SQL/Drizzle seven tests43 assertions pass:125 Film, own Episode publication under draft/archived parents, Series published/unpublished/archive precedence, source/cover request/worker jobs, obsolete asset/generation/terminal/archive exclusions, latest8/failed5 ties including same ID across types, five reads/no N+1, concurrent owner write snapshot isolation and persisted-row preservation. Native Better Auth cookies verify200/401/403/422/503/banned/expired/revoked/auth outage/closed DB. EXPLAIN measured fixture query execution under4ms; no new index/schema migration required. Synthetic publication/job fixtures prove dashboard predicates, not worker/publication or production-scale readiness. Checks: PostgreSQL7 pass/43 assertions, root types3/lint1/build2 pass, docs/format/diff/preservation. Previous task head `dc563f10d5660e8ab92d735d40fb7691946b2bef`; own receipt recorded next task after successful normal hooks.
 
 - 2026-10-08 DASH-010: Built dashboard phase passes15 width/theme cases320/390/768/1024/1440 Light/Dark/System, keyboard/44px/focus/no overflow, real SQL counts/deep links, initial skeleton, bounded lists, dedup Refresh, stale503/Retry/offline/reconnect,30s success/error/hidden polling, confirmed create with zero hidden reads, observed SQL job/publication transitions, explicit empty/large fixtures, invalid payload and held response after native SDK role loss. SSR does not read/serialize summary. Fixed discovered gateway404 with exact GET allowlist+test; API malformed repository DTO/count now safe503, and client preserves SQL tie order when native timestamp submilliseconds are lost in JSON. Dashboard browser auth is injected; native cookie proof separate. Regression commands passed native content HTTP5/107, dashboard SQL7/43, built Series editor, Series media/publication/HLS, Film/Standalone publication and Film/Standalone/Series uploader45 layouts via dedicated PostgreSQL/MinIO/FFmpeg, auth cache/routes, SSR and illegal-client-import rejection/restoration. Final API168/973 and web233/1276, root types3/lint1/build2 passed; no new schema/env/dependency or production proof. Checks: API168/web233 pass; native SQL7 and HTTP5 pass; dashboard/Series/media/publication/auth browser phases, auth SSR/import proof and root types3/lint1/build2 pass; docs/format/diff/preservation. Previous task head `3623dd54046748e203a4debf40cdfeab7b7a7cac`; own receipt recorded next task after successful normal hooks.
+
+- 2026-10-08 DASH-011: Canonical PRD-02 now reflects verified editorial/current-job summary while site settings stays open. Architecture/runbook/design/index own current behavior, exact gateway GET, five-query snapshot, safe count/DTO, browser-only cleanup/refresh, active proof commands and fixture/production limitations. Plan/backlog close mandatory001–011 with actual prior receipts; historical gateway assumption corrected. Fresh source accepted at DASH-010 head858e385 after API168/web233, PostgreSQL7/43, HTTP5/107, all requested browser/auth/import regressions and root gates. Original23 unrelated paths preserved; no schema/env/dependency change, development/production migration, push/PR/merge/deployment. Checks: DASH-010 runtime gates/regressions passed; scoped docs formatting, docs:check, staged-tree/diff and preservation; normal hooks required. Previous task head `858e38510a69491baf1224a7019035da0ce51cdb`; own receipt recorded next task after successful normal hooks.
