@@ -98,7 +98,7 @@ Layout/state specification tersedia untuk4 jenis, current-job units, bounded8/5 
 ### Commit task
 
 - Pesan: docs: define admin dashboard layout and states (DASH-002)
-- SHA: Belum dibuat; receipt dicatat pada update dokumentasi berikutnya sesudah commit berhasil.
+- SHA: `ef1c1a03815592675a816d506c94b761d7af47df`.
 - Hook/checks: docs:check, scoped Prettier/diff, preservation dan normal hooks; normal hooks wajib tanpa bypass.
 - Ledger: Jangan menulis SHA commit sendiri sebelum tersedia.
 
@@ -108,7 +108,7 @@ Menunggu approval proposal dan dependency task di atas; tidak menganggap scope a
 
 ## Task: DASH-003 — Repository dan domain aggregate
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: P0
 - Referensi: DASH-US-01/03, PRD-02/05/09; [implementation steps](../plans/admin-dashboard/implementation-plan.md#implementation-steps).
@@ -126,8 +126,8 @@ Requirements: Content partition, current owner/generation job predicate, executo
 
 ### Acceptance criteria
 
-- [ ] No fake zeros on dependencies/malformed results; no writes; no historical attempts counted.
-- [ ] Definisi/state/invariants terkait pada plan terbukti; actual validation serta scope preservation dan commit tercatat sesuai workflow.
+- [x] No fake zeros on dependencies/malformed results; no writes; no historical attempts counted.
+- [x] Definisi/state/invariants terkait pada plan terbukti; actual validation serta scope preservation dan commit tercatat sesuai workflow.
 
 ### Validasi
 
@@ -135,13 +135,13 @@ Native behavior tests and root types/lint/build; actual PostgreSQL proof follows
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement, bukan hasil actual.
+Agregasi SQL lima bounded queries dalam transaksi repeatable-read/read-only; satu current-jobs predicate untuk count/failures, pointer-owner-role-generation checks, archive parent exclusions dan request/worker parity. Service menjaga safe-integer counters, UTC timestamp, whitelist response dan safe503. Native API163 tests/937 assertions pass; PostgreSQL semantics/performance diperiksa di DASH-009.
 
 ### Commit task
 
-- Pesan: Conventional Commit dengan ID task setelah acceptance criteria dan relevant gates lulus.
+- Pesan: feat(api): aggregate dashboard summary (DASH-003)
 - SHA: Belum dibuat; receipt dicatat pada update dokumentasi berikutnya sesudah commit berhasil.
-- Hook/checks: Belum dijalankan untuk task ini.
+- Hook/checks: API163 pass, root types3/lint1/build2 pass, scoped Prettier/docs/diff/preservation; normal hooks wajib tanpa bypass.
 - Ledger: Jangan menulis SHA commit sendiri sebelum tersedia.
 
 ### Blocker atau tindak lanjut
