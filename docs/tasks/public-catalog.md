@@ -343,7 +343,7 @@ Paths/symbol owners: `apps/web/src/components/public/{public-shell,catalog-card,
 
 - [ ] Poster/layout tidak stretch/shift; fallback/title link tetap accessible, tanpa media player di card.
 - [ ] Keyboard/focus/44px/light-dark-System dan semantic contrast; long titles tidak overflow.
-- [ ] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
+- [x] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
 
 ### Validasi
 
@@ -358,8 +358,8 @@ Observed: native React SSR cover proof1/3, tanpa image/signed URL/network capabi
 ### Commit task
 
 - Pesan usulan: `feat: shell, card dan cover public reusable (PCAT-008)`.
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk commit ini.
+- SHA: `802b316c162d79fd60f2c2022fcd767a8808c6fd`.
+- Hook/checks: SSR cover1/3, root types3/lint1/build2, docs86/816, scoped format/diff dan normal Husky/Commitlint pass.
 - Ledger: receipt aktual dicatat pada update sesudah commit berhasil.
 
 ### Blocker atau tindak lanjut
@@ -491,7 +491,7 @@ Menunggu PCAT-010. Approval/hasil proof tidak diasumsikan tersedia.
 
 ## Task: PCAT-012 — Proof SQL visibility, cursor dan poster
 
-- Status: Backlog
+- Status: Done — dedicated PostgreSQL + owned MinIO/WebP proof lulus.
 - Owner: Codex/pengembang
 - Prioritas: P1 — urutan dependency DAG pada plan
 - Referensi: PCAT-US-03; PRD-07/08/09, GR-02/03/05/06/08; [plan](../plans/public-catalog/implementation-plan.md)
@@ -507,9 +507,9 @@ Paths/symbol owners: `apps/api/test/integration/public-catalog-proof.test.ts`. R
 
 ### Acceptance criteria
 
-- [ ] All/filter/pages/end/empty/no-kinds compatibility dan tombstone playable terbukti pada SQL nyata.
-- [ ] Archive/invalidation follow-up list/detail dan poster denial termasuk no new sign; Series/next tidak regress.
-- [ ] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
+- [x] All/filter/pages/end/empty/no-kinds compatibility dan tombstone playable terbukti pada SQL nyata.
+- [x] Archive/invalidation follow-up list/detail dan poster denial termasuk no new sign; Series/next tidak regress.
+- [x] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
 
 ### Validasi
 
@@ -517,7 +517,11 @@ bun test apps/api/test/integration/public-catalog-proof.test.ts; bun run --cwd a
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau divalidasi. Commands di atas merupakan rencana, bukan hasil.
+8 Oktober 2026: independent DAG proof dijalankan lebih awal setelah PCAT-004/005 selesai, sambil UI PCAT-009–011 menunggu integrasi. `bun --env-file=apps/api/.env test apps/api/test/integration/public-film-catalog-proof.test.ts`1 pass/30 assertions. Guarded vertical_movie_app_media_test, random owned MinIO bucket/WebP FFmpeg helper; tidak menyentuh database development.
+
+49 Film/Standalone +25 episode fixtures dengan tied createdAt/UUID dan draft/archive/failed media/parent/season exclusions menghasilkan45 non-episode pada20/20/5, exact descending IDs tanpa gap/duplikat; film5, standalone20 first-page, cross-filter422/reversed canonical set, legacy68 termasuk episode dan old cursor, serta empty EOF pass. Source tombstone tetap playable. Actual anonymous signed poster TTL3s, exact verified key/WebP bytes/no-store, archive via VideosService invalidates metadata dan fresh sign404, issued URL masih valid sebelum expiry, profile conflict503/no signing/authReads0 pass.
+
+Percobaan pertama menemukan fixture archive belum mengosongkan published_at; diperbaiki sesuai CHECK schema lalu proof rerun pass. API runtime tidak berubah, schema/env/dependencies tidak diubah. Root types/lint/build/docs dan normal hooks mengikuti quality gates aktual.
 
 ### Commit task
 
@@ -528,7 +532,7 @@ Belum diimplementasikan atau divalidasi. Commands di atas merupakan rencana, buk
 
 ### Blocker atau tindak lanjut
 
-Menunggu PCAT-004, PCAT-005. Approval/hasil proof tidak diasumsikan tersedia.
+SQL/storage acceptance selesai lokal. Tidak membuktikan browser UI/HLS/production; PCAT-013 menunggu PCAT-011.
 
 ## Task: PCAT-013 — Acceptance anonymous built-browser nyata
 
