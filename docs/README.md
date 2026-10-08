@@ -19,6 +19,8 @@ Aturan penamaan, ownership dan maintenance berada pada [Documentation rules](../
 
 ## Produk, arsitektur dan desain
 
+- [Admin Series/season/episode](design/admin-series-episodes.md): route dan state specification editor memakai admin Rhea existing; implementasi diminta pengguna 8 Oktober 2026.
+
 - [Kelanjutan katalog Film/Standalone](design/public-catalog.md): PCAT-002 disetujui pengguna 8 Oktober 2026; interactive HTML dan8 PNG Browse/Detail390/1440 Light/Dark. Prototype tetap artefak approval; runtime actual Film/Standalone verified pada PCAT-013.
 
 - [PRD](product/prd.md): mendekati final; matriks PRD-01–10, keputusan produk dan gerbang rilis. Review awal 5 Oktober 2026, detail/watch PCW diperbarui 8 Oktober 2026; MVP lengkap belum selesai.

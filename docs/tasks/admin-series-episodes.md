@@ -94,7 +94,7 @@ Ini proof fondasi transport/cache/contract; belum menjalankan editor browser, pe
 ### Commit task
 
 - Pesan: feat(web): add private season and episode clients (ASER-002).
-- SHA: Receipt aktual dicatat pada update task berikutnya setelah commit berhasil.
+- SHA: `0550d0484ca27fbfacb96a033055f4045b636dad`.
 - Hook/checks: Relevant tests, types/lint/build dan Prettier lulus; docs/whitespace serta normal Husky/Commitlint wajib sebelum commit diterima.
 - Ledger: Receipt setelah commit pada update task berikutnya.
 
@@ -104,7 +104,7 @@ Ikuti dependensi step; task selanjutnya ASER-003.
 
 ## Task: ASER-003 — Route dan state specification editor
 
-- Status: Ready
+- Status: Done
 - Owner: Codex
 - Prioritas: P1
 - Referensi: ASER-US-01/02/03, PRD-03/04/05/06/08/09; [step plan](../plans/admin-series-episodes/implementation-plan.md#aser-003--editor-route-dan-state-specification).
@@ -118,8 +118,8 @@ English responsive editor states memakai approved admin shell/form primitives, t
 
 ### Acceptance criteria
 
-- [ ] Route season/episode dan state matrix lengkap, media/publication states terpisah.
-- [ ] 320–1440 Light/Dark/System,44px/keyboard/focus, long list/copy dan inherited genre dipetakan ke assertions.
+- [x] Route season/episode dan state matrix lengkap, media/publication states terpisah.
+- [x] 320–1440 Light/Dark/System,44px/keyboard/focus, long list/copy dan inherited genre dipetakan ke assertions.
 
 ### Validasi
 
@@ -127,13 +127,13 @@ Source/requirement crosscheck, docs/Prettier/diff/hook; state specification buka
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi pada task ini.
+Route/state spec7 authenticated routes, season/episode ownership, parent lifecycle, genre inheritance, dirty/conflict/offline/cancellation dan responsive/keyboard matrix tersedia. User meminta mulai implementasi8 Oktober2026; desain existing digunakan kembali, tidak menganggap spec sebagai proof browser. Freshness valid0550d0484ca27fbfacb96a033055f4045b636dad: perubahan sejakbase04b hanya fondasi ASER/context/docs, backend/UI/auth impact baseline utuh.
 
 ### Commit task
 
-- Pesan: Ditentukan saat task selesai, Conventional Commit dengan ID task.
-- SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan.
+- Pesan: docs: define series and episode editor states (ASER-003).
+- SHA: Receipt dicatat pada update task berikutnya setelah commit berhasil.
+- Hook/checks: docs/Prettier/diff check dan staged snapshot sebelum commit; normal Husky/Commitlint wajib sebelum commit diterima.
 - Ledger: Receipt setelah commit pada update task berikutnya.
 
 ### Blocker atau tindak lanjut
