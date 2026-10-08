@@ -9,7 +9,7 @@ import {
 } from '#/lib/admin/content-form-state'
 import type { ContentValues } from '#/lib/admin/content-form-state'
 import { createContentOptions } from '#/lib/admin/content-queries'
-import { useContentEditor } from '#/lib/admin/use-content-editor'
+import { useContentEditor } from '#/hooks/use-content-editor'
 import { Card, CardHeader, CardTitle, CardContent } from '#/components/ui/card'
 
 export function CreateContentView() {

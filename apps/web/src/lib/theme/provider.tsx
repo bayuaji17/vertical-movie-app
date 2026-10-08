@@ -1,12 +1,10 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { resolveTheme, themeMode, themeStorageKey } from './preferences'
 import type { ThemeMode } from './preferences'
 
-const ThemeContext = createContext<{
-  mode: ThemeMode
-  setMode: (mode: ThemeMode) => void
-} | null>(null)
+import { ThemeContext } from './context'
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [initialized, setInitialized] = useState(false)
   const [mode, setMode] = useState<ThemeMode>('system')
@@ -46,9 +44,4 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   return (
     <ThemeContext value={{ mode, setMode: select }}>{children}</ThemeContext>
   )
-}
-export function useTheme() {
-  const context = useContext(ThemeContext)
-  if (!context) throw new Error('ThemeProvider is required.')
-  return context
 }

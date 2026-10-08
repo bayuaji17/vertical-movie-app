@@ -1,23 +1,27 @@
-import { publicationKeys } from './publication-queries'
+import { publicationKeys } from '#/lib/admin/publication-queries'
 import { useEffect, useMemo, useReducer } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import type { QueryClient } from '@tanstack/react-query'
-import { useAdminPrincipal } from '../auth/session-context'
-import { browserMediaClient } from './media-client'
-import type { MediaClient, MediaOwner, OwnerMedia } from './media-client'
-import type { ContentType } from './content-client'
+import { useAdminPrincipal } from '#/hooks/use-admin-principal'
+import { browserMediaClient } from '#/lib/admin/media-client'
+import type {
+  MediaClient,
+  MediaOwner,
+  OwnerMedia,
+} from '#/lib/admin/media-client'
+import type { ContentType } from '#/lib/admin/content-client'
 import {
   initiateMediaOptions,
   invalidateMedia,
   posterProcessingOptions,
   sessionControlOptions,
-} from './media-queries'
-import { UploadCoordinator, UploadManager } from './upload-manager'
-import { registerPrivateEffect } from '../auth/private-effects'
+} from '#/lib/admin/media-queries'
+import { UploadCoordinator, UploadManager } from '#/lib/admin/upload-manager'
+import { registerPrivateEffect } from '#/lib/auth/private-effects'
 import {
   notifyUploadState,
   registerUploadManager,
-} from './upload-session-registry'
+} from '#/lib/admin/upload-session-registry'
 
 const coordinators = new WeakMap<QueryClient, UploadCoordinator>()
 function coordinatorFor(cache: QueryClient) {

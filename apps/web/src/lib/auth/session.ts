@@ -1,11 +1,5 @@
-import {
-  onlineManager,
-  queryOptions,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query'
+import { onlineManager, queryOptions } from '@tanstack/react-query'
 import { createIsomorphicFn } from '@tanstack/react-start'
-import { useEffect, useState } from 'react'
 import { readClientSession, isAdminSession } from '@repo/auth/client'
 import type { SessionSnapshot } from '@repo/auth/types'
 import { authClient } from './client'
@@ -13,8 +7,7 @@ import {
   readSessionOnServer,
   setAuthFailureStatusOnServer,
 } from './session.server'
-import { sessionQueryKey, clearAdminDataQueries } from './session-cache'
-import { stopAdminPrivateEffects } from './private-effects'
+import { sessionQueryKey } from './session-cache'
 
 export const readSession = createIsomorphicFn()
   .server(readSessionOnServer)
@@ -75,39 +68,5 @@ export function sessionObserverOptions() {
       onlineManager.isOnline()
         ? 60_000
         : false,
-  }
-}
-
-export function useAdminSession() {
-  const queryClient = useQueryClient()
-  const result = useQuery(sessionObserverOptions())
-  const [, updateClock] = useState(0)
-  const expiresAt = result.data?.session.expiresAt
-  const state = result.isError
-    ? ({ status: 'unavailable' } as const)
-    : sessionState(result.data)
-  useEffect(() => {
-    if (state.status !== 'authenticated')
-      void clearAdminDataQueries(queryClient)
-  }, [state.status, queryClient])
-  useEffect(() => {
-    if (!expiresAt) return
-    const timer = setTimeout(
-      () => {
-        stopAdminPrivateEffects(queryClient)
-        updateClock((revision) => revision + 1)
-        void queryClient
-          .cancelQueries({ queryKey: sessionQueryKey })
-          .then(() => {
-            queryClient.setQueryData(sessionQueryKey, null)
-          })
-      },
-      Math.max(0, Date.parse(expiresAt) - Date.now()),
-    )
-    return () => clearTimeout(timer)
-  }, [expiresAt, queryClient])
-  return {
-    ...result,
-    sessionState: state,
   }
 }

@@ -48,6 +48,10 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 
 ## Context dan plan per fitur
 
+Organisasi hooks web: [context](plans/web-hooks-organization/repository-context.md), [plan](plans/web-hooks-organization/implementation-plan.md) dan [WHOOK](tasks/web-hooks-organization.md), scope structural disetujui pengguna 8 Oktober 2026. Delapan hooks berada di `apps/web/src/hooks/use-*.ts`; integrasi dengan katalog main diperiksa sebelum delivery.
+
+Plan awal katalog Film/Standalone: [context historis](plans/public-catalog/repository-context.md), [plan historis](plans/public-catalog/implementation-plan.md) dan [backlog awal](tasks/public-catalog.md). Baseline awal mendahului implementasi katalog/detail/watch dari PR #11; freshness dan pemetaan pekerjaan tersisa diperbarui setelah integrasi hooks.
+
 Detail dan tonton dari katalog: [context](plans/public-content-watch/repository-context.md), [plan detail](plans/public-content-watch/implementation-plan.md) dan [backlog PCW](tasks/public-content-watch.md). Pengguna meminta lanjut dan memilih Film/Standalone/Series beserta season/episode 7 Oktober 2026. PCW-000–008 implemented/verified lokal 8 Oktober 2026: detail Film/Standalone, Series dengan episode per season, watch HLS dan Next manual. Proof PostgreSQL/MinIO/FFmpeg serta Chromium development/build tersedia pada backlog. Dependency PCAT masih commit lokal, belum remote delivery; progress/autoplay/editor/production bukan scope.
 
 Logging request API memakai console implemented/verified lokal 7 Oktober 2026; [panduan](guides/api-development.md#logging-request-http), [context baseline](plans/api-request-logging/repository-context.md) dan [plan/evidence](plans/api-request-logging/implementation-plan.md) menjelaskan scope serta batas gateway/storage.
@@ -68,6 +72,9 @@ Integrasi katalog API ke homepage: [context](plans/public-catalog-api/repository
 
 ## Backlog dan evidence
 
+- [Organisasi hooks web](tasks/web-hooks-organization.md): refactor hooks/use-prefix serta integrasi katalog terbaru.
+- [Plan awal katalog publik](tasks/public-catalog.md): riwayat proposal Film/Standalone sebelum HOMEFE/PCAT/PCW.
+
 - [Logging request API](tasks/api-request-logging.md): APILOG-001–003; dua event console per request, suite API dan demo development/build-start terverifikasi lokal.
 - [Auth](tasks/auth.md): AUTH/AUTH-REF dan evidence lokal.
 - [Video](tasks/videos.md): metadata dan compatibility lifecycle.
@@ -84,6 +91,8 @@ Integrasi katalog API ke homepage: [context](plans/public-catalog-api/repository
 - [Dokumentasi](tasks/documentation.md): organisasi folder, aturan dan validasi.
 
 ## Gambaran implementasi saat ini
+
+Custom React hooks aplikasi web berada di `apps/web/src/hooks/use-*.ts`; provider/context, query factories dan domain helpers tetap pada owner di `lib/`, komponen pada `components/`. Konvensi berada di root AGENTS; evidence pada [WHOOK](tasks/web-hooks-organization.md).
 
 `apps/api` memiliki API Elysia, metadata, storage/upload, native poster request processing, publication/catalog/playback dan worker Bun/FFmpeg terpisah. `apps/web` memiliki TanStack Start, auth admin, metadata dashboard, uploader Eden/Query responsif light/dark serta primitive crop Canvas 9:16, gateway same-origin, Video.js 10 RC, detail Film/Standalone, Series/episode dan watch kontekstual, serta preview admin. `packages/auth` memiliki Better Auth dengan entry server/client/types terpisah. Homepage/katalog publik memakai API published dengan SSR6, useInfiniteQuery cursor/Load more+skeleton, search/genre/type server dan unsigned metadata/private same-origin posters; evidence PCAT. Workspace diatur oleh `turbo.json`; env samples berada pada masing-masing app.
 

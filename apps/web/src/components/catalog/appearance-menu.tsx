@@ -7,7 +7,7 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
 } from '#/components/ui/dropdown-menu'
-import { useTheme } from '#/lib/theme/provider'
+import { useTheme } from '#/hooks/use-theme'
 import { themeMode } from '#/lib/theme/preferences'
 
 export function AppearanceMenu() {
