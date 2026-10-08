@@ -1,6 +1,6 @@
 # Modul: Admin Series, season dan episode
 
-> Status: ASER-001/002 selesai lokal; editor/media/publication masih lanjutan · 8 Oktober 2026 · Pengguna memilih modul ini setelah katalog PR #13. Scope runtime per task; belum menyatakan keseluruhan editor/publikasi Series selesai.
+> Status: ASER-001–009 selesai lokal; proof terpadu dan closure masih lanjutan · 8 Oktober 2026 · Pengguna memilih modul ini setelah katalog PR #13. Scope runtime per task; belum menyatakan keseluruhan editor/publikasi Series selesai.
 
 ## Tujuan modul
 
@@ -322,7 +322,7 @@ Typed Series readiness/publish client memvalidasi owner, enam unique checks/stat
 ### Commit task
 
 - Pesan: feat(web): add series publication state and transport (ASER-008)
-- SHA: Receipt dicatat pada update task berikutnya setelah commit berhasil.
+- SHA: `50d5fe44dd35435f5aa03b5876ebaaf978511c6a`.
 - Hook/checks: bun test apps/web/test:220 pass/1223 assertions; bun run check-types, bun run lint, bun run build, docs:check, scoped Prettier dan git diff --check; normal Husky/Commitlint wajib sebelum commit diterima.
 - Ledger: Receipt setelah commit pada update task berikutnya.
 
@@ -332,7 +332,7 @@ Ikuti dependensi step; task selanjutnya ASER-009.
 
 ## Task: ASER-009 — Publication UI dan archive episode
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: P1
 - Referensi: ASER-US-01/02/03, PRD-03/04/05/06/08/09; [step plan](../plans/admin-series-episodes/implementation-plan.md#aser-009--manual-publication-dan-episode-archive-ui).
@@ -346,8 +346,8 @@ Manual Preview/Publish episode dan Series, hidden-under-draft copy, episode arch
 
 ### Acceptance criteria
 
-- [ ] Server gates dan fresh state mengontrol actions; episode published bisa tetap hidden sebelum Series published.
-- [ ] Uncertain/conflict/offline/busy recovery, focus/confirmation dan expiry copy; published Series archive tidak ditawarkan.
+- [x] Server gates dan fresh state mengontrol actions; episode published bisa tetap hidden sebelum Series published.
+- [x] Uncertain/conflict/offline/busy recovery, focus/confirmation dan expiry copy; published Series archive tidak ditawarkan.
 
 ### Validasi
 
@@ -355,13 +355,13 @@ Dialog/state tests, responsive keyboard/built browser, Film publication regressi
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi pada task ini.
+Owner publication UI tersedia pada Series dan episode: checklist authoritative, fresh metadata/media/version, upload/offline/session guards, manual acknowledgement, explicit status/retry dan preview Back context. Built Chromium memakai guarded PostgreSQL/MinIO/FFmpeg membuktikan episode publish tersembunyi pada Series draft, cover+metadata Series kemudian manual publish membuka anonymous detail/playback, absent Series archive, lalu Episode archive menolak detail/playback baru dan SQL rowVersion5/operation receipts. Film/Standalone memakai panel existing; dialogs shared mempertahankan default video.
 
 ### Commit task
 
-- Pesan: Ditentukan saat task selesai, Conventional Commit dengan ID task.
-- SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan.
+- Pesan: feat(web): add series and episode publication controls (ASER-009)
+- SHA: Receipt dicatat pada update task berikutnya setelah commit berhasil.
+- Hook/checks: bun test apps/web/test: 220 pass/1223 assertions; bun run check-types, bun run lint, bun run build dan built series-media publication browser lulus; docs:check/targeted Prettier/git diff --check sebelum commit; normal Husky/Commitlint wajib sebelum commit diterima.
 - Ledger: Receipt setelah commit pada update task berikutnya.
 
 ### Blocker atau tindak lanjut

@@ -4,7 +4,7 @@ import type { AdminSeries } from './series-resource'
 import { episodeHref, seasonHref } from '#/lib/admin/series-form-state'
 import { AdminPageHeading } from './page-heading'
 import { ContentStatus } from './content-status'
-import { EpisodeMedia } from './episode-media'
+import { OwnerPublicationMedia } from './owner-publication'
 import { Card, CardHeader, CardTitle, CardContent } from '#/components/ui/card'
 import { Button } from '#/components/ui/button'
 
@@ -94,7 +94,13 @@ export function EpisodeDetailView({
             )}
         </CardContent>
       </Card>
-      <EpisodeMedia seriesId={series.data.id} episodeId={episode.id} />
+      <OwnerPublicationMedia
+        target={{ type: 'episode', id: episode.id, seriesId: series.data.id }}
+        detail={{ type: 'episode', data: episode }}
+        metadataStale={stale}
+        parentPublished={series.data.publicationStatus === 'published'}
+        parentActive={!series.data.archivedAt && !!season && !season.archivedAt}
+      />
     </div>
   )
 }

@@ -25,7 +25,7 @@ export function SeriesResource({
   ) => ReactNode
 }) {
   return (
-    <ContentResource type="series" id={seriesId}>
+    <ContentResource type="series" id={seriesId} fresh>
       {(detail, stale) =>
         detail.type === 'series' ? (
           <SeasonsResource series={detail} parentStale={stale}>

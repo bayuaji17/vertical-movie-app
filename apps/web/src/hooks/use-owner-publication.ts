@@ -25,7 +25,7 @@ import { browserContentClient } from '#/lib/admin/content-client'
 import { browserSeriesClient } from '#/lib/admin/series-client'
 import { browserMediaClient } from '#/lib/admin/media-client'
 import { ownerMediaOptions, mediaPollInterval } from '#/lib/admin/media-queries'
-import { contentKeys } from '#/lib/admin/content-queries'
+import { contentDetailOptions, contentKeys } from '#/lib/admin/content-queries'
 import { seriesKeys } from '#/lib/admin/series-queries'
 import { scopePublicationRead } from '#/lib/admin/publication-queries'
 import { PublicationApiError } from '#/lib/admin/publication-errors'
@@ -139,6 +139,27 @@ export function useOwnerPublication(
               'CONFIG_UNAVAILABLE',
               'API unavailable',
             )
+          if (stable.type === 'episode') {
+            const parent = contentDetailOptions(
+              clients.content,
+              user.id,
+              'series',
+              seriesId,
+            )
+            await cache.cancelQueries({
+              queryKey: parent.queryKey,
+              exact: true,
+            })
+            await cache.fetchQuery({
+              ...parent,
+              staleTime: 0,
+              queryFn: ({ signal: querySignal }) =>
+                scopePublicationRead(signal, querySignal, (scoped) =>
+                  clients.content!.detail('series', seriesId, scoped),
+                ),
+            })
+            signal.throwIfAborted()
+          }
           const metadata = queryOptions({
             queryKey:
               stable.type === 'series'

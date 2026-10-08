@@ -9,7 +9,7 @@ import { ContentStatus } from './content-status'
 import { Button } from '#/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '#/components/ui/card'
 import { Badge } from '#/components/ui/badge'
-import { OwnerMediaPanel } from './media-panel'
+import { OwnerPublicationMedia } from './owner-publication'
 import { VideoPublicationMedia } from './publication-panel'
 import { seasonsHref } from '#/lib/admin/series-form-state'
 
@@ -201,9 +201,10 @@ export function ContentDetailView({
         </Card>
       </div>
       {detail.type === 'series' ? (
-        <OwnerMediaPanel
-          owner={{ ownerType: 'series', ownerId: d.id }}
-          type={detail.type}
+        <OwnerPublicationMedia
+          target={{ type: 'series', id: d.id }}
+          detail={detail}
+          metadataStale={metadataStale}
         />
       ) : detail.data.kind !== 'episode' ? (
         <VideoPublicationMedia

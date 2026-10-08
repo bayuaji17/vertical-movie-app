@@ -31,10 +31,12 @@ export function ContentResource({
   type,
   id,
   children,
+  fresh = false,
 }: {
   type: string
   id: string
   children: (detail: ContentDetail, stale: boolean) => ReactNode
+  fresh?: boolean
 }) {
   if (!isContentType(type) || !isUuid(id))
     return (
@@ -47,7 +49,7 @@ export function ContentResource({
       </>
     )
   return (
-    <ResourceQuery type={type} id={id}>
+    <ResourceQuery type={type} id={id} fresh={fresh}>
       {children}
     </ResourceQuery>
   )
@@ -56,13 +58,18 @@ function ResourceQuery({
   type,
   id,
   children,
+  fresh = false,
 }: {
   type: ContentType
   id: string
   children: (detail: ContentDetail, stale: boolean) => ReactNode
+  fresh?: boolean
 }) {
   const { client, identity } = useContentApi()
-  const query = useQuery(contentDetailOptions(client, identity, type, id))
+  const query = useQuery({
+    ...contentDetailOptions(client, identity, type, id),
+    ...(fresh ? { staleTime: 0 } : {}),
+  })
   return (
     <>
       {query.isPending && (
