@@ -34,6 +34,7 @@ export function catalogOptions(
     },
     getNextPageParam: (last) => last.nextCursor ?? undefined,
     retry: false,
+    networkMode: 'always',
     gcTime: 300_000,
     staleTime: (q) =>
       remaining(
@@ -53,6 +54,7 @@ export function videoOptions(
     queryKey: ['public-catalog', 'video', 1, slug] as const,
     queryFn: ({ signal }) => api.detail(slug, signal),
     retry: false,
+    networkMode: 'always',
     gcTime: 300_000,
     staleTime: (q) =>
       remaining(q.state.data?.expiresAt ?? 0, q.state.dataUpdatedAt),
@@ -78,6 +80,8 @@ export async function loadCatalog(client: QueryClient, type: CatalogType) {
     const cached = client.getQueryData<InfiniteData<PublicVideoPage>>(
       catalogKey(type),
     )
+    if (typeof window !== 'undefined' && !navigator.onLine)
+      return { status: cached ? null : 503 }
     if (cached && cached.pages.some((p) => p.expiresAt <= Date.now()))
       await restartCatalog(client, type)
     else await client.infiniteQuery(catalogOptions(type))
@@ -88,6 +92,10 @@ export async function loadCatalog(client: QueryClient, type: CatalogType) {
 }
 export async function loadVideo(client: QueryClient, slug: string) {
   try {
+    if (typeof window !== 'undefined' && !navigator.onLine)
+      return {
+        status: client.getQueryData(videoOptions(slug).queryKey) ? null : 503,
+      }
     await client.query(videoOptions(slug))
     return { status: null }
   } catch (error) {

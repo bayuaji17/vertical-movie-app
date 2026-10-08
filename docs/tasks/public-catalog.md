@@ -401,8 +401,8 @@ Observed: web193/1039, root types3/lint1/build2 pass; lint conditional unreachab
 ### Commit task
 
 - Pesan usulan: `feat: homepage katalog film/standalone nyata (PCAT-009)`.
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk commit ini.
+- SHA: `60b17f2b39ca32d64f5e39fefbdebc0f250c0a19`.
+- Hook/checks: web193/1039, root types/lint/build, docs/format/diff dan normal Husky/Commitlint pass.
 - Ledger: receipt aktual dicatat pada update sesudah commit berhasil.
 
 ### Blocker atau tindak lanjut
@@ -411,7 +411,7 @@ Lanjut PCAT-010 detail /videos/$slug. UI/runtime checkbox ditutup bersama PCAT-0
 
 ## Task: PCAT-010 — Detail publik Film/Standalone
 
-- Status: Backlog
+- Status: Implemented — actual browser acceptance PCAT-013 berikutnya.
 - Owner: Codex/pengembang
 - Prioritas: P1 — urutan dependency DAG pada plan
 - Referensi: PCAT-US-02; PRD-07/08/09, GR-02/03/05/06/08; [plan](../plans/public-catalog/implementation-plan.md)
@@ -437,7 +437,7 @@ Generate routes, typed/behavior tests, SSR status/HTML and browser navigation; r
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau divalidasi. Commands di atas merupakan rencana, bukan hasil.
+8 Oktober 2026: unsigned detail /videos/$slug, browser-only portrait cover, synopsis penuh, mobile Watch now sebelum cover, Back to Browse dan watch context type. Unknown type dinormalisasi oleh shared catalog-navigation; router scroll restoration memakai canonical homepage type. Catalog/detail networkMode always serta cached offline fallback mencegah paused loader. Generated route tree melalui generate-routes. Observed: web193 tests/1039 assertions, root types3/lint1/build2 pass. HTTP/visual/navigation proof actual browser masih PCAT-013.
 
 ### Commit task
 
@@ -448,7 +448,7 @@ Belum diimplementasikan atau divalidasi. Commands di atas merupakan rencana, buk
 
 ### Blocker atau tindak lanjut
 
-Menunggu PCAT-009. Approval/hasil proof tidak diasumsikan tersedia.
+Lanjut PCAT-011 watch wrapper; browser acceptance ditutup PCAT-013.
 
 ## Task: PCAT-011 — Integrasi metadata dan navigasi watch existing
 
