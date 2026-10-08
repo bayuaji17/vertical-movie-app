@@ -266,8 +266,8 @@ Dedicated native public-content-proof.test.ts: 4 pass, 57 assertions, 159.59s. P
 ### Commit task
 
 - Pesan: Conventional Commit scoped PCW-006
-- SHA: receipt aktual dicatat pada task berikutnya setelah commit.
-- Hook/checks: normal docs/lint/types/commitlint wajib tanpa bypass.
+- SHA: `47fe7f36cc6418fb81ff60a2e39789db14629c04`.
+- Hook/checks: docs:check, lint, check-types dan commitlint normal pass tanpa bypass.
 
 ### Blocker atau tindak lanjut
 
@@ -275,11 +275,11 @@ Dependency menurut DAG. Tidak menambah progress/autoplay/editor/production atau 
 
 ## Task: PCW-007 — Browser detail-to-HLS dev/built
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent
 - Prioritas: P1, dependency order
 - Referensi: PCW-US-001/002; PRD-07/08, GR-02; [plan](../plans/public-content-watch/implementation-plan.md#implementation-steps)
-- Diperbarui: 2026-10-07
+- Diperbarui: 2026-10-08
 - Dependensi: PCW-004, PCW-005, PCW-006.
 - Ukuran: Satu hasil terpisah; pecah bila risiko tambahan membutuhkan.
 
@@ -289,8 +289,8 @@ Real anonymous journey through alltypes/Series/episodes verified in development 
 
 ### Acceptance criteria
 
-- [ ] alljourneys/controls/errorcases pass againstactualAPI/PG/MinIO, no testreadyJSON substitutedforHLS proof; source/runtimefresh, screenshotsboundariesrecorded.
-- [ ] Applicable gates/evidence dan compatibility diperiksa sebelum Done.
+- [x] alljourneys/controls/errorcases pass againstactualAPI/PG/MinIO, no testreadyJSON substitutedforHLS proof; source/runtimefresh, screenshotsboundariesrecorded.
+- [x] Applicable gates/evidence dan compatibility diperiksa sebelum Done.
 
 ### Validasi
 
@@ -298,12 +298,12 @@ Chromium320/390/768/1024/1440/1920 Light/Dark/System; keyboard/touch44px/focus/r
 
 ### Hasil dan bukti
 
-Belum diimplementasikan/diverifikasi; isi command/result/batas dan receipt aktual saat task selesai.
+8 Oktober 2026: public-watch Chromium development dan built Bun/Nitro lulus semua journey serta 18 kombinasi 320/390/768/1024/1440/1920 × Light/Dark/System pada masing-masing runtime. Actual API/PG/private MinIO/FFmpeg12s HLS membuktikan SSR first20 tanpa duplicate metadata atau signed fields; dialog keyboard/focus dan CTA Film/Series; Standalone detail/watch; skeleton20→24, same-cursor Retry503, Refresh422, partial episode503 dan offline resume. Playback nyata, expiry asli API/seek mempertahankan posisi4s dan pause; pilihan480p memakai rendition486×864; Next lintas season/EOF/error manual, explicit Retry satu request, held old identity dan archive/fresh404 lulus. HTTP SSR404 diperbaiki melalui middleware; public Button render-Link diberi role link. Rasio9:16/no overflow/navigasi44px dan nol page/hydration errors; authReads0, Cookie/Authorization upstream0, tanpa unexpected external requests. Built publication regression juga lulus Film/Standalone actual create/upload/worker/private preview/play/publish/watch/archive,15 theme/viewport cases, conflicts/recovery/expiry/auth cleanup. Bun test apps/api/src apps/web/test:323 pass/1727 assertions; root check-types/lint/build pass; changed source Prettier check pass. Screenshot runtime lokal public-watch-dev/built series/watch390dark dan standalone light berada di artifact folder, memakai judul sintetis dan video warna polos; bukan artwork/production evidence. SQL-ready public fixture bukan full worker provenance proof; publication regression menjalankan actual worker. Cleanup fixture/server selesai; no schema/dependency/env changes.
 
 ### Commit task
 
 - Pesan: Conventional Commit scoped PCW-007
-- SHA: belum dibuat.
+- SHA: receipt aktual dicatat pada task berikutnya setelah commit.
 - Hook/checks: normal docs/lint/types/commitlint wajib tanpa bypass.
 
 ### Blocker atau tindak lanjut

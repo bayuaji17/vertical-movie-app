@@ -39,6 +39,7 @@ export function FeaturedFilm({
           <Button
             className="min-h-11"
             nativeButton={false}
+            role="link"
             render={
               <Link
                 to="/watch/$slug"

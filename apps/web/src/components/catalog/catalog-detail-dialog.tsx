@@ -69,6 +69,7 @@ export function CatalogDetailDialog({
               <Button
                 className="min-h-11"
                 nativeButton={false}
+                role="link"
                 render={
                   item.kind === 'series' ? (
                     <Link to="/series/$slug" params={{ slug: item.slug }} />
@@ -87,6 +88,7 @@ export function CatalogDetailDialog({
                   variant="outline"
                   className="min-h-11"
                   nativeButton={false}
+                  role="link"
                   render={
                     <Link
                       to="/watch/$slug"

@@ -69,6 +69,7 @@ export function ContentFailure({
           variant="outline"
           className="min-h-11"
           nativeButton={false}
+          role="link"
           render={<Link to="/" />}
         >
           Back to catalog
@@ -156,6 +157,7 @@ export function ContentPage({
                 <Button
                   className="min-h-11"
                   nativeButton={false}
+                  role="link"
                   render={
                     <Link
                       to="/watch/$slug"

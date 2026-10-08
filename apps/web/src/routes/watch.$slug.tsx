@@ -18,7 +18,6 @@ import {
 } from '#/lib/catalog/content-queries'
 import type { WatchVideo } from '#/lib/catalog/content-model'
 
-
 export const Route = createFileRoute('/watch/$slug')({
   loader: ({ context, params }) =>
     loadWatchMetadata(context.queryClient, params.slug),
@@ -70,6 +69,7 @@ function WatchContent({ video }: { video: WatchVideo }) {
             variant="outline"
             className="min-h-11"
             nativeButton={false}
+            role="link"
             render={
               <Link to="/series/$slug" params={{ slug: video.seriesSlug }} />
             }
@@ -82,6 +82,7 @@ function WatchContent({ video }: { video: WatchVideo }) {
               variant="outline"
               className="min-h-11"
               nativeButton={false}
+              role="link"
               render={
                 <Link
                   to="/titles/$kind/$slug"
@@ -97,6 +98,7 @@ function WatchContent({ video }: { video: WatchVideo }) {
           variant="ghost"
           className="min-h-11"
           nativeButton={false}
+          role="link"
           render={<Link to="/" />}
         >
           Back to catalog
@@ -183,6 +185,7 @@ function NextEpisode({
     <Button
       className="min-h-11"
       nativeButton={false}
+      role="link"
       render={
         <Link
           to="/watch/$slug"
