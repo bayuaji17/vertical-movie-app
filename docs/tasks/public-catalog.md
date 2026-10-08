@@ -325,7 +325,7 @@ Lanjut PCAT-008 komponen. Capability state tidak masuk cache metadata/SSR dan ti
 
 ## Task: PCAT-008 — Shell, card dan cover public reusable
 
-- Status: Implemented — komponen lokal; matriks visual/keyboard runtime diverifikasi bersama PCAT-013.
+- Status: Done — browser acceptance PCAT-013 terverifikasi lokal.
 - Owner: Codex/pengembang
 - Prioritas: P1 — urutan dependency DAG pada plan
 - Referensi: PCAT-US-01; PRD-07/08/09, GR-02/03/05/06/08; [plan](../plans/public-catalog/implementation-plan.md)
@@ -341,8 +341,8 @@ Paths/symbol owners: `apps/web/src/components/public/{public-shell,catalog-card,
 
 ### Acceptance criteria
 
-- [ ] Poster/layout tidak stretch/shift; fallback/title link tetap accessible, tanpa media player di card.
-- [ ] Keyboard/focus/44px/light-dark-System dan semantic contrast; long titles tidak overflow.
+- [x] Poster/layout tidak stretch/shift; fallback/title link tetap accessible, tanpa media player di card.
+- [x] Keyboard/focus/44px/light-dark-System dan semantic contrast; long titles tidak overflow.
 - [x] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
 
 ### Validasi
@@ -350,6 +350,8 @@ Paths/symbol owners: `apps/web/src/components/public/{public-shell,catalog-card,
 Component/visual behavior review dan root gates; matriks browser definitif PCAT-013.
 
 ### Hasil dan bukti
+
+Implementation evidence di bawah dicatat sebelum acceptance browser; PCAT-013 sekarang menutup UI/runtime checklist dengan actual built Chromium proof. Lihat hasil lengkap pada task PCAT-013; batas produksi tetap terbuka.
 
 8 Oktober 2026: shell Brand/Browse/Appearance mereuse theme menu tanpa auth; semantic tokens, skip link/main landmark, 44px controls dan mobile header diselaraskan dengan desain. Card memisahkan poster retry dari title link (renderLink milik page/controller), reserved9:16 poster/skeleton/object-cover, metadata Film/Standalone/duration dan long-title wrapping; no per-card player. React hooks tetap src/hooks/use-*.ts.
 
@@ -364,11 +366,11 @@ Observed: native React SSR cover proof1/3, tanpa image/signed URL/network capabi
 
 ### Blocker atau tindak lanjut
 
-Desain sudah disetujui, komponen tersedia untuk PCAT-009. Checkbox acceptance visual/runtime ditutup sesudah bukti browser PCAT-013; tidak mengklaim dari compilation.
+Tidak ada blocker lokal; browser acceptance PCAT-013 lulus. Canonical closure PCAT-014 mencatat batas production/device.
 
 ## Task: PCAT-009 — Homepage katalog Film/Standalone nyata
 
-- Status: Implemented — homepage API/grid20/URL filters; built-browser acceptance PCAT-013.
+- Status: Done — browser acceptance PCAT-013 terverifikasi lokal.
 - Owner: Codex/pengembang
 - Prioritas: P1 — urutan dependency DAG pada plan
 - Referensi: PCAT-US-01; PRD-07/08/09, GR-02/03/05/06/08; [plan](../plans/public-catalog/implementation-plan.md)
@@ -384,15 +386,17 @@ Paths/symbol owners: `apps/web/src/routes/index.tsx, components/public/catalog-b
 
 ### Acceptance criteria
 
-- [ ] URL/back-forward/filter/loading konsisten; filter change/reset/cursor failure terpulihkan.
-- [ ] SSR metadata unsigned; no video/HLS requests grid; scroll/filter/page memory kembali saat Back dalam session.
-- [ ] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
+- [x] URL/back-forward/filter/loading konsisten; filter change/reset/cursor failure terpulihkan.
+- [x] SSR metadata unsigned; no video/HLS requests grid; scroll/filter/page memory kembali saat Back dalam session.
+- [x] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
 
 ### Validasi
 
 Generate routes via tooling; web state/gateway tests, direct HTML/SSR/hydration browser cases, root gates.
 
 ### Hasil dan bukti
+
+Implementation evidence di bawah dicatat sebelum acceptance browser; PCAT-013 sekarang menutup UI/runtime checklist dengan actual built Chromium proof. Lihat hasil lengkap pada task PCAT-013; batas produksi tetap terbuka.
 
 8 Oktober 2026: route / memakai unsigned /videos SSR dan Query page20 movie/standalone dengan canonical URL type, unknown→all replace, robots noindex/nofollow sementara. Grid20/manual Load more, skeleton/empty/first-page error/retry/stale/append error/EOF/offline dan retained cards memakai komponen approved; card navigation tanpa preload. Type transition membatalkan old/destination query dengan latest-intent fence, destination traversal baru; fresh Back/Forward Query pages disimpan, expired loader/focus/reconnect dan explicit Refresh restart first page. Custom hook berada di hooks/use-public-catalog.ts.
 
@@ -407,11 +411,11 @@ Observed: web193/1039, root types3/lint1/build2 pass; lint conditional unreachab
 
 ### Blocker atau tindak lanjut
 
-Lanjut PCAT-010 detail /videos/$slug. UI/runtime checkbox ditutup bersama PCAT-013; main/runtime sejarah tiga jenis dan API/rute Series tetap dipertahankan.
+Tidak ada blocker lokal; browser acceptance PCAT-013 lulus. Canonical closure PCAT-014 mencatat batas production/device.
 
 ## Task: PCAT-010 — Detail publik Film/Standalone
 
-- Status: Implemented — actual browser acceptance PCAT-013 berikutnya.
+- Status: Done — browser acceptance PCAT-013 terverifikasi lokal.
 - Owner: Codex/pengembang
 - Prioritas: P1 — urutan dependency DAG pada plan
 - Referensi: PCAT-US-02; PRD-07/08/09, GR-02/03/05/06/08; [plan](../plans/public-catalog/implementation-plan.md)
@@ -427,15 +431,17 @@ Paths/symbol owners: `apps/web/src/routes/videos.$slug.tsx, components/public/vi
 
 ### Acceptance criteria
 
-- [ ] Direct/reload/SPA bekerja tanpa login; draft/hidden/archived/missing dan episode route baru 404, dependency failure 503/retry.
-- [ ] SSR/metadata tidak memuat signed URLs; cover browser-only; watch intent/preload tidak fetch stream.
-- [ ] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
+- [x] Direct/reload/SPA bekerja tanpa login; draft/hidden/archived/missing dan episode route baru 404, dependency failure 503/retry.
+- [x] SSR/metadata tidak memuat signed URLs; cover browser-only; watch intent/preload tidak fetch stream.
+- [x] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
 
 ### Validasi
 
 Generate routes, typed/behavior tests, SSR status/HTML and browser navigation; root gates.
 
 ### Hasil dan bukti
+
+Implementation evidence di bawah dicatat sebelum acceptance browser; PCAT-013 sekarang menutup UI/runtime checklist dengan actual built Chromium proof. Lihat hasil lengkap pada task PCAT-013; batas produksi tetap terbuka.
 
 8 Oktober 2026: unsigned detail /videos/$slug, browser-only portrait cover, synopsis penuh, mobile Watch now sebelum cover, Back to Browse dan watch context type. Unknown type dinormalisasi oleh shared catalog-navigation; router scroll restoration memakai canonical homepage type. Catalog/detail networkMode always serta cached offline fallback mencegah paused loader. Generated route tree melalui generate-routes. Observed: web193 tests/1039 assertions, root types3/lint1/build2 pass. HTTP/visual/navigation proof actual browser masih PCAT-013.
 
@@ -448,11 +454,11 @@ Generate routes, typed/behavior tests, SSR status/HTML and browser navigation; r
 
 ### Blocker atau tindak lanjut
 
-Lanjut PCAT-011 watch wrapper; browser acceptance ditutup PCAT-013.
+Tidak ada blocker lokal; browser acceptance PCAT-013 lulus. Canonical closure PCAT-014 mencatat batas production/device.
 
 ## Task: PCAT-011 — Integrasi metadata dan navigasi watch existing
 
-- Status: Implemented — real HLS browser acceptance PCAT-013 berikutnya.
+- Status: Done — browser acceptance PCAT-013 terverifikasi lokal.
 - Owner: Codex/pengembang
 - Prioritas: P1 — urutan dependency DAG pada plan
 - Referensi: PCAT-US-02; PRD-07/08/09, GR-02/03/05/06/08; [plan](../plans/public-catalog/implementation-plan.md)
@@ -468,9 +474,9 @@ Paths/symbol owners: `apps/web/src/routes/watch.$slug.tsx dan components/public/
 
 ### Acceptance criteria
 
-- [ ] Anonymous detail→watch/seek/renew/back berfungsi, no autoplay baru; slug lama tidak tertinggal.
-- [ ] Retry explicit mereset player terminal safely; existing episode watch tetap berjalan tanpa detail link invalid.
-- [ ] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
+- [x] Anonymous detail→watch/seek/renew/back berfungsi, no autoplay baru; slug lama tidak tertinggal.
+- [x] Retry explicit mereset player terminal safely; existing episode watch tetap berjalan tanpa detail link invalid.
+- [x] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
 
 ### Validasi
 
@@ -478,18 +484,20 @@ Videojs rc.4 bundled docs/skill; real HLS renewal/seek/quality proof affected, d
 
 ### Hasil dan bukti
 
+Implementation evidence di bawah dicatat sebelum acceptance browser; PCAT-013 sekarang menutup UI/runtime checklist dengan actual built Chromium proof. Lihat hasil lengkap pada task PCAT-013; batas produksi tetap terbuka.
+
 8 Oktober 2026: watch existing dibungkus PublicShell, canonical URL type dan Back to details /videos/$slug + Back to browse filter. Direct episode/Back to series/Next tetap tersedia. Video.js rc.4 CLI print-only dan installed bundled autoplay guide dibaca; player keyed id dan callback slug/id, cancellation/renewal/seek/no-autoplay tetap existing. Shared player copy English dan explicit Retry playback; legacy worker locator disesuaikan. Offline watch metadata memakai cached fallback/networkMode always dan disabled observer. Observed: web193/1039, root types3/lint1/build2 pass. Browser real HLS/renewal/seek/race/episode PCAT-013 berikutnya.
 
 ### Commit task
 
 - Pesan usulan: `feat: integrasi metadata dan navigasi watch existing (PCAT-011)`.
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk commit ini.
+- SHA: `3bd3c7aae374ca98c3cc725a1946e40eb036ecd9`.
+- Hook/checks: web193/1039, root types3/lint1/build2, docs/format/diff dan normal Husky/Commitlint pass.
 - Ledger: receipt aktual dicatat pada update sesudah commit berhasil.
 
 ### Blocker atau tindak lanjut
 
-PCAT-012 sudah Done; lanjut actual built-browser PCAT-013.
+Tidak ada blocker lokal; browser acceptance PCAT-013 lulus. Canonical closure PCAT-014 mencatat batas production/device.
 
 ## Task: PCAT-012 — Proof SQL visibility, cursor dan poster
 
@@ -538,7 +546,7 @@ SQL/storage acceptance selesai lokal. Tidak membuktikan browser UI/HLS/productio
 
 ## Task: PCAT-013 — Acceptance anonymous built-browser nyata
 
-- Status: Backlog
+- Status: Done — actual built Chromium, guarded PostgreSQL/MinIO/FFmpeg lokal.
 - Owner: Codex/pengembang
 - Prioritas: P1 — urutan dependency DAG pada plan
 - Referensi: PCAT-US-01/02/03; PRD-07/08/09, GR-02/03/05/06/08; [plan](../plans/public-catalog/implementation-plan.md)
@@ -554,9 +562,9 @@ Paths/symbol owners: `apps/api/test/integration/public-catalog-browser-proof.tes
 
 ### Acceptance criteria
 
-- [ ] Catalog→detail→watch→archive, actual cover bytes/HLS/expiry/refetch/direct reload/SSR statuses terbukti; signed URL tidak di HTML/dehydration.
-- [ ] Widths 320/390/768/1024/1440 light/dark, keyboard/touch/System/long copy, append/cover/offline/races dan no private headers tested.
-- [ ] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
+- [x] Catalog→detail→watch→archive, actual cover bytes/HLS/expiry/refetch/direct reload/SSR statuses terbukti; signed URL tidak di HTML/dehydration.
+- [x] Widths 320/390/768/1024/1440 light/dark, keyboard/touch/System/long copy, append/cover/offline/races dan no private headers tested.
+- [x] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
 
 ### Validasi
 
@@ -564,7 +572,11 @@ Build artifact terbaru, bun test apps/api/test/integration/public-catalog-browse
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau divalidasi. Commands di atas merupakan rencana, bukan hasil.
+8 Oktober 2026: AUTH_BROWSER_PHASE=public-film AUTH_BROWSER_RUNTIME=built bun --env-file=apps/api/.env apps/web/test/auth-browser-smoke.mjs lulus dengan installed Windows Node/Playwright/Chromium. Reuse fixture dengan optional49 non-episode,24 episode2seasons, private random MinIO/actual WebP dan production FFmpeg HLS12s3renditions; root runner public-film, business/gateway guards existing, worker public-film-catalog-browser-worker.mjs. No new runtime dependency/env/schema.
+
+Observed: SSR200/404/503 dan episode /videos404; unsigned HTML/dehydration, authReads0/upstream Cookie+Authorization absent, no private/external requests/hydration errors; Retry initial503; pages20/40/49 EOF/UUID dedup/double click, append503 retaining20/same-cursor retry; URL type normalization, Back/Forward, scroll restore/retained40 and reload20; held cursor cancellation; cover bounded503/image failure+explicit repair, actual expiry24s automatic renewal lalu expiry kedua fallback tanpa loop/Retry cover and max4 measured within one document, unit queue dedup/cancel/expiry separately. Actual geometry320/390/768/1024/1440 Light/Dark, 9:16/no overflow/44px/no nested controls, keyboard focus/Space/Enter, System follows color scheme, full480-character synopsis and mobile CTA before cover; offline browse/disabled Watch and recovery. HLS manual play/no autoplay, seek3→4 after real signed expiry with paused position preserved,480p486x864, explicit Retry playback; cross-season manual Next, held capability identity reset, direct Series/episode, archive404 and actual empty Films. Runtime screenshots outside commits; design PNGs remain approved mockups.
+
+API151/883, web193/1039, root types3/lint1 pass; built web artifact used for browser proof; final root build and canonical docs closure PCAT-014. Native Better Auth built regression passed separately. Earlier fixture synopsis exceeded500 and was reduced to480; worker loopback MinIO allowlist fixed, concurrency measured per document, keyboard waited for hydration. Public illegal @repo/auth/server import build rejection was observed PCAT-009, restored source/valid build; gateway tests prove stripping. R2/Safari/physical device/resource/stress/full restore/production not claimed.
 
 ### Commit task
 
@@ -575,7 +587,7 @@ Belum diimplementasikan atau divalidasi. Commands di atas merupakan rencana, buk
 
 ### Blocker atau tindak lanjut
 
-Menunggu PCAT-011, PCAT-012. Approval/hasil proof tidak diasumsikan tersedia.
+Lanjut PCAT-014 canonical current/history docs dan quality gate closure.
 
 ## Task: PCAT-014 — Dokumentasi canonical dan penutupan modul
 

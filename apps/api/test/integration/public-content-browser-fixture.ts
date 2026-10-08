@@ -15,16 +15,21 @@ import { transcodeHls } from "../../src/workers/transcode";
 import { probe, videoFacts } from "../../src/workers/probe";
 
 /** Guarded test DB, owned private bucket, production HLS encoder; controls never join the runtime app. */
-export async function createPublicContentBrowserFixture() {
+export async function createPublicContentBrowserFixture(
+  options: { videoCount?: number } = {},
+) {
   const storage = await publicCatalogStorageFixture(),
     extraKeys = new Set<string>();
   const f = await publicCatalogFixture({
-    videoCount: 7,
+    videoCount: options.videoCount ?? 7,
     seriesCount: 1,
     bucket: storage.config.bucket,
   });
   const directory = await mkdtemp(join(tmpdir(), "public-content-hls-"));
   try {
+    if (options.videoCount)
+      await f.db
+        .client`UPDATE videos SET title=${"A very long portrait film title with a story that keeps its words readable on the smallest screen 🎬"}, synopsis=${"A complete portrait synopsis. ".repeat(16)} WHERE id=${f.videoIds[0]}::uuid`;
     const season2 = crypto.randomUUID();
     await f.db
       .client`INSERT INTO seasons(id,series_id,season_number,created_by,updated_by) VALUES (${season2}::uuid,${f.seriesIds[0]}::uuid,2,'media-admin','media-admin')`;
@@ -128,6 +133,7 @@ export async function createPublicContentBrowserFixture() {
     }> = [];
     const flags = {
       metadataStatus: 0,
+      posterStatus: 0,
       episodesStatus: 0,
       nextStatus: 0,
       playbackStatus: 0,
@@ -165,6 +171,7 @@ export async function createPublicContentBrowserFixture() {
     async function control(body: Record<string, unknown>) {
       for (const key of [
         "metadataStatus",
+        "posterStatus",
         "episodesStatus",
         "nextStatus",
         "playbackStatus",
@@ -185,6 +192,11 @@ export async function createPublicContentBrowserFixture() {
         if (!row) throw Error("Refusing non-fixture archive");
         await admin.archive(row.id, row.row_version, "media-admin");
       }
+      if (body.archiveFilms) {
+        await f.db
+          .client`UPDATE videos SET publication_status='archived',published_at=null,archived_at=now() WHERE kind='movie'`;
+        service.invalidate();
+      }
       if (body.restore) {
         for (const row of snapshot)
           await f.db
@@ -204,7 +216,7 @@ export async function createPublicContentBrowserFixture() {
       traces.push(trace);
       if (
         (flags.holdMore &&
-          url.pathname.endsWith("/episodes") &&
+          (url.pathname.endsWith("/episodes") || url.pathname === "/videos") &&
           trace.hasCursor) ||
         (flags.holdPlayback && url.pathname.endsWith("/playback"))
       ) {
@@ -224,15 +236,18 @@ export async function createPublicContentBrowserFixture() {
           return new Response(null, { status: 499 });
         }
       }
-      const status = url.pathname.endsWith("/episodes")
-        ? flags.episodesStatus
-        : url.pathname.endsWith("/next")
-          ? flags.nextStatus
-          : url.pathname.endsWith("/playback")
-            ? flags.playbackStatus
-            : /^\/catalog\/(details|watch)\//.test(url.pathname)
-              ? flags.metadataStatus
-              : 0;
+      const status = url.pathname.endsWith("/poster")
+        ? flags.posterStatus
+        : url.pathname.endsWith("/episodes")
+          ? flags.episodesStatus
+          : url.pathname.endsWith("/next")
+            ? flags.nextStatus
+            : url.pathname.endsWith("/playback")
+              ? flags.playbackStatus
+              : /^\/catalog\/(details|watch)\//.test(url.pathname) ||
+                  /^\/videos(?:\/[^/]+)?$/.test(url.pathname)
+                ? flags.metadataStatus
+                : 0;
       if (status)
         return Response.json(
           {
