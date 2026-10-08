@@ -1,6 +1,6 @@
 # Admin Series, season dan episode — route dan state specification
 
-> Status: kontrak eksekusi · 8 Oktober 2026 · Modul dan implementasi diminta pengguna. Menggunakan desain admin Rhea yang sudah tersedia; dokumen ini bukan raster approval atau proof runtime. Baseline `0550d0484ca27fbfacb96a033055f4045b636dad`.
+> Status: implemented/verified lokal ASER-004–011; evidence pada backlog, baseline specification historis · 8 Oktober 2026 · Modul dan implementasi diminta pengguna. Menggunakan desain admin Rhea yang sudah tersedia; dokumen ini bukan raster approval atau proof runtime. Baseline `0550d0484ca27fbfacb96a033055f4045b636dad`.
 
 ## Alur dan routes
 

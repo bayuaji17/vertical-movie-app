@@ -52,7 +52,7 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 
 ## Context dan plan per fitur
 
-Admin Series/season/episode: [context](plans/admin-series-episodes/repository-context.md), [plan](plans/admin-series-episodes/implementation-plan.md) dan [backlog ASER](tasks/admin-series-episodes.md). Modul dipilih pengguna 8 Oktober 2026; ASER-001–011 selesai lokal, termasuk dedicated API/SQL dan built-browser hierarchy/media/publication/regression; closure dokumentasi ASER-012.
+Admin Series/season/episode: [context](plans/admin-series-episodes/repository-context.md), [plan](plans/admin-series-episodes/implementation-plan.md) dan [backlog ASER](tasks/admin-series-episodes.md). Modul dipilih pengguna 8 Oktober 2026; ASER-001–012 Done dan verified lokal: season/episode editor, upload/crop/Preview, Series/Episode Publish dan Episode Archive; native API/SQL serta built-browser journeys/regression lulus. Remote delivery dan production belum dijalankan.
 
 Organisasi hooks web: [context](plans/web-hooks-organization/repository-context.md), [plan](plans/web-hooks-organization/implementation-plan.md) dan [WHOOK](tasks/web-hooks-organization.md), scope structural disetujui pengguna 8 Oktober 2026. Delapan hooks berada di `apps/web/src/hooks/use-*.ts`; integrasi dengan katalog main diperiksa sebelum delivery.
 
@@ -78,7 +78,7 @@ Integrasi katalog API ke homepage: [context](plans/public-catalog-api/repository
 
 ## Backlog dan evidence
 
-- [Admin Series/season/episode](tasks/admin-series-episodes.md): fondasi ASER dan task editor/media/publication beserta proof.
+- [Admin Series/season/episode](tasks/admin-series-episodes.md): ASER-001–012 Done; kontrak/editor/media/publication, API/SQL/browser proof dan local task receipts.
 
 - [Organisasi hooks web](tasks/web-hooks-organization.md): refactor hooks/use-prefix serta integrasi katalog terbaru.
 - [Katalog Film/Standalone](tasks/public-catalog.md): PCAT-001–014 Done lokal; contract/current proof dan receipts, dengan snapshot awal tetap historis.
@@ -104,4 +104,4 @@ Custom React hooks aplikasi web berada di `apps/web/src/hooks/use-*.ts`; provide
 
 `apps/api` memiliki API Elysia, metadata, storage/upload, native poster request processing, publication/catalog/playback dan worker Bun/FFmpeg terpisah. `apps/web` memiliki TanStack Start, auth admin, metadata dashboard, uploader Eden/Query responsif light/dark serta primitive crop Canvas 9:16, gateway same-origin, Video.js 10 RC, detail Film/Standalone, Series/episode dan watch kontekstual, serta preview admin. `packages/auth` memiliki Better Auth dengan entry server/client/types terpisah. Setelah merge PR #13, homepage memakai unsigned /videos SSR20, All/Films/Standalone URL type, cursor/Load more, browser-only signed poster queue, detail /videos/$slug dan filter-aware watch; verified lokal PCAT-001–014. Katalog tiga jenis/search/genre/binary poster pada main sebelumnya tetap riwayat dan API/rute Series existing tetap tersedia. Workspace diatur oleh `turbo.json`; env samples berada pada masing-masing app.
 
-Media telah di-merge melalui [PR #3](https://github.com/bayuaji17/vertical-movie-app/pull/3). Development memakai MinIO dan production dirancang memakai Cloudflare R2 melalui env. Playback memakai HLS hasil transcoding dan lifecycle draft → published → archived. Bukti lokal serta fixture 10/30 menit ada pada runbook/backlog. R2 staging, Safari/native HLS, kapasitas 4 core/4 GB, full restore dan matriks stress yang belum terverifikasi tetap gerbang terpisah. Uploader Film/Standalone source+cover dan Series cover terverifikasi lokal; readiness/Publish/Archive Film/Standalone terverifikasi lokal 7 Oktober 2026. Publication Series/episode, editor/upload episode dan subtitle merupakan pekerjaan lanjutan.
+Media telah di-merge melalui [PR #3](https://github.com/bayuaji17/vertical-movie-app/pull/3). Development memakai MinIO dan production dirancang memakai Cloudflare R2 melalui env. Playback memakai HLS hasil transcoding dan lifecycle draft → published → archived. Bukti lokal serta fixture 10/30 menit ada pada runbook/backlog. R2 staging, Safari/native HLS, kapasitas 4 core/4 GB, full restore dan matriks stress yang belum terverifikasi tetap gerbang terpisah. Uploader Film/Standalone source+cover dan Series cover terverifikasi lokal; readiness/Publish/Archive Film/Standalone terverifikasi lokal 7 Oktober 2026. Editor season/episode, source/cover/Preview episode, Series/Episode Publish dan Episode Archive terverifikasi lokal 8 Oktober 2026 pada ASER. Subtitle dan acceptance production tetap lanjutan.

@@ -2,10 +2,11 @@
 
 ## Plan metadata
 
-- Status: executing modul; ASER-001–011 selesai lokal; closure dokumentasi mengikuti ASER-012.
+- Status: implemented/verified lokal; ASER-001–012 Done. Remote delivery/production belum dijalankan.
 - Tanggal: 2026-10-08; pengguna memilih modul ini setelah meminta lanjut task berikutnya.
 - Repository: `bayuaji17/vertical-movie-app`; base ref `main`.
-- Base SHA dan last validated SHA: `04b098bef9d210c1670f3a29c375208ef36805b9`.
+- Base SHA: `04b098bef9d210c1670f3a29c375208ef36805b9`.
+- Last validated runtime SHA: `94c7b6c8385f8af8609f56c477cbe8632687042b`; ASER-012 hanya canonical docs/ledger.
 - Context: [repository-context.md](repository-context.md), disimpan sebelum plan.
 - Backlog: [admin-series-episodes](../../tasks/admin-series-episodes.md); branch `feat/admin-series-episodes`.
 - Eksekusi pertama ASER-001/002: refinement lalu fondasi typed client/query. UI/upload/publication mempunyai task dan evidence tersendiri; pemilihan modul tidak dianggap sebagai approval desain raster atau production.
@@ -20,7 +21,7 @@ Dalam scope: list/create/edit season, list/create/detail/edit episode, source+co
 
 Parent archive hanya mengikuti capability API existing: Series published tidak mempunyai archive UI; season yang mempunyai episode published tidak diarchive. Restore/republish, unpublish, cascade/hard delete, perubahan grouping setelah first publish, penggantian source published, homepage discovery Series, subtitle, settings, bulk commands, global job monitor, dependency upgrade dan deployment merupakan scope terpisah.
 
-## Current behavior
+## Historical behavior at base SHA
 
 API hierarchy, episode upload/preview/publish dan Series publish tersedia. Web hanya membuat/edit metadata top-level dan menampilkan seasons read-only. Episode tidak mempunyai entry route sendiri atau media/publication panel. Series cover tersedia tetapi GET publication readiness Series belum ada. Lihat trace dan batas lifecycle di [context](repository-context.md#runtime-and-data-flow).
 
@@ -191,11 +192,11 @@ Modul diterima setelah admin hierarchy/media/publication journey dan recovery di
 
 ## Risks and mitigations
 
-Parent lifecycle berbeda dari video: gate kemampuan sesuai API. Series readiness drift: shared assessment dan SQL parity. Cross-owner cursor/cache: identity+series+season+filter keys serta server cursor. Uncertain create tanpa backend idempotency: no automatic replay, GET reconciliation; UI tidak mengarang dedup guarantee. Long seasons/all seasons endpoint: responsive selector/list tanpa mengklaim cursor season. Private late result: abort/session identity check sebelum navigation/invalidation pada hook UI future.
+Parent lifecycle berbeda dari video: gate kemampuan sesuai API. Series readiness drift: shared assessment dan SQL parity. Cross-owner cursor/cache: identity+series+season+filter keys serta server cursor. Uncertain create tanpa backend idempotency: no automatic replay, GET reconciliation; UI tidak mengarang dedup guarantee. Long seasons/all seasons endpoint: responsive selector/list tanpa mengklaim cursor season. Private late result: owner/session AbortSignal dan generation check sebelum navigation/invalidation/cache writes telah diverifikasi pada hooks/use-series-editor dan hooks/use-owner-publication.
 
 ## Rollback or recovery
 
-Fondasi files baru belum dipanggil UI, dapat direvert scoped tanpa data migration. Runtime berikut dipisah per task; hentikan mutation baru dan refresh server state saat rollback UI. Source/metadata/upload tidak dihapus untuk rollback client. Production rollout/migration berada di authorization terpisah.
+Editor, media dan publication clients sekarang dipakai authenticated routes. ASER tidak mengubah schema; rollback UI harus menghentikan mutation baru, mempertahankan kompatibilitas kontrak server dan merefresh state server. Source/metadata/upload tidak dihapus untuk rollback client. Production rollout/migration berada di authorization terpisah.
 
 ## Evidence
 
@@ -238,3 +239,7 @@ Parent published archive/restore/cascade dan public discovery Series tidak ditet
 - 2026-10-08 ASER-010: Dedicated admin-series-proof memakai PostgreSQL guarded dan Better Auth native create/login/cookie/authoritative guard, tiga tests/161 assertions. GET/POST parity: metadata, rights, episode600s, current poster/child generation, failed job, empat active upload states dan stale GET/version menolak write; concurrent same-intent Series publish menghasilkan satu durable operation dan payload conflict409. Season/episode uniqueness, inherited genre, first-publish grouping locks, published-parent add draft child, parent archive race, counts/Next dan hidden/archived public404 terbukti. Repeatable read tidak mereservasi eligibility; fresh POST menolak media yang berubah. SQL-ready assets hanya predicate/race fixtures; bytes/MinIO/FFmpeg tetap proof browser ASER-006/009 dengan owned random bucket cleanup. Schema/env/dependencies tidak berubah, tanpa development migration. Checks: bun test apps/api/src:153 pass/923 assertions; guarded bun test apps/api/test/integration/admin-series-proof.test.ts:3 pass/161 assertions; bun run check-types, bun run lint, bun run build lulus; docs:check/Prettier/git diff --check sebelum commit. Commit receipt pencatatan pada update task berikutnya. Previous task head `94546f59cf285be15f97f0b3248d16235dd54bde`.
 
 - 2026-10-08 ASER-011: Built Chromium journeys lulus: Create Series/default Season1/Season2/two episodes via UI, actual source/crop/poster MinIO, FFmpeg HLS Preview/Back, publish hidden children lalu Series, anonymous HLS/watch/Next manual, archive child dan public count/access. Episode lost-before explicit double-click retry memakai payload/key/version identik; lost-after read reconciliation tidak resend. Series real409 membutuhkan refresh/new review; lost-response publish confirmed via GET. 15 width/theme dialog cases (320/390/768/1024/1440, Light/Dark/System), keyboard focus trap/cancel/return/44px/no overflow dan offline guard lulus. Metadata dirty/version/preserved input/inheritance/grouping/cursor20+3/wrong-owner, archived season disabled fields dan native SDK session loss saat PATCH committed/in-flight terbukti tanpa late private cache. Native Better Auth HTTP regression5 tests/106 assertions lulus (ban/expiry/cache/auth outage serta secured31 admin OpenAPI). Film/Standalone full real-media regression lulus, termasuk malformed/lost response, failed refresh, replay/expiry/cache/auth. Shared controller sekarang memakai subject dengan default video sehingga copy Film tetap kompatibel. Public episode link membutuhkan parent active dan media/parent checks. Browser auth memakai controlled SDK fixture; native cookies dibuktikan terpisah. Checks: bun test apps/web/test:220 pass/1223 assertions; native content-http-proof:5 pass/106 assertions; built series, series-media/full dan publication browser phases lulus; bun run check-types, bun run lint, bun run build lulus; preservation22 file byte-identical/3 README overlays; docs:check/Prettier/diff check sebelum commit. Commit receipt pencatatan pada update task berikutnya. Previous task head `5d172d8bd8f25e87856b2eedbbe4968c1bfcbff2`.
+
+- 2026-10-08 closure freshness: runtime HEAD `94c7b6c8385f8af8609f56c477cbe8632687042b` berisi ASER-001–011; endpoint/client/routes/media/publication/current proof diperiksa. Tidak ada schema/env/dependency change, sehingga migration development tidak diperlukan. Seluruh mandatory task AC dibuktikan pada backlog; ASER-012 merapikan canonical status/runbook/index dan receipts. Branch tetap lokal; push/PR/merge/deployment belum dijalankan.
+
+- 2026-10-08 ASER-012: Canonical PRD/global-rules/architecture/runbook/desain/index sekarang selaras editor/media/publication Series/episode verified lokal; context/base SHA tetap historical. Current runtime freshness 94c7b6c8385f8af8609f56c477cbe8632687042b (ASER-011), seluruh mandatory ASER-001–011 AC/proof dan separate Conventional Commit receipts diperiksa. Root web220/API153 unit tests, dedicated admin-Series3/161 dan native HTTP5/106 serta tiga built-browser phases lulus. Scope preserve22 file unrelated byte-identical dan3 README overlays; generated/cache/credentials/screenshots tidak distage. Tidak ada schema/env/dependency change atau migration development diperlukan. Chromium/MinIO/FFmpeg adalah local proof, bukan R2/Safari/physical device/stress/production/deployment proof. Semua task module selesai lokal; tidak push/PR/merge. SHA task closure tidak ditulis self-referential, tersedia melalui git log ID ASER-012 setelah normal hook diterima. Checks: ASER-011 final bun run check-types:3, lint:1, build:2 successful; docs:check, scoped Prettier/git diff --check dan preservation aktual lulus; staged docs snapshot dan normal hooks sebelum commit. Commit receipt pencatatan pada update task berikutnya. Previous task head `94c7b6c8385f8af8609f56c477cbe8632687042b`.

@@ -57,7 +57,7 @@ Semua route API berikut melewati prefix /api pada origin web; backend internal t
 | Publik | GET /videos/:slug/playback                                     | DTO HLS/poster terpisah dari metadata                |
 | Publik | GET /playback/videos/:slug/master.m3u8 dan /variants/:index    | Playlist baru hanya effective playable               |
 
-Private routes memakai Better Auth authoritative requireAdmin. OpenAPI /openapi/json mencakup 30 operation admin dan playlist ber-extension .m3u8; /openapi menampilkan Scalar. Web /watch/$slug dan /admin/videos/$id/preview menyediakan player existing; detail Film/Standalone menampilkan Preview pada section Publication ketika capability ready; Series mempertahankan panel upload existing.
+Private routes memakai Better Auth authoritative requireAdmin. OpenAPI /openapi/json mencakup 31 operation admin dan playlist ber-extension .m3u8; /openapi menampilkan Scalar. Web /watch/$slug dan /admin/videos/$id/preview menyediakan player existing; detail Film/Standalone menampilkan Preview pada section Publication ketika capability ready; Series dan episode memiliki owner publication panel; Episode preview kembali ke detail hierarchy dengan type/Series UUID tervalidasi.
 
 Status editorial video draft→published→archived terpisah dari upload dan state asset/job. Publish manual memerlukan title/synopsis, rights dan source/HLS/poster verified-ready. Original tombstone tidak menghalangi publish/playback dari HLS. Episode published dalam series draft tetap tersembunyi; series publish memerlukan poster dan setidaknya satu episode published-ready. Series tanpa child playable tersembunyi tanpa mengubah status editorial otomatis. Lifecycle dan update metadata series lama dipertahankan; perubahan metadata menginvalidasi katalog setelah commit. Series published yang kehilangan title/synopsis tidak tampil sampai syarat metadata dipenuhi kembali.
 
@@ -197,3 +197,31 @@ AUTH_BROWSER_PHASE=public-film AUTH_BROWSER_RUNTIME=built bun --env-file=apps/ap
 ```
 
 Runner memakai AUTH_BROWSER_NODE, AUTH_PLAYWRIGHT_MODULE, AUTH_BROWSER_EXECUTABLE, AUTH_BROWSER_WORKER_PATH dan optional ADMIN_BROWSER_SCREENSHOT_PREFIX existing; env hanya test runner, bukan variabel runtime baru. Jalankan serial terhadap reset DB/build lain. Dedicated media test DB dijaga oleh fixture; bucket MinIO acak privat/owned objects dibersihkan dalam finally. Fixture SQL menyusun verified facts/current generations, production FFmpeg encoder menghasilkan HLS12s tiga rendition; bukan proof full upload/worker atau production. Actual browser worker public-film menguji viewport320/390/768/1024/1440 Light/Dark/System, SSR/status/unsigned metadata, paging/filter/history/cancel/scroll, cover/retry/offline, HLS seek/expiry/retry, episode Next serta archive. Evidence lengkap dan batas R2/Safari/perangkat fisik tetap di backlog. Tidak ada perubahan schema/dependency/env atau migration development; production rollout dan remote delivery terpisah.
+
+## Admin Series, season dan episode — ASER
+
+Implemented/verified lokal 8 Oktober 2026 setelah pengguna memilih modul dan meminta implementasi. Evidence dan commit per task pada [backlog ASER](../tasks/admin-series-episodes.md); route/state contract pada [desain ASER](../design/admin-series-episodes.md).
+
+1. Buat Series melalui Create draft; API membuat Season 1 atomik. Dari detail Series, Manage seasons & episodes membuka list/create/edit season, kemudian list episode dengan search/archive URL, cursor20 dan manual Load more. Episode memakai create/detail/edit route sendiri; nullable metadata dan genre inheritance mengikuti API. Conflict mempertahankan input; Reload latest version/discard harus eksplisit. Published/archived episode dan parent archived read-only.
+2. Upload source/cover episode memakai inventory video-owner dengan policy600s/512.000.000 byte, crop9:16/1080×1920, multipart/hash/pause/reselection dan status verified-ready existing. Worker Bun/FFmpeg tetap terpisah dari request/transaction. Preview HLS manual mengembalikan Series/episode context. Processing tidak mempublish otomatis.
+3. Publish episode memerlukan fresh owner metadata/media/readiness dan acknowledgement preview. Episode published pada Series draft tetap private dan menampilkan Hidden until series is published. Lengkapi synopsis/cover Series dan minimal satu published-playable episode; Publish Series memakai enam checks authoritative, fresh version dan explicit acknowledgement. Tidak ada Archive Series published.
+4. Episode Archive memakai expectedVersion; active parent diperlukan. Detail/playback baru ditolak setelah archive; files/audit dipertahankan dan signed URL existing berlaku sampai expiry. Counts/Next hanya effective playable children, Series tanpa child playable tersembunyi dengan status published tetap. Check status/Retry hanya eksplisit; lost-before/lost-after response tidak membuat key/version baru otomatis. Session/owner disposal membatalkan private effects dan menolak late cache writes.
+
+Proof API tanpa port dengan Better Auth native dan SQL guarded:
+
+```sh
+bun test apps/api/test/integration/admin-series-proof.test.ts
+```
+
+Set MEDIA_TEST_DATABASE_URL ke database dedicated guarded vertical_movie_app_media_test di loopback; fixture mereset schema test, tidak memakai DB development. Tiga tests memakai SQL-ready media rows untuk predicate/race isolation, bukan bukti media bytes. Real bytes dibuktikan terpisah oleh browser Series-media phase dengan PostgreSQL dedicated, random owned private MinIO bucket dan FFmpeg subprocess.
+
+```sh
+# Root; gunakan installed Chromium/Playwright paths melalui env runner:
+AUTH_BROWSER_PHASE=series AUTH_BROWSER_RUNTIME=built bun apps/web/test/auth-browser-smoke.mjs
+AUTH_BROWSER_PHASE=series-media MEDIA_BROWSER_PHASE=full AUTH_BROWSER_RUNTIME=built bun apps/web/test/auth-browser-smoke.mjs
+AUTH_BROWSER_PHASE=publication AUTH_BROWSER_RUNTIME=built bun apps/web/test/auth-browser-smoke.mjs
+```
+
+Metadata phase memerlukan CONTENT_TEST_DATABASE_URL dedicated vertical_movie_app_content_test. Media phases memerlukan MEDIA_TEST_DATABASE_URL, MEDIA_STORAGE_TEST_ENDPOINT, MEDIA_STORAGE_TEST_ACCESS_KEY_ID, MEDIA_STORAGE_TEST_SECRET_ACCESS_KEY serta installed AUTH_BROWSER_NODE, AUTH_PLAYWRIGHT_MODULE dan AUTH_BROWSER_EXECUTABLE. Jalankan serial: setiap media phase mereset test schema; build web fixture serta storage cleanup dikelola harness. Native Better Auth regression terpisah pada content-http-proof.test.ts; browser auth/session response memakai controlled fixture melalui SDK yang sama. Credentials/signed URLs/logs/screenshots tidak dikomit.
+
+Verifikasi lokal mencakup Create Series/default Season1/Season2/two episodes, real uploads/crops/HLS private-preview/public-watch/Next manual, hidden-before-parent-publish, Series409, stable-intent retry/lost-response reconciliation, archived counts/access, metadata dirty/offline/version/pagination/owner serta session loss saat PATCH in-flight. Chromium320/390/768/1024/1440 Light/Dark/System dan keyboard/focus/44px lulus. R2, Safari/native HLS/perangkat fisik, production/deployment dan stress-capacity tetap belum dibuktikan. Tidak ada schema/env/dependency change atau development migration pada ASER.

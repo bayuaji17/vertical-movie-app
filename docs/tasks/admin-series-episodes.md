@@ -1,6 +1,6 @@
 # Modul: Admin Series, season dan episode
 
-> Status: ASER-001–011 selesai lokal; closure dokumentasi masih lanjutan · 8 Oktober 2026 · Pengguna memilih modul ini setelah katalog PR #13. Scope runtime per task; belum menyatakan keseluruhan editor/publikasi Series selesai.
+> Status: ASER-001–012 Done dan verified lokal; remote delivery/production belum dijalankan · 8 Oktober 2026 · Pengguna memilih modul ini setelah katalog PR #13. Seluruh scope runtime ASER selesai dan verified lokal; batas platform/production tetap tercatat.
 
 ## Tujuan modul
 
@@ -58,7 +58,7 @@ Context sebelum plan/backlog tersimpan pada snapshot04b098b; user module choice 
 
 ### Blocker atau tindak lanjut
 
-Ikuti dependensi step; task selanjutnya ASER-002.
+Historis saat task selesai: task selanjutnya ASER-002.
 
 ## Task: ASER-002 — Private season/episode client dan queries
 
@@ -100,7 +100,7 @@ Ini proof fondasi transport/cache/contract; belum menjalankan editor browser, pe
 
 ### Blocker atau tindak lanjut
 
-Ikuti dependensi step; task selanjutnya ASER-003.
+Historis saat task selesai: task selanjutnya ASER-003.
 
 ## Task: ASER-003 — Route dan state specification editor
 
@@ -138,7 +138,7 @@ Route/state spec7 authenticated routes, season/episode ownership, parent lifecyc
 
 ### Blocker atau tindak lanjut
 
-Ikuti dependensi step; task selanjutnya ASER-004.
+Historis saat task selesai: task selanjutnya ASER-004.
 
 ## Task: ASER-004 — Season list/create/edit
 
@@ -176,7 +176,7 @@ Season list/create/edit dan selected-season episode read tersedia dari detail Se
 
 ### Blocker atau tindak lanjut
 
-Ikuti dependensi step; task selanjutnya ASER-005.
+Historis saat task selesai: task selanjutnya ASER-005.
 
 ## Task: ASER-005 — Episode list/create/detail/edit
 
@@ -214,7 +214,7 @@ Routes episode tersendiri mencakup create/detail/edit serta list dengan search/a
 
 ### Blocker atau tindak lanjut
 
-Ikuti dependensi step; task selanjutnya ASER-006.
+Historis saat task selesai: task selanjutnya ASER-006.
 
 ## Task: ASER-006 — Episode upload dan Preview
 
@@ -252,7 +252,7 @@ Episode detail menggunakan video-owner uploader/crop existing, hierarchy cache c
 
 ### Blocker atau tindak lanjut
 
-Ikuti dependensi step; task selanjutnya ASER-007.
+Historis saat task selesai: task selanjutnya ASER-007.
 
 ## Task: ASER-007 — Authoritative Series readiness API
 
@@ -290,7 +290,7 @@ GET private Series publication-readiness menyediakan DTO enam checks dan repeata
 
 ### Blocker atau tindak lanjut
 
-Ikuti dependensi step; task selanjutnya ASER-008.
+Historis saat task selesai: task selanjutnya ASER-008.
 
 ## Task: ASER-008 — Series publication client/controller
 
@@ -328,7 +328,7 @@ Typed Series readiness/publish client memvalidasi owner, enam unique checks/stat
 
 ### Blocker atau tindak lanjut
 
-Ikuti dependensi step; task selanjutnya ASER-009.
+Historis saat task selesai: task selanjutnya ASER-009.
 
 ## Task: ASER-009 — Publication UI dan archive episode
 
@@ -366,7 +366,7 @@ Owner publication UI tersedia pada Series dan episode: checklist authoritative, 
 
 ### Blocker atau tindak lanjut
 
-Ikuti dependensi step; task selanjutnya ASER-010.
+Historis saat task selesai: task selanjutnya ASER-010.
 
 ## Task: ASER-010 — Dedicated hierarchy/publication proof
 
@@ -404,7 +404,7 @@ Dedicated admin-series-proof memakai PostgreSQL guarded dan Better Auth native c
 
 ### Blocker atau tindak lanjut
 
-Ikuti dependensi step; task selanjutnya ASER-011.
+Historis saat task selesai: task selanjutnya ASER-011.
 
 ## Task: ASER-011 — Built browser full Series journeys
 
@@ -436,17 +436,17 @@ Built Chromium journeys lulus: Create Series/default Season1/Season2/two episode
 ### Commit task
 
 - Pesan: test(web): verify full series workflows and regressions (ASER-011)
-- SHA: Receipt dicatat pada update task berikutnya setelah commit berhasil.
+- SHA: `94c7b6c8385f8af8609f56c477cbe8632687042b`.
 - Hook/checks: bun test apps/web/test:220 pass/1223 assertions; native content-http-proof:5 pass/106 assertions; built series, series-media/full dan publication browser phases lulus; bun run check-types, bun run lint, bun run build lulus; preservation22 file byte-identical/3 README overlays; docs:check/Prettier/diff check sebelum commit; normal Husky/Commitlint wajib sebelum commit diterima.
 - Ledger: Receipt setelah commit pada update task berikutnya.
 
 ### Blocker atau tindak lanjut
 
-Ikuti dependensi step; task selanjutnya ASER-012.
+Historis saat task selesai: task selanjutnya ASER-012.
 
 ## Task: ASER-012 — Current docs dan closure
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: P1
 - Referensi: ASER-US-01/02/03, PRD-03/04/05/06/08/09; [step plan](../plans/admin-series-episodes/implementation-plan.md#aser-012--current-docs-dan-closure).
@@ -460,8 +460,8 @@ Update canonical PRD/architecture/runbook/index dan source/proof/task receipts. 
 
 ### Acceptance criteria
 
-- [ ] Seluruh mandatory AC dan per-task commits/gates terbukti dengan current source freshness.
-- [ ] Local proof/platform/production/delivery limits serta unrelated preservation dicatat tanpa self-referential SHA.
+- [x] Seluruh mandatory AC dan per-task commits/gates terbukti dengan current source freshness.
+- [x] Local proof/platform/production/delivery limits serta unrelated preservation dicatat tanpa self-referential SHA.
 
 ### Validasi
 
@@ -469,14 +469,14 @@ Docs:check, targeted Prettier/diff, final relevant gates dan normal hooks.
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi pada task ini.
+Canonical PRD/global-rules/architecture/runbook/desain/index sekarang selaras editor/media/publication Series/episode verified lokal; context/base SHA tetap historical. Current runtime freshness 94c7b6c8385f8af8609f56c477cbe8632687042b (ASER-011), seluruh mandatory ASER-001–011 AC/proof dan separate Conventional Commit receipts diperiksa. Root web220/API153 unit tests, dedicated admin-Series3/161 dan native HTTP5/106 serta tiga built-browser phases lulus. Scope preserve22 file unrelated byte-identical dan3 README overlays; generated/cache/credentials/screenshots tidak distage. Tidak ada schema/env/dependency change atau migration development diperlukan. Chromium/MinIO/FFmpeg adalah local proof, bukan R2/Safari/physical device/stress/production/deployment proof. Semua task module selesai lokal; tidak push/PR/merge. SHA task closure tidak ditulis self-referential, tersedia melalui git log ID ASER-012 setelah normal hook diterima.
 
 ### Commit task
 
-- Pesan: Ditentukan saat task selesai, Conventional Commit dengan ID task.
-- SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan.
-- Ledger: Receipt setelah commit pada update task berikutnya.
+- Pesan: docs: close verified admin series workflow (ASER-012)
+- SHA: Closure dapat ditemukan melalui `git log --grep=ASER-012`; SHA commit sendiri tidak ditulis self-referential.
+- Hook/checks: ASER-011 final bun run check-types:3, lint:1, build:2 successful; docs:check, scoped Prettier/git diff --check dan preservation aktual lulus; staged docs snapshot dan normal hooks sebelum commit; normal Husky/Commitlint wajib sebelum commit diterima.
+- Ledger: Runtime receipt ASER-011 tercatat di atas. SHA closure sendiri tersedia dari git log ID ASER-012; tidak ditulis self-referential.
 
 ### Blocker atau tindak lanjut
 
