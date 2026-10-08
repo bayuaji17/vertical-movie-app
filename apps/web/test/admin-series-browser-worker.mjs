@@ -168,10 +168,185 @@ try {
     .getByRole('button', { name: 'Discard and leave', exact: true })
     .click()
   await title('Seasons & episodes')
+
+  // Actual metadata writes and cursor pagination through the authenticated API.
+  const genres = (
+    await (
+      await page.request.get(baseURL + '/api/admin/genres?limit=20')
+    ).json()
+  ).items
+  const parent = await (
+    await page.request.get(baseURL + '/api/admin/series/' + seriesId)
+  ).json()
+  const genreUpdate = await page.request.patch(
+    baseURL + '/api/admin/series/' + seriesId,
+    { data: { expectedVersion: parent.rowVersion, genreIds: [genres[0].id] } },
+  )
+  assert.equal(genreUpdate.status(), 200)
+  await go(base + '/' + second.id)
+  await title('Season 2 episodes')
+  await page.getByText('Add episode', { exact: true }).click()
+  await title('Add episode')
+  const saveEpisode = () =>
+    page.getByRole('button', { name: 'Save episode', exact: true })
+  await saveEpisode().click()
+  await page.getByText('Enter a title.', { exact: true }).waitFor()
+  await page.getByLabel('Title *', { exact: true }).fill('Pilot episode')
+  await page
+    .getByLabel('Synopsis', { exact: true })
+    .fill('First episode synopsis')
+  await saveEpisode().click()
+  await title('Pilot episode')
+  await page
+    .getByText('Inherited series genres: ' + genres[0].name, { exact: true })
+    .waitFor()
+  const created = (
+    await (
+      await page.request.get(
+        baseURL +
+          '/api/admin/videos?kind=episode&seriesId=' +
+          seriesId +
+          '&seasonId=' +
+          second.id +
+          '&limit=20',
+      )
+    ).json()
+  ).items[0]
+  assert.equal(created.episodeNumber, 1)
+  assert.equal(created.kind, 'episode')
+  await page.getByText('Edit episode', { exact: true }).click()
+  await title('Edit episode')
+  await page.getByLabel('Episode number', { exact: true }).fill('1')
+  await page
+    .getByLabel('Season', { exact: true })
+    .selectOption(ids.parentSeason)
+  await saveEpisode().click()
+  await page
+    .getByText(
+      'This episode number is already reserved in the selected season. Choose another number.',
+      { exact: true },
+    )
+    .waitFor()
+  assert.equal(
+    await page.getByLabel('Title *', { exact: true }).inputValue(),
+    'Pilot episode',
+  )
+  const concurrent = await page.request.patch(
+    baseURL + '/api/admin/videos/' + created.id,
+    {
+      data: {
+        expectedVersion: created.rowVersion,
+        title: 'Concurrent episode',
+      },
+    },
+  )
+  assert.equal(concurrent.status(), 200)
+  await page.getByLabel('Episode number', { exact: true }).fill('23')
+  await saveEpisode().click()
+  await page.getByText(/This content changed in another session/).waitFor()
+  await page
+    .getByRole('button', { name: 'Reload latest version', exact: true })
+    .click()
+  await page
+    .getByRole('button', { name: 'Reload and discard', exact: true })
+    .click()
+  await page.waitForFunction(
+    () => document.getElementById('title')?.value === 'Concurrent episode',
+  )
+  await page
+    .getByLabel('Season', { exact: true })
+    .selectOption(ids.parentSeason)
+  await page.getByLabel('Episode number', { exact: true }).fill('23')
+  await page.getByLabel('Synopsis', { exact: true }).fill('')
+  await saveEpisode().click()
+  await title('Concurrent episode')
+  const changed = await (
+    await page.request.get(baseURL + '/api/admin/videos/' + created.id)
+  ).json()
+  assert.equal(changed.rowVersion, 3)
+  assert.equal(changed.seasonId, ids.parentSeason)
+  assert.equal(changed.episodeNumber, 23)
+  assert.equal(changed.synopsis, null)
+  for (let n = 2; n <= 22; n++) {
+    const result = await page.request.post(baseURL + '/api/admin/videos', {
+      data: {
+        kind: 'episode',
+        title: 'Paged episode ' + n,
+        seasonId: ids.parentSeason,
+        episodeNumber: n,
+      },
+    })
+    assert.equal(result.status(), 201)
+  }
+  await go(base + '/' + ids.parentSeason)
+  await title('Season 1 episodes')
+  await page.getByText('View episode', { exact: true }).first().waitFor()
+  assert.equal(
+    await page.getByText('View episode', { exact: true }).count(),
+    20,
+  )
+  await page
+    .getByRole('button', { name: 'Load more episodes', exact: true })
+    .click()
+  await page.waitForFunction(
+    () =>
+      Array.from(document.querySelectorAll('a')).filter(
+        (a) => a.textContent === 'View episode',
+      ).length === 23,
+  )
+  assert.equal(
+    await page.getByText('View episode', { exact: true }).count(),
+    23,
+  )
+  await page
+    .getByLabel('Search episodes', { exact: true })
+    .fill('Paged episode 22')
+  await page.waitForURL(/q=Paged/)
+  await page
+    .getByText('Episode 22 \u00B7 Paged episode 22', { exact: true })
+    .waitFor()
+  assert.equal(await page.getByText('View episode', { exact: true }).count(), 1)
+  const archived = await page.request.post(
+    baseURL + '/api/admin/videos/' + created.id + '/archive',
+    { data: { expectedVersion: 3 } },
+  )
+  assert.equal(archived.status(), 200)
+  await go('/admin/series/' + seriesId + '/episodes/' + created.id + '/edit')
+  await title('Edit episode')
+  assert.equal(await saveEpisode().isDisabled(), true)
+  assert.equal(
+    await page.getByLabel('Title *', { exact: true }).isDisabled(),
+    true,
+  )
+  const other = ids.seriesPublished
+  await page.goto(
+    baseURL + '/admin/series/' + other + '/episodes/' + created.id,
+    { waitUntil: 'networkidle' },
+  )
+  await page.getByText('Episode unavailable', { exact: true }).waitFor()
+  assert.equal(await page.getByText('Edit episode', { exact: true }).count(), 0)
+  await go('/admin/series/' + seriesId + '/episodes/' + ids.episode + '/edit')
+  await title('Edit episode')
+  for (const width of [320, 390, 768, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 1000 })
+    assert.equal(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+      true,
+      'episode overflow ' + width,
+    )
+    assert.ok((await saveEpisode().boundingBox()).height >= 44)
+    if (screenshotPrefix)
+      await page.screenshot({
+        path: screenshotPrefix + 'episode-' + width + '.png',
+        fullPage: true,
+      })
+  }
   assert.deepEqual(errors, [])
   await context.close()
   console.log(
-    'Browser: Series editor default Season1, create, duplicate/validation, stale version, preserved dirty input, explicit reload, saved SQL metadata, selected season, responsive/offline passed.',
+    'Browser: Series editor default Season1, create, duplicate/validation, stale version, preserved dirty input, explicit reload, saved SQL metadata, selected season, responsive/offline, episode CRUD/grouping/inheritance/duplicate/version/archive/owner isolation and finite cursor pagination passed.',
   )
 } finally {
   await browser.close()

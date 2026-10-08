@@ -4,8 +4,13 @@ import {
   seasonInput,
   validateSeason,
   patchSeasonInput,
+  episodeValues,
+  validateEpisode,
+  episodeInput,
+  patchEpisodeInput,
+  episodeListSearch,
 } from '../src/lib/admin/series-form-state'
-import type { Season } from '../src/lib/admin/series-client'
+import type { Season, Episode } from '../src/lib/admin/series-client'
 import { SeriesEditorScope } from '../src/lib/admin/series-editor-scope'
 import { registerPrivateEffect } from '../src/lib/auth/private-effects'
 import { clearAdminPrivateQueries } from '../src/lib/auth/session-cache'
@@ -96,4 +101,70 @@ test('auth cleanup stops owner writes and a reactivated scope rejects the old ge
   expect(scope.accepts(scope.signal)).toBe(false)
   release()
   cache.clear()
+})
+
+test('episode forms enforce active same-series grouping and preserve number/title errors', () => {
+  const values = {
+    ...episodeValues(season.id),
+    title: 'Pilot',
+    episodeNumber: '2',
+  }
+  expect(validateEpisode(values, [season])).toEqual({})
+  expect(
+    validateEpisode({ ...values, seasonId: 'outside' }, [season]),
+  ).toHaveProperty('seasonId')
+  expect(
+    validateEpisode(values, [{ ...season, archivedAt: season.createdAt }]),
+  ).toHaveProperty('seasonId')
+  for (const number of ['0', '-1', '1.2', '2147483648'])
+    expect(
+      validateEpisode({ ...values, episodeNumber: number }, [season]),
+    ).toHaveProperty('episodeNumber')
+  expect(validateEpisode({ ...values, title: ' ' }, [season])).toHaveProperty(
+    'title',
+  )
+  expect(episodeInput(values)).toMatchObject({
+    kind: 'episode',
+    seasonId: season.id,
+    episodeNumber: 2,
+    genreIds: [],
+    rightsConfirmed: false,
+  })
+})
+test('episode patch clears explicit genres for inheritance without losing nullable clears or its record version', () => {
+  const episode = {
+    id: '00000000-0000-4000-8000-000000000003',
+    seasonId: season.id,
+    episodeNumber: 3,
+    title: 'Pilot',
+    slug: 'pilot',
+    originalTitle: null,
+    synopsis: 'Before',
+    description: null,
+    originalLanguage: null,
+    releaseYear: null,
+    releaseDate: null,
+    genreIds: [season.id],
+    rightsConfirmedAt: null,
+    rowVersion: 9,
+  } as Episode
+  const values = episodeValues(season.id, episode)
+  expect(patchEpisodeInput(values, episode)).toBeUndefined()
+  expect(
+    patchEpisodeInput({ ...values, genreIds: [], synopsis: '' }, episode),
+  ).toEqual({ genreIds: [], synopsis: null, expectedVersion: 9 })
+  expect(
+    patchEpisodeInput(
+      { ...values, seasonId: season.seriesId, episodeNumber: '7' },
+      episode,
+    ),
+  ).toEqual({ seasonId: season.seriesId, episodeNumber: 7, expectedVersion: 9 })
+  expect(episodeListSearch({ q: ' 雨 ', archived: 'true' })).toEqual({
+    q: '雨',
+    archived: true,
+  })
+  expect(episodeListSearch({ q: 42, archived: 'false' })).toEqual({
+    q: '',
+    archived: false,
+  })
 })

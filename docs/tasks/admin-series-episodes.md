@@ -170,7 +170,7 @@ Season list/create/edit dan selected-season episode read tersedia dari detail Se
 ### Commit task
 
 - Pesan: feat(web): add season management workflow (ASER-004)
-- SHA: Receipt dicatat pada update task berikutnya setelah commit berhasil.
+- SHA: `522bb943e09e8b0547057b3e15d32e824117afc0`.
 - Hook/checks: bun test apps/web/test: 212 pass/1167 assertions; bun run check-types, bun run lint, bun run build, dedicated built Series browser phase, docs:check, scoped Prettier dan git diff --check; normal Husky/Commitlint wajib sebelum commit diterima.
 - Ledger: Receipt setelah commit pada update task berikutnya.
 
@@ -180,7 +180,7 @@ Ikuti dependensi step; task selanjutnya ASER-005.
 
 ## Task: ASER-005 — Episode list/create/detail/edit
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: P1
 - Referensi: ASER-US-01/02/03, PRD-03/04/05/06/08/09; [step plan](../plans/admin-series-episodes/implementation-plan.md#aser-005--episode-listcreatedetailedit).
@@ -194,8 +194,8 @@ Episode route tersendiri, cursor20/manual Load more per season, metadata/number/
 
 ### Acceptance criteria
 
-- [ ] Created/edited episode persisten pada grouping yang benar; duplicate/stale/422 ditangani tanpa replay.
-- [ ] Genre inheritance, locked first-publish grouping/slug, read-only published dan owner/page/Back context sesuai API.
+- [x] Created/edited episode persisten pada grouping yang benar; duplicate/stale/422 ditangani tanpa replay.
+- [x] Genre inheritance, locked first-publish grouping/slug, read-only published dan owner/page/Back context sesuai API.
 
 ### Validasi
 
@@ -203,13 +203,13 @@ Native form/client/state tests, dedicated metadata SQL/browser, Film regression 
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi pada task ini.
+Routes episode tersendiri mencakup create/detail/edit serta list dengan search/archive URL, finite cursor20/manual append dan scoped owner query. Metadata memakai season aktif dalam Series, expectedVersion episode, nullable clears, rights dan genre override/inheritance. Shared editorial validator tetap mempertahankan Film/Standalone behavior. Built Chromium+SQL dedicated membuktikan create, grouping move, duplicate/version preserved input dan explicit reload, inherited genre, archive read-only, wrong-Series response rejection, 23 records melalui 20+3 pages/search dan widths320/390/768/1024/1440 tanpa overflow.
 
 ### Commit task
 
-- Pesan: Ditentukan saat task selesai, Conventional Commit dengan ID task.
-- SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan.
+- Pesan: feat(web): add episode metadata workflow (ASER-005)
+- SHA: Receipt dicatat pada update task berikutnya setelah commit berhasil.
+- Hook/checks: bun test apps/web/test: 214 pass/1181 assertions; bun run check-types, bun run lint, bun run build, built dedicated Series/episode browser phase, docs:check, scoped Prettier dan git diff --check; normal Husky/Commitlint wajib sebelum commit diterima.
 - Ledger: Receipt setelah commit pada update task berikutnya.
 
 ### Blocker atau tindak lanjut
