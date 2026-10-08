@@ -343,6 +343,59 @@ try {
         fullPage: true,
       })
   }
+  const seasonArchive = await page.request.post(
+    baseURL + '/api/admin/seasons/' + second.id + '/archive',
+    { data: { expectedVersion: 3 } },
+  )
+  assert.equal(seasonArchive.status(), 200)
+  await go(base + '/' + second.id + '/edit')
+  assert.equal(await save().isDisabled(), true)
+  for (const label of ['Season number', 'Season title', 'Description'])
+    assert.equal(
+      await page.getByLabel(label, { exact: true }).isDisabled(),
+      true,
+    )
+  await go('/admin/series/' + seriesId + '/episodes/' + ids.episode + '/edit')
+  await page.getByLabel('Title *', { exact: true }).fill('An in-flight save')
+  let release,
+    committed = false
+  const held = new Promise((resolve) => {
+    release = resolve
+  })
+  const path = '**/api/admin/videos/' + ids.episode
+  await context.route(path, async (route) => {
+    if (route.request().method() !== 'PATCH') return route.continue()
+    const response = await route.fetch()
+    assert.equal(response.status(), 200)
+    committed = true
+    await held
+    await route.fulfill({ response }).catch(() => {})
+  })
+  await saveEpisode().click()
+  for (let i = 0; i < 400 && !committed; i++) await page.waitForTimeout(20)
+  assert.equal(committed, true)
+  await control({ role: 'user' })
+  await page.evaluate(() =>
+    window.__TSR_ROUTER__.options.context.queryClient.invalidateQueries({
+      queryKey: ['auth', 'session'],
+    }),
+  )
+  await page
+    .getByRole('heading', { name: 'Admin access denied', exact: true })
+    .waitFor()
+  release()
+  await page.waitForTimeout(100)
+  assert.equal(
+    await page.evaluate(
+      () =>
+        window.__TSR_ROUTER__.options.context.queryClient
+          .getQueryCache()
+          .getAll()
+          .filter((q) => q.queryKey[0] === 'admin').length,
+    ),
+    0,
+  )
+  await context.unroute(path)
   assert.deepEqual(errors, [])
   await context.close()
   console.log(

@@ -67,11 +67,11 @@ export function SeasonEditor({
   const dirty = JSON.stringify(values) !== JSON.stringify(initial)
   useEffect(() => api.setDirty(dirty), [dirty, api.setDirty])
   const changed = baseline && season?.rowVersion !== baseline.rowVersion
+  const readonly = !!series.data.archivedAt || !!baseline?.archivedAt
   const locked =
     stale ||
     !api.online ||
-    !!series.data.archivedAt ||
-    !!baseline?.archivedAt ||
+    readonly ||
     mutation.isPending ||
     reloading ||
     !!changed
@@ -207,7 +207,7 @@ export function SeasonEditor({
                       id={name}
                       value={values[name]}
                       maxLength={10000}
-                      disabled={mutation.isPending || reloading}
+                      disabled={readonly || mutation.isPending || reloading}
                       aria-invalid={!!errors[name]}
                       onChange={(e) =>
                         setValues((v) => ({ ...v, [name]: e.target.value }))
@@ -230,7 +230,7 @@ export function SeasonEditor({
                           : undefined
                       }
                       className="h-11"
-                      disabled={mutation.isPending || reloading}
+                      disabled={readonly || mutation.isPending || reloading}
                       aria-invalid={!!errors[name]}
                       onChange={(e) =>
                         setValues((v) => ({ ...v, [name]: e.target.value }))

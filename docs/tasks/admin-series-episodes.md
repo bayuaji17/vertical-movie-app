@@ -1,6 +1,6 @@
 # Modul: Admin Series, season dan episode
 
-> Status: ASER-001–010 selesai lokal; browser regression dan closure masih lanjutan · 8 Oktober 2026 · Pengguna memilih modul ini setelah katalog PR #13. Scope runtime per task; belum menyatakan keseluruhan editor/publikasi Series selesai.
+> Status: ASER-001–011 selesai lokal; closure dokumentasi masih lanjutan · 8 Oktober 2026 · Pengguna memilih modul ini setelah katalog PR #13. Scope runtime per task; belum menyatakan keseluruhan editor/publikasi Series selesai.
 
 ## Tujuan modul
 
@@ -398,7 +398,7 @@ Dedicated admin-series-proof memakai PostgreSQL guarded dan Better Auth native c
 ### Commit task
 
 - Pesan: test(api): verify series publication and hierarchy races (ASER-010)
-- SHA: Receipt dicatat pada update task berikutnya setelah commit berhasil.
+- SHA: `5d172d8bd8f25e87856b2eedbbe4968c1bfcbff2`.
 - Hook/checks: bun test apps/api/src:153 pass/923 assertions; guarded bun test apps/api/test/integration/admin-series-proof.test.ts:3 pass/161 assertions; bun run check-types, bun run lint, bun run build lulus; docs:check/Prettier/git diff --check sebelum commit; normal Husky/Commitlint wajib sebelum commit diterima.
 - Ledger: Receipt setelah commit pada update task berikutnya.
 
@@ -408,7 +408,7 @@ Ikuti dependensi step; task selanjutnya ASER-011.
 
 ## Task: ASER-011 — Built browser full Series journeys
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: P1
 - Referensi: ASER-US-01/02/03, PRD-03/04/05/06/08/09; [step plan](../plans/admin-series-episodes/implementation-plan.md#aser-011--built-browser-full-admin-journeys).
@@ -422,8 +422,8 @@ Create Series/season/episode→upload→Preview→publish hidden episode→Serie
 
 ### Acceptance criteria
 
-- [ ] Actual SQL/storage/player dan anonymous access asserted; stale/dirty/offline/network/auth owner races safe.
-- [ ] 320/390/768/1024/1440 Light/Dark/System/keyboard/no overflow, Film/uploader/auth regression retained.
+- [x] Actual SQL/storage/player dan anonymous access asserted; stale/dirty/offline/network/auth owner races safe.
+- [x] 320/390/768/1024/1440 Light/Dark/System/keyboard/no overflow, Film/uploader/auth regression retained.
 
 ### Validasi
 
@@ -431,13 +431,13 @@ Built Chromium+guarded PG/MinIO/FFmpeg, native auth regression, existing units d
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi pada task ini.
+Built Chromium journeys lulus: Create Series/default Season1/Season2/two episodes via UI, actual source/crop/poster MinIO, FFmpeg HLS Preview/Back, publish hidden children lalu Series, anonymous HLS/watch/Next manual, archive child dan public count/access. Episode lost-before explicit double-click retry memakai payload/key/version identik; lost-after read reconciliation tidak resend. Series real409 membutuhkan refresh/new review; lost-response publish confirmed via GET. 15 width/theme dialog cases (320/390/768/1024/1440, Light/Dark/System), keyboard focus trap/cancel/return/44px/no overflow dan offline guard lulus. Metadata dirty/version/preserved input/inheritance/grouping/cursor20+3/wrong-owner, archived season disabled fields dan native SDK session loss saat PATCH committed/in-flight terbukti tanpa late private cache. Native Better Auth HTTP regression5 tests/106 assertions lulus (ban/expiry/cache/auth outage serta secured31 admin OpenAPI). Film/Standalone full real-media regression lulus, termasuk malformed/lost response, failed refresh, replay/expiry/cache/auth. Shared controller sekarang memakai subject dengan default video sehingga copy Film tetap kompatibel. Public episode link membutuhkan parent active dan media/parent checks. Browser auth memakai controlled SDK fixture; native cookies dibuktikan terpisah.
 
 ### Commit task
 
-- Pesan: Ditentukan saat task selesai, Conventional Commit dengan ID task.
-- SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan.
+- Pesan: test(web): verify full series workflows and regressions (ASER-011)
+- SHA: Receipt dicatat pada update task berikutnya setelah commit berhasil.
+- Hook/checks: bun test apps/web/test:220 pass/1223 assertions; native content-http-proof:5 pass/106 assertions; built series, series-media/full dan publication browser phases lulus; bun run check-types, bun run lint, bun run build lulus; preservation22 file byte-identical/3 README overlays; docs:check/Prettier/diff check sebelum commit; normal Husky/Commitlint wajib sebelum commit diterima.
 - Ledger: Receipt setelah commit pada update task berikutnya.
 
 ### Blocker atau tindak lanjut

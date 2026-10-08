@@ -349,6 +349,15 @@ export function OwnerPublicationMedia({
             !archived &&
             !stale &&
             parentPublished &&
+            parentActive &&
+            (subject !== 'episode' ||
+              (media.data?.canPreview &&
+                r?.checks.some(
+                  (c) => c.code === 'VERIFIED_MEDIA' && c.status === 'passed',
+                ) &&
+                r.checks.some(
+                  (c) => c.code === 'ACTIVE_PARENTS' && c.status === 'passed',
+                ))) &&
             (subject !== 'series' ||
               r?.checks.some(
                 (c) => c.code === 'PUBLISHED_EPISODE' && c.status === 'passed',

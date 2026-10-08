@@ -325,7 +325,10 @@ export class PublicationController {
         })
       return
     }
-    const status = s.readiness.publicationStatus
+    const status = s.readiness.publicationStatus,
+      subject = ['series', 'episode'].includes(s.detail.type)
+        ? s.detail.type
+        : 'video'
     if (
       status === 'archived' ||
       (intent?.action === 'publish' && status === 'published')
@@ -336,8 +339,8 @@ export class PublicationController {
         snapshot: s,
         message:
           status === 'archived'
-            ? 'This content is archived.'
-            : 'This content is published.',
+            ? `This ${subject} is archived.`
+            : `This ${subject} is published.`,
       })
       return
     }

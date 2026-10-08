@@ -7,7 +7,7 @@ const messages: Record<string, string> = {
   PUBLICATION_STATE_CONFLICT:
     'Publication state has changed. Check status before continuing.',
   PUBLICATION_NOT_READY:
-    'This video is not ready to publish. Refresh the checklist.',
+    'This content is not ready to publish. Refresh the checklist.',
   PUBLICATION_MEDIA_BUSY:
     'Finish or cancel the active upload before publishing.',
   PUBLICATION_IDEMPOTENCY_CONFLICT:
