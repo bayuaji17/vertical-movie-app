@@ -1,3 +1,4 @@
+import { invalidateDashboard } from './dashboard-queries'
 import { mutationOptions, queryOptions } from '@tanstack/react-query'
 import type { QueryClient } from '@tanstack/react-query'
 import type { ContentType } from './content-client'
@@ -70,6 +71,8 @@ export async function invalidatePublication(
   type: ContentType,
   id: string,
 ) {
+  await invalidateDashboard(cache, identity)
+
   await Promise.all(
     [
       contentKeys.lists(identity),

@@ -1,3 +1,4 @@
+import { invalidateDashboard } from './dashboard-queries'
 import {
   infiniteQueryOptions,
   mutationOptions,
@@ -133,6 +134,8 @@ export async function invalidateSeries(
   seriesId: string,
   episodeId?: string,
 ) {
+  await invalidateDashboard(cache, identity)
+
   const keys: ReadonlyArray<readonly unknown[]> = [
     seriesKeys.owner(identity, seriesId),
     contentKeys.lists(identity),

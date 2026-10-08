@@ -308,7 +308,7 @@ Current-media four counters with explicit job units/stored Running helper. Faile
 ### Commit task
 
 - Pesan: feat(web): show dashboard media jobs and failures (DASH-007)
-- SHA: Belum dibuat; receipt dicatat pada update dokumentasi berikutnya sesudah commit berhasil.
+- SHA: `163614d812bd4e3589f39f19d27049f4047b8ee4`.
 - Hook/checks: API167 pass, root types3/lint1/build2 pass, scoped formatting/docs/diff/preservation; normal hooks wajib tanpa bypass.
 - Ledger: Jangan menulis SHA commit sendiri sebelum tersedia.
 
@@ -318,7 +318,7 @@ Menunggu approval proposal dan dependency task di atas; tidak menganggap scope a
 
 ## Task: DASH-008 — Mutation invalidation integration
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: P1
 - Referensi: DASH-US-02/03, PRD-02/05/09; [implementation steps](../plans/admin-dashboard/implementation-plan.md#implementation-steps).
@@ -336,8 +336,8 @@ Requirements: Add exact identity dashboard invalidation after safe confirmation,
 
 ### Acceptance criteria
 
-- [ ] Initial in-flight stale snapshot cannot hide confirmed update; latest refresh wins; private cleanup remains authoritative.
-- [ ] Definisi/state/invariants terkait pada plan terbukti; actual validation serta scope preservation dan commit tercatat sesuai workflow.
+- [x] Initial in-flight stale snapshot cannot hide confirmed update; latest refresh wins; private cleanup remains authoritative.
+- [x] Definisi/state/invariants terkait pada plan terbukti; actual validation serta scope preservation dan commit tercatat sesuai workflow.
 
 ### Validasi
 
@@ -345,13 +345,13 @@ Same-session create/edit/publish/archive/media updates, different-session isolat
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement, bukan hasil actual.
+Owner/session-confirmed existing invalidation helpers now cancel/fence exact matching dashboard before marking stale with refetchType:none. invalidateMedia inherits through Content/Series path; POST retry/idempotency/reconcile behavior unchanged. Five active-observer tests prove metadata, season/episode, media, Film publication and Episode publication invalidate only matching identity with zero extra fetches; stale snapshot race test remains passing. All web231 tests/1266 assertions pass.
 
 ### Commit task
 
-- Pesan: Conventional Commit dengan ID task setelah acceptance criteria dan relevant gates lulus.
+- Pesan: feat(web): invalidate dashboard after confirmed changes (DASH-008)
 - SHA: Belum dibuat; receipt dicatat pada update dokumentasi berikutnya sesudah commit berhasil.
-- Hook/checks: Belum dijalankan untuk task ini.
+- Hook/checks: Web231 pass, root types3/lint1/build2 pass, docs/format/diff/preservation; normal hooks wajib tanpa bypass.
 - Ledger: Jangan menulis SHA commit sendiri sebelum tersedia.
 
 ### Blocker atau tindak lanjut
