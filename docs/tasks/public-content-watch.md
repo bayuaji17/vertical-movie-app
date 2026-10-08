@@ -1,6 +1,6 @@
 # Modul: Detail publik dan tonton dari katalog
 
-> Status: scope confirmed / execution authorized, 7 Oktober 2026. Base c75080f6febf07312b90a6d79ef945b7a96ab84d, dependency PCAT lokal belum di-merge.
+> Status: implemented/verified lokal, 8 Oktober 2026; scope alltypes disetujui pengguna 7 Oktober 2026. Base c75080f6febf07312b90a6d79ef945b7a96ab84d, dependency PCAT lokal belum di-merge.
 
 ## Tujuan modul
 
@@ -303,8 +303,8 @@ Chromium320/390/768/1024/1440/1920 Light/Dark/System; keyboard/touch44px/focus/r
 ### Commit task
 
 - Pesan: Conventional Commit scoped PCW-007
-- SHA: receipt aktual dicatat pada task berikutnya setelah commit.
-- Hook/checks: normal docs/lint/types/commitlint wajib tanpa bypass.
+- SHA: `06e11cb3acfde7caaf9dcbfab0b743a87b5d2b95`.
+- Hook/checks: docs:check, lint, check-types dan commitlint normal pass tanpa bypass.
 
 ### Blocker atau tindak lanjut
 
@@ -312,11 +312,11 @@ Dependency menurut DAG. Tidak menambah progress/autoplay/editor/production atau 
 
 ## Task: PCW-008 — Canonical docs dan closure
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent
 - Prioritas: P1, dependency order
 - Referensi: PCW-US-001/002; PRD-07/08, GR-02; [plan](../plans/public-content-watch/implementation-plan.md#implementation-steps)
-- Diperbarui: 2026-10-07
+- Diperbarui: 2026-10-08
 - Dependensi: PCW-007.
 - Ukuran: Satu hasil terpisah; pecah bila risiko tambahan membutuhkan.
 
@@ -326,8 +326,8 @@ Approved scope/current behavior and actual evidence recorded with localtaskrecei
 
 ### Acceptance criteria
 
-- [ ] requiredACevidencecomplete, scopedbranchclean, localcommitsperstep, no push/PR/merge/deploy withoutnewauthorization.
-- [ ] Applicable gates/evidence dan compatibility diperiksa sebelum Done.
+- [x] requiredACevidencecomplete, scopedbranchclean, localcommitsperstep, no push/PR/merge/deploy withoutnewauthorization.
+- [x] Applicable gates/evidence dan compatibility diperiksa sebelum Done.
 
 ### Validasi
 
@@ -335,12 +335,12 @@ relevantexistingtests/roottypes/lint/build, docs:check/changedMDPrettier/diff/no
 
 ### Hasil dan bukti
 
-Belum diimplementasikan/diverifikasi; isi command/result/batas dan receipt aktual saat task selesai.
+8 Oktober 2026: PRD-07/08, GR-02, architecture endpoints/SSR/cache/player, design, runbook, index, historical context dan feature plan diselaraskan dengan implementasi serta evidence PCW-006/007. Semua acceptance criteria ditutup dengan actual native proof4/57, unit323/1727, public browser development+build18 cases per runtime dan built private-preview/publication regression15 cases. Root check-types/lint/build dan changed source Prettier pass; docs:check/Markdown formatting/diff diperiksa sebelum commit, normal hooks wajib tanpa bypass. PCW-000–007 receipts dicatat; receipt closure disampaikan setelah commit sehingga tidak fabricated self-reference. Branch feat/public-content-watch tetap stack lokal di atas PCAT c75080f6febf07312b90a6d79ef945b7a96ab84d. Primary23 unrelated paths preserved; tanpa schema/dependency/env changes, migration, push, PR, merge atau deployment. R2/Safari/perangkat fisik, resource/full restore, admin editor/upload/publication Series/episode, autoplay/progress tidak menjadi klaim selesai.
 
 ### Commit task
 
 - Pesan: Conventional Commit scoped PCW-008
-- SHA: belum dibuat.
+- SHA: receipt closure disampaikan pada hasil akhir setelah commit, tanpa self-reference.
 - Hook/checks: normal docs/lint/types/commitlint wajib tanpa bypass.
 
 ### Blocker atau tindak lanjut

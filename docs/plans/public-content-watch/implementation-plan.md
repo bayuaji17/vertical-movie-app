@@ -2,10 +2,11 @@
 
 ## Plan Metadata
 
-- Status: executing — user meminta lanjut dan memilih semua jenis, termasuk Series/episode, 7 Oktober 2026.
+- Status: implemented/verified lokal, 8 Oktober 2026. Pengguna menyetujui lanjut dan memilih semua jenis termasuk Series/episode pada 7 Oktober 2026.
 - Repository: bayuaji17/vertical-movie-app.
 - Base ref: feat/public-catalog-api, dependency lokal belum merged.
-- Base SHA / last validated SHA: `c75080f6febf07312b90a6d79ef945b7a96ab84d`.
+- Historical baseline SHA: `c75080f6febf07312b90a6d79ef945b7a96ab84d`.
+- Last validated implementation SHA: `06e11cb3acfde7caaf9dcbfab0b743a87b5d2b95`.
 - Context: [repository-context.md](repository-context.md).
 - Tasks: [PCW](../../tasks/public-content-watch.md).
 - Working branch: feat/public-content-watch, stack di atas PCAT; local implementation/task commits saja. Remote delivery/deploy belum diotorisasi.
@@ -20,7 +21,7 @@ Goals: fresh server eligibility untuk detail/episodes; bounded episode cursor/or
 
 Non-goals: redesign/skin/dependency upgrade, autoplay/auto-next, watch-progress persistence, playlist personalization, admin editor/upload/publication Series, subtitles, account/login wall, new signed expiry policy/schema, R2/production rollout. Existing user-controlled Play tetap diperlukan. PCAT layout/Load more/error behavior dipertahankan.
 
-## Current Behavior
+## Historical Behavior at Baseline
 
 PCAT card/dialog mempunyai metadata aktual tetapi tanpa detail/watch links; featured View film masih membuka dialog. Watch route minimal/player-only dan VITE-only API origin. Legacy Series detail membaca list100/N+1 sehingga Series yang eligible di homepage bisa404 karena cap. `/videos` bukan daftar episode menurut hierarchy. Player renewal tersedia tetapi callback tidak abortable dan identity perlu explicit remount saat slug berubah. Evidence pada context.
 
@@ -193,14 +194,14 @@ Bun-first, typedEden, no signup/authrequired public, no schema/dependency/envcha
 
 ## Acceptance Criteria
 
-- [ ] AC-01: Alltypes dialog/featured opencorrectpublicdetail/watchroutes, deepURL/refresh/backlinks safe.
-- [ ] AC-02: DirecteligibleSeries/detailworks beyond100parent cap; orderedpagedepisodes >100/crossseason/count/asOf/hiddenwithnoN+1.
-- [ ] AC-03: SSRunsignedmetadata/firstepisodepage andsafe404/503; no signedcache/secret/cookie/duplicatehydration read.
-- [ ] AC-04: ManualHLSMovie/Standalone/Episode actuallyplays; Nextonlyeligibleorderedmanual; EOF404notoutage.
-- [ ] AC-05: Expiry/seek/quality/position/pause/Retry/identityabort work andprivatepreview preserved.
-- [ ] AC-06: Publicerrors/offline/retry/cursor422 preserveoldvalidrows/player appropriately; fresharchivedaccessdenied.
-- [ ] AC-07: Responsive/themes/portrait/keyboard/focus/reducedmotion/44px targets anderrors0 verifieddev+built.
-- [ ] AC-08: Fullrelevanttests/rootgates/docs/hooksreceipts pass; scope/stack/history/providerlimits honest.
+- [x] AC-01: Alltypes dialog/featured opencorrectpublicdetail/watchroutes, deepURL/refresh/backlinks safe.
+- [x] AC-02: DirecteligibleSeries/detailworks beyond100parent cap; orderedpagedepisodes >100/crossseason/count/asOf/hiddenwithnoN+1.
+- [x] AC-03: SSRunsignedmetadata/firstepisodepage andsafe404/503; no signedcache/secret/cookie/duplicatehydration read.
+- [x] AC-04: ManualHLSMovie/Standalone/Episode actuallyplays; Nextonlyeligibleorderedmanual; EOF404notoutage.
+- [x] AC-05: Expiry/seek/quality/position/pause/Retry/identityabort work andprivatepreview preserved.
+- [x] AC-06: Publicerrors/offline/retry/cursor422 preserveoldvalidrows/player appropriately; fresharchivedaccessdenied.
+- [x] AC-07: Responsive/themes/portrait/keyboard/focus/reducedmotion/44px targets anderrors0 verifieddev+built.
+- [x] AC-08: Fullrelevanttests/rootgates/docs/hooksreceipts pass; scope/stack/history/providerlimits honest.
 
 ## Risks and Mitigations
 
@@ -212,7 +213,7 @@ Revert scopednewCTA/routes toPCATknown-goodclosure ifintegrationfails; additive 
 
 ## Evidence
 
-[Context evidence index](repository-context.md#evidence-index) pinsbaseline; newfiles/commands areplanned untilimplemented. PCAT proofdoesnotprovewatch/episodes; newresultsbelongbacklogPCW.
+[Context evidence index](repository-context.md#evidence-index) pinsbaseline; baseline historis dipertahankan; source, command dan hasil aktual tercatat pada backlog PCW. PCAT proofdoesnotprovewatch/episodes; newresultsbelongbacklogPCW.
 
 ## Open Decisions
 
@@ -239,3 +240,7 @@ Alltypes/Seriesepisodes scopeconfirmedbyuser7October2026. Technicalrecommendatio
 - PCW-006: Dedicated native public-content-proof.test.ts: 4 pass, 57 assertions, 159.59s. Proven >100 Series directlookup satu SQL/read; 103 sparse episodes dua season, count/cursor/asOf/new publish/hidden child/wrong parent; stale source/parent generation disembunyikan dan foreign owner ditolak FK. Native video Archive memakai actual VideosService; parent hidden state adalah SQL fixture, bukan published-Series archive command. Actual production FFmpeg 12s portrait HLS dipasang pada owned private MinIO outputs; signed init/segments/poster200, unsigned403, fresh capability/master404 setelah archive. Cleanup known objects/bucket selesai. Fixture SQL readiness bukan full upload/worker provenance proof. Relevant units43 pass/258 assertions dan root build pass; normal hooks memverifikasi source terkini. Previous verified commit: 0c18eae307e8a9115651f44acc70c66cbd038aaa feat(web): add contextual watch and player recovery (PCW-005).
 
 - PCW-007: 8 Oktober 2026: public-watch Chromium development dan built Bun/Nitro lulus semua journey serta 18 kombinasi 320/390/768/1024/1440/1920 × Light/Dark/System pada masing-masing runtime. Actual API/PG/private MinIO/FFmpeg12s HLS membuktikan SSR first20 tanpa duplicate metadata atau signed fields; dialog keyboard/focus dan CTA Film/Series; Standalone detail/watch; skeleton20→24, same-cursor Retry503, Refresh422, partial episode503 dan offline resume. Playback nyata, expiry asli API/seek mempertahankan posisi4s dan pause; pilihan480p memakai rendition486×864; Next lintas season/EOF/error manual, explicit Retry satu request, held old identity dan archive/fresh404 lulus. HTTP SSR404 diperbaiki melalui middleware; public Button render-Link diberi role link. Rasio9:16/no overflow/navigasi44px dan nol page/hydration errors; authReads0, Cookie/Authorization upstream0, tanpa unexpected external requests. Built publication regression juga lulus Film/Standalone actual create/upload/worker/private preview/play/publish/watch/archive,15 theme/viewport cases, conflicts/recovery/expiry/auth cleanup. Bun test apps/api/src apps/web/test:323 pass/1727 assertions; root check-types/lint/build pass; changed source Prettier check pass. Screenshot runtime lokal public-watch-dev/built series/watch390dark dan standalone light berada di artifact folder, memakai judul sintetis dan video warna polos; bukan artwork/production evidence. SQL-ready public fixture bukan full worker provenance proof; publication regression menjalankan actual worker. Cleanup fixture/server selesai; no schema/dependency/env changes. Previous verified commit: 47fe7f36cc6418fb81ff60a2e39789db14629c04 test(api): prove public content hierarchy and access (PCW-006).
+
+- PCW-008 closure: canonical PRD/global rules/architecture/design/runbook/index diselaraskan dengan scope approved dan evidence lokal. Baseline PCAT tetap historis, Series admin/editor dan production tetap lanjutan; tidak ada remote mutation. Final commit receipt disampaikan setelah normal hooks selesai.
+
+- PCW-008: 8 Oktober 2026: PRD-07/08, GR-02, architecture endpoints/SSR/cache/player, design, runbook, index, historical context dan feature plan diselaraskan dengan implementasi serta evidence PCW-006/007. Semua acceptance criteria ditutup dengan actual native proof4/57, unit323/1727, public browser development+build18 cases per runtime dan built private-preview/publication regression15 cases. Root check-types/lint/build dan changed source Prettier pass; docs:check/Markdown formatting/diff diperiksa sebelum commit, normal hooks wajib tanpa bypass. PCW-000–007 receipts dicatat; receipt closure disampaikan setelah commit sehingga tidak fabricated self-reference. Branch feat/public-content-watch tetap stack lokal di atas PCAT c75080f6febf07312b90a6d79ef945b7a96ab84d. Primary23 unrelated paths preserved; tanpa schema/dependency/env changes, migration, push, PR, merge atau deployment. R2/Safari/perangkat fisik, resource/full restore, admin editor/upload/publication Series/episode, autoplay/progress tidak menjadi klaim selesai. Previous verified commit: 06e11cb3acfde7caaf9dcbfab0b743a87b5d2b95 test(web): verify public content browser journeys (PCW-007).
