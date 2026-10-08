@@ -374,3 +374,5 @@ PCAT-002 artifact receipt: local commit307710159cbd8a6d9a0f4d230d2ec1deaf2abc37,
 8 Oktober 2026 — PCAT-004: reuse generation fence existing, deterministic legacy-list concurrent fill/TTL60s/filter/failure proof; catalog26/179 dan build2 pass. PCAT-003 receipt fca1b478a8726fd977166338731dad47cd498066; API143/811 + web185/955 regression serta normal commit hooks pass.
 
 8 Oktober 2026 — PCAT-005: signed poster API terpisah, uncached authorization, exact verified generation namespace/TTL ceiling dan no HLS/storage reads. Playback13/93, API151/883 dan root types3/lint1/build2 pass; fixture type failure diperbaiki lalu types rerun pass. PCAT-004 receipt a09728b09cbe57431ec76561938a0c1178bf3411 dengan normal hooks pass.
+
+8 Oktober 2026 — PCAT-006: typed /videos public adapter + unsigned isomorphic/server-only readers, finite page20 filters, abort10s, cookie/auth stripped, malformed errors/status/identity/expiry validation. Web189/1016 serta root types3/lint1/build2 pass sesudah fixture/lint fixes; SSR route/import/dehydration proof tetap PCAT-009/013. PCAT-005 receipt046ccbd24cea17c74e1f08b3fefca43916b5859b normal hooks pass.

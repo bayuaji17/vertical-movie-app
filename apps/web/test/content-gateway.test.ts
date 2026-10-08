@@ -17,6 +17,9 @@ test('public content gateway forwards only canonical GETs without browser creden
     '/catalog/details/series/a-series',
     '/catalog/series/a-series/episodes?limit=20&cursor=opaque',
     '/catalog/watch/episode-one',
+    '/videos?kinds=movie,standalone&limit=20',
+    '/videos/a-film',
+    '/videos/a-film/poster',
   ]) {
     const response = await gateway(
       new Request('http://web.example/api' + path, {

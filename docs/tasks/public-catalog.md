@@ -1,6 +1,6 @@
 # Modul: Katalog publik Film/Standalone
 
-> Status: **active — PCAT-001/002 Done, implementasi PCAT-003 berikutnya** · 8 Oktober 2026 · pengguna menetapkan plan `chore/public-catalog-plan` untuk dilanjutkan. Working branch `feat/public-catalog` dari main65127a1; desain plan awal disetujui pengguna sebelum implementasi UI. Baseline awal634f7d4 tetap historis.
+> Status: **active — PCAT-001–006 Done, query/state PCAT-007 berikutnya** · 8 Oktober 2026 · pengguna menetapkan plan `chore/public-catalog-plan` untuk dilanjutkan. Working branch `feat/public-catalog` dari main65127a1; desain plan awal disetujui pengguna sebelum implementasi UI. Baseline awal634f7d4 tetap historis.
 
 ## Tujuan modul
 
@@ -227,8 +227,8 @@ Observed: playback13 tests/93 assertions, full API151/883; root types3 (setelah 
 ### Commit task
 
 - Pesan usulan: `feat: endpoint public signed poster terpisah (PCAT-005)`.
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk commit ini.
+- SHA: `046ccbd24cea17c74e1f08b3fefca43916b5859b`.
+- Hook/checks: playback13/93, API151/883, root types3/lint1/build2, docs86/816, format/diff, normal Husky/Commitlint pass.
 - Ledger: receipt aktual dicatat pada update sesudah commit berhasil.
 
 ### Blocker atau tindak lanjut
@@ -237,7 +237,7 @@ Endpoint selesai lokal; lanjut typed public client PCAT-006 dan DB/storage proof
 
 ## Task: PCAT-006 — Client publik typed dan reader SSR unsigned
 
-- Status: Backlog
+- Status: Done — public video client/unsigned SSR reader tersedia lokal.
 - Owner: Codex/pengembang
 - Prioritas: P1 — urutan dependency DAG pada plan
 - Referensi: PCAT-US-01; PRD-07/08/09, GR-02/03/05/06/08; [plan](../plans/public-catalog/implementation-plan.md)
@@ -249,13 +249,13 @@ Endpoint selesai lokal; lanjut typed public client PCAT-006 dan DB/storage proof
 
 Eden public fetch/validation/signal tanpa private transition; server-only fixed upstream + safe status helper; browser same-origin.
 
-Paths/symbol owners: `apps/web/src/lib/public/catalog-{client,reader,reader.server}.ts, apps/web/test/public-catalog-client.test.ts dan public-catalog-eden-contract.ts`. Rincian simbol dan kontrak di affected-files/implementation steps plan.
+Paths/symbol owners: `apps/web/src/lib/public/catalog-{model,client,reader,reader.server}.ts`, `apps/web/test/public-video-client.test.ts`, `public-catalog-eden-contract.ts` dan `content-gateway.test.ts`. Rincian simbol dan kontrak di affected-files/implementation steps plan.
 
 ### Acceptance criteria
 
-- [ ] No cookies/authorization forwarded, no session read; server timeout/abort dan non-2xx/malformed DTO ditangani.
-- [ ] Reader SSR metadata saja, no signed poster/playback; type-only API tetap tidak masuk bundle.
-- [ ] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
+- [x] No cookies/authorization forwarded, no session read; server timeout/abort dan non-2xx/malformed DTO ditangani.
+- [x] Reader SSR metadata saja, no signed poster/playback; type-only API tetap tidak masuk bundle.
+- [x] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
 
 ### Validasi
 
@@ -263,7 +263,9 @@ Native Bun fetcher tests, Eden compile/type check, import-boundary proof pada pu
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau divalidasi. Commands di atas merupakan rencana, bukan hasil.
+8 Oktober 2026: createPublicVideoClient khusus /videos memakai type-only Eden contract existing, limit20/canonical kinds/URL type, strict unsigned metadata dan signed poster validator terpisah. Fetcher public replaces headers dengan accept-only, credentials omit, no-store, redirect error dan abort/timeout10s; tidak memakai private transition. Episode detail ditolak404, direct watch existing dipertahankan. Server-only fixed validated API_INTERNAL_URL reader hanya page/detail metadata, menggabungkan request/caller/timeout signal dan safe HTTP status. Isomorphic reader menghubungkan browser same-origin.
+
+Observed: targeted transport/gateway5 tests/92 assertions; full web189/1016, root types3/lint1/build2 pass setelah memperbaiki fixture literal kind/query generic, malformed episode fixture dan lint optional-chain. Gateway proof /videos list/detail/poster strip cookie/authorization dan no-store. Eden positive/negative contracts compile. Route SSR/dehydration/import-boundary proof menunggu PCAT-009/013 setelah route baru tersedia.
 
 ### Commit task
 
@@ -274,7 +276,7 @@ Belum diimplementasikan atau divalidasi. Commands di atas merupakan rencana, buk
 
 ### Blocker atau tindak lanjut
 
-Menunggu PCAT-003, PCAT-005. Approval/hasil proof tidak diasumsikan tersedia.
+Lanjut PCAT-007 query/state; production homepage belum diganti. SSR route/browser proof mengikuti PCAT-009/013.
 
 ## Task: PCAT-007 — State query katalog dan expiry cover yang aman
 
