@@ -208,7 +208,7 @@ Routes episode tersendiri mencakup create/detail/edit serta list dengan search/a
 ### Commit task
 
 - Pesan: feat(web): add episode metadata workflow (ASER-005)
-- SHA: Receipt dicatat pada update task berikutnya setelah commit berhasil.
+- SHA: `88d526e380001ab05e0219eab5f2ab5ec56a92e7`.
 - Hook/checks: bun test apps/web/test: 214 pass/1181 assertions; bun run check-types, bun run lint, bun run build, built dedicated Series/episode browser phase, docs:check, scoped Prettier dan git diff --check; normal Husky/Commitlint wajib sebelum commit diterima.
 - Ledger: Receipt setelah commit pada update task berikutnya.
 
@@ -218,7 +218,7 @@ Ikuti dependensi step; task selanjutnya ASER-006.
 
 ## Task: ASER-006 — Episode upload dan Preview
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: P1
 - Referensi: ASER-US-01/02/03, PRD-03/04/05/06/08/09; [step plan](../plans/admin-series-episodes/implementation-plan.md#aser-006--episode-upload-dan-preview).
@@ -232,8 +232,8 @@ Reuse uploader/crop/inventory video-owner; episode600s/512MB; HLS preview manual
 
 ### Acceptance criteria
 
-- [ ] Real source/cover dan HLS siap, batas invalid file serta processing/recovery ditampilkan.
-- [ ] Resume/pause/reselection/owner switch tidak menghapus metadata atau melakukan autopublish.
+- [x] Real source/cover dan HLS siap, batas invalid file serta processing/recovery ditampilkan.
+- [x] Resume/pause/reselection/owner switch tidak menghapus metadata atau melakukan autopublish.
 
 ### Validasi
 
@@ -241,13 +241,13 @@ Guarded MinIO/FFmpeg/browser, relevant media/upload tests dan root gates.
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi pada task ini.
+Episode detail menggunakan video-owner uploader/crop existing, hierarchy cache context dan validated preview return; preview GET meneruskan cancellation signal. Version-matched Video.js rc.4 instructions/bundled HLS docs dibaca, tanpa dependency/player-skin change. Built Chromium nyata pada dedicated media DB/random MinIO bucket: invalid file tidak initiate, policy600s/512MB, source/poster upload, 1080x1920 WebP/private403, worker FFmpeg terpisah dan HLS currentTime>0, preview Back benar. Metadata tetap draft; dua attachment memperbarui rowVersion1→3. Existing native uploader pause/resume/reselection/auth/owner tests tetap lulus; tidak ada autopublish.
 
 ### Commit task
 
-- Pesan: Ditentukan saat task selesai, Conventional Commit dengan ID task.
-- SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan.
+- Pesan: feat(web): connect episode upload and preview (ASER-006)
+- SHA: Receipt dicatat pada update task berikutnya setelah commit berhasil.
+- Hook/checks: bun test apps/web/test:216 pass/1190 assertions; bun test apps/api/src:151 pass/883 assertions; bun run check-types, bun run lint, bun run build, built series-media browser phase dengan real MinIO/FFmpeg, docs:check, scoped Prettier dan git diff --check; normal Husky/Commitlint wajib sebelum commit diterima.
 - Ledger: Receipt setelah commit pada update task berikutnya.
 
 ### Blocker atau tindak lanjut

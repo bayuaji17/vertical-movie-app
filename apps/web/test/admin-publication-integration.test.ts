@@ -80,3 +80,20 @@ test('preview return context accepts only known type and UUID, never arbitrary r
   expect(previewDetailHref('bad', 'film')).toBeUndefined()
   expect(previewDetailHref(id)).toBeUndefined()
 })
+
+test('episode preview context validates both owner UUIDs and constructs only the dedicated editor return route', () => {
+  const seriesId = '00000000-0000-4000-8000-000000000020'
+  expect(
+    previewContext({
+      type: 'episode',
+      seriesId,
+      returnTo: 'https://external.test',
+    }),
+  ).toEqual({ type: 'episode', seriesId })
+  expect(previewContext({ type: 'episode', seriesId: 'bad' })).toEqual({})
+  expect(previewDetailHref(id, 'episode', seriesId)).toBe(
+    `/admin/series/${seriesId}/episodes/${id}`,
+  )
+  expect(previewDetailHref(id, 'episode')).toBeUndefined()
+  expect(previewDetailHref('bad', 'episode', seriesId)).toBeUndefined()
+})

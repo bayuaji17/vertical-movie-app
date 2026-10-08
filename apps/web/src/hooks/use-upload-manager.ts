@@ -9,7 +9,7 @@ import type {
   MediaOwner,
   OwnerMedia,
 } from '#/lib/admin/media-client'
-import type { ContentType } from '#/lib/admin/content-client'
+import type { MediaContext } from '#/lib/admin/media-queries'
 import {
   initiateMediaOptions,
   invalidateMedia,
@@ -34,9 +34,10 @@ function coordinatorFor(cache: QueryClient) {
 }
 export function useUploadManager(
   owner: MediaOwner,
-  type: ContentType,
+  context: MediaContext,
   inventory?: OwnerMedia,
 ) {
+  const contextKey = typeof context === 'string' ? context : context.seriesId
   const cache = useQueryClient(),
     { user } = useAdminPrincipal(),
     [, changed] = useReducer((n: number) => n + 1, 0)
@@ -88,7 +89,7 @@ export function useUploadManager(
       },
       committed: async () => {
         await Promise.all([
-          invalidateMedia(cache, user.id, target, type),
+          invalidateMedia(cache, user.id, target, context),
           ...(target.ownerType === 'video'
             ? [
                 cache.invalidateQueries({
@@ -100,7 +101,7 @@ export function useUploadManager(
         ])
       },
     })
-  }, [cache, client, user.id, owner.ownerId, owner.ownerType, type])
+  }, [cache, client, user.id, owner.ownerId, owner.ownerType, contextKey])
   useEffect(() => {
     if (inventory) manager?.observe(inventory)
   }, [inventory, manager])

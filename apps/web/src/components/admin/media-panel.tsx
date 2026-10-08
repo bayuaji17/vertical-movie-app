@@ -1,3 +1,4 @@
+import type { previewContext } from '#/lib/admin/preview-navigation'
 import type { UseQueryResult } from '@tanstack/react-query'
 import type { UploadManager } from '#/lib/admin/upload-manager'
 import { useMemo } from 'react'
@@ -34,11 +35,13 @@ export function MediaPanelView({
   query,
   manager,
   showPreview = true,
+  previewSearch,
 }: {
   owner: MediaOwner
   query: UseQueryResult<OwnerMedia>
   manager?: UploadManager
   showPreview?: boolean
+  previewSearch?: ReturnType<typeof previewContext>
 }) {
   return (
     <section
@@ -65,6 +68,7 @@ export function MediaPanelView({
                 <Link
                   to="/admin/videos/$id/preview"
                   params={{ id: owner.ownerId }}
+                  search={previewSearch}
                 />
               }
             >

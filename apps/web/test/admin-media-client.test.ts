@@ -1,3 +1,4 @@
+import { seriesKeys } from '../src/lib/admin/series-queries'
 import { expect, test } from 'bun:test'
 import { QueryClient } from '@tanstack/react-query'
 import { createMediaClient } from '../src/lib/admin/media-client'
@@ -247,5 +248,26 @@ test('confirmed completion invalidates owner, metadata detail and lists; cleanup
     expect(cache.getQueryState(key)?.isInvalidated).toBe(true)
   await clearAdminPrivateQueries(cache)
   expect(cache.getQueryCache().findAll({ queryKey: ['admin'] })).toHaveLength(0)
+  cache.clear()
+})
+
+test('episode upload completion invalidates its hierarchy without using a Film alias or touching another owner', async () => {
+  const cache = new QueryClient(),
+    identity = 'episode-admin',
+    seriesId = '00000000-0000-4000-8000-000000000020'
+  const own = seriesKeys.episode(identity, seriesId, id),
+    other = seriesKeys.episode(
+      identity,
+      '00000000-0000-4000-8000-000000000021',
+      id,
+    ),
+    film = contentKeys.detail(identity, 'film', id),
+    publicKey = ['public', 'catalog']
+  for (const key of [own, other, film, publicKey])
+    cache.setQueryData(key, { marker: true })
+  await invalidateMedia(cache, identity, owner, { type: 'episode', seriesId })
+  expect(cache.getQueryState(own)?.isInvalidated).toBe(true)
+  for (const key of [other, film, publicKey])
+    expect(cache.getQueryState(key)?.isInvalidated).toBe(false)
   cache.clear()
 })

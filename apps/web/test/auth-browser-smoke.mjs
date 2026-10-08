@@ -38,7 +38,7 @@ const contentFixture = includeContent
         : null
     })
   : undefined
-const mediaFixture = ['media', 'publication'].includes(
+const mediaFixture = ['media', 'publication', 'series-media'].includes(
   process.env.AUTH_BROWSER_PHASE,
 )
   ? await (
@@ -322,15 +322,17 @@ try {
               ? '/public-content-browser-worker.mjs'
               : phase === 'public-catalog'
                 ? '/public-catalog-browser-worker.mjs'
-                : phase === 'publication'
-                  ? '/admin-publication-browser-worker.mjs'
-                  : phase === 'media'
-                    ? '/admin-media-upload-browser-worker.mjs'
-                    : phase === 'content'
-                      ? '/admin-content-browser-worker.mjs'
-                      : phase === 'routes'
-                        ? '/auth-routes-browser-worker.mjs'
-                        : '/auth-browser-worker.mjs'),
+                : phase === 'series-media'
+                  ? '/admin-series-media-browser-worker.mjs'
+                  : phase === 'publication'
+                    ? '/admin-publication-browser-worker.mjs'
+                    : phase === 'media'
+                      ? '/admin-media-upload-browser-worker.mjs'
+                      : phase === 'content'
+                        ? '/admin-content-browser-worker.mjs'
+                        : phase === 'routes'
+                          ? '/auth-routes-browser-worker.mjs'
+                          : '/auth-browser-worker.mjs'),
     ).text()
     const workerPath = process.env.AUTH_BROWSER_WORKER_PATH
     if (workerPath) await Bun.write(workerPath, workerSource)
