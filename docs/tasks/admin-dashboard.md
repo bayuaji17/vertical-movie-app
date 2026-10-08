@@ -266,7 +266,7 @@ Admin route now renders four editorial inventories/partitions, truthful Episode 
 ### Commit task
 
 - Pesan: feat(web): display dashboard content inventory (DASH-006)
-- SHA: Belum dibuat; receipt dicatat pada update dokumentasi berikutnya sesudah commit berhasil.
+- SHA: `e0139adc4442ceb64a4316e419c4c2b993421bba`.
 - Hook/checks: Web6/API167 pass, root types3/lint1/build2 pass; final SSR fallback build2 pass, docs/format/diff/preservation; hook reruns types/lint; normal hooks wajib tanpa bypass.
 - Ledger: Jangan menulis SHA commit sendiri sebelum tersedia.
 
@@ -276,7 +276,7 @@ Menunggu approval proposal dan dependency task di atas; tidak menganggap scope a
 
 ## Task: DASH-007 — Current media dan needs attention
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: P1
 - Referensi: DASH-US-02/03, PRD-02/05/09; [implementation steps](../plans/admin-dashboard/implementation-plan.md#implementation-steps).
@@ -294,8 +294,8 @@ Requirements: Four current-job counters including Retry, max5 failure list, sour
 
 ### Acceptance criteria
 
-- [ ] No misleading readiness/worker-health claims, storage URLs or reprocess button; failures count/list share predicate.
-- [ ] Definisi/state/invariants terkait pada plan terbukti; actual validation serta scope preservation dan commit tercatat sesuai workflow.
+- [x] No misleading readiness/worker-health claims, storage URLs or reprocess button; failures count/list share predicate.
+- [x] Definisi/state/invariants terkait pada plan terbukti; actual validation serta scope preservation dan commit tercatat sesuai workflow.
 
 ### Validasi
 
@@ -303,13 +303,13 @@ Mapping/bounds/navigation units, relevant regressions and root gates; actual dat
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement, bukan hasil actual.
+Current-media four counters with explicit job units/stored Running helper. Failed5 uses only whitelisted source/cover/title/type and canonical owner or Series Episode Link; honest empty state, no reprocess action. Attention/latest use responsive two-column sections and wrap titles/counts. Numeric semantics are supplied by summary contract; SQL/browser fixture acceptance follows DASH-009/010.
 
 ### Commit task
 
-- Pesan: Conventional Commit dengan ID task setelah acceptance criteria dan relevant gates lulus.
+- Pesan: feat(web): show dashboard media jobs and failures (DASH-007)
 - SHA: Belum dibuat; receipt dicatat pada update dokumentasi berikutnya sesudah commit berhasil.
-- Hook/checks: Belum dijalankan untuk task ini.
+- Hook/checks: API167 pass, root types3/lint1/build2 pass, scoped formatting/docs/diff/preservation; normal hooks wajib tanpa bypass.
 - Ledger: Jangan menulis SHA commit sendiri sebelum tersedia.
 
 ### Blocker atau tindak lanjut

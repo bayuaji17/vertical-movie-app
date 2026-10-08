@@ -113,63 +113,6 @@ export function DashboardContent({ data }: { data: DashboardSummary }) {
           )
         })}
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <h2>Latest created</h2>
-          </CardTitle>
-          <CardDescription>
-            The eight newest active films, standalone videos and series.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {data.latestContent.length ? (
-            <ul className="divide-y" data-testid="dashboard-latest">
-              {data.latestContent.map((row) => (
-                <li
-                  key={`${row.type}:${row.id}`}
-                  className="flex min-w-0 flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div className="min-w-0 space-y-1">
-                    <Link
-                      to="/admin/content/$type/$id"
-                      params={{ type: row.type, id: row.id }}
-                      className="inline-flex min-h-11 max-w-full items-center break-all font-medium underline-offset-4 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-ring"
-                    >
-                      {row.title}
-                    </Link>
-                    <p className="text-xs text-muted-foreground">
-                      {labels[row.type]} · Created{' '}
-                      <time dateTime={row.createdAt}>
-                        {new Date(row.createdAt)
-                          .toISOString()
-                          .replace('T', ' ')
-                          .slice(0, 19)}{' '}
-                        UTC
-                      </time>
-                    </p>
-                  </div>
-                  <Badge
-                    variant="secondary"
-                    className="w-fit shrink-0 capitalize"
-                  >
-                    {row.publicationStatus}
-                  </Badge>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <Empty className="p-6">
-              <EmptyHeader>
-                <EmptyTitle>No content yet</EmptyTitle>
-                <EmptyDescription>
-                  Create a draft to start your content library.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          )}
-        </CardContent>
-      </Card>
     </section>
   )
 }
@@ -189,5 +132,67 @@ export function DashboardSkeleton() {
       </div>
       <Skeleton className="h-52 w-full" />
     </div>
+  )
+}
+
+export function DashboardLatest({ data }: { data: DashboardSummary }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>
+          <h2>Latest created</h2>
+        </CardTitle>
+        <CardDescription>
+          The eight newest active films, standalone videos and series.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {data.latestContent.length ? (
+          <ul className="divide-y" data-testid="dashboard-latest">
+            {data.latestContent.map((row) => (
+              <li
+                key={`${row.type}:${row.id}`}
+                className="flex min-w-0 flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div className="min-w-0 space-y-1">
+                  <Link
+                    to="/admin/content/$type/$id"
+                    params={{ type: row.type, id: row.id }}
+                    className="inline-flex min-h-11 max-w-full items-center break-all font-medium underline-offset-4 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-ring"
+                  >
+                    {row.title}
+                  </Link>
+                  <p className="text-xs text-muted-foreground">
+                    {labels[row.type]} · Created{' '}
+                    <time dateTime={row.createdAt}>
+                      {new Date(row.createdAt)
+                        .toISOString()
+                        .replace('T', ' ')
+                        .slice(0, 19)}{' '}
+                      UTC
+                    </time>
+                  </p>
+                </div>
+                <Badge
+                  variant="secondary"
+                  className="w-fit shrink-0 capitalize"
+                >
+                  {row.publicationStatus}
+                </Badge>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <Empty className="p-6">
+            <EmptyHeader>
+              <EmptyTitle>No content yet</EmptyTitle>
+              <EmptyDescription>
+                Create a draft to start your content library.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        )}
+      </CardContent>
+    </Card>
   )
 }

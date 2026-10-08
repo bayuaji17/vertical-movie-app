@@ -1,7 +1,12 @@
+import {
+  DashboardMedia,
+  DashboardAttention,
+} from '#/components/admin/dashboard-media'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useDashboardSummary } from '#/hooks/use-dashboard-summary'
 import {
   DashboardContent,
+  DashboardLatest,
   DashboardSkeleton,
 } from '#/components/admin/dashboard-content'
 import { Alert, AlertTitle, AlertDescription } from '#/components/ui/alert'
@@ -120,7 +125,14 @@ function AdminDashboard() {
           </Alert>
         )}
         {data ? (
-          <DashboardContent data={data} />
+          <>
+            <DashboardContent data={data} />
+            <DashboardMedia data={data} />
+            <div className="grid min-w-0 items-start gap-6 lg:grid-cols-2">
+              <DashboardAttention data={data} />
+              <DashboardLatest data={data} />
+            </div>
+          </>
         ) : query.isPending && online ? (
           <DashboardSkeleton />
         ) : null}
