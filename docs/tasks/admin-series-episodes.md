@@ -132,7 +132,7 @@ Route/state spec7 authenticated routes, season/episode ownership, parent lifecyc
 ### Commit task
 
 - Pesan: docs: define series and episode editor states (ASER-003).
-- SHA: Receipt dicatat pada update task berikutnya setelah commit berhasil.
+- SHA: `d531a32e1b754f9b5857a158ab64786759c7e1f4`.
 - Hook/checks: docs/Prettier/diff check dan staged snapshot sebelum commit; normal Husky/Commitlint wajib sebelum commit diterima.
 - Ledger: Receipt setelah commit pada update task berikutnya.
 
@@ -142,7 +142,7 @@ Ikuti dependensi step; task selanjutnya ASER-004.
 
 ## Task: ASER-004 — Season list/create/edit
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: P1
 - Referensi: ASER-US-01/02/03, PRD-03/04/05/06/08/09; [step plan](../plans/admin-series-episodes/implementation-plan.md#aser-004--season-listcreateedit).
@@ -156,8 +156,8 @@ Authenticated Series entry, pemilih/list season dan create/edit dengan season ro
 
 ### Acceptance criteria
 
-- [ ] Tidak menduplikasi default Season1; nomor/release/duplicate/stale/archived errors mempertahankan input.
-- [ ] Dirty navigation dan owner/session cancellation, latest refetch/Back; published parent aktif mengikuti API.
+- [x] Tidak menduplikasi default Season1; nomor/release/duplicate/stale/archived errors mempertahankan input.
+- [x] Dirty navigation dan owner/session cancellation, latest refetch/Back; published parent aktif mengikuti API.
 
 ### Validasi
 
@@ -165,13 +165,13 @@ Form/client tests, guarded metadata persistence/browser, docs dan root gates.
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi pada task ini.
+Season list/create/edit dan selected-season episode read tersedia dari detail Series. Default Season1 tidak diduplikasi; suggested number memasukkan archived reservations. Input tetap utuh pada duplicate/version/offline; explicit reload dan dirty navigation terbukti di built Bun/Nitro Chromium dengan SQL dedicated. Browser widths 320/390/768/1024/1440 tanpa overflow; controls >=44px. Scope abort/auth cleanup menolak late generations. Browser fixture menggunakan database guarded vertical_movie_app_content_test, tanpa migration/dependency/runtime auth change.
 
 ### Commit task
 
-- Pesan: Ditentukan saat task selesai, Conventional Commit dengan ID task.
-- SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan.
+- Pesan: feat(web): add season management workflow (ASER-004)
+- SHA: Receipt dicatat pada update task berikutnya setelah commit berhasil.
+- Hook/checks: bun test apps/web/test: 212 pass/1167 assertions; bun run check-types, bun run lint, bun run build, dedicated built Series browser phase, docs:check, scoped Prettier dan git diff --check; normal Husky/Commitlint wajib sebelum commit diterima.
 - Ledger: Receipt setelah commit pada update task berikutnya.
 
 ### Blocker atau tindak lanjut

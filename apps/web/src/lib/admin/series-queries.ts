@@ -98,7 +98,7 @@ export function seriesMutationOptions(
   client: SeriesClient | undefined,
   identity: string,
   seriesId: string,
-  signal?: AbortSignal,
+  signal?: AbortSignal | (() => AbortSignal),
 ) {
   return mutationOptions({
     mutationKey: [...seriesKeys.owner(identity, seriesId), 'command'],
@@ -106,15 +106,21 @@ export function seriesMutationOptions(
     networkMode: 'always',
     mutationFn: async (command: SeriesCommand) => {
       const api = configured(client)
+      const currentSignal = typeof signal === 'function' ? signal() : signal
       switch (command.action) {
         case 'create-season':
-          return api.createSeason(seriesId, command.input, signal)
+          return api.createSeason(seriesId, command.input, currentSignal)
         case 'patch-season':
-          return api.patchSeason(seriesId, command.id, command.input, signal)
+          return api.patchSeason(
+            seriesId,
+            command.id,
+            command.input,
+            currentSignal,
+          )
         case 'create-episode':
-          return api.createEpisode(command.input, signal)
+          return api.createEpisode(command.input, currentSignal)
         case 'patch-episode':
-          return api.patchEpisode(command.id, command.input, signal)
+          return api.patchEpisode(command.id, command.input, currentSignal)
       }
     },
   })
