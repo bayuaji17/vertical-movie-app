@@ -1,6 +1,6 @@
 # Modul: Katalog publik Film/Standalone
 
-> Status: **planning draft** · 8 Oktober 2026 · owner implementasi: Codex/pengembang. Pengguna meminta plan, belum menyetujui detail UX/desain atau implementasi. Base SHA `634f7d46885692b32489b109c687d337e0e55511`.
+> Status: **active — PCAT-001 Done, PCAT-002 design review** · 8 Oktober 2026 · pengguna menetapkan plan `chore/public-catalog-plan` untuk dilanjutkan. Working branch `feat/public-catalog` dari main65127a1; desain/kontrak proposal terhadap current main ditinjau sebelum UI. Baseline awal634f7d4 tetap historis.
 
 ## Tujuan modul
 
@@ -65,7 +65,7 @@ PCAT-001 selesai; plan dan UX proposal masih draft. PCAT-002–014 menunggu appr
 
 ## Task: PCAT-002 — Spesifikasi dan desain katalog/detail/watch
 
-- Status: Backlog
+- Status: Review — spesifikasi dan prototype siap; approval desain pengguna pending.
 - Owner: Codex/pengembang
 - Prioritas: P1 — urutan dependency DAG pada plan
 - Referensi: PCAT-US-01; PRD-07/08/09, GR-02/03/05/06/08; [plan](../plans/public-catalog/implementation-plan.md)
@@ -81,7 +81,7 @@ Paths/symbol owners: `docs/design/public-catalog.md dan artefak visual approved 
 
 ### Acceptance criteria
 
-- [ ] Grid/filter/Load more dan navigation context dapat ditinjau pada 390/1440px; semantic Rhea dan 9:16.
+- [x] Grid/filter/Load more dan navigation context dapat ditinjau pada 390/1440px; semantic Rhea dan 9:16.
 - [ ] Approval desain dicatat dengan tanggal/pengguna sebelum task UI; belum mengklaim runtime.
 - [ ] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
 
@@ -91,18 +91,20 @@ Review visual/token/state matrix, docs:check/format/whitespace; gunakan imagegen
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau divalidasi. Commands di atas merupakan rencana, bukan hasil.
+8 Oktober 2026: pengguna mengoreksi plan yang harus dilanjutkan ke `chore/public-catalog-plan`68a0053. Local reconciliation yang sebelumnya membatalkan task bukan approval pengguna dan tidak dipakai. Freshness context sebelum plan; source current main65127a1 dipertahankan pada `feat/public-catalog`. [Spesifikasi](../design/public-catalog.md), HTML interactive prototype dan8 PNG Browse/Detail390/1440 Light/Dark disiapkan. Artwork/fonts/token existing direuse; fixture20 kartu, filter/navigation context dan recovery states dapat ditinjau. Browser validation dan local docs/commit results dicatat setelah observed; belum merupakan API/HLS/production proof atau persetujuan redesign.
+
+Observed prototype proof dengan bundled Windows Node/Playwright/Chromium1228:8 screenshots,390/1440 Light/Dark, local posters/fonts loaded, 9:16/no product overflow/44px buttons pass;20 fixture cards, filter Film10, keyboard Space/Enter, detail→watch→back dengan filter preserved,10 state controls, explicit Retry playback dan page errors0 pass. Play stage tanpa audio/video/HLS; SQL/cursor/SSR/expiry/media runtime tidak diuji oleh proof ini. Dua representative screenshots dilihat setelah assets benar. `bun run docs:check`86 Markdown/816 links, scoped installed Prettier HTML/Markdown dan `git diff --check` pass. Unrelated22 files/README overlay preserved; staged audit/normal commit berikut.
 
 ### Commit task
 
-- Pesan usulan: `docs: spesifikasi dan desain katalog/detail/watch (PCAT-002)`.
+- Pesan usulan: `docs: prepare public catalog design review (PCAT-002)`.
 - SHA: belum dibuat.
 - Hook/checks: belum dijalankan untuk commit ini.
 - Ledger: receipt aktual dicatat pada update sesudah commit berhasil.
 
 ### Blocker atau tindak lanjut
 
-Menunggu PCAT-001 + approval plan pengguna. Approval/hasil proof tidak diasumsikan tersedia.
+User memilih plan dan meminta kelanjutan; desain konkret menunggu review sebelum task UI PCAT-008. Perbedaan terhadap current main (Series/search/genre/page6/route/binary poster) perlu dipilih/refine secara eksplisit, bukan dihapus atau diasumsikan memenuhi plan lama. PCAT-002 tetap Review sampai acceptance approval terpenuhi.
 
 ## Task: PCAT-003 — Filter kinds publik sebelum cursor pagination
 

@@ -19,6 +19,8 @@ Aturan penamaan, ownership dan maintenance berada pada [Documentation rules](../
 
 ## Produk, arsitektur dan desain
 
+- [Kelanjutan katalog Film/Standalone](design/public-catalog.md): PCAT-002 proposal konkret untuk review; interactive HTML dan8 PNG Browse/Detail390/1440 Light/Dark. Runtime current katalog tidak diganti oleh prototype.
+
 - [PRD](product/prd.md): mendekati final; matriks PRD-01–10, keputusan produk dan gerbang rilis. Review awal 5 Oktober 2026, detail/watch PCW diperbarui 8 Oktober 2026; MVP lengkap belum selesai.
 - [Aturan produk](product/global-rules.md): GR-01–09, batas signed URL/cache dan proposal UI/kebijakan; alur publik PCW diperbarui 8 Oktober 2026.
 - [Arsitektur](architecture/overview.md): diagram/dataflow, schema/status dan rute aktif; kontrak detail/episode/watch PCW diperbarui 8 Oktober 2026, dengan batas UI/deployment/verification terpisah.
@@ -50,7 +52,7 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 
 Organisasi hooks web: [context](plans/web-hooks-organization/repository-context.md), [plan](plans/web-hooks-organization/implementation-plan.md) dan [WHOOK](tasks/web-hooks-organization.md), scope structural disetujui pengguna 8 Oktober 2026. Delapan hooks berada di `apps/web/src/hooks/use-*.ts`; integrasi dengan katalog main diperiksa sebelum delivery.
 
-Plan awal katalog Film/Standalone: [context historis](plans/public-catalog/repository-context.md), [plan historis](plans/public-catalog/implementation-plan.md) dan [backlog awal](tasks/public-catalog.md). Baseline awal mendahului implementasi katalog/detail/watch dari PR #11; freshness dan pemetaan pekerjaan tersisa diperbarui setelah integrasi hooks.
+Plan awal katalog Film/Standalone: [context historis](plans/public-catalog/repository-context.md), [plan historis](plans/public-catalog/implementation-plan.md) dan [backlog awal](tasks/public-catalog.md). Pengguna menetapkan branch chore/public-catalog-plan sebagai plan lanjutan; active pada feat/public-catalog, PCAT-002 design review. Existing main/homepage/detail/watch adalah runtime baseline; perbedaan proposal dicatat, task tidak dibatalkan otomatis.
 
 Detail dan tonton dari katalog: [context](plans/public-content-watch/repository-context.md), [plan detail](plans/public-content-watch/implementation-plan.md) dan [backlog PCW](tasks/public-content-watch.md). Pengguna meminta lanjut dan memilih Film/Standalone/Series beserta season/episode 7 Oktober 2026. PCW-000–008 implemented/verified lokal 8 Oktober 2026: detail Film/Standalone, Series dengan episode per season, watch HLS dan Next manual. Proof PostgreSQL/MinIO/FFmpeg serta Chromium development/build tersedia pada backlog. Dependency PCAT masih commit lokal, belum remote delivery; progress/autoplay/editor/production bukan scope.
 

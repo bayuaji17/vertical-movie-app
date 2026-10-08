@@ -2,14 +2,22 @@
 
 ## Plan metadata
 
-- Status: **draft — siap ditinjau, belum diotorisasi untuk implementasi** · 8 Oktober 2026.
+- Status: **active — plan pilihan pengguna, PCAT-002 disiapkan untuk review desain** · 8 Oktober 2026. Kelanjutan diminta setelah hooks delivery; perbedaan kontrak/UI terhadap main belum dianggap selesai hanya karena overlap fitur.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `feat/admin-publication`; base SHA: `634f7d46885692b32489b109c687d337e0e55511`.
 - Context: [repository-context.md](repository-context.md), disimpan terlebih dahulu.
-- Last validated SHA: `634f7d46885692b32489b109c687d337e0e55511` (static source review lokal).
+- Last validated SHA: `65127a107bad7606ef17dc908cc41777e25b1848` (freshness untuk kelanjutan); baseline awal `634f7d46885692b32489b109c687d337e0e55511` tetap historis.
 - Backlog canonical: [public-catalog](../../tasks/public-catalog.md); PCAT-001–014.
 - Pengguna meminta plan prioritas nomor 1 pada 8 Oktober 2026. Grid/Load more, filter, route detail dan indexing di bawah merupakan **proposal Codex** sampai disetujui pengguna. PRD approved tidak diubah menjadi seolah keputusan ini sudah final.
-- Local task commits diotorisasi standing root AGENTS; push/PR/merge/deployment terpisah. Branch implementasi yang diusulkan: `feat/public-catalog`, dibuat setelah approval dan freshness.
+- Plan source branch yang ditunjuk pengguna: `chore/public-catalog-plan`, head `68a0053d3bc145f07c8bdf14490456436d0973a5`. Working branch `feat/public-catalog` dibuat dari main65127a1 untuk mempertahankan latest runtime/hooks; local commits diotorisasi standing AGENTS, remote delivery terpisah.
+
+## Kelanjutan sesuai koreksi pengguna
+
+8 Oktober 2026: pengguna menegaskan `chore/public-catalog-plan` sebagai plan yang dimaksud. Penutupan proposal sebagai superseded pada branch lokal `chore/public-catalog-reconciliation` terlalu dini, bukan keputusan pengguna; branch itu tidak dipakai untuk execution dan tidak dipush. Context di-refresh terlebih dahulu pada [review](repository-context.md#freshness-untuk-plan-yang-dipilih-pengguna).
+
+PCAT-002 menghasilkan [spesifikasi desain](../../design/public-catalog.md), [preview HTML interaktif](../../design/public-catalog-preview.html) serta delapan first-viewport PNG Browse/Detail desktop/mobile Light/Dark. Prototype menampilkan20 fixture Film/Standalone, URL type context dan state/recovery untuk review; Watch adalah ilustrasi state tanpa media playback. Runtime aplikasi tidak berubah.
+
+Current main punya implementasi katalog tiga jenis/page6/search/genre/publishedAt, binary poster dan route detail berbeda. Tabel context dan spesifikasi desain mencatat gap kontrak; PCAT-003–014 tidak dibatalkan otomatis atau dianggap telah memenuhi AC. Cache fence/SSR/public client/player identity reuse ketika task terkait dimulai. Approval desain menentukan refinement UI/kontrak sebelum mengganti current product flows, sesuai dependency PCAT-008 yang sudah ditetapkan pada plan ini.
 
 ## Objective
 
@@ -356,3 +364,5 @@ Planning validation 8 Oktober 2026: `bun run docs:check` lulus 69 Markdown/665 l
 Receipt sesudah commit PCAT-001: `b844574d34e311c38f3359cd7e1ab61d7c10c6c6`, `docs: plan public film and standalone catalog (PCAT-001)`, branch `chore/public-catalog-plan`. Staged-tree docs 62/646, hooks docs 69/665, lint web 1/type 3 task cache valid dan Commitlint lulus tanpa bypass. Hanya empat file Markdown/hunk index milik planning di-commit. PCAT-001 Done, PCAT-002–014 Backlog; receipt ini dicatat untuk update task berikutnya. Plan tetap draft; tidak ada push/PR/merge/implementation.
 
 8 Oktober 2026: pengguna mengotorisasi commit/push dokumentasi plan terlebih dahulu, lalu branch baru untuk organisasi hooks web. Otorisasi delivery tidak mengubah status draft/approval UX katalog. Remote receipt dicatat setelah push berhasil.
+
+8 Oktober 2026: sesudah squash hooks PR #12, pengguna menegaskan plan yang dimaksud ialah `chore/public-catalog-plan`. Branch `feat/public-catalog` dimulai dari main65127a1 dengan dokumen plan awal, bukan local reconciliation yang terlalu dini menutup task. Context review terlebih dahulu; PCAT-002 spesifikasi/interactive HTML/eight responsive Light-Dark PNG disiapkan. Native browser prototype proof8 cases, assets/fonts,9:16/no overflow/44px, keyboard/filter/context/recovery/errors0 pass; bukan API/HLS/production proof. Docs86/816, scoped formatting/diff pass; local scoped commit/receipt berikut. Desain masih Review; task003–014 tetap terdaftar dengan dependencies/contract refinement dan tidak dibatalkan otomatis. Tidak ada perubahan apps/packages/env/dependencies atau remote delivery baru.
