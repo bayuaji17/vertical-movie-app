@@ -52,6 +52,8 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 
 ## Context dan plan per fitur
 
+Ringkasan dashboard admin: [context](plans/admin-dashboard/repository-context.md), [plan](plans/admin-dashboard/implementation-plan.md) dan [backlog DASH](tasks/admin-dashboard.md). Pengguna memilih dashboard dan meminta plan 8 Oktober 2026; metrik editorial/current-job, latest8/failed5 serta refresh30s merupakan proposal untuk review, belum runtime. Pengaturan situs tetap modul terpisah.
+
 Admin Series/season/episode: [context](plans/admin-series-episodes/repository-context.md), [plan](plans/admin-series-episodes/implementation-plan.md) dan [backlog ASER](tasks/admin-series-episodes.md). Modul dipilih pengguna 8 Oktober 2026; ASER-001–012 Done dan verified lokal: season/episode editor, upload/crop/Preview, Series/Episode Publish dan Episode Archive; native API/SQL serta built-browser journeys/regression lulus. Remote delivery disetujui pengguna 8 Oktober 2026 dan sedang diproses melalui normal merge dengan source branch dipertahankan; production belum dijalankan.
 
 Organisasi hooks web: [context](plans/web-hooks-organization/repository-context.md), [plan](plans/web-hooks-organization/implementation-plan.md) dan [WHOOK](tasks/web-hooks-organization.md), scope structural disetujui pengguna 8 Oktober 2026. Delapan hooks berada di `apps/web/src/hooks/use-*.ts`; integrasi dengan katalog main diperiksa sebelum delivery.
@@ -77,6 +79,8 @@ Integrasi katalog API ke homepage: [context](plans/public-catalog-api/repository
 | Pemrosesan sampul  | [Snapshot](plans/admin-cover-processing/repository-context.md)  | [Plan](plans/admin-cover-processing/implementation-plan.md)                                    | ACOV-001–012 selesai lokal; resolusi crop rekomendasi dan startup hashing development; cover request-path dan built-browser MinIO proof lulus; R2/production belum diverifikasi. |
 
 ## Backlog dan evidence
+
+- [Ringkasan dashboard admin](tasks/admin-dashboard.md): DASH-001–011; proposal inventori/media/latest dan private refresh, menunggu review sebelum runtime.
 
 - [Admin Series/season/episode](tasks/admin-series-episodes.md): ASER-001–012 Done; kontrak/editor/media/publication, API/SQL/browser proof dan local task receipts.
 
