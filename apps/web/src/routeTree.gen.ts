@@ -15,6 +15,7 @@ import { Route as AdminAuthenticatedRouteImport } from './routes/admin._authenti
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as ApiSplatRouteImport } from './routes/api/$'
 import { Route as SeriesSlugRouteImport } from './routes/series.$slug'
+import { Route as VideosSlugRouteImport } from './routes/videos.$slug'
 import { Route as WatchSlugRouteImport } from './routes/watch.$slug'
 import { Route as AdminAuthenticatedIndexRouteImport } from './routes/admin._authenticated.index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -52,6 +53,11 @@ const ApiSplatRoute = ApiSplatRouteImport.update({
 const SeriesSlugRoute = SeriesSlugRouteImport.update({
   id: '/series/$slug',
   path: '/series/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VideosSlugRoute = VideosSlugRouteImport.update({
+  id: '/videos/$slug',
+  path: '/videos/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WatchSlugRoute = WatchSlugRouteImport.update({
@@ -111,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/admin/login': typeof AdminLoginRoute
   '/api/$': typeof ApiSplatRoute
   '/series/$slug': typeof SeriesSlugRoute
+  '/videos/$slug': typeof VideosSlugRoute
   '/watch/$slug': typeof WatchSlugRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/titles/$kind/$slug': typeof TitlesKindSlugRoute
@@ -127,6 +134,7 @@ export interface FileRoutesByTo {
   '/admin/login': typeof AdminLoginRoute
   '/api/$': typeof ApiSplatRoute
   '/series/$slug': typeof SeriesSlugRoute
+  '/videos/$slug': typeof VideosSlugRoute
   '/watch/$slug': typeof WatchSlugRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/titles/$kind/$slug': typeof TitlesKindSlugRoute
@@ -144,6 +152,7 @@ export interface FileRoutesById {
   '/admin/login': typeof AdminLoginRoute
   '/api/$': typeof ApiSplatRoute
   '/series/$slug': typeof SeriesSlugRoute
+  '/videos/$slug': typeof VideosSlugRoute
   '/watch/$slug': typeof WatchSlugRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/titles/$kind/$slug': typeof TitlesKindSlugRoute
@@ -162,6 +171,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/api/$'
     | '/series/$slug'
+    | '/videos/$slug'
     | '/watch/$slug'
     | '/api/auth/$'
     | '/titles/$kind/$slug'
@@ -178,6 +188,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/api/$'
     | '/series/$slug'
+    | '/videos/$slug'
     | '/watch/$slug'
     | '/api/auth/$'
     | '/titles/$kind/$slug'
@@ -194,6 +205,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/api/$'
     | '/series/$slug'
+    | '/videos/$slug'
     | '/watch/$slug'
     | '/api/auth/$'
     | '/titles/$kind/$slug'
@@ -210,6 +222,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   ApiSplatRoute: typeof ApiSplatRoute
   SeriesSlugRoute: typeof SeriesSlugRoute
+  VideosSlugRoute: typeof VideosSlugRoute
   WatchSlugRoute: typeof WatchSlugRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   TitlesKindSlugRoute: typeof TitlesKindSlugRoute
@@ -257,6 +270,13 @@ declare module '@tanstack/react-router' {
       path: '/series/$slug'
       fullPath: '/series/$slug'
       preLoaderRoute: typeof SeriesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/videos/$slug': {
+      id: '/videos/$slug'
+      path: '/videos/$slug'
+      fullPath: '/videos/$slug'
+      preLoaderRoute: typeof VideosSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/watch/$slug': {
@@ -366,6 +386,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   ApiSplatRoute: ApiSplatRoute,
   SeriesSlugRoute: SeriesSlugRoute,
+  VideosSlugRoute: VideosSlugRoute,
   WatchSlugRoute: WatchSlugRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   TitlesKindSlugRoute: TitlesKindSlugRoute,

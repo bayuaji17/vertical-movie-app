@@ -1,4 +1,5 @@
-import { and, or, eq, isNull, sql, desc, gt, asc } from "drizzle-orm";
+import { and, or, eq, isNull, sql, desc, gt, asc, inArray } from "drizzle-orm";
+import type { CatalogKind } from "./model";
 import { videos, seasons, series } from "../../db/schema";
 import type {
   ContentConnection,
@@ -42,6 +43,7 @@ export class CatalogStore {
     afterEpisode,
     limit = 21,
     cursor,
+    kinds,
     includeSeriesDraft = false,
   }: {
     id?: string;
@@ -51,6 +53,7 @@ export class CatalogStore {
     afterEpisode?: number;
     limit?: number;
     cursor?: { at: Date; id: string };
+    kinds?: CatalogKind[];
     includeSeriesDraft?: boolean;
   } = {}) {
     return this.query()
@@ -58,6 +61,7 @@ export class CatalogStore {
         and(
           ready,
           own,
+          kinds ? inArray(videos.kind, kinds) : undefined,
           id ? eq(videos.id, id) : undefined,
           slug ? eq(videos.slug, slug) : undefined,
           seriesId ? eq(series.id, seriesId) : undefined,

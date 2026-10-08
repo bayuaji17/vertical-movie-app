@@ -2,14 +2,22 @@
 
 ## Plan metadata
 
-- Status: **draft — siap ditinjau, belum diotorisasi untuk implementasi** · 8 Oktober 2026.
+- Status: **implemented/verified lokal — PCAT-001–014 Done, desain/kelanjutan disetujui pengguna** · 8 Oktober 2026. Kelanjutan diminta setelah hooks delivery; perbedaan kontrak/UI terhadap main belum dianggap selesai hanya karena overlap fitur.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `feat/admin-publication`; base SHA: `634f7d46885692b32489b109c687d337e0e55511`.
 - Context: [repository-context.md](repository-context.md), disimpan terlebih dahulu.
-- Last validated SHA: `634f7d46885692b32489b109c687d337e0e55511` (static source review lokal).
+- Last validated SHA: `bf881cd1b9b33bc58ec829a78b0b961fa9ec40a7` (source/proof closure); `65127a107bad7606ef17dc908cc41777e25b1848` (freshness untuk kelanjutan); baseline awal `634f7d46885692b32489b109c687d337e0e55511` tetap historis.
 - Backlog canonical: [public-catalog](../../tasks/public-catalog.md); PCAT-001–014.
-- Pengguna meminta plan prioritas nomor 1 pada 8 Oktober 2026. Grid/Load more, filter, route detail dan indexing di bawah merupakan **proposal Codex** sampai disetujui pengguna. PRD approved tidak diubah menjadi seolah keputusan ini sudah final.
-- Local task commits diotorisasi standing root AGENTS; push/PR/merge/deployment terpisah. Branch implementasi yang diusulkan: `feat/public-catalog`, dibuat setelah approval dan freshness.
+- Pengguna meminta plan prioritas nomor 1 pada 8 Oktober 2026. Desain/grid20/Load more, filter URL, detail dan temporary noindex disetujui pengguna 8 Oktober 2026 dengan “ok, setuju”; keputusan produk canonical diperbarui bersama closure.
+- Plan source branch yang ditunjuk pengguna: `chore/public-catalog-plan`, head `68a0053d3bc145f07c8bdf14490456436d0973a5`. Working branch `feat/public-catalog` dibuat dari main65127a1 untuk mempertahankan latest runtime/hooks; local commits diotorisasi standing AGENTS, remote delivery terpisah.
+
+## Kelanjutan sesuai koreksi pengguna
+
+8 Oktober 2026: pengguna menegaskan `chore/public-catalog-plan` sebagai plan yang dimaksud. Penutupan proposal sebagai superseded pada branch lokal `chore/public-catalog-reconciliation` terlalu dini, bukan keputusan pengguna; branch itu tidak dipakai untuk execution dan tidak dipush. Context di-refresh terlebih dahulu pada [review](repository-context.md#freshness-untuk-plan-yang-dipilih-pengguna).
+
+PCAT-002 menghasilkan [spesifikasi desain](../../design/public-catalog.md), [preview HTML interaktif](../../design/public-catalog-preview.html) serta delapan first-viewport PNG Browse/Detail desktop/mobile Light/Dark. Prototype menampilkan20 fixture Film/Standalone, URL type context dan state/recovery untuk review; Watch adalah ilustrasi state tanpa media playback. Runtime aplikasi tidak berubah.
+
+Current main punya implementasi katalog tiga jenis/page6/search/genre/publishedAt, binary poster dan route detail berbeda. Tabel context dan spesifikasi desain mencatat gap kontrak; PCAT-003–014 tidak dibatalkan otomatis atau dianggap telah memenuhi AC. Cache fence/SSR/public client/player identity reuse ketika task terkait dimulai. Approval desain menentukan refinement UI/kontrak sebelum mengganti current product flows, sesuai dependency PCAT-008 yang sudah ditetapkan pada plan ini.
 
 ## Objective
 
@@ -21,22 +29,22 @@ Dalam scope: homepage katalog nyata; filter All/Films/Standalone di URL; cursor 
 
 Di luar iterasi: Series/episode discovery/editor/publication, subtitle, search/genre/advanced sorting, autoplay/feed/swipe, recommendation/analytics/view counts/watch history/favorites, pengaturan situs, restore/republish, source replacement, auth baru, perubahan worker/upload/retensi, dependency upgrade, rollout production. Existing API Series/episode dan direct watch links tetap kompatibel. Tidak menampilkan tanggal release/genre yang belum ada di DTO.
 
-## Current behavior
+## Current behavior (snapshot historis awal)
 
 Homepage starter/demo MP4; watch minimal menggunakan public playback existing. API `GET /videos` menyediakan cursor metadata seluruh playable kinds, tanpa filter jenis/cover. `GET /videos/:slug` tersedia; cover signed hanya dalam playback DTO. Gateway public sudah ada, Query/SSR integration tersedia. Source trace dan batas cache ada pada [context](repository-context.md#runtime-and-data-flow).
 
 ## Desired behavior
 
-### UX yang diusulkan
+### UX yang disetujui
 
-| Area                   | Proposal yang dapat disetujui bersama plan                                                                                                                                                                                             |
+| Area                   | UX yang disetujui pengguna8 Oktober2026                                                                                                                                                                                                |
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Header                 | Brand Vertical Movie, tautan Browse, pemilih Appearance Light/Dark/System. Tidak membaca sesi pengunjung; admin tetap memakai rute existing.                                                                                           |
 | Homepage `/`           | Heading Browse, filter All/Films/Standalone, grid cover + title/type/duration, explicit Load more, tombol retry/refresh bila gagal.                                                                                                    |
 | Layout                 | Mobile-first; 2 kolom poster pada 390px, 1 pada lebar sempit bila perlu; 3–5 kolom tablet/desktop sesuai lebar cover. Final spacing/layout pada PCAT-002, tanpa horizontal overflow 320–1440px.                                        |
 | Pagination             | 20 item per request, cursor existing. Tombol Load more menambah item, bukan numbered pages/auto-infinite scroll. Back dari detail/watch mengembalikan filter dan posisi scroll selama navigation session.                              |
 | Urutan                 | createdAt/id descending sesuai API. Label tidak mengklaim “newly published”; sort alternatif tidak ditambah.                                                                                                                           |
-| URL filter             | `/?type=all                                                                                                                                                                                                                            | film | standalone`; default all. Validasi unknown value ke default, buang cursor lama saat type berubah. Browser back/forward menyelaraskan filter dan data. |
+| URL filter             | `/?type=all`, `/?type=film` atau `/?type=standalone`; default all. Unknown type menjadi all, cursor lama dibuang saat ganti filter; Back/Forward menyelaraskan data.                                                                   |
 | Detail `/videos/$slug` | Cover, judul, badge Film/Standalone, durasi, sinopsis lengkap, Watch now, Back to browse. Tidak memuat HLS sebelum Watch. Episode di rute baru ini mendapat not-found; direct episode watch existing tetap tersedia.                   |
 | Watch `/watch/$slug`   | Player HLS 9:16 existing, judul/type/duration, back ke detail/browse untuk non-episode, loading/error dan retry jelas. Existing episode watch tidak diarahkan ke detail yang menolaknya.                                               |
 | Navigation context     | Search `type` yang tervalidasi dapat dibawa ke detail/watch; internal route/link dibangun Router, tidak menerima external return URL. Reload katalog mulai halaman pertama; tidak menjanjikan persistence seluruh pages lintas reload. |
@@ -74,10 +82,10 @@ API extension harus backward-compatible. UI baru tidak boleh mengambil private a
 - `createPublicCatalogClient` memakai Eden existing dengan injected fetcher, signal, credentials omit dan public errors; no private session reader. Browser menuju configured same-origin `/api`; server-only reader memakai fixed validated `API_INTERNAL_URL`, path/query fixed, timeout 10 detik, tanpa meneruskan headers cookie/authorization/host dari user.
 - `createIsomorphicFn` menghubungkan metadata server/client; server-only status helper memetakan 404/503. SSR import protection perlu proof dari public route baru; server config/modules tidak masuk client bundle.
 - Metadata Query keys prefix `public-catalog`, mencakup canonical filter/limit/slug; cursor melalui pageParam. StaleTime maksimal 60 detik, gcTime 5 menit, tidak dipersist. Metadata stale tetap display-only; authorization memakai endpoint uncached saat cover/watch diminta.
-- Signed poster Query prefix berbeda, browser-only/disabled SSR, in-memory, lifetime dibatasi expiresAt; tidak masuk dehydrated HTML/JSON. Fetch/URL renewal hanya kartu visible (IntersectionObserver fallback aman), concurrency maksimum 4 dan request dedup per slug; offscreen/unmount tidak menulis hasil lama. Route/intent preload tidak meminta signed URL/HLS.
+- Refinement PCAT-007: signed poster memakai browser-only ephemeral capability queue di luar QueryClient, max100 identities/in-memory dan lifetime dibatasi expiresAt; tidak masuk dehydrated HTML/JSON. Fetch/URL renewal hanya kartu visible (IntersectionObserver fallback aman), concurrency maksimum 4 dan request dedup per slug; offscreen/unmount tidak menulis hasil lama. Route/intent preload tidak meminta signed URL/HLS.
 - Pending/cursor double-click serialized; dedup id pada append; changed filter membatalkan/menolak late data lama. Back/forward/scroll restoration memakai Router existing dan memory Query pages; refresh/reconnect mengulang first page dengan filter sama.
 
-## Affected files and symbols
+## Affected files and symbols (target awal, refinement actual dicatat di ledger)
 
 Nama file baru berikut merupakan target per task, bukan folder scaffold yang dibuat pada planning.
 
@@ -85,19 +93,19 @@ Nama file baru berikut merupakan target per task, bukan folder scaffold yang dib
 | ----------------------------------------------------------------------------------------------------------------------------- | ------ | ---------------------------------------------- | -------------------------------------------------- | -------------------------------------- |
 | `apps/api/src/modules/catalog/{model,service,repository}.ts`                                                                  | modify | CatalogQuery, list/cached/invalidate, playable | kinds/filter/cursor/cache race                     | Context: katalog metadata              |
 | `apps/api/src/modules/playback/{index,service}.ts`                                                                            | modify | poster DTO/route, PlaybackService.poster       | Signed cover terpisah                              | Context: poster/playback               |
-| `apps/api/src/modules/catalog/{service,index}.test.ts`                                                                        | create | filter/TTL/HTTP tests                          | Regression behavior native Bun                     | Context: testing coverage gap          |
+| `apps/api/src/modules/catalog/{list,list-cache}.test.ts`                                                                      | create | filter/TTL/HTTP tests                          | Regression behavior native Bun                     | Context: testing coverage gap          |
 | `apps/api/src/modules/playback/service.test.ts`                                                                               | modify | poster signing tests                           | Profile/namespace/TTL/hidden failures              | Existing service test/readiness        |
 | `apps/api/src/modules/playback/poster.test.ts`                                                                                | create | poster HTTP/app composition                    | Schema/security/cache errors                       | createPlaybackModule/createApp         |
 | `apps/api/test/integration/public-catalog-proof.test.ts`                                                                      | create | SQL/visibility/cursor proof                    | Guarded dedicated DB proof                         | media-fixture/media-series-proof       |
 | `apps/web/src/lib/public/{catalog-client,catalog-reader,catalog-reader.server,catalog-queries,catalog-state,poster-state}.ts` | create | typed public readers/query/state               | Unsigned SSR, bounded browser capabilities         | client/router/session boundary pattern |
-| `apps/web/src/components/public/{public-shell,catalog-card,public-poster,catalog-browser,video-detail,watch-page}.tsx`        | create | public presentation                            | Shared three-screen UX                             | Home/watch/current primitives          |
+| `apps/web/src/components/public/{public-shell,catalog-card,public-poster,catalog-browser,video-detail}.tsx`                   | create | public presentation                            | Shared three-screen UX                             | Home/watch/current primitives          |
 | `apps/web/src/routes/index.tsx`                                                                                               | modify | Home, route loader/search/head                 | Replace starter with catalog                       | Current Home                           |
 | `apps/web/src/routes/videos.$slug.tsx`                                                                                        | create | Detail loader/head/search/error                | Public non-episode detail                          | Existing public detail API             |
 | `apps/web/src/routes/watch.$slug.tsx`                                                                                         | modify | Watch loader/search/head                       | Metadata/back links and existing player            | Current Watch/loadPlayback             |
 | `apps/web/src/routeTree.gen.ts`                                                                                               | modify | generated tree only                            | Tooling route generation                           | generate-routes script                 |
-| `apps/web/test/public-catalog-{client,state}.test.ts`, `public-catalog-eden-contract.ts`                                      | create | Contract/state/SSR-isolation proofs            | filter/race/status/runtime separation              | Existing web test conventions          |
+| `apps/web/test/public-video-{client,state}.test.ts`, `public-catalog-eden-contract.ts`                                        | create | Contract/state/SSR-isolation proofs            | filter/race/status/runtime separation              | Existing web test conventions          |
 | `apps/web/test/business-gateway.test.ts`                                                                                      | modify | Public poster path proof                       | Cookie stripping/errors/no-store                   | Existing business gateway              |
-| `apps/api/test/integration/public-catalog-browser-proof.test.ts`, `apps/web/test/public-catalog-browser-worker.mjs`           | create | Actual anonymous browser proof                 | Catalog → detail → HLS → archive                   | media-playback-fixture/harness         |
+| `apps/api/test/integration/public-content-browser-fixture.ts`, `apps/web/test/public-film-catalog-browser-worker.mjs`         | create | Actual anonymous browser proof                 | Catalog → detail → HLS → archive                   | media-playback-fixture/harness         |
 | `apps/web/test/auth-import-boundary-proof.mjs`                                                                                | modify | additional public import protection case       | Confirm new server-only reader removed from client | Existing negative fixture              |
 | `docs/design/public-catalog.md` and approved visual/export artifacts                                                          | create | Screen/state spec                              | Design reviewed before UI implementation           | Design system existing                 |
 | `docs/product/prd.md`, `docs/architecture/overview.md`, `docs/operations/media.md`                                            | modify | approved decision/current state                | Update at approval/closure, preserve history       | Existing canonical owners              |
@@ -333,9 +341,9 @@ Evidence source/path/symbol/base SHA dimiliki [context evidence index](repositor
 
 ## Open decisions
 
-Persetujuan yang diperlukan sebelum implementasi: grid + Load more; All/Films/Standalone saja; 20 items/createdAt descending; route detail `/videos/$slug`; English copy; indexing noindex sementara. Search/genre/sort alternatif ditunda dalam proposal. Pertanyaan UX opsional dikirim saat planning; jika belum dijawab, proposal grid dipertahankan berstatus draft, bukan dianggap persetujuan karena waktu berlalu.
+Keputusan disetujui pengguna 8 Oktober 2026: grid + Load more; All/Films/Standalone saja; 20 items/createdAt descending; route detail `/videos/$slug`; English copy; indexing noindex sementara. Search/genre/sort alternatif ditunda dalam proposal. Pengguna menyetujui desain konkret dengan “ok, setuju”; bukan approval berdasarkan waktu berlalu.
 
-PCAT-002 menghasilkan desain konkret untuk review berikutnya; code UI menunggu approval desain. Kebijakan konten dan indexing jangka panjang di PRD tetap terbuka. Read-only proof planning tidak mengotorisasi source implementation, push/PR/merge atau deployment.
+8 Oktober 2026: pengguna menyetujui desain konkret PCAT-002 dengan “ok, setuju”; implementasi source pada feat/public-catalog diotorisasi sesuai DAG. Kebijakan konten dan indexing jangka panjang di PRD tetap terbuka. Approval ini mengotorisasi implementasi dan local task commits sesuai workflow repository. Delivery remote berikutnya merupakan tahap tersendiri.
 
 ## Validation history
 
@@ -356,3 +364,33 @@ Planning validation 8 Oktober 2026: `bun run docs:check` lulus 69 Markdown/665 l
 Receipt sesudah commit PCAT-001: `b844574d34e311c38f3359cd7e1ab61d7c10c6c6`, `docs: plan public film and standalone catalog (PCAT-001)`, branch `chore/public-catalog-plan`. Staged-tree docs 62/646, hooks docs 69/665, lint web 1/type 3 task cache valid dan Commitlint lulus tanpa bypass. Hanya empat file Markdown/hunk index milik planning di-commit. PCAT-001 Done, PCAT-002–014 Backlog; receipt ini dicatat untuk update task berikutnya. Plan tetap draft; tidak ada push/PR/merge/implementation.
 
 8 Oktober 2026: pengguna mengotorisasi commit/push dokumentasi plan terlebih dahulu, lalu branch baru untuk organisasi hooks web. Otorisasi delivery tidak mengubah status draft/approval UX katalog. Remote receipt dicatat setelah push berhasil.
+
+8 Oktober 2026: sesudah squash hooks PR #12, pengguna menegaskan plan yang dimaksud ialah `chore/public-catalog-plan`. Branch `feat/public-catalog` dimulai dari main65127a1 dengan dokumen plan awal, bukan local reconciliation yang terlalu dini menutup task. Context review terlebih dahulu; PCAT-002 spesifikasi/interactive HTML/eight responsive Light-Dark PNG disiapkan. Native browser prototype proof8 cases, assets/fonts,9:16/no overflow/44px, keyboard/filter/context/recovery/errors0 pass; bukan API/HLS/production proof. Docs86/816, scoped formatting/diff pass; local scoped commit/receipt berikut. Desain masih Review; task003–014 tetap terdaftar dengan dependencies/contract refinement dan tidak dibatalkan otomatis. Tidak ada perubahan apps/packages/env/dependencies atau remote delivery baru.
+
+PCAT-002 artifact receipt: local commit307710159cbd8a6d9a0f4d230d2ec1deaf2abc37,14 files termasuk selective index/spec/HTML/eight screenshots. Docs86/816/staged79/797, native prototype proof, format/diff/preservation dan normal lint/type/Commitlint hooks pass. Source aplikasi tidak berubah; task tetap Review menunggu desain. Receipt dicatat sesudah commit dan dapat masuk update task berikutnya; branch feat/public-catalog belum dipush/merged.
+
+8 Oktober 2026 — PCAT-003: finite canonical kinds diterapkan sebelum SQL pagination; cursor/cache bound ke kinds, omit menjaga legacy fingerprint. Targeted Bun/HTTP/OpenAPI/compiled SQL dan root types/lint/build lulus; real DB acceptance tetap PCAT-012. Approval PCAT-002 commit a3ceba2d47c32326d7e25773a4370de5166cfd29 dengan normal hooks pass.
+
+8 Oktober 2026 — PCAT-004: reuse generation fence existing, deterministic legacy-list concurrent fill/TTL60s/filter/failure proof; catalog26/179 dan build2 pass. PCAT-003 receipt fca1b478a8726fd977166338731dad47cd498066; API143/811 + web185/955 regression serta normal commit hooks pass.
+
+8 Oktober 2026 — PCAT-005: signed poster API terpisah, uncached authorization, exact verified generation namespace/TTL ceiling dan no HLS/storage reads. Playback13/93, API151/883 dan root types3/lint1/build2 pass; fixture type failure diperbaiki lalu types rerun pass. PCAT-004 receipt a09728b09cbe57431ec76561938a0c1178bf3411 dengan normal hooks pass.
+
+8 Oktober 2026 — PCAT-006: typed /videos public adapter + unsigned isomorphic/server-only readers, finite page20 filters, abort10s, cookie/auth stripped, malformed errors/status/identity/expiry validation. Web189/1016 serta root types3/lint1/build2 pass sesudah fixture/lint fixes; SSR route/import/dehydration proof tetap PCAT-009/013. PCAT-005 receipt046ccbd24cea17c74e1f08b3fefca43916b5859b normal hooks pass.
+
+8 Oktober 2026 — PCAT-007: query first-page reset/append/cancel/keys/TTL dan max4 subscriber-dedup poster queue + use-public-* hooks. Signed cache ditempatkan di luar Query untuk menjamin no dehydration, bukan query signed yang dapat terdehydrate. State3/20, web192/1036, types3/lint1/build2 pass; actual UI/browser proof tetap PCAT-008–013. PCAT-006 receipt45c73dac15fe436bbea7405a19decd9a0bd0e1c1 normal hooks pass.
+
+8 Oktober 2026 — PCAT-008: reusable shell/card/9:16 cover/states implemented, SSR cover1/3 dan root types3/lint1/build2 pass. Card menerima renderLink dari owner page untuk menjaga tipe/navigasi; Type/search collision diperbaiki. Actual viewport/keyboard/theme proof tetap PCAT-013 dan task acceptance tidak diasumsikan dari compilation. PCAT-007 receipt eb3d034dfddab5c0ceae5db0780cfd682ba3168c normal hooks pass.
+
+8 Oktober 2026 — PCAT-012 independent proof dijalankan setelah PCAT-004/005 lebih awal dari UI: dedicated PostgreSQL + owned MinIO actual WebP1/30 pass, pages20/20/5/legacy/tombstone/archive/cache/profile/no auth/no-store. Fixture archive CHECK diperbaiki (published_at null) dan rerun pass. PCAT-008 implementation receipt 802b316c162d79fd60f2c2022fcd767a8808c6fd dengan normal hooks pass; actual UI matrix tetap PCAT-013.
+
+8 Oktober 2026 — PCAT-009: real unsigned SSR20 Film/Standalone homepage, canonical URL type/unknown normalization, Query/manual cursor/reset/offline/recovery and temporary noindex. Web193/1039/types3/lint1/build2 pass; illegal server import at public route rejected, source restored and valid build restored. History/scroll/full browser matrix ditutup di PCAT-013. PCAT-012 receipt e16dc5151b59705a330cb1a182e5299247d3520d normal hooks pass.
+
+8 Oktober 2026 — PCAT-010: /videos/$slug detail metadata/cover/CTA dan type navigation; shared normalizeCatalogLocation dan router canonical browse scroll key dibutuhkan untuk approved Back behavior. Offline cached loaders tidak memblokir navigation. Generated routes, web193/1039 dan root types3/lint1/build2 pass. PCAT-009 receipt60b17f2b39ca32d64f5e39fefbdebc0f250c0a19 normal hooks pass. Browser acceptance tetap PCAT-013.
+
+8 Oktober 2026 — PCAT-011: reuse existing watch route/Video.js player with PublicShell and filter-aware detail/Browse navigation, English retry copy, offline loader fallback. Tidak perlu owner watch-page baru karena wrapper existing tetap route-owned; shared content-queries watch-only offline options dan player copy menjadi affected owners. Existing episode/Next, keyed identity/cancellation/renewal/no autoplay dipertahankan. Web193/1039, root types3/lint1/build2 pass; actual HLS browser acceptance PCAT-013. PCAT-010 receipt a70b07d7c8e6604ee7e9f57db2e7486883ab1c74 normal hooks pass.
+
+8 Oktober 2026 — PCAT-013: actual built Chromium/guarded PostgreSQL/private owned MinIO/FFmpeg HLS proof lulus,20/40/49 paging/type/history/scroll/cover/failures/offline/SSR/no auth/no signature/themes5widths/keyboard/real expiry seek480p/retry/episode Next/identity/archive/empty. Fixtures/harness corrections dicatat di backlog. API151/883 web193/1039 root types3/lint1 pass; native Better Auth built browser regression pass; root build+canonical closure task014. PCAT-011 receipt 3bd3c7aae374ca98c3cc725a1946e40eb036ecd9 normal hooks pass.
+
+Actual owner refinement — 8 Oktober 2026: lib/public/catalog-{model,client,reader,reader.server,queries,navigation}.ts dan poster-state.ts; hooks/use-public-{online,poster,catalog}.ts; catalog list/list-cache tests; playback/service dan shared/media-readiness; public-video-client/state/poster-ssr tests dan existing Eden/gateway tests. Watch wrapper tetap route-owned, shared player English copy dan watch-only content-queries offline fallback; router.tsx canonical Browse scroll key. Browser reuse auth-browser-smoke/public-content-browser-fixture dengan phase public-film dan optional fixture count49; SQL proof public-film-catalog-proof.test.ts. Generated route tree hanya melalui generator. Affected paths planning di atas adalah target awal; refinement actual ini dan receipts menjadi acuan implementasi.
+
+8 Oktober 2026 — PCAT-014 local module closure: current canonical PRD/GR/architecture/runbook/spec/index updated, baseline/old3-kind evidence retained as history. Source/proof receipt PCAT-013 bf881cd1b9b33bc58ec829a78b0b961fa9ec40a7; final quality gates/preservation recorded in backlog. Branch feat/public-catalog, no production inference from local verification.

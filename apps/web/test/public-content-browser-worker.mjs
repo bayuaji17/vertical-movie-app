@@ -447,11 +447,11 @@ try {
   await control({ playbackStatus: 503 })
   const failuresBefore = capabilityCount()
   await goto('/watch/' + initial.movie)
-  await button('Retry video').waitFor()
+  await button('Retry playback').waitFor()
   await page.waitForTimeout(500)
   assert.equal(capabilityCount() - failuresBefore, 1)
   await control({ playbackStatus: 0 })
-  await button('Retry video').click()
+  await button('Retry playback').click()
   await play()
 
   enterStage('identity-race')

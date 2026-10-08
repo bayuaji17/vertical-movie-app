@@ -56,6 +56,18 @@ export class PlaybackService {
       expiresAt: new Date(this.now().getTime() + ttl * 1000).toISOString(),
     };
   }
+  async poster(slug: string) {
+    const { row, ttl } = await this.row(slug, false);
+    posterReadiness(row);
+    const { native } = this.dependencies();
+    return {
+      videoId: row.video.id,
+      posterUrl: native.presign(row.posterJob.outputPrefix + "poster.webp", {
+        expiresIn: ttl,
+      }),
+      expiresAt: new Date(this.now().getTime() + ttl * 1000).toISOString(),
+    };
+  }
   async playlist(
     identifier: string,
     index: string | undefined,

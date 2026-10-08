@@ -19,6 +19,11 @@ const Info = t.Object({
   posterUrl: t.String(),
   expiresAt: t.String({ format: "date-time" }),
 });
+const Poster = t.Object({
+  videoId: Uuid,
+  posterUrl: t.String(),
+  expiresAt: t.String({ format: "date-time" }),
+});
 export function createPlaybackModule({
   service = new PlaybackService(),
   getSession,
@@ -28,6 +33,15 @@ export function createPlaybackModule({
     .use(createRequireAdmin({ getSession }))
     .onBeforeHandle(({ set }) => {
       set.headers["cache-control"] = "private, no-store";
+    })
+    .get("/videos/:slug/poster", ({ params }) => service.poster(params.slug), {
+      params: Public,
+      response: { 200: Poster, ...ErrorResponses },
+      detail: {
+        tags: ["Playback"],
+        operationId: "getPublicVideoPoster",
+        security: [],
+      },
     })
     .get("/videos/:slug/playback", ({ params }) => service.info(params.slug), {
       params: Public,

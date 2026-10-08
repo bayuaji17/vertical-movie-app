@@ -26,6 +26,14 @@ export async function publicCatalogContract(
     void kind
   }
   await client.catalog({ kind: 'movie' })({ id }).poster.get()
+  await client.videos.get({ query: { kinds: 'movie,standalone', limit: '20' } })
+  const poster = await client.videos({ slug: 'a-film' }).poster.get()
+  if (poster.data) {
+    const url: string = poster.data.posterUrl
+    void url
+  }
+  // @ts-expect-error Episode is not a finite public catalog kinds filter.
+  await client.videos.get({ query: { kinds: 'episode' } })
   // @ts-expect-error Individual episodes are excluded from the public home feed.
   await client.catalog.get({ query: { kind: 'episode' } })
   // @ts-expect-error Limit is an HTTP query string, not a number.

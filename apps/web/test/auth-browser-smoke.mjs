@@ -58,12 +58,17 @@ const mediaFixture = ['media', 'publication'].includes(
         : null
     })
   : undefined
-const contentWatchFixture =
-  process.env.AUTH_BROWSER_PHASE === 'public-watch'
-    ? await (
-        await import('../../api/test/integration/public-content-browser-fixture')
-      ).createPublicContentBrowserFixture()
-    : undefined
+const contentWatchFixture = ['public-watch', 'public-film'].includes(
+  process.env.AUTH_BROWSER_PHASE,
+)
+  ? await (
+      await import('../../api/test/integration/public-content-browser-fixture')
+    ).createPublicContentBrowserFixture(
+      process.env.AUTH_BROWSER_PHASE === 'public-film'
+        ? { videoCount: 49 }
+        : {},
+    )
+  : undefined
 const catalogFixture =
   process.env.AUTH_BROWSER_PHASE === 'public-catalog'
     ? await (
@@ -308,19 +313,21 @@ try {
   for (const phase of phases) {
     const workerSource = await Bun.file(
       import.meta.dir +
-        (phase === 'public-watch'
-          ? '/public-content-browser-worker.mjs'
-          : phase === 'public-catalog'
-            ? '/public-catalog-browser-worker.mjs'
-            : phase === 'publication'
-              ? '/admin-publication-browser-worker.mjs'
-              : phase === 'media'
-                ? '/admin-media-upload-browser-worker.mjs'
-                : phase === 'content'
-                  ? '/admin-content-browser-worker.mjs'
-                  : phase === 'routes'
-                    ? '/auth-routes-browser-worker.mjs'
-                    : '/auth-browser-worker.mjs'),
+        (phase === 'public-film'
+          ? '/public-film-catalog-browser-worker.mjs'
+          : phase === 'public-watch'
+            ? '/public-content-browser-worker.mjs'
+            : phase === 'public-catalog'
+              ? '/public-catalog-browser-worker.mjs'
+              : phase === 'publication'
+                ? '/admin-publication-browser-worker.mjs'
+                : phase === 'media'
+                  ? '/admin-media-upload-browser-worker.mjs'
+                  : phase === 'content'
+                    ? '/admin-content-browser-worker.mjs'
+                    : phase === 'routes'
+                      ? '/auth-routes-browser-worker.mjs'
+                      : '/auth-browser-worker.mjs'),
     ).text()
     const workerPath = process.env.AUTH_BROWSER_WORKER_PATH
     if (workerPath) await Bun.write(workerPath, workerSource)
@@ -349,7 +356,9 @@ try {
       ],
       {
         stdout: 'pipe',
-        stderr: phase === 'public-watch' ? 'inherit' : 'pipe',
+        stderr: ['public-watch', 'public-film'].includes(phase)
+          ? 'inherit'
+          : 'pipe',
         env: {
           ...process.env,
           MEDIA_BROWSER_PHASE: process.env.MEDIA_BROWSER_PHASE ?? 'full',

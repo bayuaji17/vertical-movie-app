@@ -2,10 +2,14 @@ import { useCallback } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
-  ContentShell,
   ContentLoading,
   ContentFailure,
 } from '#/components/catalog/content-page'
+import { PublicShell } from '#/components/public/public-shell'
+import { catalogSearch } from '#/lib/public/catalog-model'
+import type { CatalogType } from '#/lib/public/catalog-model'
+import { normalizeCatalogLocation } from '#/lib/public/catalog-navigation'
+import { usePublicOnline } from '#/hooks/use-public-online'
 import { VerticalVideoPlayer } from '#/components/vertical-video-player'
 import { Button } from '#/components/ui/button'
 import { Badge } from '#/components/ui/badge'
@@ -19,28 +23,47 @@ import {
 import type { WatchVideo } from '#/lib/catalog/content-model'
 
 export const Route = createFileRoute('/watch/$slug')({
+  validateSearch: catalogSearch,
+  beforeLoad: ({ location }) => normalizeCatalogLocation(location),
   loader: ({ context, params }) =>
     loadWatchMetadata(context.queryClient, params.slug),
-  head: () => ({ meta: [{ title: 'Watch — Vertical Movie' }] }),
+  head: () => ({
+    meta: [
+      { title: 'Watch — Vertical Movie' },
+      { name: 'robots', content: 'noindex,nofollow' },
+    ],
+  }),
   component: Watch,
 })
 function Watch() {
   const { slug } = Route.useParams(),
     bootstrap = Route.useLoaderData()
+  const type = Route.useSearch().type ?? 'all'
+  const online = usePublicOnline()
   const client = useQueryClient(),
     options = watchMetadataOptions(slug)
   const query = useQuery({
     ...options,
-    enabled: !bootstrap.status || !!client.getQueryData(options.queryKey),
+    enabled:
+      online && (!bootstrap.status || !!client.getQueryData(options.queryKey)),
   })
   const status =
     query.error instanceof CatalogRequestError
       ? query.error.status
       : (bootstrap.status ?? 503)
   return (
-    <ContentShell>
+    <PublicShell type={type}>
+      {!online && (
+        <p role="status" className="mb-5 text-muted-foreground">
+          You are offline. Reconnect to play this video.
+        </p>
+      )}
       {query.data ? (
-        <WatchContent key={query.data.item.id} video={query.data.item} />
+        <WatchContent
+          key={query.data.item.id}
+          video={query.data.item}
+          type={type}
+        />
       ) : query.isFetching || (!query.isError && !bootstrap.status) ? (
         <ContentLoading />
       ) : (
@@ -52,10 +75,16 @@ function Watch() {
           }}
         />
       )}
-    </ContentShell>
+    </PublicShell>
   )
 }
-function WatchContent({ video }: { video: WatchVideo }) {
+function WatchContent({
+  video,
+  type,
+}: {
+  video: WatchVideo
+  type: CatalogType
+}) {
   const load = useCallback(
     (signal: AbortSignal) =>
       publicContentBrowser().playback(video.slug, video.id, signal),
@@ -85,8 +114,10 @@ function WatchContent({ video }: { video: WatchVideo }) {
               role="link"
               render={
                 <Link
-                  to="/titles/$kind/$slug"
-                  params={{ kind: video.kind, slug: video.slug }}
+                  to="/videos/$slug"
+                  params={{ slug: video.slug }}
+                  search={{ type }}
+                  preload={false}
                 />
               }
             >
@@ -99,9 +130,9 @@ function WatchContent({ video }: { video: WatchVideo }) {
           className="min-h-11"
           nativeButton={false}
           role="link"
-          render={<Link to="/" />}
+          render={<Link to="/" search={{ type }} preload={false} />}
         >
-          Back to catalog
+          Back to browse
         </Button>
       </div>
       <div className="grid items-start gap-7 md:grid-cols-[minmax(240px,360px)_1fr]">

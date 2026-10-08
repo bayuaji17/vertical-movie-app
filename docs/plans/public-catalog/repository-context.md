@@ -6,9 +6,26 @@
 - Base ref: `feat/admin-publication` (checkout lokal; bukan klaim freshness remote `main`).
 - Base SHA: `634f7d46885692b32489b109c687d337e0e55511`.
 - Analyzed at: 2026-10-08, Asia/Jakarta.
-- Context status: **current** untuk source pada snapshot; dokumen desain lokal dibaca sebagai overlay yang belum seluruhnya tracked.
+- Context status: **historical initial snapshot**; fakta source di bawah memakai base awal. Freshness untuk kelanjutan plan ada pada review berikut.
 - Permintaan pengguna: lanjut prioritas nomor 1 dan buat plan. Scope awal yang diusulkan sebelumnya: homepage → detail → watch Film/Standalone. Persetujuan membuat plan bukan persetujuan seluruh keputusan UX atau implementasi.
 - Context disimpan sebelum [implementation plan](implementation-plan.md); task canonical pada [public-catalog](../../tasks/public-catalog.md).
+
+## Freshness untuk plan yang dipilih pengguna
+
+8 Oktober 2026: pengguna menegaskan branch `chore/public-catalog-plan`, head `68a0053d3bc145f07c8bdf14490456436d0973a5`, sebagai plan yang harus dilanjutkan. Penutupan task002–014 sebagai superseded pada branch lokal `chore/public-catalog-reconciliation` adalah keputusan Codex yang terlalu dini dan **tidak digunakan sebagai execution plan**. Branch itu tetap dipertahankan sebagai riwayat lokal, tidak dipush.
+
+Working branch `feat/public-catalog` dimulai dari main `65127a107bad7606ef17dc908cc41777e25b1848`, sesudah requested hooks squash PR #12. Dokumen plan awal identik dengan planning branch; runtime memakai main terbaru sehingga hooks dan hasil PR #11 tetap tersedia. Context review ini ditulis sebelum refinement plan/PCAT-002.
+
+| Requirement plan awal        | Fakta source main terbaru                                                                              | Dampak kelanjutan                                                                                                                        |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Browse Film/Standalone       | `/catalog` + homepage sudah melayani Movie/Standalone/Series, search/genre, page6                      | Bukan acceptance otomatis untuk proposal Film/Standalone/page20/URL filter. Desain PCAT-002 memperlihatkan scope plan awal untuk review. |
+| Kinds pada legacy `/videos`  | Legacy query masih limit/cursor; kind filter memakai endpoint `/catalog`                               | PCAT-003 tetap punya kontrak berbeda; jangan mengubah legacy tanpa compatibility proof.                                                  |
+| Cache invalidation fence     | `CatalogService.entry/invalidate` sudah memiliki generation guard                                      | Reuse dan validasi task004; tidak membuat implementasi kedua.                                                                            |
+| Signed poster DTO            | `CatalogPosterService.get` menyediakan binary WebP same-origin/private/no-store                        | Usulan signed poster dan expiry state belum sama dengan current contract. Catat perbedaan sebelum task005/007.                           |
+| URL filter + `/videos/$slug` | Filter katalog state lokal; detail memakai `/titles/$kind/$slug` dan `/series/$slug`                   | Scope navigasi/route belum diimplementasikan persis plan awal. Preview desain belum mengubah routes atau fitur Series.                   |
+| SSR/playback/hooks           | Unsigned SSR readers, public client, contextual watch, identity/abort guards dan hooks folder tersedia | Reuse sumber terkini; regression dan integration hanya saat task source dijalankan.                                                      |
+
+PCAT-002 adalah deliverable desain, bukan penggantian homepage saat ini. Approval desain/keputusan kontrak dicatat sebelum task UI. Bukti PCAT API/PCW existing dipakai sebagai referensi, tidak dianggap proof bahwa seluruh acceptance plan awal lulus. Tidak menyatakan plan selesai hanya berdasarkan overlap fitur.
 
 ## Product and users
 
@@ -134,3 +151,7 @@ Seluruh source berikut dibaca pada SHA snapshot di atas; dokumen desain disebut 
 ## Validation history
 
 2026-10-08: HEAD/source snapshot diperiksa lokal; source target tidak mempunyai diff terhadap base. Overlay docs dipisahkan dari facts source. Context ditulis sebelum plan. Freshness execution belum dilakukan karena implementasi belum diminta.
+
+## Execution freshness — 8 Oktober 2026
+
+Source/proof head `bf881cd1b9b33bc58ec829a78b0b961fa9ec40a7` pada feat/public-catalog memakai baseline main65127a1 dan plan pilihan chore/public-catalog-plan68a0053. Desain/kelanjutan disetujui pengguna8 Oktober 2026; Film/Standalone homepage20/type, unsigned SSR/detail dan signed cover queue/browser watch implemented/verified lokal. API/Series/episode direct routes dan custom hooks convention dipertahankan. Snapshot awal dan PCAT/PCW3-kind behavior di atas tetap sejarah; current contracts pada PRD/architecture/runbook, evidence dan receipts pada backlog/plan. Remote delivery/production tidak diambil dari local proof.

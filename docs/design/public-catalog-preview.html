@@ -1,0 +1,983 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PCAT-002 — Public catalog design review</title>
+    <style>
+      @font-face {
+        font-family: Inter;
+        src: url("../../apps/web/node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2");
+        font-weight: 100 900;
+      }
+      @font-face {
+        font-family: Space;
+        src: url("../../apps/web/node_modules/@fontsource-variable/space-grotesk/files/space-grotesk-latin-wght-normal.woff2");
+        font-weight: 300 700;
+      }
+      :root {
+        --background: oklch(1 0 0);
+        --foreground: oklch(0.145 0 0);
+        --card: oklch(1 0 0);
+        --card-foreground: oklch(0.145 0 0);
+        --popover: oklch(1 0 0);
+        --popover-foreground: oklch(0.145 0 0);
+        --primary: oklch(0.841 0.238 128.85);
+        --primary-foreground: oklch(0.405 0.101 131.063);
+        --secondary: oklch(0.967 0.001 286.375);
+        --secondary-foreground: oklch(0.21 0.006 285.885);
+        --muted: oklch(0.97 0 0);
+        --muted-foreground: oklch(0.556 0 0);
+        --accent: oklch(0.97 0 0);
+        --accent-foreground: oklch(0.205 0 0);
+        --destructive: oklch(0.577 0.245 27.325);
+        --border: oklch(0.922 0 0);
+        --input: oklch(0.922 0 0);
+        --ring: oklch(0.708 0 0);
+        --chart-1: oklch(0.87 0 0);
+        --chart-2: oklch(0.556 0 0);
+        --chart-3: oklch(0.439 0 0);
+        --chart-4: oklch(0.371 0 0);
+        --chart-5: oklch(0.269 0 0);
+        --radius: 0.625rem;
+        --sidebar: oklch(0.985 0 0);
+        --sidebar-foreground: oklch(0.145 0 0);
+        --sidebar-primary: oklch(0.648 0.2 131.684);
+        --sidebar-primary-foreground: oklch(0.986 0.031 120.757);
+        --sidebar-accent: oklch(0.97 0 0);
+        --sidebar-accent-foreground: oklch(0.205 0 0);
+        --sidebar-border: oklch(0.922 0 0);
+        --sidebar-ring: oklch(0.708 0 0);
+      }
+      .dark {
+        /* Approved charcoal base; preserve the shadcn semantic token contract. */
+        --background: #1e201e;
+        --foreground: #f3f5f3;
+        --card: #272a27;
+        --card-foreground: #f3f5f3;
+        --popover: #272a27;
+        --popover-foreground: #f3f5f3;
+        --primary: oklch(0.768 0.233 130.85);
+        --primary-foreground: oklch(0.405 0.101 131.063);
+        --secondary: #303430;
+        --secondary-foreground: #f3f5f3;
+        --muted: #303430;
+        --muted-foreground: #a8b0a8;
+        --accent: #303430;
+        --accent-foreground: #f3f5f3;
+        --destructive: oklch(0.704 0.191 22.216);
+        --border: #424842;
+        --input: #303430;
+        --ring: #a8b0a8;
+        --chart-1: oklch(0.87 0 0);
+        --chart-2: oklch(0.556 0 0);
+        --chart-3: oklch(0.439 0 0);
+        --chart-4: oklch(0.371 0 0);
+        --chart-5: oklch(0.269 0 0);
+        --sidebar: #272a27;
+        --sidebar-foreground: #f3f5f3;
+        --sidebar-primary: oklch(0.768 0.233 130.85);
+        --sidebar-primary-foreground: oklch(0.274 0.072 132.109);
+        --sidebar-accent: #303430;
+        --sidebar-accent-foreground: #f3f5f3;
+        --sidebar-border: #424842;
+        --sidebar-ring: #a8b0a8;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--background);
+        color: var(--foreground);
+        font:
+          16px/1.5 Inter,
+          sans-serif;
+      }
+      button,
+      select {
+        font: inherit;
+      }
+      button,
+      a,
+      select {
+        min-height: 44px;
+      }
+      button,
+      select,
+      .button {
+        border: 1px solid var(--border);
+        background: var(--card);
+        color: var(--foreground);
+        border-radius: 12px;
+        padding: 9px 16px;
+        cursor: pointer;
+      }
+      button:focus-visible,
+      a:focus-visible,
+      select:focus-visible {
+        outline: 3px solid var(--ring);
+        outline-offset: 3px;
+      }
+      button:disabled {
+        cursor: wait;
+        opacity: 0.65;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      .primary,
+      button[aria-pressed="true"] {
+        background: var(--primary);
+        color: var(--primary-foreground);
+        border-color: var(--primary);
+      }
+      h1,
+      h2,
+      .brand {
+        font-family: Space, sans-serif;
+        letter-spacing: -0.035em;
+      }
+      h1 {
+        font-size: 40px;
+        line-height: 1.15;
+        margin: 0 0 12px;
+        overflow-wrap: anywhere;
+      }
+      h2 {
+        font-size: 24px;
+      }
+      p {
+        margin: 0 0 16px;
+      }
+      .muted {
+        color: var(--muted-foreground);
+      }
+      .review {
+        padding: 16px 24px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px 20px;
+        align-items: end;
+        background: var(--muted);
+      }
+      .review strong {
+        display: block;
+      }
+      .review small {
+        display: block;
+        max-width: 42ch;
+      }
+      .review label {
+        display: flex;
+        flex-direction: column;
+        font-size: 12px;
+        gap: 4px;
+      }
+      .canvas {
+        overflow: auto;
+        padding: 24px;
+      }
+      .viewport {
+        width: 1440px;
+        height: 900px;
+        overflow: auto;
+        margin: auto;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        container: product / inline-size;
+        background: var(--background);
+      }
+      .viewport.mobile {
+        width: 390px;
+        height: 844px;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        height: 80px;
+        padding: 0 40px;
+        border-bottom: 1px solid var(--border);
+      }
+      .brand {
+        font-weight: 700;
+        font-size: 22px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .brand b {
+        background: var(--primary);
+        color: var(--primary-foreground);
+        border-radius: 10px;
+        width: 36px;
+        height: 36px;
+        display: grid;
+        place-items: center;
+        font-size: 18px;
+      }
+      .header-links {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+      }
+      .header-links a {
+        display: flex;
+        align-items: center;
+      }
+      main {
+        padding: 40px;
+      }
+      .filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 24px 0 32px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 32px 24px;
+      }
+      .card {
+        display: block;
+        min-width: 0;
+        border-radius: 14px;
+      }
+      .poster {
+        aspect-ratio: 9 / 16;
+        background: var(--muted);
+        border-radius: 14px;
+        overflow: hidden;
+        position: relative;
+      }
+      .poster img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .card-title {
+        font-weight: 600;
+        margin: 12px 0 4px;
+        overflow-wrap: anywhere;
+      }
+      .card .muted {
+        font-size: 14px;
+      }
+      .fallback {
+        height: 100%;
+        display: grid;
+        place-content: center;
+        gap: 12px;
+        text-align: center;
+        padding: 16px;
+        color: var(--muted-foreground);
+      }
+      .fallback span {
+        font-size: 36px;
+      }
+      .pagination {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        margin: 40px 0 0;
+      }
+      .notice {
+        padding: 16px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: var(--muted);
+        margin: 24px 0;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .notice p {
+        margin: 0;
+        flex: 1 1 200px;
+      }
+      .empty {
+        text-align: center;
+        padding: 96px 20px;
+        max-width: 600px;
+        margin: auto;
+      }
+      .empty .symbol {
+        font-size: 44px;
+        color: var(--muted-foreground);
+      }
+      .skeleton {
+        background: var(--muted);
+      }
+      .line {
+        height: 14px;
+        border-radius: 6px;
+        background: var(--muted);
+        margin-top: 14px;
+        width: 80%;
+      }
+      .line.short {
+        width: 50%;
+        margin-top: 10px;
+      }
+      .back {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 24px;
+      }
+      .detail {
+        display: grid;
+        grid-template-columns: 360px minmax(0, 640px);
+        align-items: start;
+        gap: 48px;
+        justify-content: center;
+      }
+      .details {
+        padding-top: 24px;
+        min-width: 0;
+      }
+      .metadata {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 16px 0 32px;
+      }
+      .badge {
+        border: 1px solid var(--border);
+        background: var(--muted);
+        border-radius: 8px;
+        font-size: 14px;
+        padding: 4px 10px;
+      }
+      .synopsis {
+        max-width: 56ch;
+        overflow-wrap: anywhere;
+      }
+      .actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 32px;
+      }
+      .watch {
+        width: 100%;
+        max-width: 390px;
+        margin: auto;
+      }
+      .stage {
+        background: #111;
+        color: #fff;
+        border-radius: 14px;
+        aspect-ratio: 9 / 16;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        text-align: center;
+        padding: 24px;
+      }
+      .stage p {
+        color: #ccc;
+      }
+      @container product (max-width: 1000px) {
+        .grid {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        .detail {
+          grid-template-columns: 300px minmax(0, 1fr);
+          gap: 24px;
+        }
+      }
+      @container product (max-width: 600px) {
+        header {
+          height: 64px;
+          padding: 0 16px;
+        }
+        .brand {
+          font-size: 18px;
+          gap: 8px;
+        }
+        .header-links {
+          gap: 8px;
+        }
+        .header-links a {
+          display: none;
+        }
+        header button {
+          padding: 9px 12px;
+        }
+        main {
+          padding: 24px 16px;
+        }
+        h1 {
+          font-size: 30px;
+        }
+        .grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 24px 12px;
+        }
+        .filters {
+          margin: 20px 0 24px;
+        }
+        .filters button {
+          padding: 9px 12px;
+        }
+        .card-title {
+          font-size: 14px;
+        }
+        .card .muted {
+          font-size: 12px;
+        }
+        .detail {
+          display: flex;
+          flex-direction: column;
+          gap: 24px;
+        }
+        .detail > .poster {
+          width: 100%;
+        }
+        .details {
+          padding: 0;
+          order: -1;
+        }
+        .details h1 {
+          font-size: 30px;
+        }
+        .actions {
+          position: sticky;
+          bottom: 0;
+          background: var(--background);
+          padding: 12px 0;
+          margin-top: 24px;
+        }
+        .actions button {
+          width: 100%;
+        }
+        .detail {
+          padding-bottom: 12px;
+        }
+        .empty {
+          padding: 56px 0;
+        }
+        .watch .stage {
+          width: 100%;
+        }
+        .review {
+          padding: 16px;
+        }
+        .canvas {
+          padding: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <section class="review" aria-label="Design review controls">
+      <div>
+        <strong>PCAT-002 · Proposal for review</strong
+        ><small
+          >Fixture content. Select viewport, theme, screen, and state. Product
+          implementation is unchanged.</small
+        >
+      </div>
+      <label
+        >Viewport<select id="viewport">
+          <option value="desktop">Desktop · 1440</option>
+          <option value="mobile">Mobile · 390</option>
+        </select></label
+      >
+      <label
+        >Theme<select id="theme">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+          <option value="system">System</option>
+        </select></label
+      >
+      <label
+        >Screen<select id="screen">
+          <option value="home">Browse</option>
+          <option value="detail">Detail</option>
+          <option value="watch">Watch</option>
+        </select></label
+      >
+      <label
+        >State<select id="state">
+          <option value="ready">Ready</option>
+          <option value="loading">Loading</option>
+          <option value="empty">Empty</option>
+          <option value="error">Network error</option>
+          <option value="more-loading">Load more pending</option>
+          <option value="more-error">Load more error</option>
+          <option value="stale">Stale snapshot</option>
+          <option value="cover-error">Cover error</option>
+          <option value="missing">Not found / archived</option>
+          <option value="offline">Offline</option>
+          <option value="expired">Playback expired</option>
+        </select></label
+      >
+      <small id="route"></small>
+    </section>
+    <div class="canvas">
+      <article class="viewport" aria-label="Product viewport">
+        <div id="product"></div>
+      </article>
+    </div>
+    <script>
+      const fixtures = [
+        {
+          id: "after-the-rain",
+          slug: "after-the-rain",
+          title: "After the Rain",
+          kind: "movie",
+          synopsis:
+            "A chance encounter on a rainy evening brings two strangers closer to home.",
+          genreIds: ["drama"],
+          poster: "../../apps/web/public/images/catalog/after-the-rain.png",
+          publishedAt: "2026-09-30T12:00:00Z",
+          durationMs: 1080000,
+        },
+        {
+          id: "a-small-beginning",
+          slug: "a-small-beginning",
+          title: "A Small Beginning",
+          kind: "standalone",
+          synopsis:
+            "A few plants and an open window turn a new apartment into a home.",
+          genreIds: ["slice-of-life"],
+          poster: "../../apps/web/public/images/catalog/a-small-beginning.png",
+          publishedAt: "2026-09-28T12:00:00Z",
+          durationMs: 240000,
+        },
+        {
+          id: "letters-to-home",
+          slug: "letters-to-home",
+          title: "Letters to Home",
+          kind: "movie",
+          synopsis:
+            "An unexpected letter draws a young woman back to the countryside she left behind.",
+          genreIds: ["drama"],
+          poster: "../../apps/web/public/images/catalog/letters-to-home.png",
+          publishedAt: "2026-09-27T12:00:00Z",
+          durationMs: 1440000,
+        },
+        {
+          id: "city-in-motion",
+          slug: "city-in-motion",
+          title: "City in Motion",
+          kind: "standalone",
+          synopsis:
+            "See Jakarta wake up through the eyes of a cyclist on the morning commute.",
+          genreIds: ["documentary"],
+          poster: "../../apps/web/public/images/catalog/city-in-motion.png",
+          publishedAt: "2026-09-25T12:00:00Z",
+          durationMs: 360000,
+        },
+        {
+          id: "borrowed-umbrella",
+          slug: "borrowed-umbrella",
+          title: "Borrowed Umbrella",
+          kind: "movie",
+          synopsis:
+            "A misplaced umbrella brings neighbors together for an unlikely adventure.",
+          genreIds: ["comedy"],
+          poster: "../../apps/web/public/images/catalog/after-the-rain.png",
+          publishedAt: "2026-09-24T12:00:00Z",
+          durationMs: 960000,
+        },
+        {
+          id: "window-garden",
+          slug: "window-garden",
+          title: "Window Garden",
+          kind: "standalone",
+          synopsis:
+            "Meet the people growing little gardens above the busy streets.",
+          genreIds: ["documentary"],
+          poster: "../../apps/web/public/images/catalog/a-small-beginning.png",
+          publishedAt: "2026-09-22T12:00:00Z",
+          durationMs: 300000,
+        },
+        {
+          id: "the-long-way-home",
+          slug: "the-long-way-home",
+          title: "The Long Way Home",
+          kind: "movie",
+          synopsis:
+            "A missed bus turns a familiar journey into a fresh beginning.",
+          genreIds: ["slice-of-life"],
+          poster: "../../apps/web/public/images/catalog/letters-to-home.png",
+          publishedAt: "2026-09-21T12:00:00Z",
+          durationMs: 1320000,
+        },
+        {
+          id: "between-traffic-lights",
+          slug: "between-traffic-lights",
+          title: "Between Traffic Lights",
+          kind: "standalone",
+          synopsis: "Quiet moments hidden in the rhythm of the city.",
+          genreIds: ["documentary"],
+          poster: "../../apps/web/public/images/catalog/city-in-motion.png",
+          publishedAt: "2026-09-19T12:00:00Z",
+          durationMs: 420000,
+        },
+        {
+          id: "a-light-in-the-window",
+          slug: "a-light-in-the-window",
+          title: "A Light in the Window",
+          kind: "movie",
+          synopsis:
+            "Someone leaves a light on in a house that has been empty for years.",
+          genreIds: ["mystery"],
+          poster: "../../apps/web/public/images/catalog/after-the-rain.png",
+          publishedAt: "2026-09-18T12:00:00Z",
+          durationMs: 1200000,
+        },
+        {
+          id: "kota-yang-menyimpan-cerita",
+          slug: "kota-yang-menyimpan-cerita",
+          title:
+            "Kota yang Menyimpan Cerita — Sebuah Perjalanan Pulang di Antara Hujan dan Cahaya",
+          kind: "standalone",
+          synopsis:
+            "A portrait of familiar streets, remembered voices, and the meaning of home.",
+          genreIds: ["slice-of-life"],
+          poster: "../../apps/web/public/images/catalog/a-small-beginning.png",
+          publishedAt: "2026-09-16T12:00:00Z",
+          durationMs: 540000,
+        },
+        {
+          id: "one-more-stop",
+          slug: "one-more-stop",
+          title: "One More Stop",
+          kind: "movie",
+          synopsis:
+            "Two old friends share a ride and finally finish an unfinished conversation.",
+          genreIds: ["drama"],
+          poster: "../../apps/web/public/images/catalog/letters-to-home.png",
+          publishedAt: "2026-09-15T12:00:00Z",
+          durationMs: 1140000,
+        },
+        {
+          id: "morning-on-two-wheels",
+          slug: "morning-on-two-wheels",
+          title: "Morning on Two Wheels",
+          kind: "standalone",
+          synopsis:
+            "An ambitious morning ride meets a series of very small detours.",
+          genreIds: ["comedy"],
+          poster: "../../apps/web/public/images/catalog/city-in-motion.png",
+          publishedAt: "2026-09-14T12:00:00Z",
+          durationMs: 180000,
+        },
+        {
+          id: "preview-0",
+          slug: "preview-0",
+          title: "Morning Light",
+          kind: "movie",
+          synopsis:
+            "A chance encounter on a rainy evening brings two strangers closer to home.",
+          genreIds: ["drama"],
+          poster: "../../apps/web/public/images/catalog/after-the-rain.png",
+          publishedAt: "2026-09-30T12:00:00Z",
+          durationMs: 1080000,
+        },
+        {
+          id: "preview-1",
+          slug: "preview-1",
+          title: "The Quiet Street",
+          kind: "standalone",
+          synopsis:
+            "A few plants and an open window turn a new apartment into a home.",
+          genreIds: ["slice-of-life"],
+          poster: "../../apps/web/public/images/catalog/a-small-beginning.png",
+          publishedAt: "2026-09-28T12:00:00Z",
+          durationMs: 240000,
+        },
+        {
+          id: "preview-2",
+          slug: "preview-2",
+          title: "Home Again",
+          kind: "movie",
+          synopsis:
+            "An unexpected letter draws a young woman back to the countryside she left behind.",
+          genreIds: ["drama"],
+          poster: "../../apps/web/public/images/catalog/letters-to-home.png",
+          publishedAt: "2026-09-27T12:00:00Z",
+          durationMs: 1440000,
+        },
+        {
+          id: "preview-3",
+          slug: "preview-3",
+          title: "A Cup of Coffee",
+          kind: "standalone",
+          synopsis:
+            "See Jakarta wake up through the eyes of a cyclist on the morning commute.",
+          genreIds: ["documentary"],
+          poster: "../../apps/web/public/images/catalog/city-in-motion.png",
+          publishedAt: "2026-09-25T12:00:00Z",
+          durationMs: 360000,
+        },
+        {
+          id: "preview-4",
+          slug: "preview-4",
+          title: "Across the Bridge",
+          kind: "movie",
+          synopsis:
+            "A misplaced umbrella brings neighbors together for an unlikely adventure.",
+          genreIds: ["comedy"],
+          poster: "../../apps/web/public/images/catalog/after-the-rain.png",
+          publishedAt: "2026-09-24T12:00:00Z",
+          durationMs: 960000,
+        },
+        {
+          id: "preview-5",
+          slug: "preview-5",
+          title: "First Steps",
+          kind: "standalone",
+          synopsis:
+            "Meet the people growing little gardens above the busy streets.",
+          genreIds: ["documentary"],
+          poster: "../../apps/web/public/images/catalog/a-small-beginning.png",
+          publishedAt: "2026-09-22T12:00:00Z",
+          durationMs: 300000,
+        },
+        {
+          id: "preview-6",
+          slug: "preview-6",
+          title: "Under the Same Sky",
+          kind: "movie",
+          synopsis:
+            "A missed bus turns a familiar journey into a fresh beginning.",
+          genreIds: ["slice-of-life"],
+          poster: "../../apps/web/public/images/catalog/letters-to-home.png",
+          publishedAt: "2026-09-21T12:00:00Z",
+          durationMs: 1320000,
+        },
+        {
+          id: "preview-7",
+          slug: "preview-7",
+          title: "One More Story",
+          kind: "standalone",
+          synopsis: "Quiet moments hidden in the rhythm of the city.",
+          genreIds: ["documentary"],
+          poster: "../../apps/web/public/images/catalog/city-in-motion.png",
+          publishedAt: "2026-09-19T12:00:00Z",
+          durationMs: 420000,
+        },
+      ];
+      const query = new URLSearchParams(location.search);
+      let type = ["all", "film", "standalone"].includes(query.get("type"))
+        ? query.get("type")
+        : "all";
+      let selected = 0;
+      let appended = false;
+      const controls = ["viewport", "theme", "screen", "state"];
+      for (const id of controls) {
+        const el = document.getElementById(id);
+        if ([...el.options].some((o) => o.value === query.get(id)))
+          el.value = query.get(id);
+        el.addEventListener("change", render);
+      }
+      const escape = (s) =>
+        String(s).replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+      const label = (item) => (item.kind === "movie" ? "Film" : "Standalone");
+      const length = (item) => `${Math.ceil(item.durationMs / 60000)} min`;
+      function poster(item, failed, canRetry = false) {
+        return `<div class="poster">${failed ? `<div class="fallback"><span aria-hidden="true">▧</span>Cover unavailable${canRetry ? '<button data-action="retry">Retry cover</button>' : ""}</div>` : `<img src="${escape(item.poster)}" alt="${escape(item.title)} cover" loading="lazy" width="900" height="1600">`}</div>`;
+      }
+      function notice(text, action = "Retry") {
+        return `<div class="notice" role="status"><p>${escape(text)}</p><button data-action="retry">${escape(action)}</button></div>`;
+      }
+      function empty(title, text, action = "Back to browse") {
+        return `<section class="empty"><div class="symbol" aria-hidden="true">◇</div><h2>${escape(title)}</h2><p class="muted">${escape(text)}</p><button data-action="${action === "Retry" ? "retry" : "browse"}">${escape(action)}</button></section>`;
+      }
+      function skeleton() {
+        return '<div aria-hidden="true"><div class="poster skeleton"></div><div class="line"></div><div class="line short"></div></div>';
+      }
+      function render() {
+        const values = Object.fromEntries(
+          controls.map((id) => [id, document.getElementById(id).value]),
+        );
+        const { theme, screen, state, viewport } = values;
+        document.documentElement.classList.toggle(
+          "dark",
+          theme === "dark" ||
+            (theme === "system" &&
+              matchMedia("(prefers-color-scheme: dark)").matches),
+        );
+        document
+          .querySelector(".viewport")
+          .classList.toggle("mobile", viewport === "mobile");
+        const item = fixtures[selected];
+        const plannedRoute =
+          screen === "home"
+            ? `/?type=${type}`
+            : `/${screen === "detail" ? "videos" : "watch"}/${item.slug}?type=${type}`;
+        document.getElementById("route").textContent =
+          "Planned URL: " + plannedRoute;
+        history.replaceState(
+          null,
+          "",
+          "?" + new URLSearchParams({ ...values, type }),
+        );
+        let html = `<header><a class="brand" href="#browse" data-action="browse"><b aria-hidden="true">▶</b>Vertical Movie</a><nav class="header-links" aria-label="Main"><a href="#browse" data-action="browse">Browse</a><button data-action="theme" aria-label="Change appearance">◐</button></nav></header><main>`;
+        if (screen === "home") {
+          html += `<h1>Browse</h1><p class="muted">Find your next story.</p><div class="filters" role="group" aria-label="Content type">${["all", "film", "standalone"].map((v) => `<button data-filter="${v}" aria-pressed="${v === type}">${v === "all" ? "All" : v === "film" ? "Films" : "Standalone"}</button>`).join("")}</div>`;
+          const cards = fixtures
+            .map((x, index) => ({ ...x, index }))
+            .filter(
+              (x) =>
+                type === "all" ||
+                (type === "film"
+                  ? x.kind === "movie"
+                  : x.kind === "standalone"),
+            );
+          if (state === "empty")
+            html += empty(
+              type === "all" ? "No videos yet" : "No videos in this category",
+              "Check back soon for more stories.",
+              "Browse all",
+            );
+          else if (state === "error")
+            html += empty(
+              "Could not load videos",
+              "Check your connection and try again.",
+              "Retry",
+            );
+          else {
+            if (state === "stale")
+              html += notice(
+                "Showing previously loaded videos. Refresh to see the latest.",
+                "Refresh",
+              );
+            if (state === "offline")
+              html += notice(
+                "You are offline. Reconnect to load more stories.",
+                "Retry",
+              );
+            if (state === "cover-error")
+              html += notice(
+                "A cover could not be loaded. Video details are still available.",
+                "Retry cover",
+              );
+            html += `<div class="grid" aria-busy="${state === "loading" || state === "more-loading"}">`;
+            if (state === "loading")
+              html += Array.from({ length: 10 }, skeleton).join("");
+            else
+              html += cards
+                .map(
+                  (x) =>
+                    `<a class="card" href="#detail" data-item="${x.index}" aria-label="Open ${escape(x.title)} details">${poster(x, state === "cover-error" && x.index === 0)}<div class="card-title">${escape(x.title)}</div><div class="muted">${label(x)} · ${length(x)}</div></a>`,
+                )
+                .join("");
+            if (state === "more-loading")
+              html += Array.from({ length: 5 }, skeleton).join("");
+            if (appended)
+              html += `<a class="card" href="#detail" data-item="0">${poster(item, false)}<div class="card-title">One More Story</div><div class="muted">Film · 12 min</div></a>`;
+            html += '</div><div class="pagination">';
+            if (state === "more-error")
+              html += notice(
+                "More videos could not be loaded. Your current videos are still here.",
+                "Retry load more",
+              );
+            html += `<button data-action="more" ${["loading", "more-loading", "offline"].includes(state) ? "disabled" : ""}>${state === "more-loading" ? "Loading…" : "Load more"}</button><small class="muted" role="status">${state === "loading" ? "Loading videos…" : `${cards.length + (appended ? 1 : 0)} videos shown`}</small></div>`;
+          }
+        } else if (state === "missing")
+          html += empty(
+            "Video unavailable",
+            "This video is not available. Browse for another story.",
+          );
+        else if (state === "error")
+          html += empty(
+            "Could not load this video",
+            "Check your connection and try again.",
+            "Retry",
+          );
+        else if (state === "loading")
+          html += `<a class="back" href="#browse" data-action="browse">← Back to browse</a><div class="detail">${skeleton()}<div><div class="line"></div><div class="line"></div></div></div><p role="status">Loading video…</p>`;
+        else if (screen === "detail") {
+          html += `<a class="back" href="#browse" data-action="browse">← Back to browse</a><section class="detail">${poster(item, state === "cover-error", true)}<div class="details"><h1>${escape(item.title)}</h1><div class="metadata"><span class="badge">${label(item)}</span><span class="muted">${length(item)}</span></div><h2>Synopsis</h2><p class="synopsis">${escape(item.synopsis)}</p>${state === "stale" ? notice("Showing previously loaded information.", "Refresh") : ""}${state === "offline" ? notice("You are offline. Reconnect to watch.", "Retry") : ""}<div class="actions"><button class="primary" data-action="watch" ${state === "offline" ? "disabled" : ""}>▶ Watch now</button></div></div></section>`;
+        } else {
+          html += `<section class="watch"><a class="back" href="#detail" data-action="detail">← Back to details</a><h1>${escape(item.title)}</h1><div class="metadata"><span class="badge">${label(item)}</span><span class="muted">${length(item)}</span></div><div class="stage">${state === "expired" ? '<h2>Playback interrupted</h2><p>Refresh playback to continue watching.</p><button data-action="retry">Retry playback</button>' : state === "offline" ? '<h2>You are offline</h2><p>Reconnect and try again.</p><button data-action="retry">Retry</button>' : '<button class="primary" aria-label="Play video" data-action="play">▶ Play</button><p>Ready to watch</p>'}</div></section>`;
+        }
+        html += "</main>";
+        document.getElementById("product").innerHTML = html;
+      }
+      document.getElementById("product").addEventListener("click", (event) => {
+        const target = event.target.closest(
+          "[data-filter], [data-item], [data-action]",
+        );
+        if (!target || target.disabled) return;
+        event.preventDefault();
+        const action = target.dataset.action;
+        if (target.dataset.filter) {
+          type = target.dataset.filter;
+          appended = false;
+          document.getElementById("state").value = "ready";
+        }
+        if (target.dataset.item) {
+          selected = Number(target.dataset.item);
+          document.getElementById("screen").value = "detail";
+        }
+        if (["browse", "detail", "watch"].includes(action)) {
+          document.getElementById("screen").value =
+            action === "browse" ? "home" : action;
+          document.getElementById("state").value = "ready";
+          if (action === "browse" && target.textContent === "Browse all")
+            type = "all";
+        }
+        if (action === "retry")
+          document.getElementById("state").value = "ready";
+        if (action === "more") appended = true;
+        if (action === "theme")
+          document.getElementById("theme").value =
+            document.documentElement.classList.contains("dark")
+              ? "light"
+              : "dark";
+        if (action === "play")
+          document.getElementById("state").value = "expired";
+        render();
+        if (
+          ["browse", "detail", "watch"].includes(action) ||
+          target.dataset.item
+        )
+          document.querySelector(".viewport").scrollTop = 0;
+        if (
+          ["browse", "detail", "watch"].includes(action) ||
+          target.dataset.item
+        ) {
+          const focus =
+            action === "browse"
+              ? document.querySelector(`[data-item="${selected}"]`)
+              : document.querySelector("#product h1, #product h2");
+          if (focus) {
+            if (!focus.matches("a, button")) focus.tabIndex = -1;
+            focus.focus({ preventScroll: true });
+          }
+        }
+      });
+      matchMedia("(prefers-color-scheme: dark)").addEventListener(
+        "change",
+        render,
+      );
+      render();
+    </script>
+  </body>
+</html>
