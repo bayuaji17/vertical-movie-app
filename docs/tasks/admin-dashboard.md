@@ -182,7 +182,7 @@ Static chained dashboard endpoint + bootstrap DI + unique secured OpenAPI operat
 ### Commit task
 
 - Pesan: feat(api): expose private dashboard summary (DASH-004)
-- SHA: Belum dibuat; receipt dicatat pada update dokumentasi berikutnya sesudah commit berhasil.
+- SHA: `f93785a8883466a3e8c731f17767b355e14f74fb`.
 - Hook/checks: API167 pass, root types3/lint1/build2 pass, docs/Prettier/diff/preservation; normal hooks wajib tanpa bypass.
 - Ledger: Jangan menulis SHA commit sendiri sebelum tersedia.
 
@@ -192,7 +192,7 @@ Menunggu approval proposal dan dependency task di atas; tidak menganggap scope a
 
 ## Task: DASH-005 — Private client, query dan hook
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: P0
 - Referensi: DASH-US-02/03, PRD-02/05/09; [implementation steps](../plans/admin-dashboard/implementation-plan.md#implementation-steps).
@@ -210,8 +210,8 @@ Requirements: Signal, identity key, strict DTO/invariants, no retry loops, onlin
 
 ### Acceptance criteria
 
-- [ ] Wrong/malformed response never cached as success; logout/expiry stops reads and suppresses late result; no private SSR summary.
-- [ ] Definisi/state/invariants terkait pada plan terbukti; actual validation serta scope preservation dan commit tercatat sesuai workflow.
+- [x] Wrong/malformed response never cached as success; logout/expiry stops reads and suppresses late result; no private SSR summary.
+- [x] Definisi/state/invariants terkait pada plan terbukti; actual validation serta scope preservation dan commit tercatat sesuai workflow.
 
 ### Validasi
 
@@ -219,13 +219,13 @@ Injected-fetch and QueryClient/timer behavior, compile-only Eden positive/negati
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement, bukan hasil actual.
+Eden-derived DTO validated strictly with existing Zod: safe counts/partitions, UUIDs/UTC dates, owner-role-parent invariants, bounded unique/stably sorted lists. Browser-only identity key, signal fence, private-effect cleanup, visible/online successful-read30s polling, retry:false and deduplicated manual refresh. Web6 tests/28 assertions including auth-loss and stale invalidation races pass; runtime hook/browser proof follows DASH-010.
 
 ### Commit task
 
-- Pesan: Conventional Commit dengan ID task setelah acceptance criteria dan relevant gates lulus.
+- Pesan: feat(web): read dashboard summary with session scope (DASH-005)
 - SHA: Belum dibuat; receipt dicatat pada update dokumentasi berikutnya sesudah commit berhasil.
-- Hook/checks: Belum dijalankan untuk task ini.
+- Hook/checks: Web6/API167 pass, root types3/lint1/build2 pass, scoped formatting/docs/diff/preservation; normal hooks wajib tanpa bypass.
 - Ledger: Jangan menulis SHA commit sendiri sebelum tersedia.
 
 ### Blocker atau tindak lanjut
