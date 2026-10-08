@@ -1,6 +1,6 @@
 # Modul: Admin Series, season dan episode
 
-> Status: ASER-001–009 selesai lokal; proof terpadu dan closure masih lanjutan · 8 Oktober 2026 · Pengguna memilih modul ini setelah katalog PR #13. Scope runtime per task; belum menyatakan keseluruhan editor/publikasi Series selesai.
+> Status: ASER-001–010 selesai lokal; browser regression dan closure masih lanjutan · 8 Oktober 2026 · Pengguna memilih modul ini setelah katalog PR #13. Scope runtime per task; belum menyatakan keseluruhan editor/publikasi Series selesai.
 
 ## Tujuan modul
 
@@ -360,7 +360,7 @@ Owner publication UI tersedia pada Series dan episode: checklist authoritative, 
 ### Commit task
 
 - Pesan: feat(web): add series and episode publication controls (ASER-009)
-- SHA: Receipt dicatat pada update task berikutnya setelah commit berhasil.
+- SHA: `94546f59cf285be15f97f0b3248d16235dd54bde`.
 - Hook/checks: bun test apps/web/test: 220 pass/1223 assertions; bun run check-types, bun run lint, bun run build dan built series-media publication browser lulus; docs:check/targeted Prettier/git diff --check sebelum commit; normal Husky/Commitlint wajib sebelum commit diterima.
 - Ledger: Receipt setelah commit pada update task berikutnya.
 
@@ -370,7 +370,7 @@ Ikuti dependensi step; task selanjutnya ASER-010.
 
 ## Task: ASER-010 — Dedicated hierarchy/publication proof
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: P1
 - Referensi: ASER-US-01/02/03, PRD-03/04/05/06/08/09; [step plan](../plans/admin-series-episodes/implementation-plan.md#aser-010--dedicated-hierarchypublication-proof).
@@ -384,8 +384,8 @@ API/SQL/MinIO/FFmpeg actual hierarchy, uniqueness, replay dan visibility races. 
 
 ### Acceptance criteria
 
-- [ ] Auth/version/grouping/genre/active-parent/archive/idempotency/readiness parity proved pada DB dedicated.
-- [ ] Public Series counts/Next/watch tidak membocorkan hidden child; owned fixture cleanup/preservation.
+- [x] Auth/version/grouping/genre/active-parent/archive/idempotency/readiness parity proved pada DB dedicated.
+- [x] Public Series counts/Next/watch tidak membocorkan hidden child; owned fixture cleanup/preservation.
 
 ### Validasi
 
@@ -393,13 +393,13 @@ Native integration serial dengan dedicated guard; root gates dan recorded actual
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi pada task ini.
+Dedicated admin-series-proof memakai PostgreSQL guarded dan Better Auth native create/login/cookie/authoritative guard, tiga tests/161 assertions. GET/POST parity: metadata, rights, episode600s, current poster/child generation, failed job, empat active upload states dan stale GET/version menolak write; concurrent same-intent Series publish menghasilkan satu durable operation dan payload conflict409. Season/episode uniqueness, inherited genre, first-publish grouping locks, published-parent add draft child, parent archive race, counts/Next dan hidden/archived public404 terbukti. Repeatable read tidak mereservasi eligibility; fresh POST menolak media yang berubah. SQL-ready assets hanya predicate/race fixtures; bytes/MinIO/FFmpeg tetap proof browser ASER-006/009 dengan owned random bucket cleanup. Schema/env/dependencies tidak berubah, tanpa development migration.
 
 ### Commit task
 
-- Pesan: Ditentukan saat task selesai, Conventional Commit dengan ID task.
-- SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan.
+- Pesan: test(api): verify series publication and hierarchy races (ASER-010)
+- SHA: Receipt dicatat pada update task berikutnya setelah commit berhasil.
+- Hook/checks: bun test apps/api/src:153 pass/923 assertions; guarded bun test apps/api/test/integration/admin-series-proof.test.ts:3 pass/161 assertions; bun run check-types, bun run lint, bun run build lulus; docs:check/Prettier/git diff --check sebelum commit; normal Husky/Commitlint wajib sebelum commit diterima.
 - Ledger: Receipt setelah commit pada update task berikutnya.
 
 ### Blocker atau tindak lanjut
