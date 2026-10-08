@@ -1,6 +1,6 @@
 # Modul: Admin Series, season dan episode
 
-> Status: ASER-001–012 Done dan verified lokal; remote delivery/production belum dijalankan · 8 Oktober 2026 · Pengguna memilih modul ini setelah katalog PR #13. Seluruh scope runtime ASER selesai dan verified lokal; batas platform/production tetap tercatat.
+> Status: ASER-001–012 Done dan verified lokal; remote delivery disetujui pengguna dan sedang diproses; production belum dijalankan · 8 Oktober 2026 · Pengguna memilih modul ini setelah katalog PR #13. Seluruh scope runtime ASER selesai dan verified lokal; batas platform/production tetap tercatat.
 
 ## Tujuan modul
 
@@ -474,10 +474,10 @@ Canonical PRD/global-rules/architecture/runbook/desain/index sekarang selaras ed
 ### Commit task
 
 - Pesan: docs: close verified admin series workflow (ASER-012)
-- SHA: Closure dapat ditemukan melalui `git log --grep=ASER-012`; SHA commit sendiri tidak ditulis self-referential.
+- SHA: `7424b6f39c817f0b0612f7ccc0fd617c9c04474a` (receipt dicatat pada delivery update berikutnya).
 - Hook/checks: ASER-011 final bun run check-types:3, lint:1, build:2 successful; docs:check, scoped Prettier/git diff --check dan preservation aktual lulus; staged docs snapshot dan normal hooks sebelum commit; normal Husky/Commitlint wajib sebelum commit diterima.
 - Ledger: Runtime receipt ASER-011 tercatat di atas. SHA closure sendiri tersedia dari git log ID ASER-012; tidak ditulis self-referential.
 
 ### Blocker atau tindak lanjut
 
-Remote delivery/production memerlukan authorization dan gates tersendiri.
+Pengguna menyetujui commit/push/PR/normal merge pada 8 Oktober 2026; delivery sedang diproses dengan source branch dipertahankan. Production tetap memerlukan authorization tersendiri.

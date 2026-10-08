@@ -52,7 +52,7 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 
 ## Context dan plan per fitur
 
-Admin Series/season/episode: [context](plans/admin-series-episodes/repository-context.md), [plan](plans/admin-series-episodes/implementation-plan.md) dan [backlog ASER](tasks/admin-series-episodes.md). Modul dipilih pengguna 8 Oktober 2026; ASER-001–012 Done dan verified lokal: season/episode editor, upload/crop/Preview, Series/Episode Publish dan Episode Archive; native API/SQL serta built-browser journeys/regression lulus. Remote delivery dan production belum dijalankan.
+Admin Series/season/episode: [context](plans/admin-series-episodes/repository-context.md), [plan](plans/admin-series-episodes/implementation-plan.md) dan [backlog ASER](tasks/admin-series-episodes.md). Modul dipilih pengguna 8 Oktober 2026; ASER-001–012 Done dan verified lokal: season/episode editor, upload/crop/Preview, Series/Episode Publish dan Episode Archive; native API/SQL serta built-browser journeys/regression lulus. Remote delivery disetujui pengguna 8 Oktober 2026 dan sedang diproses melalui normal merge dengan source branch dipertahankan; production belum dijalankan.
 
 Organisasi hooks web: [context](plans/web-hooks-organization/repository-context.md), [plan](plans/web-hooks-organization/implementation-plan.md) dan [WHOOK](tasks/web-hooks-organization.md), scope structural disetujui pengguna 8 Oktober 2026. Delapan hooks berada di `apps/web/src/hooks/use-*.ts`; integrasi dengan katalog main diperiksa sebelum delivery.
 
