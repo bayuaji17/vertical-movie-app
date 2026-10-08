@@ -1,6 +1,6 @@
 # Modul: Organisasi hooks web
 
-> Status: Done — implemented/verified lokal · 8 Oktober 2026 · scope structural disetujui pengguna; katalog tetap draft terpisah.
+> Status: WHOOK-001–003 Done; integrasi delivery WHOOK-004 In Progress · 8 Oktober 2026 · refactor structural disetujui pengguna.
 
 ## Tujuan modul
 
@@ -131,3 +131,37 @@ WHOOK-001 `82e0495` dan WHOOK-002 `d0e0cf4718b1cba693fd09256d21de99f2b50135` ber
 ### Blocker atau tindak lanjut
 
 Push/PR/merge refactor memerlukan authorization terpisah; tidak termasuk push awal plan katalog.
+
+## Task: WHOOK-004 — Integrasi dengan katalog main dan squash delivery
+
+- Status: In Progress
+- Owner: Codex
+- Prioritas: P1
+- Referensi: WHOOK-US-01; instruksi pengguna commit/push/merge squash 8 Oktober 2026.
+- Dependensi: WHOOK-003; main `85f635049380df0f7fbc80725d37dfa79d96cc52`.
+
+### Ruang lingkup
+
+Integrasikan main yang sudah memuat katalog/detail/watch PR #11 ke branch hooks. Resolve index docs dengan mempertahankan kedua owner; update AppearanceMenu katalog ke `#/hooks/use-theme`. Source fitur katalog existing tetap menjadi baseline, bukan implementasi baru WHOOK.
+
+### Acceptance criteria
+
+- [x] Konflik docs index terselesaikan dan consumer katalog memakai hook baru.
+- [ ] Tests/types/lint/import-boundary/build/SSR serta docs/format/diff lulus pada hasil integrasi.
+- [ ] PR head diverifikasi, push/squash merge sesuai instruksi, source branch dipertahankan dan unrelated work dipulihkan.
+
+### Validasi dan evidence
+
+Receipt WHOOK-003 final `01e9956104351270d6ed1c5a2d0743aaccc897dc` berhasil; docs 72/684, scoped formatting/diff dan normal hooks lulus. Branch pushed pada SHA tersebut dan PR #12 dibuat. Fresh main berisi PR #11, menyebabkan konflik index README dan satu import useTheme yang perlu disesuaikan. Snapshot 23 unrelated paths disimpan dalam stash khusus selama integrasi; tidak di-stage untuk delivery.
+
+Unit API/web hasil integrasi: `bun test apps/api/src apps/web/test`, 323 pass, 0 fail, 1727 assertions, 63 files, 19.15s. Root check-types 3 successful/2 cached, 27.473s; lint web fresh pass, 30.957s. Auth import proof menolak server import pada client dan memulihkan fixture. Root build 2 successful/0 cached, 8.859s. Built native auth SSR smoke awalnya exit1: fixture hanya menyediakan auth tetapi readiness probe homepage kini memanggil katalog. Probe dipindahkan ke `/admin/login`, memastikan status200 dan membatalkan body; tidak mengubah runtime aplikasi atau melemahkan assertions auth. SSR rerun lulus admin/null/user/outage/stall, login redirect/availability, cookie isolation/multiple Set-Cookie dan safe HTML. Lint diulang untuk perubahan harness. Browser UI smoke tidak dijalankan ulang karena runner env belum terkonfigurasi; bukti browser PCAT/PCW existing tetap historis. Docs 78/780 dan format/diff lulus sebelum receipt final; normal hooks wajib sebelum commit.
+
+### Commit task
+
+- Pesan: `fix(web): integrate hooks with current catalog (WHOOK-004)`.
+- SHA: dicatat sesudah commit berhasil.
+- Hooks: normal docs/lint/types/Commitlint wajib tanpa bypass.
+
+### Tindak lanjut
+
+Setelah delivery, refresh plan katalog awal terhadap main; plan lama tidak boleh mengulang fitur HOMEFE/PCAT/PCW yang sudah disetujui dan diimplementasikan.

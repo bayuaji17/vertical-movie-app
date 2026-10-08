@@ -8,6 +8,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { nitro } from 'nitro/vite'
 
 import { filterBuildLog } from './tooling/log-filter.ts'
+import { catalogPosterDev } from './tooling/catalog-poster-dev.ts'
 
 const config = defineConfig(({ mode }) => {
   const env: Partial<Record<'PORT' | 'HOST', string>> = loadEnv(
@@ -35,6 +36,7 @@ const config = defineConfig(({ mode }) => {
       strictPort: true,
     },
     plugins: [
+      catalogPosterDev(),
       devtools(),
       nitro({
         preset: 'bun',

@@ -19,7 +19,7 @@ export type PlaybackInfo = {
 interface VerticalVideoPlayerProps {
   src?: string
   poster?: string
-  loadPlayback?: () => Promise<PlaybackInfo>
+  loadPlayback?: (signal: AbortSignal) => Promise<PlaybackInfo>
 }
 function PlaybackObserver({
   onQuality,
@@ -47,10 +47,16 @@ export function VerticalVideoPlayer({
   poster,
   loadPlayback,
 }: VerticalVideoPlayerProps) {
-  const [playback, setPlayback] = useState<PlaybackInfo>(),
+  const [result, setResult] = useState<{
+      info: PlaybackInfo
+      loader: typeof loadPlayback
+    }>(),
+    [retryGeneration, setRetryGeneration] = useState(0),
     [generation, setGeneration] = useState(0),
     [error, setError] = useState<string>()
+  const playback = result?.loader === loadPlayback ? result?.info : undefined
   const media = useRef<HTMLVideoElement>(null),
+    controller = useRef<AbortController | null>(null),
     mounted = useRef(false),
     busy = useRef<number | null>(null),
     epoch = useRef(0),
@@ -64,17 +70,24 @@ export function VerticalVideoPlayer({
     if (attempts.current >= 2) {
       terminal.current = true
       setError(
-        'Video tidak dapat diputar. Muat ulang halaman untuk mencoba kembali.',
+        'Video tidak dapat diputar. Tekan Retry video untuk mencoba kembali.',
       )
       return
     }
     const currentEpoch = epoch.current,
       request = ++requests.current
+    const abort = new AbortController()
+    controller.current = abort
     busy.current = request
     attempts.current++
     try {
-      const next = await loadPlayback()
-      if (!mounted.current || currentEpoch !== epoch.current) return
+      const next = await loadPlayback(abort.signal)
+      if (
+        !mounted.current ||
+        currentEpoch !== epoch.current ||
+        abort.signal.aborted
+      )
+        return
       const value = media.current
       if (value)
         restore.current = { position: value.currentTime, paused: value.paused }
@@ -82,15 +95,19 @@ export function VerticalVideoPlayer({
       if (!Number.isFinite(deadline) || deadline <= Date.now())
         throw new Error('Invalid playback lifetime')
       expires.current = deadline
-      setPlayback(next)
+      setResult({ info: next, loader: loadPlayback })
       setGeneration((n) => n + 1)
       setError(undefined)
     } catch {
-      if (mounted.current && currentEpoch === epoch.current) {
+      if (
+        mounted.current &&
+        currentEpoch === epoch.current &&
+        !abort.signal.aborted
+      ) {
         terminal.current = true
         media.current?.pause()
         setError(
-          'Video tidak tersedia. Muat ulang halaman untuk mencoba kembali.',
+          'Video tidak tersedia. Tekan Retry video untuk mencoba kembali.',
         )
       }
     } finally {
@@ -108,6 +125,8 @@ export function VerticalVideoPlayer({
     if (loadPlayback) void renew()
     return () => {
       mounted.current = false
+      epoch.current++
+      controller.current?.abort()
     }
   }, [loadPlayback, renew])
   useEffect(() => {
@@ -145,9 +164,23 @@ export function VerticalVideoPlayer({
   const failed = useCallback(() => {
     if (loadPlayback && Date.now() >= expires.current - 1000) void renew()
   }, [loadPlayback, renew])
+  function retry() {
+    controller.current?.abort()
+    epoch.current++
+    busy.current = null
+    terminal.current = false
+    attempts.current = 0
+    expires.current = 0
+    restore.current = null
+    media.current?.pause()
+    setResult(undefined)
+    setError(undefined)
+    setRetryGeneration((n) => n + 1)
+    void renew()
+  }
   return (
     <div>
-      <VideoPlayer>
+      <VideoPlayer key={retryGeneration}>
         {loadPlayback && (
           <PlaybackObserver onQuality={checkExpiry} onFailure={failed} />
         )}
@@ -182,9 +215,21 @@ export function VerticalVideoPlayer({
           )}
         </VideoSkin>
       </VideoPlayer>
+      {loadPlayback && !playback && !error && (
+        <p role="status" className="mt-3 text-sm text-muted-foreground">
+          Loading video…
+        </p>
+      )}
       {error && (
         <p role="alert" className="mt-3 text-sm">
           {error}
+          <button
+            type="button"
+            className="mt-3 block min-h-11 rounded-xl border px-4 focus-visible:ring-2 focus-visible:ring-ring"
+            onClick={retry}
+          >
+            Retry video
+          </button>
         </p>
       )}
     </div>

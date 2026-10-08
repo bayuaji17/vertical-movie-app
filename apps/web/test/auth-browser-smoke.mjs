@@ -58,6 +58,18 @@ const mediaFixture = ['media', 'publication'].includes(
         : null
     })
   : undefined
+const contentWatchFixture =
+  process.env.AUTH_BROWSER_PHASE === 'public-watch'
+    ? await (
+        await import('../../api/test/integration/public-content-browser-fixture')
+      ).createPublicContentBrowserFixture()
+    : undefined
+const catalogFixture =
+  process.env.AUTH_BROWSER_PHASE === 'public-catalog'
+    ? await (
+        await import('../../api/test/integration/public-catalog-browser-fixture')
+      ).createPublicCatalogBrowserFixture()
+    : undefined
 if (process.env.AUTH_BROWSER_PHASE === 'content')
   assert.ok(
     contentFixture,
@@ -68,6 +80,26 @@ const api = Bun.serve({
   port: 0,
   fetch: async (request) => {
     const url = new URL(request.url)
+    if (contentWatchFixture) {
+      if (url.pathname === '/control/content-watch') {
+        await contentWatchFixture.control(await request.json())
+        return Response.json({ ok: true })
+      }
+      if (url.pathname === '/content-watch-proof')
+        return Response.json(contentWatchFixture.proof())
+      if (/^\/(catalog|videos|playback)(?:\/|$)/.test(url.pathname))
+        return contentWatchFixture.handle(request)
+    }
+    if (catalogFixture) {
+      if (url.pathname === '/control/catalog') {
+        await catalogFixture.control(await request.json())
+        return Response.json({ ok: true })
+      }
+      if (url.pathname === '/catalog-proof')
+        return Response.json(catalogFixture.proof())
+      if (/^\/catalog(?:\/|$)/.test(url.pathname))
+        return catalogFixture.handle(request)
+    }
     if (url.pathname === '/control/media' && mediaFixture) {
       await mediaFixture.control(await request.json())
       return Response.json({ ok: true })
@@ -101,7 +133,7 @@ const api = Bun.serve({
     if (
       (url.pathname.startsWith('/admin/') ||
         (mediaFixture &&
-          /^\/(videos|series|playback)(\/|$)/.test(url.pathname))) &&
+          /^\/(catalog|videos|series|playback)(\/|$)/.test(url.pathname))) &&
       (mediaFixture || contentFixture)
     )
       return (mediaFixture ?? contentFixture).handle(request)
@@ -213,6 +245,8 @@ const reserve = Bun.serve({
 const port = reserve.port
 reserve.stop(true)
 const url = `http://127.0.0.1:${port}`
+contentWatchFixture?.setWebOrigin(url)
+mediaFixture?.setWebOrigin(url)
 const app = import.meta.dir.replace(/\/test$/, '')
 const built = process.env.AUTH_BROWSER_RUNTIME === 'built'
 const appEnv = {
@@ -238,6 +272,8 @@ if (built) {
     api.stop(true)
     await contentFixture?.close()
     await mediaFixture?.close()
+    await catalogFixture?.close()
+    await contentWatchFixture?.close()
     throw new Error('Browser fixture build failed: ' + (out + err).slice(-4000))
   }
 }
@@ -272,15 +308,19 @@ try {
   for (const phase of phases) {
     const workerSource = await Bun.file(
       import.meta.dir +
-        (phase === 'publication'
-          ? '/admin-publication-browser-worker.mjs'
-          : phase === 'media'
-            ? '/admin-media-upload-browser-worker.mjs'
-            : phase === 'content'
-              ? '/admin-content-browser-worker.mjs'
-              : phase === 'routes'
-                ? '/auth-routes-browser-worker.mjs'
-                : '/auth-browser-worker.mjs'),
+        (phase === 'public-watch'
+          ? '/public-content-browser-worker.mjs'
+          : phase === 'public-catalog'
+            ? '/public-catalog-browser-worker.mjs'
+            : phase === 'publication'
+              ? '/admin-publication-browser-worker.mjs'
+              : phase === 'media'
+                ? '/admin-media-upload-browser-worker.mjs'
+                : phase === 'content'
+                  ? '/admin-content-browser-worker.mjs'
+                  : phase === 'routes'
+                    ? '/auth-routes-browser-worker.mjs'
+                    : '/auth-browser-worker.mjs'),
     ).text()
     const workerPath = process.env.AUTH_BROWSER_WORKER_PATH
     if (workerPath) await Bun.write(workerPath, workerSource)
@@ -309,7 +349,7 @@ try {
       ],
       {
         stdout: 'pipe',
-        stderr: 'pipe',
+        stderr: phase === 'public-watch' ? 'inherit' : 'pipe',
         env: {
           ...process.env,
           MEDIA_BROWSER_PHASE: process.env.MEDIA_BROWSER_PHASE ?? 'full',
@@ -333,4 +373,6 @@ try {
   api.stop(true)
   await contentFixture?.close()
   await mediaFixture?.close()
+  await catalogFixture?.close()
+  await contentWatchFixture?.close()
 }

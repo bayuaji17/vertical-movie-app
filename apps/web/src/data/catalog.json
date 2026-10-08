@@ -1,0 +1,226 @@
+{
+  "schemaVersion": 1,
+  "featuredId": "after-the-rain",
+  "genres": [
+    {
+      "id": "drama",
+      "label": "Drama"
+    },
+    {
+      "id": "mystery",
+      "label": "Mystery"
+    },
+    {
+      "id": "slice-of-life",
+      "label": "Slice of life"
+    },
+    {
+      "id": "comedy",
+      "label": "Comedy"
+    },
+    {
+      "id": "documentary",
+      "label": "Documentary"
+    }
+  ],
+  "items": [
+    {
+      "id": "after-the-rain",
+      "slug": "after-the-rain",
+      "title": "After the Rain",
+      "kind": "movie",
+      "synopsis": "A chance encounter on a rainy evening brings two strangers closer to home.",
+      "genreIds": ["drama"],
+      "poster": "/images/catalog/after-the-rain.png",
+      "publishedAt": "2026-09-30T12:00:00Z",
+      "durationMs": 1080000
+    },
+    {
+      "id": "the-last-train",
+      "slug": "the-last-train",
+      "title": "The Last Train",
+      "kind": "series",
+      "synopsis": "One suitcase, an empty platform, and a secret that cannot leave the station.",
+      "genreIds": ["mystery"],
+      "poster": "/images/catalog/the-last-train.png",
+      "publishedAt": "2026-09-29T12:00:00Z",
+      "episodeCount": 8
+    },
+    {
+      "id": "a-small-beginning",
+      "slug": "a-small-beginning",
+      "title": "A Small Beginning",
+      "kind": "standalone",
+      "synopsis": "A few plants and an open window turn a new apartment into a home.",
+      "genreIds": ["slice-of-life"],
+      "poster": "/images/catalog/a-small-beginning.png",
+      "publishedAt": "2026-09-28T12:00:00Z",
+      "durationMs": 240000
+    },
+    {
+      "id": "letters-to-home",
+      "slug": "letters-to-home",
+      "title": "Letters to Home",
+      "kind": "movie",
+      "synopsis": "An unexpected letter draws a young woman back to the countryside she left behind.",
+      "genreIds": ["drama"],
+      "poster": "/images/catalog/letters-to-home.png",
+      "publishedAt": "2026-09-27T12:00:00Z",
+      "durationMs": 1440000
+    },
+    {
+      "id": "midnight-kitchen",
+      "slug": "midnight-kitchen",
+      "title": "Midnight Kitchen",
+      "kind": "series",
+      "synopsis": "Two friends cook their way through the small surprises of life after midnight.",
+      "genreIds": ["comedy"],
+      "poster": "/images/catalog/midnight-kitchen.png",
+      "publishedAt": "2026-09-26T12:00:00Z",
+      "episodeCount": 6
+    },
+    {
+      "id": "city-in-motion",
+      "slug": "city-in-motion",
+      "title": "City in Motion",
+      "kind": "standalone",
+      "synopsis": "See Jakarta wake up through the eyes of a cyclist on the morning commute.",
+      "genreIds": ["documentary"],
+      "poster": "/images/catalog/city-in-motion.png",
+      "publishedAt": "2026-09-25T12:00:00Z",
+      "durationMs": 360000
+    },
+    {
+      "id": "borrowed-umbrella",
+      "slug": "borrowed-umbrella",
+      "title": "Borrowed Umbrella",
+      "kind": "movie",
+      "synopsis": "A misplaced umbrella brings neighbors together for an unlikely adventure.",
+      "genreIds": ["comedy"],
+      "poster": "/images/catalog/after-the-rain.png",
+      "publishedAt": "2026-09-24T12:00:00Z",
+      "durationMs": 960000
+    },
+    {
+      "id": "platform-nine",
+      "slug": "platform-nine",
+      "title": "Platform Nine",
+      "kind": "series",
+      "synopsis": "Every passenger has a story. A station attendant learns to listen.",
+      "genreIds": ["drama"],
+      "poster": "/images/catalog/the-last-train.png",
+      "publishedAt": "2026-09-23T12:00:00Z",
+      "episodeCount": 10
+    },
+    {
+      "id": "window-garden",
+      "slug": "window-garden",
+      "title": "Window Garden",
+      "kind": "standalone",
+      "synopsis": "Meet the people growing little gardens above the busy streets.",
+      "genreIds": ["documentary"],
+      "poster": "/images/catalog/a-small-beginning.png",
+      "publishedAt": "2026-09-22T12:00:00Z",
+      "durationMs": 300000
+    },
+    {
+      "id": "the-long-way-home",
+      "slug": "the-long-way-home",
+      "title": "The Long Way Home",
+      "kind": "movie",
+      "synopsis": "A missed bus turns a familiar journey into a fresh beginning.",
+      "genreIds": ["slice-of-life"],
+      "poster": "/images/catalog/letters-to-home.png",
+      "publishedAt": "2026-09-21T12:00:00Z",
+      "durationMs": 1320000
+    },
+    {
+      "id": "table-for-two",
+      "slug": "table-for-two",
+      "title": "Table for Two",
+      "kind": "series",
+      "synopsis": "A tiny restaurant makes room for big dreams and even bigger mistakes.",
+      "genreIds": ["comedy"],
+      "poster": "/images/catalog/midnight-kitchen.png",
+      "publishedAt": "2026-09-20T12:00:00Z",
+      "episodeCount": 7
+    },
+    {
+      "id": "between-traffic-lights",
+      "slug": "between-traffic-lights",
+      "title": "Between Traffic Lights",
+      "kind": "standalone",
+      "synopsis": "Quiet moments hidden in the rhythm of the city.",
+      "genreIds": ["documentary"],
+      "poster": "/images/catalog/city-in-motion.png",
+      "publishedAt": "2026-09-19T12:00:00Z",
+      "durationMs": 420000
+    },
+    {
+      "id": "a-light-in-the-window",
+      "slug": "a-light-in-the-window",
+      "title": "A Light in the Window",
+      "kind": "movie",
+      "synopsis": "Someone leaves a light on in a house that has been empty for years.",
+      "genreIds": ["mystery"],
+      "poster": "/images/catalog/after-the-rain.png",
+      "publishedAt": "2026-09-18T12:00:00Z",
+      "durationMs": 1200000
+    },
+    {
+      "id": "slow-sunday",
+      "slug": "slow-sunday",
+      "title": "Slow Sunday",
+      "kind": "series",
+      "synopsis": "A family rediscovers the pleasure of doing very little together.",
+      "genreIds": ["slice-of-life"],
+      "poster": "/images/catalog/the-last-train.png",
+      "publishedAt": "2026-09-17T12:00:00Z",
+      "episodeCount": 5
+    },
+    {
+      "id": "kota-yang-menyimpan-cerita",
+      "slug": "kota-yang-menyimpan-cerita",
+      "title": "Kota yang Menyimpan Cerita — Sebuah Perjalanan Pulang di Antara Hujan dan Cahaya",
+      "kind": "standalone",
+      "synopsis": "A portrait of familiar streets, remembered voices, and the meaning of home.",
+      "genreIds": ["slice-of-life"],
+      "poster": "/images/catalog/a-small-beginning.png",
+      "publishedAt": "2026-09-16T12:00:00Z",
+      "durationMs": 540000
+    },
+    {
+      "id": "one-more-stop",
+      "slug": "one-more-stop",
+      "title": "One More Stop",
+      "kind": "movie",
+      "synopsis": "Two old friends share a ride and finally finish an unfinished conversation.",
+      "genreIds": ["drama"],
+      "poster": "/images/catalog/letters-to-home.png",
+      "publishedAt": "2026-09-15T12:00:00Z",
+      "durationMs": 1140000
+    },
+    {
+      "id": "notes-from-the-kitchen",
+      "slug": "notes-from-the-kitchen",
+      "title": "Notes from the Kitchen",
+      "kind": "series",
+      "synopsis": "Recipes and memories from home cooks across the neighborhood.",
+      "genreIds": ["documentary"],
+      "poster": "/images/catalog/midnight-kitchen.png",
+      "publishedAt": "2026-09-14T12:00:00Z",
+      "episodeCount": 6
+    },
+    {
+      "id": "morning-on-two-wheels",
+      "slug": "morning-on-two-wheels",
+      "title": "Morning on Two Wheels",
+      "kind": "standalone",
+      "synopsis": "An ambitious morning ride meets a series of very small detours.",
+      "genreIds": ["comedy"],
+      "poster": "/images/catalog/city-in-motion.png",
+      "publishedAt": "2026-09-14T12:00:00Z",
+      "durationMs": 180000
+    }
+  ]
+}

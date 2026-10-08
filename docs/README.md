@@ -1,6 +1,6 @@
 # Dokumentasi proyek
 
-Indeks utama dokumentasi Vertical Movie App. Mulai dari [AGENTS.md root](../AGENTS.md) untuk aturan kerja, lalu baca spesifikasi, panduan dan backlog yang relevan. [README root](../README.md) berisi quick start. Struktur/status publication diperbarui 7 Oktober 2026.
+Indeks utama dokumentasi Vertical Movie App. Mulai dari [AGENTS.md root](../AGENTS.md) untuk aturan kerja, lalu baca spesifikasi, panduan dan backlog yang relevan. [README root](../README.md) berisi quick start. Status katalog, detail dan watch diperbarui 8 Oktober 2026.
 
 ## Struktur dan sumber acuan
 
@@ -19,9 +19,9 @@ Aturan penamaan, ownership dan maintenance berada pada [Documentation rules](../
 
 ## Produk, arsitektur dan desain
 
-- [PRD](product/prd.md): mendekati final; keputusan inti, matriks implementasi PRD-01–10, keputusan produk tersisa dan gerbang rilis. Review repository 5 Oktober 2026; MVP lengkap belum selesai.
-- [Aturan produk](product/global-rules.md): GR-01–09 selaras PRD/kode pada review 5 Oktober 2026; aturan inti, batas signed URL/cache dan proposal UI/kebijakan dipisahkan.
-- [Arsitektur](architecture/overview.md): baseline implementasi pada review 5 Oktober 2026; diagram/dataflow, schema/status dan rute aktif, dengan batas UI/deployment/verification terpisah.
+- [PRD](product/prd.md): mendekati final; matriks PRD-01–10, keputusan produk dan gerbang rilis. Review awal 5 Oktober 2026, detail/watch PCW diperbarui 8 Oktober 2026; MVP lengkap belum selesai.
+- [Aturan produk](product/global-rules.md): GR-01–09, batas signed URL/cache dan proposal UI/kebijakan; alur publik PCW diperbarui 8 Oktober 2026.
+- [Arsitektur](architecture/overview.md): diagram/dataflow, schema/status dan rute aktif; kontrak detail/episode/watch PCW diperbarui 8 Oktober 2026, dengan batas UI/deployment/verification terpisah.
 - [Model data video](architecture/video-data-model.md): series/season/video/genre dan aset/upload/job/attempt/rendition/operation.
 - [Kontrak upload](architecture/media-upload-contract.md): S3 multipart, idempotency, freeze dan completion.
 - [Design system](design/design-system.md): baseline spesifikasi desain dari Git, dipindahkan tanpa memasukkan perubahan desain lokal.
@@ -29,6 +29,8 @@ Aturan penamaan, ownership dan maintenance berada pada [Documentation rules](../
 - [Dashboard mobile light/dark](design/admin-content-mobile.md): lima layouts light/dark disetujui; cards/form/drawer dan pagination metadata diimplementasikan.
 - [Upload Media desktop/mobile light/dark](design/admin-media-upload.md): empat mockup disetujui pengguna 5 Oktober 2026; state/modal specification dan runtime responsif terverifikasi lokal 6 Oktober 2026.
 - [Publish & Archive desktop/mobile light/dark](design/admin-publication.md): empat mockup disetujui pengguna 7 Oktober 2026; readiness, konfirmasi manual dan recovery runtime verified lokal, evidence APUB.
+
+- [Homepage/katalog publik](design/home-catalog.md): arah mockup light desktop/mobile disetujui pengguna 7 Oktober 2026; API published Movie/Standalone/Series + SSR/cursor useInfiniteQuery/manual Load more dan poster privat implemented/verified lokal pada [PCAT](tasks/public-catalog-api.md), 7 Oktober 2026. Tahap dummy tetap sejarah. [Evidence desain](tasks/home-catalog-design.md), [context](plans/home-catalog/repository-context.md), [plan detail](plans/home-catalog/implementation-plan.md) dan [backlog HOMEFE](tasks/home-catalog.md).
 
 Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dashboard dark](design/dashboard-dark-shadcn.prompt.md) dan [login](design/login-light-shadcn-redesign.prompt.md). Screenshot login: [desktop](design/login-implemented-desktop.png) dan [mobile](design/login-implemented-mobile.png). Data mockup bukan bukti fitur selesai.
 
@@ -46,13 +48,17 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 
 ## Context dan plan per fitur
 
-Organisasi hooks web: [context](plans/web-hooks-organization/repository-context.md), [plan](plans/web-hooks-organization/implementation-plan.md) dan [WHOOK-001–003](tasks/web-hooks-organization.md), scope structural disetujui pengguna 8 Oktober 2026. Delapan hooks berada di `apps/web/src/hooks/use-*.ts`; implemented/verified lokal pada branch terpisah, browser UI belum diuji ulang.
+Organisasi hooks web: [context](plans/web-hooks-organization/repository-context.md), [plan](plans/web-hooks-organization/implementation-plan.md) dan [WHOOK](tasks/web-hooks-organization.md), scope structural disetujui pengguna 8 Oktober 2026. Delapan hooks berada di `apps/web/src/hooks/use-*.ts`; integrasi dengan katalog main diperiksa sebelum delivery.
 
-Katalog publik Film/Standalone: [context snapshot](plans/public-catalog/repository-context.md), [implementation plan](plans/public-catalog/implementation-plan.md) dan [backlog PCAT-001–014](tasks/public-catalog.md), draft untuk review 8 Oktober 2026. Scope proposal homepage grid → detail → watch, filter server/cursor dan signed cover terpisah. UX/desain dan implementasi belum disetujui; source belum diubah.
+Plan awal katalog Film/Standalone: [context historis](plans/public-catalog/repository-context.md), [plan historis](plans/public-catalog/implementation-plan.md) dan [backlog awal](tasks/public-catalog.md). Baseline awal mendahului implementasi katalog/detail/watch dari PR #11; freshness dan pemetaan pekerjaan tersisa diperbarui setelah integrasi hooks.
+
+Detail dan tonton dari katalog: [context](plans/public-content-watch/repository-context.md), [plan detail](plans/public-content-watch/implementation-plan.md) dan [backlog PCW](tasks/public-content-watch.md). Pengguna meminta lanjut dan memilih Film/Standalone/Series beserta season/episode 7 Oktober 2026. PCW-000–008 implemented/verified lokal 8 Oktober 2026: detail Film/Standalone, Series dengan episode per season, watch HLS dan Next manual. Proof PostgreSQL/MinIO/FFmpeg serta Chromium development/build tersedia pada backlog. Dependency PCAT masih commit lokal, belum remote delivery; progress/autoplay/editor/production bukan scope.
 
 Logging request API memakai console implemented/verified lokal 7 Oktober 2026; [panduan](guides/api-development.md#logging-request-http), [context baseline](plans/api-request-logging/repository-context.md) dan [plan/evidence](plans/api-request-logging/implementation-plan.md) menjelaskan scope serta batas gateway/storage.
 
 Publish & Archive admin Film/Standalone: [context snapshot](plans/admin-publication/repository-context.md) dan [implementation plan](plans/admin-publication/implementation-plan.md), disetujui pengguna 7 Oktober 2026. Scope mencakup readiness server, konfirmasi manual, version/idempotency/recovery dan proof akses publik; plan/empat desain approved, APUB-001–013 implemented/verified lokal; actual API/DB/MinIO/FFmpeg/built-browser proof dan local receipts pada backlog.
+
+Integrasi katalog API ke homepage: [context](plans/public-catalog-api/repository-context.md), [plan detail](plans/public-catalog-api/implementation-plan.md) dan [backlog PCAT](tasks/public-catalog-api.md). Pengguna menyetujui point1/plan 7 Oktober 2026; PCAT-001–011 implemented/verified lokal. Feed Movie/Standalone/Series, cursor/filter, poster privat, SSR dan recovery memakai API; dev/built browser serta dedicated PG/MinIO proof lulus. Detail/watch dilanjutkan pada PCW; editor/production dan remote delivery tetap tahap tersendiri.
 
 | Fitur              | Context                                                         | Plan                                                                                           | Penggunaan                                                                                                                                                                       |
 | ------------------ | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -66,8 +72,9 @@ Publish & Archive admin Film/Standalone: [context snapshot](plans/admin-publicat
 
 ## Backlog dan evidence
 
-- [Organisasi hooks web](tasks/web-hooks-organization.md): WHOOK-001–003; folder hooks/use-prefix, provider/domain boundaries dan verifikasi regression.
-- [Katalog publik Film/Standalone](tasks/public-catalog.md): PCAT-001–014; planning draft, discover/detail/watch tanpa login dan acceptance lokal, tidak mencakup rollout production.
+- [Organisasi hooks web](tasks/web-hooks-organization.md): refactor hooks/use-prefix serta integrasi katalog terbaru.
+- [Plan awal katalog publik](tasks/public-catalog.md): riwayat proposal Film/Standalone sebelum HOMEFE/PCAT/PCW.
+
 - [Logging request API](tasks/api-request-logging.md): APILOG-001–003; dua event console per request, suite API dan demo development/build-start terverifikasi lokal.
 - [Auth](tasks/auth.md): AUTH/AUTH-REF dan evidence lokal.
 - [Video](tasks/videos.md): metadata dan compatibility lifecycle.
@@ -85,8 +92,8 @@ Publish & Archive admin Film/Standalone: [context snapshot](plans/admin-publicat
 
 ## Gambaran implementasi saat ini
 
-Custom React hooks aplikasi web berada pada `apps/web/src/hooks/use-*.ts`; provider/context, client/query factories dan domain helpers tetap pada owner di `lib/`, komponen pada `components/`. Konvensi naming/import dimiliki root AGENTS; bukti refactor pada [WHOOK](tasks/web-hooks-organization.md).
+Custom React hooks aplikasi web berada di `apps/web/src/hooks/use-*.ts`; provider/context, query factories dan domain helpers tetap pada owner di `lib/`, komponen pada `components/`. Konvensi berada di root AGENTS; evidence pada [WHOOK](tasks/web-hooks-organization.md).
 
-`apps/api` memiliki API Elysia, metadata, storage/upload, native poster request processing, publication/catalog/playback dan worker Bun/FFmpeg terpisah. `apps/web` memiliki TanStack Start, auth admin, metadata dashboard, uploader Eden/Query responsif light/dark serta primitive crop Canvas 9:16, gateway same-origin, Video.js 10 RC, watch dan preview minimal. `packages/auth` memiliki Better Auth dengan entry server/client/types terpisah. Workspace diatur oleh `turbo.json`; env samples berada pada masing-masing app.
+`apps/api` memiliki API Elysia, metadata, storage/upload, native poster request processing, publication/catalog/playback dan worker Bun/FFmpeg terpisah. `apps/web` memiliki TanStack Start, auth admin, metadata dashboard, uploader Eden/Query responsif light/dark serta primitive crop Canvas 9:16, gateway same-origin, Video.js 10 RC, detail Film/Standalone, Series/episode dan watch kontekstual, serta preview admin. `packages/auth` memiliki Better Auth dengan entry server/client/types terpisah. Homepage/katalog publik memakai API published dengan SSR6, useInfiniteQuery cursor/Load more+skeleton, search/genre/type server dan unsigned metadata/private same-origin posters; evidence PCAT. Workspace diatur oleh `turbo.json`; env samples berada pada masing-masing app.
 
 Media telah di-merge melalui [PR #3](https://github.com/bayuaji17/vertical-movie-app/pull/3). Development memakai MinIO dan production dirancang memakai Cloudflare R2 melalui env. Playback memakai HLS hasil transcoding dan lifecycle draft → published → archived. Bukti lokal serta fixture 10/30 menit ada pada runbook/backlog. R2 staging, Safari/native HLS, kapasitas 4 core/4 GB, full restore dan matriks stress yang belum terverifikasi tetap gerbang terpisah. Uploader Film/Standalone source+cover dan Series cover terverifikasi lokal; readiness/Publish/Archive Film/Standalone terverifikasi lokal 7 Oktober 2026. Publication Series/episode, editor/upload episode dan subtitle merupakan pekerjaan lanjutan.

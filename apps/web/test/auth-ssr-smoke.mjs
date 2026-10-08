@@ -66,7 +66,14 @@ try {
   let ready = false
   for (let i = 0; i < 100; i++) {
     try {
-      await fetch(`http://127.0.0.1:${port}/`)
+      // Probe an auth-owned page: the public homepage now calls catalog APIs,
+      // while this upstream fixture intentionally supplies only auth sessions.
+      const response = await fetch(`http://127.0.0.1:${port}/admin/login`)
+      await response.body?.cancel()
+      if (response.status !== 200) {
+        await Bun.sleep(100)
+        continue
+      }
       ready = true
       break
     } catch {

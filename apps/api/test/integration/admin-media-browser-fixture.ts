@@ -27,6 +27,8 @@ import { GenresService } from "../../src/modules/genres/service";
 import { createGenresRepository } from "../../src/modules/genres/repository";
 import { PlaybackService } from "../../src/modules/playback/service";
 import { CatalogStore } from "../../src/modules/catalog/repository";
+import { CatalogHomeStore } from "../../src/modules/catalog/home-repository";
+import { PublicContentStore } from "../../src/modules/catalog/content-repository";
 import { CatalogService } from "../../src/modules/catalog/service";
 import { PublicationService } from "../../src/modules/publication/service";
 import { runMediaProcess } from "../../src/workers/process";
@@ -95,7 +97,12 @@ export async function createAdminMediaBrowserFixture(
     poster = join(dir, "cover.jpg");
   await mkdir(dir, { recursive: true, mode: 0o700 });
   const catalogStore = new CatalogStore(database.db),
-    catalogService = new CatalogService(catalogStore),
+    catalogService = new CatalogService(
+      catalogStore,
+      undefined,
+      new CatalogHomeStore(database.db),
+      new PublicContentStore(database.db),
+    ),
     videoService = new VideosService(
       createVideosRepository(database.db),
       undefined,
@@ -229,27 +236,29 @@ export async function createAdminMediaBrowserFixture(
           "browser-admin",
         );
     }
-    const app = createApp({
-      getSession,
-      mediaService,
-      videosService: videoService,
-      seriesService,
-      contentPageService: new ContentPageService(
-        createContentPageRepository(database.db),
-      ),
-      genresService: new GenresService(createGenresRepository(database.db)),
-      catalogService,
-      publicationService: new PublicationService(
-        database.db,
-        catalogService.invalidate,
-      ),
-      playbackService: new PlaybackService(
-        new CatalogStore(database.db),
-        native,
-        "/api",
-        config,
-      ),
-    }).compile();
+    const makeApp = (playbackBase = "/api") =>
+      createApp({
+        getSession,
+        mediaService,
+        videosService: videoService,
+        seriesService,
+        contentPageService: new ContentPageService(
+          createContentPageRepository(database.db),
+        ),
+        genresService: new GenresService(createGenresRepository(database.db)),
+        catalogService,
+        publicationService: new PublicationService(
+          database.db,
+          catalogService.invalidate,
+        ),
+        playbackService: new PlaybackService(
+          new CatalogStore(database.db),
+          native,
+          playbackBase,
+          config,
+        ),
+      }).compile();
+    let app = makeApp();
     const traces: Array<{
       path: string;
       method: string;
@@ -497,6 +506,11 @@ export async function createAdminMediaBrowserFixture(
             partNumber: input?.partNumber,
           });
         return response;
+      },
+      setWebOrigin: (origin: string) => {
+        if (!/^http:\/\/127\.0\.0\.1:\d+$/.test(origin))
+          throw Error("Loopback web origin required");
+        app = makeApp(origin + "/api");
       },
       close,
     };
