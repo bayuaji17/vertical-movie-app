@@ -100,7 +100,7 @@ Observed prototype proof dengan bundled Windows Node/Playwright/Chromium1228:8 s
 - Pesan usulan: `docs: prepare public catalog design review (PCAT-002)`.
 - SHA: `307710159cbd8a6d9a0f4d230d2ec1deaf2abc37` — prototype/spec review,14 scoped files.
 - Hook/checks: docs86/816, staged-tree79/797, scoped formatting/diff/preservation, lint1/type3 cache valid dan Commitlint pass tanpa bypass. Receipt review sebelum approval; pengguna kemudian menyetujui desain.
-- Ledger: receipt aktual dicatat pada update sesudah commit berhasil.
+- Ledger: approval commit `a3ceba2d47c32326d7e25773a4370de5166cfd29`; normal docs86/816, lint1/type3 cached dan Commitlint pass.
 
 ### Blocker atau tindak lanjut
 
@@ -108,7 +108,7 @@ Pengguna menyetujui desain pada 8 Oktober 2026 dengan “ok, setuju”: Film/Sta
 
 ## Task: PCAT-003 — Filter kinds publik sebelum cursor pagination
 
-- Status: Backlog
+- Status: Done — implementasi dan quality gates lulus; receipt commit berikut.
 - Owner: Codex/pengembang
 - Prioritas: P1 — urutan dependency DAG pada plan
 - Referensi: PCAT-US-01; PRD-07/08/09, GR-02/03/05/06/08; [plan](../plans/public-catalog/implementation-plan.md)
@@ -124,9 +124,9 @@ Paths/symbol owners: `apps/api/src/modules/catalog/{model,service,repository}.ts
 
 ### Acceptance criteria
 
-- [ ] All hanya movie+standalone melalui API filter, bukan post-filter client; tied createdAt/id pagination konsisten.
-- [ ] Cursor beda filter ditolak 422; reversed canonical kinds equivalent; invalid enum ditolak sebelum I/O.
-- [ ] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
+- [x] All hanya movie+standalone melalui API filter, bukan post-filter client; tied createdAt/id pagination konsisten.
+- [x] Cursor beda filter ditolak 422; reversed canonical kinds equivalent; invalid enum ditolak sebelum I/O.
+- [x] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
 
 ### Validasi
 
@@ -134,18 +134,20 @@ bun test apps/api/src/modules/catalog; Eden/type checks dan app.handle/OpenAPI s
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau divalidasi. Commands di atas merupakan rencana, bukan hasil.
+8 Oktober 2026: CatalogQuery menerima empat finite kinds; CatalogService canonicalizes order, validates sebelum repository, isolates cache/filter/limit dan mempertahankan fingerprint tanpa kinds. CatalogStore menerapkan parameterized IN sebelum LIMIT dan tuple createdAt/id descending. Native unit/HTTP/OpenAPI serta compiled Drizzle SQL proof lulus; traversal/filter real PostgreSQL tetap PCAT-012.
+
+Observed: targeted list suite5/39, catalog suite23/167 sebelum tambahan OpenAPI; root check-types3, lint1, build2 lulus. Build memiliki warning chunk >500kB existing, tidak gagal. Full regression/docs/normal hooks dicatat sesudah observed.
 
 ### Commit task
 
 - Pesan usulan: `feat: filter kinds publik sebelum cursor pagination (PCAT-003)`.
 - SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk commit ini.
+- Hook/checks: root types/lint/build lulus; docs/format/diff dan normal commit hooks berikut.
 - Ledger: receipt aktual dicatat pada update sesudah commit berhasil.
 
 ### Blocker atau tindak lanjut
 
-Menunggu PCAT-001 + approval plan pengguna. Approval/hasil proof tidak diasumsikan tersedia.
+API kind filter selesai lokal; tidak mengubah endpoint/default Series/episode. Real SQL visibility proof dan public web mengikuti dependencies task berikutnya.
 
 ## Task: PCAT-004 — Cegah pengisian cache lama setelah invalidation
 

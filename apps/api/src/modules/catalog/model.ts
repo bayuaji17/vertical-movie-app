@@ -1,13 +1,22 @@
 import { t } from "elysia";
 import { Uuid, NextCursor } from "../../shared/content-model";
 import { VideoKind } from "../videos/model";
+export const CatalogKinds = t.Union([
+  t.Literal("movie"),
+  t.Literal("standalone"),
+  t.Literal("movie,standalone"),
+  t.Literal("standalone,movie"),
+]);
 export const CatalogQuery = t.Object(
   {
     limit: t.Optional(t.String({ pattern: "^[1-9][0-9]{0,2}$" })),
     cursor: t.Optional(t.String({ maxLength: 2048 })),
+    kinds: t.Optional(CatalogKinds),
   },
   { additionalProperties: false },
 );
+export type CatalogInput = typeof CatalogQuery.static;
+export type CatalogKind = "movie" | "standalone";
 export const SlugParams = t.Object(
   { slug: t.String({ pattern: "^[a-z0-9]+(-[a-z0-9]+)*$", maxLength: 180 }) },
   { additionalProperties: false },

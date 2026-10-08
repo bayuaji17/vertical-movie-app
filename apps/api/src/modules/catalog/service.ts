@@ -1,7 +1,7 @@
-import { notFound, unavailable } from "../../shared/content-error";
+import { invalid, notFound, unavailable } from "../../shared/content-error";
 import { parseList, page } from "../../shared/content-pagination";
 import type { CatalogStore, PlayableRow } from "./repository";
-import type { PublicVideo } from "./model";
+import type { CatalogInput, CatalogKind, PublicVideo } from "./model";
 import type { HomeStore } from "./home-repository";
 import { parseHome, type HomeInput } from "./home-pagination";
 import type { PublicHomeItem } from "./home-model";
@@ -121,28 +121,44 @@ export class CatalogService {
       seriesSlug: row.parent?.slug ?? null,
     };
   }
-  async list(query: { limit?: string; cursor?: string }) {
-    const q = parseList(query, "public-videos");
-    return this.cached("videos:" + JSON.stringify(query), async () => {
-      const rows = await this.repository().playable({
-          limit: q.limit + 1,
-          cursor: q.cursor
-            ? { at: new Date(q.cursor.createdAt), id: q.cursor.id }
-            : undefined,
-        }),
-        result = page(
-          rows.map((row) => ({
-            id: row.video.id,
-            createdAt: row.video.createdAt,
-            row,
-          })),
-          q,
-        );
-      return {
-        items: result.items.map((r) => this.video(r.row)),
-        nextCursor: result.nextCursor,
-      };
-    });
+  async list(query: CatalogInput) {
+    if (
+      query.kinds !== undefined &&
+      !["movie", "standalone", "movie,standalone", "standalone,movie"].includes(
+        query.kinds,
+      )
+    )
+      invalid("Invalid catalog kinds.");
+    const kinds = query.kinds?.split(",").sort() as CatalogKind[] | undefined;
+    const q = parseList(
+      query,
+      "public-videos",
+      kinds ? { kinds: kinds.join(",") } : {},
+    );
+    return this.cached(
+      "videos:" + q.filter + ":" + q.limit + ":" + (query.cursor ?? ""),
+      async () => {
+        const rows = await this.repository().playable({
+            limit: q.limit + 1,
+            kinds,
+            cursor: q.cursor
+              ? { at: new Date(q.cursor.createdAt), id: q.cursor.id }
+              : undefined,
+          }),
+          result = page(
+            rows.map((row) => ({
+              id: row.video.id,
+              createdAt: row.video.createdAt,
+              row,
+            })),
+            q,
+          );
+        return {
+          items: result.items.map((r) => this.video(r.row)),
+          nextCursor: result.nextCursor,
+        };
+      },
+    );
   }
   async get(slug: string) {
     return this.cached("video:" + slug, async () => {
