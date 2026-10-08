@@ -270,8 +270,8 @@ Observed: targeted transport/gateway5 tests/92 assertions; full web189/1016, roo
 ### Commit task
 
 - Pesan usulan: `feat: client publik typed dan reader ssr unsigned (PCAT-006)`.
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk commit ini.
+- SHA: `45c73dac15fe436bbea7405a19decd9a0bd0e1c1`.
+- Hook/checks: web189/1016, root types3/lint1/build2, docs86/816, scoped format/diff dan normal Husky/Commitlint pass.
 - Ledger: receipt aktual dicatat pada update sesudah commit berhasil.
 
 ### Blocker atau tindak lanjut
@@ -280,7 +280,7 @@ Lanjut PCAT-007 query/state; production homepage belum diganti. SSR route/browse
 
 ## Task: PCAT-007 — State query katalog dan expiry cover yang aman
 
-- Status: Backlog
+- Status: Done — query helpers/capability queue/hooks tersedia; UI acceptance mengikuti integrasi.
 - Owner: Codex/pengembang
 - Prioritas: P1 — urutan dependency DAG pada plan
 - Referensi: PCAT-US-03; PRD-07/08/09, GR-02/03/05/06/08; [plan](../plans/public-catalog/implementation-plan.md)
@@ -292,13 +292,13 @@ Lanjut PCAT-007 query/state; production homepage belum diganti. SSR route/browse
 
 Canonical filter/keys/pageParam, first-page refresh, append/dedup/abort late data; browser-only visible poster queue/expiry.
 
-Paths/symbol owners: `apps/web/src/lib/public/{catalog-queries,catalog-state,poster-state}.ts, apps/web/test/public-catalog-state.test.ts`. Rincian simbol dan kontrak di affected-files/implementation steps plan.
+Paths/symbol owners: `apps/web/src/lib/public/{catalog-queries,poster-state}.ts`, `apps/web/src/hooks/use-public-{online,poster}.ts`, `apps/web/test/public-video-state.test.ts`. Rincian simbol dan kontrak di affected-files/implementation steps plan.
 
 ### Acceptance criteria
 
-- [ ] Load-more failure mempertahankan item/cursor; double-click/changed-filter late response tidak mencampur data.
-- [ ] Poster max 4 concurrent/dedup/expiry-aware, no offscreen loop/persistence/dehydration; failure bounded + explicit retry.
-- [ ] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
+- [x] Load-more failure mempertahankan item/cursor; double-click/changed-filter late response tidak mencampur data.
+- [x] Poster max 4 concurrent/dedup/expiry-aware, no offscreen loop/persistence/dehydration; failure bounded + explicit retry.
+- [x] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
 
 ### Validasi
 
@@ -306,7 +306,11 @@ Native Bun deferred fetch/clock/queue/dehydration tests dan root gates; UI behav
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau divalidasi. Commands di atas merupakan rencana, bukan hasil.
+8 Oktober 2026: canonical metadata keys include type/limit20/createdAt-id sort, cursor pageParam, max stale60s/gc5min memory, retry false dan explicit first-page restart. ID dedup, serialized next-page request, retained pages/cursor on failure dan canceled old-filter response dibuktikan dengan Query observer.
+
+PosterQueue adalah ephemeral capability cache di luar QueryClient (refinement untuk menjamin exclusion dari dehydration), max4 active/max100 cached identities, dedup subscriber per id/slug, expired cache rejected dan abandoned jobs canceled. Hook aplikasi berada di src/hooks/use-public-poster.ts: actual viewport-only fetch, safe Observer fallback, abort on hide/unmount, expiry/image/network failure shares satu automatic renewal lalu explicit retry; no preload/persistence/interval. Online hook tidak membaca auth.
+
+Observed: targeted state3/20, full web192/1036; root types3/lint1/build2 pass, sesudah memperbaiki import-spacing lint. Browser viewport/expiry/accessibility proof tetap PCAT-013 setelah integrasi UI.
 
 ### Commit task
 
@@ -317,7 +321,7 @@ Belum diimplementasikan atau divalidasi. Commands di atas merupakan rencana, buk
 
 ### Blocker atau tindak lanjut
 
-Menunggu PCAT-006. Approval/hasil proof tidak diasumsikan tersedia.
+Lanjut PCAT-008 komponen. Capability state tidak masuk cache metadata/SSR dan tidak meminta HLS. UI browser acceptance belum diklaim.
 
 ## Task: PCAT-008 — Shell, card dan cover public reusable
 
