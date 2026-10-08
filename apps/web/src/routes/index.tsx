@@ -1,7 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { HomePage } from '#/components/catalog/home-page'
+import { loadPublicCatalog } from '#/lib/catalog/public-catalog-queries'
 
 export const Route = createFileRoute('/')({
+  loader: ({ context }) => loadPublicCatalog(context.queryClient),
   head: () => ({
     meta: [
       { title: 'Vertical Movie — Find your next story' },
@@ -12,5 +14,5 @@ export const Route = createFileRoute('/')({
       },
     ],
   }),
-  component: HomePage,
+  component: () => <HomePage bootstrap={Route.useLoaderData()} />,
 })

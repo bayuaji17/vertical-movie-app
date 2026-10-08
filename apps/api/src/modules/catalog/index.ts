@@ -2,6 +2,22 @@ import { Elysia } from "elysia";
 import { createContentErrors } from "../../plugins/errors";
 import { ErrorResponses } from "../../shared/content-model";
 import { CatalogService } from "./service";
+import { CatalogPosterService } from "./poster-service";
+import {
+  DetailParams,
+  EpisodeQuery,
+  ContentDetailDto,
+  EpisodesDto,
+  WatchMetadataDto,
+} from "./content-model";
+import {
+  HomeQuerySchema,
+  HomeGenresQuery,
+  HomePageDto,
+  HomeGenresDto,
+  HomeFeaturedDto,
+  HomePosterParams,
+} from "./home-model";
 import {
   CatalogQuery,
   SlugParams,
@@ -10,12 +26,79 @@ import {
   PublicSeriesDto,
   PublicSeriesListDto,
 } from "./model";
-export function createCatalogModule(service = new CatalogService()) {
+export function createCatalogModule(
+  service = new CatalogService(),
+  posters = new CatalogPosterService(),
+) {
   return new Elysia({ name: "api.catalog", normalize: false })
     .use(createContentErrors())
     .onBeforeHandle(({ set }) => {
       set.headers["cache-control"] = "private, max-age=60";
     })
+    .get("/catalog", ({ query }) => service.home(query), {
+      query: HomeQuerySchema,
+      response: { 200: HomePageDto, ...ErrorResponses },
+      detail: { tags: ["Catalog"], operationId: "listPublicHomeCatalog" },
+    })
+    .get("/catalog/genres", ({ query }) => service.genres(query), {
+      query: HomeGenresQuery,
+      response: { 200: HomeGenresDto, ...ErrorResponses },
+      detail: { tags: ["Catalog"], operationId: "listPublicHomeGenres" },
+    })
+    .get("/catalog/featured", () => service.featured(), {
+      response: { 200: HomeFeaturedDto, ...ErrorResponses },
+      detail: { tags: ["Catalog"], operationId: "getPublicFeaturedFilm" },
+    })
+    .get(
+      "/catalog/:kind/:id/poster",
+      ({ params, request, set }) => {
+        set.headers["cache-control"] = "private, no-store";
+        return posters.get(params.kind, params.id, request.signal);
+      },
+      {
+        params: HomePosterParams,
+        detail: {
+          tags: ["Catalog"],
+          operationId: "getPublicCatalogPoster",
+          responses: {
+            200: {
+              description: "Bounded WebP image",
+              content: {
+                "image/webp": { schema: { type: "string", format: "binary" } },
+              },
+            },
+          },
+        },
+      },
+    )
+    .get(
+      "/catalog/details/:kind/:slug",
+      ({ params }) => service.detail(params.kind, params.slug),
+      {
+        params: DetailParams,
+        response: { 200: ContentDetailDto, ...ErrorResponses },
+        detail: { tags: ["Catalog"], operationId: "getPublicContentDetail" },
+      },
+    )
+    .get(
+      "/catalog/series/:slug/episodes",
+      ({ params, query }) => service.episodes(params.slug, query),
+      {
+        params: SlugParams,
+        query: EpisodeQuery,
+        response: { 200: EpisodesDto, ...ErrorResponses },
+        detail: { tags: ["Catalog"], operationId: "listPublicSeriesEpisodes" },
+      },
+    )
+    .get(
+      "/catalog/watch/:slug",
+      ({ params }) => service.watchMetadata(params.slug),
+      {
+        params: SlugParams,
+        response: { 200: WatchMetadataDto, ...ErrorResponses },
+        detail: { tags: ["Catalog"], operationId: "getPublicWatchMetadata" },
+      },
+    )
     .get("/videos", ({ query }) => service.list(query), {
       query: CatalogQuery,
       response: { 200: PublicVideoListDto, ...ErrorResponses },

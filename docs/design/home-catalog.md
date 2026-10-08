@@ -6,7 +6,7 @@
 
 Beranda yang membantu pengunjung menemukan Film, Series dan Standalone published tanpa akun. Acuan: [PRD-07/08 dan keputusan katalog terbuka](../product/prd.md#keputusan-produk-yang-masih-terbuka), [aturan publik](../product/global-rules.md), [design system](design-system.md) dan token runtime `apps/web/src/styles.css`.
 
-Mockup memakai light neutral/lime, Inter/Space Grotesk dan sampul portrait 9:16. Copy English mengikuti mockup admin terbaru. Semua judul, foto, genre, durasi dan jumlah episode adalah fixture fiktif. Raster awal adalah evidence desain historis. Runtime homepage kini memakai fixture lokal; player/watch tetap di luar tahap FE dummy.
+Mockup memakai light neutral/lime, Inter/Space Grotesk dan sampul portrait 9:16. Copy English mengikuti mockup admin terbaru. Semua judul, foto, genre, durasi dan jumlah episode adalah fixture fiktif. Raster awal adalah evidence desain historis. Runtime homepage kini memakai API pada PCAT; judul/gambar raster dan bukti HOMEFE tetap fixture historis. Alur katalog-ke-watch masih lanjutan.
 
 ## Usulan tata letak
 
@@ -14,7 +14,7 @@ Desktop: header brand/Home/Browse/search/appearance; judul editorial singkat; sa
 
 Film/Standalone membuka detail/tonton; Series mengarah ke detail series/daftar episode. Poster Series memakai jumlah episode, bukan durasi total. Tidak menampilkan status editorial atau data admin.
 
-Grid, featured placement serta search/filter adalah arah visual yang disetujui pengguna 7 Oktober 2026. Semantik interaksi, jumlah fixture/batch dan CTA dummy disetujui lalu diimplementasikan menurut [implementation plan](../plans/home-catalog/implementation-plan.md); bukan seluruh detail runtime dianggap disetujui melalui raster. DTO katalog saat snapshot hanya menerima limit/cursor; API video/series terpisah. Integrasi API/featured selection nyata menjadi tahap lanjutan. Episode tidak dijanjikan sebagai kartu top-level terpisah.
+Grid, featured placement serta search/filter adalah arah visual yang disetujui pengguna 7 Oktober 2026. Semantik interaksi, jumlah fixture/batch dan CTA dummy disetujui lalu diimplementasikan menurut [implementation plan](../plans/home-catalog/implementation-plan.md); bukan seluruh detail runtime dianggap disetujui melalui raster. DTO katalog saat snapshot hanya menerima limit/cursor; API video/series terpisah. Integrasi API/featured selection terbaru telah disetujui dan diimplementasikan pada PCAT; snapshot dummy tetap sejarah. Episode tidak dijanjikan sebagai kartu top-level terpisah.
 
 ## Keputusan tahap frontend — 7 Oktober 2026
 
@@ -46,7 +46,7 @@ Enam foto dibuat terpisah dengan ImageGen, memakai mockup approved sebagai refer
 
 Semua output native PNG 941×1672 (rasio 0.5628, mendekati 9:16), telah dilihat satu per satu; enam scene sesuai dan tidak mengandung UI. Penyesuaian teknis terhadap ukuran source plan: output native dipertahankan tanpa resize/crop, sedangkan frame CSS menggunakan exact 9:16 + object-cover. Selisih lebar native dari rasio tepat hanya 0.5 pixel. Hero eager, kartu lazy, dimensi reservasi 900×1600, fallback SVG lokal 900×1600. Batas fallback satu perpindahan source mencegah retry loop.
 
-Tidak ada external CDN atau network image service pada runtime. Native copy menjaga file regular; permission 100644 diverifikasi melalui Git. Browser rasio/failed-image proof ditutup di HOMEFE-009.
+Pada tahap HOMEFE historis tidak ada external CDN atau network image service. Native copy menjaga file regular; permission 100644 diverifikasi melalui Git. Browser rasio/failed-image proof ditutup di HOMEFE-009.
 
 ## Runtime FE terverifikasi — 7 Oktober 2026
 
@@ -57,3 +57,15 @@ Development dan build Bun/Nitro lulus matrix Chromium 320–1920px Light/Dark, S
 ### Loading halaman berikutnya — HOMEFE-012
 
 Refinement pengguna 7 Oktober 2026: Load more menambahkan skeleton portrait9:16/judul/metadata di akhir grid selama isFetchingNextPage, sambil mempertahankan kartu yang sudah dimuat. Maksimal enam placeholder dengan batas jumlah hasil tersisa, aria-hidden dekoratif, grid aria-busy/live status, reduced-motion tanpa pulse. Tombol disabled saat loading; skeleton diganti kartu baru ketika query selesai. Fixture JSON tidak diberi delay buatan; state dapat berlalu sangat cepat. Browser proof dan gates pada [HOMEFE-012](../tasks/home-catalog.md#task-homefe-012--skeleton-halaman-berikutnya).
+
+## Integrasi API — PCAT, 7 Oktober 2026
+
+Pengguna menyetujui [plan PCAT](../plans/public-catalog-api/implementation-plan.md); [PCAT-001–011](../tasks/public-catalog-api.md) implemented/verified lokal. UI mempertahankan grid/light-dark/portrait/dialog, kini memakai published Movie/Standalone/Series, genre DTO (boleh kosong), latest Film featured nullable dan order publishedAt DESC/UUID ASC/kind ASC. SSR first6, cursor useInfiniteQuery, Load more manual+skeleton, literal search300ms/IME dan filter server; tidak auto scroll. Initial pending/error, empty, partial section Retry, next-page/background failure retaining cards, cursor422/Refresh dan offline pause dibedakan tanpa fallback JSON.
+
+Poster berasal binary same-origin private WebP output, eager hero/lazy grid, one-step SVG fallback. Production components tidak mengimpor dummy data/schema/selectors; retained fixtures/PNG untuk design/tests. Detail metadata tetap dialog, belum integrasi watch/Series episode route. Chromium dev/built dengan actual Elysia/PG/private MinIO lolos320/390/768/1024/1440/1920 Light/Dark, System, CSS9:16/no overflow, long unbroken title, mobile/menu/dialog keyboard focus dan reduced-motion. Screenshots dev/built Light/Dark390/1440 adalah artifacts lokal dengan synthetic SQL titles dan repeated test image; bukan data development atau production. HOMEFE screenshots/matrix tetap evidence tahap dummy.
+
+## Detail dan watch publik — 8 Oktober 2026
+
+[PCW](../tasks/public-content-watch.md) melanjutkan PCAT dengan CTA Open details/Watch, featured View film langsung ke watch, detail Film/Standalone dan Series dengan grouped season/episode. Episode memakai useInfiniteQuery, first20 dan Load More manual dengan append skeleton, retry cursor yang sama, refresh cursor422 dan offline pause. Watch mempertahankan metadata/backlinks saat Next gagal; Next lintas season dipilih manual. Player tetap memakai skin Video.js existing, tanpa autoplay atau progres tersimpan.
+
+Chromium development dan built Bun/Nitro membuktikan playback HLS nyata, expiry/seek dengan posisi/pause dipertahankan, kualitas480p, explicit Retry dan cancellation saat identitas berubah. Detail Series dan watch diuji320/390/768/1024/1440/1920px × Light/Dark/System, CSS9:16, tanpa overflow dan navigasi44px. Screenshot runtime lokal memakai judul sintetis dan video warna polos; bukan artwork/katalog production. Bukti preview admin terpisah pada PCW-007; riwayat screenshot HOMEFE/PCAT tetap mewakili tahap sebelumnya.

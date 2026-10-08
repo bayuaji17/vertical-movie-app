@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { cn } from 'cn'
-import type { CatalogItem } from '#/lib/catalog/catalog-schema'
+import type { CatalogItem } from '#/lib/catalog/public-catalog-model'
 
 const fallback = '/images/catalog/poster-fallback.svg'
 export function Poster({

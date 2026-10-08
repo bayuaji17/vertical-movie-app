@@ -1,12 +1,13 @@
 import { RiPlayFill } from '@remixicon/react'
+import { Link } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import {
   genreLabels,
   itemLength,
   kindLabels,
-} from '#/lib/catalog/catalog-selectors'
-import type { CatalogItem } from '#/lib/catalog/catalog-schema'
+} from '#/lib/catalog/public-catalog-model'
+import type { CatalogItem } from '#/lib/catalog/public-catalog-model'
 import { Poster } from './poster'
 
 export function FeaturedFilm({
@@ -23,7 +24,7 @@ export function FeaturedFilm({
     >
       <div className="flex min-w-0 flex-col items-start gap-3 lg:gap-5">
         <Badge variant="outline">Featured film</Badge>
-        <h2 className="font-heading text-2xl leading-tight font-bold tracking-tight sm:text-4xl lg:text-5xl">
+        <h2 className="max-w-full font-heading text-2xl leading-tight font-bold tracking-tight break-words sm:text-4xl lg:text-5xl">
           {item.title}
         </h2>
         <p className="hidden max-w-xl text-base text-muted-foreground sm:block lg:text-lg">
@@ -37,7 +38,15 @@ export function FeaturedFilm({
         <div className="flex flex-wrap gap-2 sm:gap-3">
           <Button
             className="min-h-11"
-            onClick={(event) => onDetails(item, event.currentTarget)}
+            nativeButton={false}
+            role="link"
+            render={
+              <Link
+                to="/watch/$slug"
+                params={{ slug: item.slug }}
+                preload={false}
+              />
+            }
           >
             <RiPlayFill data-icon="inline-start" aria-hidden="true" />
             View film

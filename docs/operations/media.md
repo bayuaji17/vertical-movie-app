@@ -146,3 +146,37 @@ Private `GET /admin/videos/:id/publication-readiness` tidak mengubah data. Memak
 Query invalidation mencakup identity-scoped list/detail/inventory/readiness. Working File/hash/upload owner yang sama memblokir commands, owner lain tidak menjadi global blocker; Refresh status tetap read-only dan tidak membuang selected File. Offline tidak mengantre mutation untuk reconnect. Session invalid menghentikan private effects dan membuang private caches; valid-admin business outage tetap berada pada UI dengan status unavailable.
 
 Browser proof mengikuti harness existing dengan `AUTH_BROWSER_PHASE=publication`, `AUTH_BROWSER_RUNTIME=built`, dedicated `MEDIA_TEST_DATABASE_URL`, loopback private random MinIO bucket dan actual worker subprocess. Runner env `AUTH_BROWSER_NODE`, `AUTH_PLAYWRIGHT_MODULE`, `AUTH_BROWSER_EXECUTABLE` menunjuk Node/Playwright/Chrome yang tersedia. Command root: `bun apps/web/test/auth-browser-smoke.mjs`; jalankan serial terhadap reset DB/build lainnya. Browser auth injected fixture; API/domain PG suite terpisah menguji guards/lifecycle. Native Better Auth evidence tetap pada runbook auth. Browser evidence meliputi Film/Standalone actual create/upload/process/preview/public watch/archive, 15 width/theme cases, keyboard/focus/44px, local hashing/offline, external active upload/readiness and version race, committed lost/malformed response, explicit retry, confirmed command+failed refetch, archive pending session revocation, stale replay, catalog invalidation dan actual signed expiry. Screenshots runtime ignored di `.turbo/admin-publication-execution/browser/`; empat PNG canonical tetap mockup. R2/Safari/physical-device/resource/full-restore gates existing tetap terpisah.
+
+## Homepage katalog publik — PCAT
+
+Implemented/verified lokal 7 Oktober 2026 pada [PCAT-001–011](../tasks/public-catalog-api.md). Pengunjung membaca `/api/catalog`, `/api/catalog/genres`, `/api/catalog/featured` dan `/api/catalog/:kind/:id/poster`; public tanpa Cookie/Authorization ke upstream. Eligible published Movie/Standalone/Series memerlukan current ready media/provenance/owner/parent gates. Empty sah; outage memberi error/Retry, tanpa dummy fallback. Refresh katalog membaca traversal baru; archive tidak menarik kembali metadata/image yang telah diterima. Fresh poster lookup menolak hidden owner404; storage/profile/missing/oversized503 memberi SVG fallback di UI. Tidak mengubah signed playback expiry.
+
+Native proof command root:
+
+```sh
+bun test apps/api/test/integration/public-catalog-proof.test.ts apps/api/test/integration/public-catalog-poster-proof.test.ts
+bun test apps/api/test/integration/media-publication-proof.test.ts apps/api/test/integration/media-series-proof.test.ts
+AUTH_BROWSER_PHASE=public-catalog AUTH_BROWSER_RUNTIME=dev bun apps/web/test/auth-browser-smoke.mjs
+AUTH_BROWSER_PHASE=public-catalog AUTH_BROWSER_RUNTIME=built bun apps/web/test/auth-browser-smoke.mjs
+```
+
+Jalankan serial: fixture reset hanya guarded loopback dedicated `MEDIA_TEST_DATABASE_URL` bernama `vertical_movie_app_media_test`; storage memerlukan loopback `MEDIA_STORAGE_TEST_ENDPOINT` port9000 dan `MEDIA_STORAGE_TEST_ACCESS_KEY_ID`/`MEDIA_STORAGE_TEST_SECRET_ACCESS_KEY` dengan izin create/delete bucket test acak. Credentials hanya env ignored, jangan memakai bucket/DB aplikasi. Runner browser memakai `AUTH_BROWSER_NODE`, `AUTH_PLAYWRIGHT_MODULE`, `AUTH_BROWSER_EXECUTABLE`; screenshot prefix opsional `ADMIN_BROWSER_SCREENSHOT_PREFIX`, worker path native opsional `AUTH_BROWSER_WORKER_PATH`. Cleanup hanya known fixture objects dan dedicated bucket. Fault/hold/empty/title controls hanya test harness, tidak route aplikasi.
+
+Observed: native4 tests/74 assertions; legacy6/122; actual production poster transcode306422bytes/1080×1920, private unsigned403/public200/archive404/error503. Catalog fixture SQL menyiapkan verified HLS-ready facts, tidak memproses source HLS nyata. Dataset127 titles/121 Series/101 genres membuktikan global pages dan tanpa cap100; satu SQL per read, EXPLAIN execution103.644–114.992ms pada fixture lokal. Tidak menambah schema/index atau development migration; tidak mengesahkan SLA, R2/Safari/perangkat fisik/production. Dev+built browser matrix lengkap dan gates ada di backlog PCAT.
+
+## Detail publik dan watch — PCW
+
+Implemented/verified lokal 8 Oktober 2026; evidence dan task receipts pada [PCW](../tasks/public-content-watch.md). Rute web `/titles/:kind/:slug` untuk Movie/Standalone, `/series/:slug` untuk Series dan `/watch/:slug` untuk Movie/Standalone/Episode. Read upstream tambahan: `GET /catalog/details/:kind/:slug`, `/catalog/series/:slug/episodes` dan `/catalog/watch/:slug`. DTO detail/watch/episode unsigned, public tanpa session; gateway membuang Cookie/Authorization. Detail memakai lookup langsung, bukan legacy list100. Episode diurutkan season/episode/UUID dengan cursor scoped/asOf dan default20/max100, count serta null EOF.
+
+SSR mengirim detail/first20 episode atau metadata watch dengan TTL60s dan sisa freshForMs; capability playback tidak masuk SSR/Query cache. Cache/invalidation dapat mempertahankan metadata yang telah diterima sampai refresh/refetch. Playback/poster baru memeriksa visibility/profile/provenance terkini. Load More dan Next manual; failed append mempertahankan rows, Retry memakai cursor yang sama, cursor422 meminta Refresh dari page pertama. Partial error episode mempertahankan detail; public404/503 tetap berstatus HTTP sesuai pada SSR. Player menolak capability identitas/origin yang salah, membatalkan request saat pergantian judul dan menyediakan Retry manual. Autoplay, auto-next dan watch-progress tidak ditambahkan.
+
+Command root, dengan test database/storage/runner env pada bagian PCAT di atas:
+
+```sh
+bun test apps/api/test/integration/public-content-proof.test.ts
+AUTH_BROWSER_PHASE=public-watch AUTH_BROWSER_RUNTIME=dev bun apps/web/test/auth-browser-smoke.mjs
+AUTH_BROWSER_PHASE=public-watch AUTH_BROWSER_RUNTIME=built bun apps/web/test/auth-browser-smoke.mjs
+AUTH_BROWSER_PHASE=publication AUTH_BROWSER_RUNTIME=built bun apps/web/test/auth-browser-smoke.mjs
+```
+
+Jalankan serial terhadap suite yang reset DB/build. Native proof4 tests/57 assertions mencakup121 Series lookup langsung,103 sparse episodes, snapshot/order/count/cursor, owner FK/current generation, parent/child visibility dan actual signed HLS/archive. Browser memakai24 episode dua season dan FFmpeg12s portrait HLS tiga rendition pada private bucket acak. Facts/readiness disiapkan fixture SQL; ini bukan bukti full upload/worker provenance. Publication browser regression menjalankan actual create/upload/worker/private preview Film/Standalone serta public watch/archive. Browser public membuktikan SSR tanpa duplicate metadata, partial503/offline, cursor retry/422, actual expiry/seek/quality/play, explicit Retry, identity race, archive404 dan18 width/theme cases; metadata SSR tidak memuat URL signed/credential. Cleanup hanya owned objects/bucket dan DB dedicated. Tidak ada perubahan schema/dependency/env atau migration; R2/Safari/perangkat fisik/resource/full restore/production tetap gerbang tersendiri. PCAT/PCW masih local stack, bukan remote delivery.
