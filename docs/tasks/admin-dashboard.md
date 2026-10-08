@@ -350,7 +350,7 @@ Owner/session-confirmed existing invalidation helpers now cancel/fence exact mat
 ### Commit task
 
 - Pesan: feat(web): invalidate dashboard after confirmed changes (DASH-008)
-- SHA: Belum dibuat; receipt dicatat pada update dokumentasi berikutnya sesudah commit berhasil.
+- SHA: `dc563f10d5660e8ab92d735d40fb7691946b2bef`.
 - Hook/checks: Web231 pass, root types3/lint1/build2 pass, docs/format/diff/preservation; normal hooks wajib tanpa bypass.
 - Ledger: Jangan menulis SHA commit sendiri sebelum tersedia.
 
@@ -360,7 +360,7 @@ Menunggu approval proposal dan dependency task di atas; tidak menganggap scope a
 
 ## Task: DASH-009 — PostgreSQL/native auth proof
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: P1
 - Referensi: DASH-US-02/03, PRD-02/05/09; [implementation steps](../plans/admin-dashboard/implementation-plan.md#implementation-steps).
@@ -378,8 +378,8 @@ Requirements: >100 mixed rows; all statuses including Series unpublished/archive
 
 ### Acceptance criteria
 
-- [ ] One consistent read snapshot, exact partitions/counters/lists, authorized native session only; record actual results/limitations.
-- [ ] Definisi/state/invariants terkait pada plan terbukti; actual validation serta scope preservation dan commit tercatat sesuai workflow.
+- [x] One consistent read snapshot, exact partitions/counters/lists, authorized native session only; record actual results/limitations.
+- [x] Definisi/state/invariants terkait pada plan terbukti; actual validation serta scope preservation dan commit tercatat sesuai workflow.
 
 ### Validasi
 
@@ -387,13 +387,13 @@ Requirements: >100 mixed rows; all statuses including Series unpublished/archive
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement, bukan hasil actual.
+Dedicated loopback vertical_movie_app_content_test reset/migrated only. Real Bun SQL/Drizzle seven tests43 assertions pass:125 Film, own Episode publication under draft/archived parents, Series published/unpublished/archive precedence, source/cover request/worker jobs, obsolete asset/generation/terminal/archive exclusions, latest8/failed5 ties including same ID across types, five reads/no N+1, concurrent owner write snapshot isolation and persisted-row preservation. Native Better Auth cookies verify200/401/403/422/503/banned/expired/revoked/auth outage/closed DB. EXPLAIN measured fixture query execution under4ms; no new index/schema migration required. Synthetic publication/job fixtures prove dashboard predicates, not worker/publication or production-scale readiness.
 
 ### Commit task
 
-- Pesan: Conventional Commit dengan ID task setelah acceptance criteria dan relevant gates lulus.
+- Pesan: test(api): prove dashboard snapshot and authorization (DASH-009)
 - SHA: Belum dibuat; receipt dicatat pada update dokumentasi berikutnya sesudah commit berhasil.
-- Hook/checks: Belum dijalankan untuk task ini.
+- Hook/checks: PostgreSQL7 pass/43 assertions, root types3/lint1/build2 pass, docs/format/diff/preservation; normal hooks wajib tanpa bypass.
 - Ledger: Jangan menulis SHA commit sendiri sebelum tersedia.
 
 ### Blocker atau tindak lanjut
