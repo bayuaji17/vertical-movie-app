@@ -32,7 +32,7 @@ export function useDashboardSummary() {
     environment = useSyncExternalStore(
       subscribe,
       snapshot,
-      () => 'hidden:false',
+      () => 'hidden:true',
     ),
     online = environment.endsWith(':true'),
     visible = environment.startsWith('visible:')

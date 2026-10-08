@@ -1,6 +1,6 @@
 import { onlineManager, queryOptions } from '@tanstack/react-query'
 import type { QueryClient } from '@tanstack/react-query'
-import type { DashboardClient } from './dashboard-client'
+import type { DashboardClient, DashboardSummary } from './dashboard-client'
 import { PrivateApiError } from '../api/private-result'
 
 export const dashboardKeys = {
@@ -20,7 +20,7 @@ export function dashboardSummaryOptions(
   identity: string,
   ownerSignal?: AbortSignal,
 ) {
-  return queryOptions({
+  return queryOptions<DashboardSummary>({
     queryKey: dashboardKeys.summary(identity),
     enabled: typeof window !== 'undefined',
     retry: false,

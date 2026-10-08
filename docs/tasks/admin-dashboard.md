@@ -224,7 +224,7 @@ Eden-derived DTO validated strictly with existing Zod: safe counts/partitions, U
 ### Commit task
 
 - Pesan: feat(web): read dashboard summary with session scope (DASH-005)
-- SHA: Belum dibuat; receipt dicatat pada update dokumentasi berikutnya sesudah commit berhasil.
+- SHA: `36ff219c30bdfd5195ef8d77e0f9a4cdd4e202dd`.
 - Hook/checks: Web6/API167 pass, root types3/lint1/build2 pass, scoped formatting/docs/diff/preservation; normal hooks wajib tanpa bypass.
 - Ledger: Jangan menulis SHA commit sendiri sebelum tersedia.
 
@@ -234,7 +234,7 @@ Menunggu approval proposal dan dependency task di atas; tidak menganggap scope a
 
 ## Task: DASH-006 — Content overview dan latest list
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: P1
 - Referensi: DASH-US-01/03, PRD-02/05/09; [implementation steps](../plans/admin-dashboard/implementation-plan.md#implementation-steps).
@@ -252,8 +252,8 @@ Requirements: Existing shell/account/quick actions, counters partition, editoria
 
 ### Acceptance criteria
 
-- [ ] Empty is real0, error is unavailable/stale; Episode card never links to an unsupported global list; archive labels don't mutate child state.
-- [ ] Definisi/state/invariants terkait pada plan terbukti; actual validation serta scope preservation dan commit tercatat sesuai workflow.
+- [x] Empty is real0, error is unavailable/stale; Episode card never links to an unsupported global list; archive labels don't mutate child state.
+- [x] Definisi/state/invariants terkait pada plan terbukti; actual validation serta scope preservation dan commit tercatat sesuai workflow.
 
 ### Validasi
 
@@ -261,13 +261,13 @@ Relevant units and root gates, intermediate built-browser smoke if harness avail
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement, bukan hasil actual.
+Admin route now renders four editorial inventories/partitions, truthful Episode helper, supported type links, latest8 owner links, actual UTC snapshot time and account information. Existing Rhea primitives cover skeleton/empty/error/offline/stale-refresh states; no SSR summary read. Explicit summary query generic preserves UI inference. Initial SSR renders loading skeleton rather than a false offline claim. Browser responsive/navigation acceptance follows DASH-010.
 
 ### Commit task
 
-- Pesan: Conventional Commit dengan ID task setelah acceptance criteria dan relevant gates lulus.
+- Pesan: feat(web): display dashboard content inventory (DASH-006)
 - SHA: Belum dibuat; receipt dicatat pada update dokumentasi berikutnya sesudah commit berhasil.
-- Hook/checks: Belum dijalankan untuk task ini.
+- Hook/checks: Web6/API167 pass, root types3/lint1/build2 pass; final SSR fallback build2 pass, docs/format/diff/preservation; hook reruns types/lint; normal hooks wajib tanpa bypass.
 - Ledger: Jangan menulis SHA commit sendiri sebelum tersedia.
 
 ### Blocker atau tindak lanjut
