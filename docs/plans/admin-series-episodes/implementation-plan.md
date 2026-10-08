@@ -2,7 +2,7 @@
 
 ## Plan metadata
 
-- Status: executing fondasi; scope metadata/client ready, task publication mengikuti parity gate.
+- Status: executing modul; ASER-001/002 selesai lokal, editor/media/publication mengikuti task dan parity gate.
 - Tanggal: 2026-10-08; pengguna memilih modul ini setelah meminta lanjut task berikutnya.
 - Repository: `bayuaji17/vertical-movie-app`; base ref `main`.
 - Base SHA dan last validated SHA: `04b098bef9d210c1670f3a29c375208ef36805b9`.
@@ -217,3 +217,6 @@ Parent published archive/restore/cascade dan public discovery Series tidak ditet
 ## Execution log
 
 - 2026-10-08: pengguna memilih modul; branch `feat/admin-series-episodes` dari base, snapshot preservation 23 path lokal dibuat di ignored `.turbo/`; context disimpan sebelum plan/backlog. Validation dan commit receipts dicatat setelah benar-benar berjalan.
+
+- 2026-10-08, ASER-001 receipt: `213aa986c2d43de7177b50ba1f598c3f7097cbb7`; scoped5 dokumentasi, staged docs82/835, working docs89/854, normal lint/types cache dan Commitlint lulus.
+- 2026-10-08, ASER-002: typed private clients/keys/mutations/invalidation dan native/compile-only tests; API151/883, web208/1144, types3/lint1/build2 lulus. Dua source dan tiga test baru; route/UI/schema/env/dependency tidak berubah. Final evidence dimiliki backlog; runtime commit SHA dicatat pada update berikutnya. ASER-003 route/state spec menjadi next task; ASER-007 readiness API juga prerequisite-ready, belum diimplementasikan.

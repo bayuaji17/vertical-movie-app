@@ -1,6 +1,6 @@
 # Modul: Admin Series, season dan episode
 
-> Status: fondasi dalam eksekusi · 8 Oktober 2026 · Pengguna memilih modul ini setelah katalog PR #13. Scope runtime per task; belum menyatakan keseluruhan editor/publikasi Series selesai.
+> Status: ASER-001/002 selesai lokal; editor/media/publication masih lanjutan · 8 Oktober 2026 · Pengguna memilih modul ini setelah katalog PR #13. Scope runtime per task; belum menyatakan keseluruhan editor/publikasi Series selesai.
 
 ## Tujuan modul
 
@@ -47,14 +47,14 @@ docs:check, targeted Prettier, diff check, scoped staged snapshot, preservation 
 
 ### Hasil dan bukti
 
-Context sebelum plan/backlog tersimpan pada snapshot04b098b; user module choice dan23 path unrelated dipisahkan. `bun run docs:check` lulus89 Markdown/854 links; targeted Prettier dan git diff --check lulus. Snapshot committed akan diperiksa sebelum commit; source/runtime belum diubah pada task ini.
+Context sebelum plan/backlog tersimpan pada snapshot04b098b; user module choice dan23 path unrelated dipisahkan. `bun run docs:check` lulus89 Markdown/854 links; targeted Prettier dan git diff --check lulus. Snapshot staged lulus82 Markdown/835 links; source/runtime belum diubah pada task ini.
 
 ### Commit task
 
 - Pesan: docs: plan admin series and episode workflow (ASER-001)
-- SHA: Belum dibuat.
-- Hook/checks: Docs/Prettier/diff lulus; normal pre-commit docs/lint/types dan Commitlint diperlukan sebelum task commit diterima.
-- Ledger: Receipt setelah commit pada update task berikutnya.
+- SHA: `213aa986c2d43de7177b50ba1f598c3f7097cbb7`.
+- Hook/checks: docs89/854, lint1/types3 task cache valid dan Commitlint lulus tanpa bypass. Commit scoped5 file dokumentasi; belum push.
+- Ledger: Receipt aktual dicatat pada dokumentasi ASER-002.
 
 ### Blocker atau tindak lanjut
 
@@ -62,7 +62,7 @@ Ikuti dependensi step; task selanjutnya ASER-002.
 
 ## Task: ASER-002 — Private season/episode client dan queries
 
-- Status: Ready
+- Status: Done
 - Owner: Codex
 - Prioritas: P0
 - Referensi: ASER-US-01/02/03, PRD-03/04/05/06/08/09; [step plan](../plans/admin-series-episodes/implementation-plan.md#aser-002--private-seasonepisode-client-dan-queries).
@@ -76,8 +76,8 @@ Typed Eden season list/create/patch serta episode list/detail/create/patch; quer
 
 ### Acceptance criteria
 
-- [ ] Wrong-kind/owner/version/UUID atau malformed2xx tidak menjadi confirmed save; signals/cursor20/HTTP codes terjaga.
-- [ ] Identity/filter keys, cancellation/cleanup401 dan scoped invalidation; mutations satu request tanpa replay/optimistic success.
+- [x] Wrong-kind/owner/version/UUID atau malformed2xx tidak menjadi confirmed save; signals/cursor20/HTTP codes terjaga.
+- [x] Identity/filter keys, cancellation/cleanup401 dan scoped invalidation; mutations satu request tanpa replay/optimistic success.
 
 ### Validasi
 
@@ -85,13 +85,17 @@ Native injected-fetch/QueryClient tests, compile-only Eden positif/negatif, exis
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi pada task ini.
+8 Oktober 2026: `series-client.ts`/`series-queries.ts` tersedia tanpa UI callers baru. Typed Eden season list/create/patch dan episode list/detail/create/patch memakai private transport existing; critical UUID/version/kind/grouping/owner, archived-list leakage, malformed2xx, duplicate pages dan cursor validation berjalan sebelum confirmed result. Query identity+Series+season/filter, explicit invalidation/no-refetch, signals/cleanup401 serta no retry/no optimistic cache success tersedia.
+
+`bun test apps/web/test/admin-series-client.test.ts apps/web/test/admin-series-queries.test.ts`:15 pass/105 assertions; final `bun test apps/web/test`:208 pass/1144 assertions. `bun test apps/api/src`:151 pass/883 assertions. Root `bun run check-types`:3 successful (22.802s); `bun run lint`:1 successful (18.893s); `bun run build`:2 successful (4.928s), existing large-chunk warning tetap. Compile-only Eden positive/negative ikut type gate; targeted source Prettier check lulus. Initial TypeScript union/null/directive dan dua lint annotations diperbaiki sebelum final gates, tanpa bypass.
+
+Ini proof fondasi transport/cache/contract; belum menjalankan editor browser, persistence SQL baru atau media-Series journey. Schema/env/dependency/runtime routes tidak berubah; tidak ada migration development diperlukan.22 path unrelated byte-identical dan docs index overlay desain existing tetap terpisah. Documentation/commit hooks ditutup pada commit task ini.
 
 ### Commit task
 
-- Pesan: Ditentukan saat task selesai, Conventional Commit dengan ID task.
-- SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan.
+- Pesan: feat(web): add private season and episode clients (ASER-002).
+- SHA: Receipt aktual dicatat pada update task berikutnya setelah commit berhasil.
+- Hook/checks: Relevant tests, types/lint/build dan Prettier lulus; docs/whitespace serta normal Husky/Commitlint wajib sebelum commit diterima.
 - Ledger: Receipt setelah commit pada update task berikutnya.
 
 ### Blocker atau tindak lanjut
@@ -100,7 +104,7 @@ Ikuti dependensi step; task selanjutnya ASER-003.
 
 ## Task: ASER-003 — Route dan state specification editor
 
-- Status: Backlog
+- Status: Ready
 - Owner: Codex
 - Prioritas: P1
 - Referensi: ASER-US-01/02/03, PRD-03/04/05/06/08/09; [step plan](../plans/admin-series-episodes/implementation-plan.md#aser-003--editor-route-dan-state-specification).
@@ -252,7 +256,7 @@ Ikuti dependensi step; task selanjutnya ASER-007.
 
 ## Task: ASER-007 — Authoritative Series readiness API
 
-- Status: Backlog
+- Status: Ready
 - Owner: Codex
 - Prioritas: P0
 - Referensi: ASER-US-01/02/03, PRD-03/04/05/06/08/09; [step plan](../plans/admin-series-episodes/implementation-plan.md#aser-007--authoritative-series-readiness-api).
