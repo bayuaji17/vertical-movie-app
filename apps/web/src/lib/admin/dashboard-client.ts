@@ -103,11 +103,8 @@ const schema = z
       const a = value.latestContent[i - 1],
         b = value.latestContent[i]
       const time = Date.parse(a.createdAt) - Date.parse(b.createdAt)
-      if (
-        time < 0 ||
-        (time === 0 && (a.id < b.id || (a.id === b.id && a.type > b.type)))
-      )
-        fail()
+      // SQL owns tie ordering: timestamp JSON loses PostgreSQL submilliseconds.
+      if (time < 0) fail()
     }
   })
 export function verifiedDashboardSummary(value: unknown): DashboardSummary {

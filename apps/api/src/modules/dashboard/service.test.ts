@@ -93,3 +93,25 @@ describe("dashboard summary", () => {
     }
   });
 });
+
+test("malformed repository count and DTO fail safely before HTTP serialization", async () => {
+  const badCount = empty();
+  badCount.media = [{ state: "failed", count: false as unknown as number }];
+  const badDto = empty();
+  badDto.latestContent = [
+    {
+      type: "film",
+      id: "bad-id",
+      title: "Invalid",
+      publicationStatus: "draft",
+      createdAt: new Date(),
+    },
+  ];
+  for (const snapshot of [badCount, badDto])
+    await expect(
+      new DashboardService({ read: async () => snapshot }).summary(),
+    ).rejects.toMatchObject({
+      httpStatus: 503,
+      code: "CONTENT_DEPENDENCY_UNAVAILABLE",
+    });
+});

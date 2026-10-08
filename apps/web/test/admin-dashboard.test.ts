@@ -175,3 +175,64 @@ test('confirmed mutation invalidation cancels stale snapshot without hidden refe
   expect(reads).toBe(1)
   cache.clear()
 })
+
+test('private dashboard gateway forwards only exact GET with cookie and no-store', async () => {
+  const { createAuthGateway } = await import('../src/lib/server/auth-gateway')
+  const requests: Request[] = []
+  const gateway = createAuthGateway('business', {
+    getPublicOrigin: () => 'http://web.example',
+    getApiInternalUrl: () => 'http://127.0.0.1:43127',
+    fetcher: async (request) => {
+      requests.push(request)
+      return Response.json(summary())
+    },
+  })
+  const response = await gateway(
+    new Request('http://web.example/api/admin/dashboard/summary', {
+      headers: { cookie: 'session=private' },
+    }),
+  )
+  expect(response.status).toBe(200)
+  expect(requests[0].url).toBe('http://127.0.0.1:43127/admin/dashboard/summary')
+  expect(requests[0].headers.get('cookie')).toBe('session=private')
+  expect(response.headers.get('cache-control')).toBe('private, no-store')
+  for (const path of [
+    '/api/admin/dashboard',
+    '/api/admin/dashboard/summary/other',
+    '/api/admin/dashboard/%73ummary',
+  ])
+    expect(
+      (await gateway(new Request('http://web.example' + path))).status,
+    ).toBe(404)
+  expect(
+    (
+      await gateway(
+        new Request('http://web.example/api/admin/dashboard/summary', {
+          method: 'POST',
+        }),
+      )
+    ).status,
+  ).toBe(405)
+  expect(requests).toHaveLength(1)
+})
+
+test('summary preserves SQL order when native timestamp precision is lost in JSON', () => {
+  const value = summary()
+  value.content.film = {
+    total: 2,
+    draft: 2,
+    published: 0,
+    archived: 0,
+    unpublished: 0,
+  }
+  const rows = [1, 2].map((n) => ({
+    type: 'film' as const,
+    id: `00000000-0000-4000-8000-00000000000${n}`,
+    title: `Film ${n}`,
+    publicationStatus: 'draft' as const,
+    createdAt: '2026-10-08T00:00:00.000Z',
+  }))
+  expect(
+    verifiedDashboardSummary({ ...value, latestContent: rows }).latestContent,
+  ).toEqual(rows)
+})

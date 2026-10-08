@@ -392,7 +392,7 @@ Dedicated loopback vertical_movie_app_content_test reset/migrated only. Real Bun
 ### Commit task
 
 - Pesan: test(api): prove dashboard snapshot and authorization (DASH-009)
-- SHA: Belum dibuat; receipt dicatat pada update dokumentasi berikutnya sesudah commit berhasil.
+- SHA: `3623dd54046748e203a4debf40cdfeab7b7a7cac`.
 - Hook/checks: PostgreSQL7 pass/43 assertions, root types3/lint1/build2 pass, docs/format/diff/preservation; normal hooks wajib tanpa bypass.
 - Ledger: Jangan menulis SHA commit sendiri sebelum tersedia.
 
@@ -402,7 +402,7 @@ Menunggu approval proposal dan dependency task di atas; tidak menganggap scope a
 
 ## Task: DASH-010 — Built-browser acceptance dan regressions
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: P1
 - Referensi: DASH-US-02/03, PRD-02/05/09; [implementation steps](../plans/admin-dashboard/implementation-plan.md#implementation-steps).
@@ -420,8 +420,8 @@ Requirements: Mixed/empty/long-title data, navigation, repeated Refresh, metadat
 
 ### Acceptance criteria
 
-- [ ] Counts reflect dedicated database and stale reads can't overwrite newer confirmation; browser fixture and native-cookie proof limits explicit; no new media upload/player proof claimed.
-- [ ] Definisi/state/invariants terkait pada plan terbukti; actual validation serta scope preservation dan commit tercatat sesuai workflow.
+- [x] Counts reflect dedicated database and stale reads can't overwrite newer confirmation; browser fixture and native-cookie proof limits explicit; no new media upload/player proof claimed.
+- [x] Definisi/state/invariants terkait pada plan terbukti; actual validation serta scope preservation dan commit tercatat sesuai workflow.
 
 ### Validasi
 
@@ -429,13 +429,13 @@ Built Bun/Nitro browser via existing runner after dashboard phase is implemented
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement, bukan hasil actual.
+Built dashboard phase passes15 width/theme cases320/390/768/1024/1440 Light/Dark/System, keyboard/44px/focus/no overflow, real SQL counts/deep links, initial skeleton, bounded lists, dedup Refresh, stale503/Retry/offline/reconnect,30s success/error/hidden polling, confirmed create with zero hidden reads, observed SQL job/publication transitions, explicit empty/large fixtures, invalid payload and held response after native SDK role loss. SSR does not read/serialize summary. Fixed discovered gateway404 with exact GET allowlist+test; API malformed repository DTO/count now safe503, and client preserves SQL tie order when native timestamp submilliseconds are lost in JSON. Dashboard browser auth is injected; native cookie proof separate. Regression commands passed native content HTTP5/107, dashboard SQL7/43, built Series editor, Series media/publication/HLS, Film/Standalone publication and Film/Standalone/Series uploader45 layouts via dedicated PostgreSQL/MinIO/FFmpeg, auth cache/routes, SSR and illegal-client-import rejection/restoration. Final API168/973 and web233/1276, root types3/lint1/build2 passed; no new schema/env/dependency or production proof.
 
 ### Commit task
 
-- Pesan: Conventional Commit dengan ID task setelah acceptance criteria dan relevant gates lulus.
+- Pesan: test: verify dashboard browser flow and regressions (DASH-010)
 - SHA: Belum dibuat; receipt dicatat pada update dokumentasi berikutnya sesudah commit berhasil.
-- Hook/checks: Belum dijalankan untuk task ini.
+- Hook/checks: API168/web233 pass; native SQL7 and HTTP5 pass; dashboard/Series/media/publication/auth browser phases, auth SSR/import proof and root types3/lint1/build2 pass; docs/format/diff/preservation; normal hooks wajib tanpa bypass.
 - Ledger: Jangan menulis SHA commit sendiri sebelum tersedia.
 
 ### Blocker atau tindak lanjut

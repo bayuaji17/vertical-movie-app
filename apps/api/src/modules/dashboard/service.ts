@@ -1,7 +1,14 @@
+import { getSchemaValidator } from "elysia";
+import { DashboardSummaryDto } from "./model";
 import { unavailable } from "../../shared/content-error";
 import type { DashboardSummary } from "./model";
 import type { DashboardRepository } from "./repository";
+const validator = getSchemaValidator(DashboardSummaryDto, {
+  normalize: false,
+  additionalProperties: false,
+});
 function count(value: string | number | bigint): number {
+  if (!["number", "string", "bigint"].includes(typeof value)) unavailable();
   if (typeof value === "number" && (!Number.isSafeInteger(value) || value < 0))
     unavailable();
   if (typeof value === "string" && !/^\d+$/.test(value)) unavailable();
@@ -51,7 +58,7 @@ export class DashboardService {
           unavailable();
         media[row.state as keyof typeof media] = count(row.count);
       }
-      return {
+      const result: DashboardSummary = {
         generatedAt: timestamp(snapshot.generatedAt),
         content,
         media,
@@ -71,6 +78,8 @@ export class DashboardService {
           seriesId: row.seriesId,
         })),
       };
+      if (!validator.Check(result)) unavailable();
+      return result;
     } catch {
       return unavailable();
     }

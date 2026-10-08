@@ -20,6 +20,7 @@ const targetPaths: Record<GatewayTarget, (pathname: string) => boolean> = {
     (/^\/api\/(?:admin\/(?:videos|series|seasons|genres|media|content)(?:\/|$)|videos(?:\/|$)|series(?:\/|$)|playback\/videos\/)/.test(
       pathname,
     ) ||
+      pathname === '/api/admin/dashboard/summary' ||
       publicCatalogPath.test(pathname) ||
       publicContentPath.test(pathname)) &&
     !/%|\\/.test(pathname),
@@ -219,7 +220,8 @@ export function createAuthGateway(
     }
     if (
       target === 'business' &&
-      (publicCatalogPath.test(incomingUrl.pathname) ||
+      (incomingUrl.pathname === '/api/admin/dashboard/summary' ||
+        publicCatalogPath.test(incomingUrl.pathname) ||
         publicContentPath.test(incomingUrl.pathname)) &&
       request.method !== 'GET'
     )
