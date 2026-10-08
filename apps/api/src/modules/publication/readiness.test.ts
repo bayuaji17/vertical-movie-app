@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import {
   assessVideoPublication,
+  assessSeriesPublication,
+  assertSeriesPublication,
+  type SeriesPublicationEvidence,
   assertVideoPublication,
   type VideoPublicationEvidence,
 } from "./readiness";
@@ -87,4 +90,61 @@ describe("publication assessment and command policy", () => {
     expect(assessVideoPublication(e).canPublish).toBe(false);
     // Command locks and rejects archived parents before owner assessment.
   });
+});
+
+test("Series assessment and command share all checks, record version and error precedence", () => {
+  const ready: SeriesPublicationEvidence = {
+    series: {
+      publicationStatus: "draft",
+      archivedAt: null,
+      title: "Series",
+      synopsis: "Synopsis",
+      rowVersion: 4,
+    },
+    posterReady: true,
+    publishedEpisodeReady: true,
+    uploadBusy: false,
+  };
+  expect(assessSeriesPublication(ready).canPublish).toBe(true);
+  expect(assessSeriesPublication(ready).checks).toHaveLength(6);
+  expect(() => assertSeriesPublication(ready, 4)).not.toThrow();
+  const cases: Array<[SeriesPublicationEvidence, string]> = [
+    [
+      { ...ready, series: { ...ready.series, publicationStatus: "published" } },
+      "PUBLICATION_STATE_CONFLICT",
+    ],
+    [
+      { ...ready, series: { ...ready.series, archivedAt: new Date() } },
+      "PUBLICATION_STATE_CONFLICT",
+    ],
+    [
+      { ...ready, series: { ...ready.series, title: " " } },
+      "PUBLICATION_NOT_READY",
+    ],
+    [
+      { ...ready, series: { ...ready.series, synopsis: null } },
+      "PUBLICATION_NOT_READY",
+    ],
+    [{ ...ready, posterReady: false }, "PUBLICATION_NOT_READY"],
+    [{ ...ready, publishedEpisodeReady: false }, "PUBLICATION_NOT_READY"],
+    [{ ...ready, uploadBusy: true }, "PUBLICATION_MEDIA_BUSY"],
+  ];
+  for (const [e, code] of cases) {
+    expect(assessSeriesPublication(e).canPublish).toBe(false);
+    try {
+      assertSeriesPublication(e, 4);
+      throw Error("Expected block");
+    } catch (error) {
+      expect(error).toMatchObject({ code });
+    }
+  }
+  expect(() => assertSeriesPublication(ready, 3)).toThrow(
+    "Content has changed.",
+  );
+  expect(() =>
+    assertSeriesPublication(
+      { ...ready, uploadBusy: true, posterReady: false },
+      4,
+    ),
+  ).toThrow("Finish or abort");
 });

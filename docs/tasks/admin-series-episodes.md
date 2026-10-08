@@ -246,7 +246,7 @@ Episode detail menggunakan video-owner uploader/crop existing, hierarchy cache c
 ### Commit task
 
 - Pesan: feat(web): connect episode upload and preview (ASER-006)
-- SHA: Receipt dicatat pada update task berikutnya setelah commit berhasil.
+- SHA: `a56f2821f9945ce77f0842bd5cca045c961eb071`.
 - Hook/checks: bun test apps/web/test:216 pass/1190 assertions; bun test apps/api/src:151 pass/883 assertions; bun run check-types, bun run lint, bun run build, built series-media browser phase dengan real MinIO/FFmpeg, docs:check, scoped Prettier dan git diff --check; normal Husky/Commitlint wajib sebelum commit diterima.
 - Ledger: Receipt setelah commit pada update task berikutnya.
 
@@ -256,7 +256,7 @@ Ikuti dependensi step; task selanjutnya ASER-007.
 
 ## Task: ASER-007 — Authoritative Series readiness API
 
-- Status: Ready
+- Status: Done
 - Owner: Codex
 - Prioritas: P0
 - Referensi: ASER-US-01/02/03, PRD-03/04/05/06/08/09; [step plan](../plans/admin-series-episodes/implementation-plan.md#aser-007--authoritative-series-readiness-api).
@@ -270,8 +270,8 @@ Shared Series readiness assessment dan private GET sebelum panel publish; existi
 
 ### Acceptance criteria
 
-- [ ] Title/synopsis/current cover/child playable/lifecycle/upload/version gates sama antara GET assessment dan POST transaction.
-- [ ] Guard/error/schema/no-store, no signing/write in GET dan concurrent state ditangani authoritative.
+- [x] Title/synopsis/current cover/child playable/lifecycle/upload/version gates sama antara GET assessment dan POST transaction.
+- [x] Guard/error/schema/no-store, no signing/write in GET dan concurrent state ditangani authoritative.
 
 ### Validasi
 
@@ -279,13 +279,13 @@ bun:test/app.handle, injected evidence, dedicated SQL child/archive/generation p
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi pada task ini.
+GET private Series publication-readiness menyediakan DTO enam checks dan repeatable-read/read-only snapshot. Shared Series evidence/assessment dipakai POST setelah lock, mempertahankan current poster+matching generation job dan canonical published-playable child predicate, upload/status/version/metadata gates serta persistent idempotency. Lifecycle Series tetap draft/published/unpublished+archivedAt. Native HTTP proof guard401/403/expired/dependency503, UUID422, missing404, no-store dan secured OpenAPI lulus. SQL dedicated memverifikasi blocked sebelum child published, ready setelahnya dan blocked published setelah command. Tidak ada schema/dependency/env/migration change.
 
 ### Commit task
 
-- Pesan: Ditentukan saat task selesai, Conventional Commit dengan ID task.
-- SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan.
+- Pesan: feat(api): expose series publication readiness (ASER-007)
+- SHA: Receipt dicatat pada update task berikutnya setelah commit berhasil.
+- Hook/checks: bun test apps/api/src:153 pass/923 assertions; dedicated media-series-proof:3 pass/32 assertions; bun run check-types, bun run lint, bun run build, docs:check, scoped Prettier dan git diff --check; normal Husky/Commitlint wajib sebelum commit diterima.
 - Ledger: Receipt setelah commit pada update task berikutnya.
 
 ### Blocker atau tindak lanjut

@@ -6,7 +6,12 @@ import {
 import { createContentErrors } from "../../plugins/errors";
 import { IdParams, ErrorResponses } from "../../shared/content-model";
 import { PublicationService } from "./service";
-import { PublishBody, PublicationDto, PublicationReadinessDto } from "./model";
+import {
+  PublishBody,
+  PublicationDto,
+  PublicationReadinessDto,
+  SeriesPublicationReadinessDto,
+} from "./model";
 export function createPublicationModule({
   service = new PublicationService(),
   getSession,
@@ -28,6 +33,21 @@ export function createPublicationModule({
           tags: ["Publication"],
           operationId: "videoPublicationReadiness",
           summary: "Assess video publication readiness without side effects",
+          security: [{ betterAuthSessionCookie: [] }],
+        },
+      },
+    )
+    .get(
+      "/admin/series/:id/publication-readiness",
+      ({ params }) => service.seriesReadiness(params.id),
+      {
+        requireAdmin: true,
+        params: IdParams,
+        response: { 200: SeriesPublicationReadinessDto, ...ErrorResponses },
+        detail: {
+          tags: ["Publication"],
+          operationId: "seriesPublicationReadiness",
+          summary: "Assess series publication readiness without side effects",
           security: [{ betterAuthSessionCookie: [] }],
         },
       },
