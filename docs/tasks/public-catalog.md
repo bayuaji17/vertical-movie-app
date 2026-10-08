@@ -24,7 +24,7 @@ Task Ready hanya setelah decisions/dependencies tersedia. Plan approval diperluk
 
 ## Task: PCAT-001 — Context, plan dan backlog berbasis repository
 
-- Status: Review
+- Status: Done
 - Owner: Codex/pengembang
 - Prioritas: P1 — urutan dependency DAG pada plan
 - Referensi: PCAT-US-01; PRD-07/08/09, GR-02/03/05/06/08; [plan](../plans/public-catalog/implementation-plan.md)
@@ -42,7 +42,7 @@ Paths/symbol owners: `docs/plans/public-catalog/{repository-context,implementati
 
 - [x] Context ditulis sebelum plan; facts vs proposal dibedakan.
 - [x] Semua requirement mempunyai task/dependensi/validation; source dan dirty overlay existing dipertahankan.
-- [ ] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
+- [x] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
 
 ### Validasi
 
@@ -50,18 +50,18 @@ Static source review, bun run docs:check, scoped Prettier, git diff --check dan 
 
 ### Hasil dan bukti
 
-8 Oktober 2026: source snapshot/trace, docs ownership dan working-tree preservation diperiksa; context disimpan sebelum plan/backlog. Runtime tidak berubah. `bun run docs:check` lulus 69 Markdown/665 local links/anchors; scoped Prettier write/check dan `git diff --check` lulus. Preservation 22 file unrelated dan 14 IDs plan/backlog lulus; source/apps/packages/manifests/lockfile/Turbo tidak berubah. Branch planning `chore/public-catalog-plan` dibuat dari base setelah review. Commit/hook receipt dicatat setelah berhasil.
+8 Oktober 2026: source snapshot/trace, docs ownership dan working-tree preservation diperiksa; context disimpan sebelum plan/backlog. Runtime tidak berubah. `bun run docs:check` lulus 69 Markdown/665 local links/anchors; scoped Prettier write/check dan `git diff --check` lulus. Preservation 22 file unrelated dan 14 IDs plan/backlog lulus; source/apps/packages/manifests/lockfile/Turbo tidak berubah. Branch planning `chore/public-catalog-plan` dibuat dari base setelah review. Commit docs berhasil pada `b844574d34e311c38f3359cd7e1ab61d7c10c6c6`. Hook docs 69/665, lint web 1 task cache valid, types 3 task cache valid dan Commitlint lulus tanpa bypass. Staged-tree documentation check lulus 62 Markdown/646 local links; tidak memasukkan desain/evidence unrelated.
 
 ### Commit task
 
 - Pesan usulan: `docs: context, plan dan backlog berbasis repository (PCAT-001)`.
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk commit ini.
-- Ledger: receipt aktual dicatat pada update sesudah commit berhasil.
+- SHA: `b844574d34e311c38f3359cd7e1ab61d7c10c6c6`.
+- Hook/checks: docs 69/665, lint 1/types 3 task cache valid dan Commitlint lulus; scoped staged-tree docs 62/646, Prettier/whitespace/preservation lulus.
+- Ledger: receipt/status Done dicatat sesudah commit berhasil; perubahan receipt ini untuk dokumentasi task berikutnya, bukan SHA self-referential.
 
 ### Blocker atau tindak lanjut
 
-Dokumentasi validation lulus; local commit/hooks masih pending. UX proposal masih draft.
+PCAT-001 selesai; plan dan UX proposal masih draft. PCAT-002–014 menunggu approval/dependencies. Pengguna mengotorisasi commit/push plan pada 8 Oktober 2026; PR/merge belum diminta.
 
 ## Task: PCAT-002 — Spesifikasi dan desain katalog/detail/watch
 
