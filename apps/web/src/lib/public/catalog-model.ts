@@ -6,7 +6,9 @@ export const catalogTypes = ['all', 'film', 'standalone'] as const
 export function catalogType(value: unknown): CatalogType {
   return value === 'film' || value === 'standalone' ? value : 'all'
 }
-export function catalogSearch(search: Record<string, unknown>) {
+export function catalogSearch(search: Record<string, unknown>): {
+  type?: CatalogType
+} {
   return { type: catalogType(search.type) }
 }
 export const catalogPageSize = 20

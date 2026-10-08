@@ -315,8 +315,8 @@ Observed: targeted state3/20, full web192/1036; root types3/lint1/build2 pass, s
 ### Commit task
 
 - Pesan usulan: `feat: state query katalog dan expiry cover yang aman (PCAT-007)`.
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk commit ini.
+- SHA: `eb3d034dfddab5c0ceae5db0780cfd682ba3168c`.
+- Hook/checks: state3/20, web192/1036, types3/lint1/build2, docs86/816, scoped format/diff dan normal Husky/Commitlint pass.
 - Ledger: receipt aktual dicatat pada update sesudah commit berhasil.
 
 ### Blocker atau tindak lanjut
@@ -325,7 +325,7 @@ Lanjut PCAT-008 komponen. Capability state tidak masuk cache metadata/SSR dan ti
 
 ## Task: PCAT-008 — Shell, card dan cover public reusable
 
-- Status: Backlog
+- Status: Implemented — komponen lokal; matriks visual/keyboard runtime diverifikasi bersama PCAT-013.
 - Owner: Codex/pengembang
 - Prioritas: P1 — urutan dependency DAG pada plan
 - Referensi: PCAT-US-01; PRD-07/08/09, GR-02/03/05/06/08; [plan](../plans/public-catalog/implementation-plan.md)
@@ -351,7 +351,9 @@ Component/visual behavior review dan root gates; matriks browser definitif PCAT-
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau divalidasi. Commands di atas merupakan rencana, bukan hasil.
+8 Oktober 2026: shell Brand/Browse/Appearance mereuse theme menu tanpa auth; semantic tokens, skip link/main landmark, 44px controls dan mobile header diselaraskan dengan desain. Card memisahkan poster retry dari title link (renderLink milik page/controller), reserved9:16 poster/skeleton/object-cover, metadata Film/Standalone/duration dan long-title wrapping; no per-card player. React hooks tetap src/hooks/use-*.ts.
+
+Observed: native React SSR cover proof1/3, tanpa image/signed URL/network capability; root types3/lint1/build2 pass setelah mengganti dynamic-link ownership yang bertabrakan dengan Search type admin. Static layout/markup diperiksa; actual responsive/keyboard/theme/fallback matrix menunggu PCAT-013 setelah homepage/detail terintegrasi.
 
 ### Commit task
 
@@ -362,7 +364,7 @@ Belum diimplementasikan atau divalidasi. Commands di atas merupakan rencana, buk
 
 ### Blocker atau tindak lanjut
 
-Menunggu PCAT-002 + approval desain, PCAT-007. Approval/hasil proof tidak diasumsikan tersedia.
+Desain sudah disetujui, komponen tersedia untuk PCAT-009. Checkbox acceptance visual/runtime ditutup sesudah bukti browser PCAT-013; tidak mengklaim dari compilation.
 
 ## Task: PCAT-009 — Homepage katalog Film/Standalone nyata
 
