@@ -40,9 +40,10 @@ export function playbackReadiness(
 export function posterReadiness(row: PlayableRow) {
   if (
     !row.posterJob.outputFiles?.includes("poster.webp") ||
-    !row.posterJob.outputPrefix?.startsWith(
-      "outputs/" + row.poster.id + "/" + row.posterJob.id + "/",
-    )
+    !row.posterJob.outputPrefix ||
+    !new RegExp(
+      "^outputs/" + row.poster.id + "/" + row.posterJob.id + "/[a-f0-9-]{36}/$",
+    ).test(row.posterJob.outputPrefix)
   )
     throw new ContentError(
       "PLAYBACK_INVALID_POSTER",

@@ -184,8 +184,8 @@ Observed: `bun test apps/api/src/modules/catalog`26 pass/179 assertions; `bun ru
 ### Commit task
 
 - Pesan usulan: `test: verify catalog invalidation generation fence (PCAT-004)`.
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk commit ini.
+- SHA: `a09728b09cbe57431ec76561938a0c1178bf3411`.
+- Hook/checks: catalog26/179, build2, docs86/816, scoped format/diff dan normal Husky lint1/types3/Commitlint pass.
 - Ledger: receipt aktual dicatat pada update sesudah commit berhasil.
 
 ### Blocker atau tindak lanjut
@@ -194,7 +194,7 @@ Reuse cache guard selesai lokal; real mutation proof tetap PCAT-012. Tidak mengu
 
 ## Task: PCAT-005 — Endpoint public signed poster terpisah
 
-- Status: Backlog
+- Status: Done — signed poster endpoint tersedia lokal; receipt commit berikut.
 - Owner: Codex/pengembang
 - Prioritas: P1 — urutan dependency DAG pada plan
 - Referensi: PCAT-US-01; PRD-07/08/09, GR-02/03/05/06/08; [plan](../plans/public-catalog/implementation-plan.md)
@@ -210,9 +210,9 @@ Paths/symbol owners: `apps/api/src/modules/playback/{index,service}.ts, service.
 
 ### Acceptance criteria
 
-- [ ] Anonymous/no-store; 404 hidden/missing sebelum signer; 503 safe pada profile/output/dependency failure.
-- [ ] Hanya poster.webp verified disign dengan existing duration TTL; tidak membaca HLS/source atau mengubah metadata DTO/cache.
-- [ ] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
+- [x] Anonymous/no-store; 404 hidden/missing sebelum signer; 503 safe pada profile/output/dependency failure.
+- [x] Hanya poster.webp verified disign dengan existing duration TTL; tidak membaca HLS/source atau mengubah metadata DTO/cache.
+- [x] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
 
 ### Validasi
 
@@ -220,7 +220,9 @@ bun test apps/api/src/modules/playback; app.handle pada modul dan createApp term
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau divalidasi. Commands di atas merupakan rencana, bukan hasil.
+8 Oktober 2026: GET /videos/:slug/poster memakai uncached CatalogStore playable, playbackReadiness/profile/duration dan posterReadiness sebelum native presign. DTO hanya videoId/posterUrl/expiresAt, private/no-store dan public OpenAPI. Poster namespace sekarang exact generation prefix (traversal/foreign output ditolak), sign hanya poster.webp; tidak membaca HEAD/file/manifest maupun sign HLS. Existing binary poster/playback/private admin routes dipertahankan.
+
+Observed: playback13 tests/93 assertions, full API151/883; root types3 (setelah memperbaiki missing getSession pada fixture test), lint1/build2 pass. Test membuktikan duration ceiling, profile/output/facts gagal tanpa sign, anonymous HTTP/errors/guard/OpenAPI dan uncached renewal. Dokumen/format/diff/normal hooks berikut. Storage PostgreSQL proof tetap PCAT-012.
 
 ### Commit task
 
@@ -231,7 +233,7 @@ Belum diimplementasikan atau divalidasi. Commands di atas merupakan rencana, buk
 
 ### Blocker atau tindak lanjut
 
-Menunggu PCAT-001 + approval plan pengguna. Approval/hasil proof tidak diasumsikan tersedia.
+Endpoint selesai lokal; lanjut typed public client PCAT-006 dan DB/storage proof PCAT-012. Tidak mengubah schema/env/dependencies; tidak mengklaim production storage.
 
 ## Task: PCAT-006 — Client publik typed dan reader SSR unsigned
 

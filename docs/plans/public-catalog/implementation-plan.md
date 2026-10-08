@@ -372,3 +372,5 @@ PCAT-002 artifact receipt: local commit307710159cbd8a6d9a0f4d230d2ec1deaf2abc37,
 8 Oktober 2026 — PCAT-003: finite canonical kinds diterapkan sebelum SQL pagination; cursor/cache bound ke kinds, omit menjaga legacy fingerprint. Targeted Bun/HTTP/OpenAPI/compiled SQL dan root types/lint/build lulus; real DB acceptance tetap PCAT-012. Approval PCAT-002 commit a3ceba2d47c32326d7e25773a4370de5166cfd29 dengan normal hooks pass.
 
 8 Oktober 2026 — PCAT-004: reuse generation fence existing, deterministic legacy-list concurrent fill/TTL60s/filter/failure proof; catalog26/179 dan build2 pass. PCAT-003 receipt fca1b478a8726fd977166338731dad47cd498066; API143/811 + web185/955 regression serta normal commit hooks pass.
+
+8 Oktober 2026 — PCAT-005: signed poster API terpisah, uncached authorization, exact verified generation namespace/TTL ceiling dan no HLS/storage reads. Playback13/93, API151/883 dan root types3/lint1/build2 pass; fixture type failure diperbaiki lalu types rerun pass. PCAT-004 receipt a09728b09cbe57431ec76561938a0c1178bf3411 dengan normal hooks pass.
