@@ -368,7 +368,7 @@ Desain sudah disetujui, komponen tersedia untuk PCAT-009. Checkbox acceptance vi
 
 ## Task: PCAT-009 — Homepage katalog Film/Standalone nyata
 
-- Status: Backlog
+- Status: Implemented — homepage API/grid20/URL filters; built-browser acceptance PCAT-013.
 - Owner: Codex/pengembang
 - Prioritas: P1 — urutan dependency DAG pada plan
 - Referensi: PCAT-US-01; PRD-07/08/09, GR-02/03/05/06/08; [plan](../plans/public-catalog/implementation-plan.md)
@@ -394,7 +394,9 @@ Generate routes via tooling; web state/gateway tests, direct HTML/SSR/hydration 
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau divalidasi. Commands di atas merupakan rencana, bukan hasil.
+8 Oktober 2026: route / memakai unsigned /videos SSR dan Query page20 movie/standalone dengan canonical URL type, unknown→all replace, robots noindex/nofollow sementara. Grid20/manual Load more, skeleton/empty/first-page error/retry/stale/append error/EOF/offline dan retained cards memakai komponen approved; card navigation tanpa preload. Type transition membatalkan old/destination query dengan latest-intent fence, destination traversal baru; fresh Back/Forward Query pages disimpan, expired loader/focus/reconnect dan explicit Refresh restart first page. Custom hook berada di hooks/use-public-catalog.ts.
+
+Observed: web193/1039, root types3/lint1/build2 pass; lint conditional unreachable diperbaiki. Negative build public homepage import @repo/auth/server ditolak oleh import protection, fixture source restored lalu valid build restored/pass. SSR no-capability cover proof dan Query/cache tests tetap lulus. Real browser URL/history/scroll/pagination/SSR acceptance belum diklaim sebelum PCAT-013.
 
 ### Commit task
 
@@ -405,7 +407,7 @@ Belum diimplementasikan atau divalidasi. Commands di atas merupakan rencana, buk
 
 ### Blocker atau tindak lanjut
 
-Menunggu PCAT-008. Approval/hasil proof tidak diasumsikan tersedia.
+Lanjut PCAT-010 detail /videos/$slug. UI/runtime checkbox ditutup bersama PCAT-013; main/runtime sejarah tiga jenis dan API/rute Series tetap dipertahankan.
 
 ## Task: PCAT-010 — Detail publik Film/Standalone
 
@@ -526,8 +528,8 @@ Percobaan pertama menemukan fixture archive belum mengosongkan published_at; dip
 ### Commit task
 
 - Pesan usulan: `test: proof sql visibility, cursor dan poster (PCAT-012)`.
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk commit ini.
+- SHA: `e16dc5151b59705a330cb1a182e5299247d3520d`.
+- Hook/checks: dedicated proof1/30, root types3/lint1/build2, docs86/816, scoped format/diff dan normal Husky/Commitlint pass.
 - Ledger: receipt aktual dicatat pada update sesudah commit berhasil.
 
 ### Blocker atau tindak lanjut

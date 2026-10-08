@@ -1,18 +1,41 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { HomePage } from '#/components/catalog/home-page'
-import { loadPublicCatalog } from '#/lib/catalog/public-catalog-queries'
+import { createFileRoute, redirect } from '@tanstack/react-router'
+import { CatalogBrowser } from '#/components/public/catalog-browser'
+import {
+  catalogSearch,
+  catalogType,
+  catalogTypes,
+} from '#/lib/public/catalog-model'
+import { loadCatalog } from '#/lib/public/catalog-queries'
+import { setPublicHttpStatus } from '#/lib/public/catalog-reader'
 
 export const Route = createFileRoute('/')({
-  loader: ({ context }) => loadPublicCatalog(context.queryClient),
+  validateSearch: catalogSearch,
+  beforeLoad: ({ location }) => {
+    const type = new URLSearchParams(location.searchStr).get('type')
+    if (type !== null && !catalogTypes.some((value) => value === type))
+      throw redirect({ to: '/', search: { type: 'all' }, replace: true })
+  },
+  loaderDeps: ({ search }) => ({ type: catalogType(search.type) }),
+  loader: async ({ context, deps }) => {
+    const result = await loadCatalog(context.queryClient, deps.type)
+    setPublicHttpStatus(result.status)
+    return result
+  },
   head: () => ({
     meta: [
       { title: 'Vertical Movie — Find your next story' },
       {
         name: 'description',
         content:
-          'Discover films, series, and short stories in portrait. Open to everyone.',
+          'Discover films and standalone stories in portrait. Open to everyone.',
       },
+      { name: 'robots', content: 'noindex, nofollow' },
     ],
   }),
-  component: () => <HomePage bootstrap={Route.useLoaderData()} />,
+  component: () => (
+    <CatalogBrowser
+      type={catalogType(Route.useSearch().type)}
+      status={Route.useLoaderData().status}
+    />
+  ),
 })

@@ -1,5 +1,5 @@
 import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
-import type { QueryClient } from '@tanstack/react-query'
+import type { InfiniteData, QueryClient } from '@tanstack/react-query'
 import { CatalogRequestError } from '../catalog/catalog-client'
 import { readPublicVideo, readPublicVideos } from './catalog-reader'
 import { catalogPageSize, catalogType } from './catalog-model'
@@ -75,7 +75,12 @@ export async function restartCatalog(
 }
 export async function loadCatalog(client: QueryClient, type: CatalogType) {
   try {
-    await client.infiniteQuery(catalogOptions(type))
+    const cached = client.getQueryData<InfiniteData<PublicVideoPage>>(
+      catalogKey(type),
+    )
+    if (cached && cached.pages.some((p) => p.expiresAt <= Date.now()))
+      await restartCatalog(client, type)
+    else await client.infiniteQuery(catalogOptions(type))
     return { status: null }
   } catch (error) {
     return { status: error instanceof CatalogRequestError ? error.status : 503 }
