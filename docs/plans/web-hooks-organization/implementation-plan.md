@@ -2,7 +2,7 @@
 
 ## Plan metadata
 
-- Status: **implemented dan verified lokal — dokumentasi closure Review** · 8 Oktober 2026.
+- Status: **completed — implemented dan verified lokal, WHOOK-001–003** · 8 Oktober 2026.
 - Repository: `bayuaji17/vertical-movie-app`; base ref `chore/public-catalog-plan`.
 - Base SHA/last validated SHA: `68a0053d3bc145f07c8bdf14490456436d0973a5`.
 - Context: [repository-context.md](repository-context.md), ditulis terlebih dahulu; backlog: [WHOOK-001–003](../../tasks/web-hooks-organization.md).
@@ -143,3 +143,5 @@ WHOOK-001 selesai pada `82e04958a14e42206acc97604e226a16a53aa9e1`; docs 72/683, 
 WHOOK-002 source/refactor dan relevant gates lulus 8 Oktober 2026: web 158/779, types 3 task (2 cached), lint 1 fresh, import-boundary proof, final build 2 task (1 cached) dan built native SSR smoke. Docs 72/684, format/whitespace dan 22-file unrelated preservation lulus. Browser UI smoke belum dijalankan karena runner env tidak terkonfigurasi; no runtime production claim. Task Review menunggu scoped local commit/hooks; source algorithm/route/style/schema/manifest/lockfile tetap terjaga.
 
 WHOOK-002 committed `d0e0cf4718b1cba693fd09256d21de99f2b50135`: 28 task files termasuk root convention dan selective index hunk; staged-tree docs 65/665, hooks docs 72/684, lint 1/type 3 cache valid dan Commitlint lulus. WHOOK-001/002 Done; WHOOK-003 Review. Source/SSR/import proof selesai, browser UI rerun belum dilakukan karena runner configuration tidak tersedia. Push hanya branch plan sebelumnya; refactor local commits belum dipush.
+
+WHOOK-003 closure committed `115f6e417266604f157a99c4e74059955a3f3db5`, `docs: record web hook organization verification (WHOOK-003)`. Hooks docs 72/684, lint 1/types 3 cache valid dan Commitlint lulus tanpa bypass. WHOOK-001–003 Done; refactor branch lokal pada closure head ini, catalog plan remote tetap `68a0053`. Receipt ditulis sesudah commit untuk update dokumentasi task berikutnya. Tidak ada source change setelah runtime gates.

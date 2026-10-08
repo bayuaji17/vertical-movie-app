@@ -1,6 +1,6 @@
 # Modul: Organisasi hooks web
 
-> Status: In Progress · 8 Oktober 2026 · scope structural disetujui pengguna; katalog tetap draft terpisah.
+> Status: Done — implemented/verified lokal · 8 Oktober 2026 · scope structural disetujui pengguna; katalog tetap draft terpisah.
 
 ## Tujuan modul
 
@@ -95,7 +95,7 @@ WHOOK-001 prerequisite; browser runner availability diperiksa saat validation.
 
 ## Task: WHOOK-003 — Closure dokumentasi dan receipts
 
-- Status: Review
+- Status: Done
 - Owner: Codex
 - Prioritas: P1
 - Referensi: WHOOK-US-01; proof/receipt task sebelumnya.
@@ -111,7 +111,7 @@ Status implemented/verified lokal, actual task SHA/checks dan remote plan receip
 
 - [x] Source organization dan actual checks/limitations tercatat; task SHA tidak self-referential.
 - [x] Unrelated work preserved; refactor branch lokal dan catalog branch remote dibedakan akurat.
-- [ ] Docs/format/whitespace/hooks serta local closure commit lulus.
+- [x] Docs/format/whitespace/hooks serta local closure commit lulus.
 
 ### Validasi
 
@@ -119,13 +119,13 @@ Docs:check, scoped Prettier, git diff --check, staged-tree local links/anchors, 
 
 ### Hasil dan bukti
 
-WHOOK-001 `82e0495` dan WHOOK-002 `d0e0cf4718b1cba693fd09256d21de99f2b50135` berhasil. Source implemented/verified lokal dan actual checks/limitations dicatat; docs closure source-free, quality gates WHOOK-002 tetap valid. Catalog plan remote verified pada `68a0053d3bc145f07c8bdf14490456436d0973a5`; refactor branch lokal. Closure docs checks/commit pending.
+WHOOK-001 `82e0495` dan WHOOK-002 `d0e0cf4718b1cba693fd09256d21de99f2b50135` berhasil. Source implemented/verified lokal dan actual checks/limitations dicatat; docs closure source-free, quality gates WHOOK-002 tetap valid. Catalog plan remote verified pada `68a0053d3bc145f07c8bdf14490456436d0973a5`; refactor branch lokal. Closure documentation commit `115f6e417266604f157a99c4e74059955a3f3db5` berhasil; hooks/format/whitespace lulus. Receipt ditulis sesudah commit dan dapat masuk dokumentasi task berikutnya, tanpa self-referential SHA.
 
 ### Commit task
 
 - Pesan: `docs: record web hook organization verification (WHOOK-003)`.
-- SHA: belum dibuat.
-- Hook/checks: pending.
+- SHA: `115f6e417266604f157a99c4e74059955a3f3db5`.
+- Hook/checks: docs 72/684, lint 1/types 3 task cache valid dan Commitlint lulus tanpa bypass; scoped Prettier/diff-check lulus.
 - Ledger: receipt aktual dicatat setelah commit berhasil untuk update berikutnya.
 
 ### Blocker atau tindak lanjut
