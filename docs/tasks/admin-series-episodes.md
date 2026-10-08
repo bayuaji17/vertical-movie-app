@@ -284,7 +284,7 @@ GET private Series publication-readiness menyediakan DTO enam checks dan repeata
 ### Commit task
 
 - Pesan: feat(api): expose series publication readiness (ASER-007)
-- SHA: Receipt dicatat pada update task berikutnya setelah commit berhasil.
+- SHA: `602fc970eb5e2f1943c65d98447d5d952537ca00`.
 - Hook/checks: bun test apps/api/src:153 pass/923 assertions; dedicated media-series-proof:3 pass/32 assertions; bun run check-types, bun run lint, bun run build, docs:check, scoped Prettier dan git diff --check; normal Husky/Commitlint wajib sebelum commit diterima.
 - Ledger: Receipt setelah commit pada update task berikutnya.
 
@@ -294,7 +294,7 @@ Ikuti dependensi step; task selanjutnya ASER-008.
 
 ## Task: ASER-008 — Series publication client/controller
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: P1
 - Referensi: ASER-US-01/02/03, PRD-03/04/05/06/08/09; [step plan](../plans/admin-series-episodes/implementation-plan.md#aser-008--series-publication-clientcontroller).
@@ -308,8 +308,8 @@ Typed owner-specific readiness/mutation keys/intent/reconciliation memakai contr
 
 ### Acceptance criteria
 
-- [ ] Version dan idempotency intent stabil; no auto replay atau fabricated success.
-- [ ] Network/auth/owner cancellation dan late results tidak reseed private cache atau navigate owner lain.
+- [x] Version dan idempotency intent stabil; no auto replay atau fabricated success.
+- [x] Network/auth/owner cancellation dan late results tidak reseed private cache atau navigate owner lain.
 
 ### Validasi
 
@@ -317,13 +317,13 @@ Client/controller/private cache tests, relevant auth/publication regression dan 
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi pada task ini.
+Typed Series readiness/publish client memvalidasi owner, enam unique checks/status/canPublish consistency, record version dan response; body Eden tetap expectedVersion/idempotencyKey. Owner publication hook/controller menyediakan Series/episode snapshot, fresh cancellable reads, parent readiness invalidation dan session disposal. Episode metadata envelope memakai publication-owned key lalu confirmed DTO mengisi editor key, mencegah cache shape collision. Tests membuktikan lost-before/lost-after reconciliation dengan key/version identik, Series archive tidak mengirim request, Episode archive parent readiness gate serta identity/owner/public cache isolation. Film/Standalone controller behavior regressions tetap lulus; UI publication mengikuti ASER-009.
 
 ### Commit task
 
-- Pesan: Ditentukan saat task selesai, Conventional Commit dengan ID task.
-- SHA: Belum dibuat.
-- Hook/checks: Belum dijalankan.
+- Pesan: feat(web): add series publication state and transport (ASER-008)
+- SHA: Receipt dicatat pada update task berikutnya setelah commit berhasil.
+- Hook/checks: bun test apps/web/test:220 pass/1223 assertions; bun run check-types, bun run lint, bun run build, docs:check, scoped Prettier dan git diff --check; normal Husky/Commitlint wajib sebelum commit diterima.
 - Ledger: Receipt setelah commit pada update task berikutnya.
 
 ### Blocker atau tindak lanjut

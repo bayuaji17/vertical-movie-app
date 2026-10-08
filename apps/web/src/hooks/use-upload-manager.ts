@@ -97,7 +97,12 @@ export function useUploadManager(
                   exact: true,
                 }),
               ]
-            : []),
+            : [
+                cache.invalidateQueries({
+                  queryKey: publicationKeys.series(user.id, target.ownerId),
+                  exact: true,
+                }),
+              ]),
         ])
       },
     })

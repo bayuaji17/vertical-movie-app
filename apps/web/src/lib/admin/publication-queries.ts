@@ -9,6 +9,8 @@ import { mediaKeys } from './media-queries'
 
 export const publicationKeys = {
   root: (identity: string) => ['admin', identity, 'publication'] as const,
+  series: (identity: string, id: string) =>
+    [...publicationKeys.root(identity), 'series', id] as const,
   video: (identity: string, id: string) =>
     [...publicationKeys.root(identity), 'video', id] as const,
 }

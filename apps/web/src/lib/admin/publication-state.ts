@@ -1,16 +1,20 @@
+import type { Episode } from './series-client'
 import type { ContentDetail } from './content-client'
 import type { OwnerMedia } from './media-client'
 import type {
   PublicationClient,
   PublicationReadiness,
+  SeriesPublicationReadiness,
   PublishVideoInput,
 } from './publication-client'
 import { PublicationApiError, publicationFailure } from './publication-errors'
 
 export type PublicationAction = 'publish' | 'archive'
+export type PublicationDetail =
+  ContentDetail | { type: 'episode'; data: Episode }
 export type PublicationSnapshot = {
-  detail: ContentDetail
-  readiness: PublicationReadiness
+  detail: PublicationDetail
+  readiness: PublicationReadiness | SeriesPublicationReadiness
   media: OwnerMedia
 }
 export type PublicationIntent = {
@@ -35,31 +39,43 @@ export type PublicationState = {
   refreshUnavailable?: boolean
 }
 export function snapshotMatches(s: PublicationSnapshot, id: string) {
-  const d = s.detail
+  const d = s.detail,
+    r = s.readiness
+  const ownerMatches =
+    d.type === 'series'
+      ? 'seriesId' in r && r.seriesId === id && s.media.ownerType === 'series'
+      : 'videoId' in r &&
+        r.videoId === id &&
+        r.kind === d.data.kind &&
+        (d.type === 'episode') === (d.data.kind === 'episode') &&
+        s.media.ownerType === 'video'
   return (
-    d.type !== 'series' &&
-    d.data.kind !== 'episode' &&
+    ownerMatches &&
     d.data.id === id &&
-    s.readiness.videoId === id &&
-    s.readiness.kind === d.data.kind &&
-    s.media.ownerType === 'video' &&
     s.media.ownerId === id &&
-    d.data.rowVersion === s.readiness.rowVersion &&
+    d.data.rowVersion === r.rowVersion &&
     d.data.rowVersion === s.media.rowVersion &&
-    d.data.publicationStatus === s.readiness.publicationStatus &&
+    d.data.publicationStatus === r.publicationStatus &&
     d.data.publicationStatus === s.media.status &&
-    d.data.archivedAt === s.readiness.archivedAt
+    d.data.archivedAt === r.archivedAt
   )
 }
+
 function eligible(s: PublicationSnapshot, action: PublicationAction) {
   const status = s.readiness.publicationStatus
   return (
     !s.readiness.archivedAt &&
+    (s.detail.type !== 'episode' ||
+      s.readiness.checks.some(
+        (check) => check.code === 'ACTIVE_PARENTS' && check.status === 'passed',
+      )) &&
     (action === 'archive'
-      ? status === 'published'
+      ? s.detail.type !== 'series' &&
+        (status === 'published' ||
+          (s.detail.type === 'episode' && status === 'draft'))
       : status === 'draft' &&
         s.readiness.canPublish &&
-        s.media.canPreview &&
+        (s.detail.type === 'series' || s.media.canPreview) &&
         !s.media.source?.busy &&
         !s.media.poster.busy)
   )
@@ -320,8 +336,8 @@ export class PublicationController {
         snapshot: s,
         message:
           status === 'archived'
-            ? 'This video is archived.'
-            : 'This video is published.',
+            ? 'This content is archived.'
+            : 'This content is published.',
       })
       return
     }
