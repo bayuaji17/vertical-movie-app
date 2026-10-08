@@ -19,6 +19,8 @@ Aturan penamaan, ownership dan maintenance berada pada [Documentation rules](../
 
 ## Produk, arsitektur dan desain
 
+- [Ringkasan dashboard admin](design/admin-dashboard.md): layout dan state approved melalui plan, runtime/proof mengikuti DASH.
+
 - [Admin Series/season/episode](design/admin-series-episodes.md): route dan state specification editor memakai admin Rhea existing; implementasi diminta pengguna 8 Oktober 2026.
 
 - [Kelanjutan katalog Film/Standalone](design/public-catalog.md): PCAT-002 disetujui pengguna 8 Oktober 2026; interactive HTML dan8 PNG Browse/Detail390/1440 Light/Dark. Prototype tetap artefak approval; runtime actual Film/Standalone verified pada PCAT-013.
@@ -52,7 +54,7 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 
 ## Context dan plan per fitur
 
-Ringkasan dashboard admin: [context](plans/admin-dashboard/repository-context.md), [plan](plans/admin-dashboard/implementation-plan.md) dan [backlog DASH](tasks/admin-dashboard.md). Pengguna memilih dashboard dan meminta plan 8 Oktober 2026; metrik editorial/current-job, latest8/failed5 serta refresh30s merupakan proposal untuk review, belum runtime. Pengaturan situs tetap modul terpisah.
+Ringkasan dashboard admin: [context](plans/admin-dashboard/repository-context.md), [plan](plans/admin-dashboard/implementation-plan.md) dan [backlog DASH](tasks/admin-dashboard.md). Pengguna memilih dashboard dan meminta plan 8 Oktober 2026; plan/metrik disetujui pengguna 8 Oktober 2026; runtime DASH bertahap. Pengaturan situs tetap modul terpisah.
 
 Admin Series/season/episode: [context](plans/admin-series-episodes/repository-context.md), [plan](plans/admin-series-episodes/implementation-plan.md) dan [backlog ASER](tasks/admin-series-episodes.md). Modul dipilih pengguna 8 Oktober 2026; ASER-001–012 Done dan verified lokal: season/episode editor, upload/crop/Preview, Series/Episode Publish dan Episode Archive; native API/SQL serta built-browser journeys/regression lulus. Remote delivery disetujui pengguna 8 Oktober 2026 dan sedang diproses melalui normal merge dengan source branch dipertahankan; production belum dijalankan.
 
@@ -80,7 +82,7 @@ Integrasi katalog API ke homepage: [context](plans/public-catalog-api/repository
 
 ## Backlog dan evidence
 
-- [Ringkasan dashboard admin](tasks/admin-dashboard.md): DASH-001–011; proposal inventori/media/latest dan private refresh, menunggu review sebelum runtime.
+- [Ringkasan dashboard admin](tasks/admin-dashboard.md): DASH-001–011; plan disetujui; inventori/media/latest dan private refresh dikerjakan bertahap.
 
 - [Admin Series/season/episode](tasks/admin-series-episodes.md): ASER-001–012 Done; kontrak/editor/media/publication, API/SQL/browser proof dan local task receipts.
 

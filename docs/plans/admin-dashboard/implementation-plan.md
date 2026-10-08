@@ -2,8 +2,8 @@
 
 ## Plan metadata
 
-- Status: draft untuk review pengguna; context dan pembagian task tersedia, runtime belum dimulai.
-- Tanggal: 2026-10-08. Pengguna memilih dashboard terlebih dahulu dan meminta plan; metrik/layout rinci di bawah masih proposal.
+- Status: approved/executing; pengguna menyetujui plan pada 8 Oktober 2026. Runtime dikerjakan bertahap.
+- Tanggal: 2026-10-08. Pengguna memilih dashboard terlebih dahulu dan meminta plan; metrik/layout rinci disetujui melalui approval plan pengguna.
 - Repository: `bayuaji17/vertical-movie-app`; base ref `main`.
 - Base SHA dan last validated SHA: `65fcc2b58d5b316e8c44b2d99e28baf2e90e4f8c`.
 - Context: [repository-context.md](repository-context.md), disimpan sebelum plan.
@@ -273,3 +273,7 @@ User review of this proposal covers counter semantics/layout, latest8/failed5 an
 - Documentation validation and DASH-001 commit receipt will be recorded only after actual checks; SHA of the planning commit belongs in the next documentation update after it exists.
 
 - 2026-10-08 DASH-001 validation: bun run docs:check93 Markdown/896 local links; staged-tree validator86/877; scoped Prettier dan diff checks lulus. Eleven task IDs/dependencies match dan DAG acyclic. Twenty-two unrelated files byte-identical; original README preserved apart from owned additions. Four Markdown paths only in staging; no runtime tests/migration/source/dependency/env changes. Planning local commit uses normal hooks, with final SHA discoverable via git log ID DASH-001 after success; receipt belongs in next documentation update. Proposal remains draft for user review.
+
+- 2026-10-08 approval/freshness: pengguna mengatakan oke, setuju. HEAD478f313 hanya planning docs sejak base65fcc2b; runtime/schema/gateway/auth unchanged. Branch feat/admin-dashboard-summary dibuat; detailed scope/layout/metrics approved.
+
+- 2026-10-08 DASH-002: Layout/state specification tersedia untuk4 jenis, current-job units, bounded8/5 lists, canonical navigation, empty/loading/stale/offline/poll/auth loss dan15 width/theme cases. Approval pengguna tercatat; freshness runtime65fcc2b→478f313 source unchanged. No raster/source change. Checks: docs:check, scoped Prettier/diff, preservation dan normal hooks. Previous task head `478f313145a962b574eaa6ec1594395c5d2c29e0`; own receipt recorded next task after successful normal hooks.

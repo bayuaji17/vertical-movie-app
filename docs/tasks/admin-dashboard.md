@@ -56,7 +56,7 @@ docs:check, scoped Prettier, DAG/ID validation, diff, staged docs and normal hoo
 ### Commit task
 
 - Pesan: docs: plan admin dashboard summary (DASH-001)
-- SHA: Belum dibuat; receipt dicatat pada update dokumentasi berikutnya sesudah commit berhasil.
+- SHA: `478f313145a962b574eaa6ec1594395c5d2c29e0`.
 - Hook/checks: docs working93/896 dan staged86/877, scoped Prettier, DAG/task consistency, preservation/diff lulus sebelum commit; normal Husky docs/lint/types dan Commitlint wajib tanpa bypass.
 - Ledger: Jangan menulis SHA commit sendiri sebelum tersedia.
 
@@ -66,7 +66,7 @@ Detailed proposal menunggu review pengguna; bukan runtime blocker planning.
 
 ## Task: DASH-002 — Layout dan state specification
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex
 - Prioritas: P1
 - Referensi: DASH-US-01/03, PRD-02/05/09; [implementation steps](../plans/admin-dashboard/implementation-plan.md#implementation-steps).
@@ -84,8 +84,8 @@ Requirements: Four kinds, Series unpublished/archive rules, jobs units, latest8/
 
 ### Acceptance criteria
 
-- [ ] Every label/counter/link/state mapped to a testable outcome; distinguish spec from implemented UI.
-- [ ] Definisi/state/invariants terkait pada plan terbukti; actual validation serta scope preservation dan commit tercatat sesuai workflow.
+- [x] Every label/counter/link/state mapped to a testable outcome; distinguish spec from implemented UI.
+- [x] Definisi/state/invariants terkait pada plan terbukti; actual validation serta scope preservation dan commit tercatat sesuai workflow.
 
 ### Validasi
 
@@ -93,13 +93,13 @@ Requirement-to-browser matrix, docs/format/diff and hooks. Raster mockup only if
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement, bukan hasil actual.
+Layout/state specification tersedia untuk4 jenis, current-job units, bounded8/5 lists, canonical navigation, empty/loading/stale/offline/poll/auth loss dan15 width/theme cases. Approval pengguna tercatat; freshness runtime65fcc2b→478f313 source unchanged. No raster/source change.
 
 ### Commit task
 
-- Pesan: Conventional Commit dengan ID task setelah acceptance criteria dan relevant gates lulus.
+- Pesan: docs: define admin dashboard layout and states (DASH-002)
 - SHA: Belum dibuat; receipt dicatat pada update dokumentasi berikutnya sesudah commit berhasil.
-- Hook/checks: Belum dijalankan untuk task ini.
+- Hook/checks: docs:check, scoped Prettier/diff, preservation dan normal hooks; normal hooks wajib tanpa bypass.
 - Ledger: Jangan menulis SHA commit sendiri sebelum tersedia.
 
 ### Blocker atau tindak lanjut
