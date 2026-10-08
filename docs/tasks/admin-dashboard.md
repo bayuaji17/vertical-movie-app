@@ -62,7 +62,7 @@ docs:check, scoped Prettier, DAG/ID validation, diff, staged docs and normal hoo
 
 ### Blocker atau tindak lanjut
 
-Detailed proposal menunggu review pengguna; bukan runtime blocker planning.
+Historis pada DASH-001: detailed proposal menunggu review pengguna. Approval diberikan sebelum DASH-002; seluruh runtime task sekarang selesai dan terverifikasi lokal.
 
 ## Task: DASH-002 — Layout dan state specification
 
@@ -476,8 +476,8 @@ Canonical PRD-02 now reflects verified editorial/current-job summary while site 
 ### Commit task
 
 - Pesan: docs: close verified dashboard implementation (DASH-011)
-- SHA: Belum dibuat; receipt dicatat pada update dokumentasi berikutnya sesudah commit berhasil.
-- Hook/checks: DASH-010 runtime gates/regressions passed; scoped docs formatting, docs:check, staged-tree/diff and preservation; normal hooks required; normal hooks wajib tanpa bypass.
+- SHA: `c533e2240d3263258fe8bcdf5e0451e01a079bb4` (completed task; metadata receipt recorded afterward).
+- Hook/checks: DASH-010 runtime gates/regressions passed; scoped docs formatting, docs:check, staged-tree/diff and preservation; normal Husky docs94/909, lint1/types3 dan Commitlint lulus tanpa bypass; normal hooks wajib tanpa bypass.
 - Ledger: Jangan menulis SHA commit sendiri sebelum tersedia.
 
 ### Blocker atau tindak lanjut
