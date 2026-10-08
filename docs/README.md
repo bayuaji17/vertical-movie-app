@@ -46,7 +46,7 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 
 ## Context dan plan per fitur
 
-Organisasi hooks web: [context](plans/web-hooks-organization/repository-context.md), [plan](plans/web-hooks-organization/implementation-plan.md) dan [WHOOK-001–003](tasks/web-hooks-organization.md), scope structural disetujui pengguna 8 Oktober 2026. Delapan hooks menuju `apps/web/src/hooks/use-*.ts`; refactor sedang dikerjakan pada branch terpisah.
+Organisasi hooks web: [context](plans/web-hooks-organization/repository-context.md), [plan](plans/web-hooks-organization/implementation-plan.md) dan [WHOOK-001–003](tasks/web-hooks-organization.md), scope structural disetujui pengguna 8 Oktober 2026. Delapan hooks berada di `apps/web/src/hooks/use-*.ts`; implemented/verified lokal pada branch terpisah, browser UI belum diuji ulang.
 
 Katalog publik Film/Standalone: [context snapshot](plans/public-catalog/repository-context.md), [implementation plan](plans/public-catalog/implementation-plan.md) dan [backlog PCAT-001–014](tasks/public-catalog.md), draft untuk review 8 Oktober 2026. Scope proposal homepage grid → detail → watch, filter server/cursor dan signed cover terpisah. UX/desain dan implementasi belum disetujui; source belum diubah.
 

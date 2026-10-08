@@ -96,3 +96,5 @@ Semua source berikut dibaca pada base SHA di atas.
 ## Validation history
 
 8 Oktober 2026: base/ref/source verified; branch plan remote head sama dengan local SHA; source clean sebelum refactor. Context written before plan. Pending implementation harus recheck relevant source sebelum moves.
+
+Current source ownership sesudah WHOOK-002 pada `d0e0cf4718b1cba693fd09256d21de99f2b50135`: delapan definitions berada di src/hooks/use-*.ts, ThemeContext pada lib/theme/context.ts, shared provider/pure helper APIs tetap pada owner. Tabel lokasi awal di atas merupakan evidence baseline historis. Source/behavior body comparison dan tests/types/lint/build/import/SSR lulus; no schema/env/dependency/route/style changes.
