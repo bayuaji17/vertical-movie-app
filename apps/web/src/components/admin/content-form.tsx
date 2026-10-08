@@ -292,8 +292,9 @@ export function ContentForm({
                           </NativeSelectOption>
                         </NativeSelect>
                         <FieldDescription>
-                          A default season is created with the series. Episode
-                          management follows separately.
+                          A default season is created with the series. Manage
+                          seasons and episodes from the series details after
+                          saving.
                         </FieldDescription>
                       </Field>
                     )}

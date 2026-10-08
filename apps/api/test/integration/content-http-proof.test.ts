@@ -268,7 +268,7 @@ test("merged Scalar documents auth and every business operation with resolvable 
       }
     }
   }
-  expect(count).toBe(26);
+  expect(count).toBe(31);
   for (const id of [
     "initiateMediaUpload",
     "getMediaUpload",
@@ -277,6 +277,7 @@ test("merged Scalar documents auth and every business operation with resolvable 
     "abortMediaUpload",
     "publishVideo",
     "publishSeries",
+    "seriesPublicationReadiness",
     "getVideoPreview",
     "getVideoPreviewMaster",
     "getVideoPreviewVariant",

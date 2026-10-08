@@ -13,6 +13,20 @@ export type ArchiveVideoInput = Parameters<VideoRoutes['archive']['post']>[0]
 export type PublicationReadiness = NonNullable<
   Awaited<ReturnType<VideoRoutes['publication-readiness']['get']>>['data']
 >
+type SeriesRoutes = ReturnType<
+  ReturnType<typeof createPrivateApiClient>['admin']['series']
+>
+export type SeriesPublicationReadiness = NonNullable<
+  Awaited<ReturnType<SeriesRoutes['publication-readiness']['get']>>['data']
+>
+export const seriesPublicationCheckCodes = [
+  'ACTIVE_DRAFT',
+  'TITLE',
+  'SYNOPSIS',
+  'VERIFIED_POSTER',
+  'PUBLISHED_EPISODE',
+  'NO_ACTIVE_UPLOAD',
+] as const
 export const publicationCheckCodes = [
   'ACTIVE_DRAFT',
   'TITLE',
@@ -60,6 +74,63 @@ export function createPublicationClient(
 ) {
   const api = createPrivateApiClient(baseUrl, cache, fetcher)
   return {
+    async seriesReadiness(id: string, signal?: AbortSignal) {
+      const r = await unwrap(
+          api.admin
+            .series({ id })
+            ['publication-readiness'].get({ fetch: { signal } }),
+        ),
+        raw = record(r),
+        checks = raw.checks
+      if (
+        raw.seriesId !== id ||
+        !isUuid(raw.seriesId) ||
+        raw.ownerType !== 'series' ||
+        !version(raw.rowVersion) ||
+        !['draft', 'published', 'unpublished'].includes(
+          String(raw.publicationStatus),
+        ) ||
+        !(raw.archivedAt === null || date(raw.archivedAt)) ||
+        typeof raw.canPublish !== 'boolean' ||
+        !Array.isArray(checks) ||
+        checks.length !== 6
+      )
+        invalid()
+      const rows = checks.map((c: unknown) => record(c))
+      if (
+        new Set(rows.map((c) => c.code)).size !== 6 ||
+        rows.some(
+          (c) =>
+            !seriesPublicationCheckCodes.some((code) => code === c.code) ||
+            !['passed', 'blocked'].includes(String(c.status)),
+        ) ||
+        raw.canPublish !== rows.every((c) => c.status === 'passed') ||
+        (raw.canPublish &&
+          (raw.publicationStatus !== 'draft' || raw.archivedAt !== null))
+      )
+        invalid()
+      return r
+    },
+    async publishSeries(
+      id: string,
+      input: Parameters<SeriesRoutes['publish']['post']>[0],
+      signal?: AbortSignal,
+    ) {
+      const r = await unwrap(
+          api.admin.series({ id }).publish.post(input, { fetch: { signal } }),
+        ),
+        raw = record(r)
+      if (
+        raw.id !== id ||
+        !isUuid(raw.id) ||
+        raw.rowVersion !== input.expectedVersion + 1 ||
+        raw.publicationStatus !== 'published' ||
+        !date(raw.publishedAt) ||
+        !date(raw.firstPublishedAt)
+      )
+        invalid()
+      return r
+    },
     async readiness(id: string, signal?: AbortSignal) {
       const r = await unwrap(
         api.admin

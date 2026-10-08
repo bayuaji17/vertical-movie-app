@@ -67,7 +67,11 @@ export function isEditableContent(detail: ContentDetail) {
     (detail.type === 'series' || detail.data.kind !== 'episode')
   )
 }
-export function validateContentValues(v: ContentValues, editing = false) {
+export type EditorialValues = Omit<
+  ContentValues,
+  'type' | 'completionStatus' | 'rightsConfirmed'
+>
+export function validateContentValues(v: EditorialValues, editing = false) {
   const errors: Partial<Record<keyof ContentValues, string>> = {}
   if (!v.title.trim()) errors.title = 'Enter a title.'
   for (const field of contentTextFields)
@@ -108,7 +112,7 @@ export function validateContentValues(v: ContentValues, editing = false) {
   return errors
 }
 const nullable = (v: string) => v.trim() || null
-function editorial(v: ContentValues) {
+export function editorialFields(v: EditorialValues) {
   return {
     title: v.title.trim(),
     ...(v.slug.trim() ? { slug: v.slug.trim() } : {}),
@@ -124,7 +128,7 @@ function editorial(v: ContentValues) {
   }
 }
 export function createContentCommand(v: ContentValues): CreateContent {
-  const common = editorial(v)
+  const common = editorialFields(v)
   return v.type === 'series'
     ? {
         type: v.type,
@@ -153,7 +157,7 @@ export function patchContentCommand(
   baseline: ContentDetail,
 ): PatchContent | undefined {
   const old = valuesFromDetail(baseline)
-  const common = changedFields(editorial(v), editorial(old))
+  const common = changedFields(editorialFields(v), editorialFields(old))
   if (baseline.type === 'series') {
     const input = {
       ...common,

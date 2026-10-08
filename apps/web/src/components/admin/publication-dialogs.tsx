@@ -23,12 +23,16 @@ export function PublishVideoDialog({
   returnFocus,
   fallbackFocus,
   canConfirm = true,
+  subject = 'video',
+  hiddenUntilSeriesPublished = false,
 }: {
   controller: PublicationController
   state: PublicationState
   returnFocus: RefObject<HTMLButtonElement | null>
   fallbackFocus?: RefObject<HTMLButtonElement | null>
   canConfirm?: boolean
+  subject?: 'video' | 'series' | 'episode'
+  hiddenUntilSeriesPublished?: boolean
 }) {
   const [acknowledged, setAcknowledged] = useState(false),
     checkboxId = useId(),
@@ -51,9 +55,11 @@ export function PublishVideoDialog({
         className="max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] overflow-y-auto"
       >
         <AlertDialogHeader>
-          <AlertDialogTitle>Publish video?</AlertDialogTitle>
+          <AlertDialogTitle>Publish {subject}?</AlertDialogTitle>
           <AlertDialogDescription>
-            This video will be available to visitors without signing in.
+            {hiddenUntilSeriesPublished
+              ? 'This episode will remain private until its series is published.'
+              : `This ${subject} will be available to visitors without signing in.`}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="flex min-w-0 flex-col gap-3">
@@ -61,7 +67,9 @@ export function PublishVideoDialog({
             {state.snapshot?.detail.data.title}
           </p>
           <p className="text-sm text-muted-foreground">
-            Content rights: Confirmed
+            {subject === 'series'
+              ? 'Ready cover and published playable episode: Confirmed'
+              : 'Content rights: Confirmed'}
           </p>
           <FieldGroup>
             <Field orientation="horizontal" data-disabled={pending}>
@@ -72,7 +80,9 @@ export function PublishVideoDialog({
                 disabled={pending}
               />
               <FieldLabel htmlFor={checkboxId} className="min-h-11">
-                I have reviewed the preview and want to publish this video.
+                {subject === 'series'
+                  ? 'I have reviewed the episode previews and want to publish this series.'
+                  : `I have reviewed the preview and want to publish this ${subject}.`}
               </FieldLabel>
             </Field>
           </FieldGroup>
@@ -97,7 +107,7 @@ export function PublishVideoDialog({
             className="min-h-11"
             onClick={() => void controller.confirm(acknowledged)}
           >
-            {state.phase === 'pending' ? 'Publishing…' : 'Publish video'}
+            {state.phase === 'pending' ? 'Publishing…' : `Publish ${subject}`}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -111,12 +121,14 @@ export function ArchiveVideoDialog({
   returnFocus,
   fallbackFocus,
   canConfirm = true,
+  subject = 'video',
 }: {
   controller: PublicationController
   state: PublicationState
   returnFocus: RefObject<HTMLButtonElement | null>
   fallbackFocus?: RefObject<HTMLButtonElement | null>
   canConfirm?: boolean
+  subject?: 'video' | 'episode'
 }) {
   const cancel = useRef<HTMLButtonElement>(null),
     pending = state.phase !== 'review'
@@ -137,10 +149,10 @@ export function ArchiveVideoDialog({
         className="max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] overflow-y-auto"
       >
         <AlertDialogHeader>
-          <AlertDialogTitle>Archive video?</AlertDialogTitle>
+          <AlertDialogTitle>Archive {subject}?</AlertDialogTitle>
           <AlertDialogDescription>
             Visitors will no longer be able to request new playback access for
-            this video. Previously issued media links may work until they
+            this {subject}. Previously issued media links may work until they
             expire.
           </AlertDialogDescription>
         </AlertDialogHeader>
@@ -177,7 +189,7 @@ export function ArchiveVideoDialog({
             className="min-h-11"
             onClick={() => void controller.confirm()}
           >
-            {state.phase === 'pending' ? 'Archiving…' : 'Archive video'}
+            {state.phase === 'pending' ? 'Archiving…' : `Archive ${subject}`}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

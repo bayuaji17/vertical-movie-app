@@ -16,8 +16,9 @@ const releases = new Set()
 let signInCalls = 0
 let authoritativeReads = 0
 const includeContent =
-  ['all', 'content'].includes(process.env.AUTH_BROWSER_PHASE ?? 'cache') &&
-  !!process.env.CONTENT_TEST_DATABASE_URL
+  ['all', 'content', 'series'].includes(
+    process.env.AUTH_BROWSER_PHASE ?? 'cache',
+  ) && !!process.env.CONTENT_TEST_DATABASE_URL
 const contentFixture = includeContent
   ? await (
       await import('../../api/test/integration/admin-content-fixture')
@@ -37,7 +38,7 @@ const contentFixture = includeContent
         : null
     })
   : undefined
-const mediaFixture = ['media', 'publication'].includes(
+const mediaFixture = ['media', 'publication', 'series-media'].includes(
   process.env.AUTH_BROWSER_PHASE,
 )
   ? await (
@@ -75,7 +76,7 @@ const catalogFixture =
         await import('../../api/test/integration/public-catalog-browser-fixture')
       ).createPublicCatalogBrowserFixture()
     : undefined
-if (process.env.AUTH_BROWSER_PHASE === 'content')
+if (['content', 'series'].includes(process.env.AUTH_BROWSER_PHASE))
   assert.ok(
     contentFixture,
     'CONTENT_TEST_DATABASE_URL is required for the dedicated content browser proof',
@@ -313,21 +314,25 @@ try {
   for (const phase of phases) {
     const workerSource = await Bun.file(
       import.meta.dir +
-        (phase === 'public-film'
-          ? '/public-film-catalog-browser-worker.mjs'
-          : phase === 'public-watch'
-            ? '/public-content-browser-worker.mjs'
-            : phase === 'public-catalog'
-              ? '/public-catalog-browser-worker.mjs'
-              : phase === 'publication'
-                ? '/admin-publication-browser-worker.mjs'
-                : phase === 'media'
-                  ? '/admin-media-upload-browser-worker.mjs'
-                  : phase === 'content'
-                    ? '/admin-content-browser-worker.mjs'
-                    : phase === 'routes'
-                      ? '/auth-routes-browser-worker.mjs'
-                      : '/auth-browser-worker.mjs'),
+        (phase === 'series'
+          ? '/admin-series-browser-worker.mjs'
+          : phase === 'public-film'
+            ? '/public-film-catalog-browser-worker.mjs'
+            : phase === 'public-watch'
+              ? '/public-content-browser-worker.mjs'
+              : phase === 'public-catalog'
+                ? '/public-catalog-browser-worker.mjs'
+                : phase === 'series-media'
+                  ? '/admin-series-media-browser-worker.mjs'
+                  : phase === 'publication'
+                    ? '/admin-publication-browser-worker.mjs'
+                    : phase === 'media'
+                      ? '/admin-media-upload-browser-worker.mjs'
+                      : phase === 'content'
+                        ? '/admin-content-browser-worker.mjs'
+                        : phase === 'routes'
+                          ? '/auth-routes-browser-worker.mjs'
+                          : '/auth-browser-worker.mjs'),
     ).text()
     const workerPath = process.env.AUTH_BROWSER_WORKER_PATH
     if (workerPath) await Bun.write(workerPath, workerSource)

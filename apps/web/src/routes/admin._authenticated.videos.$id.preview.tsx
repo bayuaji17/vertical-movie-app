@@ -8,6 +8,7 @@ import {
   previewContext,
   previewDetailHref,
 } from '#/lib/admin/preview-navigation'
+import { browserSeriesClient } from '#/lib/admin/series-client'
 import { BackToContent } from '#/components/admin/content-resource'
 
 export const Route = createFileRoute(
@@ -18,18 +19,26 @@ export const Route = createFileRoute(
 })
 function Preview() {
   const { id } = Route.useParams(),
-    { type } = Route.useSearch(),
+    { type, seriesId } = Route.useSearch(),
     cache = useQueryClient()
-  const load = useCallback(async () => {
-    const base = getBrowserApiBaseUrl()
-    if (!base) throw new Error('API unavailable')
-    const result = await createPrivateApiClient(base, cache)
-      .admin.videos({ id })
-      .playback.get()
-    if (result.error) throw new Error('Preview unavailable')
-    return result.data
-  }, [id, cache])
-  const back = previewDetailHref(id, type)
+  const load = useCallback(
+    async (signal: AbortSignal) => {
+      const base = getBrowserApiBaseUrl()
+      if (!base) throw new Error('API unavailable')
+      if (type === 'episode') {
+        const client = browserSeriesClient(cache)
+        if (!client || !seriesId) throw new Error('Episode context unavailable')
+        await client.episode(seriesId, id, signal)
+      }
+      const result = await createPrivateApiClient(base, cache)
+        .admin.videos({ id })
+        .playback.get({ fetch: { signal } })
+      if (result.error) throw new Error('Preview unavailable')
+      return result.data
+    },
+    [id, cache, type, seriesId],
+  )
+  const back = previewDetailHref(id, type, seriesId)
   return (
     <section className="mx-auto flex w-full max-w-sm flex-col gap-4 p-4">
       <h1 className="text-lg font-semibold">Preview video</h1>
@@ -40,7 +49,7 @@ function Preview() {
           className="min-h-11"
           render={<Link to={back} />}
         >
-          Back to content details
+          Back to {type === 'episode' ? 'episode' : 'content details'}
         </Button>
       ) : (
         <BackToContent />

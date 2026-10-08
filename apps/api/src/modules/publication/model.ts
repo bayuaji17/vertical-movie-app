@@ -52,3 +52,38 @@ export const PublicationDto = t.Object({
   firstPublishedAt: t.String({ format: "date-time" }),
 });
 export type PublicationResult = typeof PublicationDto.static;
+
+export const SeriesPublicationReadinessDto = t.Object(
+  {
+    seriesId: Uuid,
+    ownerType: t.Literal("series"),
+    rowVersion: ExpectedVersion,
+    publicationStatus: t.Union([
+      t.Literal("draft"),
+      t.Literal("published"),
+      t.Literal("unpublished"),
+    ]),
+    archivedAt: t.Nullable(t.String({ format: "date-time" })),
+    canPublish: t.Boolean(),
+    checks: t.Array(
+      t.Object(
+        {
+          code: t.Union([
+            t.Literal("ACTIVE_DRAFT"),
+            t.Literal("TITLE"),
+            t.Literal("SYNOPSIS"),
+            t.Literal("VERIFIED_POSTER"),
+            t.Literal("PUBLISHED_EPISODE"),
+            t.Literal("NO_ACTIVE_UPLOAD"),
+          ]),
+          status: t.Union([t.Literal("passed"), t.Literal("blocked")]),
+        },
+        { additionalProperties: false },
+      ),
+      { minItems: 6, maxItems: 6 },
+    ),
+  },
+  { additionalProperties: false },
+);
+export type SeriesPublicationReadiness =
+  typeof SeriesPublicationReadinessDto.static;

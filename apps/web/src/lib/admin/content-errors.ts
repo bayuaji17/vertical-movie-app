@@ -6,6 +6,12 @@ export function contentErrorMessage(error: unknown, mutation = false) {
       ? 'The save could not be confirmed. Check the content list before submitting again.'
       : 'Content could not be loaded. Try again.'
   switch (error.code) {
+    case 'SEASON_NUMBER_CONFLICT':
+      return 'This season number is already reserved. Choose another number.'
+    case 'EPISODE_NUMBER_CONFLICT':
+      return 'This episode number is already reserved in the selected season. Choose another number.'
+    case 'CONTENT_ARCHIVED':
+      return 'This record or its parent has been archived. Your input is preserved; reload its current state.'
     case 'SLUG_CONFLICT':
       return 'This slug is already in use. Choose another slug.'
     case 'CONTENT_VERSION_CONFLICT':

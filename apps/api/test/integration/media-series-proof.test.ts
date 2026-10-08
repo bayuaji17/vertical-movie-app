@@ -110,6 +110,11 @@ test("series remains hidden until it and ready episodes are manually published; 
     }
     const catalog = new CatalogService(new CatalogStore(db.db)),
       publish = new PublicationService(db.db, catalog.invalidate);
+    const before = await publish.seriesReadiness(parent);
+    expect(before.canPublish).toBe(false);
+    expect(
+      before.checks.find((c) => c.code === "PUBLISHED_EPISODE")?.status,
+    ).toBe("blocked");
     await expect(
       publish.publish(
         "series",
@@ -126,6 +131,7 @@ test("series remains hidden until it and ready episodes are manually published; 
         "media-admin",
       );
     expect((await catalog.list({})).items).toHaveLength(0);
+    expect((await publish.seriesReadiness(parent)).canPublish).toBe(true);
     await publish.publish(
       "series",
       parent,
@@ -133,6 +139,10 @@ test("series remains hidden until it and ready episodes are manually published; 
       "media-admin",
     );
     expect((await catalog.list({})).items).toHaveLength(2);
+    const after = await publish.seriesReadiness(parent);
+    expect(after.rowVersion).toBe(2);
+    expect(after.publicationStatus).toBe("published");
+    expect(after.canPublish).toBe(false);
     expect((await catalog.seriesDetail(parent)).playableEpisodeCount).toBe(2);
     expect((await catalog.next(ids[0])).id).toBe(ids[2]);
     const seriesService = new SeriesService(

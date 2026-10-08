@@ -225,6 +225,23 @@ export async function createAdminMediaBrowserFixture(
         }
       }
     }
+    if (Bun.env.AUTH_BROWSER_PHASE === "series-media") {
+      const parent = await seriesService.get(ids.seriesDraft!);
+      ids.episodeSeason = parent.seasons[0]!.id;
+      ids.episodeDraft = (
+        await videoService.create(
+          {
+            kind: "episode",
+            title: "Media Episode",
+            synopsis: "A verified episode browser journey.",
+            seasonId: ids.episodeSeason!,
+            episodeNumber: 1,
+            rightsConfirmed: true,
+          },
+          "browser-admin",
+        )
+      ).id;
+    }
     if (Bun.env.AUTH_BROWSER_PHASE === "publication") {
       for (let i = 0; i < 16; i++)
         await videoService.create(

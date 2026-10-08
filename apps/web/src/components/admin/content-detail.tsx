@@ -9,8 +9,9 @@ import { ContentStatus } from './content-status'
 import { Button } from '#/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '#/components/ui/card'
 import { Badge } from '#/components/ui/badge'
-import { OwnerMediaPanel } from './media-panel'
+import { OwnerPublicationMedia } from './owner-publication'
 import { VideoPublicationMedia } from './publication-panel'
+import { seasonsHref } from '#/lib/admin/series-form-state'
 
 function MetadataRows({
   rows,
@@ -133,10 +134,14 @@ export function ContentDetailView({
                       No seasons available.
                     </p>
                   )}
-                  <p className="text-sm text-muted-foreground">
-                    Season and episode management follows in a separate
-                    workflow.
-                  </p>
+                  <Button
+                    nativeButton={false}
+                    variant="outline"
+                    className="min-h-11"
+                    render={<Link to={seasonsHref(d.id)} />}
+                  >
+                    Manage seasons & episodes
+                  </Button>
                 </div>
               </>
             ) : (
@@ -196,9 +201,10 @@ export function ContentDetailView({
         </Card>
       </div>
       {detail.type === 'series' ? (
-        <OwnerMediaPanel
-          owner={{ ownerType: 'series', ownerId: d.id }}
-          type={detail.type}
+        <OwnerPublicationMedia
+          target={{ type: 'series', id: d.id }}
+          detail={detail}
+          metadataStale={metadataStale}
         />
       ) : detail.data.kind !== 'episode' ? (
         <VideoPublicationMedia

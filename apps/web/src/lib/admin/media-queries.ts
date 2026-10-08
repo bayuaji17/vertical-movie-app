@@ -13,7 +13,10 @@ import type {
 import { MediaApiError } from './media-errors'
 import { invalidateContent } from './content-queries'
 import type { ContentType } from './content-client'
+import { invalidateSeries } from './series-queries'
 import { inventoryNeedsPolling, sessionNeedsPolling } from './media-state'
+
+export type MediaContext = ContentType | { type: 'episode'; seriesId: string }
 
 export function mediaPollInterval(
   pending: boolean,
@@ -123,10 +126,12 @@ export async function invalidateMedia(
   cache: QueryClient,
   identity: string,
   owner: MediaOwner,
-  type: ContentType,
+  context: MediaContext,
 ) {
   await Promise.all([
     cache.invalidateQueries({ queryKey: mediaKeys.owner(identity, owner) }),
-    invalidateContent(cache, identity, type, owner.ownerId),
+    typeof context === 'string'
+      ? invalidateContent(cache, identity, context, owner.ownerId)
+      : invalidateSeries(cache, identity, context.seriesId, owner.ownerId),
   ])
 }

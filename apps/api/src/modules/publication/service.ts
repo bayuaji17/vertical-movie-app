@@ -1,16 +1,8 @@
 import { createHash } from "node:crypto";
-import { and, eq, inArray, sql } from "drizzle-orm";
-import {
-  videos,
-  series,
-  mediaAssets,
-  mediaJobs,
-  contentOperations,
-  uploadSessions,
-} from "../../db/schema";
+import { and, eq, sql } from "drizzle-orm";
+import { videos, series, contentOperations } from "../../db/schema";
 import type { ContentDatabase } from "../../shared/content-db";
 import { VideosStore } from "../videos/repository";
-import { CatalogStore } from "../catalog/repository";
 import {
   ContentError,
   notFound,
@@ -20,11 +12,15 @@ import type {
   PublishInput,
   PublicationResult,
   PublicationReadiness,
+  SeriesPublicationReadiness,
 } from "./model";
 import {
   assertVideoPublication,
   assessVideoPublication,
   PublicationEvidenceStore,
+  assertSeriesPublication,
+  assessSeriesPublication,
+  SeriesPublicationEvidenceStore,
 } from "./readiness";
 export class PublicationService {
   constructor(
@@ -46,6 +42,32 @@ export class PublicationService {
             publicationStatus: row.publicationStatus,
             archivedAt: row.archivedAt?.toISOString() ?? null,
             ...assessVideoPublication(evidence),
+          };
+        },
+        { isolationLevel: "repeatable read", accessMode: "read only" },
+      );
+    } catch (error) {
+      if (error instanceof ContentError) throw error;
+      unavailable();
+    }
+  }
+  async seriesReadiness(id: string): Promise<SeriesPublicationReadiness> {
+    if (!this.db) unavailable();
+    try {
+      return await this.db.transaction(
+        async (tx) => {
+          const [row] = await tx.select().from(series).where(eq(series.id, id));
+          if (!row) notFound();
+          const evidence = await new SeriesPublicationEvidenceStore(tx).read(
+            row,
+          );
+          return {
+            seriesId: row.id,
+            ownerType: "series" as const,
+            rowVersion: row.rowVersion,
+            publicationStatus: row.publicationStatus,
+            archivedAt: row.archivedAt?.toISOString() ?? null,
+            ...assessSeriesPublication(evidence),
           };
         },
         { isolationLevel: "repeatable read", accessMode: "read only" },
@@ -143,7 +165,6 @@ export class PublicationService {
           "PUBLICATION_NOT_READY",
           "Title and synopsis are required.",
         );
-      const catalog = new CatalogStore(tx);
       if (type === "video") {
         const evidence = await new PublicationEvidenceStore(tx).read(
           row as typeof videos.$inferSelect,
@@ -151,58 +172,12 @@ export class PublicationService {
         );
         assertVideoPublication(evidence, input.expectedVersion);
       } else {
-        const busy = await tx
-          .select({ id: uploadSessions.id })
-          .from(uploadSessions)
-          .where(
-            and(
-              eq(uploadSessions.seriesId, id),
-              inArray(uploadSessions.status, [
-                "initializing",
-                "pending",
-                "completing",
-                "aborting",
-              ]),
-            ),
-          )
-          .limit(1);
-        if (busy.length)
-          throw new ContentError(
-            "PUBLICATION_MEDIA_BUSY",
-            "Finish or abort the active upload before publishing.",
-          );
-        const [poster] = await tx
-          .select({ asset: mediaAssets, job: mediaJobs })
-          .from(mediaAssets)
-          .innerJoin(mediaJobs, eq(mediaAssets.readyJobId, mediaJobs.id))
-          .where(
-            and(
-              eq(
-                mediaAssets.id,
-                row.posterAssetId ?? "00000000-0000-0000-0000-000000000000",
-              ),
-              eq(mediaAssets.seriesId, id),
-              eq(mediaAssets.kind, "poster"),
-              eq(mediaAssets.state, "ready"),
-              eq(mediaJobs.state, "succeeded"),
-              eq(mediaJobs.assetId, mediaAssets.id),
-              eq(mediaJobs.generation, mediaAssets.generation),
-            ),
-          );
-        if (
-          !poster ||
-          (
-            await catalog.playable({
-              seriesId: id,
-              includeSeriesDraft: true,
-              limit: 1,
-            })
-          ).length === 0
-        )
-          throw new ContentError(
-            "PUBLICATION_NOT_READY",
-            "A ready poster and published playable episode are required.",
-          );
+        assertSeriesPublication(
+          await new SeriesPublicationEvidenceStore(tx).read(
+            row as typeof series.$inferSelect,
+          ),
+          input.expectedVersion,
+        );
       }
       const now = new Date(),
         table = type === "video" ? videos : series;

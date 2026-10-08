@@ -25,6 +25,13 @@ import { Route as AdminAuthenticatedContentNewRouteImport } from './routes/admin
 import { Route as AdminAuthenticatedVideosIdPreviewRouteImport } from './routes/admin._authenticated.videos.$id.preview'
 import { Route as AdminAuthenticatedContentTypeIdIndexRouteImport } from './routes/admin._authenticated.content.$type.$id.index'
 import { Route as AdminAuthenticatedContentTypeIdEditRouteImport } from './routes/admin._authenticated.content.$type.$id.edit'
+import { Route as AdminAuthenticatedSeriesSeriesIdSeasonsIndexRouteImport } from './routes/admin._authenticated.series.$seriesId.seasons.index'
+import { Route as AdminAuthenticatedSeriesSeriesIdSeasonsNewRouteImport } from './routes/admin._authenticated.series.$seriesId.seasons.new'
+import { Route as AdminAuthenticatedSeriesSeriesIdEpisodesEpisodeIdIndexRouteImport } from './routes/admin._authenticated.series.$seriesId.episodes.$episodeId.index'
+import { Route as AdminAuthenticatedSeriesSeriesIdEpisodesEpisodeIdEditRouteImport } from './routes/admin._authenticated.series.$seriesId.episodes.$episodeId.edit'
+import { Route as AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdIndexRouteImport } from './routes/admin._authenticated.series.$seriesId.seasons.$seasonId.index'
+import { Route as AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdEditRouteImport } from './routes/admin._authenticated.series.$seriesId.seasons.$seasonId.edit'
+import { Route as AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdEpisodesNewRouteImport } from './routes/admin._authenticated.series.$seriesId.seasons.$seasonId.episodes.new'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -110,6 +117,48 @@ const AdminAuthenticatedContentTypeIdEditRoute =
     path: '/content/$type/$id/edit',
     getParentRoute: () => AdminAuthenticatedRoute,
   } as any)
+const AdminAuthenticatedSeriesSeriesIdSeasonsIndexRoute =
+  AdminAuthenticatedSeriesSeriesIdSeasonsIndexRouteImport.update({
+    id: '/series/$seriesId/seasons/',
+    path: '/series/$seriesId/seasons/',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
+const AdminAuthenticatedSeriesSeriesIdSeasonsNewRoute =
+  AdminAuthenticatedSeriesSeriesIdSeasonsNewRouteImport.update({
+    id: '/series/$seriesId/seasons/new',
+    path: '/series/$seriesId/seasons/new',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
+const AdminAuthenticatedSeriesSeriesIdEpisodesEpisodeIdIndexRoute =
+  AdminAuthenticatedSeriesSeriesIdEpisodesEpisodeIdIndexRouteImport.update({
+    id: '/series/$seriesId/episodes/$episodeId/',
+    path: '/series/$seriesId/episodes/$episodeId/',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
+const AdminAuthenticatedSeriesSeriesIdEpisodesEpisodeIdEditRoute =
+  AdminAuthenticatedSeriesSeriesIdEpisodesEpisodeIdEditRouteImport.update({
+    id: '/series/$seriesId/episodes/$episodeId/edit',
+    path: '/series/$seriesId/episodes/$episodeId/edit',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
+const AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdIndexRoute =
+  AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdIndexRouteImport.update({
+    id: '/series/$seriesId/seasons/$seasonId/',
+    path: '/series/$seriesId/seasons/$seasonId/',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
+const AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdEditRoute =
+  AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdEditRouteImport.update({
+    id: '/series/$seriesId/seasons/$seasonId/edit',
+    path: '/series/$seriesId/seasons/$seasonId/edit',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
+const AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdEpisodesNewRoute =
+  AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdEpisodesNewRouteImport.update({
+    id: '/series/$seriesId/seasons/$seasonId/episodes/new',
+    path: '/series/$seriesId/seasons/$seasonId/episodes/new',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -126,7 +175,14 @@ export interface FileRoutesByFullPath {
   '/admin/content/': typeof AdminAuthenticatedContentIndexRoute
   '/admin/videos/$id/preview': typeof AdminAuthenticatedVideosIdPreviewRoute
   '/admin/content/$type/$id/edit': typeof AdminAuthenticatedContentTypeIdEditRoute
+  '/admin/series/$seriesId/seasons/new': typeof AdminAuthenticatedSeriesSeriesIdSeasonsNewRoute
   '/admin/content/$type/$id/': typeof AdminAuthenticatedContentTypeIdIndexRoute
+  '/admin/series/$seriesId/seasons/': typeof AdminAuthenticatedSeriesSeriesIdSeasonsIndexRoute
+  '/admin/series/$seriesId/episodes/$episodeId/edit': typeof AdminAuthenticatedSeriesSeriesIdEpisodesEpisodeIdEditRoute
+  '/admin/series/$seriesId/seasons/$seasonId/edit': typeof AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdEditRoute
+  '/admin/series/$seriesId/episodes/$episodeId/': typeof AdminAuthenticatedSeriesSeriesIdEpisodesEpisodeIdIndexRoute
+  '/admin/series/$seriesId/seasons/$seasonId/': typeof AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdIndexRoute
+  '/admin/series/$seriesId/seasons/$seasonId/episodes/new': typeof AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdEpisodesNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -142,7 +198,14 @@ export interface FileRoutesByTo {
   '/admin/content': typeof AdminAuthenticatedContentIndexRoute
   '/admin/videos/$id/preview': typeof AdminAuthenticatedVideosIdPreviewRoute
   '/admin/content/$type/$id/edit': typeof AdminAuthenticatedContentTypeIdEditRoute
+  '/admin/series/$seriesId/seasons/new': typeof AdminAuthenticatedSeriesSeriesIdSeasonsNewRoute
   '/admin/content/$type/$id': typeof AdminAuthenticatedContentTypeIdIndexRoute
+  '/admin/series/$seriesId/seasons': typeof AdminAuthenticatedSeriesSeriesIdSeasonsIndexRoute
+  '/admin/series/$seriesId/episodes/$episodeId/edit': typeof AdminAuthenticatedSeriesSeriesIdEpisodesEpisodeIdEditRoute
+  '/admin/series/$seriesId/seasons/$seasonId/edit': typeof AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdEditRoute
+  '/admin/series/$seriesId/episodes/$episodeId': typeof AdminAuthenticatedSeriesSeriesIdEpisodesEpisodeIdIndexRoute
+  '/admin/series/$seriesId/seasons/$seasonId': typeof AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdIndexRoute
+  '/admin/series/$seriesId/seasons/$seasonId/episodes/new': typeof AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdEpisodesNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -161,7 +224,14 @@ export interface FileRoutesById {
   '/admin/_authenticated/content/': typeof AdminAuthenticatedContentIndexRoute
   '/admin/_authenticated/videos/$id/preview': typeof AdminAuthenticatedVideosIdPreviewRoute
   '/admin/_authenticated/content/$type/$id/edit': typeof AdminAuthenticatedContentTypeIdEditRoute
+  '/admin/_authenticated/series/$seriesId/seasons/new': typeof AdminAuthenticatedSeriesSeriesIdSeasonsNewRoute
   '/admin/_authenticated/content/$type/$id/': typeof AdminAuthenticatedContentTypeIdIndexRoute
+  '/admin/_authenticated/series/$seriesId/seasons/': typeof AdminAuthenticatedSeriesSeriesIdSeasonsIndexRoute
+  '/admin/_authenticated/series/$seriesId/episodes/$episodeId/edit': typeof AdminAuthenticatedSeriesSeriesIdEpisodesEpisodeIdEditRoute
+  '/admin/_authenticated/series/$seriesId/seasons/$seasonId/edit': typeof AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdEditRoute
+  '/admin/_authenticated/series/$seriesId/episodes/$episodeId/': typeof AdminAuthenticatedSeriesSeriesIdEpisodesEpisodeIdIndexRoute
+  '/admin/_authenticated/series/$seriesId/seasons/$seasonId/': typeof AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdIndexRoute
+  '/admin/_authenticated/series/$seriesId/seasons/$seasonId/episodes/new': typeof AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdEpisodesNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -180,7 +250,14 @@ export interface FileRouteTypes {
     | '/admin/content/'
     | '/admin/videos/$id/preview'
     | '/admin/content/$type/$id/edit'
+    | '/admin/series/$seriesId/seasons/new'
     | '/admin/content/$type/$id/'
+    | '/admin/series/$seriesId/seasons/'
+    | '/admin/series/$seriesId/episodes/$episodeId/edit'
+    | '/admin/series/$seriesId/seasons/$seasonId/edit'
+    | '/admin/series/$seriesId/episodes/$episodeId/'
+    | '/admin/series/$seriesId/seasons/$seasonId/'
+    | '/admin/series/$seriesId/seasons/$seasonId/episodes/new'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -196,7 +273,14 @@ export interface FileRouteTypes {
     | '/admin/content'
     | '/admin/videos/$id/preview'
     | '/admin/content/$type/$id/edit'
+    | '/admin/series/$seriesId/seasons/new'
     | '/admin/content/$type/$id'
+    | '/admin/series/$seriesId/seasons'
+    | '/admin/series/$seriesId/episodes/$episodeId/edit'
+    | '/admin/series/$seriesId/seasons/$seasonId/edit'
+    | '/admin/series/$seriesId/episodes/$episodeId'
+    | '/admin/series/$seriesId/seasons/$seasonId'
+    | '/admin/series/$seriesId/seasons/$seasonId/episodes/new'
   id:
     | '__root__'
     | '/'
@@ -214,7 +298,14 @@ export interface FileRouteTypes {
     | '/admin/_authenticated/content/'
     | '/admin/_authenticated/videos/$id/preview'
     | '/admin/_authenticated/content/$type/$id/edit'
+    | '/admin/_authenticated/series/$seriesId/seasons/new'
     | '/admin/_authenticated/content/$type/$id/'
+    | '/admin/_authenticated/series/$seriesId/seasons/'
+    | '/admin/_authenticated/series/$seriesId/episodes/$episodeId/edit'
+    | '/admin/_authenticated/series/$seriesId/seasons/$seasonId/edit'
+    | '/admin/_authenticated/series/$seriesId/episodes/$episodeId/'
+    | '/admin/_authenticated/series/$seriesId/seasons/$seasonId/'
+    | '/admin/_authenticated/series/$seriesId/seasons/$seasonId/episodes/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -342,6 +433,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuthenticatedContentTypeIdEditRouteImport
       parentRoute: typeof AdminAuthenticatedRoute
     }
+    '/admin/_authenticated/series/$seriesId/seasons/': {
+      id: '/admin/_authenticated/series/$seriesId/seasons/'
+      path: '/series/$seriesId/seasons'
+      fullPath: '/admin/series/$seriesId/seasons/'
+      preLoaderRoute: typeof AdminAuthenticatedSeriesSeriesIdSeasonsIndexRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
+    '/admin/_authenticated/series/$seriesId/seasons/new': {
+      id: '/admin/_authenticated/series/$seriesId/seasons/new'
+      path: '/series/$seriesId/seasons/new'
+      fullPath: '/admin/series/$seriesId/seasons/new'
+      preLoaderRoute: typeof AdminAuthenticatedSeriesSeriesIdSeasonsNewRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
+    '/admin/_authenticated/series/$seriesId/episodes/$episodeId/': {
+      id: '/admin/_authenticated/series/$seriesId/episodes/$episodeId/'
+      path: '/series/$seriesId/episodes/$episodeId'
+      fullPath: '/admin/series/$seriesId/episodes/$episodeId/'
+      preLoaderRoute: typeof AdminAuthenticatedSeriesSeriesIdEpisodesEpisodeIdIndexRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
+    '/admin/_authenticated/series/$seriesId/episodes/$episodeId/edit': {
+      id: '/admin/_authenticated/series/$seriesId/episodes/$episodeId/edit'
+      path: '/series/$seriesId/episodes/$episodeId/edit'
+      fullPath: '/admin/series/$seriesId/episodes/$episodeId/edit'
+      preLoaderRoute: typeof AdminAuthenticatedSeriesSeriesIdEpisodesEpisodeIdEditRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
+    '/admin/_authenticated/series/$seriesId/seasons/$seasonId/': {
+      id: '/admin/_authenticated/series/$seriesId/seasons/$seasonId/'
+      path: '/series/$seriesId/seasons/$seasonId'
+      fullPath: '/admin/series/$seriesId/seasons/$seasonId/'
+      preLoaderRoute: typeof AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdIndexRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
+    '/admin/_authenticated/series/$seriesId/seasons/$seasonId/edit': {
+      id: '/admin/_authenticated/series/$seriesId/seasons/$seasonId/edit'
+      path: '/series/$seriesId/seasons/$seasonId/edit'
+      fullPath: '/admin/series/$seriesId/seasons/$seasonId/edit'
+      preLoaderRoute: typeof AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdEditRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
+    '/admin/_authenticated/series/$seriesId/seasons/$seasonId/episodes/new': {
+      id: '/admin/_authenticated/series/$seriesId/seasons/$seasonId/episodes/new'
+      path: '/series/$seriesId/seasons/$seasonId/episodes/new'
+      fullPath: '/admin/series/$seriesId/seasons/$seasonId/episodes/new'
+      preLoaderRoute: typeof AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdEpisodesNewRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
   }
 }
 
@@ -351,7 +491,14 @@ interface AdminAuthenticatedRouteChildren {
   AdminAuthenticatedContentIndexRoute: typeof AdminAuthenticatedContentIndexRoute
   AdminAuthenticatedVideosIdPreviewRoute: typeof AdminAuthenticatedVideosIdPreviewRoute
   AdminAuthenticatedContentTypeIdEditRoute: typeof AdminAuthenticatedContentTypeIdEditRoute
+  AdminAuthenticatedSeriesSeriesIdSeasonsNewRoute: typeof AdminAuthenticatedSeriesSeriesIdSeasonsNewRoute
   AdminAuthenticatedContentTypeIdIndexRoute: typeof AdminAuthenticatedContentTypeIdIndexRoute
+  AdminAuthenticatedSeriesSeriesIdSeasonsIndexRoute: typeof AdminAuthenticatedSeriesSeriesIdSeasonsIndexRoute
+  AdminAuthenticatedSeriesSeriesIdEpisodesEpisodeIdEditRoute: typeof AdminAuthenticatedSeriesSeriesIdEpisodesEpisodeIdEditRoute
+  AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdEditRoute: typeof AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdEditRoute
+  AdminAuthenticatedSeriesSeriesIdEpisodesEpisodeIdIndexRoute: typeof AdminAuthenticatedSeriesSeriesIdEpisodesEpisodeIdIndexRoute
+  AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdIndexRoute: typeof AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdIndexRoute
+  AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdEpisodesNewRoute: typeof AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdEpisodesNewRoute
 }
 
 const AdminAuthenticatedRouteChildren: AdminAuthenticatedRouteChildren = {
@@ -362,8 +509,22 @@ const AdminAuthenticatedRouteChildren: AdminAuthenticatedRouteChildren = {
     AdminAuthenticatedVideosIdPreviewRoute,
   AdminAuthenticatedContentTypeIdEditRoute:
     AdminAuthenticatedContentTypeIdEditRoute,
+  AdminAuthenticatedSeriesSeriesIdSeasonsNewRoute:
+    AdminAuthenticatedSeriesSeriesIdSeasonsNewRoute,
   AdminAuthenticatedContentTypeIdIndexRoute:
     AdminAuthenticatedContentTypeIdIndexRoute,
+  AdminAuthenticatedSeriesSeriesIdSeasonsIndexRoute:
+    AdminAuthenticatedSeriesSeriesIdSeasonsIndexRoute,
+  AdminAuthenticatedSeriesSeriesIdEpisodesEpisodeIdEditRoute:
+    AdminAuthenticatedSeriesSeriesIdEpisodesEpisodeIdEditRoute,
+  AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdEditRoute:
+    AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdEditRoute,
+  AdminAuthenticatedSeriesSeriesIdEpisodesEpisodeIdIndexRoute:
+    AdminAuthenticatedSeriesSeriesIdEpisodesEpisodeIdIndexRoute,
+  AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdIndexRoute:
+    AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdIndexRoute,
+  AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdEpisodesNewRoute:
+    AdminAuthenticatedSeriesSeriesIdSeasonsSeasonIdEpisodesNewRoute,
 }
 
 const AdminAuthenticatedRouteWithChildren =
