@@ -2,7 +2,7 @@
 
 ## Plan metadata
 
-- Status: **active — plan pilihan pengguna, PCAT-002 disiapkan untuk review desain** · 8 Oktober 2026. Kelanjutan diminta setelah hooks delivery; perbedaan kontrak/UI terhadap main belum dianggap selesai hanya karena overlap fitur.
+- Status: **active — plan pilihan pengguna, PCAT-002 disetujui pengguna, implementasi dimulai** · 8 Oktober 2026. Kelanjutan diminta setelah hooks delivery; perbedaan kontrak/UI terhadap main belum dianggap selesai hanya karena overlap fitur.
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `feat/admin-publication`; base SHA: `634f7d46885692b32489b109c687d337e0e55511`.
 - Context: [repository-context.md](repository-context.md), disimpan terlebih dahulu.
@@ -35,7 +35,7 @@ Homepage starter/demo MP4; watch minimal menggunakan public playback existing. A
 
 ## Desired behavior
 
-### UX yang diusulkan
+### UX yang disetujui
 
 | Area                   | Proposal yang dapat disetujui bersama plan                                                                                                                                                                                             |
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -341,9 +341,9 @@ Evidence source/path/symbol/base SHA dimiliki [context evidence index](repositor
 
 ## Open decisions
 
-Persetujuan yang diperlukan sebelum implementasi: grid + Load more; All/Films/Standalone saja; 20 items/createdAt descending; route detail `/videos/$slug`; English copy; indexing noindex sementara. Search/genre/sort alternatif ditunda dalam proposal. Pertanyaan UX opsional dikirim saat planning; jika belum dijawab, proposal grid dipertahankan berstatus draft, bukan dianggap persetujuan karena waktu berlalu.
+Keputusan disetujui pengguna 8 Oktober 2026: grid + Load more; All/Films/Standalone saja; 20 items/createdAt descending; route detail `/videos/$slug`; English copy; indexing noindex sementara. Search/genre/sort alternatif ditunda dalam proposal. Pengguna menyetujui desain konkret dengan “ok, setuju”; bukan approval berdasarkan waktu berlalu.
 
-PCAT-002 menghasilkan desain konkret untuk review berikutnya; code UI menunggu approval desain. Kebijakan konten dan indexing jangka panjang di PRD tetap terbuka. Read-only proof planning tidak mengotorisasi source implementation, push/PR/merge atau deployment.
+8 Oktober 2026: pengguna menyetujui desain konkret PCAT-002 dengan “ok, setuju”; implementasi source pada feat/public-catalog diotorisasi sesuai DAG. Kebijakan konten dan indexing jangka panjang di PRD tetap terbuka. Approval ini mengotorisasi implementasi dan local task commits sesuai workflow repository. Delivery remote berikutnya merupakan tahap tersendiri.
 
 ## Validation history
 
@@ -366,3 +366,5 @@ Receipt sesudah commit PCAT-001: `b844574d34e311c38f3359cd7e1ab61d7c10c6c6`, `do
 8 Oktober 2026: pengguna mengotorisasi commit/push dokumentasi plan terlebih dahulu, lalu branch baru untuk organisasi hooks web. Otorisasi delivery tidak mengubah status draft/approval UX katalog. Remote receipt dicatat setelah push berhasil.
 
 8 Oktober 2026: sesudah squash hooks PR #12, pengguna menegaskan plan yang dimaksud ialah `chore/public-catalog-plan`. Branch `feat/public-catalog` dimulai dari main65127a1 dengan dokumen plan awal, bukan local reconciliation yang terlalu dini menutup task. Context review terlebih dahulu; PCAT-002 spesifikasi/interactive HTML/eight responsive Light-Dark PNG disiapkan. Native browser prototype proof8 cases, assets/fonts,9:16/no overflow/44px, keyboard/filter/context/recovery/errors0 pass; bukan API/HLS/production proof. Docs86/816, scoped formatting/diff pass; local scoped commit/receipt berikut. Desain masih Review; task003–014 tetap terdaftar dengan dependencies/contract refinement dan tidak dibatalkan otomatis. Tidak ada perubahan apps/packages/env/dependencies atau remote delivery baru.
+
+PCAT-002 artifact receipt: local commit307710159cbd8a6d9a0f4d230d2ec1deaf2abc37,14 files termasuk selective index/spec/HTML/eight screenshots. Docs86/816/staged79/797, native prototype proof, format/diff/preservation dan normal lint/type/Commitlint hooks pass. Source aplikasi tidak berubah; task tetap Review menunggu desain. Receipt dicatat sesudah commit dan dapat masuk update task berikutnya; branch feat/public-catalog belum dipush/merged.

@@ -1,6 +1,6 @@
 # Modul: Katalog publik Film/Standalone
 
-> Status: **active — PCAT-001 Done, PCAT-002 design review** · 8 Oktober 2026 · pengguna menetapkan plan `chore/public-catalog-plan` untuk dilanjutkan. Working branch `feat/public-catalog` dari main65127a1; desain/kontrak proposal terhadap current main ditinjau sebelum UI. Baseline awal634f7d4 tetap historis.
+> Status: **active — PCAT-001/002 Done, implementasi PCAT-003 berikutnya** · 8 Oktober 2026 · pengguna menetapkan plan `chore/public-catalog-plan` untuk dilanjutkan. Working branch `feat/public-catalog` dari main65127a1; desain plan awal disetujui pengguna sebelum implementasi UI. Baseline awal634f7d4 tetap historis.
 
 ## Tujuan modul
 
@@ -65,7 +65,7 @@ PCAT-001 selesai; plan dan UX proposal masih draft. PCAT-002–014 menunggu appr
 
 ## Task: PCAT-002 — Spesifikasi dan desain katalog/detail/watch
 
-- Status: Review — spesifikasi dan prototype siap; approval desain pengguna pending.
+- Status: Done — desain disetujui pengguna pada 8 Oktober 2026.
 - Owner: Codex/pengembang
 - Prioritas: P1 — urutan dependency DAG pada plan
 - Referensi: PCAT-US-01; PRD-07/08/09, GR-02/03/05/06/08; [plan](../plans/public-catalog/implementation-plan.md)
@@ -82,8 +82,8 @@ Paths/symbol owners: `docs/design/public-catalog.md dan artefak visual approved 
 ### Acceptance criteria
 
 - [x] Grid/filter/Load more dan navigation context dapat ditinjau pada 390/1440px; semantic Rhea dan 9:16.
-- [ ] Approval desain dicatat dengan tanggal/pengguna sebelum task UI; belum mengklaim runtime.
-- [ ] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
+- [x] Approval desain dicatat dengan tanggal/pengguna sebelum task UI; belum mengklaim runtime.
+- [x] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
 
 ### Validasi
 
@@ -98,13 +98,13 @@ Observed prototype proof dengan bundled Windows Node/Playwright/Chromium1228:8 s
 ### Commit task
 
 - Pesan usulan: `docs: prepare public catalog design review (PCAT-002)`.
-- SHA: belum dibuat.
-- Hook/checks: belum dijalankan untuk commit ini.
+- SHA: `307710159cbd8a6d9a0f4d230d2ec1deaf2abc37` — prototype/spec review,14 scoped files.
+- Hook/checks: docs86/816, staged-tree79/797, scoped formatting/diff/preservation, lint1/type3 cache valid dan Commitlint pass tanpa bypass. Receipt review sebelum approval; pengguna kemudian menyetujui desain.
 - Ledger: receipt aktual dicatat pada update sesudah commit berhasil.
 
 ### Blocker atau tindak lanjut
 
-User memilih plan dan meminta kelanjutan; desain konkret menunggu review sebelum task UI PCAT-008. Perbedaan terhadap current main (Series/search/genre/page6/route/binary poster) perlu dipilih/refine secara eksplisit, bukan dihapus atau diasumsikan memenuhi plan lama. PCAT-002 tetap Review sampai acceptance approval terpenuhi.
+Pengguna menyetujui desain pada 8 Oktober 2026 dengan “ok, setuju”: Film/Standalone, grid20/Load more, URL type, detail `/videos/$slug`, English dan noindex sementara. PCAT-002 Done; lanjut PCAT-003 sesuai DAG. Route/API Series dan episode watch existing tetap compatible. Source runtime belum berubah pada approval ini.
 
 ## Task: PCAT-003 — Filter kinds publik sebelum cursor pagination
 
