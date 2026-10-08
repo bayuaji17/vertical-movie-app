@@ -141,8 +141,8 @@ Observed: targeted list suite5/39, catalog suite23/167 sebelum tambahan OpenAPI;
 ### Commit task
 
 - Pesan usulan: `feat: filter kinds publik sebelum cursor pagination (PCAT-003)`.
-- SHA: belum dibuat.
-- Hook/checks: root types/lint/build lulus; docs/format/diff dan normal commit hooks berikut.
+- SHA: `fca1b478a8726fd977166338731dad47cd498066`.
+- Hook/checks: types3/lint1/build2, API143/811 + web185/955, docs86/816, scoped format/diff, normal Husky/Commitlint pass.
 - Ledger: receipt aktual dicatat pada update sesudah commit berhasil.
 
 ### Blocker atau tindak lanjut
@@ -151,7 +151,7 @@ API kind filter selesai lokal; tidak mengubah endpoint/default Series/episode. R
 
 ## Task: PCAT-004 — Cegah pengisian cache lama setelah invalidation
 
-- Status: Backlog
+- Status: Done — existing generation fence direuse dan dibuktikan untuk legacy list.
 - Owner: Codex/pengembang
 - Prioritas: P1 — urutan dependency DAG pada plan
 - Referensi: PCAT-US-03; PRD-07/08/09, GR-02/03/05/06/08; [plan](../plans/public-catalog/implementation-plan.md)
@@ -167,9 +167,9 @@ Paths/symbol owners: `apps/api/src/modules/catalog/service.ts dan service.test.t
 
 ### Acceptance criteria
 
-- [ ] invalidate selama read pending tidak membiarkan hasil lama mengisi cache generasi baru.
-- [ ] Follow-up request membaca data baru; TTL 60s dan isolation filters terbukti tanpa mengklaim distributed invalidation.
-- [ ] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
+- [x] invalidate selama read pending tidak membiarkan hasil lama mengisi cache generasi baru.
+- [x] Follow-up request membaca data baru; TTL 60s dan isolation filters terbukti tanpa mengklaim distributed invalidation.
+- [x] Pemeriksaan relevant task dan local commit berhasil; actual evidence/receipt dicatat sesudah diamati.
 
 ### Validasi
 
@@ -177,18 +177,20 @@ Native Bun injected clock/deferred store tests dan root gates; real mutation pro
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau divalidasi. Commands di atas merupakan rencana, bukan hasil.
+8 Oktober 2026: generation fence CatalogService sudah berada pada baseline main; tidak dibuat implementasi cache kedua. Deferred legacy list test mengizinkan request baru mengisi cache setelah invalidate lalu menyelesaikan read lama; hasil lama tidak menimpa generasi baru. Injected clock membuktikan TTL60s dimulai sebelum read, kind isolation, retry failed fill dan invalidate kedua filter.
+
+Observed: `bun test apps/api/src/modules/catalog`26 pass/179 assertions; `bun run build`2 tasks pass. Docs/format/diff dan normal commit hooks berikut; mutation PostgreSQL tetap PCAT-012, tanpa klaim distributed invalidation.
 
 ### Commit task
 
-- Pesan usulan: `fix: cegah pengisian cache lama setelah invalidation (PCAT-004)`.
+- Pesan usulan: `test: verify catalog invalidation generation fence (PCAT-004)`.
 - SHA: belum dibuat.
 - Hook/checks: belum dijalankan untuk commit ini.
 - Ledger: receipt aktual dicatat pada update sesudah commit berhasil.
 
 ### Blocker atau tindak lanjut
 
-Menunggu PCAT-003. Approval/hasil proof tidak diasumsikan tersedia.
+Reuse cache guard selesai lokal; real mutation proof tetap PCAT-012. Tidak mengubah race policy atau scope cache existing.
 
 ## Task: PCAT-005 — Endpoint public signed poster terpisah
 
