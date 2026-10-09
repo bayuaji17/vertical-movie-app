@@ -102,7 +102,7 @@ dedicated test fresh/populated/rerun proof, full gates, `bun run --cwd apps/api 
 ### Commit task
 
 - Pesan: feat(api): persist site settings singleton (SSET-002)
-- SHA: belum dibuat; receipt dicatat pada update berikutnya setelah successful commit, bukan self-referential.
+- SHA: `673b920d13a6e9bcd21bd241f5ac692b5c5965ad` (actual previous-task receipt).
 - Hook/checks: relevant native tests, root check-types/lint/build, docs/format/diff passed; normal hooks required without bypass.
 - Ledger: actual prior SHA dan evidence pada task/plan berikutnya.
 
@@ -112,7 +112,7 @@ Dependent tasks follow the approved implementation plan. Production and remote d
 
 ## Task: SSET-003 — Domain validation and versioned persistence
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex/pengembang
 - Prioritas: 3
 - Referensi: SSET-US-01/02/03, PRD-02, GR-01/02/05/07/08; [implementation step](../plans/site-settings/implementation-plan.md#sset-003--domain-validation-and-versioned-persistence).
@@ -130,8 +130,8 @@ Requirements: exact body keys, character-count parity, trim/control rules, posit
 
 ### Acceptance criteria
 
-- [ ] racing writes from same version yield one success; inputs survive failure; no partial fields or credential output.
-- [ ] Validasi task dan relevant gates lulus; changes hanya milik task dan local commit melalui normal hooks.
+- [x] racing writes from same version yield one success; inputs survive failure; no partial fields or credential output.
+- [x] Validasi task dan relevant gates lulus; changes hanya milik task dan local commit melalui normal hooks.
 
 ### Validasi
 
@@ -139,18 +139,18 @@ native deterministic service tests and real SQL smoke against isolated fixtures;
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement, bukan hasil actual.
+2026-10-09: Full-field trim/control/codepoint validation and atomic Drizzle CAS implemented. Native suite404/2269 passed; real PostgreSQL CAS/restart1 test5 assertions passed. Root types3/lint1/build2 passed. Invalid/unknown keys422, missing503 and version409 preserve fields.
 
 ### Commit task
 
-- Pesan: Conventional Commit dengan ID SSET-003 sesudah acceptance/gates lulus.
+- Pesan: feat(api): validate and save site settings (SSET-003)
 - SHA: belum dibuat; receipt dicatat pada update berikutnya setelah successful commit, bukan self-referential.
-- Hook/checks: belum dijalankan untuk task ini.
+- Hook/checks: relevant native tests, root check-types/lint/build, docs/format/diff passed; normal hooks required without bypass.
 - Ledger: actual prior SHA dan evidence pada task/plan berikutnya.
 
 ### Blocker atau tindak lanjut
 
-Cache architecture sudah disetujui pengguna9Oct; menunggu detailed field/UI plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
+Dependent tasks follow the approved implementation plan. Production and remote delivery remain separate.
 
 ## Task: SSET-004 — Backend cache, single-flight and save fencing
 
