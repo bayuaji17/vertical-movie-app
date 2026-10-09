@@ -1,3 +1,5 @@
+import { SettingsService } from "./modules/settings/service";
+import { createSettingsRepository } from "./modules/settings/repository";
 import { DashboardService } from "./modules/dashboard/service";
 import { createDashboardRepository } from "./modules/dashboard/repository";
 import { CatalogService } from "./modules/catalog/service";
@@ -49,6 +51,7 @@ const auth = createAdminAuthServer({
 });
 const authOpenApiSchema = await generateAuthOpenAPISchema(auth);
 const app = createApp({
+  settingsService: new SettingsService(createSettingsRepository(database.db)),
   dashboardService: new DashboardService(
     createDashboardRepository(database.db),
   ),

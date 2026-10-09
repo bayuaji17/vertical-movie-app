@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { SETTINGS_DEFAULTS } from '../../api/src/modules/settings/model'
 const node = process.env.AUTH_BROWSER_NODE
 const module = process.env.AUTH_PLAYWRIGHT_MODULE
 const executable = process.env.AUTH_BROWSER_EXECUTABLE
@@ -101,11 +102,52 @@ if (['content', 'series'].includes(process.env.AUTH_BROWSER_PHASE))
     contentFixture,
     'CONTENT_TEST_DATABASE_URL is required for the dedicated content browser proof',
   )
+const settingsFixture =
+  process.env.AUTH_BROWSER_PHASE === 'settings'
+    ? await (
+        await import('../../api/test/integration/site-settings-browser-fixture')
+      ).createSettingsBrowserFixture(async ({ headers }) => {
+        if (outage) throw Error('Fixture auth unavailable')
+        return (headers.get('cookie') ?? '').includes('browser-fixture=admin')
+          ? {
+              user: {
+                id: 'browser-admin',
+                name: 'Browser Admin',
+                email: 'browser@example.test',
+                role,
+                banned: false,
+              },
+              session: { expiresAt: new Date(Date.now() + 86400000) },
+            }
+          : null
+      })
+    : undefined
 const api = Bun.serve({
   hostname: '127.0.0.1',
   port: 0,
   fetch: async (request) => {
     const url = new URL(request.url)
+    if (settingsFixture) {
+      if (url.pathname === '/control/settings') {
+        await settingsFixture.control(await request.json())
+        return Response.json({ ok: true })
+      }
+      if (url.pathname === '/settings-proof')
+        return Response.json(settingsFixture.proof())
+      if (
+        url.pathname === '/site-settings' ||
+        url.pathname === '/admin/settings'
+      )
+        return settingsFixture.handle(request)
+      if (url.pathname === '/catalog' || url.pathname === '/videos')
+        return Response.json({ items: [], nextCursor: null })
+    }
+    if (url.pathname === '/site-settings')
+      return Response.json({
+        item: SETTINGS_DEFAULTS,
+        version: 1,
+        freshForMs: 3600000,
+      })
     if (url.pathname === '/control/dashboard' && dashboardFixture) {
       await dashboardFixture.control(await request.json())
       return Response.json({ ok: true })
@@ -309,6 +351,7 @@ if (built) {
     api.stop(true)
     await contentFixture?.close()
     await dashboardFixture?.close()
+    await settingsFixture?.close()
     await mediaFixture?.close()
     await catalogFixture?.close()
     await contentWatchFixture?.close()
@@ -346,27 +389,29 @@ try {
   for (const phase of phases) {
     const workerSource = await Bun.file(
       import.meta.dir +
-        (phase === 'dashboard'
-          ? '/admin-dashboard-browser-worker.mjs'
-          : phase === 'series'
-            ? '/admin-series-browser-worker.mjs'
-            : phase === 'public-film'
-              ? '/public-film-catalog-browser-worker.mjs'
-              : phase === 'public-watch'
-                ? '/public-content-browser-worker.mjs'
-                : phase === 'public-catalog'
-                  ? '/public-catalog-browser-worker.mjs'
-                  : phase === 'series-media'
-                    ? '/admin-series-media-browser-worker.mjs'
-                    : phase === 'publication'
-                      ? '/admin-publication-browser-worker.mjs'
-                      : phase === 'media'
-                        ? '/admin-media-upload-browser-worker.mjs'
-                        : phase === 'content'
-                          ? '/admin-content-browser-worker.mjs'
-                          : phase === 'routes'
-                            ? '/auth-routes-browser-worker.mjs'
-                            : '/auth-browser-worker.mjs'),
+        (phase === 'settings'
+          ? '/site-settings-browser-worker.mjs'
+          : phase === 'dashboard'
+            ? '/admin-dashboard-browser-worker.mjs'
+            : phase === 'series'
+              ? '/admin-series-browser-worker.mjs'
+              : phase === 'public-film'
+                ? '/public-film-catalog-browser-worker.mjs'
+                : phase === 'public-watch'
+                  ? '/public-content-browser-worker.mjs'
+                  : phase === 'public-catalog'
+                    ? '/public-catalog-browser-worker.mjs'
+                    : phase === 'series-media'
+                      ? '/admin-series-media-browser-worker.mjs'
+                      : phase === 'publication'
+                        ? '/admin-publication-browser-worker.mjs'
+                        : phase === 'media'
+                          ? '/admin-media-upload-browser-worker.mjs'
+                          : phase === 'content'
+                            ? '/admin-content-browser-worker.mjs'
+                            : phase === 'routes'
+                              ? '/auth-routes-browser-worker.mjs'
+                              : '/auth-browser-worker.mjs'),
     ).text()
     const workerPath = process.env.AUTH_BROWSER_WORKER_PATH
     if (workerPath) await Bun.write(workerPath, workerSource)
@@ -421,6 +466,7 @@ try {
   api.stop(true)
   await contentFixture?.close()
   await dashboardFixture?.close()
+  await settingsFixture?.close()
   await mediaFixture?.close()
   await catalogFixture?.close()
   await contentWatchFixture?.close()

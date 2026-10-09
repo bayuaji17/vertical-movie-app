@@ -1,8 +1,14 @@
+import {
+  publicTitle,
+  publicMeta,
+  settingsFromMatches,
+} from '#/lib/settings/presentation'
+import { videoOptions, loadVideo } from '#/lib/public/catalog-queries'
+import type { PublicVideoDetail } from '#/lib/public/catalog-client'
 import { createFileRoute } from '@tanstack/react-router'
 import { VideoDetail } from '#/components/public/video-detail'
 import { catalogSearch, catalogType } from '#/lib/public/catalog-model'
 import { normalizeCatalogLocation } from '#/lib/public/catalog-navigation'
-import { loadVideo } from '#/lib/public/catalog-queries'
 import { setPublicHttpStatus } from '#/lib/public/catalog-reader'
 
 export const Route = createFileRoute('/videos/$slug')({
@@ -11,14 +17,30 @@ export const Route = createFileRoute('/videos/$slug')({
   loader: async ({ context, params }) => {
     const result = await loadVideo(context.queryClient, params.slug)
     setPublicHttpStatus(result.status)
-    return result
+    const video = context.queryClient.getQueryData<PublicVideoDetail>(
+      videoOptions(params.slug).queryKey,
+    )?.item
+    return {
+      ...result,
+      metadata: video
+        ? { title: video.title, description: video.synopsis }
+        : undefined,
+    }
   },
-  head: () => ({
-    meta: [
-      { title: 'Video — Vertical Movie' },
-      { name: 'robots', content: 'noindex, nofollow' },
-    ],
-  }),
+  head: ({ matches, loaderData }) => {
+    const settings = settingsFromMatches(matches),
+      video = loaderData?.metadata
+    return {
+      meta: [
+        ...publicMeta(
+          settings,
+          publicTitle(settings, video?.title ?? 'Video'),
+          video?.description,
+        ),
+        { name: 'robots', content: 'noindex, nofollow' },
+      ],
+    }
+  },
   component: () => (
     <VideoDetail
       key={Route.useParams().slug}

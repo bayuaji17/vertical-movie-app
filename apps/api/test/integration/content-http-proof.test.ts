@@ -268,7 +268,8 @@ test("merged Scalar documents auth and every business operation with resolvable 
       }
     }
   }
-  expect(count).toBe(32);
+  expect(count).toBe(34);
+  expect(document.paths["/site-settings"].get.security ?? []).toEqual([]);
   for (const id of [
     "initiateMediaUpload",
     "getMediaUpload",
@@ -282,6 +283,9 @@ test("merged Scalar documents auth and every business operation with resolvable 
     "getVideoPreviewMaster",
     "getVideoPreviewVariant",
     "getVideoMasterPlaylist",
+    "getPublicSiteSettings",
+    "getAdminSiteSettings",
+    "saveAdminSiteSettings",
   ])
     expect(operationIds).toContain(id);
   expect(new Set(operationIds).size).toBe(operationIds.length);

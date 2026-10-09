@@ -1,7 +1,12 @@
+import { useEffect } from 'react'
+import { useSiteSettings } from '#/hooks/use-site-settings'
+import { bootstrapPublicSettings } from '#/lib/settings/queries'
+import { defaultSiteSettings } from '#/lib/settings/model'
 import { ThemeProvider } from '#/lib/theme/provider'
 import { themeBootstrap } from '#/lib/theme/preferences'
 import {
   HeadContent,
+  useRouter,
   Scripts,
   createRootRouteWithContext,
 } from '@tanstack/react-router'
@@ -20,7 +25,10 @@ interface MyRouterContext {
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
-  head: () => ({
+  loader: async ({ context }) => ({
+    settings: await bootstrapPublicSettings(context.queryClient),
+  }),
+  head: ({ loaderData }) => ({
     meta: [
       {
         charSet: 'utf-8',
@@ -30,7 +38,8 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Start Starter',
+        title:
+          loaderData?.settings?.item.siteName ?? defaultSiteSettings.siteName,
       },
     ],
     links: [
@@ -52,6 +61,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <ThemeProvider>
+          <SettingsHeadSync />
           {children}
           <Toaster />
           <TanStackDevtools
@@ -71,4 +81,17 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </body>
     </html>
   )
+}
+
+function SettingsHeadSync() {
+  const { query } = useSiteSettings(),
+    router = useRouter(),
+    version = query.data?.version
+  useEffect(() => {
+    const root = router.state.matches.find((m) => m.routeId === '__root__')
+      ?.loaderData as { settings?: { version: number } } | undefined
+    if (version && root?.settings?.version !== version)
+      void router.invalidate({ filter: (m) => m.routeId === '__root__' })
+  }, [version, router])
+  return null
 }

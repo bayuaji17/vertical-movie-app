@@ -1,27 +1,57 @@
+import {
+  publicTitle,
+  publicMeta,
+  settingsFromMatches,
+} from '#/lib/settings/presentation'
+import {
+  contentDetailOptions,
+  loadContent,
+  setContentHttpStatus,
+} from '#/lib/catalog/content-queries'
+import type { CatalogItem } from '#/lib/catalog/public-catalog-model'
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import {
   ContentPage,
   ContentShell,
   ContentFailure,
 } from '#/components/catalog/content-page'
-import {
-  loadContent,
-  setContentHttpStatus,
-} from '#/lib/catalog/content-queries'
 import { contentSlug } from '#/lib/catalog/content-model'
 
 export const Route = createFileRoute('/titles/$kind/$slug')({
-  loader: ({ context, params }) => {
+  loader: async ({ context, params }) => {
     if (
       (params.kind !== 'movie' && params.kind !== 'standalone') ||
       !contentSlug.safeParse(params.slug).success
     ) {
       setContentHttpStatus(404)
-      return { detailStatus: 404, episodesStatus: null }
+      return { detailStatus: 404, episodesStatus: null, metadata: undefined }
     }
-    return loadContent(context.queryClient, params.kind, params.slug)
+    const result = await loadContent(
+      context.queryClient,
+      params.kind,
+      params.slug,
+    )
+    const item = context.queryClient.getQueryData<{ item: CatalogItem }>(
+      contentDetailOptions(params.kind, params.slug).queryKey,
+    )?.item
+    return {
+      ...result,
+      metadata: item
+        ? { title: item.title, description: item.synopsis }
+        : undefined,
+    }
   },
-  head: () => ({ meta: [{ title: 'Title details — Vertical Movie' }] }),
+  head: ({ matches, loaderData }) => {
+    const settings = settingsFromMatches(matches),
+      item = loaderData?.metadata
+    return {
+      meta: publicMeta(
+        settings,
+        publicTitle(settings, item?.title ?? 'Title details'),
+        item?.description,
+      ),
+    }
+  },
   component: Details,
 })
 function Details() {

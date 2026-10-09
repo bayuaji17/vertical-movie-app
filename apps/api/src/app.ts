@@ -1,3 +1,5 @@
+import { createSettingsModule } from "./modules/settings";
+import type { SettingsService } from "./modules/settings/service";
 import { createDashboardModule } from "./modules/dashboard";
 import type { DashboardService } from "./modules/dashboard/service";
 import { createCatalogModule } from "./modules/catalog";
@@ -36,6 +38,7 @@ import { createContentModule } from "./modules/content";
 import type { ContentPageService } from "./modules/content/service";
 
 type AppDependencies = {
+  settingsService?: SettingsService;
   dashboardService?: DashboardService;
   requestLogger?: RequestLoggerDependencies;
   contentPageService?: ContentPageService;
@@ -73,6 +76,7 @@ function createAuthRoutes(auth?: AppDependencies["auth"]) {
 }
 
 export function createApp({
+  settingsService,
   dashboardService,
   requestLogger,
   contentPageService,
@@ -109,6 +113,7 @@ export function createApp({
     .use(createGenresModule({ service: genresService, getSession }))
     .use(createContentModule({ service: contentPageService, getSession }))
     .use(createDashboardModule({ service: dashboardService, getSession }))
+    .use(createSettingsModule({ service: settingsService, getSession }))
     .use(createMediaModule({ service: mediaService, getSession }))
     .use(createCatalogModule(catalogService, catalogPosterService))
     .use(createPublicationModule({ service: publicationService, getSession }))

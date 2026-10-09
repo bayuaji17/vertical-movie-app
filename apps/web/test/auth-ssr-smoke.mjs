@@ -6,6 +6,16 @@ const api = Bun.serve({
   port: 0,
   fetch: async (request) => {
     const url = new URL(request.url)
+    if (url.pathname === '/site-settings')
+      return Response.json(
+        {
+          error: {
+            code: 'SETTINGS_UNAVAILABLE',
+            message: 'Fixture settings unavailable',
+          },
+        },
+        { status: 503 },
+      )
     assert.equal(url.pathname, '/api/auth/get-session')
     assert.equal(url.searchParams.get('disableCookieCache'), 'true')
     const cookie = request.headers.get('cookie') ?? ''

@@ -1,3 +1,4 @@
+import { SettingsServerCache } from '../src/lib/settings/server-cache.server'
 import { describe, expect, test } from 'bun:test'
 
 import { createAuthGateway } from '../src/lib/server/auth-gateway'
@@ -92,13 +93,20 @@ describe('same-origin auth gateway', () => {
   })
 
   test('rejects the removed legacy session endpoint before fetching', async () => {
-    let calls = 0;
+    let calls = 0
     const gateway = createAuthGateway('auth', {
-      getPublicOrigin: () => 'http://web.example', getApiInternalUrl: () => apiOrigin,
-      fetcher: async () => { calls++; return new Response(null); },
-    });
-    expect((await gateway(new Request('http://web.example/api/admin/session'))).status).toBe(404);
-    expect(calls).toBe(0);
+      getPublicOrigin: () => 'http://web.example',
+      getApiInternalUrl: () => apiOrigin,
+      fetcher: async () => {
+        calls++
+        return new Response(null)
+      },
+    })
+    expect(
+      (await gateway(new Request('http://web.example/api/admin/session')))
+        .status,
+    ).toBe(404)
+    expect(calls).toBe(0)
   })
 
   test('rewrites same-upstream redirects to a relative web path and rejects external redirects', async () => {
@@ -256,4 +264,79 @@ describe('same-origin auth gateway', () => {
         .status,
     ).toBe(504)
   })
+})
+
+test('settings admits only exact GET/PATCH paths and strips public credentials', async () => {
+  let calls = 0,
+    last: Request | undefined
+  const gateway = createAuthGateway('business', {
+    settingsCache: new SettingsServerCache({
+      fetcher: async () =>
+        Response.json({
+          item: {
+            siteName: 'Vertical Movie',
+            tagline: '',
+            description: '',
+            footerText: '',
+          },
+          version: 1,
+          freshForMs: 3600000,
+        }),
+    }),
+    getPublicOrigin: () => 'http://web.example',
+    getApiInternalUrl: () => apiOrigin,
+    fetcher: async (r) => {
+      calls++
+      last = r
+      return Response.json({ ok: true })
+    },
+  })
+  expect(
+    (
+      await gateway(
+        new Request('http://web.example/api/site-settings', {
+          headers: { cookie: 'secret', authorization: 'secret' },
+        }),
+      )
+    ).status,
+  ).toBe(200)
+  expect(last).toBeUndefined()
+  expect(calls).toBe(0)
+  for (const path of [
+    '/api/site-settings/anything',
+    '/api/admin/settings/anything',
+    '/api/%73ite-settings',
+  ])
+    expect(
+      (await gateway(new Request('http://web.example' + path))).status,
+    ).toBe(404)
+  for (const path of ['/api/site-settings', '/api/admin/settings'])
+    expect(
+      (
+        await gateway(
+          new Request('http://web.example' + path, { method: 'POST' }),
+        )
+      ).status,
+    ).toBe(405)
+  expect(
+    (
+      await gateway(
+        new Request('http://web.example/api/admin/settings', {
+          method: 'PATCH',
+          headers: { origin: 'http://other.example' },
+        }),
+      )
+    ).status,
+  ).toBe(403)
+  expect(calls).toBe(0)
+  expect(
+    (
+      await gateway(
+        new Request('http://web.example/api/admin/settings?fresh=1', {
+          headers: { cookie: 'session' },
+        }),
+      )
+    ).status,
+  ).toBe(200)
+  expect(last?.headers.get('cookie')).toBe('session')
 })

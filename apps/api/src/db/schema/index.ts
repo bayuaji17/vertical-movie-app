@@ -7,3 +7,5 @@ export * from "./media";
 export * from "./upload";
 export * from "./jobs";
 export * from "./operations";
+
+export * from "./site-settings";
