@@ -1,6 +1,6 @@
 # Modul: Ringkasan dashboard admin
 
-> Status: implemented/verified lokal · 8 Oktober 2026 · Pengguna menyetujui detailed plan; context berbasis main `65fcc2b58d5b316e8c44b2d99e28baf2e90e4f8c`, implementation branch feat/admin-dashboard-summary. Mandatory DASH-001–011 selesai; push/PR/merge dan production rollout belum dilakukan.
+> Status: implemented/verified lokal · 8 Oktober 2026 · Pengguna menyetujui detailed plan; context berbasis main `65fcc2b58d5b316e8c44b2d99e28baf2e90e4f8c`, implementation branch feat/admin-dashboard-summary. Mandatory DASH-001–011 selesai; delivery melalui [PR #15](https://github.com/bayuaji17/vertical-movie-app/pull/15) disetujui pengguna 9 Oktober 2026 dengan normal merge dan source branch dipertahankan. Status remote aktual mengikuti PR; production rollout belum dilakukan.
 
 ## Tujuan modul
 

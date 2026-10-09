@@ -54,7 +54,7 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 
 ## Context dan plan per fitur
 
-Ringkasan dashboard admin: [context](plans/admin-dashboard/repository-context.md), [plan](plans/admin-dashboard/implementation-plan.md) dan [backlog DASH](tasks/admin-dashboard.md). Pengguna memilih dashboard dan meminta plan 8 Oktober 2026; plan/metrik disetujui pengguna dan ringkasan editorial/current jobs/latest/failures verified lokal8Oct; remote delivery belum dilakukan. Pengaturan situs tetap modul terpisah.
+Ringkasan dashboard admin: [context](plans/admin-dashboard/repository-context.md), [plan](plans/admin-dashboard/implementation-plan.md) dan [backlog DASH](tasks/admin-dashboard.md). Pengguna memilih dashboard dan meminta plan 8 Oktober 2026; plan/metrik disetujui pengguna dan ringkasan editorial/current jobs/latest/failures verified lokal8Oct; delivery melalui [PR #15](https://github.com/bayuaji17/vertical-movie-app/pull/15) disetujui pengguna 9 Oktober 2026 dengan normal merge dan source branch dipertahankan. Status remote aktual mengikuti PR. Pengaturan situs tetap modul terpisah.
 
 Admin Series/season/episode: [context](plans/admin-series-episodes/repository-context.md), [plan](plans/admin-series-episodes/implementation-plan.md) dan [backlog ASER](tasks/admin-series-episodes.md). Modul dipilih pengguna 8 Oktober 2026; ASER-001–012 Done dan verified lokal: season/episode editor, upload/crop/Preview, Series/Episode Publish dan Episode Archive; native API/SQL serta built-browser journeys/regression lulus. Remote delivery disetujui pengguna 8 Oktober 2026 dan sedang diproses melalui normal merge dengan source branch dipertahankan; production belum dijalankan.
 
