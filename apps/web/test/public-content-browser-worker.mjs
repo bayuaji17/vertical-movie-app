@@ -39,10 +39,10 @@ await context.addCookies([
 await context.route('**/*', async (route) => {
   const url = new URL(route.request().url())
   const ownedStorage =
-    url.origin === 'http://127.0.0.1:9000' &&
+    ['http://127.0.0.1:9000', 'http://localhost:9000'].includes(url.origin) &&
     url.pathname.startsWith('/' + initial.bucket + '/outputs/')
   const publicApi =
-    /^\/api\/(catalog(?:\/|$)|videos\/[a-z0-9-]+\/(playback|next)$|playback\/videos\/)/.test(
+    /^\/api\/(site-settings$|catalog(?:\/|$)|videos(?:$|\/[a-z0-9-]+(?:\/(playback|next|poster))?$)|playback\/videos\/)/.test(
       url.pathname,
     )
   if (
@@ -286,71 +286,22 @@ try {
   await context.setOffline(false)
   await waitRows(24)
 
-  enterStage('dialog-links-and-focus')
-  await goto('/')
-  await button('View details').click()
-  const dialog = page.getByRole('dialog')
-  await dialog.waitFor()
-  assert.ok(
-    (
-      await dialog
-        .getByRole('link', { name: 'Open details' })
-        .getAttribute('href')
-    ).startsWith('/titles/movie/'),
-  )
-  assert.ok(
-    (
-      await dialog.getByRole('link', { name: 'Watch now' }).getAttribute('href')
-    ).startsWith('/watch/'),
-  )
-  await page.keyboard.press('Escape')
-  await dialog.waitFor({ state: 'hidden' })
-  await page.waitForFunction(
-    (trigger) => document.activeElement === trigger,
-    await button('View details').elementHandle(),
-  )
-  assert.equal(
-    await button('View details').evaluate((e) => e === document.activeElement),
-    true,
-  )
-  await link('View film').hover()
+  enterStage('current-detail-links-and-keyboard')
+  // The approved8Oct homepage uses direct Film/Standalone cards; Series stays a direct route.
+  await goto('/videos/' + initial.movie)
+  await page.getByRole('heading', { level: 1 }).waitFor()
   const noPlaybackBefore = capabilityCount()
+  await link('Watch now').hover()
   await page.waitForTimeout(250)
   assert.equal(capabilityCount(), noPlaybackBefore)
-  await button('View details').click()
-  await dialog.getByRole('link', { name: 'Open details' }).click()
-  await page.getByRole('heading', { level: 1 }).waitFor()
-  await link('Watch now').click()
+  await link('Watch now').focus()
+  await page.keyboard.press('Enter')
   await page.waitForURL(/\/watch\//)
   await play()
   await link('Back to details').click()
   await page.getByRole('heading', { level: 1 }).waitFor()
   assert.equal(await page.locator('video').count(), 0)
-
-  await goto('/')
-  await button('Series').click()
-  await page.waitForFunction(() => {
-    const cards = [...document.querySelectorAll('[data-catalog-card]')]
-    return (
-      cards.length > 0 &&
-      cards.every((card) => card.dataset.catalogId.startsWith('series:'))
-    )
-  })
-  const seriesCard = page
-    .locator('[data-catalog-card]')
-    .first()
-    .getByRole('button')
-  await seriesCard.focus()
-  await page.keyboard.press('Enter')
-  await dialog.waitFor()
-  assert.equal(
-    await dialog
-      .getByRole('link', { name: 'Open details' })
-      .getAttribute('href'),
-    seriesPath,
-  )
-  assert.equal(await dialog.getByRole('link', { name: 'Watch now' }).count(), 0)
-  await dialog.getByRole('link', { name: 'Open details' }).click()
+  await goto(seriesPath)
   await waitRows(20)
 
   enterStage('standalone-detail-watch')
@@ -410,11 +361,11 @@ try {
   await page
     .getByRole('link', { name: 'Next episode · S2 E1', exact: true })
     .waitFor()
-  assert.ok(page.url().endsWith(previous.slug))
+  assert.equal(new URL(page.url()).pathname, '/watch/' + previous.slug)
   await page
     .getByRole('link', { name: 'Next episode · S2 E1', exact: true })
     .click()
-  await page.waitForURL('**/watch/' + next.slug)
+  await page.waitForURL((url) => url.pathname === '/watch/' + next.slug)
   await page
     .getByRole('heading', { level: 1, name: next.title, exact: true })
     .waitFor()
@@ -461,7 +412,7 @@ try {
   })
   await page.getByRole('link', { name: 'Next episode · S2 E1' }).waitFor()
   await page.getByRole('link', { name: 'Next episode · S2 E1' }).click()
-  await page.waitForURL('**/watch/' + next.slug)
+  await page.waitForURL((url) => url.pathname === '/watch/' + next.slug)
   await control({ holdPlayback: false })
   await page
     .getByRole('heading', { level: 1, name: next.title, exact: true })

@@ -141,9 +141,32 @@ test('a cancelled page detaches without cancelling the shared fill; origin chang
   const next = cache.get('http://new-api.example')
   b.resolve(Response.json(dto(8)))
   expect((await next).version).toBe(8)
-  a.resolve(Response.json(dto(9)))
-  expect((await other).freshForMs).toBe(0)
+  a.resolve(Response.json(dto(7)))
+  const oldOrigin = await other
+  expect(oldOrigin.freshForMs).toBe(0)
+  expect(oldOrigin.version).toBe(7)
   expect((await cache.get('http://new-api.example')).version).toBe(8)
+})
+test('an old-origin failure cannot resolve using another origin snapshot', async () => {
+  const old = deferred<Response>(),
+    started = deferred<void>()
+  let reads = 0
+  const cache = new SettingsServerCache({
+    fetcher: async () => {
+      if (++reads === 1) {
+        started.resolve()
+        return old.promise
+      }
+      return Response.json(dto(10))
+    },
+  })
+  const failed = cache.get(apiOrigin)
+  void failed.catch(() => undefined)
+  await started.promise
+  expect((await cache.get('http://new-api.example')).version).toBe(10)
+  old.resolve(Response.json({}, { status: 503 }))
+  await expect(failed).rejects.toMatchObject({ status: 503 })
+  expect((await cache.get('http://new-api.example')).version).toBe(10)
 })
 test('errors and invalid DTOs have five-second cooldown; timeout bounded; remaining ten-second deadline survives transport', async () => {
   let now = 0,

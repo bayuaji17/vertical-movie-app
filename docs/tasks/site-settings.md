@@ -438,7 +438,7 @@ native integration suite, root gates; record actual command/environment/totals, 
 ### Commit task
 
 - Pesan: test(api): prove settings cache persistence and authorization (SSET-010)
-- SHA: belum dibuat; receipt dicatat pada update berikutnya setelah successful commit, bukan self-referential.
+- SHA: `5547e714f3170f5c47016932bbb7edfd9148c329` (actual previous-task receipt).
 - Hook/checks: relevant native tests, root check-types/lint/build, docs/format/diff passed; normal hooks required without bypass.
 - Ledger: actual prior SHA dan evidence pada task/plan berikutnya.
 
@@ -448,7 +448,7 @@ Dependent tasks follow the approved implementation plan. Production and remote d
 
 ## Task: SSET-011 — Built browser flow and regression
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex/pengembang
 - Prioritas: 12
 - Referensi: SSET-US-01/02/03, PRD-02, GR-01/02/05/07/08; [implementation step](../plans/site-settings/implementation-plan.md#sset-011--built-browser-flow-and-regression).
@@ -466,8 +466,8 @@ Requirements: 320/390/768/1024/1440 × Light/Dark/System; long/empty/malicious-l
 
 ### Acceptance criteria
 
-- [ ] 15 layout/theme combinations pass; confirmed Save changes public values/title; old response cannot restore earlier version; settings failure does not block catalog/login/watch or alter401/403/404/503 behavior.
-- [ ] Validasi task dan relevant gates lulus; changes hanya milik task dan local commit melalui normal hooks.
+- [x] 15 layout/theme combinations pass; confirmed Save changes public values/title; old response cannot restore earlier version; settings failure does not block catalog/login/watch or alter401/403/404/503 behavior.
+- [x] Validasi task dan relevant gates lulus; changes hanya milik task dan local commit melalui normal hooks.
 
 ### Validasi
 
@@ -475,18 +475,18 @@ actual dev/built browser proof with separate native-cookie evidence where browse
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement, bukan hasil actual.
+2026-10-09: Built Bun/Nitro + Chromium with guarded real PostgreSQL passed15 settings viewport/theme combinations (320/390/768/1024/1440 × Light/Dark/System), keyboard/control/wrap, validation/Unicode/literal-empty text, Save/cancel/leave/conflict/fresh Reload/unknown reconciliation/offline and held logout. Production clock browser fixture observes conserved remaining1h deadline; Save public SSR/client brand/head updates with zero refill;10 warm public SSR pages/hydration add zero settings API calls. Final SQL/API counters publicReads1/privateReads7/saves5/sqlReads5/sqlWrites6 include intentional fresh recovery/conflict/external writer; no blind replay. SSR stub success10 pages+10 GET shares one API read; settings503 preserves catalog/login/watch/content404/admin307 and credential isolation. Existing built dashboard15, current Film/Standalone catalog/real HLS+Next/archive, direct public detail/watch18, auth cache/routes and native SSR regressions passed. Retired legacy homepage dialog/Series-filter assertions in watch worker replaced by current8Oct direct detail keyboard/navigation; loopback MinIO endpoint and URL query guards updated. Legacy unified catalog API covered by existing native proof; no claim old homepage remains active. Discard copy now respects unknown Save, and strengthened origin-switch tests found/fixed cross-origin late success/failure contamination. Full native unit436/2509; targeted cache/gateway17/113; frozen install unchanged; root types/lint/build/docs/format/diff and import boundary passed. Browser auth is injected; native Better Auth evidence remains010; media regression uses owned test MinIO/FFmpeg, not development reset or production proof.
 
 ### Commit task
 
-- Pesan: Conventional Commit dengan ID SSET-011 sesudah acceptance/gates lulus.
+- Pesan: fix(web): verify settings coherence and recovery (SSET-011)
 - SHA: belum dibuat; receipt dicatat pada update berikutnya setelah successful commit, bukan self-referential.
-- Hook/checks: belum dijalankan untuk task ini.
+- Hook/checks: relevant native tests, root check-types/lint/build, docs/format/diff passed; normal hooks required without bypass.
 - Ledger: actual prior SHA dan evidence pada task/plan berikutnya.
 
 ### Blocker atau tindak lanjut
 
-Plan lengkap disetujui pengguna9Oct dan freshness sudah diperiksa; dependent tasks harus selesai sebelum task ini. Tidak ada production proof yang diasumsikan.
+Dependent tasks follow the approved implementation plan. Production and remote delivery remain separate.
 
 ## Task: SSET-012 — Canonical docs and implementation closure
 

@@ -6,7 +6,15 @@ import type { SessionSnapshot } from '@repo/auth/types'
 import { sessionQueryKey } from '#/lib/auth/session-cache'
 import { DiscardDialog } from './discard-dialog'
 
-export function UnsavedChangesGuard({ dirty }: { dirty: boolean }) {
+export function UnsavedChangesGuard({
+  dirty,
+  title = 'Discard unsaved changes?',
+  description = 'Your changes have not been saved. Keep editing to retain them, or discard them to leave this page.',
+}: {
+  dirty: boolean
+  title?: string
+  description?: string
+}) {
   const cache = useQueryClient()
   const shouldProtect = useCallback(
     () =>
@@ -35,8 +43,8 @@ export function UnsavedChangesGuard({ dirty }: { dirty: boolean }) {
       onOpenChange={(open) => {
         if (!open) blocker.reset?.()
       }}
-      title="Discard unsaved changes?"
-      description="Your changes have not been saved. Keep editing to retain them, or discard them to leave this page."
+      title={title}
+      description={description}
       confirmLabel="Discard and leave"
       onConfirm={() => blocker.proceed?.()}
     />

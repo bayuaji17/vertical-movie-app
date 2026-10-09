@@ -123,14 +123,14 @@ export class SettingsServerCache {
           })
           this.failureUntil = 0
         }
-        const latest = this.current()
+        const latest = this.origin === origin ? this.current() : undefined
         if (latest && latest.version >= data.version) return latest
         return { ...publicSettingsDto(data, this.now()), freshForMs: 0 }
       })
       .catch(() => {
         if (generation === this.generation)
           this.failureUntil = this.now() + 5000
-        else {
+        else if (this.origin === origin) {
           const latest = this.current()
           if (latest && latest.freshForMs > 0) return latest
         }

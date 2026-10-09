@@ -1,14 +1,17 @@
 import { createSettingsFixture } from "./site-settings-fixture";
 import { createApp } from "../../src/app";
+import { SettingsService } from "../../src/modules/settings/service";
 import type { RequireAdminDependencies } from "../../src/modules/auth/admin/guard";
 
 export async function createSettingsBrowserFixture(
   getSession: RequireAdminDependencies["getSession"],
 ) {
   const fixture = await createSettingsFixture();
+  // Browser timing uses the production clock; SQL expiry proof controls time separately.
+  const service = new SettingsService(fixture.repository);
   const app = createApp({
     getSession,
-    settingsService: fixture.service,
+    settingsService: service,
     requestLogger: { write: () => {} },
   }).compile();
   let publicReads = 0,
@@ -43,8 +46,8 @@ export async function createSettingsBrowserFixture(
           rowVersion,
           updatedAt: _updatedAt,
           ...fields
-        } = await fixture.service.read();
-        await fixture.service.save({
+        } = await service.read();
+        await service.save({
           ...fields,
           siteName: input.externalName,
           expectedVersion: rowVersion,

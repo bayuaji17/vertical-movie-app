@@ -82,7 +82,11 @@ export function SettingsForm() {
   }
   return (
     <>
-      <UnsavedChangesGuard dirty={dirty} />
+      <UnsavedChangesGuard
+        dirty={dirty}
+        title="Discard your draft?"
+        description="Keep editing to retain your draft, or discard it to leave this page. Use Check saved values to verify an unconfirmed Save."
+      />
       <AdminPageHeading
         title="Site settings"
         description="Manage the text visitors see across your public site."
@@ -92,7 +96,9 @@ export function SettingsForm() {
           {state.pending
             ? 'Saving or checking…'
             : dirty
-              ? 'Unsaved changes'
+              ? state.phase === 'unknown'
+                ? 'Unconfirmed Save'
+                : 'Unsaved changes'
               : 'Saved values'}
         </Badge>
         {state.baseline && (
@@ -280,7 +286,7 @@ export function SettingsForm() {
             <CardTitle>Public preview</CardTitle>
             <CardDescription>
               {dirty
-                ? 'Preview of your unsaved text.'
+                ? 'Preview of your draft.'
                 : 'Preview of the saved site text.'}
             </CardDescription>
           </CardHeader>
@@ -326,11 +332,11 @@ export function SettingsForm() {
         onOpenChange={(open) => {
           if (!open) setDiscard(null)
         }}
-        title="Discard unsaved changes?"
+        title="Discard your draft?"
         description={
           discard === 'reload'
             ? 'Reloading will replace your draft with the latest saved values.'
-            : 'Your changes have not been saved. Cancel restores the last confirmed values.'
+            : 'Cancel restores the last confirmed values in this editor. Use Check saved values to verify an unconfirmed Save.'
         }
         confirmLabel={
           discard === 'reload' ? 'Discard and reload' : 'Discard changes'
