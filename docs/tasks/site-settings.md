@@ -396,7 +396,7 @@ meaningful editor state tests, route generation through installed generator (no 
 ### Commit task
 
 - Pesan: feat(web): add site settings editor page (SSET-009)
-- SHA: belum dibuat; receipt dicatat pada update berikutnya setelah successful commit, bukan self-referential.
+- SHA: `133a14ca128c4c22ce010177c5b1322b5d882212` (actual previous-task receipt).
 - Hook/checks: relevant native tests, root check-types/lint/build, docs/format/diff passed; normal hooks required without bypass.
 - Ledger: actual prior SHA dan evidence pada task/plan berikutnya.
 
@@ -406,7 +406,7 @@ Dependent tasks follow the approved implementation plan. Production and remote d
 
 ## Task: SSET-010 — Real PostgreSQL, migration and native-cookie proof
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex/pengembang
 - Prioritas: 11
 - Referensi: SSET-US-03, PRD-02, GR-01/02/05/07/08; [implementation step](../plans/site-settings/implementation-plan.md#sset-010--real-postgresql-migration-and-native-cookie-proof).
@@ -424,8 +424,8 @@ Requirements: loopback dedicated test DB guard; reset serially; query logger cou
 
 ### Acceptance criteria
 
-- [ ] cold100→one and warm→zero additional settings SELECT observed; persisted Save and conflicting writes verified; unchanged previous rows/journal; unauthorized writes blocked even with warm settings cache.
-- [ ] Validasi task dan relevant gates lulus; changes hanya milik task dan local commit melalui normal hooks.
+- [x] cold100→one and warm→zero additional settings SELECT observed; persisted Save and conflicting writes verified; unchanged previous rows/journal; unauthorized writes blocked even with warm settings cache.
+- [x] Validasi task dan relevant gates lulus; changes hanya milik task dan local commit melalui normal hooks.
 
 ### Validasi
 
@@ -433,18 +433,18 @@ native integration suite, root gates; record actual command/environment/totals, 
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement, bukan hasil actual.
+2026-10-09: Dedicated loopback PostgreSQL proof16 tests/213 assertions across settings CAS/cache/native-cookie, populated migration, content HTTP/OpenAPI and dashboard regression passed. Query logger observes cold100 one settings SELECT, warm/private and committed Save zero refill, explicit fresh and hourly expiry one each. Native Better Auth cookies reject anonymous/user/banned/expired writes while warm; concurrent CAS one winner and restart durability passed. Populated pre0011 upgrade snapshots all17 prior tables including auth account/session,125 films/Series/episodes/media assets/jobs; exact rows survive upgrade/rerun with12 journal entries. Existing native auth runtime and authorization regressions passed (totals recorded in logs); development migration/preservation receipt stays in002. Dedicated counted browser fixture prepared; no development fixtures reset. Root types/lint/build/docs/format/diff passed.
 
 ### Commit task
 
-- Pesan: Conventional Commit dengan ID SSET-010 sesudah acceptance/gates lulus.
+- Pesan: test(api): prove settings cache persistence and authorization (SSET-010)
 - SHA: belum dibuat; receipt dicatat pada update berikutnya setelah successful commit, bukan self-referential.
-- Hook/checks: belum dijalankan untuk task ini.
+- Hook/checks: relevant native tests, root check-types/lint/build, docs/format/diff passed; normal hooks required without bypass.
 - Ledger: actual prior SHA dan evidence pada task/plan berikutnya.
 
 ### Blocker atau tindak lanjut
 
-Plan lengkap disetujui pengguna9Oct dan freshness sudah diperiksa; dependent tasks harus selesai sebelum task ini. Tidak ada production proof yang diasumsikan.
+Dependent tasks follow the approved implementation plan. Production and remote delivery remain separate.
 
 ## Task: SSET-011 — Built browser flow and regression
 

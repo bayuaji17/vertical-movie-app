@@ -5,6 +5,9 @@ import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { contentTestUrl } from "./content-fixture";
 import { applyDatabaseMigrations } from "../../src/db/migrate";
+import { drizzle } from "drizzle-orm/bun-sql";
+import * as schema from "../../src/db/schema";
+import { seedDashboard } from "./admin-dashboard-fixture";
 
 test("populated upgrade preserves every existing table; defaults, Unicode limits and rerun", async () => {
   const url = contentTestUrl(),
@@ -29,6 +32,12 @@ test("populated upgrade preserves every existing table; defaults, Unicode limits
     await applyDatabaseMigrations(url, folder);
     await sql`INSERT INTO "user" (id,name,email,role,created_at,updated_at) VALUES ('settings-upgrade','Existing','upgrade@example.test','admin',now(),now())`;
     await sql`INSERT INTO genres (id,name,slug) VALUES ('10000000-0000-4000-8000-000000000001','Existing','existing')`;
+    await sql`INSERT INTO account (id,account_id,provider_id,user_id,created_at,updated_at) VALUES ('upgrade-account','settings-upgrade','credential','settings-upgrade',now(),now())`;
+    await sql`INSERT INTO session (id,token,user_id,expires_at,created_at,updated_at) VALUES ('upgrade-session','test-upgrade-token','settings-upgrade',now()+interval '1 day',now(),now())`;
+    await seedDashboard(
+      { client: sql, db: drizzle({ client: sql, schema }) },
+      "settings-upgrade",
+    );
     const tables =
       await sql`SELECT tablename FROM pg_tables WHERE schemaname='public' ORDER BY tablename`;
     const before = new Map<string, string>();
