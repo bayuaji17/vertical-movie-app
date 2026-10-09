@@ -19,6 +19,8 @@ Aturan penamaan, ownership dan maintenance berada pada [Documentation rules](../
 
 ## Produk, arsitektur dan desain
 
+- [Site settings](design/site-settings.md): component/state specification disetujui9Oct; form/preview Rhea implemented, verification mengikuti SSET.
+
 - [Ringkasan dashboard admin](design/admin-dashboard.md): layout/state implemented dan verified lokal8Oct melalui DASH.
 
 - [Admin Series/season/episode](design/admin-series-episodes.md): route dan state specification editor memakai admin Rhea existing; implementasi diminta pengguna 8 Oktober 2026.

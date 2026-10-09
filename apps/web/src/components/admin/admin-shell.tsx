@@ -6,6 +6,7 @@ import {
   RiMenuLine,
   RiPlayFill,
   RiDashboardLine,
+  RiSettings3Line,
 } from '@remixicon/react'
 import type { ReactNode } from 'react'
 import { Button } from '#/components/ui/button'
@@ -75,6 +76,15 @@ export function AdminShell({ children }: { children: ReactNode }) {
         activeProps={{ className: 'bg-primary/15' }}
       >
         Content
+      </Link>
+      <Link
+        to="/admin/settings"
+        onClick={() => setDrawer(false)}
+        className="mt-1 flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium hover:bg-sidebar-accent focus-visible:outline-2 focus-visible:outline-ring"
+        activeProps={{ className: 'bg-primary/15' }}
+      >
+        <RiSettings3Line className="size-5" aria-hidden="true" />
+        Settings
       </Link>
       <div className="mt-auto pt-8">
         <AdminLogout {...logout} />

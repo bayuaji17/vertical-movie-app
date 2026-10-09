@@ -354,7 +354,7 @@ QueryClient/deferred transport tests for cache hit,409/503/abort/no automatic re
 ### Commit task
 
 - Pesan: feat(web): manage private settings editor state (SSET-008)
-- SHA: belum dibuat; receipt dicatat pada update berikutnya setelah successful commit, bukan self-referential.
+- SHA: `f3d8a58253b7eefcb91aea961c7eeb5fc917f85f` (actual previous-task receipt).
 - Hook/checks: relevant native tests, root check-types/lint/build, docs/format/diff passed; normal hooks required without bypass.
 - Ledger: actual prior SHA dan evidence pada task/plan berikutnya.
 
@@ -364,7 +364,7 @@ Dependent tasks follow the approved implementation plan. Production and remote d
 
 ## Task: SSET-009 — Responsive settings page and preview
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex/pengembang
 - Prioritas: 10
 - Referensi: SSET-US-01/02/03, PRD-02, GR-01/02/05/07/08; [implementation step](../plans/site-settings/implementation-plan.md#sset-009--responsive-settings-page-and-preview).
@@ -382,8 +382,8 @@ Requirements: English existing UI, proposed layout, loading/dirty/pending/errors
 
 ### Acceptance criteria
 
-- [ ] valid Save is reviewable; duplicate clicks don't duplicate mutation; Cancel and navigation protect dirty values;320px and all themes usable.
-- [ ] Validasi task dan relevant gates lulus; changes hanya milik task dan local commit melalui normal hooks.
+- [x] valid Save is reviewable; duplicate clicks don't duplicate mutation; Cancel and navigation protect dirty values;320px and all themes usable.
+- [x] Validasi task dan relevant gates lulus; changes hanya milik task dan local commit melalui normal hooks.
 
 ### Validasi
 
@@ -391,18 +391,18 @@ meaningful editor state tests, route generation through installed generator (no 
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement, bukan hasil actual.
+2026-10-09: Generated settings route/admin navigation, responsive four-field form, text-only preview, clear pending/offline/conflict/unknown states and explicit discard/fresh reload controls. Vite/Chromium initial proof passed Save/public brand/title, Cancel keep/discard,15 width/theme CSS overflow/control combinations (320/390/768/1024/1440; Light/Dark/System appearance); injected auth and in-memory repository, not native cookie/SQL proof. Actual counters one public API read, one repository read, one Save; broader built/native proofs follow010/011. Editor/query10/68, root types/lint/build, docs/format/diff passed.
 
 ### Commit task
 
-- Pesan: Conventional Commit dengan ID SSET-009 sesudah acceptance/gates lulus.
+- Pesan: feat(web): add site settings editor page (SSET-009)
 - SHA: belum dibuat; receipt dicatat pada update berikutnya setelah successful commit, bukan self-referential.
-- Hook/checks: belum dijalankan untuk task ini.
+- Hook/checks: relevant native tests, root check-types/lint/build, docs/format/diff passed; normal hooks required without bypass.
 - Ledger: actual prior SHA dan evidence pada task/plan berikutnya.
 
 ### Blocker atau tindak lanjut
 
-Plan lengkap disetujui pengguna9Oct dan freshness sudah diperiksa; dependent tasks harus selesai sebelum task ini. Tidak ada production proof yang diasumsikan.
+Dependent tasks follow the approved implementation plan. Production and remote delivery remain separate.
 
 ## Task: SSET-010 — Real PostgreSQL, migration and native-cookie proof
 

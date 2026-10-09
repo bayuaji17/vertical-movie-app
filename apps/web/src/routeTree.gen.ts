@@ -18,6 +18,7 @@ import { Route as SeriesSlugRouteImport } from './routes/series.$slug'
 import { Route as VideosSlugRouteImport } from './routes/videos.$slug'
 import { Route as WatchSlugRouteImport } from './routes/watch.$slug'
 import { Route as AdminAuthenticatedIndexRouteImport } from './routes/admin._authenticated.index'
+import { Route as AdminAuthenticatedSettingsRouteImport } from './routes/admin._authenticated.settings'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as TitlesKindSlugRouteImport } from './routes/titles.$kind.$slug'
 import { Route as AdminAuthenticatedContentIndexRouteImport } from './routes/admin._authenticated.content.index'
@@ -77,6 +78,12 @@ const AdminAuthenticatedIndexRoute = AdminAuthenticatedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminAuthenticatedRoute,
 } as any)
+const AdminAuthenticatedSettingsRoute =
+  AdminAuthenticatedSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -168,6 +175,7 @@ export interface FileRoutesByFullPath {
   '/series/$slug': typeof SeriesSlugRoute
   '/videos/$slug': typeof VideosSlugRoute
   '/watch/$slug': typeof WatchSlugRoute
+  '/admin/settings': typeof AdminAuthenticatedSettingsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/titles/$kind/$slug': typeof TitlesKindSlugRoute
   '/admin/': typeof AdminAuthenticatedIndexRoute
@@ -192,6 +200,7 @@ export interface FileRoutesByTo {
   '/series/$slug': typeof SeriesSlugRoute
   '/videos/$slug': typeof VideosSlugRoute
   '/watch/$slug': typeof WatchSlugRoute
+  '/admin/settings': typeof AdminAuthenticatedSettingsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/titles/$kind/$slug': typeof TitlesKindSlugRoute
   '/admin/content/new': typeof AdminAuthenticatedContentNewRoute
@@ -217,6 +226,7 @@ export interface FileRoutesById {
   '/series/$slug': typeof SeriesSlugRoute
   '/videos/$slug': typeof VideosSlugRoute
   '/watch/$slug': typeof WatchSlugRoute
+  '/admin/_authenticated/settings': typeof AdminAuthenticatedSettingsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/titles/$kind/$slug': typeof TitlesKindSlugRoute
   '/admin/_authenticated/': typeof AdminAuthenticatedIndexRoute
@@ -243,6 +253,7 @@ export interface FileRouteTypes {
     | '/series/$slug'
     | '/videos/$slug'
     | '/watch/$slug'
+    | '/admin/settings'
     | '/api/auth/$'
     | '/titles/$kind/$slug'
     | '/admin/'
@@ -267,6 +278,7 @@ export interface FileRouteTypes {
     | '/series/$slug'
     | '/videos/$slug'
     | '/watch/$slug'
+    | '/admin/settings'
     | '/api/auth/$'
     | '/titles/$kind/$slug'
     | '/admin/content/new'
@@ -291,6 +303,7 @@ export interface FileRouteTypes {
     | '/series/$slug'
     | '/videos/$slug'
     | '/watch/$slug'
+    | '/admin/_authenticated/settings'
     | '/api/auth/$'
     | '/titles/$kind/$slug'
     | '/admin/_authenticated/'
@@ -382,6 +395,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminAuthenticatedIndexRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
+    '/admin/_authenticated/settings': {
+      id: '/admin/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminAuthenticatedSettingsRouteImport
       parentRoute: typeof AdminAuthenticatedRoute
     }
     '/api/auth/$': {
@@ -486,6 +506,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminAuthenticatedRouteChildren {
+  AdminAuthenticatedSettingsRoute: typeof AdminAuthenticatedSettingsRoute
   AdminAuthenticatedIndexRoute: typeof AdminAuthenticatedIndexRoute
   AdminAuthenticatedContentNewRoute: typeof AdminAuthenticatedContentNewRoute
   AdminAuthenticatedContentIndexRoute: typeof AdminAuthenticatedContentIndexRoute
@@ -502,6 +523,7 @@ interface AdminAuthenticatedRouteChildren {
 }
 
 const AdminAuthenticatedRouteChildren: AdminAuthenticatedRouteChildren = {
+  AdminAuthenticatedSettingsRoute: AdminAuthenticatedSettingsRoute,
   AdminAuthenticatedIndexRoute: AdminAuthenticatedIndexRoute,
   AdminAuthenticatedContentNewRoute: AdminAuthenticatedContentNewRoute,
   AdminAuthenticatedContentIndexRoute: AdminAuthenticatedContentIndexRoute,
