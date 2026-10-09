@@ -228,7 +228,7 @@ app.handle200/401/403/409/422/503; dependency call counts, auth failure isolatio
 ### Commit task
 
 - Pesan: feat(api): expose site settings routes (SSET-005)
-- SHA: belum dibuat; receipt dicatat pada update berikutnya setelah successful commit, bukan self-referential.
+- SHA: `0258a3a6f53886ff100461a33193e75fe22786fa` (actual previous-task receipt).
 - Hook/checks: relevant native tests, root check-types/lint/build, docs/format/diff passed; normal hooks required without bypass.
 - Ledger: actual prior SHA dan evidence pada task/plan berikutnya.
 
@@ -532,7 +532,7 @@ Plan lengkap disetujui pengguna9Oct dan freshness sudah diperiksa; dependent tas
 
 ## Task: SSET-013 — Server web snapshot cache and committed Save bridge
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex/pengembang
 - Prioritas: 6 (sesudah005, sebelum006; ID existing dipertahankan)
 - Referensi: SSET-US-02/03, PRD-02, GR-02/05/07/08; [implementation step](../plans/site-settings/implementation-plan.md#sset-013--server-web-snapshot-cache-and-committed-save-bridge).
@@ -550,8 +550,8 @@ Requirements: approved1-hour upstream deadline without TTL stacking, one public 
 
 ### Acceptance criteria
 
-- [ ] same-process cold100→one API GET, warm reads→zero; Save primes with zero refill GET, latest version wins, no successful cache of defaults/errors, unauthorized writes never prime, unrelated request state/gateway semantics preserved. Multi-instance/direct-API limits recorded honestly.
-- [ ] Validasi task dan relevant gates lulus; changes hanya milik task dan local commit melalui normal hooks.
+- [x] same-process cold100→one API GET, warm reads→zero; Save primes with zero refill GET, latest version wins, no successful cache of defaults/errors, unauthorized writes never prime, unrelated request state/gateway semantics preserved. Multi-instance/direct-API limits recorded honestly.
+- [x] Validasi task dan relevant gates lulus; changes hanya milik task dan local commit melalui normal hooks.
 
 ### Validasi
 
@@ -559,17 +559,15 @@ fake clock/deferred upstream tests for SSR/gateway shared identity,100 cold read
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Pengguna menyetujui cache architecture dan meminta plan update9Oct. Count targets dan commands adalah acceptance requirements, bukan observed proof.
+2026-10-09: Server-only public snapshot shared by SSR/gateway;100 cold reads one API call and warm SSR/GET zero calls observed in deferred unit proof. Independent10s fill timeout, waiter abort, origin/generation/version fencing,5s cooldown and bounded DTO parsing implemented. Gateway committed Save/fresh1 projection primes before response, zero refill; known errors do not prime and unknown/malformed outcomes expire without claiming rollback. Targeted16/109 and full418/2403 passed; root types/lint/build passed. Immediate coherence limited to writer process/gateway; other instances/direct API writes converge on remaining TTL.
 
 ### Commit task
 
 - Pesan: feat(web): cache public settings snapshot (SSET-013)
 - SHA: belum dibuat; receipt setelah successful commit.
-- Hook/checks: belum dijalankan untuk task ini.
+- Hook/checks: relevant native tests, root check-types/lint/build, docs/format/diff passed; normal hooks required without bypass.
 - Ledger: actual prior SHA/evidence pada update task/plan berikutnya.
 
 ### Blocker atau tindak lanjut
 
-Menunggu dependent005, freshness dan implementasi yang diotorisasi. Multi-instance/direct-API propagation merupakan rollout prerequisite untuk fleet-wide immediate consistency.
-
-- Implementation authorization9Oct: pengguna meminta "oke lanjut implementasi"; all proposed field/default/empty/footer/recovery/UI details in this plan are approved. Main/origin unchanged at36f185e; planning revision receipt9524b6306c00ccdc1e727c336a8b06bdbfad9262, normal hooks passed. Historical planning-only statements above describe previous turns.
+Dependent tasks follow the approved implementation plan. Production and remote delivery remain separate.

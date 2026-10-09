@@ -1,8 +1,13 @@
+import { settingsServerCache } from '../settings/server-cache.server'
+import type { SettingsServerCache } from '../settings/server-cache.server'
+import { projectPrivateSettings } from '../settings/model'
 import { isDisabledAuthPath } from '@repo/auth/server'
 
 type GatewayTarget = 'auth' | 'business'
 
 type GatewayDependencies = {
+  settingsCache?: SettingsServerCache
+  now?: () => number
   getApiInternalUrl?: () => string | undefined
   getPublicOrigin?: () => string | undefined
   fetcher?: (request: Request) => Promise<Response>
@@ -263,6 +268,41 @@ export function createAuthGateway(
       )
     }
 
+    const settingsPublic =
+      target === 'business' && incomingUrl.pathname === '/api/site-settings'
+    const settingsPrivate =
+      target === 'business' && incomingUrl.pathname === '/api/admin/settings'
+    const settingsWrite = settingsPrivate && request.method === 'PATCH'
+    const settingsCache = dependencies.settingsCache ?? settingsServerCache
+    const now = dependencies.now ?? Date.now
+    const settingsStarted = now()
+    if (settingsPublic || settingsPrivate) settingsCache.useOrigin(apiOrigin)
+    if (settingsPublic) {
+      if (incomingUrl.searchParams.size)
+        return errorResponse(
+          422,
+          'VALIDATION_ERROR',
+          'Settings query is invalid.',
+        )
+      try {
+        return Response.json(
+          await settingsCache.get(apiOrigin, request.signal),
+          { headers: { 'cache-control': 'private, no-store' } },
+        )
+      } catch {
+        const response = errorResponse(
+          request.signal.aborted ? 499 : 503,
+          'SETTINGS_UNAVAILABLE',
+          'Site settings are temporarily unavailable.',
+        )
+        response.headers.set('retry-after', '5')
+        return response
+      }
+    }
+    let settingsDispatched = false
+    const expireSettingsWrite = () => {
+      if (settingsWrite && settingsDispatched) settingsCache.expire(apiOrigin)
+    }
     const privateBusiness =
       target === 'business' && incomingUrl.pathname.startsWith('/api/admin/')
     if (
@@ -308,7 +348,9 @@ export function createAuthGateway(
       if (request.method !== 'GET' && request.method !== 'HEAD') {
         const result = await readLimitedBody(
           request,
-          maxRequestBodyBytes,
+          settingsWrite
+            ? Math.min(maxRequestBodyBytes, 16_384)
+            : maxRequestBodyBytes,
           abortController.signal,
         )
         if (!result.ok) {
@@ -333,7 +375,14 @@ export function createAuthGateway(
       }
       if (body !== null) requestInit.body = body
       const upstreamRequest = new Request(upstreamUrl, requestInit)
+      settingsDispatched = settingsWrite
       const upstreamResponse = await fetcher(upstreamRequest)
+      if (
+        settingsWrite &&
+        (upstreamResponse.status >= 500 ||
+          ![200, 401, 403, 409, 422].includes(upstreamResponse.status))
+      )
+        expireSettingsWrite()
       if (
         target === 'business' &&
         isPublicCatalogPoster(request) &&
@@ -359,6 +408,7 @@ export function createAuthGateway(
         publicOrigin,
       )
       if (!headers) {
+        expireSettingsWrite()
         await upstreamResponse.body?.cancel().catch(() => undefined)
         cleanup()
         return errorResponse(
@@ -370,6 +420,7 @@ export function createAuthGateway(
       if (target === 'business') {
         headers.delete('set-cookie')
         if (headers.has('location')) {
+          expireSettingsWrite()
           await upstreamResponse.body?.cancel().catch(() => undefined)
           cleanup()
           return errorResponse(
@@ -392,12 +443,15 @@ export function createAuthGateway(
             headers: upstreamResponse.headers,
             duplex: 'half',
           } as RequestInit),
-          dependencies.maxResponseBodyBytesForRequest?.(request) ??
-            maxRequestBodyBytes,
+          settingsPrivate
+            ? 16_384
+            : (dependencies.maxResponseBodyBytesForRequest?.(request) ??
+                maxRequestBodyBytes),
           abortController.signal,
         )
         if (abortController.signal.aborted) throw abortController.signal.reason
         if (!result.ok) {
+          expireSettingsWrite()
           cleanup()
           return errorResponse(
             502,
@@ -407,6 +461,25 @@ export function createAuthGateway(
         }
         responseBody = result.body
       }
+      if (
+        settingsPrivate &&
+        upstreamResponse.status === 200 &&
+        (settingsWrite ||
+          (request.method === 'GET' &&
+            incomingUrl.searchParams.size === 1 &&
+            incomingUrl.searchParams.get('fresh') === '1'))
+      ) {
+        try {
+          const dto = projectPrivateSettings(
+            JSON.parse(
+              new TextDecoder().decode(responseBody ?? new ArrayBuffer(0)),
+            ),
+          )
+          settingsCache.prime(apiOrigin, dto, settingsStarted)
+        } catch {
+          settingsCache.expire(apiOrigin)
+        }
+      }
       cleanup()
       return new Response(responseBody, {
         status: upstreamResponse.status,
@@ -414,6 +487,7 @@ export function createAuthGateway(
         headers,
       })
     } catch {
+      expireSettingsWrite()
       cleanup()
       if (request.signal.aborted)
         return errorResponse(

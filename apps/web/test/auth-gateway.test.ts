@@ -1,3 +1,4 @@
+import { SettingsServerCache } from '../src/lib/settings/server-cache.server'
 import { describe, expect, test } from 'bun:test'
 
 import { createAuthGateway } from '../src/lib/server/auth-gateway'
@@ -269,6 +270,19 @@ test('settings admits only exact GET/PATCH paths and strips public credentials',
   let calls = 0,
     last: Request | undefined
   const gateway = createAuthGateway('business', {
+    settingsCache: new SettingsServerCache({
+      fetcher: async () =>
+        Response.json({
+          item: {
+            siteName: 'Vertical Movie',
+            tagline: '',
+            description: '',
+            footerText: '',
+          },
+          version: 1,
+          freshForMs: 3600000,
+        }),
+    }),
     getPublicOrigin: () => 'http://web.example',
     getApiInternalUrl: () => apiOrigin,
     fetcher: async (r) => {
@@ -286,8 +300,8 @@ test('settings admits only exact GET/PATCH paths and strips public credentials',
       )
     ).status,
   ).toBe(200)
-  expect(last?.headers.has('cookie')).toBe(false)
-  expect(last?.headers.has('authorization')).toBe(false)
+  expect(last).toBeUndefined()
+  expect(calls).toBe(0)
   for (const path of [
     '/api/site-settings/anything',
     '/api/admin/settings/anything',
@@ -314,7 +328,7 @@ test('settings admits only exact GET/PATCH paths and strips public credentials',
       )
     ).status,
   ).toBe(403)
-  expect(calls).toBe(1)
+  expect(calls).toBe(0)
   expect(
     (
       await gateway(
