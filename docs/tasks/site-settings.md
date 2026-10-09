@@ -238,7 +238,7 @@ Dependent tasks follow the approved implementation plan. Production and remote d
 
 ## Task: SSET-006 — Public Query, SSR and freshness ownership
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex/pengembang
 - Prioritas: 7
 - Referensi: SSET-US-02, PRD-02, GR-01/02/05/07/08; [implementation step](../plans/site-settings/implementation-plan.md#sset-006--public-query-ssr-and-freshness-ownership).
@@ -256,8 +256,8 @@ Requirements: strict DTO and freshness0–3,600,000, request-scoped QueryClient 
 
 ### Acceptance criteria
 
-- [ ] fresh navigation/hydration adds zero duplicate fetch; root does not break content/auth status; no private DTO serialized or fallback marked fresh success.
-- [ ] Validasi task dan relevant gates lulus; changes hanya milik task dan local commit melalui normal hooks.
+- [x] fresh navigation/hydration adds zero duplicate fetch; root does not break content/auth status; no private DTO serialized or fallback marked fresh success.
+- [x] Validasi task dan relevant gates lulus; changes hanya milik task dan local commit melalui normal hooks.
 
 ### Validasi
 
@@ -265,18 +265,18 @@ native client/QueryClient tests for10-second remaining TTL, slow SSR hydration, 
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement, bukan hasil actual.
+2026-10-09: Public Query/hook and root SSR bootstrap use request-scoped clients and the shared server snapshot; absolute expiry survives transport/render/hydration, retry/poll disabled, stale mount/route/focus/reconnect supported. Defaults remain presentation-only and failed reads retain last-good data. Query/client6 tests28 assertions and targeted24/147 passed. Built SSR ten new pages shared one API read with no forwarded cookies and content404/login200 preserved. Root types/lint/build passed.
 
 ### Commit task
 
-- Pesan: Conventional Commit dengan ID SSET-006 sesudah acceptance/gates lulus.
+- Pesan: feat(web): hydrate cached site settings (SSET-006)
 - SHA: belum dibuat; receipt dicatat pada update berikutnya setelah successful commit, bukan self-referential.
-- Hook/checks: belum dijalankan untuk task ini.
+- Hook/checks: relevant native tests, root check-types/lint/build, docs/format/diff passed; normal hooks required without bypass.
 - Ledger: actual prior SHA dan evidence pada task/plan berikutnya.
 
 ### Blocker atau tindak lanjut
 
-Plan lengkap disetujui pengguna9Oct dan freshness sudah diperiksa; dependent tasks harus selesai sebelum task ini. Tidak ada production proof yang diasumsikan.
+Dependent tasks follow the approved implementation plan. Production and remote delivery remain separate.
 
 ## Task: SSET-007 — Public branding and metadata
 
@@ -564,7 +564,7 @@ fake clock/deferred upstream tests for SSR/gateway shared identity,100 cold read
 ### Commit task
 
 - Pesan: feat(web): cache public settings snapshot (SSET-013)
-- SHA: belum dibuat; receipt setelah successful commit.
+- SHA: `7ea046ebde9576d448cea467691cfd46f108e8dd` (actual previous-task receipt).
 - Hook/checks: relevant native tests, root check-types/lint/build, docs/format/diff passed; normal hooks required without bypass.
 - Ledger: actual prior SHA/evidence pada update task/plan berikutnya.
 

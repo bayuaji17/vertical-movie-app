@@ -1,3 +1,5 @@
+import { bootstrapPublicSettings } from '#/lib/settings/queries'
+import { defaultSiteSettings } from '#/lib/settings/model'
 import { ThemeProvider } from '#/lib/theme/provider'
 import { themeBootstrap } from '#/lib/theme/preferences'
 import {
@@ -20,7 +22,10 @@ interface MyRouterContext {
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
-  head: () => ({
+  loader: async ({ context }) => ({
+    settings: await bootstrapPublicSettings(context.queryClient),
+  }),
+  head: ({ loaderData }) => ({
     meta: [
       {
         charSet: 'utf-8',
@@ -30,7 +35,8 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Start Starter',
+        title:
+          loaderData?.settings?.item.siteName ?? defaultSiteSettings.siteName,
       },
     ],
     links: [
