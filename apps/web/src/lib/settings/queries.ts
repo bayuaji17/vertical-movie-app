@@ -36,15 +36,25 @@ export function publicSettingsOptions(
     refetchOnReconnect: true,
   })
 }
-export async function updatePublicSettings(
+export function primePublicSettings(
   cache: QueryClient,
   incoming: PublicSettingsData,
 ) {
   epochs.set(cache, (epochs.get(cache) ?? 0) + 1)
-  await cache.cancelQueries({ queryKey: publicSettingsKey, exact: true })
   const current = cache.getQueryData<PublicSettingsData>(publicSettingsKey)
   if (!current || incoming.version >= current.version)
     cache.setQueryData(publicSettingsKey, incoming)
+}
+export async function updatePublicSettings(
+  cache: QueryClient,
+  incoming: PublicSettingsData,
+  signal?: AbortSignal,
+) {
+  signal?.throwIfAborted()
+  epochs.set(cache, (epochs.get(cache) ?? 0) + 1)
+  await cache.cancelQueries({ queryKey: publicSettingsKey, exact: true })
+  signal?.throwIfAborted()
+  primePublicSettings(cache, incoming)
 }
 export async function bootstrapPublicSettings(
   cache: QueryClient,

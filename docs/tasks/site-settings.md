@@ -312,7 +312,7 @@ source/SSR assertions for escaped text and selected title/description/default/em
 ### Commit task
 
 - Pesan: feat(web): apply public site branding (SSET-007)
-- SHA: belum dibuat; receipt dicatat pada update berikutnya setelah successful commit, bukan self-referential.
+- SHA: `b5ce69f8c6de4813bca8b19e17747cfa639e10b1` (actual previous-task receipt).
 - Hook/checks: relevant native tests, root check-types/lint/build, docs/format/diff passed; normal hooks required without bypass.
 - Ledger: actual prior SHA dan evidence pada task/plan berikutnya.
 
@@ -322,7 +322,7 @@ Dependent tasks follow the approved implementation plan. Production and remote d
 
 ## Task: SSET-008 — Admin query, confirmed-save cache update and recovery
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex/pengembang
 - Prioritas: 9
 - Referensi: SSET-US-01/02/03, PRD-02, GR-01/02/05/07/08; [implementation step](../plans/site-settings/implementation-plan.md#sset-008--admin-query-confirmed-save-cache-update-and-recovery).
@@ -340,8 +340,8 @@ Requirements: identity scope, no private SSR, signal/late response/version fenci
 
 ### Acceptance criteria
 
-- [ ] Save success shows returned values without extra refill GET; failed/unknown Save never primes attempted branding; auth loss removes private draft/mutation data.
-- [ ] Validasi task dan relevant gates lulus; changes hanya milik task dan local commit melalui normal hooks.
+- [x] Save success shows returned values without extra refill GET; failed/unknown Save never primes attempted branding; auth loss removes private draft/mutation data.
+- [x] Validasi task dan relevant gates lulus; changes hanya milik task dan local commit melalui normal hooks.
 
 ### Validasi
 
@@ -349,18 +349,18 @@ QueryClient/deferred transport tests for cache hit,409/503/abort/no automatic re
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement, bukan hasil actual.
+2026-10-09: Identity-scoped private client/query/editor hook implemented with no SSR reads, no retry/poll,15s transport timeout, remaining expiry, controlled pending/draft and auth-loss abort cleanup. Confirmed response atomically updates settings keys after cancelling reads, leaves content untouched; versions cannot regress. Unknown Save expires only private settings cache without replay or attempted public branding; fresh1 reload compares observed state and preserves differing drafts. Editor/query10 tests68 assertions passed, including same-version observer preserving Save confirmation; root types/lint/build passed.
 
 ### Commit task
 
-- Pesan: Conventional Commit dengan ID SSET-008 sesudah acceptance/gates lulus.
+- Pesan: feat(web): manage private settings editor state (SSET-008)
 - SHA: belum dibuat; receipt dicatat pada update berikutnya setelah successful commit, bukan self-referential.
-- Hook/checks: belum dijalankan untuk task ini.
+- Hook/checks: relevant native tests, root check-types/lint/build, docs/format/diff passed; normal hooks required without bypass.
 - Ledger: actual prior SHA dan evidence pada task/plan berikutnya.
 
 ### Blocker atau tindak lanjut
 
-Plan lengkap disetujui pengguna9Oct dan freshness sudah diperiksa; dependent tasks harus selesai sebelum task ini. Tidak ada production proof yang diasumsikan.
+Dependent tasks follow the approved implementation plan. Production and remote delivery remain separate.
 
 ## Task: SSET-009 — Responsive settings page and preview
 
