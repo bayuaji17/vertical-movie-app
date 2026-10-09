@@ -19,7 +19,7 @@ Aturan penamaan, ownership dan maintenance berada pada [Documentation rules](../
 
 ## Produk, arsitektur dan desain
 
-- [Site settings](design/site-settings.md): component/state specification disetujui9Oct; form/preview Rhea implemented, verification mengikuti SSET.
+- [Site settings](design/site-settings.md): component/state specification disetujui9Oct; form/preview Rhea implemented/verified lokal dengan15 theme/width cases pada SSET.
 
 - [Ringkasan dashboard admin](design/admin-dashboard.md): layout/state implemented dan verified lokal8Oct melalui DASH.
 
@@ -56,7 +56,7 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 
 ## Context dan plan per fitur
 
-Site Settings: [context](plans/site-settings/repository-context.md), [plan](plans/site-settings/implementation-plan.md) dan [backlog SSET](tasks/site-settings.md). Pengguna meminta plan 9 Oktober 2026 setelah menerima direction empat field teks dan cache frontend/backend. Cache tiga lapis browser/server-web/API dengan TTL1 jam, shared deadline dan Save update disetujui pengguna9Oct; plan lengkap kini disetujui untuk implementasi9Oct. SSET-013 menambahkan server snapshot/single-flight dan API-call proof untuk SSR. Implementasi berjalan pada branch feat/site-settings; evidence mengikuti backlog.
+Site Settings: [context](plans/site-settings/repository-context.md), [plan](plans/site-settings/implementation-plan.md) dan [backlog SSET](tasks/site-settings.md). Empat field teks dan cache browser/server-web/API maksimum1 jam disetujui pengguna serta implemented/verified lokal9Oct pada feat/site-settings; actual proof/receipt dan per-process limits berada di SSET. Contract aktif pada PRD/architecture dan runbook metadata.
 
 Ringkasan dashboard admin: [context](plans/admin-dashboard/repository-context.md), [plan](plans/admin-dashboard/implementation-plan.md) dan [backlog DASH](tasks/admin-dashboard.md). Pengguna memilih dashboard dan meminta plan 8 Oktober 2026; plan/metrik disetujui pengguna dan ringkasan editorial/current jobs/latest/failures verified lokal8Oct; delivery melalui [PR #15](https://github.com/bayuaji17/vertical-movie-app/pull/15) disetujui pengguna 9 Oktober 2026 dengan normal merge dan source branch dipertahankan. Status remote aktual mengikuti PR. Pengaturan situs tetap modul terpisah.
 
@@ -86,7 +86,7 @@ Integrasi katalog API ke homepage: [context](plans/public-catalog-api/repository
 
 ## Backlog dan evidence
 
-- [Site Settings](tasks/site-settings.md): SSET-001 planning; SSET-002–013 backlog; plan lengkap disetujui dan implementasi berjalan9Oct.
+- [Site Settings](tasks/site-settings.md): SSET-001–013 completed/verified lokal9Oct, task commits dan proof cache/SQL/browser tersedia.
 
 - [Ringkasan dashboard admin](tasks/admin-dashboard.md): DASH-001–011 implemented/verified lokal; inventori/media/latest, private refresh, native SQL/auth dan built-browser15 width/theme proof.
 

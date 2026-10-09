@@ -1,10 +1,10 @@
 # Modul: Site Settings
 
-> Status: approved and executing · 9 Oktober 2026 · Pengguna meminta implementasi plan lengkap; branch `feat/site-settings`, runtime base `36f185e275bc90fa609cf071405848ff021c3223`.
+> Status: implemented and verified locally · 9 Oktober 2026 · Pengguna meminta implementasi plan lengkap; branch `feat/site-settings`, runtime base `36f185e275bc90fa609cf071405848ff021c3223`.
 
 ## Tujuan modul
 
-Admin mengubah identitas situs melalui form privat; halaman publik memakai nilai tersimpan dengan cache backend/frontend tanpa settings SELECT pada setiap request. Kontrak/default/cache/UX dimiliki [plan](../plans/site-settings/implementation-plan.md#desired-behavior); baseline source dimiliki [context](../plans/site-settings/repository-context.md). Referensi [PRD-02](../product/prd.md#kebutuhan-produk-dan-kondisi-implementasi), [GR-01/02/05/07/08](../product/global-rules.md#aturan-produk-lintas-fitur), [workflow](../guides/development-workflow.md) dan [template](../templates/task.md).
+Admin mengubah identitas situs melalui form privat; halaman publik memakai nilai tersimpan dengan cache backend/frontend tanpa settings SELECT pada setiap request. Aturan field/default dimiliki [PRD](../product/prd.md#site-settings--9-oktober-2026), runtime contract/cache dimiliki [architecture](../architecture/overview.md#site-settings-dataflow--9-oktober-2026) dan [runbook](../operations/video-metadata.md#site-settings--9-oktober-2026); execution history dimiliki [plan](../plans/site-settings/implementation-plan.md#execution-log); baseline source dimiliki [context](../plans/site-settings/repository-context.md). Referensi [PRD-02](../product/prd.md#kebutuhan-produk-dan-kondisi-implementasi), [GR-01/02/05/07/08](../product/global-rules.md#aturan-produk-lintas-fitur), [workflow](../guides/development-workflow.md) dan [template](../templates/task.md).
 
 ## User story: SSET-US-01
 
@@ -108,7 +108,7 @@ dedicated test fresh/populated/rerun proof, full gates, `bun run --cwd apps/api 
 
 ### Blocker atau tindak lanjut
 
-Dependent tasks follow the approved implementation plan. Production and remote delivery remain separate.
+Implementation dependencies completed and verified locally. Production and remote delivery remain separate.
 
 ## Task: SSET-003 — Domain validation and versioned persistence
 
@@ -150,7 +150,7 @@ native deterministic service tests and real SQL smoke against isolated fixtures;
 
 ### Blocker atau tindak lanjut
 
-Dependent tasks follow the approved implementation plan. Production and remote delivery remain separate.
+Implementation dependencies completed and verified locally. Production and remote delivery remain separate.
 
 ## Task: SSET-004 — Backend cache, single-flight and save fencing
 
@@ -192,7 +192,7 @@ fake clock/deferred read tests including100 parallel reads, expiry boundary, rej
 
 ### Blocker atau tindak lanjut
 
-Dependent tasks follow the approved implementation plan. Production and remote delivery remain separate.
+Implementation dependencies completed and verified locally. Production and remote delivery remain separate.
 
 ## Task: SSET-005 — Typed HTTP composition and exact gateway
 
@@ -234,7 +234,7 @@ app.handle200/401/403/409/422/503; dependency call counts, auth failure isolatio
 
 ### Blocker atau tindak lanjut
 
-Dependent tasks follow the approved implementation plan. Production and remote delivery remain separate.
+Implementation dependencies completed and verified locally. Production and remote delivery remain separate.
 
 ## Task: SSET-006 — Public Query, SSR and freshness ownership
 
@@ -276,7 +276,7 @@ native client/QueryClient tests for10-second remaining TTL, slow SSR hydration, 
 
 ### Blocker atau tindak lanjut
 
-Dependent tasks follow the approved implementation plan. Production and remote delivery remain separate.
+Implementation dependencies completed and verified locally. Production and remote delivery remain separate.
 
 ## Task: SSET-007 — Public branding and metadata
 
@@ -318,7 +318,7 @@ source/SSR assertions for escaped text and selected title/description/default/em
 
 ### Blocker atau tindak lanjut
 
-Dependent tasks follow the approved implementation plan. Production and remote delivery remain separate.
+Implementation dependencies completed and verified locally. Production and remote delivery remain separate.
 
 ## Task: SSET-008 — Admin query, confirmed-save cache update and recovery
 
@@ -360,7 +360,7 @@ QueryClient/deferred transport tests for cache hit,409/503/abort/no automatic re
 
 ### Blocker atau tindak lanjut
 
-Dependent tasks follow the approved implementation plan. Production and remote delivery remain separate.
+Implementation dependencies completed and verified locally. Production and remote delivery remain separate.
 
 ## Task: SSET-009 — Responsive settings page and preview
 
@@ -402,7 +402,7 @@ meaningful editor state tests, route generation through installed generator (no 
 
 ### Blocker atau tindak lanjut
 
-Dependent tasks follow the approved implementation plan. Production and remote delivery remain separate.
+Implementation dependencies completed and verified locally. Production and remote delivery remain separate.
 
 ## Task: SSET-010 — Real PostgreSQL, migration and native-cookie proof
 
@@ -444,7 +444,7 @@ native integration suite, root gates; record actual command/environment/totals, 
 
 ### Blocker atau tindak lanjut
 
-Dependent tasks follow the approved implementation plan. Production and remote delivery remain separate.
+Implementation dependencies completed and verified locally. Production and remote delivery remain separate.
 
 ## Task: SSET-011 — Built browser flow and regression
 
@@ -480,17 +480,17 @@ actual dev/built browser proof with separate native-cookie evidence where browse
 ### Commit task
 
 - Pesan: fix(web): verify settings coherence and recovery (SSET-011)
-- SHA: belum dibuat; receipt dicatat pada update berikutnya setelah successful commit, bukan self-referential.
+- SHA: `226a64469b077295145afb882028ade16643aff5` (actual previous-task receipt).
 - Hook/checks: relevant native tests, root check-types/lint/build, docs/format/diff passed; normal hooks required without bypass.
 - Ledger: actual prior SHA dan evidence pada task/plan berikutnya.
 
 ### Blocker atau tindak lanjut
 
-Dependent tasks follow the approved implementation plan. Production and remote delivery remain separate.
+Implementation dependencies completed and verified locally. Production and remote delivery remain separate.
 
 ## Task: SSET-012 — Canonical docs and implementation closure
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex/pengembang
 - Prioritas: 13
 - Referensi: SSET-US-01/02/03, PRD-02, GR-01/02/05/07/08; [implementation step](../plans/site-settings/implementation-plan.md#sset-012--canonical-docs-and-implementation-closure).
@@ -508,8 +508,8 @@ Requirements: mark exact approved fields/current routes/cache/defaults/recovery;
 
 ### Acceptance criteria
 
-- [ ] mandatory tasks closed only after their proof/local commits; proposal/history/current behavior distinguished; no production readiness or remote delivery inferred.
-- [ ] Validasi task dan relevant gates lulus; changes hanya milik task dan local commit melalui normal hooks.
+- [x] mandatory tasks closed only after their proof/local commits; proposal/history/current behavior distinguished; no production readiness or remote delivery inferred.
+- [x] Validasi task dan relevant gates lulus; changes hanya milik task dan local commit melalui normal hooks.
 
 ### Validasi
 
@@ -517,18 +517,18 @@ docs:check, scoped Prettier, diff/staged-tree and preservation checks, relevant 
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement, bukan hasil actual.
+2026-10-09: Canonical PRD/GR/architecture/metadata runbook/design/index now describe approved four fields/defaults/validation, exact public/private routes,1h shared remaining deadline, per-process caches/Save prime, recovery/authorization and production boundaries. Context base36f185e and earlier proposals remain explicitly historical; current contract owners linked. Prior task SHAs recorded from actual Git, final own receipt is available from Git after normal hook completion (no self-reference). Implementation verification:436 unit tests/2509 assertions; settings/migration/content/dashboard native16/213 plus current OpenAPI5/113, native auth8/44+5/36 and legacy catalog SQL3/61. Built settings15 cases/public10 warm pages zero additional API reads, dashboard15, current Film/Standalone HLS/Next/archive, direct detail/watch18 and auth cache/routes/SSR passed; settings503 preserves public/auth/content statuses. Import boundary rejects server auth in client; frozen install unchanged; final root types/lint/build passed. Development0011 migration/preservation evidence belongs002. Scoped Prettier/docs:check/staged-tree/diff and22 unrelated-file hashes plus original3 README overlays passed. Local runtime restarted with final development build; remote delivery/production rollout remain separate.
 
 ### Commit task
 
-- Pesan: Conventional Commit dengan ID SSET-012 sesudah acceptance/gates lulus.
-- SHA: belum dibuat; receipt dicatat pada update berikutnya setelah successful commit, bukan self-referential.
-- Hook/checks: belum dijalankan untuk task ini.
+- Pesan: docs(settings): close implementation ledger (SSET-012)
+- SHA: final task receipt tersedia melalui `git log -1` setelah normal hooks; tidak self-referential.
+- Hook/checks: relevant native tests, root check-types/lint/build, docs/format/diff passed; normal hooks required without bypass.
 - Ledger: actual prior SHA dan evidence pada task/plan berikutnya.
 
 ### Blocker atau tindak lanjut
 
-Plan lengkap disetujui pengguna9Oct dan freshness sudah diperiksa; dependent tasks harus selesai sebelum task ini. Tidak ada production proof yang diasumsikan.
+Implementation dependencies completed and verified locally. Production and remote delivery remain separate.
 
 ## Task: SSET-013 — Server web snapshot cache and committed Save bridge
 
@@ -570,4 +570,4 @@ fake clock/deferred upstream tests for SSR/gateway shared identity,100 cold read
 
 ### Blocker atau tindak lanjut
 
-Dependent tasks follow the approved implementation plan. Production and remote delivery remain separate.
+Implementation dependencies completed and verified locally. Production and remote delivery remain separate.

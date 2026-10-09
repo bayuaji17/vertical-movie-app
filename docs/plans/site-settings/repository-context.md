@@ -5,7 +5,7 @@
 - Repository: `bayuaji17/vertical-movie-app`.
 - Base ref: `main`; base SHA: `36f185e275bc90fa609cf071405848ff021c3223`.
 - Analyzed at: 2026-10-09T00:55:35Z (9 Oktober 2026, Asia/Jakarta).
-- Context status: current at the pinned snapshot; recheck before implementation.
+- Context status: historical planning snapshot at pinned base; freshness verified before implementation9Oct. Current closure/evidence below.
 - Planning branch: `chore/site-settings-plan`.
 - Request: pengguna meminta plan sesudah menerima pendekatan empat field teks. Pada 9 Oktober 2026 pengguna menyetujui revisi cache tiga lapis (browser, server web, API), TTL awal1 jam dan pembaruan setelah Save, lalu meminta pembaruan plan saja. Field/default/recovery detail tetap proposal; belum ada implementasi runtime.
 
@@ -116,3 +116,7 @@ All code observations above are pinned to `36f185e275bc90fa609cf071405848ff021c3
 Context saved before plan creation. Current implementation and validation contract follow in [implementation-plan.md](implementation-plan.md).
 
 Revalidated2026-10-09T01:29:17Z: main/origin remain `36f185e275bc90fa609cf071405848ff021c3223`; planning HEAD `2617bd7c35008cd513aa1a238a7e6d26675dbc04` differs only in the four owned Markdown documents. Added targeted reader/gateway response-buffer analysis before revising the plan. The observed catalog TTL60 is historical/current source evidence; it is not the newly approved settings TTL1 hour.
+
+## Implementation closure — 9 Oktober 2026
+
+Pengguna kemudian menyetujui plan lengkap dan meminta implementasi9Oct; field/default/validation/cache/recovery bukan lagi proposal. Settings singleton migration0011, Elysia public/private routes, API/web snapshot caches, request-scoped public Query hydration/head, identity-scoped admin editor dan responsive page sudah implemented/verified lokal pada feat/site-settings. Snapshot/map/evidence di atas tetap history base36f185e, bukan deskripsi tree terbaru. Current canonical contract: [PRD](../../product/prd.md#site-settings--9-oktober-2026), [architecture](../../architecture/overview.md#site-settings-dataflow--9-oktober-2026), [runbook](../../operations/video-metadata.md#site-settings--9-oktober-2026); actual execution/receipts dimiliki [plan](implementation-plan.md#execution-log) dan [SSET](../../tasks/site-settings.md). Tidak ada remote/production delivery atau destructive development fixtures.

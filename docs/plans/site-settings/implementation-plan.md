@@ -2,7 +2,7 @@
 
 ## Plan metadata
 
-- Status: approved and executing; user requested implementation on 2026-10-09.
+- Status: implemented and verified locally on 2026-10-09; all mandatory tasks completed with local commits.
 - Date: 2026-10-09; decision owner: pengguna. Pengguna menyetujui plan lengkap dan meminta implementasi9Oct: empat field/default/validasi, cache tiga lapis TTL1 jam/shared deadline, Save update dan recovery/UI. Approval implementasi berlaku untuk seluruh SSET-002–013.
 - Repository: `bayuaji17/vertical-movie-app`; base ref: `main`.
 - Base SHA and last validated SHA: `36f185e275bc90fa609cf071405848ff021c3223`.
@@ -22,7 +22,7 @@ Logo/favicon upload, visual theme/token editing, infrastructure credentials, ana
 
 ## Current behavior
 
-Settings table/module/routes do not exist. Branding/tagline/footer/title/description are literals in current web shells/routes. Existing catalog cache supplies TTL60, generation fencing and `freshForMs`, but lacks single-flight. Gateway admits only known paths/methods. Public SSR uses internal API readers and request-scoped QueryClient; private queries are identity-scoped and removed on auth loss. Full evidence: [context](repository-context.md#evidence-index).
+Historical planning base36f185e: Settings table/module/routes did not exist. Branding/tagline/footer/title/description are literals in current web shells/routes. Existing catalog cache supplies TTL60, generation fencing and `freshForMs`, but lacks single-flight. Gateway admits only known paths/methods. Public SSR uses internal API readers and request-scoped QueryClient; private queries are identity-scoped and removed on auth loss. Full evidence: [context](repository-context.md#evidence-index).
 
 ## Desired behavior
 
@@ -334,16 +334,16 @@ Follow root AGENTS, API guide and workflow. Use Bun pool/Drizzle, chained Elysia
 
 ## Acceptance criteria
 
-- [ ] AC-01: Four normalized fields persist in a singleton and survive restart; upgrade preserves existing data.
-- [ ] AC-02: Admin guard protects reads/save; public DTO is whitelisted and anonymous with no auth dependency.
-- [ ] AC-03:100 simultaneous public misses execute one settings SELECT; warm hits execute none; expiry causes one shared refill.
-- [ ] AC-04: Confirmed Save primes returned committed data without refill SELECT; failed/late/older results cannot overwrite cache.
-- [ ] AC-05: Approved1-hour freshness is preserved across API/web/browser without renewal; fresh hydration/navigation share cached Query data.
-- [ ] AC-10: Warm SSR/public GET adds zero settings API calls;100 concurrent web-cold reads share one API call; confirmed gateway Save/fresh reconciliation primes public web cache without a refill call.
-- [ ] AC-06: Public shells/tagline/footer/head use saved text, escape input and preserve content/robots/status behavior.
-- [ ] AC-07: Admin supports validation/save/cancel/dirty/conflict/unknown/offline/auth loss with safe fresh-read recovery.
-- [ ] AC-08: Actual SQL/native-cookie and15-layout built-browser evidence plus relevant regressions/root gates pass.
-- [ ] AC-09: Canonical specs/commands/receipts describe approved and verified behavior with actual limitations.
+- [x] AC-01: Four normalized fields persist in a singleton and survive restart; upgrade preserves existing data.
+- [x] AC-02: Admin guard protects reads/save; public DTO is whitelisted and anonymous with no auth dependency.
+- [x] AC-03:100 simultaneous public misses execute one settings SELECT; warm hits execute none; expiry causes one shared refill.
+- [x] AC-04: Confirmed Save primes returned committed data without refill SELECT; failed/late/older results cannot overwrite cache.
+- [x] AC-05: Approved1-hour freshness is preserved across API/web/browser without renewal; fresh hydration/navigation share cached Query data.
+- [x] AC-10: Warm SSR/public GET adds zero settings API calls;100 concurrent web-cold reads share one API call; confirmed gateway Save/fresh reconciliation primes public web cache without a refill call.
+- [x] AC-06: Public shells/tagline/footer/head use saved text, escape input and preserve content/robots/status behavior.
+- [x] AC-07: Admin supports validation/save/cancel/dirty/conflict/unknown/offline/auth loss with safe fresh-read recovery.
+- [x] AC-08: Actual SQL/native-cookie and15-layout built-browser evidence plus relevant regressions/root gates pass.
+- [x] AC-09: Canonical specs/commands/receipts describe approved and verified behavior with actual limitations.
 
 ## Risks and mitigations
 
@@ -421,3 +421,9 @@ Detailed field lengths/defaults/empty behavior, shared footer and private fresh-
 - 2026-10-09 SSET-010: Dedicated loopback PostgreSQL proof16 tests/213 assertions across settings CAS/cache/native-cookie, populated migration, content HTTP/OpenAPI and dashboard regression passed. Query logger observes cold100 one settings SELECT, warm/private and committed Save zero refill, explicit fresh and hourly expiry one each. Native Better Auth cookies reject anonymous/user/banned/expired writes while warm; concurrent CAS one winner and restart durability passed. Populated pre0011 upgrade snapshots all17 prior tables including auth account/session,125 films/Series/episodes/media assets/jobs; exact rows survive upgrade/rerun with12 journal entries. Existing native auth runtime and authorization regressions passed (totals recorded in logs); development migration/preservation receipt stays in002. Dedicated counted browser fixture prepared; no development fixtures reset. Root types/lint/build/docs/format/diff passed. Previous task head `133a14ca128c4c22ce010177c5b1322b5d882212`; own receipt is recorded in the next documentation update after normal hooks.
 
 - 2026-10-09 SSET-011: Built Bun/Nitro + Chromium with guarded real PostgreSQL passed15 settings viewport/theme combinations (320/390/768/1024/1440 × Light/Dark/System), keyboard/control/wrap, validation/Unicode/literal-empty text, Save/cancel/leave/conflict/fresh Reload/unknown reconciliation/offline and held logout. Production clock browser fixture observes conserved remaining1h deadline; Save public SSR/client brand/head updates with zero refill;10 warm public SSR pages/hydration add zero settings API calls. Final SQL/API counters publicReads1/privateReads7/saves5/sqlReads5/sqlWrites6 include intentional fresh recovery/conflict/external writer; no blind replay. SSR stub success10 pages+10 GET shares one API read; settings503 preserves catalog/login/watch/content404/admin307 and credential isolation. Existing built dashboard15, current Film/Standalone catalog/real HLS+Next/archive, direct public detail/watch18, auth cache/routes and native SSR regressions passed. Retired legacy homepage dialog/Series-filter assertions in watch worker replaced by current8Oct direct detail keyboard/navigation; loopback MinIO endpoint and URL query guards updated. Legacy unified catalog API covered by existing native proof; no claim old homepage remains active. Discard copy now respects unknown Save, and strengthened origin-switch tests found/fixed cross-origin late success/failure contamination. Full native unit436/2509; targeted cache/gateway17/113; frozen install unchanged; root types/lint/build/docs/format/diff and import boundary passed. Browser auth is injected; native Better Auth evidence remains010; media regression uses owned test MinIO/FFmpeg, not development reset or production proof. Previous task head `5547e714f3170f5c47016932bbb7edfd9148c329`; own receipt is recorded in the next documentation update after normal hooks.
+
+- 2026-10-09 SSET-012: Canonical PRD/GR/architecture/metadata runbook/design/index now describe approved four fields/defaults/validation, exact public/private routes,1h shared remaining deadline, per-process caches/Save prime, recovery/authorization and production boundaries. Context base36f185e and earlier proposals remain explicitly historical; current contract owners linked. Prior task SHAs recorded from actual Git, final own receipt is available from Git after normal hook completion (no self-reference). Implementation verification:436 unit tests/2509 assertions; settings/migration/content/dashboard native16/213 plus current OpenAPI5/113, native auth8/44+5/36 and legacy catalog SQL3/61. Built settings15 cases/public10 warm pages zero additional API reads, dashboard15, current Film/Standalone HLS/Next/archive, direct detail/watch18 and auth cache/routes/SSR passed; settings503 preserves public/auth/content statuses. Import boundary rejects server auth in client; frozen install unchanged; final root types/lint/build passed. Development0011 migration/preservation evidence belongs002. Scoped Prettier/docs:check/staged-tree/diff and22 unrelated-file hashes plus original3 README overlays passed. Local runtime restarted with final development build; remote delivery/production rollout remain separate. Previous task head `226a64469b077295145afb882028ade16643aff5`; own receipt is recorded in the next documentation update after normal hooks.
+
+### Local closure — 2026-10-09
+
+All SSET-001–013 acceptance criteria verified locally; mandatory implementation tasks committed separately after required gates. User approval9Oct remains the scope owner. Last implementation proof commit226a644 records011; final documentation receipt is read from Git after this closing commit, never self-referenced. Current product/runtime contract belongs PRD/architecture/runbook; this document keeps planned design and execution history. Root build restores configured local origins after temporary browser fixture builds. Existing unrelated worktree23 paths are preserved (22 byte hashes and3 README overlays); no push/PR/merge/deployment or production migration occurred. Multi-instance/direct-API/idle-tab convergence remains bounded by TTL/refetch rather than immediate propagation.

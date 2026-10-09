@@ -1,6 +1,6 @@
 # Site settings
 
-> Status: approved component/state specification · 2026-10-09 · Pengguna meminta implementasi plan lengkap. Runtime proof mengikuti [backlog SSET](../tasks/site-settings.md); specification ini bukan bukti browser/production.
+> Status: implemented and verified locally; approved component/state specification · 2026-10-09 · Pengguna meminta implementasi plan lengkap. Runtime proof mengikuti [backlog SSET](../tasks/site-settings.md); specification ini bukan bukti browser/production.
 
 Halaman `/admin/settings` menggunakan admin shell Rhea existing, semantic tokens dan Light/Dark/System. Navigasi Settings tersedia pada sidebar desktop dan drawer mobile. Identitas tetap pada admin/login; empat field hanya mengganti tampilan publik.
 
@@ -21,3 +21,5 @@ Preview menampilkan brand, Browse/tagline/description/footer sebagai teks React.
 | Auth loss                | Scope/abort/draft dihapus oleh private effects; layout existing menangani login/forbidden.             |
 
 Detail field/kontrak/deadline/cache tetap pada [plan](../plans/site-settings/implementation-plan.md#desired-behavior); evidence SQL/browser dan limitations berada pada backlog. Tidak ada raster mockup baru atau klaim browser sebelum proof actual dijalankan.
+
+Proof9Oct: built Nitro/Chromium15 real theme/width combinations, keyboard focus,44px/wrap, Save/public head, dirty/cancel/leave/conflict/unknown/offline/auth cancellation passed. Unknown Save remains explicitly unconfirmed in badges/preview/discard dialogs until reconciled. Runtime evidence/receipts are in SSET-011; native SQL/cookies in SSET-010. Specification remains separate from production/device acceptance.
