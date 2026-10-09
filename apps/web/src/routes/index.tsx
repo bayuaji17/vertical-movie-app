@@ -1,3 +1,8 @@
+import {
+  homeTitle,
+  publicMeta,
+  settingsFromMatches,
+} from '#/lib/settings/presentation'
 import { createFileRoute } from '@tanstack/react-router'
 import { CatalogBrowser } from '#/components/public/catalog-browser'
 import { catalogSearch, catalogType } from '#/lib/public/catalog-model'
@@ -14,17 +19,15 @@ export const Route = createFileRoute('/')({
     setPublicHttpStatus(result.status)
     return result
   },
-  head: () => ({
-    meta: [
-      { title: 'Vertical Movie — Find your next story' },
-      {
-        name: 'description',
-        content:
-          'Discover films and standalone stories in portrait. Open to everyone.',
-      },
-      { name: 'robots', content: 'noindex, nofollow' },
-    ],
-  }),
+  head: ({ matches }) => {
+    const settings = settingsFromMatches(matches)
+    return {
+      meta: [
+        ...publicMeta(settings, homeTitle(settings)),
+        { name: 'robots', content: 'noindex, nofollow' },
+      ],
+    }
+  },
   component: () => (
     <CatalogBrowser
       type={catalogType(Route.useSearch().type)}

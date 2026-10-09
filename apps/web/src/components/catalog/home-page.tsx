@@ -1,3 +1,4 @@
+import { useSiteSettings } from '#/hooks/use-site-settings'
 import { useEffect, useRef, useState } from 'react'
 import {
   useInfiniteQuery,
@@ -60,6 +61,7 @@ function SectionFailure({
   )
 }
 export function HomePage({ bootstrap }: { bootstrap: CatalogBootstrap }) {
+  const { settings } = useSiteSettings()
   const client = useQueryClient()
   const [filters, setFilters] = useState(defaultCatalogFilters),
     [draft, setDraft] = useState(defaultCatalogFilters)
@@ -176,12 +178,16 @@ export function HomePage({ bootstrap }: { bootstrap: CatalogBootstrap }) {
         <p className="text-xs font-semibold tracking-[0.35em] text-muted-foreground">
           STORIES IN PORTRAIT
         </p>
-        <h1 className="font-heading text-4xl leading-[1.08] font-bold tracking-tight sm:text-5xl lg:text-6xl">
-          Find your next story.
-        </h1>
-        <p className="text-base text-muted-foreground lg:text-lg">
-          Films, series, and short stories. Watch without an account.
-        </p>
+        {settings.tagline && (
+          <h1 className="font-heading text-4xl leading-[1.08] font-bold tracking-tight [overflow-wrap:anywhere] sm:text-5xl lg:text-6xl">
+            {settings.tagline}
+          </h1>
+        )}
+        {settings.description && (
+          <p className="text-base text-muted-foreground [overflow-wrap:anywhere] lg:text-lg">
+            {settings.description}
+          </p>
+        )}
       </section>
       {defaultView &&
         (featured.data?.item ? (

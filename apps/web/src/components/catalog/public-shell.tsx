@@ -1,3 +1,4 @@
+import { useSiteSettings } from '#/hooks/use-site-settings'
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { RiMenuLine, RiPlayFill, RiCloseLine } from '@remixicon/react'
@@ -15,12 +16,15 @@ import { Separator } from '#/components/ui/separator'
 import { AppearanceMenu } from './appearance-menu'
 
 function Brand() {
+  const { settings } = useSiteSettings()
   return (
-    <span className="flex items-center gap-3 font-heading text-lg font-bold tracking-tight sm:text-xl">
+    <span className="flex min-w-0 items-center gap-3 font-heading text-lg font-bold tracking-tight sm:text-xl">
       <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
         <RiPlayFill className="size-5" aria-hidden="true" />
       </span>
-      Vertical Movie
+      <span className="min-w-0 [overflow-wrap:anywhere]">
+        {settings.siteName}
+      </span>
     </span>
   )
 }
@@ -35,6 +39,7 @@ export function PublicShell({
   onHome: () => void
   onBrowse: () => void
 }) {
+  const { settings } = useSiteSettings()
   const [open, setOpen] = useState(false)
   return (
     <div className="flex min-h-svh flex-col bg-background text-foreground">
@@ -45,8 +50,8 @@ export function PublicShell({
         <div className="mx-auto flex max-w-[1376px] flex-wrap items-center gap-3 px-4 py-4 sm:px-6 lg:gap-6 lg:px-10">
           <button
             type="button"
-            className="flex min-h-11 shrink-0 items-center rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            aria-label="Vertical Movie home"
+            className="flex min-h-11 min-w-0 items-center rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label={`${settings.siteName} home`}
             onClick={onHome}
           >
             <Brand />
@@ -79,8 +84,10 @@ export function PublicShell({
               </SheetTrigger>
               <SheetContent showCloseButton={false}>
                 <SheetHeader className="pr-16">
-                  <SheetTitle>Vertical Movie</SheetTitle>
-                  <SheetDescription>Find your next story.</SheetDescription>
+                  <SheetTitle className="[overflow-wrap:anywhere]">
+                    {settings.siteName}
+                  </SheetTitle>
+                  <SheetDescription>{settings.tagline}</SheetDescription>
                 </SheetHeader>
                 <SheetClose
                   render={
@@ -133,9 +140,11 @@ export function PublicShell({
       <Separator />
       <footer className="mx-auto flex w-full max-w-[1376px] flex-col gap-4 px-4 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-10">
         <Brand />
-        <p className="text-sm text-muted-foreground">
-          Vertical stories. Open to everyone.
-        </p>
+        {settings.footerText && (
+          <p className="text-sm text-muted-foreground [overflow-wrap:anywhere]">
+            {settings.footerText}
+          </p>
+        )}
       </footer>
     </div>
   )

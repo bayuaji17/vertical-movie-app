@@ -270,7 +270,7 @@ native client/QueryClient tests for10-second remaining TTL, slow SSR hydration, 
 ### Commit task
 
 - Pesan: feat(web): hydrate cached site settings (SSET-006)
-- SHA: belum dibuat; receipt dicatat pada update berikutnya setelah successful commit, bukan self-referential.
+- SHA: `3971e864d205b97f9f81021b596a28d3d0ec89f0` (actual previous-task receipt).
 - Hook/checks: relevant native tests, root check-types/lint/build, docs/format/diff passed; normal hooks required without bypass.
 - Ledger: actual prior SHA dan evidence pada task/plan berikutnya.
 
@@ -280,7 +280,7 @@ Dependent tasks follow the approved implementation plan. Production and remote d
 
 ## Task: SSET-007 — Public branding and metadata
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex/pengembang
 - Prioritas: 8
 - Referensi: SSET-US-02, PRD-02, GR-01/02/05/07/08; [implementation step](../plans/site-settings/implementation-plan.md#sset-007--public-branding-and-metadata).
@@ -298,8 +298,8 @@ Requirements: proposed defaults/empty behavior, accessible labels/wrap/plain-tex
 
 ### Acceptance criteria
 
-- [ ] same persisted brand/footer across shells; Save/navigation updates metadata; no content data/cache reset or new playback requests.
-- [ ] Validasi task dan relevant gates lulus; changes hanya milik task dan local commit melalui normal hooks.
+- [x] same persisted brand/footer across shells; Save/navigation updates metadata; no content data/cache reset or new playback requests.
+- [x] Validasi task dan relevant gates lulus; changes hanya milik task dan local commit melalui normal hooks.
 
 ### Validasi
 
@@ -307,18 +307,18 @@ source/SSR assertions for escaped text and selected title/description/default/em
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement, bukan hasil actual.
+2026-10-09: Both public shell families, homepage intro and all five public route heads use cached settings; content title/synopsis, robots, catalog/player semantics retained. Root head sync invalidates only root match on version change. Installed head API has no context, so content metadata is projected into loaderData. Plain-text/default/empty metadata plus catalog/content regressions20 tests133 assertions passed. Built SSR verifies title/description/header/footer and ten SSR plus ten gateway reads share one settings API call; content404/login200 unchanged. Root types/lint/build passed.
 
 ### Commit task
 
-- Pesan: Conventional Commit dengan ID SSET-007 sesudah acceptance/gates lulus.
+- Pesan: feat(web): apply public site branding (SSET-007)
 - SHA: belum dibuat; receipt dicatat pada update berikutnya setelah successful commit, bukan self-referential.
-- Hook/checks: belum dijalankan untuk task ini.
+- Hook/checks: relevant native tests, root check-types/lint/build, docs/format/diff passed; normal hooks required without bypass.
 - Ledger: actual prior SHA dan evidence pada task/plan berikutnya.
 
 ### Blocker atau tindak lanjut
 
-Plan lengkap disetujui pengguna9Oct dan freshness sudah diperiksa; dependent tasks harus selesai sebelum task ini. Tidak ada production proof yang diasumsikan.
+Dependent tasks follow the approved implementation plan. Production and remote delivery remain separate.
 
 ## Task: SSET-008 — Admin query, confirmed-save cache update and recovery
 

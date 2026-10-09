@@ -1,3 +1,4 @@
+import { useSiteSettings } from '#/hooks/use-site-settings'
 import { useRef } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { PublicShell } from './public-shell'
@@ -18,6 +19,7 @@ export function CatalogBrowser({
   type: CatalogType
   status: number | null
 }) {
+  const { settings } = useSiteSettings()
   const { query, items, online, more, refresh, client } = usePublicCatalog(
     type,
     status,
@@ -44,7 +46,11 @@ export function CatalogBrowser({
           >
             Browse
           </h1>
-          <p className="text-lg text-muted-foreground">Find your next story.</p>
+          {settings.tagline && (
+            <p className="text-lg text-muted-foreground [overflow-wrap:anywhere]">
+              {settings.tagline}
+            </p>
+          )}
         </div>
         <ToggleGroup
           aria-label="Content type"

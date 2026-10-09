@@ -1,3 +1,4 @@
+import { useSiteSettings } from '#/hooks/use-site-settings'
 import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { RiPlayFill } from '@remixicon/react'
@@ -12,6 +13,7 @@ export function PublicShell({
   children: ReactNode
   type?: CatalogType
 }) {
+  const { settings } = useSiteSettings()
   return (
     <div className="flex min-h-svh flex-col bg-background text-foreground">
       <a
@@ -26,12 +28,14 @@ export function PublicShell({
             to="/"
             search={{ type }}
             className="flex min-h-11 min-w-0 items-center gap-3 rounded-xl font-heading text-lg font-bold outline-none focus-visible:ring-2 focus-visible:ring-ring sm:text-xl"
-            aria-label="Vertical Movie home"
+            aria-label={`${settings.siteName} home`}
           >
             <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
               <RiPlayFill className="size-5" aria-hidden="true" />
             </span>
-            <span>Vertical Movie</span>
+            <span className="min-w-0 [overflow-wrap:anywhere]">
+              {settings.siteName}
+            </span>
           </Link>
           <nav
             aria-label="Main navigation"
@@ -57,7 +61,9 @@ export function PublicShell({
       </main>
       <Separator />
       <footer className="mx-auto w-full max-w-[1440px] px-4 py-6 text-sm text-muted-foreground sm:px-6 lg:px-10">
-        Stories made for portrait.
+        {settings.footerText && (
+          <p className="[overflow-wrap:anywhere]">{settings.footerText}</p>
+        )}
       </footer>
     </div>
   )

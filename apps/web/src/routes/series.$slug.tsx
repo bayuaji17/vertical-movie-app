@@ -1,11 +1,40 @@
+import {
+  publicTitle,
+  publicMeta,
+  settingsFromMatches,
+} from '#/lib/settings/presentation'
+import {
+  contentDetailOptions,
+  loadContent,
+} from '#/lib/catalog/content-queries'
+import type { CatalogItem } from '#/lib/catalog/public-catalog-model'
 import { createFileRoute } from '@tanstack/react-router'
 import { ContentPage } from '#/components/catalog/content-page'
-import { loadContent } from '#/lib/catalog/content-queries'
 
 export const Route = createFileRoute('/series/$slug')({
-  loader: ({ context, params }) =>
-    loadContent(context.queryClient, 'series', params.slug),
-  head: () => ({ meta: [{ title: 'Series details — Vertical Movie' }] }),
+  loader: async ({ context, params }) => {
+    const result = await loadContent(context.queryClient, 'series', params.slug)
+    const item = context.queryClient.getQueryData<{ item: CatalogItem }>(
+      contentDetailOptions('series', params.slug).queryKey,
+    )?.item
+    return {
+      ...result,
+      metadata: item
+        ? { title: item.title, description: item.synopsis }
+        : undefined,
+    }
+  },
+  head: ({ matches, loaderData }) => {
+    const settings = settingsFromMatches(matches),
+      item = loaderData?.metadata
+    return {
+      meta: publicMeta(
+        settings,
+        publicTitle(settings, item?.title ?? 'Series details'),
+        item?.description,
+      ),
+    }
+  },
   component: () => {
     const { slug } = Route.useParams()
     return (

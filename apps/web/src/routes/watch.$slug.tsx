@@ -1,3 +1,8 @@
+import {
+  publicTitle,
+  publicMeta,
+  settingsFromMatches,
+} from '#/lib/settings/presentation'
 import { useCallback } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -25,14 +30,32 @@ import type { WatchVideo } from '#/lib/catalog/content-model'
 export const Route = createFileRoute('/watch/$slug')({
   validateSearch: catalogSearch,
   beforeLoad: ({ location }) => normalizeCatalogLocation(location),
-  loader: ({ context, params }) =>
-    loadWatchMetadata(context.queryClient, params.slug),
-  head: () => ({
-    meta: [
-      { title: 'Watch — Vertical Movie' },
-      { name: 'robots', content: 'noindex,nofollow' },
-    ],
-  }),
+  loader: async ({ context, params }) => {
+    const result = await loadWatchMetadata(context.queryClient, params.slug)
+    const video = context.queryClient.getQueryData<{ item: WatchVideo }>(
+      watchMetadataOptions(params.slug).queryKey,
+    )?.item
+    return {
+      ...result,
+      metadata: video
+        ? { title: video.title, description: video.synopsis }
+        : undefined,
+    }
+  },
+  head: ({ matches, loaderData }) => {
+    const settings = settingsFromMatches(matches),
+      video = loaderData?.metadata
+    return {
+      meta: [
+        ...publicMeta(
+          settings,
+          publicTitle(settings, video ? 'Watch ' + video.title : 'Watch'),
+          video?.description,
+        ),
+        { name: 'robots', content: 'noindex,nofollow' },
+      ],
+    }
+  },
   component: Watch,
 })
 function Watch() {
