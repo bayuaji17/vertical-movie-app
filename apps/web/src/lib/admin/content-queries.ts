@@ -1,3 +1,4 @@
+import { invalidateDashboard } from './dashboard-queries'
 import {
   infiniteQueryOptions,
   mutationOptions,
@@ -118,6 +119,8 @@ export async function invalidateContent(
   type?: ContentType,
   id?: string,
 ) {
+  await invalidateDashboard(queryClient, identity)
+
   await Promise.all([
     queryClient.invalidateQueries({ queryKey: contentKeys.lists(identity) }),
     ...(type && id

@@ -38,6 +38,26 @@ const contentFixture = includeContent
         : null
     })
   : undefined
+const dashboardFixture =
+  process.env.AUTH_BROWSER_PHASE === 'dashboard'
+    ? await (
+        await import('../../api/test/integration/admin-dashboard-browser-fixture')
+      ).createAdminDashboardFixture(async ({ headers }) => {
+        if (outage) throw Error('Fixture auth unavailable')
+        return (headers.get('cookie') ?? '').includes('browser-fixture=admin')
+          ? {
+              user: {
+                id: 'browser-admin',
+                name: 'Browser Admin',
+                email: 'browser@example.test',
+                role,
+                banned: false,
+              },
+              session: { expiresAt: new Date(Date.now() + 86400000) },
+            }
+          : null
+      })
+    : undefined
 const mediaFixture = ['media', 'publication', 'series-media'].includes(
   process.env.AUTH_BROWSER_PHASE,
 )
@@ -86,6 +106,15 @@ const api = Bun.serve({
   port: 0,
   fetch: async (request) => {
     const url = new URL(request.url)
+    if (url.pathname === '/control/dashboard' && dashboardFixture) {
+      await dashboardFixture.control(await request.json())
+      return Response.json({ ok: true })
+    }
+    if (url.pathname === '/dashboard-proof' && dashboardFixture)
+      return Response.json({
+        ...dashboardFixture.proof(),
+        ids: dashboardFixture.ids,
+      })
     if (contentWatchFixture) {
       if (url.pathname === '/control/content-watch') {
         await contentWatchFixture.control(await request.json())
@@ -140,9 +169,11 @@ const api = Bun.serve({
       (url.pathname.startsWith('/admin/') ||
         (mediaFixture &&
           /^\/(catalog|videos|series|playback)(\/|$)/.test(url.pathname))) &&
-      (mediaFixture || contentFixture)
+      (mediaFixture || contentFixture || dashboardFixture)
     )
-      return (mediaFixture ?? contentFixture).handle(request)
+      return (dashboardFixture ?? mediaFixture ?? contentFixture).handle(
+        request,
+      )
     if (url.pathname === '/control') {
       const body = await request.json()
       if (body.role) role = body.role
@@ -277,6 +308,7 @@ if (built) {
   if (code) {
     api.stop(true)
     await contentFixture?.close()
+    await dashboardFixture?.close()
     await mediaFixture?.close()
     await catalogFixture?.close()
     await contentWatchFixture?.close()
@@ -314,25 +346,27 @@ try {
   for (const phase of phases) {
     const workerSource = await Bun.file(
       import.meta.dir +
-        (phase === 'series'
-          ? '/admin-series-browser-worker.mjs'
-          : phase === 'public-film'
-            ? '/public-film-catalog-browser-worker.mjs'
-            : phase === 'public-watch'
-              ? '/public-content-browser-worker.mjs'
-              : phase === 'public-catalog'
-                ? '/public-catalog-browser-worker.mjs'
-                : phase === 'series-media'
-                  ? '/admin-series-media-browser-worker.mjs'
-                  : phase === 'publication'
-                    ? '/admin-publication-browser-worker.mjs'
-                    : phase === 'media'
-                      ? '/admin-media-upload-browser-worker.mjs'
-                      : phase === 'content'
-                        ? '/admin-content-browser-worker.mjs'
-                        : phase === 'routes'
-                          ? '/auth-routes-browser-worker.mjs'
-                          : '/auth-browser-worker.mjs'),
+        (phase === 'dashboard'
+          ? '/admin-dashboard-browser-worker.mjs'
+          : phase === 'series'
+            ? '/admin-series-browser-worker.mjs'
+            : phase === 'public-film'
+              ? '/public-film-catalog-browser-worker.mjs'
+              : phase === 'public-watch'
+                ? '/public-content-browser-worker.mjs'
+                : phase === 'public-catalog'
+                  ? '/public-catalog-browser-worker.mjs'
+                  : phase === 'series-media'
+                    ? '/admin-series-media-browser-worker.mjs'
+                    : phase === 'publication'
+                      ? '/admin-publication-browser-worker.mjs'
+                      : phase === 'media'
+                        ? '/admin-media-upload-browser-worker.mjs'
+                        : phase === 'content'
+                          ? '/admin-content-browser-worker.mjs'
+                          : phase === 'routes'
+                            ? '/auth-routes-browser-worker.mjs'
+                            : '/auth-browser-worker.mjs'),
     ).text()
     const workerPath = process.env.AUTH_BROWSER_WORKER_PATH
     if (workerPath) await Bun.write(workerPath, workerSource)
@@ -386,6 +420,7 @@ try {
   await child.exited
   api.stop(true)
   await contentFixture?.close()
+  await dashboardFixture?.close()
   await mediaFixture?.close()
   await catalogFixture?.close()
   await contentWatchFixture?.close()

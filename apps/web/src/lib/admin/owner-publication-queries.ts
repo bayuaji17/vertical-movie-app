@@ -1,3 +1,4 @@
+import { invalidateDashboard } from './dashboard-queries'
 import { mutationOptions, queryOptions } from '@tanstack/react-query'
 import type { QueryClient } from '@tanstack/react-query'
 import type {
@@ -90,6 +91,8 @@ export async function invalidateOwnerPublication(
   identity: string,
   target: PublicationTarget,
 ) {
+  await invalidateDashboard(cache, identity)
+
   const seriesId = target.type === 'series' ? target.id : target.seriesId
   await Promise.all(
     [

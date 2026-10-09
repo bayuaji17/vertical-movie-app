@@ -1,5 +1,15 @@
+import {
+  DashboardMedia,
+  DashboardAttention,
+} from '#/components/admin/dashboard-media'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { RiFilmLine } from '@remixicon/react'
+import { useDashboardSummary } from '#/hooks/use-dashboard-summary'
+import {
+  DashboardContent,
+  DashboardLatest,
+  DashboardSkeleton,
+} from '#/components/admin/dashboard-content'
+import { Alert, AlertTitle, AlertDescription } from '#/components/ui/alert'
 import {
   Card,
   CardContent,
@@ -24,63 +34,108 @@ export const Route = createFileRoute('/admin/_authenticated/')({
 })
 function AdminDashboard() {
   const { user, session } = useAdminPrincipal()
+  const { query, online, refresh } = useDashboardSummary()
+  const data = query.data
   return (
     <>
       <AdminPageHeading
         title="Dashboard"
-        description="Manage your content metadata in one place."
+        description="Your editorial inventory and current media jobs."
       />
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-3 text-2xl">
-            <RiFilmLine className="size-7" aria-hidden="true" />
-            Welcome back, {user.name}
-          </CardTitle>
-          <CardDescription>Start with a well-organized draft.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="max-w-xl text-sm leading-6 text-muted-foreground">
-            Create and manage films, standalone videos, and series before
-            uploading.
-          </p>
-        </CardContent>
-      </Card>
-      <div className="mb-6 grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Create a new draft</CardTitle>
-            <CardDescription>
-              Save the title and initial content metadata.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button
-              nativeButton={false}
-              className="min-h-11"
-              render={<Link to="/admin/content/new" />}
-            >
-              Create draft
-            </Button>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Manage content</CardTitle>
-            <CardDescription>
-              Find content and update draft metadata.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button
-              nativeButton={false}
-              className="min-h-11"
-              variant="outline"
-              render={<Link to="/admin/content" search={contentSearch({})} />}
-            >
-              View content
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="mb-6 flex flex-wrap items-center gap-3">
+        <Button
+          nativeButton={false}
+          className="min-h-11"
+          render={<Link to="/admin/content/new" />}
+        >
+          Create draft
+        </Button>
+        <Button
+          nativeButton={false}
+          className="min-h-11"
+          variant="outline"
+          render={<Link to="/admin/content" search={contentSearch({})} />}
+        >
+          View content
+        </Button>
+        <Button
+          className="min-h-11"
+          variant="outline"
+          disabled={!online || query.isFetching}
+          onClick={refresh}
+        >
+          {query.isFetching
+            ? 'Refreshing…'
+            : query.isError
+              ? 'Retry'
+              : 'Refresh'}
+        </Button>
+      </div>
+      <div
+        className="mb-6 space-y-6"
+        data-testid="dashboard-summary"
+        aria-busy={query.isFetching}
+      >
+        <p
+          className="text-sm text-muted-foreground"
+          role="status"
+          aria-live="polite"
+        >
+          {data ? (
+            <>
+              {!online || query.isError
+                ? 'Stale data · '
+                : query.isFetching
+                  ? 'Refreshing · '
+                  : ''}
+              Last updated{' '}
+              <time dateTime={data.generatedAt}>
+                {new Date(data.generatedAt)
+                  .toISOString()
+                  .replace('T', ' ')
+                  .slice(0, 19)}{' '}
+                UTC
+              </time>
+            </>
+          ) : online ? (
+            'Waiting for dashboard data.'
+          ) : (
+            'Offline · Dashboard data is unavailable.'
+          )}
+        </p>
+        {query.isError && (
+          <Alert variant="destructive">
+            <AlertTitle>Dashboard could not be refreshed</AlertTitle>
+            <AlertDescription>
+              {data
+                ? 'Showing the last successful snapshot.'
+                : 'Dashboard data is unavailable.'}{' '}
+              Use Retry when connected.
+            </AlertDescription>
+          </Alert>
+        )}
+        {!online && (
+          <Alert>
+            <AlertTitle>You are offline</AlertTitle>
+            <AlertDescription>
+              {data
+                ? 'Showing the last successful snapshot.'
+                : 'Connect to load your dashboard.'}
+            </AlertDescription>
+          </Alert>
+        )}
+        {data ? (
+          <>
+            <DashboardContent data={data} />
+            <DashboardMedia data={data} />
+            <div className="grid min-w-0 items-start gap-6 lg:grid-cols-2">
+              <DashboardAttention data={data} />
+              <DashboardLatest data={data} />
+            </div>
+          </>
+        ) : query.isPending && online ? (
+          <DashboardSkeleton />
+        ) : null}
       </div>
       <Card>
         <CardHeader>

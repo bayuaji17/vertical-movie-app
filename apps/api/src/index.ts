@@ -1,3 +1,5 @@
+import { DashboardService } from "./modules/dashboard/service";
+import { createDashboardRepository } from "./modules/dashboard/repository";
 import { CatalogService } from "./modules/catalog/service";
 import { CatalogStore } from "./modules/catalog/repository";
 import { CatalogHomeStore } from "./modules/catalog/home-repository";
@@ -47,6 +49,9 @@ const auth = createAdminAuthServer({
 });
 const authOpenApiSchema = await generateAuthOpenAPISchema(auth);
 const app = createApp({
+  dashboardService: new DashboardService(
+    createDashboardRepository(database.db),
+  ),
   contentPageService: new ContentPageService(
     createContentPageRepository(database.db),
   ),
