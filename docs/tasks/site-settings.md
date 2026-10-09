@@ -144,7 +144,7 @@ native deterministic service tests and real SQL smoke against isolated fixtures;
 ### Commit task
 
 - Pesan: feat(api): validate and save site settings (SSET-003)
-- SHA: belum dibuat; receipt dicatat pada update berikutnya setelah successful commit, bukan self-referential.
+- SHA: `0b0e09883e8d8d9d3f1f186cdd1fe41476c3c7e7` (actual previous-task receipt).
 - Hook/checks: relevant native tests, root check-types/lint/build, docs/format/diff passed; normal hooks required without bypass.
 - Ledger: actual prior SHA dan evidence pada task/plan berikutnya.
 
@@ -154,7 +154,7 @@ Dependent tasks follow the approved implementation plan. Production and remote d
 
 ## Task: SSET-004 — Backend cache, single-flight and save fencing
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex/pengembang
 - Prioritas: 4
 - Referensi: SSET-US-03, PRD-02, GR-01/02/05/07/08; [implementation step](../plans/site-settings/implementation-plan.md#sset-004--backend-cache-single-flight-and-save-fencing).
@@ -172,8 +172,8 @@ Requirements: approved TTL1 hour, remaining freshness, warm/cold coalescing, sep
 
 ### Acceptance criteria
 
-- [ ] normal cold100 calls one SELECT; warm calls zero extra; Save refill zero extra SELECT; old data cannot replace new cache; bounded state and no success-cached errors.
-- [ ] Validasi task dan relevant gates lulus; changes hanya milik task dan local commit melalui normal hooks.
+- [x] normal cold100 calls one SELECT; warm calls zero extra; Save refill zero extra SELECT; old data cannot replace new cache; bounded state and no success-cached errors.
+- [x] Validasi task dan relevant gates lulus; changes hanya milik task dan local commit melalui normal hooks.
 
 ### Validasi
 
@@ -181,18 +181,18 @@ fake clock/deferred read tests including100 parallel reads, expiry boundary, rej
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement, bukan hasil actual.
+2026-10-09: Settings cache9 native tests56 assertions passed:100 cold reads one read, warm zero, TTL1 hour minus elapsed time, separate fresh flight, abort isolation, generation/version races, five-second cooldown and unknown-commit expiry. Save primes without SELECT. Root gates passed.
 
 ### Commit task
 
-- Pesan: Conventional Commit dengan ID SSET-004 sesudah acceptance/gates lulus.
+- Pesan: feat(api): cache site settings snapshots (SSET-004)
 - SHA: belum dibuat; receipt dicatat pada update berikutnya setelah successful commit, bukan self-referential.
-- Hook/checks: belum dijalankan untuk task ini.
+- Hook/checks: relevant native tests, root check-types/lint/build, docs/format/diff passed; normal hooks required without bypass.
 - Ledger: actual prior SHA dan evidence pada task/plan berikutnya.
 
 ### Blocker atau tindak lanjut
 
-Cache architecture sudah disetujui pengguna9Oct; menunggu detailed field/UI plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
+Dependent tasks follow the approved implementation plan. Production and remote delivery remain separate.
 
 ## Task: SSET-005 — Typed HTTP composition and exact gateway
 
