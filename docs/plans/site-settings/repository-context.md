@@ -7,7 +7,7 @@
 - Analyzed at: 2026-10-09T00:55:35Z (9 Oktober 2026, Asia/Jakarta).
 - Context status: current at the pinned snapshot; recheck before implementation.
 - Planning branch: `chore/site-settings-plan`.
-- Request: pengguna meminta plan sesudah menerima pendekatan empat field teks dan meminta cache frontend/backend agar reads tidak selalu ke database. Detailed validation/defaults/recovery below remain proposals until plan approval.
+- Request: pengguna meminta plan sesudah menerima pendekatan empat field teks. Pada 9 Oktober 2026 pengguna menyetujui revisi cache tiga lapis (browser, server web, API), TTL awal1 jam dan pembaruan setelah Save, lalu meminta pembaruan plan saja. Field/default/recovery detail tetap proposal; belum ada implementasi runtime.
 
 ## Product and users
 
@@ -45,6 +45,10 @@ Observed cache: `apps/api/src/modules/catalog/service.ts:CatalogService.entry/in
 
 Observed web: `src/router.tsx:getRouter` calls `integrations/tanstack-query/root-provider.tsx:getContext`, which creates a new QueryClient, then installs SSR integration. `lib/public/catalog-reader.ts` splits server-only internal reads from browser same-origin transport; query factories compute freshness from response deadlines. A settings query can be shared within that router/request and safely hydrated because its public projection contains only permitted text/version/freshness.
 
+Recheck9Oct: `lib/public/catalog-reader.server.ts:reader` currently fetches the internal API with the individual request signal and10-second timeout. API caching alone does not prevent this SSR API request. There is no settings server cache today. Proposal approved by user: a server-only public snapshot cache, shared by SSR and exact GET gateway within the web process, while each request retains its own QueryClient. Shared fills require an independent bounded fetch signal so one cancelled page cannot abort other waiters.
+
+`lib/server/auth-gateway.ts:createAuthGateway` already reads the upstream response into a bounded buffer before returning. The future exact PATCH settings success path can validate the committed response and update the shared web cache before returning success; it must not cache other admin responses or bypass authorization. Private fresh settings GET can reconcile an uncertain Save and update the public projection. These are planned extensions, not existing behavior.
+
 Private dashboard queries use `['admin', identity, ...]`, browser-only reads and `registerPrivateEffect`. `lib/auth/session-cache.ts` cancels/removes admin queries and mutations on auth loss. Settings admin queries and editor effects must remain in that cleanup boundary; public settings are separate.
 
 ## Domain and data model
@@ -67,7 +71,7 @@ Proposal: one settings row, four normalized plain-text fields, monotonic row ver
 
 ## External integrations
 
-This scope requires only existing PostgreSQL/auth/internal API. Plain-text settings need no S3/MinIO/R2/FFmpeg, Redis, new credentials or dependency. Media/cache/player semantics remain their existing contracts. In-memory settings cache is per API process; cross-instance invalidation is a future rollout decision, not a promised capability.
+This scope requires only existing PostgreSQL/auth/internal API. Plain-text settings need no S3/MinIO/R2/FFmpeg, Redis, new credentials or dependency. Media/cache/player semantics remain their existing contracts. In-memory settings snapshots are per API and web process. Save via the writer web gateway updates those processes; direct API writes and other instances need invalidation propagation before fleet-wide immediate consistency can be promised. Otherwise they converge on TTL/refetch.
 
 ## Development, testing and delivery
 
@@ -91,8 +95,8 @@ Inspected root tree/instructions/docs index/product/workflow/API guide, all thre
 
 ## Unknowns and assumptions
 
-- User accepted the four-field/cache direction and requested this plan on 9 October 2026; proposed field lengths/defaults, fresh-read recovery and UI details await detailed plan approval.
-- API process count and production topology are not fixed. Single-process prime is immediate; other processes converge via TTL/refetch. Open idle pages have no live-update deadline without refetch.
+- User accepted the four-field direction and requested the first plan on 9 October 2026; then explicitly approved three cache layers/TTL1 hour/Save update and requested this documentation revision. Proposed field lengths/defaults, fresh-read recovery and UI details await detailed plan approval.
+- API/web process counts and production topology are not fixed. Same writer API/web process prime is immediate; other processes or direct API writes require a propagation mechanism or converge via TTL/refetch. Open idle pages have no live-update deadline without refetch.
 - Bun SQL/Drizzle compatibility already exists; singleton/check/CAS details must be proved on real PostgreSQL.
 - SSR metadata updates and prevention of duplicate hydration reads require the installed TanStack APIs and actual built-browser proof, not assumptions from other library versions.
 
@@ -110,3 +114,5 @@ All code observations above are pinned to `36f185e275bc90fa609cf071405848ff021c3
 | Real SQL/browser proof templates              | `apps/api/test/integration/{content-fixture,admin-dashboard-proof.test}.ts`, `apps/web/test/{auth-browser-smoke,public-film-catalog-browser-worker,admin-dashboard-browser-worker}.mjs`      |
 
 Context saved before plan creation. Current implementation and validation contract follow in [implementation-plan.md](implementation-plan.md).
+
+Revalidated2026-10-09T01:29:17Z: main/origin remain `36f185e275bc90fa609cf071405848ff021c3223`; planning HEAD `2617bd7c35008cd513aa1a238a7e6d26675dbc04` differs only in the four owned Markdown documents. Added targeted reader/gateway response-buffer analysis before revising the plan. The observed catalog TTL60 is historical/current source evidence; it is not the newly approved settings TTL1 hour.

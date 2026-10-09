@@ -1,6 +1,6 @@
 # Modul: Site Settings
 
-> Status: detailed plan draft untuk review · 9 Oktober 2026 · Direction empat field teks/cache diterima pengguna; implementasi belum dimulai. Base main `36f185e275bc90fa609cf071405848ff021c3223`, planning branch `chore/site-settings-plan`.
+> Status: detailed plan draft untuk review · 9 Oktober 2026 · Direction empat field teks diterima pengguna; cache tiga lapis/TTL1 jam/shared deadline/Save update disetujui pengguna9Oct. Revisi dokumentasi saja; implementasi belum dimulai. Base main `36f185e275bc90fa609cf071405848ff021c3223`, planning branch `chore/site-settings-plan`.
 
 ## Tujuan modul
 
@@ -20,7 +20,7 @@ Sebagai operator, saya ingin cache hits dan request bersamaan menghindari settin
 
 ## Status dan bukti
 
-SSET-001 adalah task dokumentasi yang diminta pengguna. SSET-002–012 Backlog sampai detailed plan disetujui dan freshness diperiksa. Perintah validasi di bawah adalah requirement, bukan hasil actual. Local task commits mengikuti AGENTS; remote delivery/deployment memerlukan authorization tersendiri.
+SSET-001 adalah task dokumentasi yang diminta pengguna. SSET-002–013 Backlog sampai detailed field/UI plan disetujui dan freshness diperiksa. Cache architecture sudah disetujui; SSET-013 ditambahkan tanpa mengganti ID existing, dengan urutan005 →013 →006. Perintah validasi di bawah adalah requirement, bukan hasil actual. Local task commits mengikuti AGENTS; remote delivery/deployment memerlukan authorization tersendiri.
 
 ## Task: SSET-001 — Evidence-backed planning
 
@@ -38,7 +38,7 @@ context saved before complete plan/backlog with preservation and freshness evide
 
 Files/symbols: context, this plan, module backlog and owned docs index links.
 
-Requirements: pinned SHA, four fields/cache contracts, constraints, matching dependency graph and observable AC; detailed plan remains draft pending review.
+Requirements: pinned SHA, four fields/cache contracts, constraints, matching dependency graph and observable AC; detailed field/UI review remains pending while three-layer/TTL1-hour cache revision is already user-approved. Preserve original planning proof and actual prior commit receipt when revising.
 
 ### Acceptance criteria
 
@@ -51,12 +51,16 @@ scoped Prettier, docs:check, diff/staged-tree checks, unrelated preservation and
 
 ### Hasil dan bukti
 
-9 Oktober 2026: context disimpan sebelum plan pada pinned main36f185e. Plan12 steps lengkap dengan backlog/DAG, default/length/cache/fresh-read/SSR/admin/SQL/browser acceptance. Scoped Prettier lulus; `bun run docs:check`97 Markdown/950 local links dan staged-tree validator90/931 lulus; `git diff --check`/cached diff lulus. Plan/backlog dependency audit tanpa cycle dan affected-action contract lulus. Preservation22 unrelated files byte-identical; README setelah owned additions dihapus sama persis baseline lokal. Hanya empat owned Markdown distage. Local planning commit melalui normal hooks; actual SHA dicatat pada update berikutnya, tanpa self-reference. Detailed product plan tetap draft untuk review; runtime/schema/env/dependency belum berubah dan belum ada migration/integration/browser proof baru atau remote operation.
+9 Oktober 2026: context disimpan sebelum plan pada pinned main36f185e. Plan12 steps lengkap dengan backlog/DAG, default/length/cache/fresh-read/SSR/admin/SQL/browser acceptance. Scoped Prettier lulus; `bun run docs:check`97 Markdown/950 local links dan staged-tree validator90/931 lulus; `git diff --check`/cached diff lulus. Plan/backlog dependency audit tanpa cycle dan affected-action contract lulus. Preservation22 unrelated files byte-identical; README setelah owned additions dihapus sama persis baseline lokal. Hanya empat owned Markdown distage. Local planning commit melalui normal hooks; actual SHA dicatat pada update berikutnya, tanpa self-reference. Historical original proof: detailed product plan saat itu draft untuk review; runtime/schema/env/dependency belum berubah dan belum ada migration/integration/browser proof baru atau remote operation.
+
+Revisi9Oct: pengguna menyetujui tiga cache layers/TTL1 hour/shared deadline/Save update; plan/context/backlog/index diperbarui dengan server-only cache task013 dan per-layer request counters. Metadata ini tidak menjalankan runtime/migration/API/browser proof. Revisi checks dicatat setelah actual validation; commit sendiri tidak ditulis self-referential.
+
+Actual revision checks9Oct: scoped Prettier, docs97 Markdown/951 links, staged-tree90/932, plan13/backlog13/dependency-DAG/action/TTL audit dan working/cached diff checks lulus. Original22 non-index paths byte-identical dan README overlay dapat direkonstruksi persis. Empat owned Markdown saja distage; revision task commit wajib memakai normal hooks. Task013 dan seluruh runtime tasks tetap Backlog, bukan proof cache sudah tersedia.
 
 ### Commit task
 
 - Pesan: docs: plan site settings and cache (SSET-001)
-- SHA: belum dibuat; receipt dicatat pada update berikutnya setelah successful commit, bukan self-referential.
+- SHA: `2617bd7c35008cd513aa1a238a7e6d26675dbc04` (original SSET-001 planning; receipt dicatat pada revisi berikutnya).
 - Hook/checks: docs/format/diff/staged-tree/preservation lulus; normal docs/lint/types dan Commitlint wajib pada task commit tanpa bypass.
 - Ledger: actual prior SHA dan evidence pada task/plan berikutnya.
 
@@ -104,7 +108,7 @@ Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement
 
 ### Blocker atau tindak lanjut
 
-Menunggu detailed plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
+Cache architecture sudah disetujui pengguna9Oct; menunggu detailed field/UI plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
 
 ## Task: SSET-003 — Domain validation and versioned persistence
 
@@ -146,7 +150,7 @@ Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement
 
 ### Blocker atau tindak lanjut
 
-Menunggu detailed plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
+Cache architecture sudah disetujui pengguna9Oct; menunggu detailed field/UI plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
 
 ## Task: SSET-004 — Backend cache, single-flight and save fencing
 
@@ -164,7 +168,7 @@ public/cached admin settings reads avoid repeated SELECTs and stale fills.
 
 Files/symbols: settings cache/service/cache tests; snapshot, generation, flights, cooldown and prime.
 
-Requirements: TTL60 remaining freshness, warm/cold coalescing, separate authorized fresh flight, no per-consumer abort of shared work, monotonic save prime, uncertain-commit expiry and5-second failure cooldown.
+Requirements: approved TTL1 hour, remaining freshness, warm/cold coalescing, separate authorized fresh flight, no per-consumer abort of shared work, monotonic save prime, uncertain-commit expiry and5-second failure cooldown.
 
 ### Acceptance criteria
 
@@ -188,7 +192,7 @@ Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement
 
 ### Blocker atau tindak lanjut
 
-Menunggu detailed plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
+Cache architecture sudah disetujui pengguna9Oct; menunggu detailed field/UI plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
 
 ## Task: SSET-005 — Typed HTTP composition and exact gateway
 
@@ -230,25 +234,25 @@ Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement
 
 ### Blocker atau tindak lanjut
 
-Menunggu detailed plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
+Cache architecture sudah disetujui pengguna9Oct; menunggu detailed field/UI plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
 
 ## Task: SSET-006 — Public Query, SSR and freshness ownership
 
 - Status: Backlog
 - Owner: Codex/pengembang
-- Prioritas: 6
+- Prioritas: 7
 - Referensi: SSET-US-02, PRD-02, GR-01/02/05/07/08; [implementation step](../plans/site-settings/implementation-plan.md#sset-006--public-query-ssr-and-freshness-ownership).
 - Diperbarui: 2026-10-09
-- Dependensi: SSET-005
+- Dependensi: SSET-013
 - Ukuran: Satu outcome terbatas; commit terpisah setelah acceptance dan gates.
 
 ### Ruang lingkup
 
 one public settings query per router, no duplicate fresh hydration read or TTL stacking.
 
-Files/symbols: public settings model/client/queries/readers, use-site-settings, root loader/head.
+Files/symbols: public settings queries/isomorphic reader, use-site-settings, root loader/head; reuse public model/client/server-only reader and shared snapshot created in013.
 
-Requirements: strict DTO, request-scoped SSR, unsigned-only hydration, remaining deadline with transport/render time, version/epoch fence, gc5min/no polling, route/focus/reconnect stale reads, last-good offline and uncached defaults on failure.
+Requirements: strict DTO and freshness0–3,600,000, request-scoped QueryClient SSR, unsigned-only hydration, shared1-hour deadline with transport/render time, version/epoch fence, gc1hour/no polling, route/focus/reconnect stale reads, last-good offline and uncached defaults on failure.
 
 ### Acceptance criteria
 
@@ -272,13 +276,13 @@ Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement
 
 ### Blocker atau tindak lanjut
 
-Menunggu detailed plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
+Cache architecture sudah disetujui pengguna9Oct; menunggu detailed field/UI plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
 
 ## Task: SSET-007 — Public branding and metadata
 
 - Status: Backlog
 - Owner: Codex/pengembang
-- Prioritas: 7
+- Prioritas: 8
 - Referensi: SSET-US-02, PRD-02, GR-01/02/05/07/08; [implementation step](../plans/site-settings/implementation-plan.md#sset-007--public-branding-and-metadata).
 - Diperbarui: 2026-10-09
 - Dependensi: SSET-006
@@ -314,13 +318,13 @@ Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement
 
 ### Blocker atau tindak lanjut
 
-Menunggu detailed plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
+Cache architecture sudah disetujui pengguna9Oct; menunggu detailed field/UI plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
 
 ## Task: SSET-008 — Admin query, confirmed-save cache update and recovery
 
 - Status: Backlog
 - Owner: Codex/pengembang
-- Prioritas: 8
+- Prioritas: 9
 - Referensi: SSET-US-01/02/03, PRD-02, GR-01/02/05/07/08; [implementation step](../plans/site-settings/implementation-plan.md#sset-008--admin-query-confirmed-save-cache-update-and-recovery).
 - Diperbarui: 2026-10-09
 - Dependensi: SSET-005, SSET-006
@@ -332,7 +336,7 @@ private read/save state updates only settings keys and survives conflicts/unknow
 
 Files/symbols: admin settings client/queries/editor-scope, use-settings-editor, private effect integration/tests.
 
-Requirements: identity scope, no private SSR, signal/late response/version fencing, retry:false, dedup save; cancel reads then update private/public snapshots on confirmed Save; dirty drafts unaffected by refetch; private fresh1 reconciliation; session-loss cleanup.
+Requirements: identity scope, no private SSR, signal/late response/version fencing, retry:false/gc1hour, dedup save; confirmed gateway Save primes API and server-web before browser cancels reads and updates private/public snapshots; dirty drafts unaffected by refetch; private fresh1 reconciliation updates web public projection; session-loss cleanup. Failed/unknown writes never prime attempted values.
 
 ### Acceptance criteria
 
@@ -356,13 +360,13 @@ Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement
 
 ### Blocker atau tindak lanjut
 
-Menunggu detailed plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
+Cache architecture sudah disetujui pengguna9Oct; menunggu detailed field/UI plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
 
 ## Task: SSET-009 — Responsive settings page and preview
 
 - Status: Backlog
 - Owner: Codex/pengembang
-- Prioritas: 9
+- Prioritas: 10
 - Referensi: SSET-US-01/02/03, PRD-02, GR-01/02/05/07/08; [implementation step](../plans/site-settings/implementation-plan.md#sset-009--responsive-settings-page-and-preview).
 - Diperbarui: 2026-10-09
 - Dependensi: SSET-008
@@ -398,13 +402,13 @@ Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement
 
 ### Blocker atau tindak lanjut
 
-Menunggu detailed plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
+Cache architecture sudah disetujui pengguna9Oct; menunggu detailed field/UI plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
 
 ## Task: SSET-010 — Real PostgreSQL, migration and native-cookie proof
 
 - Status: Backlog
 - Owner: Codex/pengembang
-- Prioritas: 10
+- Prioritas: 11
 - Referensi: SSET-US-03, PRD-02, GR-01/02/05/07/08; [implementation step](../plans/site-settings/implementation-plan.md#sset-010--real-postgresql-migration-and-native-cookie-proof).
 - Diperbarui: 2026-10-09
 - Dependensi: SSET-002, SSET-005
@@ -440,13 +444,13 @@ Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement
 
 ### Blocker atau tindak lanjut
 
-Menunggu detailed plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
+Cache architecture sudah disetujui pengguna9Oct; menunggu detailed field/UI plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
 
 ## Task: SSET-011 — Built browser flow and regression
 
 - Status: Backlog
 - Owner: Codex/pengembang
-- Prioritas: 11
+- Prioritas: 12
 - Referensi: SSET-US-01/02/03, PRD-02, GR-01/02/05/07/08; [implementation step](../plans/site-settings/implementation-plan.md#sset-011--built-browser-flow-and-regression).
 - Diperbarui: 2026-10-09
 - Dependensi: SSET-007, SSET-009, SSET-010
@@ -458,7 +462,7 @@ real settings save is reflected in public SSR/client UI without extra database h
 
 Files/symbols: settings browser worker, harness phase and dedicated SQL browser fixture.
 
-Requirements: 320/390/768/1024/1440 × Light/Dark/System; long/empty/malicious-looking literal text, invalid/dirty/cancel/conflict/unknown/offline/auth/held read; public warm navigation and hydration counts; root head updates and both shells; no hidden polling.
+Requirements: 320/390/768/1024/1440 × Light/Dark/System; long/empty/malicious-looking literal text, invalid/dirty/cancel/conflict/unknown/offline/auth/held read; browser fresh navigation/hydration counts and repeated new SSR page/reload API-call counts; approved1-hour expiry/remaining deadline across browser/web/API; root head updates and both shells; no hidden polling.
 
 ### Acceptance criteria
 
@@ -482,13 +486,13 @@ Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement
 
 ### Blocker atau tindak lanjut
 
-Menunggu detailed plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
+Cache architecture sudah disetujui pengguna9Oct; menunggu detailed field/UI plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
 
 ## Task: SSET-012 — Canonical docs and implementation closure
 
 - Status: Backlog
 - Owner: Codex/pengembang
-- Prioritas: 12
+- Prioritas: 13
 - Referensi: SSET-US-01/02/03, PRD-02, GR-01/02/05/07/08; [implementation step](../plans/site-settings/implementation-plan.md#sset-012--canonical-docs-and-implementation-closure).
 - Diperbarui: 2026-10-09
 - Dependensi: SSET-011
@@ -524,4 +528,46 @@ Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement
 
 ### Blocker atau tindak lanjut
 
-Menunggu detailed plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
+Cache architecture sudah disetujui pengguna9Oct; menunggu detailed field/UI plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
+
+## Task: SSET-013 — Server web snapshot cache and committed Save bridge
+
+- Status: Backlog
+- Owner: Codex/pengembang
+- Prioritas: 6 (sesudah005, sebelum006; ID existing dipertahankan)
+- Referensi: SSET-US-02/03, PRD-02, GR-02/05/07/08; [implementation step](../plans/site-settings/implementation-plan.md#sset-013--server-web-snapshot-cache-and-committed-save-bridge).
+- Diperbarui: 2026-10-09
+- Dependensi: SSET-005
+- Ukuran: Satu outcome server snapshot/Save bridge; commit terpisah setelah gates.
+
+### Ruang lingkup
+
+warm SSR/public GET serves settings without an API call; confirmed gateway Save updates the shared public snapshot before responding.
+
+Files/symbols: settings public model/client, server-cache.server.ts and reader.server.ts, gateway DI/exact settings read/write branches, site-settings-server-cache tests and gateway tests; public DTO/committed-response projection validators, transport, server-only cache factory/default instance, shared fill, prime and fence. Prepare transport/validators here before006 consumes them; do not depend on the later admin client008.
+
+Requirements: approved1-hour upstream deadline without TTL stacking, one public DTO slot per canonical API origin/version,100 concurrent reads one API GET, independent bounded fill signal,5-second cooldown, per-waiter abort, monotonic generation/version, validated bounded Save/fresh-reconciliation projection, uncertain-result expiry and strict no-store GET shortcut. No request/session/private DTO/QueryClient sharing; no other gateway route changes.
+
+### Acceptance criteria
+
+- [ ] same-process cold100→one API GET, warm reads→zero; Save primes with zero refill GET, latest version wins, no successful cache of defaults/errors, unauthorized writes never prime, unrelated request state/gateway semantics preserved. Multi-instance/direct-API limits recorded honestly.
+- [ ] Validasi task dan relevant gates lulus; changes hanya milik task dan local commit melalui normal hooks.
+
+### Validasi
+
+fake clock/deferred upstream tests for SSR/gateway shared identity,100 cold reads, repeated warm SSR and GET with zero extra API reads, API-warm/web-cold, expiry/refill, per-waiter cancel, origin switch, error/cooldown, Save versus slow fill/out-of-order completions and fresh reconciliation. Gateway unauthorized/bad-query/method/suffix/oversize/invalid DTO cases; root gates.
+
+### Hasil dan bukti
+
+Belum diimplementasikan atau diverifikasi. Pengguna menyetujui cache architecture dan meminta plan update9Oct. Count targets dan commands adalah acceptance requirements, bukan observed proof.
+
+### Commit task
+
+- Pesan: feat(web): cache public settings snapshot (SSET-013)
+- SHA: belum dibuat; receipt setelah successful commit.
+- Hook/checks: belum dijalankan untuk task ini.
+- Ledger: actual prior SHA/evidence pada update task/plan berikutnya.
+
+### Blocker atau tindak lanjut
+
+Menunggu dependent005, freshness dan implementasi yang diotorisasi. Multi-instance/direct-API propagation merupakan rollout prerequisite untuk fleet-wide immediate consistency.

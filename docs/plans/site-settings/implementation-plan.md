@@ -2,21 +2,21 @@
 
 ## Plan metadata
 
-- Status: draft for detailed plan review; evidence/impact/DAG complete, implementation not started.
-- Date: 2026-10-09; decision owner: pengguna. Four-text-field direction and frontend/backend cache requirement accepted in conversation; detailed values and recovery rules below are proposals.
+- Status: draft for detailed plan review; cache architecture revision approved, implementation not started.
+- Date: 2026-10-09; decision owner: pengguna. Four-text-field direction accepted; user explicitly approved three cache layers, initial TTL1 hour and Save-triggered cache updates, then requested plan revision only. Detailed field/default/recovery/UI proposals remain for review; cache approval need not be requested again.
 - Repository: `bayuaji17/vertical-movie-app`; base ref: `main`.
 - Base SHA and last validated SHA: `36f185e275bc90fa609cf071405848ff021c3223`.
 - Context: [repository-context.md](repository-context.md), saved before this plan.
-- Backlog: [site-settings](../../tasks/site-settings.md), SSET-001–012.
+- Backlog: [site-settings](../../tasks/site-settings.md), SSET-001–013. Existing IDs retained; SSET-013 is the added web-server cache task and runs after005, before006.
 - Planning branch: `chore/site-settings-plan`; proposed implementation branch: `feat/site-settings` after approval and freshness check.
 
 ## Objective
 
-Admin edits site identity once; public headers, footers and metadata use the saved values. Cache hits avoid settings SELECTs, concurrent misses share one read, and confirmed saves update the writer process/browser without a stale response restoring older values.
+Admin edits site identity once; public headers, footers and metadata use saved values. Warm browser navigation avoids a settings request, warm web SSR avoids a settings API request, and warm API reads avoid a settings SELECT. Initial cold reads are coalesced; confirmed saves update the writer API/web process and browser without an older response restoring prior values.
 
 ## Goals and non-goals
 
-Include four plain-text fields, singleton persistence/versioning, private read/save, public projection, API memory cache, SSR/browser Query cache, responsive admin form with preview, conflict/unknown-outcome/auth recovery, and actual migration/query-count/browser proofs.
+Include four plain-text fields, singleton persistence/versioning, private read/save, public projection, API memory cache, public snapshot cache in the server web process, SSR/browser Query cache, responsive admin form with preview, conflict/unknown-outcome/auth recovery, and actual migration/API-call/query-count/browser proofs. Settings freshness starts at1 hour and is preserved as remaining time across hops.
 
 Logo/favicon upload, visual theme/token editing, infrastructure credentials, analytics, genres, playback configuration, Redis/distributed cache, realtime visitor broadcasts, SEO indexing-policy changes, production migrations and deployment remain separate scope. No storage/worker/player changes or additional package/environment variables are expected.
 
@@ -58,13 +58,15 @@ Proposed exact routes (Eden types inferred from chained module):
 
 Public response: `{ item: { siteName, tagline, description, footerText }, version, freshForMs }`. `version` is nonsecret cache-coherence metadata. Private response: `{ item: { four fields, rowVersion, updatedAt }, freshForMs }`; no raw SQL/server/session objects. Save returns the authoritative committed snapshot and remaining freshness. Public success200/errors422/503; private200/401/403/409/422/503 as applicable, safe error DTO and documented response schemas. All settings HTTP responses use no-store so browser/CDN caching cannot stack a separate TTL over application cache. API and web memory/query caches still work.
 
+`freshForMs` is0–3,600,000 for settings only; catalog retains its existing contract. The browser GET gateway and root SSR reader use the same server-web snapshot cache; cache hits do not forward to API. Private reads/saves still forward through authorization, and private fresh reads are never answered from the public snapshot.
+
 Separate public scope from admin macro. Exact gateway paths/methods only; arbitrary suffixes/encoded paths rejected. Public forwarding strips Cookie/Authorization; private PATCH preserves existing same-origin guard. `fresh=1` is private only and normalizes no other truthy values. It bypasses a warm snapshot and uses a separate fresh-read flight at the current generation; it cannot join an old pre-save fill. Public API cannot force database reads via query options.
 
 ### Backend cache algorithm
 
 One settings service/cache per API process, injected from bootstrap with existing repository/pool and test clock. Keep one validated immutable snapshot, expiry, generation, at most one in-flight normal read and one in-flight fresh read per generation. Different HTTP consumers project DTOs from the same snapshot; private authorization is never cached here.
 
-1. Valid normal cache hit returns snapshot and remaining TTL without settings SELECT. TTL initial60,000ms; anchor read freshness at read start conservatively so query duration does not extend the window.
+1. Valid normal cache hit returns snapshot and remaining TTL without settings SELECT. Initial TTL is3,600,000ms (1 hour), approved by user9Oct. Anchor read freshness at read start conservatively so query duration does not extend the window.
 2. A cold/expired normal read joins the current generation's single-flight Promise. Target:100 simultaneous successful public reads → one settings SELECT; warm repeats → zero additional SELECTs.
 3. Clear settled flights in finally, including rejected reads. One request's cancellation does not abort a shared read needed by other waiters. No timers, locks or state grow with request count.
 4. Successful Save primes from returned committed row, advances generation, clears failure cooldown and detaches old flights. Cache replacement is monotonic by rowVersion, including writes completing out of order. Mutation completion does not require a second SELECT just to refill cache.
@@ -74,14 +76,29 @@ One settings service/cache per API process, injected from bootstrap with existin
 
 Existing catalog cache remains unchanged; settings cache is module-specific rather than a repo-wide cache framework. Private cached reads still run authoritative native auth each request. Database-read savings are measured for settings reads, not a promise that auth/other endpoints never access the DB.
 
+### Server web snapshot cache and gateway coherence
+
+Add a server-only factory and one default public snapshot instance per web process, shared by root SSR reads and exact `GET /api/site-settings`. Cache only the validated four public fields, version and freshness, never request/session/header/private DTO data or a QueryClient. Bound namespace to the configured canonical internal API origin plus DTO version; switching origin fences/replaces the slot instead of growing an unbounded map. Unit tests inject isolated cache instances and clocks into readers/gateway.
+
+- A warm snapshot serves each SSR request or public GET without a settings API call. An empty/expired cache has one shared fill:100 concurrent SSR/public reads within the same process → one API GET. API independently coalesces its own DB read. Recompute remaining `freshForMs` for every returned response.
+- Web expiry is at most the upstream remaining deadline after deducting fill transport time, never a new hour from the time web received the snapshot. Preserve that deadline into request-scoped Query data and browser hydration. Example: upstream has10 minutes remaining → web and browser have at most10 minutes, not another hour each.
+- The shared fill uses a cache-owned bounded10-second upstream signal and no cookies/authorization/redirects. Request abort cancels only that waiter. Clear settled flights and use the existing5-second outage cooldown pattern; never cache errors/defaults as successful settings. Track generation/version so a detached old fill cannot replace a new Save result.
+- Exact public GET validation/method/origin configuration checks happen before the cache shortcut: reject query fields/encoded/suffix routes, accept only GET, return the documented no-store DTO. This branch changes only settings and must not weaken the existing gateway allowlist or other routes.
+- After an exact private PATCH receives an API200, validate its already bounded response buffer and project only public fields/version/freshness. Before returning confirmed success, advance/fence the web cache and prime it from committed values using the remaining deadline. A lower-version completion never replaces a newer snapshot. No extra settings API refill or database read is needed.
+- Unauthorized/invalid/conflicting writes never prime attempted data. An uncertain forwarded-write result expires/fences the web snapshot without claiming success. Successful authorized `GET /admin/settings?fresh=1` reconciliation may prime the same public projection; ordinary cached admin reads do not bypass the public cache generation rules.
+- Cache-refresh failure after a committed write must not report the write as rolled back: clear the web snapshot and preserve the API response/observed outcome. Browser still validates the response before showing success. Public fallback is presentation-only, and a later cold read can refill.
+- Same-process immediate Save coherence requires the save to pass through that web gateway. Direct API writes or writes through another web/API instance may leave this slot stale for its remaining TTL. Fleet-wide immediate updates require invalidation propagation (for example a shared cache/event channel) as a rollout prerequisite; no new Redis dependency or secret is added in this scope.
+
+Request HTML still reaches the SSR web server. Warm-cache acceptance counts settings API calls and settings SELECTs separately, not a claim of zero web requests or zero unrelated catalog/auth requests.
+
 ### Frontend and SSR cache
 
-- Public query key `['site-settings', 'public', 1]`, one per router/browser, `gcTime`5 minutes, no periodic polling, retry disabled; deduplicate mounted consumers. Fetch stale on route entry/mount, focus and reconnect when online. Navigation while fresh reuses data.
-- API exposes remaining `freshForMs` in0–60,000. Transport computes a conservative receipt deadline, deducting elapsed request time; Query staleTime never renews another60 seconds. SSR serialization preserves the existing deadline, hydration does not restart it, including slow render/transfer. A deadline already elapsed may legitimately cause a new read on hydration.
-- Root loader bootstraps only public settings with its request-scoped QueryClient, preserving route-specific loaders/status. No process-global web QueryClient, admin settings read or private DTO dehydration. Failed bootstrap uses presentation defaults at render time, not a cached/dehydrated successful database result; existing content/auth routes remain available. No automatic retry loop caused by fallback mounting.
+- Public query key `['site-settings', 'public', 1]`, one per router/browser, `gcTime`1 hour, no periodic polling, retry disabled; deduplicate mounted consumers. Retention does not renew freshness. Fetch stale on route entry/mount, focus and reconnect when online. Navigation while fresh reuses data.
+- API/web expose remaining `freshForMs` in0–3,600,000. Transport computes a conservative receipt deadline, deducting elapsed request time; Query staleTime never renews another hour. SSR serialization preserves the existing deadline, hydration does not restart it, including slow render/transfer. A deadline already elapsed may legitimately cause a new read on hydration.
+- Root loader bootstraps only public settings from the shared server-web snapshot into its request-scoped QueryClient, preserving route-specific loaders/status. A process-global public snapshot is allowed; a process-global QueryClient, admin settings read or private DTO dehydration is not. Failed bootstrap uses presentation defaults at render time, not a cached/dehydrated successful database result; existing content/auth routes remain available. No automatic retry loop caused by fallback mounting.
 - Separate model/client/query/isomorphic reader/server-only reader and root `use-site-settings` hook. Shared presentation helper handles defaults, metadata title/description and plain-text rendering. The root fallback title ceases to expose starter branding. Route head values must update on client navigation and confirmed Save; verify installed router/query APIs in source rather than assuming static head data updates automatically.
 - Public render may retain last good data during offline/refetch failure. Admin shows stale/error state and retains draft. No guarantee of immediate updates for another visitor's open idle tab; it sees settings on its next stale-triggered refetch. Same writer QueryClient updates immediately after confirmed save.
-- Admin key `['admin', identity, 'settings']`, browser-only Query, no-store transport, retry:false, no polling and remaining freshness. Register abort/editor cleanup in existing private effects; remove query/mutation/draft on logout/role loss, fence late responses.
+- Admin key `['admin', identity, 'settings']`, browser-only Query, no-store transport, retry:false, gcTime1 hour, no polling and remaining freshness. This private query never reuses the shared public snapshot for authorization or fresh recovery. Register abort/editor cleanup in existing private effects; remove query/mutation/draft on logout/role loss, fence late responses.
 - On confirmed Save: cancel public and identity-scoped settings reads, advance local response epoch, then set private committed snapshot and its public projection from the Save response; enforce monotonic version. Update route metadata/loaders without clearing/refetching catalog/playback caches. Dirty editor inputs are never reset by background refetch.
 - On409 preserve input and offer **Reload saved values** with discard confirmation, using fresh private GET. On network/503/abort with uncertain Save, show **Check saved values** and compare authoritative fields/version against attempted values; report observed stored state without claiming which request caused it. No automatic mutation replay or optimistic public branding.
 
@@ -93,11 +110,20 @@ States: loading, saved/default values, dirty, saving, invalid, conflict, outcome
 
 ## Impact analysis
 
-New schema/module and exact proxy admission; public root dataflow/head is the largest compatibility surface. Keep public settings separate from content filtering/caches and admin session/cache. Legacy public shells remain functional and share settings values. An admin write triggers settings invalidation only. No auth config, playback TTL/cache, worker/storage or route-tree hand edits.
+New schema/module and exact proxy admission; shared server snapshot, gateway committed-write handling and public root dataflow/head are the largest compatibility surfaces. Share only the public DTO between SSR requests, preserve per-request QueryClient and individual response status/headers, and isolate test caches. Keep settings separate from content/auth caches. Legacy shells share settings values; writes update settings caches only. No auth config, playback TTL/cache, worker/storage or route-tree hand edits.
 
 ## Affected files and symbols
 
 Paths below are targets, not source already created. Evidence references the [context index](repository-context.md#evidence-index) at the pinned SHA.
+
+Additional targets for the approved9Oct server-web cache revision:
+
+| Path                                               | Action | Symbols                                               | Reason / evidence                                                                         |
+| -------------------------------------------------- | ------ | ----------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `apps/web/src/lib/settings/server-cache.server.ts` | create | Server-only public cache factory and process instance | Shared SSR/GET snapshot; existing reader currently fetches API per request                |
+| `apps/web/test/site-settings-server-cache.test.ts` | create | Shared-fill/TTL/Save bridge tests                     | Inject clock/upstream and isolated instances; current gateway has bounded response buffer |
+
+The existing `reader.server.ts` target consumes this cache; the existing gateway target gets injected cache access and exact GET/PATCH/fresh-reconciliation branches. No process-global QueryClient is introduced.
 
 | Path                                                                                                                   | Action | Symbols                                             | Reason / evidence                                              |
 | ---------------------------------------------------------------------------------------------------------------------- | ------ | --------------------------------------------------- | -------------------------------------------------------------- |
@@ -129,13 +155,16 @@ Paths below are targets, not source already created. Evidence references the [co
 
 ## Implementation DAG
 
+SSET-013 is added without renumbering001–012. It owns the new server-web cache and Save bridge; runtime order is005 →013 →006.
+
 ```mermaid
 flowchart TD
   S001[SSET-001 Plan] --> S002[SSET-002 Schema]
   S002 --> S003[SSET-003 Domain save]
   S003 --> S004[SSET-004 Backend cache]
   S004 --> S005[SSET-005 HTTP and gateway]
-  S005 --> S006[SSET-006 Public SSR cache]
+  S005 --> S013[SSET-013 Server web cache and Save bridge]
+  S013 --> S006[SSET-006 Public SSR cache]
   S006 --> S007[SSET-007 Public presentation]
   S005 --> S008[SSET-008 Admin query and recovery]
   S006 --> S008
@@ -157,7 +186,7 @@ Independent dependency edges do not imply subagent delegation; work remains sequ
 - Outcome: context saved before complete plan/backlog with preservation and freshness evidence.
 - Depends on: none.
 - Files/symbols: context, this plan, module backlog and owned docs index links.
-- Requirements: pinned SHA, four fields/cache contracts, constraints, matching dependency graph and observable AC; detailed plan remains draft pending review.
+- Requirements: pinned SHA, four fields/cache contracts, constraints, matching dependency graph and observable AC; detailed field/UI review remains pending while three-layer/TTL1-hour cache revision is already user-approved. Preserve original planning proof and actual prior commit receipt when revising.
 - Validation: scoped Prettier, docs:check, diff/staged-tree checks, unrelated preservation and normal commit hooks.
 - Acceptance criteria: links valid; each requirement covered below; only owned docs in local task commit.
 
@@ -184,7 +213,7 @@ Independent dependency edges do not imply subagent delegation; work remains sequ
 - Outcome: public/cached admin settings reads avoid repeated SELECTs and stale fills.
 - Depends on: SSET-003.
 - Files/symbols: settings cache/service/cache tests; snapshot, generation, flights, cooldown and prime.
-- Requirements: TTL60 remaining freshness, warm/cold coalescing, separate authorized fresh flight, no per-consumer abort of shared work, monotonic save prime, uncertain-commit expiry and5-second failure cooldown.
+- Requirements: approved TTL1 hour, remaining freshness, warm/cold coalescing, separate authorized fresh flight, no per-consumer abort of shared work, monotonic save prime, uncertain-commit expiry and5-second failure cooldown.
 - Validation: fake clock/deferred read tests including100 parallel reads, expiry boundary, rejected flight cleanup, late pre-save fill, out-of-order successful commits, missing row/outage/cooldown and detached aborted waiter; root gates.
 - Acceptance criteria: normal cold100 calls one SELECT; warm calls zero extra; Save refill zero extra SELECT; old data cannot replace new cache; bounded state and no success-cached errors.
 
@@ -197,12 +226,21 @@ Independent dependency edges do not imply subagent delegation; work remains sequ
 - Validation: app.handle200/401/403/409/422/503; dependency call counts, auth failure isolation, malformed repository response, gateway405/encoded/suffix/origin/header cases; Eden good/bad compile proof; root gates.
 - Acceptance criteria: anonymous GET works even when auth dependency fails; unauthorized writes never reach repository; guarded routes remain guarded; browser path does not404.
 
+### SSET-013 — Server web snapshot cache and committed Save bridge
+
+- Outcome: warm SSR/public GET serves settings without an API call; confirmed gateway Save updates the shared public snapshot before responding.
+- Depends on: SSET-005.
+- Files/symbols: settings public model/client, server-cache.server.ts and reader.server.ts, gateway DI/exact settings read/write branches, site-settings-server-cache tests and gateway tests; public DTO/committed-response projection validators, transport, server-only cache factory/default instance, shared fill, prime and fence. Prepare transport/validators here before006 consumes them; do not depend on the later admin client008.
+- Requirements: approved1-hour upstream deadline without TTL stacking, one public DTO slot per canonical API origin/version,100 concurrent reads one API GET, independent bounded fill signal,5-second cooldown, per-waiter abort, monotonic generation/version, validated bounded Save/fresh-reconciliation projection, uncertain-result expiry and strict no-store GET shortcut. No request/session/private DTO/QueryClient sharing; no other gateway route changes.
+- Validation: fake clock/deferred upstream tests for SSR/gateway shared identity,100 cold reads, repeated warm SSR and GET with zero extra API reads, API-warm/web-cold, expiry/refill, per-waiter cancel, origin switch, error/cooldown, Save versus slow fill/out-of-order completions and fresh reconciliation. Gateway unauthorized/bad-query/method/suffix/oversize/invalid DTO cases; root gates.
+- Acceptance criteria: same-process cold100→one API GET, warm reads→zero; Save primes with zero refill GET, latest version wins, no successful cache of defaults/errors, unauthorized writes never prime, unrelated request state/gateway semantics preserved. Multi-instance/direct-API limits recorded honestly.
+
 ### SSET-006 — Public Query, SSR and freshness ownership
 
 - Outcome: one public settings query per router, no duplicate fresh hydration read or TTL stacking.
-- Depends on: SSET-005.
-- Files/symbols: public settings model/client/queries/readers, use-site-settings, root loader/head.
-- Requirements: strict DTO, request-scoped SSR, unsigned-only hydration, remaining deadline with transport/render time, version/epoch fence, gc5min/no polling, route/focus/reconnect stale reads, last-good offline and uncached defaults on failure.
+- Depends on: SSET-013.
+- Files/symbols: public settings queries/isomorphic reader, use-site-settings, root loader/head; reuse public model/client/server-only reader and shared snapshot created in013.
+- Requirements: strict DTO and freshness0–3,600,000, request-scoped QueryClient SSR, unsigned-only hydration, shared1-hour deadline with transport/render time, version/epoch fence, gc1hour/no polling, route/focus/reconnect stale reads, last-good offline and uncached defaults on failure.
 - Validation: native client/QueryClient tests for10-second remaining TTL, slow SSR hydration, shared observers, failed bootstrap, offline, old response after local update, cancellation and schema rejection; root gates and SSR/import smoke.
 - Acceptance criteria: fresh navigation/hydration adds zero duplicate fetch; root does not break content/auth status; no private DTO serialized or fallback marked fresh success.
 
@@ -220,7 +258,7 @@ Independent dependency edges do not imply subagent delegation; work remains sequ
 - Outcome: private read/save state updates only settings keys and survives conflicts/unknown results safely.
 - Depends on: SSET-005, SSET-006.
 - Files/symbols: admin settings client/queries/editor-scope, use-settings-editor, private effect integration/tests.
-- Requirements: identity scope, no private SSR, signal/late response/version fencing, retry:false, dedup save; cancel reads then update private/public snapshots on confirmed Save; dirty drafts unaffected by refetch; private fresh1 reconciliation; session-loss cleanup.
+- Requirements: identity scope, no private SSR, signal/late response/version fencing, retry:false/gc1hour, dedup save; confirmed gateway Save primes API and server-web before browser cancels reads and updates private/public snapshots; dirty drafts unaffected by refetch; private fresh1 reconciliation updates web public projection; session-loss cleanup. Failed/unknown writes never prime attempted values.
 - Validation: QueryClient/deferred transport tests for cache hit,409/503/abort/no automatic replay, Save versus late GET, higher version versus older Save, logout/role loss, exact key isolation and observed-state comparison; root gates.
 - Acceptance criteria: Save success shows returned values without extra refill GET; failed/unknown Save never primes attempted branding; auth loss removes private draft/mutation data.
 
@@ -247,7 +285,7 @@ Independent dependency edges do not imply subagent delegation; work remains sequ
 - Outcome: real settings save is reflected in public SSR/client UI without extra database hits or stale restoration.
 - Depends on: SSET-007, SSET-009, SSET-010.
 - Files/symbols: settings browser worker, harness phase and dedicated SQL browser fixture.
-- Requirements: 320/390/768/1024/1440 × Light/Dark/System; long/empty/malicious-looking literal text, invalid/dirty/cancel/conflict/unknown/offline/auth/held read; public warm navigation and hydration counts; root head updates and both shells; no hidden polling.
+- Requirements: 320/390/768/1024/1440 × Light/Dark/System; long/empty/malicious-looking literal text, invalid/dirty/cancel/conflict/unknown/offline/auth/held read; browser fresh navigation/hydration counts and repeated new SSR page/reload API-call counts; approved1-hour expiry/remaining deadline across browser/web/API; root head updates and both shells; no hidden polling.
 - Validation: actual dev/built browser proof with separate native-cookie evidence where browser session is injected; SQL logger request counts, API/web units, existing dashboard/public catalog/detail/watch/auth regressions, root build/types/lint/docs; no destructive development fixtures.
 - Acceptance criteria: 15 layout/theme combinations pass; confirmed Save changes public values/title; old response cannot restore earlier version; settings failure does not block catalog/login/watch or alter401/403/404/503 behavior.
 
@@ -263,6 +301,19 @@ Independent dependency edges do not imply subagent delegation; work remains sequ
 ## Test requirements
 
 Use API native bun:test beside modules, app.handle without port, fake clocks/deferred repository for cache behavior. Web native tests cover real QueryClient/editor transport state, not copied implementations. Real SQL/cookies/migration tests are in the isolated integration suite and browser proofs inspect built runtime.
+
+Added cache-call acceptance for013/006/010/011:
+
+| Scenario in one web/API process                        | Expected settings work                                                                      |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
+| Browser Query is fresh after SSR hydration/navigation  | Zero additional settings HTTP request                                                       |
+| New SSR requests/public GETs with warm web snapshot    | Zero settings API requests, zero settings SELECTs                                           |
+| 100 concurrent web-cold reads with API cache also cold | One coalesced API GET, one coalesced settings SELECT                                        |
+| Web-cold reads with API snapshot still fresh           | One coalesced API GET, zero settings SELECTs                                                |
+| Expiry at original1-hour deadline                      | One shared refill; remaining freshness not renewed at each hop                              |
+| Confirmed gateway Save then public reload              | One conditional write; zero settings refill GET/SELECT; reload reads newly primed web cache |
+
+Count settings separately from HTML/catalog/auth requests. Force expired clocks deterministically, test API remaining10 minutes and10 seconds, and prove per-request cancellation/header isolation while sharing only public snapshots. Held pre-Save reads/out-of-order successful saves must not restore an older version in any layer. Test both reader and gateway using the same cache factory instance, not two isolated fake caches that hide double API reads.
 
 | Risk / requirement                                  | Tasks and proof                                                                                     |
 | --------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
@@ -287,7 +338,8 @@ Follow root AGENTS, API guide and workflow. Use Bun pool/Drizzle, chained Elysia
 - [ ] AC-02: Admin guard protects reads/save; public DTO is whitelisted and anonymous with no auth dependency.
 - [ ] AC-03:100 simultaneous public misses execute one settings SELECT; warm hits execute none; expiry causes one shared refill.
 - [ ] AC-04: Confirmed Save primes returned committed data without refill SELECT; failed/late/older results cannot overwrite cache.
-- [ ] AC-05: Remaining TTL is honored across SSR/browser without renewal; fresh hydration/navigation share cached query.
+- [ ] AC-05: Approved1-hour freshness is preserved across API/web/browser without renewal; fresh hydration/navigation share cached Query data.
+- [ ] AC-10: Warm SSR/public GET adds zero settings API calls;100 concurrent web-cold reads share one API call; confirmed gateway Save/fresh reconciliation primes public web cache without a refill call.
 - [ ] AC-06: Public shells/tagline/footer/head use saved text, escape input and preserve content/robots/status behavior.
 - [ ] AC-07: Admin supports validation/save/cancel/dirty/conflict/unknown/offline/auth loss with safe fresh-read recovery.
 - [ ] AC-08: Actual SQL/native-cookie and15-layout built-browser evidence plus relevant regressions/root gates pass.
@@ -295,7 +347,8 @@ Follow root AGENTS, API guide and workflow. Use Bun pool/Drizzle, chained Elysia
 
 ## Risks and mitigations
 
-- Multiple API instances have independent caches: other instances converge on next TTL-expired read; require shared invalidation or a different topology before promising immediate fleet consistency. No Redis requirement inferred now.
+- Multiple API/web instances and direct API writes have independent cache paths: updates propagate immediately only in the writer API/web process reached through its gateway. Other processes converge within remaining1-hour freshness on refetch; direct API writes do not automatically prime web. Shared invalidation or enforced topology is required before promising immediate fleet consistency. No Redis dependency is added now.
+- A shared web fill must not retain request headers/cookies or bind to one page's abort signal; share only validated public DTO, own timeout and clock, with isolated per-request QueryClient and response state. Tests verify actual SSR/gateway cache instance identity and origin namespace.
 - A long-lived idle browser can retain an old display until refetch. State that limitation; no polling/broadcast SLA silently introduced.
 - Root SSR is shared by login/admin/public pages: isolate unsigned settings, fail softly with presentation defaults and preserve child HTTP status. Inspect installed framework and actual hydration/head behavior.
 - Request/result races: independent cache generation and monotonic rowVersion at backend/frontend; private fresh read for observed-state reconciliation, no mutation replay.
@@ -304,7 +357,7 @@ Follow root AGENTS, API guide and workflow. Use Bun pool/Drizzle, chained Elysia
 
 ## Rollback or recovery
 
-Before release, preserve development data and verify additive migration. If app code must be reverted, retain the additive table/data and revert feature wiring/UI rather than dropping saved settings or other tables. Missing/broken dependency yields503 plus uncached presentation fallback publicly; admin displays error and preserves input. Restart warms cache from persisted row. Production rollout, backups/restore and multi-instance policy require separate authorization and proof.
+Before release, preserve development data and verify additive migration. If app code must be reverted, retain the additive table/data and revert feature wiring/UI rather than dropping saved settings or other tables. Missing/broken dependency yields503 plus uncached presentation fallback publicly; admin displays error and preserves input. Restarted web warms from API, restarted API warms from the persisted row; expire slots on ambiguous Save and reconcile with private fresh read. Production rollout, backups/restore and multi-instance invalidation policy require separate authorization and proof.
 
 ## Evidence
 
@@ -312,9 +365,20 @@ Evidence index in [context](repository-context.md#evidence-index) maps every bou
 
 ## Open decisions
 
-Detailed plan review covers field lengths/defaults/empty behavior, shared public footer, private fresh-read recovery, cache TTL60/cooldown5/Query gc5min and no idle-tab realtime guarantee. No credential, deployment or media provider decision is needed to implement text settings locally. User requesting this plan does not authorize runtime changes; implementation begins after explicit plan approval.
+Approved by user9Oct: browser/server-web/API cache layers, initial1-hour settings freshness, shared deadline and confirmed Save cache update. That decision supersedes the original60-second settings proposal; observed catalog TTL remains unchanged. This turn authorizes documentation revision only, not runtime implementation.
+
+Detailed field lengths/defaults/empty behavior, shared footer and private fresh-read recovery remain proposed. Technical choices refine the approved architecture: Query retention1 hour, cache-owned fill timeout10 seconds and read-failure cooldown5 seconds; these do not renew snapshot freshness. No immediate cross-instance or idle-visitor-tab SLA is claimed. Deployment topology/invalidation propagation remains a rollout decision; no credential or media-provider change is required.
 
 ## Validation history
+
+### 2026-10-09T01:29:17Z — Approved cache revision freshness
+
+- Result: valid runtime context; user-approved cache revision documented, implementation not started.
+- Plan base/current main and origin/main: `36f185e275bc90fa609cf071405848ff021c3223`.
+- Planning pre-write HEAD: `2617bd7c35008cd513aa1a238a7e6d26675dbc04`, original SSET-001 local commit; normal docs/lint/types and Commitlint passed for that commit.
+- Checked paths: internal public reader/per-request signal, shared QueryClient ownership, gateway response buffer/private/public boundaries, existing catalog TTL, plan/backlog/index and unrelated worktree baseline.
+- Changed relevant runtime paths: none; planning HEAD differs from main only in owned Markdown.
+- Decision: retain source snapshot and task IDs; add SSET-013 and revise settings freshness to1 hour plus server-web cache/Save bridge/API-call acceptance. Preserve initial60-second proposal as superseded history rather than active requirements.
 
 ### 2026-10-09T00:55:35Z
 
@@ -329,3 +393,7 @@ Detailed plan review covers field lengths/defaults/empty behavior, shared public
 - 2026-10-09: requested plan, read index/specs/guides/source/manifests and pinned main36f185e; context saved first. Created local planning branch `chore/site-settings-plan`. Wrote context/plan/backlog and owned index links only. No runtime/schema/env/dependency changes, database migration, push/PR/merge or deployment in this planning task. Formatting/docs/preservation/commit results are recorded after they actually run.
 
 - 2026-10-09 SSET-001 validation: scoped Prettier, docs97 Markdown/950 local links, staged-tree90/931, working/cached diff checks and plan12/backlog12/DAG/affected-actions audit passed. Original22 non-index paths byte-identical; working README reconstructs exactly after removing owned links. Main/origin remain36f185e. Only four owned Markdown files staged; normal hooks required for local task commit. Receipt SHA belongs in the next documentation update after successful commit; detailed plan remains draft pending approval.
+
+- 2026-10-09 original receipt and revision: original SSET-001 committed as `2617bd7c35008cd513aa1a238a7e6d26675dbc04` via normal hooks. User now explicitly approved browser/server-web/API cache layers, TTL1 hour, one remaining deadline and Save-triggered update, requesting plan update only. Context rechecked and updated before this plan; added dedicated SSET-013, adjusted006 dependency, synchronized backlog/index and per-layer request-count acceptance. No runtime/schema/env/dependency changes, migration or remote delivery. Revision validation/commit results are recorded after actual checks; its own SHA is not self-referential.
+
+- 2026-10-09 revision validation: scoped Prettier, `bun run docs:check`97 Markdown/951 links, staged-tree90/932 and working/cached diff checks passed. Plan13/backlog13/DAG/action/TTL contract audit passed, including matching file/requirement dependencies and no cycles. Original22 non-index paths byte-identical; README outside owned settings links reconstructs exactly. Four owned Markdown paths staged, normal docs/lint/types/Commitlint hooks required without bypass. No cache/API-call/SQL/browser runtime proof claimed by these documentation checks.
