@@ -21,6 +21,8 @@ const targetPaths: Record<GatewayTarget, (pathname: string) => boolean> = {
       pathname,
     ) ||
       pathname === '/api/admin/dashboard/summary' ||
+      pathname === '/api/site-settings' ||
+      pathname === '/api/admin/settings' ||
       publicCatalogPath.test(pathname) ||
       publicContentPath.test(pathname)) &&
     !/%|\\/.test(pathname),
@@ -221,6 +223,7 @@ export function createAuthGateway(
     if (
       target === 'business' &&
       (incomingUrl.pathname === '/api/admin/dashboard/summary' ||
+        incomingUrl.pathname === '/api/site-settings' ||
         publicCatalogPath.test(incomingUrl.pathname) ||
         publicContentPath.test(incomingUrl.pathname)) &&
       request.method !== 'GET'
@@ -231,6 +234,16 @@ export function createAuthGateway(
         'This operation is unavailable.',
       )
 
+    if (
+      target === 'business' &&
+      incomingUrl.pathname === '/api/admin/settings' &&
+      !['GET', 'PATCH'].includes(request.method)
+    )
+      return errorResponse(
+        405,
+        'METHOD_NOT_ALLOWED',
+        'This operation is unavailable.',
+      )
     if (
       target === 'auth' &&
       isDisabledAuthPath(

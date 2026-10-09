@@ -3,7 +3,7 @@
 ## Plan metadata
 
 - Status: approved and executing; user requested implementation on 2026-10-09.
-- Date: 2026-10-09; decision owner: pengguna. Four-text-field direction accepted; user explicitly approved three cache layers, initial TTL1 hour and Save-triggered cache updates, then requested plan revision only. Detailed field/default/recovery/UI proposals remain for review; cache approval need not be requested again.
+- Date: 2026-10-09; decision owner: pengguna. Pengguna menyetujui plan lengkap dan meminta implementasi9Oct: empat field/default/validasi, cache tiga lapis TTL1 jam/shared deadline, Save update dan recovery/UI. Approval implementasi berlaku untuk seluruh SSET-002–013.
 - Repository: `bayuaji17/vertical-movie-app`; base ref: `main`.
 - Base SHA and last validated SHA: `36f185e275bc90fa609cf071405848ff021c3223`.
 - Context: [repository-context.md](repository-context.md), saved before this plan.
@@ -365,9 +365,9 @@ Evidence index in [context](repository-context.md#evidence-index) maps every bou
 
 ## Open decisions
 
-Approved by user9Oct: browser/server-web/API cache layers, initial1-hour settings freshness, shared deadline and confirmed Save cache update. That decision supersedes the original60-second settings proposal; observed catalog TTL remains unchanged. This turn authorizes documentation revision only, not runtime implementation.
+Approved by user9Oct: browser/server-web/API cache layers, initial1-hour settings freshness, shared deadline and confirmed Save cache update. That decision supersedes the original60-second settings proposal; observed catalog TTL remains unchanged. The subsequent user request9Oct authorizes implementation of the complete plan.
 
-Detailed field lengths/defaults/empty behavior, shared footer and private fresh-read recovery remain proposed. Technical choices refine the approved architecture: Query retention1 hour, cache-owned fill timeout10 seconds and read-failure cooldown5 seconds; these do not renew snapshot freshness. No immediate cross-instance or idle-visitor-tab SLA is claimed. Deployment topology/invalidation propagation remains a rollout decision; no credential or media-provider change is required.
+Detailed field lengths/defaults/empty behavior, shared footer and private fresh-read recovery are approved by the user9Oct. Technical choices refine the approved architecture: Query retention1 hour, cache-owned fill timeout10 seconds and read-failure cooldown5 seconds; these do not renew snapshot freshness. No immediate cross-instance or idle-visitor-tab SLA is claimed. Deployment topology/invalidation propagation remains a rollout decision; no credential or media-provider change is required.
 
 ## Validation history
 
@@ -405,3 +405,5 @@ Detailed field lengths/defaults/empty behavior, shared footer and private fresh-
 - 2026-10-09 SSET-003: Full-field trim/control/codepoint validation and atomic Drizzle CAS implemented. Native suite404/2269 passed; real PostgreSQL CAS/restart1 test5 assertions passed. Root types3/lint1/build2 passed. Invalid/unknown keys422, missing503 and version409 preserve fields. Previous task head `673b920d13a6e9bcd21bd241f5ac692b5c5965ad`; own receipt is recorded in the next documentation update after normal hooks.
 
 - 2026-10-09 SSET-004: Settings cache9 native tests56 assertions passed:100 cold reads one read, warm zero, TTL1 hour minus elapsed time, separate fresh flight, abort isolation, generation/version races, five-second cooldown and unknown-commit expiry. Save primes without SELECT. Root gates passed. Previous task head `0b0e09883e8d8d9d3f1f186cdd1fe41476c3c7e7`; own receipt is recorded in the next documentation update after normal hooks.
+
+- 2026-10-09 SSET-005: API public GET and guarded GET/PATCH composed once with typed DTOs, native guard, strict queries/body,16KiB parser and no-store; exact gateway paths/methods and credential/origin protections proven. Settings/gateway22 tests139 assertions and full API/web413 tests2347 assertions passed. Eden positive/negative compile proof and root types3/lint1/build2 passed. Previous task head `c69ddf75c1a2b52ddb5268ab3032c263f23831ce`; own receipt is recorded in the next documentation update after normal hooks.

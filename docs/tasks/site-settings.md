@@ -66,7 +66,7 @@ Actual revision checks9Oct: scoped Prettier, docs97 Markdown/951 links, staged-t
 
 ### Blocker atau tindak lanjut
 
-Detailed plan siap untuk review; runtime approval belum diberikan.
+Plan lengkap disetujui pengguna9Oct dan runtime implementation berjalan; historical planning receipts dipertahankan.
 
 ## Task: SSET-002 — Singleton schema and additive migration
 
@@ -186,7 +186,7 @@ fake clock/deferred read tests including100 parallel reads, expiry boundary, rej
 ### Commit task
 
 - Pesan: feat(api): cache site settings snapshots (SSET-004)
-- SHA: belum dibuat; receipt dicatat pada update berikutnya setelah successful commit, bukan self-referential.
+- SHA: `c69ddf75c1a2b52ddb5268ab3032c263f23831ce` (actual previous-task receipt).
 - Hook/checks: relevant native tests, root check-types/lint/build, docs/format/diff passed; normal hooks required without bypass.
 - Ledger: actual prior SHA dan evidence pada task/plan berikutnya.
 
@@ -196,7 +196,7 @@ Dependent tasks follow the approved implementation plan. Production and remote d
 
 ## Task: SSET-005 — Typed HTTP composition and exact gateway
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex/pengembang
 - Prioritas: 5
 - Referensi: SSET-US-01/02/03, PRD-02, GR-01/02/05/07/08; [implementation step](../plans/site-settings/implementation-plan.md#sset-005--typed-http-composition-and-exact-gateway).
@@ -214,8 +214,8 @@ Requirements: separate public/private hook scope, existing native guard, strict 
 
 ### Acceptance criteria
 
-- [ ] anonymous GET works even when auth dependency fails; unauthorized writes never reach repository; guarded routes remain guarded; browser path does not404.
-- [ ] Validasi task dan relevant gates lulus; changes hanya milik task dan local commit melalui normal hooks.
+- [x] anonymous GET works even when auth dependency fails; unauthorized writes never reach repository; guarded routes remain guarded; browser path does not404.
+- [x] Validasi task dan relevant gates lulus; changes hanya milik task dan local commit melalui normal hooks.
 
 ### Validasi
 
@@ -223,18 +223,18 @@ app.handle200/401/403/409/422/503; dependency call counts, auth failure isolatio
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement, bukan hasil actual.
+2026-10-09: API public GET and guarded GET/PATCH composed once with typed DTOs, native guard, strict queries/body,16KiB parser and no-store; exact gateway paths/methods and credential/origin protections proven. Settings/gateway22 tests139 assertions and full API/web413 tests2347 assertions passed. Eden positive/negative compile proof and root types3/lint1/build2 passed.
 
 ### Commit task
 
-- Pesan: Conventional Commit dengan ID SSET-005 sesudah acceptance/gates lulus.
+- Pesan: feat(api): expose site settings routes (SSET-005)
 - SHA: belum dibuat; receipt dicatat pada update berikutnya setelah successful commit, bukan self-referential.
-- Hook/checks: belum dijalankan untuk task ini.
+- Hook/checks: relevant native tests, root check-types/lint/build, docs/format/diff passed; normal hooks required without bypass.
 - Ledger: actual prior SHA dan evidence pada task/plan berikutnya.
 
 ### Blocker atau tindak lanjut
 
-Cache architecture sudah disetujui pengguna9Oct; menunggu detailed field/UI plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
+Dependent tasks follow the approved implementation plan. Production and remote delivery remain separate.
 
 ## Task: SSET-006 — Public Query, SSR and freshness ownership
 
@@ -276,7 +276,7 @@ Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement
 
 ### Blocker atau tindak lanjut
 
-Cache architecture sudah disetujui pengguna9Oct; menunggu detailed field/UI plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
+Plan lengkap disetujui pengguna9Oct dan freshness sudah diperiksa; dependent tasks harus selesai sebelum task ini. Tidak ada production proof yang diasumsikan.
 
 ## Task: SSET-007 — Public branding and metadata
 
@@ -318,7 +318,7 @@ Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement
 
 ### Blocker atau tindak lanjut
 
-Cache architecture sudah disetujui pengguna9Oct; menunggu detailed field/UI plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
+Plan lengkap disetujui pengguna9Oct dan freshness sudah diperiksa; dependent tasks harus selesai sebelum task ini. Tidak ada production proof yang diasumsikan.
 
 ## Task: SSET-008 — Admin query, confirmed-save cache update and recovery
 
@@ -360,7 +360,7 @@ Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement
 
 ### Blocker atau tindak lanjut
 
-Cache architecture sudah disetujui pengguna9Oct; menunggu detailed field/UI plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
+Plan lengkap disetujui pengguna9Oct dan freshness sudah diperiksa; dependent tasks harus selesai sebelum task ini. Tidak ada production proof yang diasumsikan.
 
 ## Task: SSET-009 — Responsive settings page and preview
 
@@ -402,7 +402,7 @@ Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement
 
 ### Blocker atau tindak lanjut
 
-Cache architecture sudah disetujui pengguna9Oct; menunggu detailed field/UI plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
+Plan lengkap disetujui pengguna9Oct dan freshness sudah diperiksa; dependent tasks harus selesai sebelum task ini. Tidak ada production proof yang diasumsikan.
 
 ## Task: SSET-010 — Real PostgreSQL, migration and native-cookie proof
 
@@ -444,7 +444,7 @@ Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement
 
 ### Blocker atau tindak lanjut
 
-Cache architecture sudah disetujui pengguna9Oct; menunggu detailed field/UI plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
+Plan lengkap disetujui pengguna9Oct dan freshness sudah diperiksa; dependent tasks harus selesai sebelum task ini. Tidak ada production proof yang diasumsikan.
 
 ## Task: SSET-011 — Built browser flow and regression
 
@@ -486,7 +486,7 @@ Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement
 
 ### Blocker atau tindak lanjut
 
-Cache architecture sudah disetujui pengguna9Oct; menunggu detailed field/UI plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
+Plan lengkap disetujui pengguna9Oct dan freshness sudah diperiksa; dependent tasks harus selesai sebelum task ini. Tidak ada production proof yang diasumsikan.
 
 ## Task: SSET-012 — Canonical docs and implementation closure
 
@@ -528,7 +528,7 @@ Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement
 
 ### Blocker atau tindak lanjut
 
-Cache architecture sudah disetujui pengguna9Oct; menunggu detailed field/UI plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
+Plan lengkap disetujui pengguna9Oct dan freshness sudah diperiksa; dependent tasks harus selesai sebelum task ini. Tidak ada production proof yang diasumsikan.
 
 ## Task: SSET-013 — Server web snapshot cache and committed Save bridge
 

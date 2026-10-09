@@ -1,3 +1,4 @@
+import { t } from "elysia";
 import { ContentError, invalid } from "../../shared/content-error";
 export const SETTINGS_TTL_MS = 3_600_000;
 export const SETTINGS_LIMITS = {
@@ -108,3 +109,42 @@ export function publicFields(row: SettingsFields): SettingsFields {
     footerText: row.footerText,
   };
 }
+
+// Domain validation counts Unicode codepoints; TypeBox maxLength counts UTF-16.
+// The HTTP string bound protects parsing; approved lengths are checked by saveInput.
+
+const TextFields = {
+  siteName: t.String({ maxLength: 2000 }),
+  tagline: t.String({ maxLength: 2000 }),
+  description: t.String({ maxLength: 2000 }),
+  footerText: t.String({ maxLength: 2000 }),
+};
+export const SettingsSaveBody = t.Object(
+  {
+    ...TextFields,
+    expectedVersion: t.Integer({ minimum: 1, maximum: 2147483646 }),
+  },
+  { additionalProperties: false },
+);
+export const SettingsPublicDto = t.Object(
+  {
+    item: t.Object(TextFields, { additionalProperties: false }),
+    version: t.Integer({ minimum: 1, maximum: 2147483647 }),
+    freshForMs: t.Integer({ minimum: 0, maximum: SETTINGS_TTL_MS }),
+  },
+  { additionalProperties: false },
+);
+export const SettingsPrivateDto = t.Object(
+  {
+    item: t.Object(
+      {
+        ...TextFields,
+        rowVersion: t.Integer({ minimum: 1, maximum: 2147483647 }),
+        updatedAt: t.String({ format: "date-time" }),
+      },
+      { additionalProperties: false },
+    ),
+    freshForMs: t.Integer({ minimum: 0, maximum: SETTINGS_TTL_MS }),
+  },
+  { additionalProperties: false },
+);
