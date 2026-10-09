@@ -54,6 +54,8 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 
 ## Context dan plan per fitur
 
+Site Settings: [context](plans/site-settings/repository-context.md), [plan](plans/site-settings/implementation-plan.md) dan [backlog SSET](tasks/site-settings.md). Pengguna meminta plan 9 Oktober 2026 setelah menerima direction empat field teks dan cache frontend/backend. Detailed plan draft untuk review: TTL60, single-flight, remaining freshness SSR/browser, versioned Save dan recovery. Runtime belum diimplementasikan.
+
 Ringkasan dashboard admin: [context](plans/admin-dashboard/repository-context.md), [plan](plans/admin-dashboard/implementation-plan.md) dan [backlog DASH](tasks/admin-dashboard.md). Pengguna memilih dashboard dan meminta plan 8 Oktober 2026; plan/metrik disetujui pengguna dan ringkasan editorial/current jobs/latest/failures verified lokal8Oct; delivery melalui [PR #15](https://github.com/bayuaji17/vertical-movie-app/pull/15) disetujui pengguna 9 Oktober 2026 dengan normal merge dan source branch dipertahankan. Status remote aktual mengikuti PR. Pengaturan situs tetap modul terpisah.
 
 Admin Series/season/episode: [context](plans/admin-series-episodes/repository-context.md), [plan](plans/admin-series-episodes/implementation-plan.md) dan [backlog ASER](tasks/admin-series-episodes.md). Modul dipilih pengguna 8 Oktober 2026; ASER-001–012 Done dan verified lokal: season/episode editor, upload/crop/Preview, Series/Episode Publish dan Episode Archive; native API/SQL serta built-browser journeys/regression lulus. Remote delivery disetujui pengguna 8 Oktober 2026 dan sedang diproses melalui normal merge dengan source branch dipertahankan; production belum dijalankan.
@@ -81,6 +83,8 @@ Integrasi katalog API ke homepage: [context](plans/public-catalog-api/repository
 | Pemrosesan sampul  | [Snapshot](plans/admin-cover-processing/repository-context.md)  | [Plan](plans/admin-cover-processing/implementation-plan.md)                                    | ACOV-001–012 selesai lokal; resolusi crop rekomendasi dan startup hashing development; cover request-path dan built-browser MinIO proof lulus; R2/production belum diverifikasi. |
 
 ## Backlog dan evidence
+
+- [Site Settings](tasks/site-settings.md): SSET-001 planning; SSET-002–012 backlog untuk approval/implementasi/proof.
 
 - [Ringkasan dashboard admin](tasks/admin-dashboard.md): DASH-001–011 implemented/verified lokal; inventori/media/latest, private refresh, native SQL/auth dan built-browser15 width/theme proof.
 
