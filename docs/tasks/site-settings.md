@@ -1,6 +1,6 @@
 # Modul: Site Settings
 
-> Status: detailed plan draft untuk review · 9 Oktober 2026 · Direction empat field teks diterima pengguna; cache tiga lapis/TTL1 jam/shared deadline/Save update disetujui pengguna9Oct. Revisi dokumentasi saja; implementasi belum dimulai. Base main `36f185e275bc90fa609cf071405848ff021c3223`, planning branch `chore/site-settings-plan`.
+> Status: approved and executing · 9 Oktober 2026 · Pengguna meminta implementasi plan lengkap; branch `feat/site-settings`, runtime base `36f185e275bc90fa609cf071405848ff021c3223`.
 
 ## Tujuan modul
 
@@ -20,7 +20,7 @@ Sebagai operator, saya ingin cache hits dan request bersamaan menghindari settin
 
 ## Status dan bukti
 
-SSET-001 adalah task dokumentasi yang diminta pengguna. SSET-002–013 Backlog sampai detailed field/UI plan disetujui dan freshness diperiksa. Cache architecture sudah disetujui; SSET-013 ditambahkan tanpa mengganti ID existing, dengan urutan005 →013 →006. Perintah validasi di bawah adalah requirement, bukan hasil actual. Local task commits mengikuti AGENTS; remote delivery/deployment memerlukan authorization tersendiri.
+SSET-001 adalah task dokumentasi yang diminta pengguna. Pengguna menyetujui implementasi lengkap9Oct; freshness main/origin36f185e sudah diperiksa. SSET-002–013 dikerjakan berurutan. Cache architecture sudah disetujui; SSET-013 ditambahkan tanpa mengganti ID existing, dengan urutan005 →013 →006. Perintah validasi di bawah adalah requirement, bukan hasil actual. Local task commits mengikuti AGENTS; remote delivery/deployment memerlukan authorization tersendiri.
 
 ## Task: SSET-001 — Evidence-backed planning
 
@@ -60,7 +60,7 @@ Actual revision checks9Oct: scoped Prettier, docs97 Markdown/951 links, staged-t
 ### Commit task
 
 - Pesan: docs: plan site settings and cache (SSET-001)
-- SHA: `2617bd7c35008cd513aa1a238a7e6d26675dbc04` (original SSET-001 planning; receipt dicatat pada revisi berikutnya).
+- SHA: `9524b6306c00ccdc1e727c336a8b06bdbfad9262` (actual previous-task receipt).
 - Hook/checks: docs/format/diff/staged-tree/preservation lulus; normal docs/lint/types dan Commitlint wajib pada task commit tanpa bypass.
 - Ledger: actual prior SHA dan evidence pada task/plan berikutnya.
 
@@ -70,7 +70,7 @@ Detailed plan siap untuk review; runtime approval belum diberikan.
 
 ## Task: SSET-002 — Singleton schema and additive migration
 
-- Status: Backlog
+- Status: Done
 - Owner: Codex/pengembang
 - Prioritas: 2
 - Referensi: SSET-US-01/02/03, PRD-02, GR-01/02/05/07/08; [implementation step](../plans/site-settings/implementation-plan.md#sset-002--singleton-schema-and-additive-migration).
@@ -88,8 +88,8 @@ Requirements: singleton id/checks, four text fields, rowVersion/update timestamp
 
 ### Acceptance criteria
 
-- [ ] exactly one initialized row; invalid singleton/length writes rejected; existing auth/content/media unaffected.
-- [ ] Validasi task dan relevant gates lulus; changes hanya milik task dan local commit melalui normal hooks.
+- [x] exactly one initialized row; invalid singleton/length writes rejected; existing auth/content/media unaffected.
+- [x] Validasi task dan relevant gates lulus; changes hanya milik task dan local commit melalui normal hooks.
 
 ### Validasi
 
@@ -97,18 +97,18 @@ dedicated test fresh/populated/rerun proof, full gates, `bun run --cwd apps/api 
 
 ### Hasil dan bukti
 
-Belum diimplementasikan atau diverifikasi. Commands pada plan adalah requirement, bukan hasil actual.
+2026-10-09: Generated/reviewed0011_site-settings adds singleton/defaults. Dedicated populated upgrade/rerun and constraints proof passed; development db:migrate journal11 to12, all17 existing tables byte-equivalent SQL snapshots preserved. Root gates passed.
 
 ### Commit task
 
-- Pesan: Conventional Commit dengan ID SSET-002 sesudah acceptance/gates lulus.
+- Pesan: feat(api): persist site settings singleton (SSET-002)
 - SHA: belum dibuat; receipt dicatat pada update berikutnya setelah successful commit, bukan self-referential.
-- Hook/checks: belum dijalankan untuk task ini.
+- Hook/checks: relevant native tests, root check-types/lint/build, docs/format/diff passed; normal hooks required without bypass.
 - Ledger: actual prior SHA dan evidence pada task/plan berikutnya.
 
 ### Blocker atau tindak lanjut
 
-Cache architecture sudah disetujui pengguna9Oct; menunggu detailed field/UI plan approval, freshness dan dependent tasks. Tidak ada runtime/production proof yang diasumsikan dari planning.
+Dependent tasks follow the approved implementation plan. Production and remote delivery remain separate.
 
 ## Task: SSET-003 — Domain validation and versioned persistence
 
@@ -571,3 +571,5 @@ Belum diimplementasikan atau diverifikasi. Pengguna menyetujui cache architectur
 ### Blocker atau tindak lanjut
 
 Menunggu dependent005, freshness dan implementasi yang diotorisasi. Multi-instance/direct-API propagation merupakan rollout prerequisite untuk fleet-wide immediate consistency.
+
+- Implementation authorization9Oct: pengguna meminta "oke lanjut implementasi"; all proposed field/default/empty/footer/recovery/UI details in this plan are approved. Main/origin unchanged at36f185e; planning revision receipt9524b6306c00ccdc1e727c336a8b06bdbfad9262, normal hooks passed. Historical planning-only statements above describe previous turns.

@@ -2,13 +2,13 @@
 
 ## Plan metadata
 
-- Status: draft for detailed plan review; cache architecture revision approved, implementation not started.
+- Status: approved and executing; user requested implementation on 2026-10-09.
 - Date: 2026-10-09; decision owner: pengguna. Four-text-field direction accepted; user explicitly approved three cache layers, initial TTL1 hour and Save-triggered cache updates, then requested plan revision only. Detailed field/default/recovery/UI proposals remain for review; cache approval need not be requested again.
 - Repository: `bayuaji17/vertical-movie-app`; base ref: `main`.
 - Base SHA and last validated SHA: `36f185e275bc90fa609cf071405848ff021c3223`.
 - Context: [repository-context.md](repository-context.md), saved before this plan.
 - Backlog: [site-settings](../../tasks/site-settings.md), SSET-001–013. Existing IDs retained; SSET-013 is the added web-server cache task and runs after005, before006.
-- Planning branch: `chore/site-settings-plan`; proposed implementation branch: `feat/site-settings` after approval and freshness check.
+- Planning branch: `chore/site-settings-plan`; implementation branch: `feat/site-settings`.
 
 ## Objective
 
@@ -397,3 +397,7 @@ Detailed field lengths/defaults/empty behavior, shared footer and private fresh-
 - 2026-10-09 original receipt and revision: original SSET-001 committed as `2617bd7c35008cd513aa1a238a7e6d26675dbc04` via normal hooks. User now explicitly approved browser/server-web/API cache layers, TTL1 hour, one remaining deadline and Save-triggered update, requesting plan update only. Context rechecked and updated before this plan; added dedicated SSET-013, adjusted006 dependency, synchronized backlog/index and per-layer request-count acceptance. No runtime/schema/env/dependency changes, migration or remote delivery. Revision validation/commit results are recorded after actual checks; its own SHA is not self-referential.
 
 - 2026-10-09 revision validation: scoped Prettier, `bun run docs:check`97 Markdown/951 links, staged-tree90/932 and working/cached diff checks passed. Plan13/backlog13/DAG/action/TTL contract audit passed, including matching file/requirement dependencies and no cycles. Original22 non-index paths byte-identical; README outside owned settings links reconstructs exactly. Four owned Markdown paths staged, normal docs/lint/types/Commitlint hooks required without bypass. No cache/API-call/SQL/browser runtime proof claimed by these documentation checks.
+
+- Implementation authorization9Oct: pengguna meminta "oke lanjut implementasi"; all proposed field/default/empty/footer/recovery/UI details in this plan are approved. Main/origin unchanged at36f185e; planning revision receipt9524b6306c00ccdc1e727c336a8b06bdbfad9262, normal hooks passed. Historical planning-only statements above describe previous turns.
+
+- 2026-10-09 SSET-002: Generated/reviewed0011_site-settings adds singleton/defaults. Dedicated populated upgrade/rerun and constraints proof passed; development db:migrate journal11 to12, all17 existing tables byte-equivalent SQL snapshots preserved. Root gates passed. Previous task head `9524b6306c00ccdc1e727c336a8b06bdbfad9262`; own receipt is recorded in the next documentation update after normal hooks.

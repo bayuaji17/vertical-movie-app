@@ -54,7 +54,7 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 
 ## Context dan plan per fitur
 
-Site Settings: [context](plans/site-settings/repository-context.md), [plan](plans/site-settings/implementation-plan.md) dan [backlog SSET](tasks/site-settings.md). Pengguna meminta plan 9 Oktober 2026 setelah menerima direction empat field teks dan cache frontend/backend. Cache tiga lapis browser/server-web/API dengan TTL1 jam, shared deadline dan Save update disetujui pengguna9Oct; detailed field/UI plan tetap draft. SSET-013 menambahkan server snapshot/single-flight dan API-call proof untuk SSR. Runtime belum diimplementasikan.
+Site Settings: [context](plans/site-settings/repository-context.md), [plan](plans/site-settings/implementation-plan.md) dan [backlog SSET](tasks/site-settings.md). Pengguna meminta plan 9 Oktober 2026 setelah menerima direction empat field teks dan cache frontend/backend. Cache tiga lapis browser/server-web/API dengan TTL1 jam, shared deadline dan Save update disetujui pengguna9Oct; plan lengkap kini disetujui untuk implementasi9Oct. SSET-013 menambahkan server snapshot/single-flight dan API-call proof untuk SSR. Implementasi berjalan pada branch feat/site-settings; evidence mengikuti backlog.
 
 Ringkasan dashboard admin: [context](plans/admin-dashboard/repository-context.md), [plan](plans/admin-dashboard/implementation-plan.md) dan [backlog DASH](tasks/admin-dashboard.md). Pengguna memilih dashboard dan meminta plan 8 Oktober 2026; plan/metrik disetujui pengguna dan ringkasan editorial/current jobs/latest/failures verified lokal8Oct; delivery melalui [PR #15](https://github.com/bayuaji17/vertical-movie-app/pull/15) disetujui pengguna 9 Oktober 2026 dengan normal merge dan source branch dipertahankan. Status remote aktual mengikuti PR. Pengaturan situs tetap modul terpisah.
 
@@ -84,7 +84,7 @@ Integrasi katalog API ke homepage: [context](plans/public-catalog-api/repository
 
 ## Backlog dan evidence
 
-- [Site Settings](tasks/site-settings.md): SSET-001 planning; SSET-002–013 backlog; cache architecture1 jam disetujui, detailed field/UI scope menunggu review.
+- [Site Settings](tasks/site-settings.md): SSET-001 planning; SSET-002–013 backlog; plan lengkap disetujui dan implementasi berjalan9Oct.
 
 - [Ringkasan dashboard admin](tasks/admin-dashboard.md): DASH-001–011 implemented/verified lokal; inventori/media/latest, private refresh, native SQL/auth dan built-browser15 width/theme proof.
 
