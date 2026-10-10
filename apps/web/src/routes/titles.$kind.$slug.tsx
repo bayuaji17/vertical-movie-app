@@ -6,7 +6,6 @@ import {
 import {
   contentDetailOptions,
   loadContent,
-  setContentHttpStatus,
 } from '#/lib/catalog/content-queries'
 import type { CatalogItem } from '#/lib/catalog/public-catalog-model'
 import { createFileRoute, notFound } from '@tanstack/react-router'
@@ -20,7 +19,6 @@ export const Route = createFileRoute('/titles/$kind/$slug')({
       (params.kind !== 'movie' && params.kind !== 'standalone') ||
       !contentSlug.safeParse(params.slug).success
     ) {
-      setContentHttpStatus(404)
       throw notFound()
     }
     const result = await loadContent(
