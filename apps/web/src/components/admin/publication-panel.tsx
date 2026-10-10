@@ -126,7 +126,7 @@ export function publicationViewState(
       !!media.data,
   }
 }
-function PublicationPanel({
+export function PublicationPanel({
   detail,
   type,
   metadataStale,
