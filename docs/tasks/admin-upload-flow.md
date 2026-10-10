@@ -1,6 +1,6 @@
 # Modul: Alur admin tambah video (stepper)
 
-> Status: proposed · 10 Oktober 2026 · Desain disetujui pengguna; plan menunggu persetujuan implementasi. Plan: [implementation-plan](../plans/admin-upload-flow/implementation-plan.md), context: [repository-context](../plans/admin-upload-flow/repository-context.md), desain: [admin-upload-flow](../design/admin-upload-flow.md).
+> Status: approved plan · 10 Oktober 2026 · Desain dan keputusan disetujui pengguna. Plan: [implementation-plan](../plans/admin-upload-flow/implementation-plan.md), context: [repository-context](../plans/admin-upload-flow/repository-context.md), desain: [admin-upload-flow](../design/admin-upload-flow.md).
 
 ## Tujuan modul
 
@@ -30,11 +30,11 @@ Sebagai admin, saya ingin melihat langkah berikutnya tiap draft pada daftar kont
 
 ### Ruang lingkup
 
-Tulis `docs/design/admin-upload-flow.md` (spesifikasi dari kanvas yang disetujui) dan catat keputusan: rights (PATCH lalu POST atau ubah API), ekstraksi frame cover di rilis pertama, Series terpisah.
+Tulis `docs/design/admin-upload-flow.md` (spesifikasi dari kanvas yang disetujui) dan catat keputusan pengguna: rights PATCH lalu POST, frame cover di rilis pertama, Series terpisah.
 
 ### Acceptance criteria
 
-- [ ] Keputusan terbuka dicatat dengan pemberi persetujuan dan tanggal.
+- [ ] Keputusan dicatat dengan pemberi persetujuan dan tanggal (plan, 10 Oktober 2026).
 - [ ] Spesifikasi desain tertulis dan diindeks.
 
 ### Validasi
@@ -52,7 +52,7 @@ Belum dikerjakan.
 
 ### Blocker atau tindak lanjut
 
-Menunggu jawaban pengguna atas tiga keputusan terbuka.
+Tidak ada.
 
 ## Task: UFLOW-002 — Rute stepper dan rangka langkah
 
@@ -103,7 +103,7 @@ Tidak ada.
 
 ### Ruang lingkup
 
-Mode minimal pada `ContentForm`: tipe dan judul wajib; sinopsis, kategori, tahun, bahasa pada "More details" yang dapat dilipat; Save & continue membuat draft lalu membuka langkah Media. Rights tidak lagi di form awal (sesuai keputusan UFLOW-001). Edit draft tetap memakai form lengkap.
+Mode minimal pada `ContentForm`: tipe dan judul wajib; sinopsis, genre, tahun, bahasa pada "More details" yang dapat dilipat; Save & continue membuat draft lalu membuka langkah Media. Rights tidak lagi di form awal (dikonfirmasi di langkah Review). Edit draft tetap memakai form lengkap.
 
 ### Acceptance criteria
 
@@ -126,7 +126,7 @@ Belum dikerjakan.
 
 ### Blocker atau tindak lanjut
 
-Kategori memakai picker dari plan admin-categories.
+Genre memakai picker dari plan admin-genres.
 
 ## Task: UFLOW-004 — Langkah Media: kartu video tunggal dan status otomatis
 
@@ -200,7 +200,7 @@ Belum dikerjakan.
 
 ### Blocker atau tindak lanjut
 
-Dapat ditunda ke rilis berikutnya bila keputusan UFLOW-001 menyatakan demikian.
+Masuk rilis pertama sesuai keputusan pengguna.
 
 ## Task: UFLOW-006 — Langkah Review & publish
 
@@ -221,7 +221,7 @@ Player HLS tertanam (loader playback admin existing), checklist readiness dengan
 - [ ] Preview diputar di halaman yang sama dengan signed playback existing.
 - [ ] Checklist menunjukkan item yang belum siap dan menautkan ke Details/Media.
 - [ ] Publish idempotent dan menangani konflik versi/hasil tidak pasti seperti sebelumnya.
-- [ ] Rights mengikuti keputusan UFLOW-001 dan tidak memecah kontrak readiness.
+- [ ] Rights dikirim sebagai PATCH lalu POST; kegagalan di tengah tidak melakukan replay otomatis dan kontrak readiness tidak berubah.
 
 ### Validasi
 
@@ -238,7 +238,7 @@ Belum dikerjakan.
 
 ### Blocker atau tindak lanjut
 
-Bergantung pada keputusan rights.
+Rights: PATCH lalu POST sesuai keputusan pengguna.
 
 ## Task: UFLOW-007 — Daftar konten: langkah berikutnya
 

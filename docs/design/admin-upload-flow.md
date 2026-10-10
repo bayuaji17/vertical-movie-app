@@ -1,6 +1,6 @@
 # Alur admin tambah video
 
-> Status: proposed, desain disetujui pengguna 10 Oktober 2026 · Sumber: kanvas desain [Alur Admin Upload Video](https://claude.ai/artifact/NaGoxkbairUuwLHuUmskia) (artefak eksternal privat milik pengguna; bukan bukti implementasi).
+> Status: approved plan, desain disetujui pengguna 10 Oktober 2026 · Sumber: kanvas desain [Alur Admin Upload Video](https://claude.ai/artifact/NaGoxkbairUuwLHuUmskia) (artefak eksternal privat milik pengguna; bukan bukti implementasi).
 
 Stepper tiga langkah untuk Film/Standalone: **Details → Media → Review & publish**, memakai token design system yang ada (lime, Space Grotesk/Inter, sudut membulat, Light/Dark).
 
@@ -14,4 +14,4 @@ Stepper tiga langkah untuk Film/Standalone: **Details → Media → Review & pub
 | Content list      | Chip dan CTA langkah berikutnya per draft.                                                                                                                              |
 | Mobile — Media    | Satu kolom 390 px, Continue menempel di bawah.                                                                                                                          |
 
-State yang harus tercakup saat implementasi: loading, kosong, error, offline, upload paused/gagal/unknown, konflik versi, dan guard dirty/leave yang sudah ada. Spesifikasi kategori ada pada [plan admin-categories](../plans/admin-categories/implementation-plan.md). Series tidak termasuk.
+State yang harus tercakup saat implementasi: loading, kosong, error, offline, upload paused/gagal/unknown, konflik versi, dan guard dirty/leave yang sudah ada. Genre multi-pilih dan halaman manajemen ada pada [plan admin-genres](../plans/admin-genres/implementation-plan.md). Series tidak termasuk.
