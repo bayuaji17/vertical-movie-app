@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import {
   RiArrowRightLine,
+  RiEyeLine,
+  RiEyeOffLine,
   RiLoader4Line,
   RiLockLine,
   RiMailLine,
@@ -14,7 +16,6 @@ import { Alert, AlertDescription, AlertTitle } from '#/components/ui/alert'
 import { Button } from '#/components/ui/button'
 import {
   Field,
-  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -22,6 +23,7 @@ import {
 import {
   InputGroup,
   InputGroupAddon,
+  InputGroupButton,
   InputGroupInput,
 } from '#/components/ui/input-group'
 import { Separator } from '#/components/ui/separator'
@@ -49,6 +51,7 @@ export function AdminLoginForm({ redirectTo }: AdminLoginFormProps) {
   const queryClient = useQueryClient()
   const router = useRouter()
   const [formError, setFormError] = useState<string>()
+  const [showPassword, setShowPassword] = useState(false)
 
   const form = useForm({
     defaultValues: { email: '', password: '' },
@@ -153,7 +156,7 @@ export function AdminLoginForm({ redirectTo }: AdminLoginFormProps) {
                 <form.Field
                   name="email"
                   validators={{
-                    onBlur: ({ value }) => validateLoginEmail(value),
+                    onChange: ({ value }) => validateLoginEmail(value),
                     onSubmit: ({ value }) => validateLoginEmail(value),
                   }}
                 >
@@ -206,7 +209,7 @@ export function AdminLoginForm({ redirectTo }: AdminLoginFormProps) {
                 <form.Field
                   name="password"
                   validators={{
-                    onBlur: ({ value }) => validateLoginPassword(value),
+                    onChange: ({ value }) => validateLoginPassword(value),
                     onSubmit: ({ value }) => validateLoginPassword(value),
                   }}
                 >
@@ -222,7 +225,7 @@ export function AdminLoginForm({ redirectTo }: AdminLoginFormProps) {
                           <InputGroupInput
                             id={field.name}
                             name={field.name}
-                            type="password"
+                            type={showPassword ? 'text' : 'password'}
                             autoComplete="current-password"
                             value={field.state.value}
                             disabled={isSubmitting}
@@ -238,6 +241,25 @@ export function AdminLoginForm({ redirectTo }: AdminLoginFormProps) {
                           <InputGroupAddon>
                             <RiLockLine aria-hidden="true" />
                           </InputGroupAddon>
+                          <InputGroupAddon align="inline-end">
+                            <InputGroupButton
+                              size="icon-xs"
+                              aria-label={
+                                showPassword
+                                  ? 'Sembunyikan password'
+                                  : 'Tampilkan password'
+                              }
+                              aria-pressed={showPassword}
+                              disabled={isSubmitting}
+                              onClick={() => setShowPassword((shown) => !shown)}
+                            >
+                              {showPassword ? (
+                                <RiEyeOffLine aria-hidden="true" />
+                              ) : (
+                                <RiEyeLine aria-hidden="true" />
+                              )}
+                            </InputGroupButton>
+                          </InputGroupAddon>
                         </InputGroup>
                         {invalid ? (
                           <FieldError
@@ -246,11 +268,7 @@ export function AdminLoginForm({ redirectTo }: AdminLoginFormProps) {
                               message: String(message),
                             }))}
                           />
-                        ) : (
-                          <FieldDescription>
-                            Minimal 12 karakter.
-                          </FieldDescription>
-                        )}
+                        ) : null}
                       </Field>
                     )
                   }}
