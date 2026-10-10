@@ -48,7 +48,7 @@ function AdminDashboard() {
           className="min-h-11"
           render={<Link to="/admin/content/new" />}
         >
-          Create draft
+          Add a video
         </Button>
         <Button
           nativeButton={false}
