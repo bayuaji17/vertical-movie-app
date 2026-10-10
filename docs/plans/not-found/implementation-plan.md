@@ -2,7 +2,7 @@
 
 ## Plan metadata
 
-- Status: **implemented lokal** (10 Oktober 2026): NF-001–005 Done, NF-006 Review karena bukti browser parsial; bukan klaim kesiapan production.
+- Status: **implemented lokal** (10 Oktober 2026): NF-001–006 Done; bukti browser 320/390/768, System, keyboard dan SSR smoke build dikesampingkan pengguna dan tidak terbukti; bukan klaim kesiapan production.
 - Date: 10 Oktober 2026; decision owner: pengguna.
 - Repository: `bayuaji17/vertical-movie-app`; base ref: `main`; base SHA: `e94699d82b8f38dd5d2ffdc2db86cdf4f6779f55`.
 - Context: [repository-context.md](repository-context.md), disimpan sebelum plan ini.
@@ -80,8 +80,8 @@ Aturan root `AGENTS.md`: tanpa edit `routeTree.gen.ts`, hooks di `src/hooks/`, k
 - [x] URL tak dikenal (termasuk `/admin/*`) menampilkan satu halaman 404 dengan HTTP 404, `noindex, nofollow` dan satu tombol ke home (dev server; title SSR masih nama situs).
 - [x] Slug tak ada pada `/videos/$slug`, `/watch/$slug`, `/titles/$kind/$slug` dan `/series/$slug` menampilkan halaman yang sama; 503/jaringan tetap state Retry.
 - [x] Respons tidak berbeda untuk anonim dan admin; tidak ada pembacaan sesi.
-- [ ] Light/Dark/System, 320–1920 px, keyboard dan target 44 px terbukti pada browser.
-- [ ] Tests, check-types, lint, build dan docs:check lulus; evidence dicatat per task.
+- [ ] Light/Dark/System, 320–1920 px, keyboard dan target 44 px terbukti pada browser — dikesampingkan pengguna 10 Oktober 2026; hanya 1440 px Light/Dark yang teramati.
+- [x] Tests, check-types, lint, build dan docs:check lulus; evidence dicatat per task.
 
 ## Risks and mitigations
 

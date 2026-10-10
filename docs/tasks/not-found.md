@@ -1,6 +1,6 @@
 # Modul: Halaman Not Found
 
-> Status: NF-001–005 Done lokal; NF-006 Review (bukti browser parsial) · 10 Oktober 2026 · Pengguna meminta plan dan memutuskan satu halaman 404 untuk semua kasus dengan satu tombol ke home (10 Oktober 2026); belum ada implementasi. Plan: [implementation-plan](../plans/not-found/implementation-plan.md), context: [repository-context](../plans/not-found/repository-context.md). Base SHA `e94699d82b8f38dd5d2ffdc2db86cdf4f6779f55`.
+> Status: NF-001–006 Done lokal; bukti browser parsial dikesampingkan pengguna · 10 Oktober 2026 · Pengguna meminta plan dan memutuskan satu halaman 404 untuk semua kasus dengan satu tombol ke home (10 Oktober 2026); belum ada implementasi. Plan: [implementation-plan](../plans/not-found/implementation-plan.md), context: [repository-context](../plans/not-found/repository-context.md). Base SHA `e94699d82b8f38dd5d2ffdc2db86cdf4f6779f55`.
 
 ## Tujuan modul
 
@@ -198,7 +198,7 @@ Tidak ada.
 
 ## Task: NF-006 — Bukti browser dan closure dokumen
 
-- Status: Review
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: 6
 - Referensi: plan Acceptance criteria
@@ -212,8 +212,8 @@ Chromium dev/built: 320/390/768/1440 × Light/Dark/System, keyboard/fokus, tanpa
 
 ### Acceptance criteria
 
-- [ ] Evidence browser tercatat; bila runner tidak tersedia dicatat belum diuji.
-- [ ] Status plan/backlog dan indeks docs diperbarui; `docs:check` lulus.
+- [x] Evidence browser tercatat; bila runner tidak tersedia dicatat belum diuji.
+- [x] Status plan/backlog dan indeks docs diperbarui; `docs:check` lulus.
 
 ### Validasi
 
@@ -221,12 +221,12 @@ Smoke browser, `bun run docs:check`.
 
 ### Hasil dan bukti
 
-10 Oktober 2026: `bun run build` lulus (2 successful, 1 cached); `bun run lint` dan `bun run check-types` lulus (cache Turbo); `bun run docs:check` lulus. Chrome Windows headless (mode lama) pada dev server: `/does-not-exist` 1440×900 Light dan Dark dirender sesuai desain (kontras terbaca, tombol di tengah). **Belum terbukti:** tangkapan 390 px terpotong karena Chrome headless lama memakai lebar minimum ±500 px, jadi 320/390/768, System, keyboard/fokus dan target 44 px tidak diverifikasi di browser; SSR smoke pada hasil build (bukan dev server) tidak dijalankan; runner browser proyek tidak terkonfigurasi pada mesin ini. Status Review hingga bukti tersebut ada.
+10 Oktober 2026: `bun run build` lulus (2 successful, 1 cached); `bun run lint` dan `bun run check-types` lulus (cache Turbo); `bun run docs:check` lulus. Chrome Windows headless (mode lama) pada dev server: `/does-not-exist` 1440×900 Light dan Dark dirender sesuai desain (kontras terbaca, tombol di tengah). **Belum terbukti:** tangkapan 390 px terpotong karena Chrome headless lama memakai lebar minimum ±500 px, jadi 320/390/768, System, keyboard/fokus dan target 44 px tidak diverifikasi di browser; SSR smoke pada hasil build (bukan dev server) tidak dijalankan; runner browser proyek tidak terkonfigurasi pada mesin ini. Pengguna memutuskan 10 Oktober 2026 untuk mengabaikan bukti browser yang tersisa (320/390/768, System, keyboard/fokus, target 44 px, SSR smoke build) dan menutup task; itu tetap tidak terbukti dan bukan klaim lulus.
 
 ### Commit task
 
 - Pesan: `docs(web): close not-found verification (NF-006)`
-- SHA: dicatat pada update dokumentasi berikutnya
+- SHA: e3001eb
 
 ### Blocker atau tindak lanjut
 
