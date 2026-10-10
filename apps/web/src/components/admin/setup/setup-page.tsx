@@ -9,7 +9,7 @@ import {
   ContentResource,
   contentHref,
 } from '../content-resource'
-import { MediaPanelView } from '../media-panel'
+import { MediaStep } from './media-step'
 import { PublicationPanel } from '../publication-panel'
 import { SetupStepper } from './setup-stepper'
 import { useSetupController } from '#/hooks/use-setup-controller'
@@ -89,10 +89,7 @@ function SetupFlow({
 }) {
   const id = detail.data.id
   const router = useRouter()
-  const { publication, manager, owner, uploadBusy } = useSetupController(
-    type,
-    id,
-  )
+  const { publication, manager, uploadBusy } = useSetupController(type, id)
   const media = publication.media.data
   const settled = !!media && !publication.media.isFetching
   const target = step ?? (media ? initialSetupStep(media) : undefined)
@@ -137,12 +134,7 @@ function SetupFlow({
         </div>
       ) : current === 'media' ? (
         <div className="flex flex-col gap-6">
-          <MediaPanelView
-            owner={owner}
-            query={publication.media}
-            manager={manager}
-            showPreview={false}
-          />
+          <MediaStep query={publication.media} manager={manager} />
           <SetupFooter>
             <Button
               variant="outline"
