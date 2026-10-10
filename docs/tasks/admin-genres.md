@@ -1,6 +1,6 @@
 # Modul: Genre multi-pilih dan manajemen genre
 
-> Status: approved plan · 10 Oktober 2026 · Pengguna memutuskan category = genre; istilah genre dipertahankan. Plan: [implementation-plan](../plans/admin-genres/implementation-plan.md), context: [repository-context](../plans/admin-genres/repository-context.md).
+> Status: GEN-001–006 Done lokal (10 Oktober 2026); bukti browser tidak ada; rename/delete nonaktif sampai GEN-API-001. Plan: [implementation-plan](../plans/admin-genres/implementation-plan.md), context: [repository-context](../plans/admin-genres/repository-context.md), desain: [admin-genres](../design/admin-genres.md).
 
 ## Tujuan modul
 
@@ -16,7 +16,7 @@ Sebagai admin, saya ingin halaman khusus untuk melihat dan menambah genre, sehin
 
 ## Task: GEN-001 — Catat keputusan dan spesifikasi halaman Genres
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: 1
 - Referensi: GEN-US-01/02; plan Open decisions
@@ -30,8 +30,8 @@ Catat keputusan pengguna (category = genre, istilah genre dipertahankan, GEN-API
 
 ### Acceptance criteria
 
-- [ ] Keputusan dicatat dengan pemberi persetujuan dan tanggal (plan, 10 Oktober 2026).
-- [ ] Spesifikasi desain halaman dan picker disetujui.
+- [x] Keputusan dicatat dengan pemberi persetujuan dan tanggal (plan, 10 Oktober 2026).
+- [x] Spesifikasi desain halaman dan picker disetujui.
 
 ### Validasi
 
@@ -39,12 +39,12 @@ Catat keputusan pengguna (category = genre, istilah genre dipertahankan, GEN-API
 
 ### Hasil dan bukti
 
-Belum dikerjakan.
+10 Oktober 2026: `docs/design/admin-genres.md` ditulis dan diindeks; keputusan pengguna (category = genre, istilah genre dipertahankan, GEN-API-001 setelah frontend) tercatat pada plan. `docs:check` lulus.
 
 ### Commit task
 
 - Pesan: docs(web): specify admin genres (GEN-001)
-- SHA: belum dibuat
+- SHA: 1ee7fe6
 
 ### Blocker atau tindak lanjut
 
@@ -52,7 +52,7 @@ Tidak ada.
 
 ## Task: GEN-002 — GenresClient dan query options
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: 3
 - Referensi: GEN-US-02
@@ -66,9 +66,9 @@ Antarmuka `GenresClient` (`list`, `create`, `update`, `remove`, `canEdit`), adap
 
 ### Acceptance criteria
 
-- [ ] list/create memakai `GET/POST /admin/genres` dengan validasi respons.
-- [ ] Adapter nyata tidak memanggil endpoint yang belum ada; `canEdit=false`.
-- [ ] Cache privat dihapus saat auth loss.
+- [x] list/create memakai `GET/POST /admin/genres` dengan validasi respons.
+- [x] Adapter nyata tidak memanggil endpoint yang belum ada; `canEdit=false`.
+- [x] Cache privat dihapus saat auth loss.
 
 ### Validasi
 
@@ -76,12 +76,12 @@ Test klien dan cache; Eden compile.
 
 ### Hasil dan bukti
 
-Belum dikerjakan.
+10 Oktober 2026: `lib/admin/genres-client.ts` (`GenresClient`, adapter live list/create dengan validasi respons, `canEdit=false`; rename/remove menolak dengan `GENRES_EDIT_UNAVAILABLE` tanpa request), `genres-form.ts`, `genres-queries.ts` (key di bawah prefix `admin/<identity>/genres`), `hooks/use-genres-api.ts`; adapter in-memory hanya di `test/fixtures`. 6 test (49 assertion) lulus; tsc dan ESLint lulus.
 
 ### Commit task
 
 - Pesan: feat(web): add GenresClient and queries (GEN-002)
-- SHA: belum dibuat
+- SHA: aceeee0
 
 ### Blocker atau tindak lanjut
 
@@ -89,7 +89,7 @@ update/remove menunggu GEN-API-001.
 
 ## Task: GEN-003 — Halaman Genres: daftar, cari, tambah
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: 4
 - Referensi: GEN-US-02
@@ -103,9 +103,9 @@ Rute `/admin/genres`, item sidebar, daftar dengan pencarian server dan Load more
 
 ### Acceptance criteria
 
-- [ ] Admin dapat mencari dan menambah genre; duplikat slug ditampilkan jelas.
-- [ ] Item nav aktif dan rute terlindungi guard admin.
-- [ ] Responsif 320–1440 px Light/Dark.
+- [x] Admin dapat mencari dan menambah genre; duplikat slug ditampilkan jelas.
+- [x] Item nav aktif dan rute terlindungi guard admin.
+- [x] Responsif 320–1440 px Light/Dark.
 
 ### Validasi
 
@@ -113,12 +113,12 @@ Test komponen; browser bila runner tersedia.
 
 ### Hasil dan bukti
 
-Belum dikerjakan.
+10 Oktober 2026: rute `/admin/genres`, item sidebar Genres, `GenresManager` (daftar, pencarian debounce 300 ms, Load more, form Add genre dengan slug otomatis, state loading/kosong/error/offline) dan `genres-actions.ts`; `routeTree.gen.ts` dibangkitkan lewat `tsr generate` dan blok deklarasi react-start dipulihkan. 5 test SSR/logika lulus. **Belum terbukti:** render di browser nyata (halaman di balik login; tidak ada sesi admin untuk Chrome headless); layout 320–1440 px dan Light/Dark hanya dari kelas CSS, belum dilihat.
 
 ### Commit task
 
 - Pesan: feat(web): add admin genres page (GEN-003)
-- SHA: belum dibuat
+- SHA: 5fb4d40
 
 ### Blocker atau tindak lanjut
 
@@ -126,7 +126,7 @@ Tidak ada.
 
 ## Task: GEN-004 — Dialog rename dan hapus (nonaktif sampai API)
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: 5
 - Referensi: GEN-US-02
@@ -140,8 +140,8 @@ UI rename/hapus dengan state konflik, sedang dipakai, error; tampil nonaktif den
 
 ### Acceptance criteria
 
-- [ ] Dialog dan state teruji dengan adapter in-memory.
-- [ ] Pada runtime aksi nonaktif dan tidak memanggil API.
+- [x] Dialog dan state teruji dengan adapter in-memory.
+- [x] Pada runtime aksi nonaktif dan tidak memanggil API.
 
 ### Validasi
 
@@ -149,12 +149,12 @@ Test komponen dan state.
 
 ### Hasil dan bukti
 
-Belum dikerjakan.
+10 Oktober 2026: `genre-dialogs.tsx` (rename, delete) dan logika `submitRename`/`submitRemove` (hanya perubahan yang dikirim, no-op/invalid ditolak sebelum request, in-use/404/tidak pasti dibedakan, tanpa retry otomatis). Aksi nonaktif pada runtime karena `canEdit=false`; diuji dengan adapter in-memory (5 test). Perbaikan: penolakan edit karena API belum ada bukan hasil "tidak pasti".
 
 ### Commit task
 
 - Pesan: feat(web): add genre rename and delete dialogs (GEN-004)
-- SHA: belum dibuat
+- SHA: d429f64
 
 ### Blocker atau tindak lanjut
 
@@ -162,7 +162,7 @@ Aktif setelah GEN-API-001.
 
 ## Task: GEN-005 — Picker multi-genre
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: 6
 - Referensi: GEN-US-01
@@ -176,8 +176,8 @@ Perbarui `genre-picker.tsx`: multi-pilih dengan chip, pencarian, buat genre baru
 
 ### Acceptance criteria
 
-- [ ] Banyak genre dapat dipilih/dilepas; pilihan bertahan saat pencarian berubah.
-- [ ] Buat genre inline menambah opsi dan memilihnya; error tidak menghapus pilihan.
+- [x] Banyak genre dapat dipilih/dilepas; pilihan bertahan saat pencarian berubah.
+- [x] Buat genre inline menambah opsi dan memilihnya; error tidak menghapus pilihan.
 
 ### Validasi
 
@@ -185,12 +185,12 @@ Test picker; regresi form konten.
 
 ### Hasil dan bukti
 
-Belum dikerjakan.
+10 Oktober 2026: `genre-picker.tsx` memakai query genres baru; chip nama (nama dikenal dari baseline edit), penghitung "N selected · up to 100", pesan batas, "Create “x”" inline (`POST /admin/genres`, memilih hasilnya, pilihan dipertahankan saat gagal), state pilihan di `genre-picker-state.ts`. Kode genre lama pada `content-client`/`content-queries` dihapus. 4 test lulus; suite web 278 pass, 0 fail (50 file).
 
 ### Commit task
 
 - Pesan: feat(web): improve genre picker (GEN-005)
-- SHA: belum dibuat
+- SHA: 1a304d5
 
 ### Blocker atau tindak lanjut
 
@@ -198,7 +198,7 @@ Digunakan juga oleh langkah Details (UFLOW-003).
 
 ## Task: GEN-006 — Bukti browser dan closure dokumen
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: 7
 - Referensi: plan
@@ -212,7 +212,7 @@ Bukti browser halaman dan picker; perbarui plan, backlog, desain, `docs/README.m
 
 ### Acceptance criteria
 
-- [ ] Bukti dicatat atau batas diuji dicatat apa adanya; `docs:check` lulus.
+- [x] Bukti dicatat atau batas diuji dicatat apa adanya; `docs:check` lulus.
 
 ### Validasi
 
@@ -220,12 +220,12 @@ Smoke browser; `bun run docs:check`.
 
 ### Hasil dan bukti
 
-Belum dikerjakan.
+10 Oktober 2026: `bun run build` lulus (2 successful, 1 cached); `bun run lint` dan `bun run check-types` lulus (cache Turbo); `bun test ./apps/web/test` 278 pass; `bun run docs:check` lulus. **Batas:** bukti browser untuk halaman Genres dan picker tidak ada (halaman admin di balik login dan runner browser proyek belum dikonfigurasi); perilaku interaktif hanya dibuktikan lewat test logika dan SSR. Rename/delete nonaktif sampai GEN-API-001.
 
 ### Commit task
 
 - Pesan: docs(web): close admin genres (GEN-006)
-- SHA: belum dibuat
+- SHA: dicatat pada update dokumentasi berikutnya
 
 ### Blocker atau tindak lanjut
 

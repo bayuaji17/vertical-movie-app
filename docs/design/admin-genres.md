@@ -1,6 +1,6 @@
 # Halaman Genres admin
 
-> Status: approved plan, spesifikasi komponen · 10 Oktober 2026 · Keputusan pengguna pada [plan](../plans/admin-genres/implementation-plan.md#keputusan-pengguna-10-oktober-2026). Tanpa mockup raster; spesifikasi ini bukan bukti implementasi.
+> Status: implemented lokal (tanpa bukti browser), spesifikasi komponen · 10 Oktober 2026 · Keputusan pengguna pada [plan](../plans/admin-genres/implementation-plan.md#keputusan-pengguna-10-oktober-2026). Tanpa mockup raster; spesifikasi ini bukan bukti implementasi.
 
 Rute `/admin/genres` memakai admin shell yang ada (Rhea, Light/Dark/System). Item sidebar "Genres" (ikon tag) berada setelah Content dan sebelum Settings, juga pada drawer mobile.
 
