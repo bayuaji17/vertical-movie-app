@@ -6,7 +6,11 @@ import {
   openedFromBrowse,
   stripLegacyTypeSearch,
 } from '../src/lib/public/catalog-navigation'
-import { browseSearch } from '../src/lib/public/catalog-model'
+import {
+  browseFilters,
+  browseSearch,
+  normalizeQuery,
+} from '../src/lib/public/catalog-model'
 
 function redirected(run: () => void): { to: unknown; search: unknown } | null {
   try {
@@ -30,19 +34,54 @@ test('detail and watch URLs drop any legacy type query', () => {
     redirected(() => stripLegacyTypeSearch(at('/videos/a', ''))),
   ).toBeNull()
 })
-test('home keeps only film and standalone filters in the URL', () => {
-  for (const value of ['film', 'standalone'])
+test('home keeps only non-default filters and a trimmed query in the URL', () => {
+  for (const search of [
+    '',
+    '?type=film',
+    '?type=standalone',
+    '?type=series',
+    '?q=night',
+    '?type=film&q=night',
+  ])
     expect(
-      redirected(() => normalizeBrowseLocation(at('/', '?type=' + value))),
+      redirected(() => normalizeBrowseLocation(at('/', search))),
     ).toBeNull()
-  expect(redirected(() => normalizeBrowseLocation(at('/', '')))).toBeNull()
-  for (const value of ['all', 'wrong', 'series'])
-    expect(
-      redirected(() => normalizeBrowseLocation(at('/', '?type=' + value))),
-    ).toEqual({ to: '/', search: {} })
+  for (const [search, expected] of [
+    ['?type=all', {}],
+    ['?type=wrong', {}],
+    ['?type=Film', {}],
+    ['?type=all&q=night', { q: 'night' }],
+    ['?type=film&q=', { type: 'film' }],
+    ['?q=%20%20', {}],
+    ['?q=%20night%20', { q: 'night' }],
+    ['?type=bogus&q=%20a%20', { q: 'a' }],
+  ] as const)
+    expect(redirected(() => normalizeBrowseLocation(at('/', search)))).toEqual({
+      to: '/',
+      search: expected,
+    })
+  const long = 'x'.repeat(250)
+  expect(
+    redirected(() => normalizeBrowseLocation(at('/', '?q=' + long))),
+  ).toEqual({ to: '/', search: { q: 'x'.repeat(200) } })
+})
+test('browse filters map the URL type to API kind and bound the query', () => {
+  expect(browseFilters('all', '')).toEqual({
+    search: '',
+    kind: 'all',
+    genreId: 'all',
+  })
+  expect(browseFilters('film', ' Night ').kind).toBe('movie')
+  expect(browseFilters('series', 'a').kind).toBe('series')
+  expect(browseFilters('standalone', 'a').kind).toBe('standalone')
+  expect([...browseFilters('all', '😀'.repeat(300)).search]).toHaveLength(200)
+  expect(normalizeQuery(undefined)).toBe('')
+  expect(normalizeQuery(['a'])).toBe('')
 })
 test('browse search omits the default filter', () => {
   expect(browseSearch('all')).toEqual({})
+  expect(browseSearch('all', '  ')).toEqual({})
+  expect(browseSearch('series', ' abc ')).toEqual({ type: 'series', q: 'abc' })
   expect(browseSearch('film')).toEqual({ type: 'film' })
   expect(browseSearch('standalone')).toEqual({ type: 'standalone' })
 })

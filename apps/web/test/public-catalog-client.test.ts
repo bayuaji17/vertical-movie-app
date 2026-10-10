@@ -45,7 +45,7 @@ test('public Eden adapter sends canonical query/abort, omits credentials and val
   const url = new URL(request!.url)
   expect(url.pathname).toBe('/api/catalog')
   expect(url.searchParams.get('search')).toBe('rain')
-  expect(url.searchParams.get('limit')).toBe('6')
+  expect(url.searchParams.get('limit')).toBe('20')
   expect(url.searchParams.has('cursor')).toBe(false)
   expect(data.expiresAt).toBe(101)
   expect(data.items[0].poster).toBe('/api' + movie.posterPath)

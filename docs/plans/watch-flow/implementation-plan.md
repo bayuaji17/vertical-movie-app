@@ -129,6 +129,7 @@ Perubahan frontend saja; rollback dengan revert commit. Redirect legacy dipertah
 ## Execution history
 
 - 10 Oktober 2026: context dan plan ditulis; branch `feat/watch-flow-redesign` dibuat dari `main` (`f1b1d18`). Belum ada implementasi.
+- 11 Oktober 2026: WFLOW-009 diimplementasikan lokal (Review): Browse berpindah ke `GET /catalog`, `q`/`type` di URL, debounce 300 ms; daftar `GET /videos` web dihapus.
 - 11 Oktober 2026: pengguna menyetujui preview dan D1–D7 ("oke setuju"); WFLOW-001 Done, WFLOW-009 Ready. D6 mengubah keputusan homepage 8 Oktober 2026 (Series ikut di Browse/search).
 - 10 Oktober 2026: WFLOW-002 selesai lokal (`b401c47`). WFLOW-001: [desain](../../design/watch-flow.md) dan [preview HTML](../../design/watch-flow-preview.html) ditulis, termasuk input search debounce; menunggu persetujuan D1–D7. WFLOW-009 ditambahkan untuk search.
 - 10 Oktober 2026: pengguna memutuskan commit GEN-007 (`8ce7d1e`, `7af059a`) tetap berada di branch ini; branch dibuat dari `f1b1d18` sehingga belum memuat merge PR #27 di `main`. Pekerjaan watch-flow berikutnya mengikuti plan ini.

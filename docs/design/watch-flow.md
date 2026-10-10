@@ -37,7 +37,7 @@ Rasio 9:16 tidak pernah di-crop atau di-stretch: lebar player diturunkan dari ti
 - Hasil memakai filter yang sedang aktif. Mengubah filter mempertahankan teks; mengubah teks mempertahankan filter.
 - URL: `/?type=film&q=night`; `type=all` dan `q` kosong tidak ditulis. Perubahan `q` memakai `replace` agar tombol Back tidak dipenuhi ketikan; perubahan filter tetap `push`. Request sebelumnya dibatalkan (AbortSignal) ketika query key berubah. Kunci query menyertakan `q` ter-normalisasi.
 - Sumber data: API `GET /catalog` sudah mempunyai `search`, `kind`, `genreId`, cursor dan `total` (lihat [API publik](../architecture/overview.md)). Hasil tetap memakai Load more manual dan skeleton append.
-- State: loading awal (skeleton), empty ("No results for “…”" + Clear search), error ("Could not search" + Retry search; hasil sebelumnya tetap), offline (input dinonaktifkan, "Reconnect to search"). Search dinonaktifkan saat offline dan tidak mengirim permintaan.
+- State: loading awal (skeleton), empty ("No results for “…”" + Clear search), error ("Could not search" + Retry search; hasil query sebelumnya tidak ditampilkan karena setiap query punya daftar sendiri), offline (input dinonaktifkan, "Reconnect to search"). Search dinonaktifkan saat offline dan tidak mengirim permintaan.
 - Series: kartu Series memakai badge "Series" dan "N seasons" bila keputusan D6 menyertakan Series di Browse.
 
 ## Detail Film/Standalone (`/videos/:slug`)

@@ -1,15 +1,5 @@
 import { expect, test } from 'bun:test'
-import {
-  QueryClient,
-  InfiniteQueryObserver,
-  dehydrate,
-} from '@tanstack/react-query'
-import {
-  catalogItems,
-  catalogKey,
-  catalogOptions,
-  restartCatalog,
-} from '../src/lib/public/catalog-queries'
+import { QueryClient, dehydrate } from '@tanstack/react-query'
 import { PosterQueue } from '../src/lib/public/poster-state'
 import type { PublicVideo, SignedPoster } from '../src/lib/public/catalog-model'
 
@@ -30,82 +20,6 @@ const packet = (n: number, expiry = Date.now() + 100_000): SignedPoster => ({
   expiresAt: new Date(expiry).toISOString(),
 })
 
-test('append failure retains pages/cursor, double click shares request, dedup by ID and refresh restarts first page', async () => {
-  const client = new QueryClient(),
-    cursors: Array<string | null> = []
-  let fail = true
-  const api = {
-    page: async (_type: unknown, cursor: string | null) => {
-      cursors.push(cursor)
-      await Promise.resolve()
-      if (cursor && fail) throw Error('503')
-      return {
-        items: cursor ? [video(1), video(2)] : [video(1)],
-        nextCursor: cursor ? null : 'next',
-        expiresAt: Date.now() + 60_000,
-      }
-    },
-  }
-  const options = catalogOptions('all', api)
-  await client.infiniteQuery(options)
-  const observer = new InfiniteQueryObserver(client, options),
-    unsubscribe = observer.subscribe(() => {})
-  await Promise.all([
-    observer.fetchNextPage({ cancelRefetch: false }),
-    observer.fetchNextPage({ cancelRefetch: false }),
-  ])
-  expect(cursors).toEqual([null, 'next'])
-  expect(observer.getCurrentResult().isFetchNextPageError).toBe(true)
-  expect(catalogItems(observer.getCurrentResult().data?.pages).length).toBe(1)
-  fail = false
-  await observer.fetchNextPage({ cancelRefetch: false })
-  expect(cursors).toEqual([null, 'next', 'next'])
-  expect(catalogItems(observer.getCurrentResult().data?.pages).length).toBe(2)
-  await restartCatalog(client, 'all', api)
-  expect(observer.getCurrentResult().data?.pageParams).toEqual([null])
-  expect(cursors.at(-1)).toBeNull()
-  expect(catalogKey('film')).not.toEqual(catalogKey('all'))
-  unsubscribe()
-  client.clear()
-})
-test('canceled filter response cannot replace destination data and metadata dehydration has no capability', async () => {
-  const client = new QueryClient()
-  let release!: () => void
-  const waiting = new Promise<void>((r) => {
-    release = r
-  })
-  const old = client
-    .infiniteQuery(
-      catalogOptions('all', {
-        page: async () => {
-          await waiting
-          return {
-            items: [video(1)],
-            nextCursor: null,
-            expiresAt: Date.now() + 60_000,
-          }
-        },
-      }),
-    )
-    .catch(() => undefined)
-  await client.cancelQueries({ queryKey: catalogKey('all'), exact: true })
-  await client.infiniteQuery(
-    catalogOptions('film', {
-      page: async () => ({
-        items: [video(2)],
-        nextCursor: null,
-        expiresAt: Date.now() + 60_000,
-      }),
-    }),
-  )
-  release()
-  await old
-  const state = JSON.stringify(dehydrate(client))
-  expect(state).toContain('film-2')
-  expect(state).not.toContain('film-1')
-  expect(state).not.toMatch(/posterUrl|masterUrl|signature/)
-  client.clear()
-})
 test('visible poster queue bounds four requests, deduplicates consumers, cancels offscreen work and does not persist capabilities', async () => {
   let active = 0,
     maximum = 0,

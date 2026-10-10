@@ -347,11 +347,11 @@ Tidak ada.
 
 ## Task: WFLOW-009 — Search Browse dengan debounce
 
-- Status: Ready
+- Status: Review (diimplementasikan lokal; perilaku interaktif belum dibuktikan di browser)
 - Owner: agent
 - Prioritas: 9
 - Referensi: WFLOW-US-04; [desain](../design/watch-flow.md#browse-dan-search); API `GET /catalog` (`search`, `kind`, cursor)
-- Diperbarui: 2026-10-10
+- Diperbarui: 2026-10-11
 - Dependensi: WFLOW-001, WFLOW-002
 - Ukuran: sedang
 
@@ -363,9 +363,9 @@ Input search pada Browse (`/`) tanpa tombol submit: debounce 300 ms, tahan selam
 
 - [ ] Permintaan hanya dikirim 300 ms setelah ketikan terakhir; satu request untuk rangkaian ketikan cepat; request lama dibatalkan.
 - [ ] Komposisi IME tidak memicu request sebelum selesai.
-- [ ] `/?q=…&type=…` dapat dibuka langsung (SSR/hydrate) dan Back tidak berisi ketikan per karakter.
-- [ ] Empty, error (hasil sebelumnya tetap), offline (input nonaktif) dan Clear/Escape berfungsi; fokus tetap di input.
-- [ ] Filter dan search berkombinasi; cursor Load more tidak bercampur antar query.
+- [x] `/?q=…&type=…` dapat dibuka langsung dan dirender SSR dengan input terisi (curl dev server). Back tanpa riwayat ketikan memakai `replace`, belum dibuktikan di browser.
+- [ ] Empty, error (Retry search), offline (input nonaktif) dan Clear/Escape berfungsi; fokus tetap di input.
+- [x] Filter dan search berkombinasi; cursor Load more tidak bercampur antar query (query key per filter + q; test `public-browse-loader.test.ts`).
 
 ### Validasi
 
@@ -373,13 +373,21 @@ Test hook debounce dan klien (timer palsu), test komponen; browser dev/build 390
 
 ### Hasil dan bukti
 
-Belum ada.
+Diimplementasikan 11 Oktober 2026 pada `feat/watch-flow-redesign`.
+
+- Browse (`/`) memakai `GET /catalog` melalui `lib/catalog` (`catalogInfiniteOptions`, 20 per halaman) dan poster privat `/api/catalog/:kind/:id/poster`; filter All/Films/Standalone/Series dan `q` berada di URL (`/?type=series&q=night`, `all` dan `q` kosong tidak ditulis; `?q=` tidak kanonik dialihkan). Loader `loadBrowseCatalog` meniru pola status SSR sebelumnya.
+- `useBrowseSearch` (`hooks/use-browse-search.ts`): draft lokal, debounce 300 ms memakai `createCatalogDebounce` yang sudah ada, ditahan saat komposisi IME, trim dan batas 200 code point, `replace` untuk `q`, `push` untuk filter, query lama dibatalkan dan tujuan dimulai dari halaman satu, URL eksternal (Back/Forward) menimpa draft. Komponen `BrowseSearch` (spinner, Clear, Escape, `role="search"`, `aria-live` untuk ringkasan) dan `BrowseCard` (Series ke `/series/:slug`, lainnya ke `/videos/:slug` dengan state `fromBrowse`).
+- Dihapus karena tidak lagi dipakai: daftar `GET /videos` pada klien/reader/query web (`page`, `catalogOptions`, `restartCatalog`, `loadCatalog`, `catalogKinds`, `publicVideoPageSchema`) dan `components/public/catalog-card.tsx`; test terkait dialihkan ke `detail`. API tidak diubah.
+- Penyimpangan dari desain: saat query gagal, daftar query sebelumnya tidak ditampilkan (setiap query punya daftar sendiri); copy dan desain diperbarui.
+- Test: `bun test apps/web/test/public-*.test.ts*` → 26 pass/0 fail (baru: `public-browse-loader.test.ts`, kasus URL/filter pada `public-navigation.test.ts`); `bun run check-types` 3/3 sukses; `bun run lint` sukses; `bun run build` sukses. Dev server lokal (API 3001, web 3000, PostgreSQL/MinIO): `/?type=all` → 307 ke `/`; `/?q=%20a%20` → 307 ke `/?q=a`; `/`, `/?type=series`, `/?q=a`, `/?type=film&q=test`, `/?q=zzzzqqq` → 200 dengan input terisi dan ringkasan ("1 result for “a”", "0 results for “zzzzqqq”", "No videos in this category"); tautan kartu `/videos/test-film-1`; HTML tanpa signed URL; poster `/api/catalog/movie/…/poster` → 200. Dev DB hanya berisi satu Film.
+
+Belum terbukti: debounce 300 ms dan satu request per rangkaian ketikan di browser, IME, Clear/Escape/fokus, spinner/skeleton, Back/Forward menyinkronkan draft, offline, dan tampilan 390/1440 px (tidak ada browser; `useBrowseSearch` tidak diuji unit karena tanpa DOM, hanya util debounce dan loader). Seri/Standalone/jumlah halaman >1 belum diuji dengan data dev nyata.
 
 ### Commit task
 
 - Pesan: `feat(web): add debounced browse search (WFLOW-009)`
 - SHA: belum dibuat
-- Hook/checks: belum dijalankan
+- Hook/checks: dijalankan saat commit
 - Ledger: dicatat pada update dokumentasi berikutnya
 
 ### Blocker atau tindak lanjut

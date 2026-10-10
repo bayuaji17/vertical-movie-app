@@ -3,14 +3,8 @@ import { createApiClient } from '../api/client'
 import type { ApiFetcher } from '../api/client'
 import { CatalogRequestError } from '../catalog/catalog-client'
 import { contentSlug, watchVideoSchema } from '../catalog/content-model'
-import {
-  catalogKinds,
-  catalogPageSize,
-  catalogType,
-  publicVideoPageSchema,
-  signedPosterSchema,
-} from './catalog-model'
-import type { CatalogType, PublicVideo } from './catalog-model'
+import { signedPosterSchema } from './catalog-model'
+import type { PublicVideo } from './catalog-model'
 
 export function createPublicVideoClient(
   base: string,
@@ -46,32 +40,6 @@ export function createPublicVideoClient(
     if (!contentSlug.safeParse(value).success)
       throw new CatalogRequestError(422)
   }
-  async function page(
-    type: CatalogType,
-    cursor: string | null,
-    signal: AbortSignal,
-  ) {
-    signal.throwIfAborted()
-    const normalized = catalogType(type)
-    const r = await client.videos.get({
-      query: {
-        limit: String(catalogPageSize),
-        kinds: catalogKinds[normalized],
-        ...(cursor ? { cursor } : {}),
-      },
-      fetch: { signal },
-    })
-    const data = check(r, publicVideoPageSchema, signal)
-    if (
-      data.items.some((v) =>
-        normalized === 'film'
-          ? v.kind !== 'movie'
-          : normalized === 'standalone' && v.kind !== 'standalone',
-      )
-    )
-      throw new CatalogRequestError(502)
-    return { ...data, expiresAt: now() + 60_000 }
-  }
   async function detail(value: string, signal: AbortSignal) {
     slug(value)
     signal.throwIfAborted()
@@ -104,8 +72,7 @@ export function createPublicVideoClient(
       throw new CatalogRequestError(502)
     return data
   }
-  return { page, detail, poster }
+  return { detail, poster }
 }
 export type PublicVideoClient = ReturnType<typeof createPublicVideoClient>
-export type PublicVideoPage = Awaited<ReturnType<PublicVideoClient['page']>>
 export type PublicVideoDetail = Awaited<ReturnType<PublicVideoClient['detail']>>

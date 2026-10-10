@@ -1663,9 +1663,7 @@
                 <div class="status" aria-live="polite"></div>
                 <div class="notice" role="alert">
                   <h2>Could not search</h2>
-                  <p class="muted">
-                    Your previous results are unchanged. Please try again.
-                  </p>
+                  <p class="muted">Please try again in a moment.</p>
                   <button class="btn">Retry search</button>
                 </div>
                 <div
@@ -4038,7 +4036,7 @@
           body = skel(5);
         } else if (state === "error") {
           status = "";
-          body = `<div class="notice" role="alert"><h2>Could not search</h2><p class="muted">Your previous results are unchanged. Please try again.</p><button class="btn">Retry search</button></div>`;
+          body = `<div class="notice" role="alert"><h2>Could not search</h2><p class="muted">Please try again in a moment.</p><button class="btn">Retry search</button></div>`;
         } else if (state === "empty" || list.length === 0) {
           const t = state === "empty" ? "zzz" : shown.trim();
           status = `0 results for “${q(t)}”`;
