@@ -23,6 +23,7 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as TitlesKindSlugRouteImport } from './routes/titles.$kind.$slug'
 import { Route as AdminAuthenticatedContentIndexRouteImport } from './routes/admin._authenticated.content.index'
 import { Route as AdminAuthenticatedContentNewRouteImport } from './routes/admin._authenticated.content.new'
+import { Route as AdminAuthenticatedGenresIndexRouteImport } from './routes/admin._authenticated.genres.index'
 import { Route as AdminAuthenticatedVideosIdPreviewRouteImport } from './routes/admin._authenticated.videos.$id.preview'
 import { Route as AdminAuthenticatedContentTypeIdIndexRouteImport } from './routes/admin._authenticated.content.$type.$id.index'
 import { Route as AdminAuthenticatedContentTypeIdEditRouteImport } from './routes/admin._authenticated.content.$type.$id.edit'
@@ -106,6 +107,12 @@ const AdminAuthenticatedContentNewRoute =
     path: '/content/new',
     getParentRoute: () => AdminAuthenticatedRoute,
   } as any)
+const AdminAuthenticatedGenresIndexRoute =
+  AdminAuthenticatedGenresIndexRouteImport.update({
+    id: '/genres/',
+    path: '/genres/',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
 const AdminAuthenticatedVideosIdPreviewRoute =
   AdminAuthenticatedVideosIdPreviewRouteImport.update({
     id: '/videos/$id/preview',
@@ -181,6 +188,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminAuthenticatedIndexRoute
   '/admin/content/new': typeof AdminAuthenticatedContentNewRoute
   '/admin/content/': typeof AdminAuthenticatedContentIndexRoute
+  '/admin/genres/': typeof AdminAuthenticatedGenresIndexRoute
   '/admin/videos/$id/preview': typeof AdminAuthenticatedVideosIdPreviewRoute
   '/admin/content/$type/$id/edit': typeof AdminAuthenticatedContentTypeIdEditRoute
   '/admin/series/$seriesId/seasons/new': typeof AdminAuthenticatedSeriesSeriesIdSeasonsNewRoute
@@ -205,6 +213,7 @@ export interface FileRoutesByTo {
   '/titles/$kind/$slug': typeof TitlesKindSlugRoute
   '/admin/content/new': typeof AdminAuthenticatedContentNewRoute
   '/admin/content': typeof AdminAuthenticatedContentIndexRoute
+  '/admin/genres': typeof AdminAuthenticatedGenresIndexRoute
   '/admin/videos/$id/preview': typeof AdminAuthenticatedVideosIdPreviewRoute
   '/admin/content/$type/$id/edit': typeof AdminAuthenticatedContentTypeIdEditRoute
   '/admin/series/$seriesId/seasons/new': typeof AdminAuthenticatedSeriesSeriesIdSeasonsNewRoute
@@ -232,6 +241,7 @@ export interface FileRoutesById {
   '/admin/_authenticated/': typeof AdminAuthenticatedIndexRoute
   '/admin/_authenticated/content/new': typeof AdminAuthenticatedContentNewRoute
   '/admin/_authenticated/content/': typeof AdminAuthenticatedContentIndexRoute
+  '/admin/_authenticated/genres/': typeof AdminAuthenticatedGenresIndexRoute
   '/admin/_authenticated/videos/$id/preview': typeof AdminAuthenticatedVideosIdPreviewRoute
   '/admin/_authenticated/content/$type/$id/edit': typeof AdminAuthenticatedContentTypeIdEditRoute
   '/admin/_authenticated/series/$seriesId/seasons/new': typeof AdminAuthenticatedSeriesSeriesIdSeasonsNewRoute
@@ -259,6 +269,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/content/new'
     | '/admin/content/'
+    | '/admin/genres/'
     | '/admin/videos/$id/preview'
     | '/admin/content/$type/$id/edit'
     | '/admin/series/$seriesId/seasons/new'
@@ -283,6 +294,7 @@ export interface FileRouteTypes {
     | '/titles/$kind/$slug'
     | '/admin/content/new'
     | '/admin/content'
+    | '/admin/genres'
     | '/admin/videos/$id/preview'
     | '/admin/content/$type/$id/edit'
     | '/admin/series/$seriesId/seasons/new'
@@ -309,6 +321,7 @@ export interface FileRouteTypes {
     | '/admin/_authenticated/'
     | '/admin/_authenticated/content/new'
     | '/admin/_authenticated/content/'
+    | '/admin/_authenticated/genres/'
     | '/admin/_authenticated/videos/$id/preview'
     | '/admin/_authenticated/content/$type/$id/edit'
     | '/admin/_authenticated/series/$seriesId/seasons/new'
@@ -432,6 +445,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuthenticatedContentNewRouteImport
       parentRoute: typeof AdminAuthenticatedRoute
     }
+    '/admin/_authenticated/genres/': {
+      id: '/admin/_authenticated/genres/'
+      path: '/genres'
+      fullPath: '/admin/genres/'
+      preLoaderRoute: typeof AdminAuthenticatedGenresIndexRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
     '/admin/_authenticated/videos/$id/preview': {
       id: '/admin/_authenticated/videos/$id/preview'
       path: '/videos/$id/preview'
@@ -510,6 +530,7 @@ interface AdminAuthenticatedRouteChildren {
   AdminAuthenticatedIndexRoute: typeof AdminAuthenticatedIndexRoute
   AdminAuthenticatedContentNewRoute: typeof AdminAuthenticatedContentNewRoute
   AdminAuthenticatedContentIndexRoute: typeof AdminAuthenticatedContentIndexRoute
+  AdminAuthenticatedGenresIndexRoute: typeof AdminAuthenticatedGenresIndexRoute
   AdminAuthenticatedVideosIdPreviewRoute: typeof AdminAuthenticatedVideosIdPreviewRoute
   AdminAuthenticatedContentTypeIdEditRoute: typeof AdminAuthenticatedContentTypeIdEditRoute
   AdminAuthenticatedSeriesSeriesIdSeasonsNewRoute: typeof AdminAuthenticatedSeriesSeriesIdSeasonsNewRoute
@@ -527,6 +548,7 @@ const AdminAuthenticatedRouteChildren: AdminAuthenticatedRouteChildren = {
   AdminAuthenticatedIndexRoute: AdminAuthenticatedIndexRoute,
   AdminAuthenticatedContentNewRoute: AdminAuthenticatedContentNewRoute,
   AdminAuthenticatedContentIndexRoute: AdminAuthenticatedContentIndexRoute,
+  AdminAuthenticatedGenresIndexRoute: AdminAuthenticatedGenresIndexRoute,
   AdminAuthenticatedVideosIdPreviewRoute:
     AdminAuthenticatedVideosIdPreviewRoute,
   AdminAuthenticatedContentTypeIdEditRoute:

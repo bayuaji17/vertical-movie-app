@@ -94,13 +94,6 @@ export function createContentClient(
           fetch: { signal },
         }),
       ),
-    genres: (search: string, cursor?: string, signal?: AbortSignal) =>
-      unwrap(
-        api.admin.genres.get({
-          query: { search, cursor, limit: '20' },
-          fetch: { signal },
-        }),
-      ),
     async detail(type: ContentType, id: string, signal?: AbortSignal) {
       if (type === 'series')
         return {

@@ -255,6 +255,11 @@ export function ContentForm({
                         value={field.state.value}
                         onChange={field.handleChange}
                         disabled={pending}
+                        knownGenres={
+                          baseline && baseline.type !== 'series'
+                            ? baseline.data.effectiveGenres
+                            : undefined
+                        }
                       />
                       <FieldError
                         errors={field.state.meta.errors.map((message) => ({

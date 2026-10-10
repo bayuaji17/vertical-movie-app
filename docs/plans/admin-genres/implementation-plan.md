@@ -2,7 +2,7 @@
 
 ## Plan metadata
 
-- Status: **approved plan** (pengguna, 10 Oktober 2026); implementasi belum dimulai.
+- Status: **implemented lokal** (10 Oktober 2026): GEN-001–006 Done; tanpa bukti browser; edit/hapus genre menunggu GEN-API-001; bukan klaim kesiapan production.
 - Date: 10 Oktober 2026; decision owner: pengguna.
 - Repository: `bayuaji17/vertical-movie-app`; base ref: `main`; base SHA: `acffe2dcdad62ddf003ff1ae2aa2db4ed8dce07a`.
 - Context: [repository-context.md](repository-context.md).
@@ -61,11 +61,11 @@ Aturan root `AGENTS.md`; commit per task; tanpa mock aktif di runtime; tanpa per
 
 ## Acceptance criteria
 
-- [ ] `/admin/genres` mendaftar, mencari dan membuat genre memakai API yang ada, dengan state error/kosong/offline.
-- [ ] Aksi rename/hapus selesai sebagai UI dan teruji, tetapi nonaktif pada runtime dengan penjelasan jelas.
-- [ ] Picker mendukung multi-genre dan pembuatan inline tanpa kehilangan pilihan; batas 100 jelas.
-- [ ] Kontrak API dan istilah "genre" tidak berubah.
-- [ ] Gates lulus dan bukti dicatat per task.
+- [x] `/admin/genres` mendaftar, mencari dan membuat genre memakai API yang ada, dengan state error/kosong/offline (dibuktikan lewat test SSR/logika; belum di browser).
+- [x] Aksi rename/hapus selesai sebagai UI dan teruji, tetapi nonaktif pada runtime dengan penjelasan jelas.
+- [x] Picker mendukung multi-genre dan pembuatan inline tanpa kehilangan pilihan; batas 100 jelas.
+- [x] Kontrak API dan istilah "genre" tidak berubah.
+- [x] Gates lulus dan bukti dicatat per task (tanpa bukti browser).
 
 ## Risks and mitigations
 
@@ -85,3 +85,4 @@ Observasi kode pada base SHA: admin genres hanya GET/POST; multi-genre sudah did
 ## Execution log
 
 - 10 Oktober 2026: context dan plan ditulis. Pengguna memutuskan categories = genres, istilah genre dipertahankan, GEN-API-001 setelah frontend; plan approved.
+- 10 Oktober 2026: GEN-001–005 diimplementasikan pada `feat/admin-genres` (1ee7fe6, aceeee0, 5fb4d40, d429f64, 1a304d5); GEN-006 closure dengan batas bukti browser pada backlog.

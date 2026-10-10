@@ -1,9 +1,5 @@
 import { invalidateDashboard } from './dashboard-queries'
-import {
-  infiniteQueryOptions,
-  mutationOptions,
-  queryOptions,
-} from '@tanstack/react-query'
+import { mutationOptions, queryOptions } from '@tanstack/react-query'
 import type { QueryClient } from '@tanstack/react-query'
 import type {
   ContentClient,
@@ -23,8 +19,6 @@ export const contentKeys = {
     [...contentKeys.lists(identity), filters] as const,
   detail: (identity: string, type: ContentType, id: string) =>
     [...contentKeys.root(identity), 'detail', type, id] as const,
-  genres: (identity: string, search: string) =>
-    ['admin', identity, 'genres', search] as const,
 }
 function configured(client?: ContentClient): ContentClient {
   if (!client)
@@ -59,21 +53,6 @@ export function contentDetailOptions(
     queryKey: contentKeys.detail(identity, type, id),
     enabled: typeof window !== 'undefined',
     queryFn: ({ signal }) => configured(client).detail(type, id, signal),
-  })
-}
-export function genreOptions(
-  client: ContentClient | undefined,
-  identity: string,
-  search: string,
-) {
-  return infiniteQueryOptions({
-    ...privateRead,
-    queryKey: contentKeys.genres(identity, search),
-    enabled: typeof window !== 'undefined',
-    initialPageParam: undefined as string | undefined,
-    queryFn: ({ pageParam, signal }) =>
-      configured(client).genres(search, pageParam, signal),
-    getNextPageParam: (page) => page.nextCursor ?? undefined,
   })
 }
 export type CreateContent =
