@@ -11,9 +11,7 @@ import {
   ContentFailure,
 } from '#/components/catalog/content-page'
 import { PublicShell } from '#/components/public/public-shell'
-import { catalogSearch } from '#/lib/public/catalog-model'
-import type { CatalogType } from '#/lib/public/catalog-model'
-import { normalizeCatalogLocation } from '#/lib/public/catalog-navigation'
+import { stripLegacyTypeSearch } from '#/lib/public/catalog-navigation'
 import { isMissingContent } from '#/lib/public/missing-content'
 import { usePublicOnline } from '#/hooks/use-public-online'
 import { VerticalVideoPlayer } from '#/components/vertical-video-player'
@@ -29,8 +27,7 @@ import {
 import type { WatchVideo } from '#/lib/catalog/content-model'
 
 export const Route = createFileRoute('/watch/$slug')({
-  validateSearch: catalogSearch,
-  beforeLoad: ({ location }) => normalizeCatalogLocation(location),
+  beforeLoad: ({ location }) => stripLegacyTypeSearch(location),
   loader: async ({ context, params }) => {
     const result = await loadWatchMetadata(context.queryClient, params.slug)
     if (isMissingContent(result.status)) throw notFound()
@@ -63,7 +60,6 @@ export const Route = createFileRoute('/watch/$slug')({
 function Watch() {
   const { slug } = Route.useParams(),
     bootstrap = Route.useLoaderData()
-  const type = Route.useSearch().type ?? 'all'
   const online = usePublicOnline()
   const client = useQueryClient(),
     options = watchMetadataOptions(slug)
@@ -77,18 +73,14 @@ function Watch() {
       ? query.error.status
       : (bootstrap.status ?? 503)
   return (
-    <PublicShell type={type}>
+    <PublicShell>
       {!online && (
         <p role="status" className="mb-5 text-muted-foreground">
           You are offline. Reconnect to play this video.
         </p>
       )}
       {query.data ? (
-        <WatchContent
-          key={query.data.item.id}
-          video={query.data.item}
-          type={type}
-        />
+        <WatchContent key={query.data.item.id} video={query.data.item} />
       ) : query.isFetching || (!query.isError && !bootstrap.status) ? (
         <ContentLoading />
       ) : (
@@ -103,13 +95,7 @@ function Watch() {
     </PublicShell>
   )
 }
-function WatchContent({
-  video,
-  type,
-}: {
-  video: WatchVideo
-  type: CatalogType
-}) {
+function WatchContent({ video }: { video: WatchVideo }) {
   const load = useCallback(
     (signal: AbortSignal) =>
       publicContentBrowser().playback(video.slug, video.id, signal),
@@ -141,7 +127,6 @@ function WatchContent({
                 <Link
                   to="/videos/$slug"
                   params={{ slug: video.slug }}
-                  search={{ type }}
                   preload={false}
                 />
               }
@@ -155,7 +140,7 @@ function WatchContent({
           className="min-h-11"
           nativeButton={false}
           role="link"
-          render={<Link to="/" search={{ type }} preload={false} />}
+          render={<Link to="/" preload={false} />}
         >
           Back to browse
         </Button>

@@ -6,13 +6,13 @@ import {
 import { createFileRoute } from '@tanstack/react-router'
 import { CatalogBrowser } from '#/components/public/catalog-browser'
 import { catalogSearch, catalogType } from '#/lib/public/catalog-model'
-import { normalizeCatalogLocation } from '#/lib/public/catalog-navigation'
+import { normalizeBrowseLocation } from '#/lib/public/catalog-navigation'
 import { loadCatalog } from '#/lib/public/catalog-queries'
 import { setPublicHttpStatus } from '#/lib/public/catalog-reader'
 
 export const Route = createFileRoute('/')({
   validateSearch: catalogSearch,
-  beforeLoad: ({ location }) => normalizeCatalogLocation(location),
+  beforeLoad: ({ location }) => normalizeBrowseLocation(location),
   loaderDeps: ({ search }) => ({ type: catalogType(search.type) }),
   loader: async ({ context, deps }) => {
     const result = await loadCatalog(context.queryClient, deps.type)

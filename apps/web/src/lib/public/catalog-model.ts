@@ -6,10 +6,14 @@ export const catalogTypes = ['all', 'film', 'standalone'] as const
 export function catalogType(value: unknown): CatalogType {
   return value === 'film' || value === 'standalone' ? value : 'all'
 }
-export function catalogSearch(search: Record<string, unknown>): {
-  type?: CatalogType
+// `all` is the default and stays out of the URL.
+export function browseSearch(type: CatalogType): {
+  type?: 'film' | 'standalone'
 } {
-  return { type: catalogType(search.type) }
+  return type === 'all' ? {} : { type }
+}
+export function catalogSearch(search: Record<string, unknown>) {
+  return browseSearch(catalogType(search.type))
 }
 export const catalogPageSize = 20
 export const catalogKinds = {

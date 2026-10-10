@@ -9,7 +9,8 @@ import { ToggleGroup, ToggleGroupItem } from '#/components/ui/toggle-group'
 import { Alert, AlertTitle, AlertDescription } from '#/components/ui/alert'
 import { usePublicCatalog } from '#/hooks/use-public-catalog'
 import { catalogKey } from '#/lib/public/catalog-queries'
-import { catalogType } from '#/lib/public/catalog-model'
+import { browseSearch, catalogType } from '#/lib/public/catalog-model'
+import { browseEntryState } from '#/lib/public/catalog-navigation'
 import type { CatalogType } from '#/lib/public/catalog-model'
 
 export function CatalogBrowser({
@@ -34,7 +35,7 @@ export function CatalogBrowser({
     await client.cancelQueries({ queryKey: catalogKey(next), exact: true })
     if (request !== revision.current) return
     client.removeQueries({ queryKey: catalogKey(next), exact: true })
-    await navigate({ to: '/', search: { type: next } })
+    await navigate({ to: '/', search: browseSearch(next) })
   }
   return (
     <PublicShell type={type}>
@@ -125,19 +126,17 @@ export function CatalogBrowser({
                 <CatalogCard
                   key={video.id}
                   video={video}
-                  renderLink={(children, className) => {
-                    const path: string = '/videos/' + video.slug
-                    return (
-                      <Link
-                        to={path}
-                        search={{ type }}
-                        preload={false}
-                        className={className}
-                      >
-                        {children}
-                      </Link>
-                    )
-                  }}
+                  renderLink={(children, className) => (
+                    <Link
+                      to="/videos/$slug"
+                      params={{ slug: video.slug }}
+                      state={browseEntryState}
+                      preload={false}
+                      className={className}
+                    >
+                      {children}
+                    </Link>
+                  )}
                 />
               ))}
             </div>

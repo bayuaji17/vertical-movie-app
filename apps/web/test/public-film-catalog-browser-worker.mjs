@@ -221,7 +221,7 @@ try {
   await page.reload()
   await count(20)
   await goto('/?type=wrong')
-  await page.waitForURL('**/?type=all')
+  await page.waitForURL((url) => url.pathname === '/' && url.search === '')
   await count(20)
   await button('Films').click()
   await count(6)
@@ -372,7 +372,9 @@ try {
   await page.waitForTimeout(300)
   assert.equal(playbackCount(), prior)
   await link('Watch now').click()
-  await page.waitForURL('**/watch/**?type=standalone')
+  await page.waitForURL(
+    (url) => url.pathname.startsWith('/watch/') && url.search === '',
+  )
   await ready()
   assert.equal(await page.locator('video').evaluate((v) => v.paused), true)
   await play()
@@ -407,8 +409,9 @@ try {
     () => document.querySelector('video')?.videoWidth === 486,
   )
   await link('Back to details').click()
-  assert.ok(
-    page.url().includes('/videos/' + initial.standalone + '?type=standalone'),
+  assert.equal(
+    new URL(page.url()).pathname + new URL(page.url()).search,
+    '/videos/' + initial.standalone,
   )
   assert.equal(await page.locator('video').count(), 0)
   await control({ playbackStatus: 503 })

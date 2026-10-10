@@ -9,23 +9,22 @@ import { Badge } from '#/components/ui/badge'
 import { Skeleton } from '#/components/ui/skeleton'
 import { Alert, AlertTitle, AlertDescription } from '#/components/ui/alert'
 import { usePublicOnline } from '#/hooks/use-public-online'
+import { useBrowseBack } from '#/hooks/use-browse-back'
 import { CatalogRequestError } from '#/lib/catalog/catalog-client'
 import { videoOptions } from '#/lib/public/catalog-queries'
 import { durationLabel } from '#/lib/public/catalog-model'
-import type { CatalogType } from '#/lib/public/catalog-model'
 
 export function VideoDetail({
   slug,
-  type,
   status,
 }: {
   slug: string
-  type: CatalogType
   status: number | null
 }) {
   const client = useQueryClient(),
     options = videoOptions(slug),
-    online = usePublicOnline()
+    online = usePublicOnline(),
+    back = useBrowseBack()
   const query = useQuery({
     ...options,
     enabled: online && (!status || !!client.getQueryData(options.queryKey)),
@@ -35,12 +34,12 @@ export function VideoDetail({
       query.error instanceof CatalogRequestError ? query.error.status : status
   const missing = errorStatus === 404 || errorStatus === 422
   return (
-    <PublicShell type={type}>
+    <PublicShell>
       <section className="flex flex-col gap-8">
         <Link
           to="/"
-          search={{ type }}
           preload={false}
+          onClick={back}
           className="inline-flex min-h-11 w-fit items-center gap-2 rounded-lg text-sm outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
         >
           <RiArrowLeftLine className="size-4" aria-hidden="true" />
@@ -102,7 +101,6 @@ export function VideoDetail({
                   <Link
                     to="/watch/$slug"
                     params={{ slug: video.slug }}
-                    search={{ type }}
                     preload={false}
                   />
                 }

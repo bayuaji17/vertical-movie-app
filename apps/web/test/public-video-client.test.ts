@@ -50,9 +50,9 @@ test('public video transport canonicalizes URL filter/cursor, strips credentials
   expect(JSON.stringify(page)).not.toMatch(
     /posterUrl|masterUrl|Signature|sourceKey/,
   )
-  expect(catalogSearch({ type: 'series', host: 'attacker' })).toEqual({
-    type: 'all',
-  })
+  expect(catalogSearch({ type: 'series', host: 'attacker' })).toEqual({})
+  expect(catalogSearch({ type: 'all' })).toEqual({})
+  expect(catalogSearch({ type: 'film' })).toEqual({ type: 'film' })
 })
 test('public failures and malformed DTOs never become empty pages or clear admin state', async () => {
   const query = new QueryClient()
