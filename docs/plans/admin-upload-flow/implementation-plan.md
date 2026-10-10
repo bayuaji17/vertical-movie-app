@@ -2,7 +2,7 @@
 
 ## Plan metadata
 
-- Status: **approved plan** (pengguna, 10 Oktober 2026); implementasi belum dimulai.
+- Status: **implemented lokal** (10 Oktober 2026): UFLOW-001–009 Done; tanpa bukti browser untuk alur penuh; progres media per item pada daftar menunggu field API; bukan klaim kesiapan production.
 - Date: 10 Oktober 2026; decision owner: pengguna.
 - Repository: `bayuaji17/vertical-movie-app`; base ref: `main`; base SHA: `acffe2dcdad62ddf003ff1ae2aa2db4ed8dce07a`.
 - Context: [repository-context.md](repository-context.md).
@@ -64,13 +64,13 @@ Aturan root `AGENTS.md`; commit per task dengan ID; tanpa bypass hook; push/PR/m
 
 ## Acceptance criteria
 
-- [ ] Admin menyelesaikan Film/Standalone dari Add a video sampai Publish melalui stepper tanpa membuka halaman detail.
-- [ ] Upload mulai otomatis dan status media diperbarui tanpa tombol manual; recovery tetap tersedia.
-- [ ] Cover dapat dipilih dari frame video, di-crop 9:16 atau diunggah sebagai gambar.
-- [ ] Review menampilkan preview tertanam dan checklist dengan tautan perbaikan; Publish idempotent dan aman terhadap konflik versi.
-- [ ] Daftar konten menunjukkan langkah berikutnya per draft.
-- [ ] Mesin upload dan kontrak API tidak berubah; test regresi lulus.
-- [ ] Gates dan bukti browser dicatat per task.
+- [x] Admin menyelesaikan Film/Standalone dari Add a video sampai Publish melalui stepper tanpa membuka halaman detail (dibuktikan lewat test logika dan SSR; belum di browser).
+- [x] Upload mulai otomatis dan status media diperbarui tanpa tombol manual; recovery tetap tersedia.
+- [x] Cover dapat dipilih dari frame video, di-crop 9:16 atau diunggah sebagai gambar (ekstraksi frame dibuktikan di Chrome nyata).
+- [x] Review menampilkan preview tertanam dan checklist dengan tautan perbaikan; Publish memakai controller idempotent yang ada.
+- [x] Daftar konten menunjukkan langkah berikutnya per draft (berdasarkan state editorial; tanpa progres media per item).
+- [x] Mesin upload dan kontrak API tidak berubah; test regresi lulus.
+- [x] Gates dicatat per task; bukti browser untuk alur penuh tidak ada dan dicatat sebagai batas.
 
 ## Risks and mitigations
 
@@ -101,3 +101,4 @@ Observasi kode pada base SHA. Belum ada bukti implementasi.
 
 - 10 Oktober 2026: context dan plan ditulis; status proposed. Desain dibuat sebagai kanvas dan disetujui pengguna.
 - 10 Oktober 2026: pengguna memutuskan rights PATCH lalu POST, cover dari frame di rilis pertama, Series terpisah; plan approved.
+- 10 Oktober 2026: UFLOW-002–008 diimplementasikan pada `feat/admin-upload-flow` (ddca2b3, 3d0c66f, 7d31600, 10f4224, 111bb98, 94d84d8, bff3223); UFLOW-009 closure dengan batas bukti browser pada backlog.

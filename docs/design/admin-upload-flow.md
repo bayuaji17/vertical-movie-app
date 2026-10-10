@@ -1,6 +1,6 @@
 # Alur admin tambah video
 
-> Status: approved plan, desain disetujui pengguna 10 Oktober 2026 · Sumber: kanvas desain [Alur Admin Upload Video](https://claude.ai/artifact/NaGoxkbairUuwLHuUmskia) (artefak eksternal privat milik pengguna; bukan bukti implementasi).
+> Status: implemented lokal (tanpa bukti browser untuk alur penuh), desain disetujui pengguna 10 Oktober 2026 · Sumber: kanvas desain [Alur Admin Upload Video](https://claude.ai/artifact/NaGoxkbairUuwLHuUmskia) (artefak eksternal privat milik pengguna; bukan bukti implementasi).
 
 Stepper tiga langkah untuk Film/Standalone: **Details → Media → Review & publish**, memakai token design system yang ada (lime, Space Grotesk/Inter, sudut membulat, Light/Dark).
 
