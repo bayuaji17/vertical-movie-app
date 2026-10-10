@@ -44,6 +44,8 @@ export function genreErrorMessage(error: unknown): string {
       return "Editing genres isn't available yet."
     case 'SLUG_CONFLICT':
       return 'This slug is already in use. Choose another slug.'
+    case 'GENRE_VERSION_CONFLICT':
+      return 'This genre was changed in another session. Refresh the list and try again.'
     case 'GENRE_IN_USE':
       return 'This genre is used by content. Remove it from that content first.'
   }

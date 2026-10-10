@@ -26,6 +26,7 @@ const genre = (name: string, n = 1) => ({
   slug: slugifyGenreName(name),
   createdAt: '2026-10-10T00:00:00.000Z',
   updatedAt: '2026-10-10T00:00:00.000Z',
+  usageCount: 2,
 })
 
 test('live client lists with search/cursor and creates through the existing admin endpoints', async () => {
@@ -57,29 +58,61 @@ test('live client lists with search/cursor and creates through the existing admi
   expect(seen[1]?.credentials).toBe('include')
 })
 
-test('live client reports edit as unavailable and never calls a missing endpoint', async () => {
-  let calls = 0
+test('live client renames with the read token and deletes through the new endpoints', async () => {
+  const seen: Request[] = []
   const client = createGenresClient(
     'http://localhost/api',
     new QueryClient(),
-    async () => {
-      calls++
-      return Response.json({})
+    async (input, init) => {
+      const request = new Request(input, init)
+      seen.push(request)
+      return request.method === 'PATCH'
+        ? Response.json({ ...genre('Dramas'), id: genre('A').id })
+        : Response.json({ id: genre('A').id })
     },
   )
-  expect(client.canEdit).toBe(false)
+  expect(client.canEdit).toBe(true)
+  const id = genre('A').id
+  const renamed = await client.rename(
+    id,
+    { name: 'Dramas', slug: 'dramas' },
+    '2026-10-10T00:00:00.000Z',
+  )
+  expect(renamed.usageCount).toBe(2)
+  expect(seen[0]?.method).toBe('PATCH')
+  expect(new URL(seen[0].url).pathname).toBe(`/api/admin/genres/${id}`)
+  expect(await seen[0]?.json()).toEqual({
+    name: 'Dramas',
+    slug: 'dramas',
+    expectedUpdatedAt: '2026-10-10T00:00:00.000Z',
+  })
+  await client.remove(id)
+  expect(seen[1]?.method).toBe('DELETE')
+  expect(new URL(seen[1].url).pathname).toBe(`/api/admin/genres/${id}`)
+  expect(seen[1]?.credentials).toBe('include')
+})
+
+test('a response for another genre is rejected instead of being trusted', async () => {
+  const id = genre('A').id
+  const wrongId = createGenresClient(
+    'http://localhost/api',
+    new QueryClient(),
+    async (input, init) =>
+      new Request(input, init).method === 'PATCH'
+        ? Response.json(genre('Other', 2))
+        : Response.json({ id: genre('Other', 2).id }),
+  )
   for (const attempt of [
-    () => client.rename(genre('A').id, { name: 'B' }),
-    () => client.remove(genre('A').id),
+    () => wrongId.rename(id, { name: 'X' }, '2026-10-10T00:00:00.000Z'),
+    () => wrongId.remove(id),
   ]) {
     const error = await attempt().then(
       () => undefined,
       (e: unknown) => e,
     )
     expect(error).toBeInstanceOf(GenresApiError)
-    expect((error as GenresApiError).code).toBe('GENRES_EDIT_UNAVAILABLE')
+    expect((error as GenresApiError).code).toBe('INVALID_RESPONSE')
   }
-  expect(calls).toBe(0)
 })
 
 test('malformed genre payloads are rejected before reaching the cache', async () => {
@@ -87,6 +120,10 @@ test('malformed genre payloads are rejected before reaching the cache', async ()
     null,
     { ...genre('A'), id: 'not-a-uuid' },
     { ...genre('A'), slug: 1 },
+    { ...genre('A'), usageCount: -1 },
+    { ...genre('A'), usageCount: 1.5 },
+    { ...genre('A'), usageCount: '2' },
+    (({ usageCount: _unused, ...rest }) => rest)(genre('A')),
     { id: genre('A').id },
   ])
     expect(() => verifiedGenre(bad)).toThrow(
@@ -123,6 +160,9 @@ test('error messages are specific, safe and never expose server values', () => {
     new GenresApiError(status, code, 'raw server text')
   expect(genreErrorMessage(make(409, 'SLUG_CONFLICT'))).toContain('slug')
   expect(genreErrorMessage(make(409, 'GENRE_IN_USE'))).toContain('used by')
+  expect(genreErrorMessage(make(409, 'GENRE_VERSION_CONFLICT'))).toContain(
+    'another session',
+  )
   expect(genreErrorMessage(make(501, 'GENRES_EDIT_UNAVAILABLE'))).toContain(
     "isn't available",
   )
@@ -134,7 +174,7 @@ test('error messages are specific, safe and never expose server values', () => {
   )
 })
 
-test('queries live under the admin identity prefix and invalidate only genre lists', async () => {
+test('queries live under the admin identity prefix and invalidate genre lists and content for that admin only', async () => {
   const cache = new QueryClient()
   const { client, calls } = memoryGenresClient([{ name: 'Drama' }])
   const options = genreListOptions(client, 'admin-1', '')
@@ -147,10 +187,15 @@ test('queries live under the admin identity prefix and invalidate only genre lis
   ])
   await cache.fetchInfiniteQuery(options)
   cache.setQueryData(['admin', 'admin-1', 'content', 'list'], 'keep')
+  cache.setQueryData(['admin', 'admin-2', 'content', 'list'], 'keep')
   await invalidateGenres(cache, 'admin-1')
   expect(cache.getQueryState(options.queryKey)?.isInvalidated).toBe(true)
+  // Genre names also appear on content, so that admin's content is refreshed.
   expect(
     cache.getQueryState(['admin', 'admin-1', 'content', 'list'])?.isInvalidated,
+  ).toBe(true)
+  expect(
+    cache.getQueryState(['admin', 'admin-2', 'content', 'list'])?.isInvalidated,
   ).toBeFalsy()
   expect(calls).toEqual(['list::'])
   expect(genresKeys.mutation('admin-1', 'create')[0]).toBe('admin')

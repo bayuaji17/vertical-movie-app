@@ -37,6 +37,7 @@ import { effectiveSlug, submitGenre } from '#/lib/admin/genres-actions'
 import type { GenreFormValues } from '#/lib/admin/genres-actions'
 import type { Genre, GenresClient } from '#/lib/admin/genres-client'
 import { genreErrorMessage } from '#/lib/admin/genres-form'
+import { canDeleteGenre, usageLabel } from '#/lib/admin/genres-usage'
 import {
   createGenreOptions,
   genreListOptions,
@@ -243,6 +244,8 @@ function GenreRow({
   noteId?: string
   onAction: (state: GenreDialogState) => void
 }) {
+  const usageId = useId()
+  const inUse = genre.usageCount > 0
   return (
     <Card size="sm">
       <CardContent className="flex flex-wrap items-center justify-between gap-3">
@@ -252,7 +255,8 @@ function GenreRow({
             <code>{genre.slug}</code> · Created{' '}
             <time dateTime={genre.createdAt}>
               {genre.createdAt.slice(0, 10)}
-            </time>
+            </time>{' '}
+            · <span id={usageId}>{usageLabel(genre.usageCount)}</span>
           </p>
         </div>
         <div className="flex gap-2">
@@ -271,8 +275,8 @@ function GenreRow({
             type="button"
             variant="outline"
             className="min-h-11"
-            disabled={!canEdit}
-            aria-describedby={noteId}
+            disabled={!canDeleteGenre(canEdit, genre.usageCount)}
+            aria-describedby={canEdit && inUse ? usageId : noteId}
             aria-label={`Delete ${genre.name}`}
             onClick={() => onAction({ kind: 'delete', genre })}
           >

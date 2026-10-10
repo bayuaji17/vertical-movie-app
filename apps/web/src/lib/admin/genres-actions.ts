@@ -78,7 +78,11 @@ export function renameInput(genre: Genre, values: GenreFormValues): GenreInput {
 }
 export async function submitRename(
   genre: Genre,
-  save: (id: string, input: GenreInput) => Promise<Genre>,
+  save: (
+    id: string,
+    input: GenreInput,
+    expectedUpdatedAt: string,
+  ) => Promise<Genre>,
   values: GenreFormValues,
 ): Promise<GenreOutcome> {
   const invalid = validateGenreForm({ ...values, slugTouched: true })
@@ -87,7 +91,10 @@ export async function submitRename(
   if (input.name === genre.name && !input.slug)
     return { status: 'invalid', nameError: 'Change the name or slug first.' }
   try {
-    return { status: 'saved', genre: await save(genre.id, input) }
+    return {
+      status: 'saved',
+      genre: await save(genre.id, input, genre.updatedAt),
+    }
   } catch (error) {
     return failureOutcome(error)
   }

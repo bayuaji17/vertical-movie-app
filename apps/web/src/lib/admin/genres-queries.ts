@@ -53,8 +53,16 @@ export function renameGenreOptions(
   return mutationOptions({
     mutationKey: genresKeys.mutation(identity, 'rename'),
     retry: false,
-    mutationFn: (command: { id: string; input: GenreInput }) =>
-      configured(client).rename(command.id, command.input),
+    mutationFn: (command: {
+      id: string
+      input: GenreInput
+      expectedUpdatedAt: string
+    }) =>
+      configured(client).rename(
+        command.id,
+        command.input,
+        command.expectedUpdatedAt,
+      ),
   })
 }
 export function removeGenreOptions(
@@ -67,11 +75,17 @@ export function removeGenreOptions(
     mutationFn: (id: string) => configured(client).remove(id),
   })
 }
+// Genre names and slugs also appear on content details and lists.
 export async function invalidateGenres(
   queryClient: QueryClient,
   identity: string,
 ) {
-  await queryClient.invalidateQueries({
-    queryKey: [...genresKeys.root(identity), 'list'],
-  })
+  await Promise.all([
+    queryClient.invalidateQueries({
+      queryKey: [...genresKeys.root(identity), 'list'],
+    }),
+    queryClient.invalidateQueries({
+      queryKey: ['admin', identity, 'content'],
+    }),
+  ])
 }

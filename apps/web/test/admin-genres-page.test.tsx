@@ -139,3 +139,28 @@ test('submitGenre validates first, then sends one request and classifies the out
   )
   expect(lost.status === 'failed' && lost.message).not.toContain('raw')
 })
+
+test('each row states how many items use the genre, and in-use genres cannot be deleted', async () => {
+  const { client } = memoryGenresClient(
+    [
+      { name: 'Drama', usageCount: 3 },
+      { name: 'Comedy', usageCount: 1 },
+      { name: 'Western', usageCount: 0 },
+    ],
+    { canEdit: true },
+  )
+  const html = await render(client)
+  expect(html).toContain('Used by 3 items')
+  expect(html).toContain('Used by 1 item<')
+  expect(html).toContain('Not used yet')
+  const disabled = (label: string) =>
+    new RegExp(
+      `<button[^>]*disabled=""[^>]*aria-label="${label}"|<button[^>]*aria-label="${label}"[^>]*disabled=""`,
+    ).test(html)
+  expect(disabled('Delete Drama')).toBe(true)
+  expect(disabled('Delete Comedy')).toBe(true)
+  expect(disabled('Delete Western')).toBe(false)
+  // Renaming stays available whatever the usage.
+  expect(disabled('Rename Drama')).toBe(false)
+  expect(html).not.toContain('available yet')
+})
