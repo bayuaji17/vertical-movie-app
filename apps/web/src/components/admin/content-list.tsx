@@ -1,10 +1,11 @@
+import { ContentNextStep } from './content-next-step'
 import { ContentStatus } from './content-status'
 import { ContentFiltersPanel } from './content-filters'
 import { ContentPagination } from './content-pagination'
 import { useEffect } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import type { ContentFilters, ContentItem } from '#/lib/admin/content-client'
+import type { ContentFilters } from '#/lib/admin/content-client'
 import { contentLabels } from '#/lib/admin/content-client'
 import { contentListOptions } from '#/lib/admin/content-queries'
 import { contentErrorMessage } from '#/lib/admin/content-errors'
@@ -37,31 +38,6 @@ import {
   TableCaption,
 } from '#/components/ui/table'
 
-function ContentActions({ item }: { item: ContentItem }) {
-  const path = '/admin/content/' + item.type + '/' + item.id
-  return (
-    <div className="flex gap-2">
-      <Button
-        variant="outline"
-        className="min-h-11"
-        nativeButton={false}
-        render={<Link to={path} />}
-      >
-        View<span className="sr-only"> {item.title}</span>
-      </Button>
-      {!item.archivedAt && item.publicationStatus === 'draft' && (
-        <Button
-          variant="ghost"
-          className="min-h-11"
-          nativeButton={false}
-          render={<Link to={path + '/edit'} />}
-        >
-          Edit<span className="sr-only"> {item.title}</span>
-        </Button>
-      )}
-    </div>
-  )
-}
 export function ContentList({
   filters,
   onChange,
@@ -89,7 +65,7 @@ export function ContentList({
             className="min-h-11"
             render={<Link to="/admin/content/new" />}
           >
-            Create draft
+            Add a video
           </Button>
         }
       />
@@ -177,7 +153,7 @@ export function ContentList({
                       </time>
                     </TableCell>
                     <TableCell>
-                      <ContentActions item={item} />
+                      <ContentNextStep item={item} />
                     </TableCell>
                   </TableRow>
                 ))}
@@ -205,7 +181,7 @@ export function ContentList({
                   </p>
                 </CardContent>
                 <CardFooter>
-                  <ContentActions item={item} />
+                  <ContentNextStep item={item} />
                 </CardFooter>
               </Card>
             ))}

@@ -38,6 +38,8 @@ import { MediaConfirmDialog } from './media-confirm-dialog'
 import { MediaProcessingStatus } from './media-processing-status'
 import { CoverCropDialog } from './cover-crop-dialog'
 import { describeCoverCropSource } from '#/lib/admin/media-file'
+import { selectAndStart } from '#/lib/admin/auto-upload'
+import { CoverFramePicker } from './setup/cover-frame-picker'
 
 const phaseLabels: Record<UploadPhase, string> = {
   idle: 'No upload selected',
@@ -66,11 +68,14 @@ export function MediaUploadCard({
   role,
   inventory,
   manager,
+  frameSource,
 }: {
   kind: MediaKind
   role: RoleInventory
   inventory: OwnerMedia
   manager?: UploadManager
+  // The chosen video file: offers its frames as cover candidates.
+  frameSource?: File
 }) {
   const id = useId(),
     input = useRef<HTMLInputElement>(null),
@@ -153,6 +158,25 @@ export function MediaUploadCard({
             className="aspect-[9/16] w-24 rounded-xl object-cover"
           />
         )}
+        {kind === 'poster' && frameSource && canChoose && (
+          <CoverFramePicker
+            file={frameSource}
+            disabled={working}
+            onPick={(frame) => {
+              setSelectionError(undefined)
+              try {
+                describeCoverCropSource(frame, inventory)
+                setPendingCover({ ownerKey, file: frame })
+              } catch (cause) {
+                setSelectionError(
+                  cause instanceof Error
+                    ? cause.message
+                    : 'This frame cannot be used as a cover.',
+                )
+              }
+            }}
+          />
+        )}
         <FieldGroup>
           <Field>
             <FieldLabel htmlFor={id}>{title} file</FieldLabel>
@@ -206,9 +230,11 @@ export function MediaUploadCard({
               >
                 {role.active
                   ? 'Select same file'
-                  : role.current
-                    ? 'Replace file'
-                    : 'Choose file'}
+                  : kind === 'poster' && frameSource
+                    ? 'Upload an image instead'
+                    : role.current
+                      ? 'Replace file'
+                      : 'Choose file'}
               </Button>
             )}
           </Field>
@@ -386,7 +412,8 @@ export function MediaUploadCard({
             ownerKey={ownerKey}
             maxBytes={Number(inventory.config.poster.maxBytes)}
             onUse={(file) => {
-              manager?.select('poster', file)
+              // The cover uploads and is prepared as soon as the crop is used.
+              if (manager) selectAndStart(manager, 'poster', file)
               setPendingCover(undefined)
               setSelectionError(undefined)
             }}

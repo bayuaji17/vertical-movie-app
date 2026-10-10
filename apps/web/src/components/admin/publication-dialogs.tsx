@@ -25,6 +25,7 @@ export function PublishVideoDialog({
   canConfirm = true,
   subject = 'video',
   hiddenUntilSeriesPublished = false,
+  acknowledged: preAcknowledged = false,
 }: {
   controller: PublicationController
   state: PublicationState
@@ -33,10 +34,13 @@ export function PublishVideoDialog({
   canConfirm?: boolean
   subject?: 'video' | 'series' | 'episode'
   hiddenUntilSeriesPublished?: boolean
+  // The preview was already acknowledged on the page (stepper review).
+  acknowledged?: boolean
 }) {
-  const [acknowledged, setAcknowledged] = useState(false),
+  const [checked, setAcknowledged] = useState(false),
     checkboxId = useId(),
     cancel = useRef<HTMLButtonElement>(null)
+  const acknowledged = preAcknowledged || checked
   const pending = state.phase !== 'review'
   return (
     <AlertDialog
@@ -71,21 +75,23 @@ export function PublishVideoDialog({
               ? 'Ready cover and published playable episode: Confirmed'
               : 'Content rights: Confirmed'}
           </p>
-          <FieldGroup>
-            <Field orientation="horizontal" data-disabled={pending}>
-              <Checkbox
-                id={checkboxId}
-                checked={acknowledged}
-                onCheckedChange={setAcknowledged}
-                disabled={pending}
-              />
-              <FieldLabel htmlFor={checkboxId} className="min-h-11">
-                {subject === 'series'
-                  ? 'I have reviewed the episode previews and want to publish this series.'
-                  : `I have reviewed the preview and want to publish this ${subject}.`}
-              </FieldLabel>
-            </Field>
-          </FieldGroup>
+          {!preAcknowledged && (
+            <FieldGroup>
+              <Field orientation="horizontal" data-disabled={pending}>
+                <Checkbox
+                  id={checkboxId}
+                  checked={acknowledged}
+                  onCheckedChange={setAcknowledged}
+                  disabled={pending}
+                />
+                <FieldLabel htmlFor={checkboxId} className="min-h-11">
+                  {subject === 'series'
+                    ? 'I have reviewed the episode previews and want to publish this series.'
+                    : `I have reviewed the preview and want to publish this ${subject}.`}
+                </FieldLabel>
+              </Field>
+            </FieldGroup>
+          )}
           <p role="status" aria-live="polite" className="text-sm">
             {pending
               ? state.phase === 'pending'
