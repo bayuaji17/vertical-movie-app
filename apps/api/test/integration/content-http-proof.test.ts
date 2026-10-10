@@ -268,7 +268,7 @@ test("merged Scalar documents auth and every business operation with resolvable 
       }
     }
   }
-  expect(count).toBe(34);
+  expect(count).toBe(36);
   expect(document.paths["/site-settings"].get.security ?? []).toEqual([]);
   for (const id of [
     "initiateMediaUpload",

@@ -277,6 +277,110 @@ test("genre taxonomy persists, paginates and treats search wildcards literally",
   ]);
 });
 
+test("genre edit and delete count usage, serialize on the read token and respect content references", async () => {
+  const { GenresService } = await import("../../src/modules/genres/service");
+  const { createGenresRepository } =
+    await import("../../src/modules/genres/repository");
+  const { mapContentError } = await import("../../src/shared/content-error");
+  const { genres, seriesGenres, videoGenres } =
+    await import("../../src/db/schema");
+  const svc = new GenresService(createGenresRepository(database.db));
+  const codeOf = async (promise: Promise<unknown>) => {
+    const error = await promise.then(
+      () => undefined,
+      (e: unknown) => e,
+    );
+    return mapContentError(error)?.code ?? (error ? "UNMAPPED" : "OK");
+  };
+
+  const created = await svc.create({ name: "Edit Me", slug: "edit-me" });
+  expect(created.usageCount).toBe(0);
+  const other = await svc.create({ name: "Edit Other", slug: "edit-other" });
+
+  // Usage counts videos and series that carry the genre.
+  const videosSvc = new VideosService(createVideosRepository(database.db));
+  const video = await videosSvc.create(
+    { kind: "standalone", title: "Tagged Video", genreIds: [created.id] },
+    "content-admin",
+  );
+  const tagged = await seriesService.create(
+    { title: "Tagged Series", genreIds: [created.id] },
+    "content-admin",
+  );
+  const listed = await svc.list({ search: "Edit Me" });
+  expect(listed.items.map((g) => [g.slug, g.usageCount])).toEqual([
+    ["edit-me", 2],
+  ]);
+
+  // A matching token renames; the read token is then stale.
+  const renamed = await svc.update(created.id, {
+    expectedUpdatedAt: created.updatedAt,
+    name: "  Edited  ",
+    slug: "edited",
+  });
+  expect([renamed.name, renamed.slug, renamed.usageCount]).toEqual([
+    "Edited",
+    "edited",
+    2,
+  ]);
+  expect(Date.parse(renamed.updatedAt)).toBeGreaterThanOrEqual(
+    Date.parse(created.updatedAt),
+  );
+  expect(
+    await codeOf(
+      svc.update(created.id, {
+        expectedUpdatedAt: created.updatedAt,
+        name: "Stale",
+      }),
+    ),
+  ).toBe("GENRE_VERSION_CONFLICT");
+
+  // Two edits from the same read: exactly one wins.
+  const token = renamed.updatedAt;
+  const race = await Promise.allSettled([
+    svc.update(created.id, { expectedUpdatedAt: token, name: "Race A" }),
+    svc.update(created.id, { expectedUpdatedAt: token, name: "Race B" }),
+  ]);
+  expect(race.filter((r) => r.status === "fulfilled")).toHaveLength(1);
+
+  // Unique slug and unknown id.
+  const fresh = (await svc.list({ search: "Race" })).items[0]!;
+  expect(
+    await codeOf(
+      svc.update(fresh.id, {
+        expectedUpdatedAt: fresh.updatedAt,
+        slug: other.slug,
+      }),
+    ),
+  ).toBe("SLUG_CONFLICT");
+  expect(
+    await codeOf(
+      svc.update(Bun.randomUUIDv7(), {
+        expectedUpdatedAt: fresh.updatedAt,
+        name: "Ghost",
+      }),
+    ),
+  ).toBe("CONTENT_NOT_FOUND");
+
+  // Content still references the genre: delete is refused and nothing changes.
+  expect(await codeOf(svc.remove(created.id))).toBe("GENRE_IN_USE");
+  expect((await svc.list({ search: "Race" })).items).toHaveLength(1);
+
+  // Once untagged the genre can be deleted, once.
+  await database.db
+    .delete(videoGenres)
+    .where(eq(videoGenres.videoId, video.id));
+  await database.db
+    .delete(seriesGenres)
+    .where(eq(seriesGenres.seriesId, tagged.series.id));
+  expect((await svc.list({ search: "Race" })).items[0]?.usageCount).toBe(0);
+  expect(await svc.remove(created.id)).toEqual({ id: created.id });
+  expect(
+    await database.db.select().from(genres).where(eq(genres.id, created.id)),
+  ).toHaveLength(0);
+  expect(await codeOf(svc.remove(created.id))).toBe("CONTENT_NOT_FOUND");
+});
+
 test("video drafts persist kinds and atomically verify episode parent and genre", async () => {
   const svc = new VideosService(createVideosRepository(database.db));
   const parent = await seriesService.create(
