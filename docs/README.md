@@ -58,6 +58,8 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 
 ## Context dan plan per fitur
 
+Alur admin tambah video (stepper): [desain](design/admin-upload-flow.md), [context](plans/admin-upload-flow/repository-context.md), [plan](plans/admin-upload-flow/implementation-plan.md) dan [backlog UFLOW](tasks/admin-upload-flow.md). Desain disetujui pengguna 10 Oktober 2026; plan proposed. Kategori konten dan halaman manajemen: [context](plans/admin-categories/repository-context.md), [plan](plans/admin-categories/implementation-plan.md) dan [backlog CAT](tasks/admin-categories.md); proposed, asumsi categories = genres menunggu konfirmasi.
+
 Halaman Not Found frontend: [desain](design/not-found.md), [context](plans/not-found/repository-context.md), [plan](plans/not-found/implementation-plan.md) dan [backlog NF](tasks/not-found.md). Pengguna meminta plan 10 Oktober 2026; implemented lokal 10 Oktober 2026 (NF-001–006 Done); satu halaman 404 untuk semua kasus (/admin/*, /videos/:slug, /watch/:slug) dengan satu tombol ke home diputuskan pengguna 10 Oktober 2026; bukti browser 320/390/768, System dan keyboard masih tersisa.
 
 Site Settings: [context](plans/site-settings/repository-context.md), [plan](plans/site-settings/implementation-plan.md) dan [backlog SSET](tasks/site-settings.md). Empat field teks dan cache browser/server-web/API maksimum1 jam disetujui pengguna serta implemented/verified lokal9Oct pada feat/site-settings; actual proof/receipt dan per-process limits berada di SSET. Contract aktif pada PRD/architecture dan runbook metadata.
