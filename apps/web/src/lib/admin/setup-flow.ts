@@ -63,3 +63,23 @@ export function setupSteps(current: SetupStep, media?: OwnerMedia) {
   ]
   return steps
 }
+
+type ReadinessLike = {
+  canPublish: boolean
+  checks: ReadonlyArray<{ code: string; status: string }>
+}
+// The review step confirms rights itself, so an unconfirmed RIGHTS check alone
+// must not block Publish; every other check still has to pass.
+export function reviewReady(
+  readiness: ReadinessLike | undefined,
+  rightsConfirmed: boolean,
+) {
+  if (!readiness) return false
+  if (readiness.canPublish) return true
+  if (rightsConfirmed) return false
+  return readiness.checks
+    .filter(
+      (check) => check.status !== 'not-applicable' && check.code !== 'RIGHTS',
+    )
+    .every((check) => check.status === 'passed')
+}

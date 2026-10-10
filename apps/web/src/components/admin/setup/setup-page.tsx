@@ -10,7 +10,7 @@ import {
   contentHref,
 } from '../content-resource'
 import { MediaStep } from './media-step'
-import { PublicationPanel } from '../publication-panel'
+import { ReviewStep } from './review-step'
 import { SetupStepper } from './setup-stepper'
 import { useSetupController } from '#/hooks/use-setup-controller'
 import type { ContentDetail } from '#/lib/admin/content-client'
@@ -174,7 +174,7 @@ function SetupFlow({
         </div>
       ) : (
         <div className="flex flex-col gap-6">
-          <PublicationPanel
+          <ReviewStep
             detail={detail}
             type={type}
             metadataStale={metadataStale}

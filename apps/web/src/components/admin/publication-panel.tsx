@@ -31,7 +31,7 @@ import { PublishVideoDialog, ArchiveVideoDialog } from './publication-dialogs'
 
 type SupportedType = Exclude<ContentType, 'series'>
 type Publication = ReturnType<typeof usePublication>
-const labels = {
+export const publicationCheckLabels = {
   ACTIVE_DRAFT: ['Active draft', 'An active draft is required.'],
   TITLE: ['Title provided', 'Add a title before publishing.'],
   SYNOPSIS: ['Synopsis provided', 'Add a synopsis before publishing.'],
@@ -231,7 +231,7 @@ export function PublicationPanel({
               {r.checks
                 .filter((c) => c.status !== 'not-applicable')
                 .map((check) => {
-                  const [label, reason] = labels[check.code],
+                  const [label, reason] = publicationCheckLabels[check.code],
                     passed = check.status === 'passed',
                     metadata = ['TITLE', 'SYNOPSIS', 'RIGHTS'].includes(
                       check.code,
