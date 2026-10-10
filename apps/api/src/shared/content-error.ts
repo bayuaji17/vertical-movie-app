@@ -22,6 +22,15 @@ export function unavailable(): never {
     503,
   );
 }
+// PostgreSQL SQLSTATE of a driver/ORM error, wherever the driver put it.
+export function databaseErrorCode(value: unknown): string | undefined {
+  if (!value || typeof value !== "object") return;
+  const error = "cause" in value && value.cause ? value.cause : value;
+  if (!error || typeof error !== "object") return;
+  const code =
+    "errno" in error ? error.errno : "code" in error ? error.code : undefined;
+  return typeof code === "string" ? code : undefined;
+}
 export function mapContentError(value: unknown): ContentError | undefined {
   if (value instanceof ContentError) return value;
   if (!value || typeof value !== "object") return;
