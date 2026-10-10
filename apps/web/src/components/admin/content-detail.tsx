@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import type { ContentDetail } from '#/lib/admin/content-client'
 import { contentLabels } from '#/lib/admin/content-client'
 import { isEditableContent } from '#/lib/admin/content-form-state'
+import { canUseSetup, isSetupType } from '#/lib/admin/setup-flow'
 import { AdminPageHeading } from './page-heading'
 import { BackToContent, contentHref } from './content-resource'
 import { ContentStatus } from './content-status'
@@ -54,6 +55,21 @@ export function ContentDetailView({
         actions={
           <>
             <BackToContent />
+            {canUseSetup(detail) && isSetupType(detail.type) && (
+              <Button
+                nativeButton={false}
+                className="min-h-11"
+                render={
+                  <Link
+                    to="/admin/content/$type/$id/setup"
+                    params={{ type: detail.type, id: d.id }}
+                    search={{ step: undefined }}
+                  />
+                }
+              >
+                Continue setup
+              </Button>
+            )}
             {editable && (
               <Button
                 nativeButton={false}
