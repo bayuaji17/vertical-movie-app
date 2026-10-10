@@ -18,7 +18,7 @@ Runtime inti telah diimplementasikan pada feat/media-backend; path/simbol final 
 
 ## Task: PUBLISH-001 — Publikasi video manual dengan readiness gate
 
-- Status: Review
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: PUBLISH-US-01; PRD-04/05/06/07/09; keputusan nomor 1–7 pada plan
@@ -31,10 +31,10 @@ Tambahkan service publication/operation repository pada apps/api/src/modules/vid
 
 ### Acceptance criteria
 
-- [ ] Publish admin memerlukan title/synopsis, hierarchy/slug valid, verified source facts, current HLS job/outputs siap, poster siap dan rights confirmation timestamp/actor. Subtitle opsional, jika ada valid/siap. Original habis retensi tidak menghalangi publish bila provenance/HLS sah.
-- [ ] Worker ready tidak autopublish; incomplete draft tetap sah. Episode boleh published saat series draft tetapi belum terlihat publik; grouping terkunci setelah first publish.
-- [ ] Lock/version/idempotency menangani readiness/generation/parent race; replay mempertahankan timestamp, same key different payload 409. Rekomendasi teknis dedup MVP sepanjang umur row; pruning task terpisah.
-- [ ] Guard sebelum service/I/O, private no-store; endpoint/DTO/errors dibekukan dalam model/Scalar sebelum Done. Status saja tidak memberi izin object storage.
+- [x] Publish admin memerlukan title/synopsis, hierarchy/slug valid, verified source facts, current HLS job/outputs siap, poster siap dan rights confirmation timestamp/actor. Subtitle opsional, jika ada valid/siap. Original habis retensi tidak menghalangi publish bila provenance/HLS sah.
+- [x] Worker ready tidak autopublish; incomplete draft tetap sah. Episode boleh published saat series draft tetapi belum terlihat publik; grouping terkunci setelah first publish.
+- [x] Lock/version/idempotency menangani readiness/generation/parent race; replay mempertahankan timestamp, same key different payload 409. Rekomendasi teknis dedup MVP sepanjang umur row; pruning task terpisah.
+- [x] Guard sebelum service/I/O, private no-store; endpoint/DTO/errors dibekukan dalam model/Scalar sebelum Done. Status saja tidak memberi izin object storage.
 
 ### Validasi
 
@@ -50,7 +50,7 @@ PUBLISH-002 archive; PUBLISH-SERIES-001 membuka series. Restore/republish/revisi
 
 ## Task: PUBLISH-002 — Archive published dan invalidasi visibility
 
-- Status: Review
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: PUBLISH-US-01; PRD-04/05/06/07/09; keputusan nomor 1–7 pada plan
@@ -63,10 +63,10 @@ Perbarui video archive service/repository/routes dan after-commit invalidation h
 
 ### Acceptance criteria
 
-- [ ] Published → archived atomik expectedVersion/actor/timestamp; hilang dari katalog dan API berhenti memberi URL baru. Aset valid yang masih ada dipertahankan termasuk original.
-- [ ] Replay/race publish/archive/source deletion claim konsisten; response menjelaskan original sudah terhapus bila claim sebelumnya menang, tidak menjanjikan recovery file.
-- [ ] Cache metadata/catalog diinvalidasi setelah commit dengan TTL 60 detik fallback. Signed URL lama berlaku sampai expiry; buffer/cache tidak ditarik kembali.
-- [ ] Series/season cascade/restore/republish/hard deletion tidak dibuat otomatis; regression existing parent rules.
+- [x] Published → archived atomik expectedVersion/actor/timestamp; hilang dari katalog dan API berhenti memberi URL baru. Aset valid yang masih ada dipertahankan termasuk original.
+- [x] Replay/race publish/archive/source deletion claim konsisten; response menjelaskan original sudah terhapus bila claim sebelumnya menang, tidak menjanjikan recovery file.
+- [x] Cache metadata/catalog diinvalidasi setelah commit dengan TTL 60 detik fallback. Signed URL lama berlaku sampai expiry; buffer/cache tidak ditarik kembali.
+- [x] Series/season cascade/restore/republish/hard deletion tidak dibuat otomatis; regression existing parent rules.
 
 ### Validasi
 
@@ -82,7 +82,7 @@ WORKER-RETENTION-001 mengaktifkan physical GC; PUBLIC-001/002 memakai predicate 
 
 ## Task: PUBLISH-SERIES-001 — Publikasi series dengan satu episode siap
 
-- Status: Review
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: PUBLISH-US-01; PRD-04/05/06/07/09; keputusan nomor 1–7 pada plan
@@ -95,9 +95,9 @@ Tambahkan series publication service/model/routes dan series_operations/migratio
 
 ### Acceptance criteria
 
-- [ ] Series publish memerlukan title/synopsis/poster dan minimal satu episode published/ready dengan parent tidak archived. Tanpa child playable tersembunyi katalog tanpa autoubah status editorial.
-- [ ] Parent lock konsisten; series publish bersamaan dengan child archive tidak membocorkan hidden episode. Dedup/audit/version/no-store sesuai kontrak video.
-- [ ] Counts/next episode/genre tidak mencakup child tersembunyi; lifecycle/cascade parent di luar kebutuhan publish ditangguhkan.
+- [x] Series publish memerlukan title/synopsis/poster dan minimal satu episode published/ready dengan parent tidak archived. Tanpa child playable tersembunyi katalog tanpa autoubah status editorial.
+- [x] Parent lock konsisten; series publish bersamaan dengan child archive tidak membocorkan hidden episode. Dedup/audit/version/no-store sesuai kontrak video.
+- [x] Counts/next episode/genre tidak mencakup child tersembunyi; lifecycle/cascade parent di luar kebutuhan publish ditangguhkan.
 
 ### Validasi
 
@@ -113,7 +113,7 @@ PUBLIC-001 menguji effective visibility lintas kind.
 
 ## Task: PUBLIC-001 — Katalog dan detail konten efektif published
 
-- Status: In Progress
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: PUBLIC-US-01; PRD-04/05/06/07/09; keputusan nomor 1–7 pada plan
@@ -126,9 +126,9 @@ Buat apps/api/src/modules/catalog/{index,model,service,repository}.ts, factory/b
 
 ### Acceptance criteria
 
-- [ ] Viewer tanpa login hanya mendapat DTO whitelisted effective playable; draft/archived/hidden/absent 404 setara. Kind/hierarchy/cursor stabil, tanpa source key/private metadata.
-- [ ] Counts/next episode/series listing memakai predicate sama; series tanpa child playable tersembunyi. Original expired tidak menghilangkan HLS playable sah.
-- [ ] Unsigned metadata/catalog TTL 60 detik dengan after-commit invalidation. Signed poster/playback DTO dipisah dari metadata cache dan private no-store; factory import tanpa I/O.
+- [x] Viewer tanpa login hanya mendapat DTO whitelisted effective playable; draft/archived/hidden/absent 404 setara. Kind/hierarchy/cursor stabil, tanpa source key/private metadata.
+- [x] Counts/next episode/series listing memakai predicate sama; series tanpa child playable tersembunyi. Original expired tidak menghilangkan HLS playable sah.
+- [x] Unsigned metadata/catalog TTL 60 detik dengan after-commit invalidation. Signed poster/playback DTO dipisah dari metadata cache dan private no-store; factory import tanpa I/O.
 
 ### Validasi
 
@@ -138,13 +138,15 @@ HTTP app.handle dan DB visibility/pagination/gaps/counts/cache TTL/race; Eden co
 
 4 Oktober2026, feat/media-backend (belum commit): Whitelisted public catalog/list/detail/next dan series/count predicate shared; unsigned cache60s+invalidate tersedia. DB series/gaps/tombstone dan E2E HTTP404/visibility lulus; advanced cache/pagination race matrix masih terbuka. Gate root dan batas lingkungan pada [Media Operations](../operations/media.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
+Ditutup 10 Oktober 2026: katalog, detail, dan watch publik dilanjutkan serta diperluas oleh [PCAT](public-catalog-api.md), [Film/Standalone](public-catalog.md) dan [PCW](public-content-watch.md) yang berstatus Done. Matriks race cache/pagination lanjutan yang tercatat di atas tidak dilanjutkan sebagai task ini; ajukan task baru bila diperlukan.
+
 ### Blocker atau tindak lanjut
 
 PUBLIC-002 playback; backend proof tidak membuktikan gateway tersedia.
 
 ## Task: PUBLIC-002 — API playlist dan signed payload HLS
 
-- Status: Review
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: PUBLIC-US-01; PRD-04/05/06/07/09; keputusan nomor 1–7 pada plan
@@ -157,9 +159,9 @@ Buat apps/api/src/modules/playback/{index,model,service}.ts dan adapter delivery
 
 ### Acceptance criteria
 
-- [ ] Master/variant API memeriksa published visibility/admin preview; init/segment/caption direct signed GET. Source asli bukan playback; traversal/external URI/namespace tak sah ditolak.
-- [ ] TTL ceil(2×verifiedDurationMs/1000); renewal reauthorize tidak extend URL lama. DTO/playlist no-store; private payload freshness min(300 detik,sisa URL), fallback no-cache/no-store bila header provider belum terbukti.
-- [ ] Worker HLS asli valid di MinIO termasuk Range/seek/quality switch; archive menolak URL baru, old URLs/cache mengikuti expiry. Signature/credential tidak persisten/log/bundle.
+- [x] Master/variant API memeriksa published visibility/admin preview; init/segment/caption direct signed GET. Source asli bukan playback; traversal/external URI/namespace tak sah ditolak.
+- [x] TTL ceil(2×verifiedDurationMs/1000); renewal reauthorize tidak extend URL lama. DTO/playlist no-store; private payload freshness min(300 detik,sisa URL), fallback no-cache/no-store bila header provider belum terbukti.
+- [x] Worker HLS asli valid di MinIO termasuk Range/seek/quality switch; archive menolak URL baru, old URLs/cache mengikuti expiry. Signature/credential tidak persisten/log/bundle.
 
 ### Validasi
 
@@ -175,7 +177,7 @@ WEB-CONTENT-001/002 browser integration; MEDIA-R2-001 storage proof bukan full R
 
 ## Task: WEB-CONTENT-001 — Gateway bisnis dan playlist same-origin
 
-- Status: Review
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: PUBLIC-US-01; PRD-04/05/06/07/09; keputusan nomor 1–7 pada plan
@@ -188,9 +190,9 @@ Buat gateway bounded apps/web/src/lib/server/ dan src/routes/api/; import type A
 
 ### Acceptance criteria
 
-- [ ] Fixed upstream API_INTERNAL_URL, strip satu /api bisnis; cookie per request hanya admin, tanpa secret leak/SSRF/open proxy. Auth gateway path native dipertahankan.
-- [ ] Playlist/DTO no-store/status/errors preserved; segment direct storage, tanpa proxy payload web. URL API playback sesuai public origin/path gateway.
-- [ ] Eden compile/SSR isolation terbukti; localhost tidak membuktikan domain/TLS/trusted proxy production.
+- [x] Fixed upstream API_INTERNAL_URL, strip satu /api bisnis; cookie per request hanya admin, tanpa secret leak/SSRF/open proxy. Auth gateway path native dipertahankan.
+- [x] Playlist/DTO no-store/status/errors preserved; segment direct storage, tanpa proxy payload web. URL API playback sesuai public origin/path gateway.
+- [x] Eden compile/SSR isolation terbukti; localhost tidak membuktikan domain/TLS/trusted proxy production.
 
 ### Validasi
 
@@ -206,7 +208,7 @@ WEB-CONTENT-002 player; dashboard multipart UI rinci saat scope UI disetujui.
 
 ## Task: WEB-CONTENT-002 — Player HLS dengan renewal URL
 
-- Status: Review
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: PUBLIC-US-01; PRD-04/05/06/07/09; keputusan nomor 1–7 pada plan

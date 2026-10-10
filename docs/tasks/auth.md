@@ -509,12 +509,12 @@ Validasi lokal 2 Oktober 2026; perintah auth terperinci ada pada Test Requiremen
 - Web proofs lulus: `auth:gateway:proof` 8/35, `auth:session:proof` 4/22, `auth:login:proof` 5/22, dan `auth:guard:proof` 1/3. `auth:gateway:smoke` menjalankan Vite dev dan server Nitro/Bun hasil build, memeriksa method, path, cookie ganda, status dan `no-store` terhadap API fixture.
 - `bun run check-types`, `bun run lint`, `bun run build`, serta `git diff --check` lulus. Build berhasil dengan peringatan directive module dari dependency; task memakai hasil cache Turbo. `bun run --cwd apps/web check` pernah gagal pada lima file baseline yang tidak berubah (`.cta.json`, `prettier.config.js`, `README.md`, `src/components/ui/button.tsx`, `src/lib/utils.ts`); file itu tidak diubah dalam backlog ini.
 - Smoke SSR fixture AUTH-012 yang tercatat di bagian sebelumnya membuktikan anonymous redirect/no-store, admin dashboard, non-admin denial, upstream error, dan halaman publik. Bukti itu memakai API fixture, bukan browser atau server deployment.
-- Environment tidak memiliki browser executable atau browser runner. Checklist login benar/salah/429/network, double submit, keyboard/focus, viewport mobile/desktop, lintas tab/back, dan logout visual masih pending. Domain/TLS, reverse-proxy trust, migrasi database development, provisioning development, dan production smoke juga belum dilakukan. `docs/design/` tetap untracked dan tidak disentuh.
+- (Riwayat: browser smoke kemudian ditutup.) Domain/TLS, reverse-proxy trust, migrasi database development, provisioning development, dan production smoke juga belum dilakukan. `docs/design/` tetap untracked dan tidak disentuh.
 - Runbook memperbarui command proof yang benar, batas DB test, command migrasi/provision/reset, same-origin browser/API, secret policy, dan status deployment. Tidak ada secret ditulis atau dicetak.
 
 ### Blocker atau tindak lanjut
 
-Tindak lanjut: jalankan browser smoke untuk menutup AC-02/AC-05/AC-06/AC-08 saat browser runner tersedia; setelah domain dipilih, verifikasi HTTPS/cookie dan reverse proxy di deployment. Storage/media di luar scope modul ini.
+Browser smoke AC-02/AC-05/AC-06/AC-08 kemudian ditutup (Chromium, lihat AUTH-012 dan redesign login); tersisa: setelah domain dipilih, verifikasi HTTPS/cookie dan reverse proxy di deployment. Storage/media di luar scope modul ini.
 
 Arahan refactor diperinci pengguna pada 2 Oktober 2026. Desain lengkap ada pada [AUTH_REFACTOR_PLAN.md](../plans/auth/refactor-plan.md). Task AUTH-001–013 tetap menjadi riwayat. ID AUTH-REF-001–005 dipertahankan; scope web/cleanup/acceptance dipecah menjadi AUTH-REF-006–010. Rencana induk disetujui pengguna pada 2 Oktober 2026. Checklist rinci di bawah merupakan rencana eksekusi; kode belum diimplementasikan. AUTH-REF-001 berstatus Ready karena scope/AC jelas dan tidak memiliki dependensi; task lain tetap Backlog sampai dependensinya selesai.
 

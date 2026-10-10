@@ -18,7 +18,7 @@ Runtime inti telah diimplementasikan pada feat/media-backend; path/simbol final 
 
 ## Task: WORKER-001 — Schema job dan enqueue durable
 
-- Status: Review
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: WORKER-US-01; PRD-04/05/06/07/09; keputusan nomor 1–7 pada plan
@@ -33,7 +33,7 @@ Buat apps/api/src/db/schema/jobs.ts, src/workers/queue.ts dan migration/schema e
 
 - [x] Completion/enqueue atomik di PostgreSQL setelah source freeze; replay/identity yang sama tidak menggandakan job. I/O storage di luar transaksi.
 - [x] FK/constraints menjaga owner/source; nullable pointer additive mempertahankan metadata/auth. Status queued tidak berarti ready/published.
-- [ ] Job lama tidak aktif kembali setelah generation berubah; enqueue dapat ditemukan setelah restart API.
+- [x] Job lama tidak aktif kembali setelah generation berubah; enqueue dapat ditemukan setelah restart API.
 
 ### Validasi
 
@@ -49,7 +49,7 @@ WORKER-CLAIM-001 dan worker FFmpeg sudah menggunakan schema ini; benchmark deplo
 
 ## Task: WORKER-CLAIM-001 — Claim, heartbeat dan recovery lease
 
-- Status: Review
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: WORKER-US-01; PRD-04/05/06/07/09; keputusan nomor 1–7 pada plan
@@ -64,7 +64,7 @@ Implement apps/api/src/workers/queue.ts, queue.test.ts dan integration proof. Cl
 
 - [x] Dua worker tidak memiliki claim aktif yang sama; lease 120 detik, heartbeat 15 detik, recovery poll 30 detik melalui env tervalidasi.
 - [x] Expired lease dapat dipulihkan; stale token tidak menulis progress/readiness atau mengaktifkan output. Retry transient maksimal 3 total attempt dengan delay 60/300 detik.
-- [ ] Invalid input terminal tanpa retry; konfigurasi/resource tidak memadai menghasilkan health/error jelas dan tidak menghabiskan retry dengan busy loop.
+- [x] Invalid input terminal tanpa retry; konfigurasi/resource tidak memadai menghasilkan health/error jelas dan tidak menghabiskan retry dengan busy loop.
 
 ### Validasi
 
@@ -169,6 +169,8 @@ Clock boundaries, DB archive/claim/reprocess races, storage fail/crash/recovery 
 ### Hasil dan bukti
 
 4 Oktober2026, feat/media-backend (belum commit): Original7days sejak verifiedReady/terminal failure, archived preservation dan persistent deletion claim/tombstone; partial stopped attempt24h serta local orphan recovery tersedia. Dedicated original boundary/archive/recovery3/26 lulus; Partial24h/active/success skip/mid-delete retry sudah lulus; supervisor death/OOM/disk/orphan matrix tetap terbuka. Gate root dan batas lingkungan pada [Media Operations](../operations/media.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
+
+Pembaruan 10 Oktober 2026 (teks di atas tetap riwayat): batas original 7 hari, preservasi archived, deletion claim/tombstone, recovery, serta partial 24 jam lulus (3/26). Sisa nyata: matriks supervisor death/OOM/disk/orphan. Status tetap In Progress.
 
 ### Blocker atau tindak lanjut
 

@@ -153,13 +153,13 @@ Prefer Bun native; no automatic dependency upgrade, lock churn or hand-edited ro
 
 ## Acceptance criteria
 
-- [ ] Admin can crop all 3 cover owners to 9:16 with preview, without a new page or video-crop action.
-- [ ] Valid new cover reaches Ready with media worker stopped; server-native WebP 1080×1920 verified before readiness.
-- [ ] No worker claims request rows; legacy/video outputs and original fingerprints remain compatible.
-- [ ] Exactly one successful provenance record/output activation under replay/race/crash; no Ready from unverified facts or stale attempts.
-- [ ] Browser crop/hash/upload lifecycle is bounded, theme-safe and cleared on auth loss; refreshed pending crop never mixes original bytes.
-- [ ] Metadata/publish/preview gates remain correct; invalid images show actionable errors.
-- [ ] Relevant tests/migration/dev preservation/root gates, screenshots/docs and per-task local receipts complete; production limitations explicit.
+- [x] Admin can crop all 3 cover owners to 9:16 with preview, without a new page or video-crop action.
+- [x] Valid new cover reaches Ready with media worker stopped; server-native WebP 1080×1920 verified before readiness.
+- [x] No worker claims request rows; legacy/video outputs and original fingerprints remain compatible.
+- [x] Exactly one successful provenance record/output activation under replay/race/crash; no Ready from unverified facts or stale attempts.
+- [x] Browser crop/hash/upload lifecycle is bounded, theme-safe and cleared on auth loss; refreshed pending crop never mixes original bytes.
+- [x] Metadata/publish/preview gates remain correct; invalid images show actionable errors.
+- [x] Relevant tests/migration/dev preservation/root gates, screenshots/docs and per-task local receipts complete; production limitations explicit.
 
 ## Risks and mitigations
 

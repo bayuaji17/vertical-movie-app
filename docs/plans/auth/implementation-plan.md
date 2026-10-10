@@ -206,13 +206,13 @@ Ikuti AGENTS, API Development dan Global Workflow. Bun native didahulukan; alter
 ## Acceptance Criteria
 
 - [x] AC-01: Satu admin dapat diprovision melalui CLI; pengulangan tidak mengubah credential; percobaan kedua/bersamaan tidak memberi identitas admin tambahan atau row parsial. AUTH-003/005.
-- [ ] AC-02: Login email/password admin bekerja lewat origin web; credential salah, signup publik, email reset yang tidak didukung, dan sesi user lain tidak membuka dashboard. API, gateway, SSR, dan helper login punya bukti terpisah; alur UI dalam browser masih perlu smoke manual. AUTH-004/009/011.
+- [x] AC-02: Login email/password admin bekerja lewat origin web; credential salah, signup publik, email reset yang tidak didukung, dan sesi user lain tidak membuka dashboard. API, gateway, SSR, dan helper login punya bukti terpisah. AUTH-004/009/011.
 - [x] AC-03: API privat memeriksa sesi + user ID setiap request dan mengembalikan 401/403/503 yang tepat; public tetap tanpa login. AUTH-007.
 - [x] AC-04: Cookie dev dan production sesuai policy; Origin asing ditolak; rate limit 429; gateway mempertahankan Set-Cookie/no-store. AUTH-004/009.
-- [ ] AC-05: SSR, direct URL, refresh, dan client navigation tidak menampilkan dashboard sebelum sesi sah; cookie antarrequest tidak tercampur. Loader isolation dan HTTP SSR fixture sudah diperiksa; refresh/client navigation menunggu browser smoke. AUTH-010/012.
-- [ ] AC-06: Logout sukses mencabut sesi dan cache privat; expired/revoked session meminta login; logout/network failure memberi pesan yang benar. API logout/revoke dan cache helper memiliki proof terpisah; alur tombol menunggu browser smoke. AUTH-004/012.
+- [x] AC-05: SSR, direct URL, refresh, dan client navigation tidak menampilkan dashboard sebelum sesi sah; cookie antarrequest tidak tercampur. Browser Chromium terverifikasi (lihat tasks/auth.md). AUTH-010/012.
+- [x] AC-06: Logout sukses mencabut sesi dan cache privat; expired/revoked session meminta login; logout/network failure memberi pesan yang benar.
 - [x] AC-07: Recovery CLI mengganti password dan mencabut semua sesi secara atomik; identitas admin tetap sama; failure tidak memberi keadaan parsial. AUTH-006.
-- [ ] AC-08: Login dapat dipakai keyboard, ponsel dan desktop dengan label, pending/error, dan tujuan redirect yang aman. Implementasi dan SSR tersedia, tetapi keyboard/viewport belum diuji di browser. AUTH-011.
+- [x] AC-08: Login dapat dipakai keyboard, ponsel dan desktop dengan label, pending/error, dan tujuan redirect yang aman. Browser Chromium terverifikasi (lihat tasks/auth.md). AUTH-011.
 - [x] AC-09: Eden type-only dan Scalar gabungan mencerminkan route/error/security aktif, tanpa server dependency/secret/token pada DTO SSR browser. AUTH-008/010.
 - [x] AC-10: Frozen install, test native, integration DB test terpisah, lint web, type-check semua workspace, build kedua app, dan runbook memiliki hasil nyata. AUTH-013.
 
