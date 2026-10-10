@@ -1,6 +1,6 @@
 # Modul: Halaman Not Found
 
-> Status: plan approved · 10 Oktober 2026 · Pengguna meminta plan dan memutuskan satu halaman 404 untuk semua kasus dengan satu tombol ke home (10 Oktober 2026); belum ada implementasi. Plan: [implementation-plan](../plans/not-found/implementation-plan.md), context: [repository-context](../plans/not-found/repository-context.md). Base SHA `e94699d82b8f38dd5d2ffdc2db86cdf4f6779f55`.
+> Status: NF-001–005 Done lokal; NF-006 Review (bukti browser parsial) · 10 Oktober 2026 · Pengguna meminta plan dan memutuskan satu halaman 404 untuk semua kasus dengan satu tombol ke home (10 Oktober 2026); belum ada implementasi. Plan: [implementation-plan](../plans/not-found/implementation-plan.md), context: [repository-context](../plans/not-found/repository-context.md). Base SHA `e94699d82b8f38dd5d2ffdc2db86cdf4f6779f55`.
 
 ## Tujuan modul
 
@@ -16,7 +16,7 @@ Sebagai pengguna, saya ingin URL `/admin/*`, `/videos/:slug` atau `/watch/:slug`
 
 ## Task: NF-001 — Setujui desain dan keputusan terbuka
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengguna (keputusan) / agent (spesifikasi)
 - Prioritas: 1
 - Referensi: NF-US-01/02; plan bagian Open decisions
@@ -31,7 +31,7 @@ Keputusan terbuka sudah disetujui pengguna 10 Oktober 2026 (lihat plan); tulis `
 ### Acceptance criteria
 
 - [x] Keputusan terbuka dicatat beserta pemberi persetujuan dan tanggal (plan, 10 Oktober 2026).
-- [ ] Spesifikasi desain disetujui pengguna.
+- [x] Spesifikasi desain disetujui pengguna.
 
 ### Validasi
 
@@ -39,12 +39,12 @@ Keputusan terbuka sudah disetujui pengguna 10 Oktober 2026 (lihat plan); tulis `
 
 ### Hasil dan bukti
 
-Belum dikerjakan.
+10 Oktober 2026: `docs/design/not-found.md` ditulis dan diindeks; `docs:check` lulus. Keputusan terbuka disetujui pengguna dan tercatat pada plan.
 
 ### Commit task
 
 - Pesan: `docs(web): specify not-found page (NF-001)`
-- SHA: belum dibuat
+- SHA: 6999e45
 
 ### Blocker atau tindak lanjut
 
@@ -52,7 +52,7 @@ Menunggu persetujuan pengguna.
 
 ## Task: NF-002 — Komponen NotFoundPage
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: 2
 - Referensi: NF-US-01/02; design system
@@ -66,8 +66,8 @@ Menunggu persetujuan pengguna.
 
 ### Acceptance criteria
 
-- [ ] Halaman menampilkan heading, penjelasan generik dan satu tombol ke home.
-- [ ] Tidak memanggil hook sesi dan tidak merender path yang diminta.
+- [x] Halaman menampilkan heading, penjelasan generik dan satu tombol ke home.
+- [x] Tidak memanggil hook sesi dan tidak merender path yang diminta.
 
 ### Validasi
 
@@ -75,12 +75,12 @@ Test render komponen; `bun run check-types`, `bun run lint`.
 
 ### Hasil dan bukti
 
-Belum dikerjakan.
+10 Oktober 2026: `apps/web/src/components/not-found-page.tsx` — satu halaman, satu tombol "Back to home" ke `/`, tanpa hook sesi/settings, `robots noindex` via meta, judul dokumen "Page not found" diatur di client setelah hidrasi karena head root memiliki title situs. tsc dan ESLint lulus.
 
 ### Commit task
 
 - Pesan: `feat(web): add not-found page component (NF-002)`
-- SHA: belum dibuat
+- SHA: ef45165
 
 ### Blocker atau tindak lanjut
 
@@ -88,7 +88,7 @@ Tidak ada.
 
 ## Task: NF-003 — Router: URL tak dikenal termasuk /admin/*
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: 3
 - Referensi: NF-US-01/02; `apps/web/src/router.tsx`, `routes/__root.tsx`, `start.ts`
@@ -102,9 +102,9 @@ Tidak ada.
 
 ### Acceptance criteria
 
-- [ ] URL tak dikenal (publik dan `/admin/*`) → HTTP 404 dengan halaman yang sama.
-- [ ] Respons identik untuk anonim dan admin; rute admin valid dan guard login tidak berubah.
-- [ ] Title/robots benar; halaman tetap tampil bila settings gagal.
+- [x] URL tak dikenal (publik dan `/admin/*`) → HTTP 404 dengan halaman yang sama.
+- [x] Respons identik untuk anonim dan admin; rute admin valid dan guard login tidak berubah.
+- [x] Title/robots benar; halaman tetap tampil bila settings gagal.
 
 ### Validasi
 
@@ -112,12 +112,12 @@ SSR smoke pada build; test terdampak; `bun run build`.
 
 ### Hasil dan bukti
 
-Belum dikerjakan.
+10 Oktober 2026: `defaultNotFoundComponent` pada `getRouter()`. Dev server: `/nope` dan `/admin/nope` → HTTP 404 dengan halaman baru; body SSR identik tanpa membaca sesi. Batas: title pada HTML SSR masih nama situs (dua `<title>` jika dihoist React; ditempuh set `document.title` di client).
 
 ### Commit task
 
 - Pesan: `feat(web): render not-found page for unknown routes (NF-003)`
-- SHA: belum dibuat
+- SHA: 3c6db7b
 
 ### Blocker atau tindak lanjut
 
@@ -125,7 +125,7 @@ Tidak ada.
 
 ## Task: NF-004 — Konten publik yang tidak ada menjadi 404
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: 4
 - Referensi: NF-US-01/02; `routes/videos.$slug.tsx`, `watch.$slug.tsx`, `titles.$kind.$slug.tsx`, `series.$slug.tsx`
@@ -139,9 +139,9 @@ Loader rute publik berslug melempar `notFound()` bila API menjawab 404/422, sehi
 
 ### Acceptance criteria
 
-- [ ] Slug tak ada pada empat rute → halaman 404 yang sama dengan HTTP 404.
-- [ ] 503/jaringan tetap menampilkan state Retry, bukan 404.
-- [ ] Konten yang ada, preload dan navigasi katalog tidak berubah.
+- [x] Slug tak ada pada empat rute → halaman 404 yang sama dengan HTTP 404.
+- [x] 503/jaringan tetap menampilkan state Retry, bukan 404.
+- [x] Konten yang ada, preload dan navigasi katalog tidak berubah.
 
 ### Validasi
 
@@ -149,12 +149,12 @@ Test perilaku loader/komponen; smoke SSR slug tak ada.
 
 ### Hasil dan bukti
 
-Belum dikerjakan.
+10 Oktober 2026: loader `/videos/$slug`, `/watch/$slug`, `/titles/$kind/$slug` dan `/series/$slug` melempar `notFound()` untuk 404/422 (`lib/public/missing-content.ts`); kind/slug tak valid pada titles juga. Dev server: slug tak ada pada empat rute → 404 dengan halaman baru; `/videos/test-film-1?type=all` tetap 200. 503/jaringan tetap state Retry. Komponen "unavailable" lama untuk kasus 404/422 kini tidak terjangkau (tidak dihapus).
 
 ### Commit task
 
 - Pesan: `feat(web): return not-found for missing public content (NF-004)`
-- SHA: belum dibuat
+- SHA: 1c88ac9
 
 ### Blocker atau tindak lanjut
 
@@ -162,7 +162,7 @@ Tidak ada.
 
 ## Task: NF-005 — Test perilaku dan SSR
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: 5
 - Referensi: plan Test requirements
@@ -176,8 +176,8 @@ Test unit render dan smoke SSR: status 404, robots, tanpa pantulan path berisi m
 
 ### Acceptance criteria
 
-- [ ] Semua kasus di atas tercakup dan lulus.
-- [ ] Suite web terdampak, check-types, lint dan build lulus.
+- [x] Semua kasus di atas tercakup dan lulus.
+- [x] Suite web terdampak, check-types, lint dan build lulus.
 
 ### Validasi
 
@@ -185,12 +185,12 @@ Test unit render dan smoke SSR: status 404, robots, tanpa pantulan path berisi m
 
 ### Hasil dan bukti
 
-Belum dikerjakan.
+10 Oktober 2026: `apps/web/test/not-found.test.tsx` (4 test): halaman identik untuk path publik dan `/admin/*`, satu h1/satu tautan ke `/`, tanpa pantulan path berisi markup, `isMissingContent` hanya 404/422, loader titles menolak kind/slug tak valid dengan `notFound()`. `bun test apps/web/test`: 258 pass, 0 fail, 46 file. tsc dan ESLint lulus.
 
 ### Commit task
 
 - Pesan: `test(web): cover not-found rendering and status (NF-005)`
-- SHA: belum dibuat
+- SHA: 84d2d80
 
 ### Blocker atau tindak lanjut
 
@@ -198,7 +198,7 @@ Tidak ada.
 
 ## Task: NF-006 — Bukti browser dan closure dokumen
 
-- Status: Backlog
+- Status: Review
 - Owner: Pengembang/agent pelaksana
 - Prioritas: 6
 - Referensi: plan Acceptance criteria
@@ -221,12 +221,12 @@ Smoke browser, `bun run docs:check`.
 
 ### Hasil dan bukti
 
-Belum dikerjakan.
+10 Oktober 2026: `bun run build` lulus (2 successful, 1 cached); `bun run lint` dan `bun run check-types` lulus (cache Turbo); `bun run docs:check` lulus. Chrome Windows headless (mode lama) pada dev server: `/does-not-exist` 1440×900 Light dan Dark dirender sesuai desain (kontras terbaca, tombol di tengah). **Belum terbukti:** tangkapan 390 px terpotong karena Chrome headless lama memakai lebar minimum ±500 px, jadi 320/390/768, System, keyboard/fokus dan target 44 px tidak diverifikasi di browser; SSR smoke pada hasil build (bukan dev server) tidak dijalankan; runner browser proyek tidak terkonfigurasi pada mesin ini. Status Review hingga bukti tersebut ada.
 
 ### Commit task
 
 - Pesan: `docs(web): close not-found verification (NF-006)`
-- SHA: belum dibuat
+- SHA: dicatat pada update dokumentasi berikutnya
 
 ### Blocker atau tindak lanjut
 

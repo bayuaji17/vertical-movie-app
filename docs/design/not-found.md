@@ -1,6 +1,6 @@
 # Halaman Not Found
 
-> Status: approved plan, spesifikasi komponen · 10 Oktober 2026 · Keputusan pengguna pada [plan](../plans/not-found/implementation-plan.md#decisions). Belum ada mockup raster; spesifikasi ini bukan bukti implementasi.
+> Status: implemented lokal, spesifikasi komponen · 10 Oktober 2026 · Keputusan pengguna pada [plan](../plans/not-found/implementation-plan.md#decisions). Belum ada mockup raster; spesifikasi ini bukan bukti implementasi.
 
 Satu halaman 404 dipakai untuk semua kasus: rute tak dikenal (termasuk `/admin/*`) dan konten publik berslug yang tidak ada (`/videos/$slug`, `/watch/$slug`, `/titles/$kind/$slug`, `/series/$slug`). Tidak ada varian publik/admin dan halaman tidak membaca sesi.
 
@@ -24,7 +24,7 @@ Path yang diminta tidak ditampilkan. Tidak ada tautan lain.
 
 ## Metadata dan status
 
-`<title>Page not found</title>` dan `robots: noindex, nofollow`. Respons HTTP 404 dipertahankan oleh `apps/web/src/start.ts`.
+`robots: noindex, nofollow` dari halaman; judul dokumen "Page not found" diatur di client setelah hidrasi (head root memiliki title situs). Title pada HTML SSR tetap nama situs. Respons HTTP 404 dipertahankan oleh `apps/web/src/start.ts`.
 
 ## State
 
