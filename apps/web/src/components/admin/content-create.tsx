@@ -23,7 +23,7 @@ export function CreateContentView() {
     editor.setError(undefined)
     try {
       const result = await mutation.mutateAsync(createContentCommand(values))
-      await editor.finishSave(result.type, result.id)
+      await editor.finishSave(result.type, result.id, 'setup')
     } catch (error) {
       editor.setError(error)
     } finally {
@@ -34,8 +34,8 @@ export function CreateContentView() {
     <>
       <UnsavedChangesGuard dirty={editor.dirty} />
       <AdminPageHeading
-        title="Create draft"
-        description="Save initial metadata for a film, standalone video, or series."
+        title="Add a video"
+        description="Three short steps. You can leave any time; your draft is saved."
       />
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_16rem]">
         <ContentForm
@@ -43,21 +43,22 @@ export function CreateContentView() {
           onSubmit={submit}
           onDirtyChange={editor.setDirty}
           error={editor.error}
+          variant="quick"
         />
         <Card>
           <CardHeader>
-            <CardTitle>About drafts</CardTitle>
+            <CardTitle>What happens next</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-muted-foreground">
             <p>
-              A title is enough to get started. You can complete optional
-              metadata later.
+              <strong className="text-foreground">Media.</strong> Choose your
+              video and cover; upload starts by itself.
             </p>
-            <p>Drafts are private and are not visible in the public catalog.</p>
             <p>
-              Video and cover upload, processing, and publication follow in a
-              separate workflow.
+              <strong className="text-foreground">Review.</strong> Check the
+              processed video, then publish.
             </p>
+            <p>Drafts stay private until you publish.</p>
           </CardContent>
         </Card>
       </div>

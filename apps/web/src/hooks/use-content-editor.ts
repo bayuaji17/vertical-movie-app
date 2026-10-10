@@ -18,7 +18,11 @@ export function useContentEditor() {
   const [dirty, setDirty] = useState(false),
     [saved, setSaved] = useState(false),
     [error, setError] = useState<unknown>()
-  async function finishSave(type: ContentType, id: string) {
+  async function finishSave(
+    type: ContentType,
+    id: string,
+    next: 'detail' | 'setup' = 'detail',
+  ) {
     setSaved(true)
     setDirty(false)
     setError(undefined)
@@ -29,7 +33,13 @@ export function useContentEditor() {
     })
     await invalidateContent(api.queryClient, api.identity, type, id)
     if (!mounted.current) return
-    await router.navigate({ to: `/admin/content/${type}/${id}` })
+    if (next === 'setup' && type !== 'series')
+      await router.navigate({
+        to: '/admin/content/$type/$id/setup',
+        params: { type, id },
+        search: { step: 'media' },
+      })
+    else await router.navigate({ to: `/admin/content/${type}/${id}` })
   }
   return {
     ...api,
