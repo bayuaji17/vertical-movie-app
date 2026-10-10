@@ -2,7 +2,7 @@
 
 ## Plan metadata
 
-- Status: **implemented lokal** (10 Oktober 2026): GEN-001–006 Done; tanpa bukti browser; edit/hapus genre menunggu GEN-API-001; bukan klaim kesiapan production.
+- Status: **implemented lokal** (10 Oktober 2026): GEN-001–007 dan GEN-API-001 Done; rename/hapus genre aktif (API + frontend); tanpa bukti browser; bukan klaim kesiapan production.
 - Date: 10 Oktober 2026; decision owner: pengguna.
 - Repository: `bayuaji17/vertical-movie-app`; base ref: `main`; base SHA: `acffe2dcdad62ddf003ff1ae2aa2db4ed8dce07a`.
 - Context: [repository-context.md](repository-context.md).
@@ -86,3 +86,4 @@ Observasi kode pada base SHA: admin genres hanya GET/POST; multi-genre sudah did
 
 - 10 Oktober 2026: context dan plan ditulis. Pengguna memutuskan categories = genres, istilah genre dipertahankan, GEN-API-001 setelah frontend; plan approved.
 - 10 Oktober 2026: GEN-001–005 diimplementasikan pada `feat/admin-genres` (1ee7fe6, aceeee0, 5fb4d40, d429f64, 1a304d5); GEN-006 closure dengan batas bukti browser pada backlog.
+- 10 Oktober 2026: pengguna meminta edit/hapus; GEN-API-001 (API tanpa migration, konkurensi memakai `updatedAt`) dan GEN-007 (frontend) diimplementasikan pada `feat/genres-edit-api` (9ecc268, 8ce7d1e).
