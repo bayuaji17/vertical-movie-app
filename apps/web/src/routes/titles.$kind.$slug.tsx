@@ -9,13 +9,10 @@ import {
   setContentHttpStatus,
 } from '#/lib/catalog/content-queries'
 import type { CatalogItem } from '#/lib/catalog/public-catalog-model'
-import { createFileRoute, useRouter } from '@tanstack/react-router'
-import {
-  ContentPage,
-  ContentShell,
-  ContentFailure,
-} from '#/components/catalog/content-page'
+import { createFileRoute, notFound } from '@tanstack/react-router'
+import { ContentPage } from '#/components/catalog/content-page'
 import { contentSlug } from '#/lib/catalog/content-model'
+import { isMissingContent } from '#/lib/public/missing-content'
 
 export const Route = createFileRoute('/titles/$kind/$slug')({
   loader: async ({ context, params }) => {
@@ -24,7 +21,7 @@ export const Route = createFileRoute('/titles/$kind/$slug')({
       !contentSlug.safeParse(params.slug).success
     ) {
       setContentHttpStatus(404)
-      return { detailStatus: 404, episodesStatus: null, metadata: undefined }
+      throw notFound()
     }
     const result = await loadContent(
       context.queryClient,
@@ -34,6 +31,7 @@ export const Route = createFileRoute('/titles/$kind/$slug')({
     const item = context.queryClient.getQueryData<{ item: CatalogItem }>(
       contentDetailOptions(params.kind, params.slug).queryKey,
     )?.item
+    if (isMissingContent(result.detailStatus)) throw notFound()
     return {
       ...result,
       metadata: item
@@ -56,20 +54,9 @@ export const Route = createFileRoute('/titles/$kind/$slug')({
 })
 function Details() {
   const { kind, slug } = Route.useParams(),
-    bootstrap = Route.useLoaderData(),
-    router = useRouter()
-  if (kind !== 'movie' && kind !== 'standalone')
-    return (
-      <ContentShell>
-        <ContentFailure
-          status={404}
-          busy={false}
-          onRetry={() => {
-            void router.invalidate()
-          }}
-        />
-      </ContentShell>
-    )
+    bootstrap = Route.useLoaderData()
+  // The loader rejects unknown kinds; this narrows the type for rendering.
+  if (kind !== 'movie' && kind !== 'standalone') throw notFound()
   return (
     <ContentPage
       key={kind + ':' + slug}
