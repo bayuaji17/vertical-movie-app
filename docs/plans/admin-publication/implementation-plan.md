@@ -328,13 +328,13 @@ Freshness sebelum runtime: resolve target SHA, diff affected paths dan dependenc
 
 ## Acceptance criteria
 
-- [ ] Admin Film/Standalone melihat readiness server, alasan blocked dan correction actions tanpa mengandalkan sourceAvailability/canPreview sebagai seluruh syarat publish.
-- [ ] Admin mempratinjau HLS existing, mengonfirmasi Publish secara manual dan mendapat current published state; unknown outcome/version conflict aman direkonsiliasi.
-- [ ] Admin mengonfirmasi Archive hanya pada published aktif; archived state readonly, retained asset/provenance dan expiry semantics benar.
-- [ ] Pengunjung tanpa akun mendapat playback setelah publish dan ditolak untuk request/URL baru setelah archive; existing issued URL behavior sesuai kontrak.
-- [ ] Draft, archived, series dan episode tidak memperoleh aksi unsupported; resource/auth/dirty-editor/upload existing tidak regresi.
-- [ ] Empat mode layout, keyboard/dialog/44px dan network/auth/concurrency states mempunyai evidence; applicable gates lulus.
-- [ ] Task wajib committed terpisah dan canonical docs menyatakan verified scope lokal secara tepat.
+- [x] Admin Film/Standalone melihat readiness server, alasan blocked dan correction actions tanpa mengandalkan sourceAvailability/canPreview sebagai seluruh syarat publish.
+- [x] Admin mempratinjau HLS existing, mengonfirmasi Publish secara manual dan mendapat current published state; unknown outcome/version conflict aman direkonsiliasi.
+- [x] Admin mengonfirmasi Archive hanya pada published aktif; archived state readonly, retained asset/provenance dan expiry semantics benar.
+- [x] Pengunjung tanpa akun mendapat playback setelah publish dan ditolak untuk request/URL baru setelah archive; existing issued URL behavior sesuai kontrak.
+- [x] Draft, archived, series dan episode tidak memperoleh aksi unsupported; resource/auth/dirty-editor/upload existing tidak regresi.
+- [x] Empat mode layout, keyboard/dialog/44px dan network/auth/concurrency states mempunyai evidence; applicable gates lulus.
+- [x] Task wajib committed terpisah dan canonical docs menyatakan verified scope lokal secara tepat.
 
 ## Risks and mitigations
 

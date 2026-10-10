@@ -36,7 +36,7 @@ Semua task mengikuti template dan workflow root. Owner: pengembang/agent pelaksa
 
 ## Task: MEDIA-CFG-001 — Konfigurasi provider storage melalui env
 
-- Status: Review
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P0 — urutan mengikuti dependency
 - Referensi: MEDIA-US-01, PRD-04/05/07/09, plan video tahap B–D
@@ -68,7 +68,7 @@ MEDIA-PROOF-001 membuktikan operasi, dan MEDIA-DESIGN-001 memfinalkan identity/f
 
 ## Task: MEDIA-PROOF-001 — Proof operasi native S3 pada MinIO
 
-- Status: Review
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: MEDIA-US-01, PRD-04/05/07/09, plan video tahap B–D
@@ -81,9 +81,9 @@ Suite storage di `apps/api/test/integration/` dengan bucket test khusus terpisah
 
 ### Acceptance criteria
 
-- [ ] PUT/GET/stat/DELETE serta presigned UploadPart/GET berhasil pada versi Bun repo; namespace/key ditentukan server dan hasil tidak bocor publik.
-- [ ] Browser proof membuktikan endpoint reachable, CORS, Content-Type, expiry dan penolakan URL salah/expired; signed URL tidak ditulis ke log.
-- [ ] Proof capability wajib mencakup multipart create/part/list/complete/abort untuk browser, termasuk gambar kecil satu part, copy/freeze source, metadata/checksum dan addressing. Bedakan multipart streaming server dengan resume browser; dependency alternatif hanya ditambahkan setelah gap native tercatat.
+- [x] PUT/GET/stat/DELETE serta presigned UploadPart/GET berhasil pada versi Bun repo; namespace/key ditentukan server dan hasil tidak bocor publik.
+- [x] Browser proof membuktikan endpoint reachable, CORS, Content-Type, expiry dan penolakan URL salah/expired; signed URL tidak ditulis ke log.
+- [x] Proof capability wajib mencakup multipart create/part/list/complete/abort untuk browser, termasuk gambar kecil satu part, copy/freeze source, metadata/checksum dan addressing. Bedakan multipart streaming server dengan resume browser; dependency alternatif hanya ditambahkan setelah gap native tercatat.
 
 ### Validasi
 
@@ -124,13 +124,15 @@ Review kontrak dan matriks skenario terputus/resume/expiry/duplikasi/overwrite. 
 
 4 Oktober2026, feat/media-backend (belum commit): Kontrak upload/freeze/status pada docs/architecture/media-upload-contract.md dan docs/operations/media.md; policy/probe unit serta FFmpeg still/EXIF tersedia. Seluruh format/HDR/VFR/animasi/corrupt fixture matrix tetap terbuka. Gate root dan batas lingkungan pada [Media Operations](../operations/media.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
+Pembaruan 10 Oktober 2026 (sinkronisasi status; teks di atas tetap riwayat 4 Oktober): matriks codec/container, HDR→SDR, VFR/SAR/rotasi, serta sumber corrupt/animasi ditolak lulus 3/41 dengan fixture sintetis; boundary byte/durasi per kind dan upload 4/32 lulus (lihat [Media Operations](../operations/media.md)). Sisa nyata: timeout/kebijakan di luar acuan dan proof pada konten nyata. Status tetap In Progress.
+
 ### Blocker atau tindak lanjut
 
 Resolusi 480p–1080p, target bitrate/fps sumber, batas terbaru per kind movie/standalone maksimal 30 menit dan 1,5 GB, episode maksimal 10 menit dan 512 MB, whitelist pasangan container/video codec, semua video/sampul portrait 9:16 dan standar sampul seragam antarjenis konten sudah ditetapkan. Standar sampul JPG/PNG/WebP <=5 MB, sumber minimal 1080 × 1920 dan hasil WebP 1080 × 1920 sudah disetujui. Batas produk nomor 1 selesai dengan limit terbaru per kind; batas terdahulu movie 1 jam/2 GB dan standalone 10 menit/1 GB telah digantikan. Timeout, kebijakan audio/HDR/VFR/fps di luar acuan dan copy/freeze belum ditetapkan. Setelah refinement, lanjut MEDIA-SCHEMA-001.
 
 ## Task: MEDIA-SCHEMA-001 — Schema aset dan upload session
 
-- Status: Review
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: MEDIA-US-02, PRD-04/05/07/09, plan video tahap B–D
@@ -143,9 +145,9 @@ Buat `apps/api/src/db/schema/media.ts`, `upload.ts`, update pointer source/poste
 
 ### Acceptance criteria
 
-- [ ] Ownership video/series, asset kind, provider/bucket/key unique, pointer composite FK, session pending unique dan expiry/status/idempotency/request hash mempunyai constraints yang sesuai.
-- [ ] Migrasi mempertahankan auth dan metadata existing; nullable pointers tidak merusak draf lama. Provider persisten mencegah penafsiran objek lama lewat env baru.
-- [ ] Schema proof pada DB test dedicated lolos; migrasi pending diterapkan ke development dengan command resmi, journal/constraints dan preservation data diverifikasi sesuai workflow.
+- [x] Ownership video/series, asset kind, provider/bucket/key unique, pointer composite FK, session pending unique dan expiry/status/idempotency/request hash mempunyai constraints yang sesuai.
+- [x] Migrasi mempertahankan auth dan metadata existing; nullable pointers tidak merusak draf lama. Provider persisten mencegah penafsiran objek lama lewat env baru.
+- [x] Schema proof pada DB test dedicated lolos; migrasi pending diterapkan ke development dengan command resmi, journal/constraints dan preservation data diverifikasi sesuai workflow.
 
 ### Validasi
 
@@ -161,7 +163,7 @@ Enqueue job konkret menyusul WORKER-001; jangan membuat FK ke job table yang bel
 
 ## Task: MEDIA-UPLOAD-001 — Endpoint membuat upload session admin
 
-- Status: Review
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: MEDIA-US-02, PRD-04/05/07/09, plan video tahap B–D
@@ -174,10 +176,10 @@ Module `apps/api/src/modules/media/{index,model,service,repository}.ts`, factory
 
 ### Acceptance criteria
 
-- [ ] Tanpa sesi 401/identitas tidak berhak 403 tanpa memanggil storage; ownership/kind/parent/archive/limits divalidasi sebelum menerbitkan izin upload.
-- [ ] Request identik memakai session/key yang sama; key sama payload berbeda 409, session expired tidak diberi URL aktif. Server menetapkan key dan expiry.
-- [ ] Presign dibatasi min(900 detik,floor(sisa session)); sisa <1 detik, non-pending/aborted/expired atau admin tidak sah ditolak. Renewal tidak memperpanjang session dan part terverifikasi tidak diunggah ulang. DTO memuat concurrency aman 3; browser scheduler membatasi 3 UploadPart per file saat transport/UI diimplementasikan.
-- [ ] Response privat no-store, schema typed dan OpenAPI stabil; credential/signature tidak tersimpan dalam DTO persisten/log; uploaded object belum menjadi preview publik.
+- [x] Tanpa sesi 401/identitas tidak berhak 403 tanpa memanggil storage; ownership/kind/parent/archive/limits divalidasi sebelum menerbitkan izin upload.
+- [x] Request identik memakai session/key yang sama; key sama payload berbeda 409, session expired tidak diberi URL aktif. Server menetapkan key dan expiry.
+- [x] Presign dibatasi min(900 detik,floor(sisa session)); sisa <1 detik, non-pending/aborted/expired atau admin tidak sah ditolak. Renewal tidak memperpanjang session dan part terverifikasi tidak diunggah ulang. DTO memuat concurrency aman 3; browser scheduler membatasi 3 UploadPart per file saat transport/UI diimplementasikan.
+- [x] Response privat no-store, schema typed dan OpenAPI stabil; credential/signature tidak tersimpan dalam DTO persisten/log; uploaded object belum menjadi preview publik.
 
 ### Validasi
 
@@ -193,7 +195,7 @@ Jika WEB-CONTENT-001 belum tersedia, proof HTTP backend direct tetap sah dan acc
 
 ## Task: MEDIA-COMPLETE-001 — Finalisasi upload dan status aset aman saat diulang
 
-- Status: Review
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: MEDIA-US-02, PRD-04/05/07/09, plan video tahap B–D
@@ -206,9 +208,9 @@ Service/repository/model/routes media dan adapter storage. Implement complete/st
 
 ### Acceptance criteria
 
-- [ ] Objek absent/truncated/MIME-size invalid ditolak; claim klien bukan fakta teknis. Source final identity dicatat, metadata editorial tidak hilang saat completion gagal.
-- [ ] Repeated/concurrent completion hanya menyimpan satu hasil; setelah freeze, presigned upload lama tidak menimpa input worker. Error aman; transaksi tidak mencakup network storage.
-- [ ] Status pending/completed/failed dibedakan dari publicationStatus dan processing; complete belum berarti HLS ready/published. FK pointer hanya memasangkan owner yang benar.
+- [x] Objek absent/truncated/MIME-size invalid ditolak; claim klien bukan fakta teknis. Source final identity dicatat, metadata editorial tidak hilang saat completion gagal.
+- [x] Repeated/concurrent completion hanya menyimpan satu hasil; setelah freeze, presigned upload lama tidak menimpa input worker. Error aman; transaksi tidak mencakup network storage.
+- [x] Status pending/completed/failed dibedakan dari publicationStatus dan processing; complete belum berarti HLS ready/published. FK pointer hanya memasangkan owner yang benar.
 
 ### Validasi
 
@@ -249,6 +251,8 @@ Injected clock/storage failure tests; PostgreSQL concurrent transition proof dan
 
 4 Oktober2026, feat/media-backend (belum commit): Explicit abort, session24h expiry, quarantine24h/hourly sweep dengan persisted key dan claim tersedia. DB expiry/abort race lulus; crash/fault matrix sweeper lengkap masih terbuka. Gate root dan batas lingkungan pada [Media Operations](../operations/media.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
+Pembaruan 10 Oktober 2026 (teks di atas tetap riwayat): race expiry/abort, karantina 24 jam, partial attempt, active/success skip dan retry mid-delete lulus (retensi/series 3/26, upload 4/32). Sisa nyata: crash, OOM, dan disk pada supervisor. Status tetap In Progress.
+
 ### Blocker atau tindak lanjut
 
 Retensi source 7 hari dan file konten archived permanen disepakati 4 Oktober 2026. Pengecualian archived mencakup video asli; titik awal retensi serta [aturan cleanup nomor 6](../plans/video/implementation-plan.md#nomor-6--retensi-dan-cleanup-disetujui-4-oktober-2026) disetujui 4 Oktober 2026: session resume 24 jam, abort explicit segera, objek invalid/partial gagal karantina 24 jam dan sweep per jam. Implementasi/proof masih pending. Source retention/tombstone serta cleanup worker dirinci pada WORKER-RETENTION-001; task ini tidak menghapus output sukses/arsip atau source final aktif. Restore konten tetap refinement.
@@ -281,13 +285,15 @@ FFmpeg/FFprobe nyata pada fixtures test bounded; parse/verify playlist dan semua
 
 4 Oktober2026, feat/media-backend (belum commit): Real FFmpeg4/12 lulus: three tiers1080p60→30/AAC, video-only/native480, larger poster/downscale/minimum dan JPEG EXIF orientation. hls-v1 libx264/veryfast/GOP2s/fMP4 target6s/WebP85 aktif. Full10/30min, HDR/VFR/codecs/keyframe/peak/visual matrix belum dibuktikan. Gate root dan batas lingkungan pada [Media Operations](../operations/media.md). Checklist lengkap hanya dicentang setelah seluruh matriks AC terbukti.
 
+Pembaruan 10 Oktober 2026 (teks di atas tetap riwayat): episode 600 detik 1/66 (307 objek HLS) dan movie 1800 detik 1/63 (907 objek) lulus dengan fixture sintetis 1080p24 tanpa audio, serta matriks codec 3/41. Sisa nyata: kualitas visual konten nyata, keyframe/peak lintas konten, dan Safari/native HLS. Status tetap In Progress.
+
 ### Blocker atau tindak lanjut
 
 Profil produk hls-v1 disetujui pada 4 Oktober 2026; proof kualitas/compatibility serta pembekuan detail encoder masih diperlukan. WORKER-002 membawa profil ke queue/lease/retry production code. [Rekomendasi worker nomor 7](../plans/video/implementation-plan.md#nomor-7--kebijakan-worker-disetujui-4-oktober-2026) menyetujui parameter melalui env dan concurrency default 1; retry 3 attempt/jeda 60–300 detik, timeout encoding max(15 menit,3×durasi), stall 5 menit, heartbeat 15/lease 120/recovery 30 detik juga disetujui. Penentuan thread/RAM/disk melalui benchmark disetujui, sementara angka kandidat resource/detail teknis tambahan tetap refinement. Benchmark per-thread/RSS/disk serta timeout pada episode 10 menit/movie 30 menit harus dibuktikan sebelum scale. Task queue/claim/runner/runtime/benchmark dirinci pada backlog worker.
 
 ## Task: HLS-DELIVERY-001 — Kontrak akses seluruh objek HLS dan proof delivery
 
-- Status: Review
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — urutan mengikuti dependency
 - Referensi: HLS-US-01, PRD-04/05/07/09, plan video tahap B–D
@@ -300,12 +306,12 @@ Rancang delivery lokal/production mengikuti lifecycle draft → published → ar
 
 ### Acceptance criteria
 
-- [ ] Master, variant, segment, init dan caption semuanya accessible pada sesi playback yang sah. Master presign saja dan asumsi query token diwariskan ditolak melalui test.
-- [ ] Draft/source tetap privat, preview admin, viewer konten published tanpa akun; akses lama setelah archive mengikuti keputusan/bound yang ditetapkan termasuk cache/expiry dan movie panjang.
-- [ ] Satu bucket aplikasi tetap privat; master/variant API memeriksa akses dan namespace, seluruh init/segment/caption URL terotorisasi. Browser mengambil payload video langsung dari storage tanpa proxy body melalui API. TTL 2× durasi terverifikasi mengikuti keputusan terbaru; archive-link/cache mengikuti kontrak yang disepakati dan dibuktikan sebelum task selesai; bukti expired URL, refresh/seek/quality switch dan buffer/cache lama tercatat.
-- [ ] TTL integer ceil(2 × verifiedDurationMs / 1000), signature/expiresAt dan renewal terbukti pada 3/10/30 menit, fractional/video pendek; klien tidak menentukan durasi. TTL upload part tidak ikut berubah.
-- [ ] Cache jika enabled memiliki expiry/event invalidation: playlist/DTO signed no-store; cache metadata TTL 60 detik dan invalidation setelah commit; private segment cache fresh maksimal min(300 detik, sisa URL), tidak melewati expiry URL dan hit tidak memperpanjangnya. Header/response-control provider dibuktikan; fallback no-cache/no-store bila clamp belum terbukti. Cache/CDN/browser invalidation tidak diklaim mencabut signature/buffer lama.
-- [ ] Proof browser memakai komponen HLS dari bundled docs Video.js versi installed, semua URI/MIME/CORS/seek benar; compatibility matrix dan adapter/version choice tercatat. Tidak mengandalkan R2 ACL/public-read atau custom-domain S3 presign.
+- [x] Master, variant, segment, init dan caption semuanya accessible pada sesi playback yang sah. Master presign saja dan asumsi query token diwariskan ditolak melalui test.
+- [x] Draft/source tetap privat, preview admin, viewer konten published tanpa akun; akses lama setelah archive mengikuti keputusan/bound yang ditetapkan termasuk cache/expiry dan movie panjang.
+- [x] Satu bucket aplikasi tetap privat; master/variant API memeriksa akses dan namespace, seluruh init/segment/caption URL terotorisasi. Browser mengambil payload video langsung dari storage tanpa proxy body melalui API. TTL 2× durasi terverifikasi mengikuti keputusan terbaru; archive-link/cache mengikuti kontrak yang disepakati dan dibuktikan sebelum task selesai; bukti expired URL, refresh/seek/quality switch dan buffer/cache lama tercatat.
+- [x] TTL integer ceil(2 × verifiedDurationMs / 1000), signature/expiresAt dan renewal terbukti pada 3/10/30 menit, fractional/video pendek; klien tidak menentukan durasi. TTL upload part tidak ikut berubah.
+- [x] Cache jika enabled memiliki expiry/event invalidation: playlist/DTO signed no-store; cache metadata TTL 60 detik dan invalidation setelah commit; private segment cache fresh maksimal min(300 detik, sisa URL), tidak melewati expiry URL dan hit tidak memperpanjangnya. Header/response-control provider dibuktikan; fallback no-cache/no-store bila clamp belum terbukti. Cache/CDN/browser invalidation tidak diklaim mencabut signature/buffer lama.
+- [x] Proof browser memakai komponen HLS dari bundled docs Video.js versi installed, semua URI/MIME/CORS/seek benar; compatibility matrix dan adapter/version choice tercatat. Tidak mengandalkan R2 ACL/public-read atau custom-domain S3 presign.
 
 ### Validasi
 

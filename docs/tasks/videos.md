@@ -542,7 +542,7 @@ Sebagai admin, saya ingin video mengikuti draft → published → archived, sehi
 
 ## Task: VID-016 — Sesuaikan kontrak lifecycle video dan schema compatibility
 
-- Status: Review
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: P1 — prerequisite publication
 - Referensi: VID-US-06, PRD-06, keputusan lifecycle model/plan 4 Oktober 2026

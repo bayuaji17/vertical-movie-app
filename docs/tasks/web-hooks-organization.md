@@ -134,7 +134,7 @@ Push/PR/merge refactor memerlukan authorization terpisah; tidak termasuk push aw
 
 ## Task: WHOOK-004 — Integrasi dengan katalog main dan squash delivery
 
-- Status: In Progress
+- Status: Done
 - Owner: Codex
 - Prioritas: P1
 - Referensi: WHOOK-US-01; instruksi pengguna commit/push/merge squash 8 Oktober 2026.
@@ -147,8 +147,8 @@ Integrasikan main yang sudah memuat katalog/detail/watch PR #11 ke branch hooks.
 ### Acceptance criteria
 
 - [x] Konflik docs index terselesaikan dan consumer katalog memakai hook baru.
-- [ ] Tests/types/lint/import-boundary/build/SSR serta docs/format/diff lulus pada hasil integrasi.
-- [ ] PR head diverifikasi, push/squash merge sesuai instruksi, source branch dipertahankan dan unrelated work dipulihkan.
+- [x] Tests/types/lint/import-boundary/build/SSR serta docs/format/diff lulus pada hasil integrasi.
+- [x] PR head diverifikasi, push/squash merge sesuai instruksi, source branch dipertahankan dan unrelated work dipulihkan.
 
 ### Validasi dan evidence
 
@@ -165,3 +165,5 @@ Unit API/web hasil integrasi: `bun test apps/api/src apps/web/test`, 323 pass, 0
 ### Tindak lanjut
 
 Setelah delivery, refresh plan katalog awal terhadap main; plan lama tidak boleh mengulang fitur HOMEFE/PCAT/PCW yang sudah disetujui dan diimplementasikan.
+
+Ditutup 10 Oktober 2026 sesuai keputusan pengguna: acuan dokumen adalah branch main. Kode hooks sudah di main (65127a1) dan konsumen katalog memakai hook baru. Receipt WHOOK-004 (534e692, 01e9956) berada di branch chore/web-hooks-organization dan tidak tercatat di main; push/merge branch tersebut tetap memerlukan otorisasi terpisah.
