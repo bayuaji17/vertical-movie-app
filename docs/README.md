@@ -58,7 +58,7 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 
 ## Context dan plan per fitur
 
-Halaman Not Found frontend: [desain](design/not-found.md), [context](plans/not-found/repository-context.md), [plan](plans/not-found/implementation-plan.md) dan [backlog NF](tasks/not-found.md). Pengguna meminta plan 10 Oktober 2026; implemented lokal 10 Oktober 2026 (NF-001–005 Done, NF-006 Review); satu halaman 404 untuk semua kasus (/admin/*, /videos/:slug, /watch/:slug) dengan satu tombol ke home diputuskan pengguna 10 Oktober 2026; bukti browser 320/390/768, System dan keyboard masih tersisa.
+Halaman Not Found frontend: [desain](design/not-found.md), [context](plans/not-found/repository-context.md), [plan](plans/not-found/implementation-plan.md) dan [backlog NF](tasks/not-found.md). Pengguna meminta plan 10 Oktober 2026; implemented lokal 10 Oktober 2026 (NF-001–006 Done); satu halaman 404 untuk semua kasus (/admin/*, /videos/:slug, /watch/:slug) dengan satu tombol ke home diputuskan pengguna 10 Oktober 2026; bukti browser 320/390/768, System dan keyboard masih tersisa.
 
 Site Settings: [context](plans/site-settings/repository-context.md), [plan](plans/site-settings/implementation-plan.md) dan [backlog SSET](tasks/site-settings.md). Empat field teks dan cache browser/server-web/API maksimum1 jam disetujui pengguna serta implemented/verified lokal9Oct pada feat/site-settings; actual proof/receipt dan per-process limits berada di SSET. Contract aktif pada PRD/architecture dan runbook metadata.
 
@@ -90,7 +90,7 @@ Integrasi katalog API ke homepage: [context](plans/public-catalog-api/repository
 
 ## Backlog dan evidence
 
-- [Halaman Not Found](tasks/not-found.md): NF-001–005 Done lokal, NF-006 Review (bukti browser parsial).
+- [Halaman Not Found](tasks/not-found.md): NF-001–006 Done lokal; bukti browser parsial dikesampingkan pengguna.
 - [Site Settings](tasks/site-settings.md): SSET-001–013 completed/verified lokal9Oct, task commits dan proof cache/SQL/browser tersedia.
 
 - [Ringkasan dashboard admin](tasks/admin-dashboard.md): DASH-001–011 implemented/verified lokal; inventori/media/latest, private refresh, native SQL/auth dan built-browser15 width/theme proof.
