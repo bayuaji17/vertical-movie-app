@@ -32,9 +32,11 @@ import {
 export function VideoCard({
   inventory,
   manager,
+  onFilePicked,
 }: {
   inventory: OwnerMedia
   manager?: UploadManager
+  onFilePicked?: (file: File) => void
 }) {
   const role = inventory.source
   const inputId = useId()
@@ -69,7 +71,8 @@ export function VideoCard({
 
   const pick = (file: File | undefined) => {
     // Upload starts as soon as the file passes the local checks.
-    if (manager) selectAndStart(manager, 'source', file)
+    if (manager && selectAndStart(manager, 'source', file) && file)
+      onFilePicked?.(file)
   }
   const choose = () => {
     if (role.current && !role.active && status.stage === 'ready')

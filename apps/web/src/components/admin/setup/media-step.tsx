@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { UseQueryResult } from '@tanstack/react-query'
 import { Alert, AlertDescription, AlertTitle } from '#/components/ui/alert'
 import { Skeleton } from '#/components/ui/skeleton'
@@ -17,6 +18,8 @@ export function MediaStep({
   query: UseQueryResult<OwnerMedia>
   manager?: UploadManager
 }) {
+  // Held in memory only: lets the cover offer frames from this video.
+  const [videoFile, setVideoFile] = useState<File>()
   return (
     <section
       id="upload-media"
@@ -34,12 +37,17 @@ export function MediaStep({
         </Alert>
       ) : (
         <div className="grid min-w-0 gap-5 xl:grid-cols-2">
-          <VideoCard inventory={query.data} manager={manager} />
+          <VideoCard
+            inventory={query.data}
+            manager={manager}
+            onFilePicked={setVideoFile}
+          />
           <MediaUploadCard
             kind="poster"
             role={query.data.poster}
             inventory={query.data}
             manager={manager}
+            frameSource={videoFile}
           />
         </div>
       )}
