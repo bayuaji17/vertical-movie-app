@@ -18,9 +18,13 @@ Sebagai pengunjung di desktop atau ponsel, saya ingin halaman detail dan tonton 
 
 Sebagai penonton Series, saya ingin memilih season dan berpindah episode dari halaman tonton, sehingga saya tidak perlu kembali ke halaman Series.
 
-## Task: WFLOW-001 — Setujui desain dan keputusan D1–D5
+## User story: WFLOW-US-04
 
-- Status: Backlog
+Sebagai pengunjung, saya ingin mencari judul dari halaman Browse tanpa menekan tombol, sehingga hasil muncul saat saya selesai mengetik.
+
+## Task: WFLOW-001 — Setujui desain dan keputusan D1–D7
+
+- Status: Review
 - Owner: Pengguna (keputusan) / agent (spesifikasi)
 - Prioritas: 1
 - Referensi: WFLOW-US-02/03; plan bagian Keputusan dan usulan
@@ -30,12 +34,13 @@ Sebagai penonton Series, saya ingin memilih season dan berpindah episode dari ha
 
 ### Ruang lingkup
 
-Tulis `docs/design/watch-flow.md` (layout, state, breakpoint, copy) dengan mockup desktop/mobile Light/Dark untuk detail Film/Standalone, detail Series dan watch; catat keputusan D1–D5 dan pemberi persetujuan; perbarui `docs/README.md`.
+Tulis [watch-flow](../design/watch-flow.md) (layout, state, breakpoint, copy) dan [preview HTML interaktif](../design/watch-flow-preview.html) untuk Browse + search, detail Film/Standalone, detail Series dan watch (desktop/mobile/tablet, Light/Dark); catat keputusan D1–D7 dan pemberi persetujuan; perbarui `docs/README.md`. Search memakai debounce saja (permintaan pengguna 10 Oktober 2026).
 
 ### Acceptance criteria
 
-- [ ] D1–D5 dicatat beserta pemberi persetujuan dan tanggal.
-- [ ] Mockup 390 dan 1440 px Light/Dark untuk tiga halaman disetujui pengguna.
+- [x] Spesifikasi dan preview ditulis, termasuk state Browse + search (debounce 300 ms tanpa submit).
+- [ ] D1–D7 dicatat beserta pemberi persetujuan dan tanggal.
+- [ ] Preview 390 dan 1440 px Light/Dark untuk Browse, detail dan watch disetujui pengguna.
 
 ### Validasi
 
@@ -43,11 +48,11 @@ Tulis `docs/design/watch-flow.md` (layout, state, breakpoint, copy) dengan mocku
 
 ### Hasil dan bukti
 
-Belum ada.
+10 Oktober 2026: `docs/design/watch-flow.md` dan `docs/design/watch-flow-preview.html` dibuat. Preview memakai token `apps/web/src/styles.css`, container query per viewport dan debounce 300 ms nyata terhadap fixture. Render smoke dengan stub DOM: 138 kombinasi viewport/tema/layar/state tanpa error; tampilan visual belum dilihat di browser oleh agent dan PNG belum dibuat (tidak ada browser di lingkungan). Menunggu persetujuan pengguna, terutama D6 (Series pada Browse/search) yang mengubah keputusan 8 Oktober 2026.
 
 ### Commit task
 
-- Pesan: `docs(web): approve watch flow design (WFLOW-001)`
+- Pesan: `docs(web): add watch flow design (WFLOW-001)`
 - SHA: belum dibuat
 - Hook/checks: belum dijalankan
 - Ledger: dicatat pada update dokumentasi berikutnya
@@ -98,9 +103,9 @@ Belum terbukti: perilaku Back via riwayat, pemulihan filter/scroll dan alur offl
 ### Commit task
 
 - Pesan: `feat(web): remove type search from video and watch URLs (WFLOW-002)`
-- SHA: belum dibuat
-- Hook/checks: dijalankan saat commit
-- Ledger: dicatat pada update dokumentasi berikutnya
+- SHA: `b401c47` (10 Oktober 2026)
+- Hook/checks: Husky (docs:check, lint, check-types) dan commitlint lulus
+- Ledger: SHA dicatat pada commit WFLOW-001
 
 ### Blocker atau tindak lanjut
 
@@ -308,7 +313,7 @@ Tidak ada.
 - Prioritas: 8
 - Referensi: plan bagian Test and verification strategy
 - Diperbarui: 2026-10-10
-- Dependensi: WFLOW-007
+- Dependensi: WFLOW-007, WFLOW-009
 - Ukuran: kecil
 
 ### Ruang lingkup
@@ -339,3 +344,44 @@ Belum ada.
 ### Blocker atau tindak lanjut
 
 Tidak ada.
+
+## Task: WFLOW-009 — Search Browse dengan debounce
+
+- Status: Backlog
+- Owner: agent
+- Prioritas: 9
+- Referensi: WFLOW-US-04; [desain](../design/watch-flow.md#browse-dan-search); API `GET /catalog` (`search`, `kind`, cursor)
+- Diperbarui: 2026-10-10
+- Dependensi: WFLOW-001, WFLOW-002
+- Ukuran: sedang
+
+### Ruang lingkup
+
+Input search pada Browse (`/`) tanpa tombol submit: debounce 300 ms, tahan selama komposisi IME, trim, maksimum 200 karakter, `q` di URL (`replace`), request dibatalkan saat query berubah, status `aria-live`, Clear/Escape, state empty/error/offline. Memakai `GET /catalog` melalui klien existing `lib/catalog/catalog-client.ts`; cakupan Series mengikuti keputusan D6. Hook debounce berada di `apps/web/src/hooks/use-...`.
+
+### Acceptance criteria
+
+- [ ] Permintaan hanya dikirim 300 ms setelah ketikan terakhir; satu request untuk rangkaian ketikan cepat; request lama dibatalkan.
+- [ ] Komposisi IME tidak memicu request sebelum selesai.
+- [ ] `/?q=…&type=…` dapat dibuka langsung (SSR/hydrate) dan Back tidak berisi ketikan per karakter.
+- [ ] Empty, error (hasil sebelumnya tetap), offline (input nonaktif) dan Clear/Escape berfungsi; fokus tetap di input.
+- [ ] Filter dan search berkombinasi; cursor Load more tidak bercampur antar query.
+
+### Validasi
+
+Test hook debounce dan klien (timer palsu), test komponen; browser dev/build 390 dan 1440 px.
+
+### Hasil dan bukti
+
+Belum ada.
+
+### Commit task
+
+- Pesan: `feat(web): add debounced browse search (WFLOW-009)`
+- SHA: belum dibuat
+- Hook/checks: belum dijalankan
+- Ledger: dicatat pada update dokumentasi berikutnya
+
+### Blocker atau tindak lanjut
+
+D6 (apakah Series ikut pada Browse/search) harus diputuskan sebelum implementasi.

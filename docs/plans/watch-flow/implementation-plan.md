@@ -6,7 +6,7 @@
 - Date: 10 Oktober 2026; decision owner: pengguna.
 - Repository: `bayuaji17/vertical-movie-app`; base ref: `main`; base SHA: `f1b1d184fe6d410d976495c65bbeef75ad85cc83`.
 - Context: [repository-context.md](repository-context.md), disimpan sebelum plan ini.
-- Backlog: [watch-flow](../../tasks/watch-flow.md), WFLOW-001–008.
+- Backlog: [watch-flow](../../tasks/watch-flow.md), WFLOW-001–009.
 - Branch: `feat/watch-flow-redesign`.
 
 ## Objective
@@ -27,12 +27,14 @@ Usulan (perlu persetujuan di WFLOW-001, ditandai **D**):
 - **D3** Halaman watch memakai top bar ramping (tombol Back, judul terpotong, menu tema) alih-alih header 80 px agar player mendapat tinggi maksimum.
 - **D4** Autoplay tetap tidak ada (keputusan PRD). Akhir episode menampilkan kartu "Up next" dengan tombol; auto-advance ditunda dan menjadi keputusan terpisah.
 - **D5** Daftar episode berbasis teks (tanpa thumbnail karena API episode tidak membawa poster); tidak ada perubahan API.
+- **D6** Browse dan search menyertakan Series (badge "Series", filter tambahan). `GET /catalog` sudah mendukung `kind=series`, tetapi ini mengubah keputusan 8 Oktober 2026 (homepage khusus Film/Standalone).
+- **D7** Search memakai debounce 300 ms tanpa tombol submit (permintaan pengguna 10 Oktober 2026), `q` di URL dengan `replace`, memakai `GET /catalog`.
 
 ## Goals dan non-goals
 
-Goals: URL bersih; satu pola detail untuk Film/Standalone; detail Series dengan CTA, ringkasan season/episode dan pemilih season; watch dengan layout dua-panel desktop dan player-first mobile; panel episode, Previous/Next; state loading/error/offline yang konsisten; a11y dan bukti browser.
+Goals: URL bersih; search debounce pada Browse; satu pola detail untuk Film/Standalone; detail Series dengan CTA, ringkasan season/episode dan pemilih season; watch dengan layout dua-panel desktop dan player-first mobile; panel episode, Previous/Next; state loading/error/offline yang konsisten; a11y dan bukti browser.
 
-Non-goals: perubahan API/schema/env/dependensi; progress "continue watching", autoplay, pencarian, watchlist; perubahan perilaku `VerticalVideoPlayer` (renewal, retry); menambah Series ke grid homepage (keputusan produk terpisah); kebijakan indexing; tema baru.
+Non-goals: perubahan API/schema/env/dependensi; progress "continue watching", autoplay, watchlist, pencarian di luar Browse; perubahan perilaku `VerticalVideoPlayer` (renewal, retry); menambah Series ke grid homepage (keputusan produk terpisah); kebijakan indexing; tema baru.
 
 ## Current behavior
 
@@ -106,7 +108,7 @@ Mitigasi (4): muat halaman episode berikutnya hingga episode aktif ditemukan (ba
 
 ## Implementation DAG
 
-WFLOW-001 (desain + keputusan) → WFLOW-002 (URL bersih) → WFLOW-003 (detail Film/Standalone) dan WFLOW-004 (detail Series) → WFLOW-005 (watch layout) → WFLOW-006 (episode panel + Prev/Next/Up next) → WFLOW-007 (test + a11y) → WFLOW-008 (bukti browser, docs, closure). WFLOW-002 dapat dikerjakan lebih dulu bila pengguna ingin URL bersih segera, karena tidak bergantung pada desain.
+WFLOW-001 (desain + keputusan) → WFLOW-002 (URL bersih) → WFLOW-003 (detail Film/Standalone) dan WFLOW-004 (detail Series) → WFLOW-005 (watch layout) → WFLOW-006 (episode panel + Prev/Next/Up next) → WFLOW-009 (search Browse, dapat paralel setelah WFLOW-001/002) → WFLOW-007 (test + a11y) → WFLOW-008 (bukti browser, docs, closure). WFLOW-002 dapat dikerjakan lebih dulu bila pengguna ingin URL bersih segera, karena tidak bergantung pada desain.
 
 ## Test and verification strategy
 
@@ -120,11 +122,12 @@ Perubahan frontend saja; rollback dengan revert commit. Redirect legacy dipertah
 
 ## Open decisions
 
-1. D1–D5 di atas (pengguna memilih saat WFLOW-001).
+1. D1–D7 di atas (pengguna memilih saat WFLOW-001).
 2. Auto-advance episode berikutnya setelah selesai: ditunda; perlu keputusan produk karena PRD melarang autoplay.
 3. Series di grid homepage: di luar plan ini.
 
 ## Execution history
 
 - 10 Oktober 2026: context dan plan ditulis; branch `feat/watch-flow-redesign` dibuat dari `main` (`f1b1d18`). Belum ada implementasi.
+- 10 Oktober 2026: WFLOW-002 selesai lokal (`b401c47`). WFLOW-001: [desain](../../design/watch-flow.md) dan [preview HTML](../../design/watch-flow-preview.html) ditulis, termasuk input search debounce; menunggu persetujuan D1–D7. WFLOW-009 ditambahkan untuk search.
 - 10 Oktober 2026: pengguna memutuskan commit GEN-007 (`8ce7d1e`, `7af059a`) tetap berada di branch ini; branch dibuat dari `f1b1d18` sehingga belum memuat merge PR #27 di `main`. Pekerjaan watch-flow berikutnya mengikuti plan ini.

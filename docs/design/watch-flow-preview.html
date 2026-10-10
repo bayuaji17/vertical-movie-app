@@ -1,0 +1,1112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Watch flow preview</title>
+    <!--
+      Design prototype for WFLOW-001 (docs/design/watch-flow.md).
+      Tokens are copied from apps/web/src/styles.css. Data is fixture data; no
+      API, HLS or video is loaded. Search uses a real 300 ms debounce against
+      the fixture so the behavior can be reviewed.
+    -->
+    <style>
+      :root {
+        --background: oklch(1 0 0);
+        --foreground: oklch(0.145 0 0);
+        --card: oklch(1 0 0);
+        --primary: oklch(0.841 0.238 128.85);
+        --primary-foreground: oklch(0.405 0.101 131.063);
+        --secondary: oklch(0.967 0.001 286.375);
+        --muted: oklch(0.97 0 0);
+        --muted-foreground: oklch(0.556 0 0);
+        --border: oklch(0.922 0 0);
+        --ring: oklch(0.708 0 0);
+        --destructive: oklch(0.577 0.245 27.325);
+        --radius: 0.625rem;
+        --font-sans: "Inter Variable", Inter, system-ui, sans-serif;
+        --font-heading:
+          "Space Grotesk Variable", "Space Grotesk", system-ui, sans-serif;
+      }
+      .frame[data-theme="dark"] {
+        --background: #1e201e;
+        --foreground: #f3f5f3;
+        --card: #272a27;
+        --primary: oklch(0.768 0.233 130.85);
+        --secondary: #303430;
+        --muted: #303430;
+        --muted-foreground: #a8b0a8;
+        --border: #424842;
+        --ring: #a8b0a8;
+        --destructive: oklch(0.704 0.191 22.216);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: var(--font-sans);
+        background: #e9ebe9;
+        color: #1b1d1b;
+      }
+      /* review controls (outside the product viewport) */
+      .review {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px 20px;
+        align-items: center;
+        padding: 10px 16px;
+        background: #fff;
+        border-bottom: 1px solid #cfd3cf;
+        font-size: 13px;
+      }
+      .review label {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+      .review select,
+      .review button {
+        font: inherit;
+        padding: 4px 8px;
+        border: 1px solid #b9beb9;
+        border-radius: 6px;
+        background: #fff;
+      }
+      .review .note {
+        color: #5d635d;
+        flex-basis: 100%;
+      }
+      .stage {
+        padding: 16px;
+        overflow: auto;
+      }
+      .scaler {
+        margin: 0 auto;
+        transform-origin: top left;
+      }
+      /* product viewport */
+      .frame {
+        container-type: inline-size;
+        container-name: vp;
+        position: relative;
+        overflow: auto;
+        background: var(--background);
+        color: var(--foreground);
+        font-family: var(--font-sans);
+        border: 1px solid #b9beb9;
+        border-radius: 12px;
+        scrollbar-width: thin;
+      }
+      .frame h1,
+      .frame h2,
+      .frame h3 {
+        font-family: var(--font-heading);
+        margin: 0;
+      }
+      .frame button,
+      .frame input,
+      .frame select {
+        font: inherit;
+        color: inherit;
+      }
+      .frame a {
+        color: inherit;
+        text-decoration: none;
+      }
+      .muted {
+        color: var(--muted-foreground);
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      svg {
+        width: 1em;
+        height: 1em;
+        flex: none;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 44px;
+        padding: 0 18px;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        background: var(--background);
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 14px;
+      }
+      .btn.primary {
+        background: var(--primary);
+        color: var(--primary-foreground);
+        border-color: transparent;
+      }
+      .btn.ghost {
+        border-color: transparent;
+        background: transparent;
+      }
+      .btn[disabled] {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        height: 24px;
+        padding: 0 10px;
+        border-radius: 999px;
+        background: var(--secondary);
+        font-size: 12px;
+        font-weight: 500;
+      }
+      .shell-header {
+        border-bottom: 1px solid var(--border);
+      }
+      .shell-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 80px;
+        padding: 0 16px;
+        max-width: 1440px;
+        margin: 0 auto;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font: 700 20px var(--font-heading);
+      }
+      .logo i {
+        display: grid;
+        place-items: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
+        background: var(--primary);
+        color: var(--primary-foreground);
+        font-style: normal;
+      }
+      .page {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 24px 16px 48px;
+      }
+      /* fixture posters */
+      .poster {
+        position: relative;
+        aspect-ratio: 9 / 16;
+        width: 100%;
+        border-radius: 16px;
+        overflow: hidden;
+        background: linear-gradient(
+          160deg,
+          oklch(0.62 0.12 var(--h)),
+          oklch(0.28 0.08 calc(var(--h) + 40))
+        );
+        display: flex;
+        align-items: flex-end;
+        padding: 14px;
+        color: #fff;
+        font: 700 22px/1.1 var(--font-heading);
+        text-shadow: 0 1px 8px rgb(0 0 0 / 0.4);
+      }
+      /* browse */
+      .toolbar {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin: 20px 0 8px;
+      }
+      .seg {
+        display: inline-flex;
+        gap: 4px;
+        padding: 3px;
+        border-radius: var(--radius);
+        background: var(--muted);
+        width: fit-content;
+      }
+      .seg button {
+        min-height: 44px;
+        padding: 0 16px;
+        border: 0;
+        border-radius: 8px;
+        background: transparent;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+      }
+      .seg button[aria-pressed="true"] {
+        background: var(--background);
+        box-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
+      }
+      .search {
+        position: relative;
+        width: 100%;
+      }
+      .search input {
+        width: 100%;
+        min-height: 44px;
+        padding: 0 84px 0 40px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--background);
+        font-size: 16px;
+      }
+      .search input:focus-visible {
+        outline: 2px solid var(--ring);
+        outline-offset: 2px;
+      }
+      .search .lead {
+        position: absolute;
+        left: 13px;
+        top: 14px;
+        color: var(--muted-foreground);
+      }
+      .search .tail {
+        position: absolute;
+        right: 4px;
+        top: 0;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        gap: 2px;
+      }
+      .search .tail .btn {
+        min-height: 36px;
+        width: 36px;
+        padding: 0;
+        border: 0;
+      }
+      .spin {
+        width: 16px;
+        height: 16px;
+        border: 2px solid var(--border);
+        border-top-color: var(--foreground);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin-right: 4px;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .spin {
+          animation-duration: 3s;
+        }
+      }
+      .status {
+        min-height: 24px;
+        font-size: 14px;
+        color: var(--muted-foreground);
+        margin-bottom: 12px;
+      }
+      .grid {
+        display: grid;
+        gap: 28px 16px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .card h3 {
+        font-size: 16px;
+        margin-top: 12px;
+        line-height: 1.25;
+        font-weight: 600;
+      }
+      .card .meta {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-top: 4px;
+        font-size: 14px;
+        color: var(--muted-foreground);
+      }
+      .skeleton {
+        background: var(--muted);
+        border-radius: 12px;
+        animation: pulse 1.4s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        50% {
+          opacity: 0.55;
+        }
+      }
+      .notice {
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 28px;
+        text-align: center;
+        display: grid;
+        gap: 10px;
+        justify-items: center;
+      }
+      /* detail */
+      .detail {
+        display: grid;
+        gap: 20px;
+      }
+      .detail-top {
+        display: grid;
+        grid-template-columns: 132px 1fr;
+        gap: 16px;
+        align-items: end;
+      }
+      .detail h1 {
+        font-size: 30px;
+        line-height: 1.1;
+      }
+      .clamp {
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .sticky-cta {
+        position: sticky;
+        bottom: 0;
+        padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+        background: color-mix(in oklch, var(--background) 92%, transparent);
+        border-top: 1px solid var(--border);
+        margin: 0 -16px;
+        backdrop-filter: blur(8px);
+      }
+      .sticky-cta .btn {
+        width: 100%;
+      }
+      .desk-only,
+      .sm-only {
+        display: none;
+      }
+      input[type="search"]::-webkit-search-cancel-button {
+        display: none;
+      }
+      .tabs {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+      }
+      .ep-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 8px;
+      }
+      .ep {
+        display: grid;
+        grid-template-columns: 40px 1fr auto;
+        gap: 12px;
+        align-items: start;
+        min-height: 44px;
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+      }
+      .ep[aria-current="true"] {
+        border-color: var(--primary);
+        background: color-mix(in oklch, var(--primary) 12%, var(--background));
+      }
+      .ep .no {
+        display: grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: var(--muted);
+        font: 600 14px var(--font-heading);
+      }
+      .ep[aria-current="true"] .no {
+        background: var(--primary);
+        color: var(--primary-foreground);
+      }
+      .ep b {
+        font-weight: 600;
+        font-size: 15px;
+      }
+      .ep p {
+        margin: 2px 0 0;
+        font-size: 13px;
+        color: var(--muted-foreground);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      /* watch */
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        height: 56px;
+        padding: 0 8px 0 4px;
+        background: var(--background);
+        border-bottom: 1px solid var(--border);
+      }
+      .topbar .title {
+        min-width: 0;
+        flex: 1;
+        font: 600 15px var(--font-heading);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .watch {
+        display: grid;
+        gap: 20px;
+        padding: 0 0 40px;
+      }
+      .player {
+        position: relative;
+        aspect-ratio: 9 / 16;
+        width: min(100%, calc((var(--vh) - 56px) * 9 / 16));
+        margin: 0 auto;
+        background: linear-gradient(
+          160deg,
+          oklch(0.5 0.1 var(--h)),
+          oklch(0.2 0.05 calc(var(--h) + 40))
+        );
+        color: #fff;
+        overflow: hidden;
+      }
+      .player .big {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+      }
+      .player .big span {
+        display: grid;
+        place-items: center;
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: rgb(0 0 0 / 0.5);
+        font-size: 28px;
+      }
+      .player .bar {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 10px 14px;
+        background: linear-gradient(transparent, rgb(0 0 0 / 0.6));
+        font-size: 12px;
+      }
+      .player .track {
+        height: 4px;
+        border-radius: 2px;
+        background: rgb(255 255 255 / 0.35);
+        margin-bottom: 8px;
+      }
+      .player .track i {
+        display: block;
+        height: 100%;
+        width: 34%;
+        background: var(--primary);
+        border-radius: 2px;
+      }
+      .player .proto {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: rgb(0 0 0 / 0.55);
+        font-size: 11px;
+      }
+      .upnext {
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        bottom: 54px;
+        padding: 14px;
+        border-radius: 14px;
+        background: rgb(20 22 20 / 0.88);
+        display: grid;
+        gap: 8px;
+      }
+      .info {
+        padding: 0 16px;
+        display: grid;
+        gap: 14px;
+        align-content: start;
+      }
+      .info h1 {
+        font-size: 24px;
+        line-height: 1.15;
+      }
+      .panel {
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 14px;
+        display: grid;
+        gap: 12px;
+        background: var(--card);
+      }
+      .panel select {
+        min-height: 44px;
+        padding: 0 12px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--background);
+      }
+      .pn {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      @container vp (min-width: 640px) {
+        .grid {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 32px 24px;
+        }
+        .page {
+          padding: 32px 24px 56px;
+        }
+        .shell-inner {
+          padding: 0 24px;
+        }
+        .toolbar {
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+        }
+        .search {
+          width: 340px;
+        }
+        .detail-top {
+          grid-template-columns: 220px 1fr;
+          gap: 28px;
+        }
+        .sm-only {
+          display: inline-flex;
+        }
+        .sticky-cta {
+          position: static;
+          padding: 0;
+          border: 0;
+          margin: 0;
+          background: none;
+          backdrop-filter: none;
+        }
+        .sticky-cta .btn {
+          width: auto;
+        }
+      }
+      @container vp (min-width: 1024px) {
+        .grid {
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+        }
+        .page {
+          padding: 48px 40px 64px;
+        }
+        .shell-inner {
+          padding: 0 40px;
+        }
+        .detail {
+          grid-template-columns: 360px minmax(0, 1fr);
+          gap: 48px;
+          align-items: start;
+        }
+        .detail-top {
+          display: contents;
+        }
+        .detail h1 {
+          font-size: 48px;
+        }
+        .detail-body {
+          grid-column: 2;
+          display: grid;
+          gap: 18px;
+        }
+        .detail-body.series {
+          gap: 22px;
+        }
+        .detail .poster-col {
+          grid-column: 1;
+          grid-row: 1 / span 3;
+        }
+        .detail-info {
+          grid-column: 2;
+        }
+        .watch {
+          grid-template-columns: auto minmax(0, 560px);
+          justify-content: center;
+          gap: 48px;
+          padding: 24px 40px 40px;
+          align-items: start;
+        }
+        .player {
+          width: calc((var(--vh) - 56px - 48px) * 9 / 16);
+          border-radius: 18px;
+          margin: 0;
+        }
+        .info {
+          padding: 0;
+        }
+        .info h1 {
+          font-size: 32px;
+        }
+        .ep-scroll {
+          max-height: 340px;
+          overflow: auto;
+        }
+        .desk-only {
+          display: inline;
+        }
+        .mob-only {
+          display: none;
+        }
+      }
+      .crumb {
+        font-size: 13px;
+        color: var(--muted-foreground);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="review">
+      <label
+        >Viewport
+        <select id="vp">
+          <option value="1440x900">Desktop 1440×900</option>
+          <option value="390x844" selected>Mobile 390×844</option>
+          <option value="768x1024">Tablet 768×1024</option>
+        </select></label
+      >
+      <label
+        >Theme
+        <select id="theme">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select></label
+      >
+      <label
+        >Screen
+        <select id="screen">
+          <option value="browse">Browse + search</option>
+          <option value="film">Detail: Film / Standalone</option>
+          <option value="series">Detail: Series</option>
+          <option value="watch-film">Watch: Film / Standalone</option>
+          <option value="watch-ep">Watch: Episode</option>
+        </select></label
+      >
+      <label
+        >State
+        <select id="state"></select>
+      </label>
+      <span class="note" id="note"></span>
+    </div>
+    <div class="stage">
+      <div class="scaler" id="scaler">
+        <div class="frame" id="frame" data-theme="light"></div>
+      </div>
+    </div>
+    <script>
+      const I = {
+        play: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>',
+        back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>',
+        next: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>',
+        search:
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>',
+        x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+        theme:
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>',
+      };
+      const items = [
+        [
+          "Midnight Run",
+          "film",
+          "12 min",
+          "A courier races the clock across a sleeping city.",
+          20,
+        ],
+        [
+          "Paper Lanterns",
+          "film",
+          "9 min",
+          "Two strangers share a festival night and one secret.",
+          60,
+        ],
+        [
+          "Last Train Home",
+          "standalone",
+          "14 min",
+          "The final train carries more than passengers.",
+          140,
+        ],
+        [
+          "Neon Garden",
+          "series",
+          "2 seasons",
+          "A rooftop garden hides a city-wide mystery.",
+          100,
+        ],
+        [
+          "Salt & Static",
+          "film",
+          "11 min",
+          "A radio operator hears a voice that should be gone.",
+          200,
+        ],
+        [
+          "The Quiet Hour",
+          "standalone",
+          "8 min",
+          "One hour without sound changes a small town.",
+          250,
+        ],
+        [
+          "Glass Harbor",
+          "film",
+          "13 min",
+          "A fisherman finds a door beneath the pier.",
+          300,
+        ],
+        [
+          "Room 9",
+          "series",
+          "1 season",
+          "Every guest checks in with a different story.",
+          330,
+        ],
+        [
+          "Ember Street",
+          "standalone",
+          "10 min",
+          "A power cut brings the street together.",
+          30,
+        ],
+        ["Low Tide", "film", "12 min", "The sea gives back what it took.", 180],
+      ];
+      const kindLabel = {
+        film: "Film",
+        standalone: "Standalone",
+        series: "Series",
+      };
+      const episodes = [
+        [1, 1, "Pilot", 12, "The garden is found and the first clue appears."],
+        [1, 2, "Roots", 11, "A neighbor remembers who planted it."],
+        [
+          1,
+          3,
+          "Night Watering",
+          13,
+          "Someone is visiting after dark, and it is not the gardener.",
+        ],
+        [1, 4, "Thorns", 12, "A warning is carved into the planter boxes."],
+        [2, 1, "Second Bloom", 12, "A new season opens with an old face."],
+        [
+          2,
+          2,
+          "Overgrown",
+          14,
+          "The roof is closed to everyone but one person.",
+        ],
+      ];
+      const states = {
+        browse: [
+          ["live", "Live (type to search, debounce 300 ms)"],
+          ["loading", "Searching (skeleton)"],
+          ["results", "Results for “night”"],
+          ["empty", "No results"],
+          ["error", "Search error"],
+          ["offline", "Offline"],
+        ],
+        film: [
+          ["default", "Default"],
+          ["loading", "Loading"],
+          ["offline", "Offline (Watch disabled)"],
+          ["error", "Error"],
+        ],
+        series: [
+          ["default", "Default"],
+          ["loading", "Loading episodes"],
+          ["more", "Load more episodes"],
+          ["error", "Episodes error"],
+        ],
+        "watch-film": [
+          ["default", "Default"],
+          ["loading", "Loading playback"],
+          ["playback-error", "Playback error"],
+        ],
+        "watch-ep": [
+          ["default", "S1 E3 (middle)"],
+          ["ended", "Ended: Up next"],
+          ["last", "Last episode"],
+          ["first", "First episode (no Previous)"],
+          ["episodes-error", "Episodes error"],
+          ["offline", "Offline"],
+        ],
+      };
+      const notes = {
+        browse:
+          "Search is a debounce-only field (no submit button). URL: /?type=film&q=night, updated with replace so Back is not polluted.",
+        film: "Back uses history when opened from Browse; CTA is sticky on mobile and inline on desktop.",
+        series:
+          "Play S1 E1, season tabs and episode rows. No Continue because progress is out of scope.",
+        "watch-film":
+          "Slim top bar, player height bounded by the viewport; no autoplay.",
+        "watch-ep":
+          "Desktop: player left, info and episode panel right. Mobile: player first, then info and panel.",
+      };
+      const $ = (id) => document.getElementById(id);
+      const q = (v) =>
+        v.replace(
+          /[&<>"]/g,
+          (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c],
+        );
+      let filter = "all",
+        term = "",
+        shown = "",
+        timer = 0,
+        busy = false,
+        composing = false,
+        season = 1;
+      const card = ([t, k, d, , h]) =>
+        `<article class="card"><a href="#" tabindex="0"><div class="poster" style="--h:${h}">${q(t)}</div><h3>${q(t)}</h3><div class="meta"><span class="badge">${kindLabel[k]}</span><span>${d}</span></div></a></article>`;
+      const skel = (n) =>
+        `<div class="grid" role="status" aria-label="Searching">${Array.from({ length: n }, () => '<div><div class="skeleton" style="aspect-ratio:9/16"></div><div class="skeleton" style="height:16px;margin-top:12px;width:70%"></div></div>').join("")}</div>`;
+      function header() {
+        return `<header class="shell-header"><div class="shell-inner"><a class="logo" href="#"><i>${I.play}</i>Vertical Movies</a><nav class="row" aria-label="Main navigation"><a class="btn ghost sm-only" href="#">Browse</a><button class="btn ghost" aria-label="Appearance">${I.theme}</button></nav></div></header>`;
+      }
+      function matches() {
+        const needle = shown.trim().toLowerCase();
+        return items.filter(
+          (i) =>
+            (filter === "all" || i[1] === filter) &&
+            (!needle || (i[0] + " " + i[3]).toLowerCase().includes(needle)),
+        );
+      }
+      function browseBody(state) {
+        const off = state === "offline";
+        const list =
+          state === "results"
+            ? items.filter((i) => /night|neon/i.test(i[0] + i[3]))
+            : matches();
+        let status = "",
+          body = "";
+        if (state === "loading" || (state === "live" && busy)) {
+          status = "Searching…";
+          body = skel(5);
+        } else if (state === "error") {
+          status = "";
+          body = `<div class="notice" role="alert"><h2>Could not search</h2><p class="muted">Your previous results are unchanged. Please try again.</p><button class="btn">Retry search</button></div>`;
+        } else if (state === "empty" || list.length === 0) {
+          const t = state === "empty" ? "zzz" : shown.trim();
+          status = `0 results for “${q(t)}”`;
+          body = `<div class="notice"><h2>No results for “${q(t)}”</h2><p class="muted">Check the spelling or try a shorter word.</p><button class="btn">Clear search</button></div>`;
+        } else {
+          const t = state === "results" ? "night" : shown.trim();
+          status = t
+            ? `${list.length} result${list.length === 1 ? "" : "s"} for “${q(t)}”`
+            : `${list.length} videos`;
+          body = `<div class="grid">${list.map(card).join("")}</div>`;
+        }
+        const value =
+          state === "results" ? "night" : state === "empty" ? "zzz" : term;
+        return `<div class="page"><h1 style="font-size:40px;line-height:1.1">Browse</h1><p class="muted" style="margin:8px 0 0">Find your next story.</p>
+        ${off ? '<div class="notice" role="status" style="margin-top:16px;text-align:left;justify-items:start"><b>You are offline.</b><span class="muted">Reconnect to search.</span></div>' : ""}
+        <div class="toolbar"><div class="seg" role="group" aria-label="Content type">${["all", "film", "standalone"].map((k) => `<button aria-pressed="${filter === k}" data-f="${k}">${k === "all" ? "All" : k === "film" ? "Films" : "Standalone"}</button>`).join("")}</div>
+        <div class="search" role="search"><span class="lead">${I.search}</span><input id="q" type="search" inputmode="search" enterkeyhint="search" autocomplete="off" maxlength="200" placeholder="Search titles and synopsis" aria-label="Search videos" value="${q(value)}" ${off ? "disabled" : ""}/><span class="tail">${busy || state === "loading" ? '<span class="spin" aria-hidden="true"></span>' : ""}${value ? `<button class="btn ghost" id="clear" aria-label="Clear search">${I.x}</button>` : ""}</span></div></div>
+        <div class="status" aria-live="polite" id="status">${status}</div>${body}
+        ${state === "results" || list.length > 8 ? '<div class="row" style="justify-content:center;margin-top:32px"><button class="btn">Load more</button></div>' : ""}</div>`;
+      }
+      function posterBlock(h, title) {
+        return `<div class="poster" style="--h:${h}">${q(title)}</div>`;
+      }
+      function detail(kind, state) {
+        const series = kind === "series";
+        const h = series ? 100 : 20;
+        const off = state === "offline";
+        if (state === "loading")
+          return `<div class="page"><div class="detail" role="status" aria-label="Loading video"><div class="skeleton" style="aspect-ratio:9/16;max-width:360px"></div><div style="display:grid;gap:14px"><div class="skeleton" style="height:48px;width:70%"></div><div class="skeleton" style="height:96px"></div></div></div></div>`;
+        if (state === "error")
+          return `<div class="page"><div class="notice" role="alert"><h2>Could not load video</h2><p class="muted">Please try again in a moment.</p><button class="btn">Retry video</button></div></div>`;
+        const cta = series
+          ? `<button class="btn primary">${I.play} Play S1 E1</button>`
+          : `<button class="btn primary" ${off ? "disabled" : ""}>${I.play} Watch now</button>`;
+        const body = series ? seriesBody(state) : "";
+        return `<div class="page"><a class="btn ghost" href="#" style="margin:0 0 8px -12px">${I.back} Back to browse</a>
+        ${off ? '<div class="notice" role="status" style="margin-bottom:16px;text-align:left;justify-items:start"><b>You are offline.</b><span class="muted">Reconnect to watch this video.</span></div>' : ""}
+        <div class="detail"><div class="detail-top"><div class="poster-col">${posterBlock(h, series ? "Neon Garden" : "Midnight Run")}</div>
+        <div style="display:grid;gap:10px;min-width:0"><div class="row" style="flex-wrap:wrap;gap:8px"><span class="badge">${series ? "Series" : "Film"}</span><span class="muted" style="font-size:14px">${series ? "2 seasons · 6 episodes" : "12 min"}</span></div><h1>${series ? "Neon Garden" : "Midnight Run"}</h1><div class="muted" style="font-size:14px">Thriller · Mystery</div></div></div>
+        <div class="detail-body ${series ? "series" : ""}"><div class="detail-info" style="display:grid;gap:12px"><p class="clamp muted" style="margin:0;max-width:640px;font-size:16px;line-height:1.6">${series ? "A rooftop garden hides a city-wide mystery. Each episode follows a new visitor after dark, and every answer plants a bigger question." : "A courier races the clock across a sleeping city with a package she was told never to open. By dawn, she must decide who to trust and what to deliver. A long synopsis wraps here and is clamped on mobile with a Read more control."}</p><button class="btn ghost mob-only" style="justify-self:start;margin-left:-12px;min-height:44px">Read more</button></div>
+        <div class="sticky-cta">${cta}</div>${body}</div></div></div>`;
+      }
+      function epRows(list, current) {
+        return `<ul class="ep-list">${list.map(([s, e, t, d, p]) => `<li><a class="ep" href="#" ${current && current[0] === s && current[1] === e ? 'aria-current="true"' : ""}><span class="no">E${e}</span><span><b>${q(t)}</b><p>${q(p)}</p></span><span class="muted" style="font-size:13px;white-space:nowrap">${d} min</span></a></li>`).join("")}</ul>`;
+      }
+      function seasonTabs() {
+        return `<div class="seg tabs" role="tablist" aria-label="Seasons">${[1, 2].map((n) => `<button role="tab" aria-selected="${season === n}" aria-pressed="${season === n}" data-s="${n}">Season ${n}</button>`).join("")}</div>`;
+      }
+      function seriesBody(state) {
+        const list = episodes.filter((e) => e[0] === season);
+        if (state === "loading")
+          return `<section aria-label="Episodes"><h2 style="font-size:22px;margin:8px 0 12px">Episodes</h2><div role="status" aria-label="Loading episodes" style="display:grid;gap:8px">${'<div class="skeleton" style="height:72px"></div>'.repeat(4)}</div></section>`;
+        if (state === "error")
+          return `<section aria-label="Episodes"><h2 style="font-size:22px;margin:8px 0 12px">Episodes</h2><div class="notice" role="status" style="text-align:left;justify-items:start"><span>Episodes are temporarily unavailable.</span><button class="btn">Retry episodes</button></div></section>`;
+        return `<section aria-label="Episodes" style="display:grid;gap:14px"><div class="row" style="justify-content:space-between;flex-wrap:wrap"><h2 style="font-size:22px">Episodes</h2>${seasonTabs()}</div>${epRows(list)}${state === "more" ? '<div class="row" style="justify-content:center"><button class="btn">Load more episodes</button></div>' : ""}<p class="muted" style="font-size:13px;margin:0">${list.length} of ${list.length} episodes in Season ${season}</p></section>`;
+      }
+      function topbar(title) {
+        return `<div class="topbar"><a class="btn ghost" href="#" aria-label="Back" style="padding:0 12px">${I.back}<span class="desk-only">Back</span></a><span class="title">${q(title)}</span><button class="btn ghost" aria-label="Appearance">${I.theme}</button></div>`;
+      }
+      function player(h, state, label) {
+        const ended = state === "ended";
+        let inner = `<div class="proto">Prototype · no video</div>`;
+        if (state === "loading")
+          inner += `<div class="big" role="status" aria-label="Loading video"><span class="spin" style="width:32px;height:32px;margin:0"></span></div>`;
+        else if (state === "playback-error")
+          inner += `<div class="big" role="alert" style="padding:24px;text-align:center"><div style="display:grid;gap:12px;justify-items:center"><b>Playback interrupted</b><button class="btn" style="color:#111;background:#fff">Retry playback</button></div></div>`;
+        else inner += `<div class="big"><span>${I.play}</span></div>`;
+        if (ended)
+          inner += `<div class="upnext"><span style="font-size:12px;opacity:.8">Up next · S1 E4</span><b>Thorns</b><button class="btn primary">${I.play} Play next</button></div>`;
+        inner += `<div class="bar"><div class="track"><i style="width:${ended ? 100 : 34}%"></i></div><div class="row" style="justify-content:space-between"><span>${ended ? "12:00" : "4:05"} / 12:00</span><span>${label}</span></div></div>`;
+        return `<div class="player" style="--h:${h}" aria-label="Video player (prototype)">${inner}</div>`;
+      }
+      function watchFilm(state) {
+        return `${topbar("Midnight Run")}<div class="watch">${player(20, state, "Quality auto")}<div class="info"><div class="row" style="gap:8px;flex-wrap:wrap"><span class="badge">Film</span><span class="muted" style="font-size:14px">12 min · Thriller</span></div><h1 tabindex="-1">Midnight Run</h1><p class="muted clamp" style="margin:0;line-height:1.6">A courier races the clock across a sleeping city with a package she was told never to open.</p><a class="btn" href="#" style="justify-self:start">Details</a></div></div>`;
+      }
+      function watchEp(state) {
+        const idx =
+          state === "first"
+            ? 0
+            : state === "last"
+              ? 5
+              : state === "ended"
+                ? 2
+                : 2;
+        const cur = episodes[idx];
+        const off = state === "offline";
+        const list = episodes.filter((e) => e[0] === cur[0]);
+        const prev = episodes[idx - 1],
+          next = episodes[idx + 1];
+        const panel =
+          state === "episodes-error"
+            ? `<div class="panel" role="status"><b>Episodes</b><span class="muted">Episodes are temporarily unavailable.</span><button class="btn">Retry episodes</button></div>`
+            : `<section class="panel" aria-label="Episodes"><div class="row" style="justify-content:space-between"><h2 style="font-size:18px">Episodes</h2><select aria-label="Season">${[1, 2].map((n) => `<option ${n === cur[0] ? "selected" : ""}>Season ${n}</option>`).join("")}</select></div><div class="ep-scroll">${epRows(list, cur)}</div></section>`;
+        return `${topbar("Neon Garden · S" + cur[0] + " E" + cur[1])}<div class="watch">${player(100, state, "Quality auto")}<div class="info">
+        ${off ? '<div class="notice" role="status" style="text-align:left;justify-items:start"><b>You are offline.</b><span class="muted">Reconnect to play this video.</span></div>' : ""}
+        <div class="crumb"><a href="#">Neon Garden</a> › Season ${cur[0]} › Episode ${cur[1]}</div>
+        <div class="row" style="gap:8px;flex-wrap:wrap"><span class="badge">Episode</span><span class="muted" style="font-size:14px">S${cur[0]} E${cur[1]} · ${cur[3]} min</span></div>
+        <h1 tabindex="-1">${q(cur[2])}</h1><p class="muted clamp" style="margin:0;line-height:1.6">${q(cur[4])}</p>
+        <div class="pn"><button class="btn" ${prev ? "" : "disabled"}>${I.back} Previous</button><button class="btn primary" ${next ? "" : "disabled"}>Next ${I.next}</button></div>
+        ${state === "last" ? '<p class="muted" role="status" style="margin:0">You’re all caught up. <a href="#" style="text-decoration:underline">Back to series</a></p>' : ""}
+        ${panel}</div></div>`;
+      }
+      function render() {
+        const [w, h] = $("vp").value.split("x").map(Number);
+        const screen = $("screen").value;
+        const state = $("state").value;
+        const frame = $("frame");
+        frame.dataset.theme = $("theme").value;
+        frame.style.width = w + "px";
+        frame.style.height = h + "px";
+        frame.style.setProperty("--vh", h + "px");
+        let html = "";
+        if (screen === "browse") html = header() + browseBody(state);
+        else if (screen === "film") html = header() + detail("film", state);
+        else if (screen === "series") html = header() + detail("series", state);
+        else if (screen === "watch-film") html = watchFilm(state);
+        else html = watchEp(state);
+        const focus =
+          document.activeElement && document.activeElement.id === "q";
+        const caret = focus ? document.activeElement.selectionStart : 0;
+        frame.innerHTML = html;
+        $("note").textContent = notes[screen];
+        if (focus && $("q")) {
+          $("q").focus();
+          $("q").setSelectionRange(caret, caret);
+        }
+        fit();
+      }
+      function fit() {
+        const [w, h] = $("vp").value.split("x").map(Number);
+        const avail = document.documentElement.clientWidth - 32;
+        const s = Math.min(1, avail / w);
+        const sc = $("scaler");
+        sc.style.transform = `scale(${s})`;
+        sc.style.width = w + "px";
+        sc.style.height = h + "px";
+        sc.style.marginBottom = -(h * (1 - s)) + "px";
+        sc.style.marginLeft = Math.max(0, (avail - w * s) / 2) + "px";
+      }
+      function loadStates() {
+        const screen = $("screen").value;
+        $("state").innerHTML = states[screen]
+          .map(([v, l]) => `<option value="${v}">${l}</option>`)
+          .join("");
+      }
+      // debounce-only search (no submit button); 300 ms after the last input
+      function schedule() {
+        clearTimeout(timer);
+        busy = false;
+        if (composing) return;
+        timer = setTimeout(() => {
+          busy = true;
+          render();
+          setTimeout(() => {
+            shown = term;
+            busy = false;
+            render();
+          }, 450);
+        }, 300);
+      }
+      const frame = $("frame");
+      frame.addEventListener("input", (e) => {
+        if (e.target.id !== "q") return;
+        term = e.target.value.slice(0, 200);
+        schedule();
+      });
+      frame.addEventListener("compositionstart", () => (composing = true));
+      frame.addEventListener("compositionend", (e) => {
+        composing = false;
+        term = e.target.value;
+        schedule();
+      });
+      frame.addEventListener("keydown", (e) => {
+        if (e.target.id === "q" && e.key === "Escape") {
+          term = shown = "";
+          clearTimeout(timer);
+          busy = false;
+          render();
+        }
+      });
+      frame.addEventListener("click", (e) => {
+        const t = e.target.closest("[data-f],[data-s],#clear");
+        if (!t) return;
+        e.preventDefault();
+        if (t.dataset.f) filter = t.dataset.f;
+        if (t.dataset.s) season = Number(t.dataset.s);
+        if (t.id === "clear") {
+          term = shown = "";
+          clearTimeout(timer);
+          busy = false;
+        }
+        render();
+        if (t.id === "clear") $("q") && $("q").focus();
+      });
+      for (const id of ["vp", "theme", "state"])
+        $(id).addEventListener("change", render);
+      $("screen").addEventListener("change", () => {
+        loadStates();
+        render();
+      });
+      addEventListener("resize", fit);
+      loadStates();
+      render();
+    </script>
+  </body>
+</html>
