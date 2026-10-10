@@ -58,6 +58,8 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 
 ## Context dan plan per fitur
 
+Halaman Not Found frontend: [context](plans/not-found/repository-context.md), [plan](plans/not-found/implementation-plan.md) dan [backlog NF](tasks/not-found.md). Pengguna meminta plan 10 Oktober 2026; plan approved (10 Oktober 2026); satu halaman 404 untuk semua kasus (/admin/*, /videos/:slug, /watch/:slug) dengan satu tombol ke home diputuskan pengguna 10 Oktober 2026; NF-001–006 Backlog.
+
 Site Settings: [context](plans/site-settings/repository-context.md), [plan](plans/site-settings/implementation-plan.md) dan [backlog SSET](tasks/site-settings.md). Empat field teks dan cache browser/server-web/API maksimum1 jam disetujui pengguna serta implemented/verified lokal9Oct pada feat/site-settings; actual proof/receipt dan per-process limits berada di SSET. Contract aktif pada PRD/architecture dan runbook metadata.
 
 Ringkasan dashboard admin: [context](plans/admin-dashboard/repository-context.md), [plan](plans/admin-dashboard/implementation-plan.md) dan [backlog DASH](tasks/admin-dashboard.md). Pengguna memilih dashboard dan meminta plan 8 Oktober 2026; plan/metrik disetujui pengguna dan ringkasan editorial/current jobs/latest/failures verified lokal8Oct; delivery melalui [PR #15](https://github.com/bayuaji17/vertical-movie-app/pull/15) disetujui pengguna 9 Oktober 2026 dengan normal merge dan source branch dipertahankan. Telah di-merge ke main (36f185e). Pengaturan situs tetap modul terpisah.
@@ -88,6 +90,7 @@ Integrasi katalog API ke homepage: [context](plans/public-catalog-api/repository
 
 ## Backlog dan evidence
 
+- [Halaman Not Found](tasks/not-found.md): NF-001–006; plan approved, implementasi belum dimulai.
 - [Site Settings](tasks/site-settings.md): SSET-001–013 completed/verified lokal9Oct, task commits dan proof cache/SQL/browser tersedia.
 
 - [Ringkasan dashboard admin](tasks/admin-dashboard.md): DASH-001–011 implemented/verified lokal; inventori/media/latest, private refresh, native SQL/auth dan built-browser15 width/theme proof.
