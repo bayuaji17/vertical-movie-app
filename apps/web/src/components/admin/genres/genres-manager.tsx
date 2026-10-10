@@ -29,6 +29,8 @@ import { Input } from '#/components/ui/input'
 import { Skeleton } from '#/components/ui/skeleton'
 import { toast } from '#/components/ui/toast'
 import { AdminPageHeading } from '../page-heading'
+import { GenreDialogs } from './genre-dialogs'
+import type { GenreDialogState } from './genre-dialogs'
 import { useGenresApi } from '#/hooks/use-genres-api'
 import { usePublicOnline } from '#/hooks/use-public-online'
 import { effectiveSlug, submitGenre } from '#/lib/admin/genres-actions'
@@ -57,7 +59,8 @@ export function GenresManager({
   online: boolean
 }) {
   const [search, setSearch] = useState(''),
-    [debounced, setDebounced] = useState('')
+    [debounced, setDebounced] = useState(''),
+    [dialog, setDialog] = useState<GenreDialogState>()
   useEffect(() => {
     const timer = setTimeout(() => setDebounced(search.trim()), 300)
     return () => clearTimeout(timer)
@@ -107,12 +110,19 @@ export function GenresManager({
             searching={debounced.length > 0}
             canEdit={canEdit}
             online={online}
+            onAction={setDialog}
           />
         </section>
         <div className="order-1 lg:order-2">
           <AddGenreCard client={client} identity={identity} online={online} />
         </div>
       </div>
+      <GenreDialogs
+        state={dialog}
+        onClose={() => setDialog(undefined)}
+        client={client}
+        identity={identity}
+      />
     </>
   )
 }
@@ -123,6 +133,7 @@ function GenreList({
   searching,
   canEdit,
   online,
+  onAction,
 }: {
   query: ReturnType<
     typeof useInfiniteQuery<
@@ -137,6 +148,7 @@ function GenreList({
   searching: boolean
   canEdit: boolean
   online: boolean
+  onAction: (state: GenreDialogState) => void
 }) {
   const noteId = useId()
   if (query.isPending)
@@ -198,6 +210,7 @@ function GenreList({
                   genre={genre}
                   canEdit={canEdit}
                   noteId={canEdit ? undefined : noteId}
+                  onAction={onAction}
                 />
               </li>
             ))}
@@ -223,10 +236,12 @@ function GenreRow({
   genre,
   canEdit,
   noteId,
+  onAction,
 }: {
   genre: Genre
   canEdit: boolean
   noteId?: string
+  onAction: (state: GenreDialogState) => void
 }) {
   return (
     <Card size="sm">
@@ -248,6 +263,7 @@ function GenreRow({
             disabled={!canEdit}
             aria-describedby={noteId}
             aria-label={`Rename ${genre.name}`}
+            onClick={() => onAction({ kind: 'rename', genre })}
           >
             Rename
           </Button>
@@ -258,6 +274,7 @@ function GenreRow({
             disabled={!canEdit}
             aria-describedby={noteId}
             aria-label={`Delete ${genre.name}`}
+            onClick={() => onAction({ kind: 'delete', genre })}
           >
             Delete
           </Button>

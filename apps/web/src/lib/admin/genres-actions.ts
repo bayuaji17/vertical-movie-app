@@ -32,9 +32,16 @@ export function validateGenreForm(values: GenreFormValues) {
   const slugError = validateGenreSlug(effectiveSlug(values))
   return nameError || slugError ? { nameError, slugError } : undefined
 }
+// Network loss and server errors leave the outcome unknown. A refused edit
+// (no endpoint yet) provably changed nothing, so it is not unconfirmed.
+export function isUnconfirmed(error: unknown): boolean {
+  if (!(error instanceof GenresApiError)) return true
+  if (error.code === 'GENRES_EDIT_UNAVAILABLE') return false
+  return error.status === 0 || error.status >= 500
+}
 export function failureOutcome(error: unknown): GenreOutcome {
   const known = error instanceof GenresApiError ? error : undefined
-  const unconfirmed = !known || known.status === 0 || known.status >= 500
+  const unconfirmed = isUnconfirmed(error)
   return {
     status: 'failed',
     message: genreErrorMessage(error),
@@ -58,5 +65,50 @@ export async function submitGenre(
     return { status: 'saved', genre }
   } catch (error) {
     return failureOutcome(error)
+  }
+}
+
+// Rename keeps the current slug unless the admin changed it.
+export function renameInput(genre: Genre, values: GenreFormValues): GenreInput {
+  const slug = values.slug.trim()
+  return {
+    name: values.name.trim(),
+    ...(slug && slug !== genre.slug ? { slug } : {}),
+  }
+}
+export async function submitRename(
+  genre: Genre,
+  save: (id: string, input: GenreInput) => Promise<Genre>,
+  values: GenreFormValues,
+): Promise<GenreOutcome> {
+  const invalid = validateGenreForm({ ...values, slugTouched: true })
+  if (invalid) return { status: 'invalid', ...invalid }
+  const input = renameInput(genre, values)
+  if (input.name === genre.name && !input.slug)
+    return { status: 'invalid', nameError: 'Change the name or slug first.' }
+  try {
+    return { status: 'saved', genre: await save(genre.id, input) }
+  } catch (error) {
+    return failureOutcome(error)
+  }
+}
+export type RemoveOutcome =
+  | { status: 'removed' }
+  | { status: 'failed'; message: string; inUse: boolean; unconfirmed: boolean }
+export async function submitRemove(
+  remove: (id: string) => Promise<void>,
+  genre: Genre,
+): Promise<RemoveOutcome> {
+  try {
+    await remove(genre.id)
+    return { status: 'removed' }
+  } catch (error) {
+    const known = error instanceof GenresApiError ? error : undefined
+    return {
+      status: 'failed',
+      message: genreErrorMessage(error),
+      inUse: known?.code === 'GENRE_IN_USE',
+      unconfirmed: isUnconfirmed(error),
+    }
   }
 }
