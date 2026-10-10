@@ -27,7 +27,9 @@ export function useDashboardSummary() {
     { user } = useAdminPrincipal(),
     identity = user.id
   const client = useMemo(() => browserDashboardClient(cache), [cache])
-  const controller = useMemo(() => new AbortController(), [cache, identity])
+  // Owned by the effect so a StrictMode/remount cycle gets a fresh signal
+  // instead of reusing one that stopAdminPrivateEffects already aborted.
+  const [controller, setController] = useState<AbortController>()
   const [, redraw] = useState(0),
     environment = useSyncExternalStore(
       subscribe,
@@ -37,23 +39,28 @@ export function useDashboardSummary() {
     online = environment.endsWith(':true'),
     visible = environment.startsWith('visible:')
   useEffect(() => {
+    const owner = new AbortController()
     const stop = () => {
-      controller.abort()
+      owner.abort()
       redraw((n) => n + 1)
     }
     const remove = registerPrivateEffect(cache, stop)
+    setController(owner)
     return () => {
       remove()
+      owner.abort()
+      setController(undefined)
       void cache.cancelQueries({
         queryKey: dashboardKeys.summary(identity),
         exact: true,
       })
     }
-  }, [cache, identity, controller])
+  }, [cache, identity])
   const query = useQuery({
-    ...dashboardSummaryOptions(client, identity, controller.signal),
+    ...dashboardSummaryOptions(client, identity, controller?.signal),
     enabled:
       typeof window !== 'undefined' &&
+      !!controller &&
       !controller.signal.aborted &&
       visible &&
       online,
@@ -63,7 +70,13 @@ export function useDashboardSummary() {
     online,
     visible,
     refresh: () => {
-      if (online && visible && !controller.signal.aborted && !query.isFetching)
+      if (
+        online &&
+        visible &&
+        controller &&
+        !controller.signal.aborted &&
+        !query.isFetching
+      )
         void query.refetch({ cancelRefetch: false })
     },
   }
