@@ -8,12 +8,14 @@ import {
   loadContent,
 } from '#/lib/catalog/content-queries'
 import type { CatalogItem } from '#/lib/catalog/public-catalog-model'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, notFound } from '@tanstack/react-router'
 import { ContentPage } from '#/components/catalog/content-page'
+import { isMissingContent } from '#/lib/public/missing-content'
 
 export const Route = createFileRoute('/series/$slug')({
   loader: async ({ context, params }) => {
     const result = await loadContent(context.queryClient, 'series', params.slug)
+    if (isMissingContent(result.detailStatus)) throw notFound()
     const item = context.queryClient.getQueryData<{ item: CatalogItem }>(
       contentDetailOptions('series', params.slug).queryKey,
     )?.item

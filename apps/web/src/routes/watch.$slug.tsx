@@ -4,7 +4,7 @@ import {
   settingsFromMatches,
 } from '#/lib/settings/presentation'
 import { useCallback } from 'react'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, notFound } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   ContentLoading,
@@ -14,6 +14,7 @@ import { PublicShell } from '#/components/public/public-shell'
 import { catalogSearch } from '#/lib/public/catalog-model'
 import type { CatalogType } from '#/lib/public/catalog-model'
 import { normalizeCatalogLocation } from '#/lib/public/catalog-navigation'
+import { isMissingContent } from '#/lib/public/missing-content'
 import { usePublicOnline } from '#/hooks/use-public-online'
 import { VerticalVideoPlayer } from '#/components/vertical-video-player'
 import { Button } from '#/components/ui/button'
@@ -32,6 +33,7 @@ export const Route = createFileRoute('/watch/$slug')({
   beforeLoad: ({ location }) => normalizeCatalogLocation(location),
   loader: async ({ context, params }) => {
     const result = await loadWatchMetadata(context.queryClient, params.slug)
+    if (isMissingContent(result.status)) throw notFound()
     const video = context.queryClient.getQueryData<{ item: WatchVideo }>(
       watchMetadataOptions(params.slug).queryKey,
     )?.item

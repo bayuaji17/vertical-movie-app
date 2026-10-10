@@ -5,6 +5,7 @@ import { routeTree } from './routeTree.gen'
 import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'
 import { getContext } from './integrations/tanstack-query/root-provider'
 import { catalogType } from './lib/public/catalog-model'
+import { NotFoundPage } from './components/not-found-page'
 
 export function getRouter() {
   const context = getContext()
@@ -18,6 +19,7 @@ export function getRouter() {
         ? 'public-catalog:' +
           catalogType(new URLSearchParams(location.searchStr).get('type'))
         : location.state.__TSR_key || location.href,
+    defaultNotFoundComponent: NotFoundPage,
     defaultPreload: 'intent',
     defaultPreloadStaleTime: 0,
   })
