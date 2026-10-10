@@ -6,6 +6,7 @@ import {
   RiMenuLine,
   RiPlayFill,
   RiDashboardLine,
+  RiFilmLine,
   RiPriceTag3Line,
   RiSettings3Line,
 } from '@remixicon/react'
@@ -76,6 +77,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         className="mt-1 flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium hover:bg-sidebar-accent focus-visible:outline-2 focus-visible:outline-ring"
         activeProps={{ className: 'bg-primary/15' }}
       >
+        <RiFilmLine className="size-5" aria-hidden="true" />
         Content
       </Link>
       <Link
