@@ -58,7 +58,7 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 
 ## Context dan plan per fitur
 
-Halaman Not Found frontend: [context](plans/not-found/repository-context.md), [plan](plans/not-found/implementation-plan.md) dan [backlog NF](tasks/not-found.md). Pengguna meminta plan 10 Oktober 2026; plan approved (10 Oktober 2026); satu halaman 404 untuk semua kasus (/admin/*, /videos/:slug, /watch/:slug) dengan satu tombol ke home diputuskan pengguna 10 Oktober 2026; NF-001–006 Backlog.
+Halaman Not Found frontend: [desain](design/not-found.md), [context](plans/not-found/repository-context.md), [plan](plans/not-found/implementation-plan.md) dan [backlog NF](tasks/not-found.md). Pengguna meminta plan 10 Oktober 2026; plan approved (10 Oktober 2026); satu halaman 404 untuk semua kasus (/admin/*, /videos/:slug, /watch/:slug) dengan satu tombol ke home diputuskan pengguna 10 Oktober 2026; NF-001–006 Backlog.
 
 Site Settings: [context](plans/site-settings/repository-context.md), [plan](plans/site-settings/implementation-plan.md) dan [backlog SSET](tasks/site-settings.md). Empat field teks dan cache browser/server-web/API maksimum1 jam disetujui pengguna serta implemented/verified lokal9Oct pada feat/site-settings; actual proof/receipt dan per-process limits berada di SSET. Contract aktif pada PRD/architecture dan runbook metadata.
 
