@@ -14,6 +14,8 @@
 | Watch Film/Standalone  | default, loading playback, playback error                                           |
 | Watch Episode          | tengah, ended (Up next), episode terakhir, episode pertama, episodes error, offline |
 
+Viewer yang memblokir skrip (misalnya panel pratinjau aplikasi desktop) menampilkan salinan statis tanpa JavaScript dengan kontrol radio yang sama (tanpa demo debounce langsung); salinan itu dibangkitkan oleh [build-watch-flow-preview.mjs](build-watch-flow-preview.mjs) dari fungsi render yang sama, jalankan ulang skrip itu setelah mengubah preview lalu format dengan Prettier. Buka berkas di browser untuk demo debounce langsung.
+
 Screenshot PNG belum dibuat: lingkungan penulisan tidak memiliki browser. Reviewer membuka HTML langsung; PNG 390/1440 Light/Dark dapat diekspor setelah persetujuan bila diperlukan.
 
 ## Breakpoint dan grid

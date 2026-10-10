@@ -1,6 +1,9 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <script>
+      document.documentElement.classList.add("js");
+    </script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Watch flow preview</title>
@@ -28,7 +31,8 @@
         --font-heading:
           "Space Grotesk Variable", "Space Grotesk", system-ui, sans-serif;
       }
-      .frame[data-theme="dark"] {
+      .frame[data-theme="dark"],
+      body:has(#th-d:checked) .frame {
         --background: #1e201e;
         --foreground: #f3f5f3;
         --card: #272a27;
@@ -42,6 +46,10 @@
       }
       * {
         box-sizing: border-box;
+      }
+      html.js .static-ui,
+      html:not(.js) .js-ui {
+        display: none;
       }
       body {
         margin: 0;
@@ -677,7 +685,7 @@
     </style>
   </head>
   <body>
-    <div class="review">
+    <div class="review js-ui">
       <label
         >Viewport
         <select id="vp">
@@ -709,11 +717,3138 @@
       </label>
       <span class="note" id="note"></span>
     </div>
-    <div class="stage">
+    <div class="stage js-ui">
       <div class="scaler" id="scaler">
         <div class="frame" id="frame" data-theme="light"></div>
       </div>
     </div>
+    <!-- static:start -->
+    <div class="static-ui">
+      <style>
+        .static-ui .ctl {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px 20px;
+          align-items: center;
+          padding: 10px 16px;
+          background: #fff;
+          border-bottom: 1px solid #cfd3cf;
+          font-size: 13px;
+          position: sticky;
+          top: 0;
+          z-index: 10;
+        }
+        .static-ui .grp,
+        .static-ui .states {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 4px;
+          align-items: center;
+        }
+        .static-ui .grp > span,
+        .static-ui .states > span {
+          color: #5d635d;
+          margin-right: 2px;
+        }
+        .static-ui input[type="radio"] {
+          position: absolute;
+          opacity: 0;
+          pointer-events: none;
+        }
+        .static-ui label {
+          padding: 4px 10px;
+          border: 1px solid #b9beb9;
+          border-radius: 6px;
+          background: #fff;
+          cursor: pointer;
+        }
+        .static-ui input:checked + label {
+          background: #1b1d1b;
+          color: #fff;
+          border-color: #1b1d1b;
+        }
+        .static-ui input:focus-visible + label {
+          outline: 2px solid #d89400;
+          outline-offset: 2px;
+        }
+        .static-ui .states,
+        .static-ui .fr {
+          display: none;
+        }
+        .static-ui .hint {
+          flex-basis: 100%;
+          color: #5d635d;
+        }
+        .static-ui .sstage {
+          padding: 16px;
+          overflow: auto;
+        }
+        .static-ui .sframe {
+          margin: 0 auto;
+        }
+        body:has(#s-browse:checked):has(#st-browse-live:checked)
+          .fr[data-f="browse-live"] {
+          display: block;
+        }
+        body:has(#s-browse:checked):has(#st-browse-loading:checked)
+          .fr[data-f="browse-loading"] {
+          display: block;
+        }
+        body:has(#s-browse:checked):has(#st-browse-results:checked)
+          .fr[data-f="browse-results"] {
+          display: block;
+        }
+        body:has(#s-browse:checked):has(#st-browse-empty:checked)
+          .fr[data-f="browse-empty"] {
+          display: block;
+        }
+        body:has(#s-browse:checked):has(#st-browse-error:checked)
+          .fr[data-f="browse-error"] {
+          display: block;
+        }
+        body:has(#s-browse:checked):has(#st-browse-offline:checked)
+          .fr[data-f="browse-offline"] {
+          display: block;
+        }
+        body:has(#s-browse:checked) .states[data-for="browse"] {
+          display: flex;
+        }
+        body:has(#s-film:checked):has(#st-film-default:checked)
+          .fr[data-f="film-default"] {
+          display: block;
+        }
+        body:has(#s-film:checked):has(#st-film-loading:checked)
+          .fr[data-f="film-loading"] {
+          display: block;
+        }
+        body:has(#s-film:checked):has(#st-film-offline:checked)
+          .fr[data-f="film-offline"] {
+          display: block;
+        }
+        body:has(#s-film:checked):has(#st-film-error:checked)
+          .fr[data-f="film-error"] {
+          display: block;
+        }
+        body:has(#s-film:checked) .states[data-for="film"] {
+          display: flex;
+        }
+        body:has(#s-series:checked):has(#st-series-default:checked)
+          .fr[data-f="series-default"] {
+          display: block;
+        }
+        body:has(#s-series:checked):has(#st-series-loading:checked)
+          .fr[data-f="series-loading"] {
+          display: block;
+        }
+        body:has(#s-series:checked):has(#st-series-more:checked)
+          .fr[data-f="series-more"] {
+          display: block;
+        }
+        body:has(#s-series:checked):has(#st-series-error:checked)
+          .fr[data-f="series-error"] {
+          display: block;
+        }
+        body:has(#s-series:checked) .states[data-for="series"] {
+          display: flex;
+        }
+        body:has(#s-watch-film:checked):has(#st-watch-film-default:checked)
+          .fr[data-f="watch-film-default"] {
+          display: block;
+        }
+        body:has(#s-watch-film:checked):has(#st-watch-film-loading:checked)
+          .fr[data-f="watch-film-loading"] {
+          display: block;
+        }
+        body:has(#s-watch-film:checked):has(
+            #st-watch-film-playback-error:checked
+          )
+          .fr[data-f="watch-film-playback-error"] {
+          display: block;
+        }
+        body:has(#s-watch-film:checked) .states[data-for="watch-film"] {
+          display: flex;
+        }
+        body:has(#s-watch-ep:checked):has(#st-watch-ep-default:checked)
+          .fr[data-f="watch-ep-default"] {
+          display: block;
+        }
+        body:has(#s-watch-ep:checked):has(#st-watch-ep-ended:checked)
+          .fr[data-f="watch-ep-ended"] {
+          display: block;
+        }
+        body:has(#s-watch-ep:checked):has(#st-watch-ep-last:checked)
+          .fr[data-f="watch-ep-last"] {
+          display: block;
+        }
+        body:has(#s-watch-ep:checked):has(#st-watch-ep-first:checked)
+          .fr[data-f="watch-ep-first"] {
+          display: block;
+        }
+        body:has(#s-watch-ep:checked):has(#st-watch-ep-episodes-error:checked)
+          .fr[data-f="watch-ep-episodes-error"] {
+          display: block;
+        }
+        body:has(#s-watch-ep:checked):has(#st-watch-ep-offline:checked)
+          .fr[data-f="watch-ep-offline"] {
+          display: block;
+        }
+        body:has(#s-watch-ep:checked) .states[data-for="watch-ep"] {
+          display: flex;
+        }
+        body:has(#vp-d:checked) .sframe {
+          width: 1440px;
+          height: 900px;
+          --vh: 900px;
+        }
+        body:has(#vp-m:checked) .sframe {
+          width: 390px;
+          height: 844px;
+          --vh: 844px;
+        }
+        body:has(#vp-t:checked) .sframe {
+          width: 768px;
+          height: 1024px;
+          --vh: 1024px;
+        }
+        body:has(#z-100:checked) .szoom {
+          zoom: 1;
+        }
+        body:has(#z-75:checked) .szoom {
+          zoom: 0.75;
+        }
+        body:has(#z-50:checked) .szoom {
+          zoom: 0.5;
+        }
+      </style>
+      <div class="ctl">
+        <div class="grp">
+          <span>Viewport</span><input type="radio" name="vp" id="vp-d" /><label
+            for="vp-d"
+            >Desktop 1440×900</label
+          ><input type="radio" name="vp" id="vp-m" checked /><label for="vp-m"
+            >Mobile 390×844</label
+          ><input type="radio" name="vp" id="vp-t" /><label for="vp-t"
+            >Tablet 768×1024</label
+          >
+        </div>
+        <div class="grp">
+          <span>Theme</span
+          ><input type="radio" name="th" id="th-l" checked /><label for="th-l"
+            >Light</label
+          ><input type="radio" name="th" id="th-d" /><label for="th-d"
+            >Dark</label
+          >
+        </div>
+        <div class="grp">
+          <span>Scale</span
+          ><input type="radio" name="z" id="z-100" checked /><label for="z-100"
+            >100%</label
+          ><input type="radio" name="z" id="z-75" /><label for="z-75">75%</label
+          ><input type="radio" name="z" id="z-50" /><label for="z-50"
+            >50%</label
+          >
+        </div>
+        <div class="grp">
+          <span>Screen</span
+          ><input type="radio" name="screen" id="s-browse" checked /><label
+            for="s-browse"
+            >Browse + search</label
+          ><input type="radio" name="screen" id="s-film" /><label for="s-film"
+            >Detail: Film / Standalone</label
+          ><input type="radio" name="screen" id="s-series" /><label
+            for="s-series"
+            >Detail: Series</label
+          ><input type="radio" name="screen" id="s-watch-film" /><label
+            for="s-watch-film"
+            >Watch: Film / Standalone</label
+          ><input type="radio" name="screen" id="s-watch-ep" /><label
+            for="s-watch-ep"
+            >Watch: Episode</label
+          >
+        </div>
+        <div class="states" data-for="browse">
+          <span>State</span
+          ><input
+            type="radio"
+            name="st-browse"
+            id="st-browse-live"
+            checked
+          /><label for="st-browse-live"
+            >Live (type to search, debounce 300 ms)</label
+          ><input type="radio" name="st-browse" id="st-browse-loading" /><label
+            for="st-browse-loading"
+            >Searching (skeleton)</label
+          ><input type="radio" name="st-browse" id="st-browse-results" /><label
+            for="st-browse-results"
+            >Results for “night”</label
+          ><input type="radio" name="st-browse" id="st-browse-empty" /><label
+            for="st-browse-empty"
+            >No results</label
+          ><input type="radio" name="st-browse" id="st-browse-error" /><label
+            for="st-browse-error"
+            >Search error</label
+          ><input type="radio" name="st-browse" id="st-browse-offline" /><label
+            for="st-browse-offline"
+            >Offline</label
+          >
+        </div>
+        <div class="states" data-for="film">
+          <span>State</span
+          ><input
+            type="radio"
+            name="st-film"
+            id="st-film-default"
+            checked
+          /><label for="st-film-default">Default</label
+          ><input type="radio" name="st-film" id="st-film-loading" /><label
+            for="st-film-loading"
+            >Loading</label
+          ><input type="radio" name="st-film" id="st-film-offline" /><label
+            for="st-film-offline"
+            >Offline (Watch disabled)</label
+          ><input type="radio" name="st-film" id="st-film-error" /><label
+            for="st-film-error"
+            >Error</label
+          >
+        </div>
+        <div class="states" data-for="series">
+          <span>State</span
+          ><input
+            type="radio"
+            name="st-series"
+            id="st-series-default"
+            checked
+          /><label for="st-series-default">Default</label
+          ><input type="radio" name="st-series" id="st-series-loading" /><label
+            for="st-series-loading"
+            >Loading episodes</label
+          ><input type="radio" name="st-series" id="st-series-more" /><label
+            for="st-series-more"
+            >Load more episodes</label
+          ><input type="radio" name="st-series" id="st-series-error" /><label
+            for="st-series-error"
+            >Episodes error</label
+          >
+        </div>
+        <div class="states" data-for="watch-film">
+          <span>State</span
+          ><input
+            type="radio"
+            name="st-watch-film"
+            id="st-watch-film-default"
+            checked
+          /><label for="st-watch-film-default">Default</label
+          ><input
+            type="radio"
+            name="st-watch-film"
+            id="st-watch-film-loading"
+          /><label for="st-watch-film-loading">Loading playback</label
+          ><input
+            type="radio"
+            name="st-watch-film"
+            id="st-watch-film-playback-error"
+          /><label for="st-watch-film-playback-error">Playback error</label>
+        </div>
+        <div class="states" data-for="watch-ep">
+          <span>State</span
+          ><input
+            type="radio"
+            name="st-watch-ep"
+            id="st-watch-ep-default"
+            checked
+          /><label for="st-watch-ep-default">S1 E3 (middle)</label
+          ><input
+            type="radio"
+            name="st-watch-ep"
+            id="st-watch-ep-ended"
+          /><label for="st-watch-ep-ended">Ended: Up next</label
+          ><input type="radio" name="st-watch-ep" id="st-watch-ep-last" /><label
+            for="st-watch-ep-last"
+            >Last episode</label
+          ><input
+            type="radio"
+            name="st-watch-ep"
+            id="st-watch-ep-first"
+          /><label for="st-watch-ep-first">First episode (no Previous)</label
+          ><input
+            type="radio"
+            name="st-watch-ep"
+            id="st-watch-ep-episodes-error"
+          /><label for="st-watch-ep-episodes-error">Episodes error</label
+          ><input
+            type="radio"
+            name="st-watch-ep"
+            id="st-watch-ep-offline"
+          /><label for="st-watch-ep-offline">Offline</label>
+        </div>
+        <span class="hint"
+          >Static view: scripts are disabled in this viewer. Open this file in a
+          browser for the live 300 ms debounce search demo.</span
+        >
+      </div>
+      <div class="sstage">
+        <div class="szoom">
+          <div class="frame sframe">
+            <div class="fr" data-f="browse-live">
+              <header class="shell-header">
+                <div class="shell-inner">
+                  <a class="logo" href="#"
+                    ><i
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path d="M8 5v14l11-7z" /></svg></i
+                    >Vertical Movies</a
+                  >
+                  <nav class="row" aria-label="Main navigation">
+                    <a class="btn ghost sm-only" href="#">Browse</a
+                    ><button class="btn ghost" aria-label="Appearance">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        aria-hidden="true"
+                      >
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+                      </svg>
+                    </button>
+                  </nav>
+                </div>
+              </header>
+              <div class="page">
+                <h1 style="font-size: 40px; line-height: 1.1">Browse</h1>
+                <p class="muted" style="margin: 8px 0 0">
+                  Find your next story.
+                </p>
+
+                <div class="toolbar">
+                  <div class="seg" role="group" aria-label="Content type">
+                    <button aria-pressed="true" data-f="all">All</button
+                    ><button aria-pressed="false" data-f="film">Films</button
+                    ><button aria-pressed="false" data-f="standalone">
+                      Standalone
+                    </button>
+                  </div>
+                  <div class="search" role="search">
+                    <span class="lead"
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        aria-hidden="true"
+                      >
+                        <circle cx="11" cy="11" r="7" />
+                        <path d="M20 20l-3.5-3.5" /></svg></span
+                    ><input
+                      type="search"
+                      inputmode="search"
+                      enterkeyhint="search"
+                      autocomplete="off"
+                      maxlength="200"
+                      placeholder="Search titles and synopsis"
+                      aria-label="Search videos"
+                      value=""
+                    /><span class="tail"></span>
+                  </div>
+                </div>
+                <div class="status" aria-live="polite">10 videos</div>
+                <div class="grid">
+                  <article class="card">
+                    <a href="#" tabindex="0"
+                      ><div class="poster" style="--h: 20">Midnight Run</div>
+                      <h3>Midnight Run</h3>
+                      <div class="meta">
+                        <span class="badge">Film</span><span>12 min</span>
+                      </div></a
+                    >
+                  </article>
+                  <article class="card">
+                    <a href="#" tabindex="0"
+                      ><div class="poster" style="--h: 60">Paper Lanterns</div>
+                      <h3>Paper Lanterns</h3>
+                      <div class="meta">
+                        <span class="badge">Film</span><span>9 min</span>
+                      </div></a
+                    >
+                  </article>
+                  <article class="card">
+                    <a href="#" tabindex="0"
+                      ><div class="poster" style="--h: 140">
+                        Last Train Home
+                      </div>
+                      <h3>Last Train Home</h3>
+                      <div class="meta">
+                        <span class="badge">Standalone</span><span>14 min</span>
+                      </div></a
+                    >
+                  </article>
+                  <article class="card">
+                    <a href="#" tabindex="0"
+                      ><div class="poster" style="--h: 100">Neon Garden</div>
+                      <h3>Neon Garden</h3>
+                      <div class="meta">
+                        <span class="badge">Series</span><span>2 seasons</span>
+                      </div></a
+                    >
+                  </article>
+                  <article class="card">
+                    <a href="#" tabindex="0"
+                      ><div class="poster" style="--h: 200">
+                        Salt &amp; Static
+                      </div>
+                      <h3>Salt &amp; Static</h3>
+                      <div class="meta">
+                        <span class="badge">Film</span><span>11 min</span>
+                      </div></a
+                    >
+                  </article>
+                  <article class="card">
+                    <a href="#" tabindex="0"
+                      ><div class="poster" style="--h: 250">The Quiet Hour</div>
+                      <h3>The Quiet Hour</h3>
+                      <div class="meta">
+                        <span class="badge">Standalone</span><span>8 min</span>
+                      </div></a
+                    >
+                  </article>
+                  <article class="card">
+                    <a href="#" tabindex="0"
+                      ><div class="poster" style="--h: 300">Glass Harbor</div>
+                      <h3>Glass Harbor</h3>
+                      <div class="meta">
+                        <span class="badge">Film</span><span>13 min</span>
+                      </div></a
+                    >
+                  </article>
+                  <article class="card">
+                    <a href="#" tabindex="0"
+                      ><div class="poster" style="--h: 330">Room 9</div>
+                      <h3>Room 9</h3>
+                      <div class="meta">
+                        <span class="badge">Series</span><span>1 season</span>
+                      </div></a
+                    >
+                  </article>
+                  <article class="card">
+                    <a href="#" tabindex="0"
+                      ><div class="poster" style="--h: 30">Ember Street</div>
+                      <h3>Ember Street</h3>
+                      <div class="meta">
+                        <span class="badge">Standalone</span><span>10 min</span>
+                      </div></a
+                    >
+                  </article>
+                  <article class="card">
+                    <a href="#" tabindex="0"
+                      ><div class="poster" style="--h: 180">Low Tide</div>
+                      <h3>Low Tide</h3>
+                      <div class="meta">
+                        <span class="badge">Film</span><span>12 min</span>
+                      </div></a
+                    >
+                  </article>
+                </div>
+                <div
+                  class="row"
+                  style="justify-content: center; margin-top: 32px"
+                >
+                  <button class="btn">Load more</button>
+                </div>
+              </div>
+            </div>
+            <div class="fr" data-f="browse-loading">
+              <header class="shell-header">
+                <div class="shell-inner">
+                  <a class="logo" href="#"
+                    ><i
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path d="M8 5v14l11-7z" /></svg></i
+                    >Vertical Movies</a
+                  >
+                  <nav class="row" aria-label="Main navigation">
+                    <a class="btn ghost sm-only" href="#">Browse</a
+                    ><button class="btn ghost" aria-label="Appearance">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        aria-hidden="true"
+                      >
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+                      </svg>
+                    </button>
+                  </nav>
+                </div>
+              </header>
+              <div class="page">
+                <h1 style="font-size: 40px; line-height: 1.1">Browse</h1>
+                <p class="muted" style="margin: 8px 0 0">
+                  Find your next story.
+                </p>
+
+                <div class="toolbar">
+                  <div class="seg" role="group" aria-label="Content type">
+                    <button aria-pressed="true" data-f="all">All</button
+                    ><button aria-pressed="false" data-f="film">Films</button
+                    ><button aria-pressed="false" data-f="standalone">
+                      Standalone
+                    </button>
+                  </div>
+                  <div class="search" role="search">
+                    <span class="lead"
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        aria-hidden="true"
+                      >
+                        <circle cx="11" cy="11" r="7" />
+                        <path d="M20 20l-3.5-3.5" /></svg></span
+                    ><input
+                      type="search"
+                      inputmode="search"
+                      enterkeyhint="search"
+                      autocomplete="off"
+                      maxlength="200"
+                      placeholder="Search titles and synopsis"
+                      aria-label="Search videos"
+                      value=""
+                    /><span class="tail"
+                      ><span class="spin" aria-hidden="true"></span
+                    ></span>
+                  </div>
+                </div>
+                <div class="status" aria-live="polite">Searching…</div>
+                <div class="grid" role="status" aria-label="Searching">
+                  <div>
+                    <div class="skeleton" style="aspect-ratio: 9/16"></div>
+                    <div
+                      class="skeleton"
+                      style="height: 16px; margin-top: 12px; width: 70%"
+                    ></div>
+                  </div>
+                  <div>
+                    <div class="skeleton" style="aspect-ratio: 9/16"></div>
+                    <div
+                      class="skeleton"
+                      style="height: 16px; margin-top: 12px; width: 70%"
+                    ></div>
+                  </div>
+                  <div>
+                    <div class="skeleton" style="aspect-ratio: 9/16"></div>
+                    <div
+                      class="skeleton"
+                      style="height: 16px; margin-top: 12px; width: 70%"
+                    ></div>
+                  </div>
+                  <div>
+                    <div class="skeleton" style="aspect-ratio: 9/16"></div>
+                    <div
+                      class="skeleton"
+                      style="height: 16px; margin-top: 12px; width: 70%"
+                    ></div>
+                  </div>
+                  <div>
+                    <div class="skeleton" style="aspect-ratio: 9/16"></div>
+                    <div
+                      class="skeleton"
+                      style="height: 16px; margin-top: 12px; width: 70%"
+                    ></div>
+                  </div>
+                </div>
+                <div
+                  class="row"
+                  style="justify-content: center; margin-top: 32px"
+                >
+                  <button class="btn">Load more</button>
+                </div>
+              </div>
+            </div>
+            <div class="fr" data-f="browse-results">
+              <header class="shell-header">
+                <div class="shell-inner">
+                  <a class="logo" href="#"
+                    ><i
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path d="M8 5v14l11-7z" /></svg></i
+                    >Vertical Movies</a
+                  >
+                  <nav class="row" aria-label="Main navigation">
+                    <a class="btn ghost sm-only" href="#">Browse</a
+                    ><button class="btn ghost" aria-label="Appearance">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        aria-hidden="true"
+                      >
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+                      </svg>
+                    </button>
+                  </nav>
+                </div>
+              </header>
+              <div class="page">
+                <h1 style="font-size: 40px; line-height: 1.1">Browse</h1>
+                <p class="muted" style="margin: 8px 0 0">
+                  Find your next story.
+                </p>
+
+                <div class="toolbar">
+                  <div class="seg" role="group" aria-label="Content type">
+                    <button aria-pressed="true" data-f="all">All</button
+                    ><button aria-pressed="false" data-f="film">Films</button
+                    ><button aria-pressed="false" data-f="standalone">
+                      Standalone
+                    </button>
+                  </div>
+                  <div class="search" role="search">
+                    <span class="lead"
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        aria-hidden="true"
+                      >
+                        <circle cx="11" cy="11" r="7" />
+                        <path d="M20 20l-3.5-3.5" /></svg></span
+                    ><input
+                      type="search"
+                      inputmode="search"
+                      enterkeyhint="search"
+                      autocomplete="off"
+                      maxlength="200"
+                      placeholder="Search titles and synopsis"
+                      aria-label="Search videos"
+                      value="night"
+                    /><span class="tail"
+                      ><button class="btn ghost" aria-label="Clear search">
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          aria-hidden="true"
+                        >
+                          <path d="M6 6l12 12M18 6L6 18" />
+                        </svg></button
+                    ></span>
+                  </div>
+                </div>
+                <div class="status" aria-live="polite">
+                  3 results for “night”
+                </div>
+                <div class="grid">
+                  <article class="card">
+                    <a href="#" tabindex="0"
+                      ><div class="poster" style="--h: 20">Midnight Run</div>
+                      <h3>Midnight Run</h3>
+                      <div class="meta">
+                        <span class="badge">Film</span><span>12 min</span>
+                      </div></a
+                    >
+                  </article>
+                  <article class="card">
+                    <a href="#" tabindex="0"
+                      ><div class="poster" style="--h: 60">Paper Lanterns</div>
+                      <h3>Paper Lanterns</h3>
+                      <div class="meta">
+                        <span class="badge">Film</span><span>9 min</span>
+                      </div></a
+                    >
+                  </article>
+                  <article class="card">
+                    <a href="#" tabindex="0"
+                      ><div class="poster" style="--h: 100">Neon Garden</div>
+                      <h3>Neon Garden</h3>
+                      <div class="meta">
+                        <span class="badge">Series</span><span>2 seasons</span>
+                      </div></a
+                    >
+                  </article>
+                </div>
+                <div
+                  class="row"
+                  style="justify-content: center; margin-top: 32px"
+                >
+                  <button class="btn">Load more</button>
+                </div>
+              </div>
+            </div>
+            <div class="fr" data-f="browse-empty">
+              <header class="shell-header">
+                <div class="shell-inner">
+                  <a class="logo" href="#"
+                    ><i
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path d="M8 5v14l11-7z" /></svg></i
+                    >Vertical Movies</a
+                  >
+                  <nav class="row" aria-label="Main navigation">
+                    <a class="btn ghost sm-only" href="#">Browse</a
+                    ><button class="btn ghost" aria-label="Appearance">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        aria-hidden="true"
+                      >
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+                      </svg>
+                    </button>
+                  </nav>
+                </div>
+              </header>
+              <div class="page">
+                <h1 style="font-size: 40px; line-height: 1.1">Browse</h1>
+                <p class="muted" style="margin: 8px 0 0">
+                  Find your next story.
+                </p>
+
+                <div class="toolbar">
+                  <div class="seg" role="group" aria-label="Content type">
+                    <button aria-pressed="true" data-f="all">All</button
+                    ><button aria-pressed="false" data-f="film">Films</button
+                    ><button aria-pressed="false" data-f="standalone">
+                      Standalone
+                    </button>
+                  </div>
+                  <div class="search" role="search">
+                    <span class="lead"
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        aria-hidden="true"
+                      >
+                        <circle cx="11" cy="11" r="7" />
+                        <path d="M20 20l-3.5-3.5" /></svg></span
+                    ><input
+                      type="search"
+                      inputmode="search"
+                      enterkeyhint="search"
+                      autocomplete="off"
+                      maxlength="200"
+                      placeholder="Search titles and synopsis"
+                      aria-label="Search videos"
+                      value="zzz"
+                    /><span class="tail"
+                      ><button class="btn ghost" aria-label="Clear search">
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          aria-hidden="true"
+                        >
+                          <path d="M6 6l12 12M18 6L6 18" />
+                        </svg></button
+                    ></span>
+                  </div>
+                </div>
+                <div class="status" aria-live="polite">0 results for “zzz”</div>
+                <div class="notice">
+                  <h2>No results for “zzz”</h2>
+                  <p class="muted">Check the spelling or try a shorter word.</p>
+                  <button class="btn">Clear search</button>
+                </div>
+                <div
+                  class="row"
+                  style="justify-content: center; margin-top: 32px"
+                >
+                  <button class="btn">Load more</button>
+                </div>
+              </div>
+            </div>
+            <div class="fr" data-f="browse-error">
+              <header class="shell-header">
+                <div class="shell-inner">
+                  <a class="logo" href="#"
+                    ><i
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path d="M8 5v14l11-7z" /></svg></i
+                    >Vertical Movies</a
+                  >
+                  <nav class="row" aria-label="Main navigation">
+                    <a class="btn ghost sm-only" href="#">Browse</a
+                    ><button class="btn ghost" aria-label="Appearance">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        aria-hidden="true"
+                      >
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+                      </svg>
+                    </button>
+                  </nav>
+                </div>
+              </header>
+              <div class="page">
+                <h1 style="font-size: 40px; line-height: 1.1">Browse</h1>
+                <p class="muted" style="margin: 8px 0 0">
+                  Find your next story.
+                </p>
+
+                <div class="toolbar">
+                  <div class="seg" role="group" aria-label="Content type">
+                    <button aria-pressed="true" data-f="all">All</button
+                    ><button aria-pressed="false" data-f="film">Films</button
+                    ><button aria-pressed="false" data-f="standalone">
+                      Standalone
+                    </button>
+                  </div>
+                  <div class="search" role="search">
+                    <span class="lead"
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        aria-hidden="true"
+                      >
+                        <circle cx="11" cy="11" r="7" />
+                        <path d="M20 20l-3.5-3.5" /></svg></span
+                    ><input
+                      type="search"
+                      inputmode="search"
+                      enterkeyhint="search"
+                      autocomplete="off"
+                      maxlength="200"
+                      placeholder="Search titles and synopsis"
+                      aria-label="Search videos"
+                      value=""
+                    /><span class="tail"></span>
+                  </div>
+                </div>
+                <div class="status" aria-live="polite"></div>
+                <div class="notice" role="alert">
+                  <h2>Could not search</h2>
+                  <p class="muted">
+                    Your previous results are unchanged. Please try again.
+                  </p>
+                  <button class="btn">Retry search</button>
+                </div>
+                <div
+                  class="row"
+                  style="justify-content: center; margin-top: 32px"
+                >
+                  <button class="btn">Load more</button>
+                </div>
+              </div>
+            </div>
+            <div class="fr" data-f="browse-offline">
+              <header class="shell-header">
+                <div class="shell-inner">
+                  <a class="logo" href="#"
+                    ><i
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path d="M8 5v14l11-7z" /></svg></i
+                    >Vertical Movies</a
+                  >
+                  <nav class="row" aria-label="Main navigation">
+                    <a class="btn ghost sm-only" href="#">Browse</a
+                    ><button class="btn ghost" aria-label="Appearance">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        aria-hidden="true"
+                      >
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+                      </svg>
+                    </button>
+                  </nav>
+                </div>
+              </header>
+              <div class="page">
+                <h1 style="font-size: 40px; line-height: 1.1">Browse</h1>
+                <p class="muted" style="margin: 8px 0 0">
+                  Find your next story.
+                </p>
+                <div
+                  class="notice"
+                  role="status"
+                  style="
+                    margin-top: 16px;
+                    text-align: left;
+                    justify-items: start;
+                  "
+                >
+                  <b>You are offline.</b
+                  ><span class="muted">Reconnect to search.</span>
+                </div>
+                <div class="toolbar">
+                  <div class="seg" role="group" aria-label="Content type">
+                    <button aria-pressed="true" data-f="all">All</button
+                    ><button aria-pressed="false" data-f="film">Films</button
+                    ><button aria-pressed="false" data-f="standalone">
+                      Standalone
+                    </button>
+                  </div>
+                  <div class="search" role="search">
+                    <span class="lead"
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        aria-hidden="true"
+                      >
+                        <circle cx="11" cy="11" r="7" />
+                        <path d="M20 20l-3.5-3.5" /></svg></span
+                    ><input
+                      type="search"
+                      inputmode="search"
+                      enterkeyhint="search"
+                      autocomplete="off"
+                      maxlength="200"
+                      placeholder="Search titles and synopsis"
+                      aria-label="Search videos"
+                      value=""
+                      disabled
+                    /><span class="tail"></span>
+                  </div>
+                </div>
+                <div class="status" aria-live="polite">10 videos</div>
+                <div class="grid">
+                  <article class="card">
+                    <a href="#" tabindex="0"
+                      ><div class="poster" style="--h: 20">Midnight Run</div>
+                      <h3>Midnight Run</h3>
+                      <div class="meta">
+                        <span class="badge">Film</span><span>12 min</span>
+                      </div></a
+                    >
+                  </article>
+                  <article class="card">
+                    <a href="#" tabindex="0"
+                      ><div class="poster" style="--h: 60">Paper Lanterns</div>
+                      <h3>Paper Lanterns</h3>
+                      <div class="meta">
+                        <span class="badge">Film</span><span>9 min</span>
+                      </div></a
+                    >
+                  </article>
+                  <article class="card">
+                    <a href="#" tabindex="0"
+                      ><div class="poster" style="--h: 140">
+                        Last Train Home
+                      </div>
+                      <h3>Last Train Home</h3>
+                      <div class="meta">
+                        <span class="badge">Standalone</span><span>14 min</span>
+                      </div></a
+                    >
+                  </article>
+                  <article class="card">
+                    <a href="#" tabindex="0"
+                      ><div class="poster" style="--h: 100">Neon Garden</div>
+                      <h3>Neon Garden</h3>
+                      <div class="meta">
+                        <span class="badge">Series</span><span>2 seasons</span>
+                      </div></a
+                    >
+                  </article>
+                  <article class="card">
+                    <a href="#" tabindex="0"
+                      ><div class="poster" style="--h: 200">
+                        Salt &amp; Static
+                      </div>
+                      <h3>Salt &amp; Static</h3>
+                      <div class="meta">
+                        <span class="badge">Film</span><span>11 min</span>
+                      </div></a
+                    >
+                  </article>
+                  <article class="card">
+                    <a href="#" tabindex="0"
+                      ><div class="poster" style="--h: 250">The Quiet Hour</div>
+                      <h3>The Quiet Hour</h3>
+                      <div class="meta">
+                        <span class="badge">Standalone</span><span>8 min</span>
+                      </div></a
+                    >
+                  </article>
+                  <article class="card">
+                    <a href="#" tabindex="0"
+                      ><div class="poster" style="--h: 300">Glass Harbor</div>
+                      <h3>Glass Harbor</h3>
+                      <div class="meta">
+                        <span class="badge">Film</span><span>13 min</span>
+                      </div></a
+                    >
+                  </article>
+                  <article class="card">
+                    <a href="#" tabindex="0"
+                      ><div class="poster" style="--h: 330">Room 9</div>
+                      <h3>Room 9</h3>
+                      <div class="meta">
+                        <span class="badge">Series</span><span>1 season</span>
+                      </div></a
+                    >
+                  </article>
+                  <article class="card">
+                    <a href="#" tabindex="0"
+                      ><div class="poster" style="--h: 30">Ember Street</div>
+                      <h3>Ember Street</h3>
+                      <div class="meta">
+                        <span class="badge">Standalone</span><span>10 min</span>
+                      </div></a
+                    >
+                  </article>
+                  <article class="card">
+                    <a href="#" tabindex="0"
+                      ><div class="poster" style="--h: 180">Low Tide</div>
+                      <h3>Low Tide</h3>
+                      <div class="meta">
+                        <span class="badge">Film</span><span>12 min</span>
+                      </div></a
+                    >
+                  </article>
+                </div>
+                <div
+                  class="row"
+                  style="justify-content: center; margin-top: 32px"
+                >
+                  <button class="btn">Load more</button>
+                </div>
+              </div>
+            </div>
+            <div class="fr" data-f="film-default">
+              <header class="shell-header">
+                <div class="shell-inner">
+                  <a class="logo" href="#"
+                    ><i
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path d="M8 5v14l11-7z" /></svg></i
+                    >Vertical Movies</a
+                  >
+                  <nav class="row" aria-label="Main navigation">
+                    <a class="btn ghost sm-only" href="#">Browse</a
+                    ><button class="btn ghost" aria-label="Appearance">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        aria-hidden="true"
+                      >
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+                      </svg>
+                    </button>
+                  </nav>
+                </div>
+              </header>
+              <div class="page">
+                <a class="btn ghost" href="#" style="margin: 0 0 8px -12px"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M15 5l-7 7 7 7" />
+                  </svg>
+                  Back to browse</a
+                >
+
+                <div class="detail">
+                  <div class="detail-top">
+                    <div class="poster-col">
+                      <div class="poster" style="--h: 20">Midnight Run</div>
+                    </div>
+                    <div style="display: grid; gap: 10px; min-width: 0">
+                      <div class="row" style="flex-wrap: wrap; gap: 8px">
+                        <span class="badge">Film</span
+                        ><span class="muted" style="font-size: 14px"
+                          >12 min</span
+                        >
+                      </div>
+                      <h1>Midnight Run</h1>
+                      <div class="muted" style="font-size: 14px">
+                        Thriller · Mystery
+                      </div>
+                    </div>
+                  </div>
+                  <div class="detail-body">
+                    <div class="detail-info" style="display: grid; gap: 12px">
+                      <p
+                        class="clamp muted"
+                        style="
+                          margin: 0;
+                          max-width: 640px;
+                          font-size: 16px;
+                          line-height: 1.6;
+                        "
+                      >
+                        A courier races the clock across a sleeping city with a
+                        package she was told never to open. By dawn, she must
+                        decide who to trust and what to deliver. A long synopsis
+                        wraps here and is clamped on mobile with a Read more
+                        control.
+                      </p>
+                      <button
+                        class="btn ghost mob-only"
+                        style="
+                          justify-self: start;
+                          margin-left: -12px;
+                          min-height: 44px;
+                        "
+                      >
+                        Read more
+                      </button>
+                    </div>
+                    <div class="sticky-cta">
+                      <button class="btn primary">
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                        Watch now
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="fr" data-f="film-loading">
+              <header class="shell-header">
+                <div class="shell-inner">
+                  <a class="logo" href="#"
+                    ><i
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path d="M8 5v14l11-7z" /></svg></i
+                    >Vertical Movies</a
+                  >
+                  <nav class="row" aria-label="Main navigation">
+                    <a class="btn ghost sm-only" href="#">Browse</a
+                    ><button class="btn ghost" aria-label="Appearance">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        aria-hidden="true"
+                      >
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+                      </svg>
+                    </button>
+                  </nav>
+                </div>
+              </header>
+              <div class="page">
+                <div class="detail" role="status" aria-label="Loading video">
+                  <div
+                    class="skeleton"
+                    style="aspect-ratio: 9/16; max-width: 360px"
+                  ></div>
+                  <div style="display: grid; gap: 14px">
+                    <div
+                      class="skeleton"
+                      style="height: 48px; width: 70%"
+                    ></div>
+                    <div class="skeleton" style="height: 96px"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="fr" data-f="film-offline">
+              <header class="shell-header">
+                <div class="shell-inner">
+                  <a class="logo" href="#"
+                    ><i
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path d="M8 5v14l11-7z" /></svg></i
+                    >Vertical Movies</a
+                  >
+                  <nav class="row" aria-label="Main navigation">
+                    <a class="btn ghost sm-only" href="#">Browse</a
+                    ><button class="btn ghost" aria-label="Appearance">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        aria-hidden="true"
+                      >
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+                      </svg>
+                    </button>
+                  </nav>
+                </div>
+              </header>
+              <div class="page">
+                <a class="btn ghost" href="#" style="margin: 0 0 8px -12px"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M15 5l-7 7 7 7" />
+                  </svg>
+                  Back to browse</a
+                >
+                <div
+                  class="notice"
+                  role="status"
+                  style="
+                    margin-bottom: 16px;
+                    text-align: left;
+                    justify-items: start;
+                  "
+                >
+                  <b>You are offline.</b
+                  ><span class="muted">Reconnect to watch this video.</span>
+                </div>
+                <div class="detail">
+                  <div class="detail-top">
+                    <div class="poster-col">
+                      <div class="poster" style="--h: 20">Midnight Run</div>
+                    </div>
+                    <div style="display: grid; gap: 10px; min-width: 0">
+                      <div class="row" style="flex-wrap: wrap; gap: 8px">
+                        <span class="badge">Film</span
+                        ><span class="muted" style="font-size: 14px"
+                          >12 min</span
+                        >
+                      </div>
+                      <h1>Midnight Run</h1>
+                      <div class="muted" style="font-size: 14px">
+                        Thriller · Mystery
+                      </div>
+                    </div>
+                  </div>
+                  <div class="detail-body">
+                    <div class="detail-info" style="display: grid; gap: 12px">
+                      <p
+                        class="clamp muted"
+                        style="
+                          margin: 0;
+                          max-width: 640px;
+                          font-size: 16px;
+                          line-height: 1.6;
+                        "
+                      >
+                        A courier races the clock across a sleeping city with a
+                        package she was told never to open. By dawn, she must
+                        decide who to trust and what to deliver. A long synopsis
+                        wraps here and is clamped on mobile with a Read more
+                        control.
+                      </p>
+                      <button
+                        class="btn ghost mob-only"
+                        style="
+                          justify-self: start;
+                          margin-left: -12px;
+                          min-height: 44px;
+                        "
+                      >
+                        Read more
+                      </button>
+                    </div>
+                    <div class="sticky-cta">
+                      <button class="btn primary" disabled>
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                        Watch now
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="fr" data-f="film-error">
+              <header class="shell-header">
+                <div class="shell-inner">
+                  <a class="logo" href="#"
+                    ><i
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path d="M8 5v14l11-7z" /></svg></i
+                    >Vertical Movies</a
+                  >
+                  <nav class="row" aria-label="Main navigation">
+                    <a class="btn ghost sm-only" href="#">Browse</a
+                    ><button class="btn ghost" aria-label="Appearance">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        aria-hidden="true"
+                      >
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+                      </svg>
+                    </button>
+                  </nav>
+                </div>
+              </header>
+              <div class="page">
+                <div class="notice" role="alert">
+                  <h2>Could not load video</h2>
+                  <p class="muted">Please try again in a moment.</p>
+                  <button class="btn">Retry video</button>
+                </div>
+              </div>
+            </div>
+            <div class="fr" data-f="series-default">
+              <header class="shell-header">
+                <div class="shell-inner">
+                  <a class="logo" href="#"
+                    ><i
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path d="M8 5v14l11-7z" /></svg></i
+                    >Vertical Movies</a
+                  >
+                  <nav class="row" aria-label="Main navigation">
+                    <a class="btn ghost sm-only" href="#">Browse</a
+                    ><button class="btn ghost" aria-label="Appearance">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        aria-hidden="true"
+                      >
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+                      </svg>
+                    </button>
+                  </nav>
+                </div>
+              </header>
+              <div class="page">
+                <a class="btn ghost" href="#" style="margin: 0 0 8px -12px"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M15 5l-7 7 7 7" />
+                  </svg>
+                  Back to browse</a
+                >
+
+                <div class="detail">
+                  <div class="detail-top">
+                    <div class="poster-col">
+                      <div class="poster" style="--h: 100">Neon Garden</div>
+                    </div>
+                    <div style="display: grid; gap: 10px; min-width: 0">
+                      <div class="row" style="flex-wrap: wrap; gap: 8px">
+                        <span class="badge">Series</span
+                        ><span class="muted" style="font-size: 14px"
+                          >2 seasons · 6 episodes</span
+                        >
+                      </div>
+                      <h1>Neon Garden</h1>
+                      <div class="muted" style="font-size: 14px">
+                        Thriller · Mystery
+                      </div>
+                    </div>
+                  </div>
+                  <div class="detail-body series">
+                    <div class="detail-info" style="display: grid; gap: 12px">
+                      <p
+                        class="clamp muted"
+                        style="
+                          margin: 0;
+                          max-width: 640px;
+                          font-size: 16px;
+                          line-height: 1.6;
+                        "
+                      >
+                        A rooftop garden hides a city-wide mystery. Each episode
+                        follows a new visitor after dark, and every answer
+                        plants a bigger question.
+                      </p>
+                      <button
+                        class="btn ghost mob-only"
+                        style="
+                          justify-self: start;
+                          margin-left: -12px;
+                          min-height: 44px;
+                        "
+                      >
+                        Read more
+                      </button>
+                    </div>
+                    <div class="sticky-cta">
+                      <button class="btn primary">
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                        Play S1 E1
+                      </button>
+                    </div>
+                    <section
+                      aria-label="Episodes"
+                      style="display: grid; gap: 14px"
+                    >
+                      <div
+                        class="row"
+                        style="justify-content: space-between; flex-wrap: wrap"
+                      >
+                        <h2 style="font-size: 22px">Episodes</h2>
+                        <div
+                          class="seg tabs"
+                          role="tablist"
+                          aria-label="Seasons"
+                        >
+                          <button
+                            role="tab"
+                            aria-selected="true"
+                            aria-pressed="true"
+                            data-s="1"
+                          >
+                            Season 1</button
+                          ><button
+                            role="tab"
+                            aria-selected="false"
+                            aria-pressed="false"
+                            data-s="2"
+                          >
+                            Season 2
+                          </button>
+                        </div>
+                      </div>
+                      <ul class="ep-list">
+                        <li>
+                          <a class="ep" href="#"
+                            ><span class="no">E1</span
+                            ><span
+                              ><b>Pilot</b>
+                              <p>
+                                The garden is found and the first clue appears.
+                              </p></span
+                            ><span
+                              class="muted"
+                              style="font-size: 13px; white-space: nowrap"
+                              >12 min</span
+                            ></a
+                          >
+                        </li>
+                        <li>
+                          <a class="ep" href="#"
+                            ><span class="no">E2</span
+                            ><span
+                              ><b>Roots</b>
+                              <p>A neighbor remembers who planted it.</p></span
+                            ><span
+                              class="muted"
+                              style="font-size: 13px; white-space: nowrap"
+                              >11 min</span
+                            ></a
+                          >
+                        </li>
+                        <li>
+                          <a class="ep" href="#"
+                            ><span class="no">E3</span
+                            ><span
+                              ><b>Night Watering</b>
+                              <p>
+                                Someone is visiting after dark, and it is not
+                                the gardener.
+                              </p></span
+                            ><span
+                              class="muted"
+                              style="font-size: 13px; white-space: nowrap"
+                              >13 min</span
+                            ></a
+                          >
+                        </li>
+                        <li>
+                          <a class="ep" href="#"
+                            ><span class="no">E4</span
+                            ><span
+                              ><b>Thorns</b>
+                              <p>
+                                A warning is carved into the planter boxes.
+                              </p></span
+                            ><span
+                              class="muted"
+                              style="font-size: 13px; white-space: nowrap"
+                              >12 min</span
+                            ></a
+                          >
+                        </li>
+                      </ul>
+                      <p class="muted" style="font-size: 13px; margin: 0">
+                        4 of 4 episodes in Season 1
+                      </p>
+                    </section>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="fr" data-f="series-loading">
+              <header class="shell-header">
+                <div class="shell-inner">
+                  <a class="logo" href="#"
+                    ><i
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path d="M8 5v14l11-7z" /></svg></i
+                    >Vertical Movies</a
+                  >
+                  <nav class="row" aria-label="Main navigation">
+                    <a class="btn ghost sm-only" href="#">Browse</a
+                    ><button class="btn ghost" aria-label="Appearance">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        aria-hidden="true"
+                      >
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+                      </svg>
+                    </button>
+                  </nav>
+                </div>
+              </header>
+              <div class="page">
+                <div class="detail" role="status" aria-label="Loading video">
+                  <div
+                    class="skeleton"
+                    style="aspect-ratio: 9/16; max-width: 360px"
+                  ></div>
+                  <div style="display: grid; gap: 14px">
+                    <div
+                      class="skeleton"
+                      style="height: 48px; width: 70%"
+                    ></div>
+                    <div class="skeleton" style="height: 96px"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="fr" data-f="series-more">
+              <header class="shell-header">
+                <div class="shell-inner">
+                  <a class="logo" href="#"
+                    ><i
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path d="M8 5v14l11-7z" /></svg></i
+                    >Vertical Movies</a
+                  >
+                  <nav class="row" aria-label="Main navigation">
+                    <a class="btn ghost sm-only" href="#">Browse</a
+                    ><button class="btn ghost" aria-label="Appearance">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        aria-hidden="true"
+                      >
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+                      </svg>
+                    </button>
+                  </nav>
+                </div>
+              </header>
+              <div class="page">
+                <a class="btn ghost" href="#" style="margin: 0 0 8px -12px"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M15 5l-7 7 7 7" />
+                  </svg>
+                  Back to browse</a
+                >
+
+                <div class="detail">
+                  <div class="detail-top">
+                    <div class="poster-col">
+                      <div class="poster" style="--h: 100">Neon Garden</div>
+                    </div>
+                    <div style="display: grid; gap: 10px; min-width: 0">
+                      <div class="row" style="flex-wrap: wrap; gap: 8px">
+                        <span class="badge">Series</span
+                        ><span class="muted" style="font-size: 14px"
+                          >2 seasons · 6 episodes</span
+                        >
+                      </div>
+                      <h1>Neon Garden</h1>
+                      <div class="muted" style="font-size: 14px">
+                        Thriller · Mystery
+                      </div>
+                    </div>
+                  </div>
+                  <div class="detail-body series">
+                    <div class="detail-info" style="display: grid; gap: 12px">
+                      <p
+                        class="clamp muted"
+                        style="
+                          margin: 0;
+                          max-width: 640px;
+                          font-size: 16px;
+                          line-height: 1.6;
+                        "
+                      >
+                        A rooftop garden hides a city-wide mystery. Each episode
+                        follows a new visitor after dark, and every answer
+                        plants a bigger question.
+                      </p>
+                      <button
+                        class="btn ghost mob-only"
+                        style="
+                          justify-self: start;
+                          margin-left: -12px;
+                          min-height: 44px;
+                        "
+                      >
+                        Read more
+                      </button>
+                    </div>
+                    <div class="sticky-cta">
+                      <button class="btn primary">
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                        Play S1 E1
+                      </button>
+                    </div>
+                    <section
+                      aria-label="Episodes"
+                      style="display: grid; gap: 14px"
+                    >
+                      <div
+                        class="row"
+                        style="justify-content: space-between; flex-wrap: wrap"
+                      >
+                        <h2 style="font-size: 22px">Episodes</h2>
+                        <div
+                          class="seg tabs"
+                          role="tablist"
+                          aria-label="Seasons"
+                        >
+                          <button
+                            role="tab"
+                            aria-selected="true"
+                            aria-pressed="true"
+                            data-s="1"
+                          >
+                            Season 1</button
+                          ><button
+                            role="tab"
+                            aria-selected="false"
+                            aria-pressed="false"
+                            data-s="2"
+                          >
+                            Season 2
+                          </button>
+                        </div>
+                      </div>
+                      <ul class="ep-list">
+                        <li>
+                          <a class="ep" href="#"
+                            ><span class="no">E1</span
+                            ><span
+                              ><b>Pilot</b>
+                              <p>
+                                The garden is found and the first clue appears.
+                              </p></span
+                            ><span
+                              class="muted"
+                              style="font-size: 13px; white-space: nowrap"
+                              >12 min</span
+                            ></a
+                          >
+                        </li>
+                        <li>
+                          <a class="ep" href="#"
+                            ><span class="no">E2</span
+                            ><span
+                              ><b>Roots</b>
+                              <p>A neighbor remembers who planted it.</p></span
+                            ><span
+                              class="muted"
+                              style="font-size: 13px; white-space: nowrap"
+                              >11 min</span
+                            ></a
+                          >
+                        </li>
+                        <li>
+                          <a class="ep" href="#"
+                            ><span class="no">E3</span
+                            ><span
+                              ><b>Night Watering</b>
+                              <p>
+                                Someone is visiting after dark, and it is not
+                                the gardener.
+                              </p></span
+                            ><span
+                              class="muted"
+                              style="font-size: 13px; white-space: nowrap"
+                              >13 min</span
+                            ></a
+                          >
+                        </li>
+                        <li>
+                          <a class="ep" href="#"
+                            ><span class="no">E4</span
+                            ><span
+                              ><b>Thorns</b>
+                              <p>
+                                A warning is carved into the planter boxes.
+                              </p></span
+                            ><span
+                              class="muted"
+                              style="font-size: 13px; white-space: nowrap"
+                              >12 min</span
+                            ></a
+                          >
+                        </li>
+                      </ul>
+                      <div class="row" style="justify-content: center">
+                        <button class="btn">Load more episodes</button>
+                      </div>
+                      <p class="muted" style="font-size: 13px; margin: 0">
+                        4 of 4 episodes in Season 1
+                      </p>
+                    </section>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="fr" data-f="series-error">
+              <header class="shell-header">
+                <div class="shell-inner">
+                  <a class="logo" href="#"
+                    ><i
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path d="M8 5v14l11-7z" /></svg></i
+                    >Vertical Movies</a
+                  >
+                  <nav class="row" aria-label="Main navigation">
+                    <a class="btn ghost sm-only" href="#">Browse</a
+                    ><button class="btn ghost" aria-label="Appearance">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        aria-hidden="true"
+                      >
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+                      </svg>
+                    </button>
+                  </nav>
+                </div>
+              </header>
+              <div class="page">
+                <div class="notice" role="alert">
+                  <h2>Could not load video</h2>
+                  <p class="muted">Please try again in a moment.</p>
+                  <button class="btn">Retry video</button>
+                </div>
+              </div>
+            </div>
+            <div class="fr" data-f="watch-film-default">
+              <div class="topbar">
+                <a
+                  class="btn ghost"
+                  href="#"
+                  aria-label="Back"
+                  style="padding: 0 12px"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M15 5l-7 7 7 7" /></svg
+                  ><span class="desk-only">Back</span></a
+                ><span class="title">Midnight Run</span
+                ><button class="btn ghost" aria-label="Appearance">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+                  </svg>
+                </button>
+              </div>
+              <div class="watch">
+                <div
+                  class="player"
+                  style="--h: 20"
+                  aria-label="Video player (prototype)"
+                >
+                  <div class="proto">Prototype · no video</div>
+                  <div class="big">
+                    <span
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path d="M8 5v14l11-7z" /></svg
+                    ></span>
+                  </div>
+                  <div class="bar">
+                    <div class="track"><i style="width: 34%"></i></div>
+                    <div class="row" style="justify-content: space-between">
+                      <span>4:05 / 12:00</span><span>Quality auto</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="info">
+                  <div class="row" style="gap: 8px; flex-wrap: wrap">
+                    <span class="badge">Film</span
+                    ><span class="muted" style="font-size: 14px"
+                      >12 min · Thriller</span
+                    >
+                  </div>
+                  <h1 tabindex="-1">Midnight Run</h1>
+                  <p class="muted clamp" style="margin: 0; line-height: 1.6">
+                    A courier races the clock across a sleeping city with a
+                    package she was told never to open.
+                  </p>
+                  <a class="btn" href="#" style="justify-self: start"
+                    >Details</a
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="fr" data-f="watch-film-loading">
+              <div class="topbar">
+                <a
+                  class="btn ghost"
+                  href="#"
+                  aria-label="Back"
+                  style="padding: 0 12px"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M15 5l-7 7 7 7" /></svg
+                  ><span class="desk-only">Back</span></a
+                ><span class="title">Midnight Run</span
+                ><button class="btn ghost" aria-label="Appearance">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+                  </svg>
+                </button>
+              </div>
+              <div class="watch">
+                <div
+                  class="player"
+                  style="--h: 20"
+                  aria-label="Video player (prototype)"
+                >
+                  <div class="proto">Prototype · no video</div>
+                  <div class="big" role="status" aria-label="Loading video">
+                    <span
+                      class="spin"
+                      style="width: 32px; height: 32px; margin: 0"
+                    ></span>
+                  </div>
+                  <div class="bar">
+                    <div class="track"><i style="width: 34%"></i></div>
+                    <div class="row" style="justify-content: space-between">
+                      <span>4:05 / 12:00</span><span>Quality auto</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="info">
+                  <div class="row" style="gap: 8px; flex-wrap: wrap">
+                    <span class="badge">Film</span
+                    ><span class="muted" style="font-size: 14px"
+                      >12 min · Thriller</span
+                    >
+                  </div>
+                  <h1 tabindex="-1">Midnight Run</h1>
+                  <p class="muted clamp" style="margin: 0; line-height: 1.6">
+                    A courier races the clock across a sleeping city with a
+                    package she was told never to open.
+                  </p>
+                  <a class="btn" href="#" style="justify-self: start"
+                    >Details</a
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="fr" data-f="watch-film-playback-error">
+              <div class="topbar">
+                <a
+                  class="btn ghost"
+                  href="#"
+                  aria-label="Back"
+                  style="padding: 0 12px"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M15 5l-7 7 7 7" /></svg
+                  ><span class="desk-only">Back</span></a
+                ><span class="title">Midnight Run</span
+                ><button class="btn ghost" aria-label="Appearance">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+                  </svg>
+                </button>
+              </div>
+              <div class="watch">
+                <div
+                  class="player"
+                  style="--h: 20"
+                  aria-label="Video player (prototype)"
+                >
+                  <div class="proto">Prototype · no video</div>
+                  <div
+                    class="big"
+                    role="alert"
+                    style="padding: 24px; text-align: center"
+                  >
+                    <div
+                      style="display: grid; gap: 12px; justify-items: center"
+                    >
+                      <b>Playback interrupted</b
+                      ><button
+                        class="btn"
+                        style="color: #111; background: #fff"
+                      >
+                        Retry playback
+                      </button>
+                    </div>
+                  </div>
+                  <div class="bar">
+                    <div class="track"><i style="width: 34%"></i></div>
+                    <div class="row" style="justify-content: space-between">
+                      <span>4:05 / 12:00</span><span>Quality auto</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="info">
+                  <div class="row" style="gap: 8px; flex-wrap: wrap">
+                    <span class="badge">Film</span
+                    ><span class="muted" style="font-size: 14px"
+                      >12 min · Thriller</span
+                    >
+                  </div>
+                  <h1 tabindex="-1">Midnight Run</h1>
+                  <p class="muted clamp" style="margin: 0; line-height: 1.6">
+                    A courier races the clock across a sleeping city with a
+                    package she was told never to open.
+                  </p>
+                  <a class="btn" href="#" style="justify-self: start"
+                    >Details</a
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="fr" data-f="watch-ep-default">
+              <div class="topbar">
+                <a
+                  class="btn ghost"
+                  href="#"
+                  aria-label="Back"
+                  style="padding: 0 12px"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M15 5l-7 7 7 7" /></svg
+                  ><span class="desk-only">Back</span></a
+                ><span class="title">Neon Garden · S1 E3</span
+                ><button class="btn ghost" aria-label="Appearance">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+                  </svg>
+                </button>
+              </div>
+              <div class="watch">
+                <div
+                  class="player"
+                  style="--h: 100"
+                  aria-label="Video player (prototype)"
+                >
+                  <div class="proto">Prototype · no video</div>
+                  <div class="big">
+                    <span
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path d="M8 5v14l11-7z" /></svg
+                    ></span>
+                  </div>
+                  <div class="bar">
+                    <div class="track"><i style="width: 34%"></i></div>
+                    <div class="row" style="justify-content: space-between">
+                      <span>4:05 / 12:00</span><span>Quality auto</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="info">
+                  <div class="crumb">
+                    <a href="#">Neon Garden</a> › Season 1 › Episode 3
+                  </div>
+                  <div class="row" style="gap: 8px; flex-wrap: wrap">
+                    <span class="badge">Episode</span
+                    ><span class="muted" style="font-size: 14px"
+                      >S1 E3 · 13 min</span
+                    >
+                  </div>
+                  <h1 tabindex="-1">Night Watering</h1>
+                  <p class="muted clamp" style="margin: 0; line-height: 1.6">
+                    Someone is visiting after dark, and it is not the gardener.
+                  </p>
+                  <div class="pn">
+                    <button class="btn">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M15 5l-7 7 7 7" />
+                      </svg>
+                      Previous</button
+                    ><button class="btn primary">
+                      Next
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <section class="panel" aria-label="Episodes">
+                    <div class="row" style="justify-content: space-between">
+                      <h2 style="font-size: 18px">Episodes</h2>
+                      <select aria-label="Season">
+                        <option selected>Season 1</option>
+                        <option>Season 2</option>
+                      </select>
+                    </div>
+                    <div class="ep-scroll">
+                      <ul class="ep-list">
+                        <li>
+                          <a class="ep" href="#"
+                            ><span class="no">E1</span
+                            ><span
+                              ><b>Pilot</b>
+                              <p>
+                                The garden is found and the first clue appears.
+                              </p></span
+                            ><span
+                              class="muted"
+                              style="font-size: 13px; white-space: nowrap"
+                              >12 min</span
+                            ></a
+                          >
+                        </li>
+                        <li>
+                          <a class="ep" href="#"
+                            ><span class="no">E2</span
+                            ><span
+                              ><b>Roots</b>
+                              <p>A neighbor remembers who planted it.</p></span
+                            ><span
+                              class="muted"
+                              style="font-size: 13px; white-space: nowrap"
+                              >11 min</span
+                            ></a
+                          >
+                        </li>
+                        <li>
+                          <a class="ep" href="#" aria-current="true"
+                            ><span class="no">E3</span
+                            ><span
+                              ><b>Night Watering</b>
+                              <p>
+                                Someone is visiting after dark, and it is not
+                                the gardener.
+                              </p></span
+                            ><span
+                              class="muted"
+                              style="font-size: 13px; white-space: nowrap"
+                              >13 min</span
+                            ></a
+                          >
+                        </li>
+                        <li>
+                          <a class="ep" href="#"
+                            ><span class="no">E4</span
+                            ><span
+                              ><b>Thorns</b>
+                              <p>
+                                A warning is carved into the planter boxes.
+                              </p></span
+                            ><span
+                              class="muted"
+                              style="font-size: 13px; white-space: nowrap"
+                              >12 min</span
+                            ></a
+                          >
+                        </li>
+                      </ul>
+                    </div>
+                  </section>
+                </div>
+              </div>
+            </div>
+            <div class="fr" data-f="watch-ep-ended">
+              <div class="topbar">
+                <a
+                  class="btn ghost"
+                  href="#"
+                  aria-label="Back"
+                  style="padding: 0 12px"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M15 5l-7 7 7 7" /></svg
+                  ><span class="desk-only">Back</span></a
+                ><span class="title">Neon Garden · S1 E3</span
+                ><button class="btn ghost" aria-label="Appearance">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+                  </svg>
+                </button>
+              </div>
+              <div class="watch">
+                <div
+                  class="player"
+                  style="--h: 100"
+                  aria-label="Video player (prototype)"
+                >
+                  <div class="proto">Prototype · no video</div>
+                  <div class="big">
+                    <span
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path d="M8 5v14l11-7z" /></svg
+                    ></span>
+                  </div>
+                  <div class="upnext">
+                    <span style="font-size: 12px; opacity: 0.8"
+                      >Up next · S1 E4</span
+                    ><b>Thorns</b
+                    ><button class="btn primary">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                      Play next
+                    </button>
+                  </div>
+                  <div class="bar">
+                    <div class="track"><i style="width: 100%"></i></div>
+                    <div class="row" style="justify-content: space-between">
+                      <span>12:00 / 12:00</span><span>Quality auto</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="info">
+                  <div class="crumb">
+                    <a href="#">Neon Garden</a> › Season 1 › Episode 3
+                  </div>
+                  <div class="row" style="gap: 8px; flex-wrap: wrap">
+                    <span class="badge">Episode</span
+                    ><span class="muted" style="font-size: 14px"
+                      >S1 E3 · 13 min</span
+                    >
+                  </div>
+                  <h1 tabindex="-1">Night Watering</h1>
+                  <p class="muted clamp" style="margin: 0; line-height: 1.6">
+                    Someone is visiting after dark, and it is not the gardener.
+                  </p>
+                  <div class="pn">
+                    <button class="btn">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M15 5l-7 7 7 7" />
+                      </svg>
+                      Previous</button
+                    ><button class="btn primary">
+                      Next
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <section class="panel" aria-label="Episodes">
+                    <div class="row" style="justify-content: space-between">
+                      <h2 style="font-size: 18px">Episodes</h2>
+                      <select aria-label="Season">
+                        <option selected>Season 1</option>
+                        <option>Season 2</option>
+                      </select>
+                    </div>
+                    <div class="ep-scroll">
+                      <ul class="ep-list">
+                        <li>
+                          <a class="ep" href="#"
+                            ><span class="no">E1</span
+                            ><span
+                              ><b>Pilot</b>
+                              <p>
+                                The garden is found and the first clue appears.
+                              </p></span
+                            ><span
+                              class="muted"
+                              style="font-size: 13px; white-space: nowrap"
+                              >12 min</span
+                            ></a
+                          >
+                        </li>
+                        <li>
+                          <a class="ep" href="#"
+                            ><span class="no">E2</span
+                            ><span
+                              ><b>Roots</b>
+                              <p>A neighbor remembers who planted it.</p></span
+                            ><span
+                              class="muted"
+                              style="font-size: 13px; white-space: nowrap"
+                              >11 min</span
+                            ></a
+                          >
+                        </li>
+                        <li>
+                          <a class="ep" href="#" aria-current="true"
+                            ><span class="no">E3</span
+                            ><span
+                              ><b>Night Watering</b>
+                              <p>
+                                Someone is visiting after dark, and it is not
+                                the gardener.
+                              </p></span
+                            ><span
+                              class="muted"
+                              style="font-size: 13px; white-space: nowrap"
+                              >13 min</span
+                            ></a
+                          >
+                        </li>
+                        <li>
+                          <a class="ep" href="#"
+                            ><span class="no">E4</span
+                            ><span
+                              ><b>Thorns</b>
+                              <p>
+                                A warning is carved into the planter boxes.
+                              </p></span
+                            ><span
+                              class="muted"
+                              style="font-size: 13px; white-space: nowrap"
+                              >12 min</span
+                            ></a
+                          >
+                        </li>
+                      </ul>
+                    </div>
+                  </section>
+                </div>
+              </div>
+            </div>
+            <div class="fr" data-f="watch-ep-last">
+              <div class="topbar">
+                <a
+                  class="btn ghost"
+                  href="#"
+                  aria-label="Back"
+                  style="padding: 0 12px"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M15 5l-7 7 7 7" /></svg
+                  ><span class="desk-only">Back</span></a
+                ><span class="title">Neon Garden · S2 E2</span
+                ><button class="btn ghost" aria-label="Appearance">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+                  </svg>
+                </button>
+              </div>
+              <div class="watch">
+                <div
+                  class="player"
+                  style="--h: 100"
+                  aria-label="Video player (prototype)"
+                >
+                  <div class="proto">Prototype · no video</div>
+                  <div class="big">
+                    <span
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path d="M8 5v14l11-7z" /></svg
+                    ></span>
+                  </div>
+                  <div class="bar">
+                    <div class="track"><i style="width: 34%"></i></div>
+                    <div class="row" style="justify-content: space-between">
+                      <span>4:05 / 12:00</span><span>Quality auto</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="info">
+                  <div class="crumb">
+                    <a href="#">Neon Garden</a> › Season 2 › Episode 2
+                  </div>
+                  <div class="row" style="gap: 8px; flex-wrap: wrap">
+                    <span class="badge">Episode</span
+                    ><span class="muted" style="font-size: 14px"
+                      >S2 E2 · 14 min</span
+                    >
+                  </div>
+                  <h1 tabindex="-1">Overgrown</h1>
+                  <p class="muted clamp" style="margin: 0; line-height: 1.6">
+                    The roof is closed to everyone but one person.
+                  </p>
+                  <div class="pn">
+                    <button class="btn">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M15 5l-7 7 7 7" />
+                      </svg>
+                      Previous</button
+                    ><button class="btn primary" disabled>
+                      Next
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+                  <p class="muted" role="status" style="margin: 0">
+                    You’re all caught up.
+                    <a href="#" style="text-decoration: underline"
+                      >Back to series</a
+                    >
+                  </p>
+                  <section class="panel" aria-label="Episodes">
+                    <div class="row" style="justify-content: space-between">
+                      <h2 style="font-size: 18px">Episodes</h2>
+                      <select aria-label="Season">
+                        <option>Season 1</option>
+                        <option selected>Season 2</option>
+                      </select>
+                    </div>
+                    <div class="ep-scroll">
+                      <ul class="ep-list">
+                        <li>
+                          <a class="ep" href="#"
+                            ><span class="no">E1</span
+                            ><span
+                              ><b>Second Bloom</b>
+                              <p>A new season opens with an old face.</p></span
+                            ><span
+                              class="muted"
+                              style="font-size: 13px; white-space: nowrap"
+                              >12 min</span
+                            ></a
+                          >
+                        </li>
+                        <li>
+                          <a class="ep" href="#" aria-current="true"
+                            ><span class="no">E2</span
+                            ><span
+                              ><b>Overgrown</b>
+                              <p>
+                                The roof is closed to everyone but one person.
+                              </p></span
+                            ><span
+                              class="muted"
+                              style="font-size: 13px; white-space: nowrap"
+                              >14 min</span
+                            ></a
+                          >
+                        </li>
+                      </ul>
+                    </div>
+                  </section>
+                </div>
+              </div>
+            </div>
+            <div class="fr" data-f="watch-ep-first">
+              <div class="topbar">
+                <a
+                  class="btn ghost"
+                  href="#"
+                  aria-label="Back"
+                  style="padding: 0 12px"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M15 5l-7 7 7 7" /></svg
+                  ><span class="desk-only">Back</span></a
+                ><span class="title">Neon Garden · S1 E1</span
+                ><button class="btn ghost" aria-label="Appearance">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+                  </svg>
+                </button>
+              </div>
+              <div class="watch">
+                <div
+                  class="player"
+                  style="--h: 100"
+                  aria-label="Video player (prototype)"
+                >
+                  <div class="proto">Prototype · no video</div>
+                  <div class="big">
+                    <span
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path d="M8 5v14l11-7z" /></svg
+                    ></span>
+                  </div>
+                  <div class="bar">
+                    <div class="track"><i style="width: 34%"></i></div>
+                    <div class="row" style="justify-content: space-between">
+                      <span>4:05 / 12:00</span><span>Quality auto</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="info">
+                  <div class="crumb">
+                    <a href="#">Neon Garden</a> › Season 1 › Episode 1
+                  </div>
+                  <div class="row" style="gap: 8px; flex-wrap: wrap">
+                    <span class="badge">Episode</span
+                    ><span class="muted" style="font-size: 14px"
+                      >S1 E1 · 12 min</span
+                    >
+                  </div>
+                  <h1 tabindex="-1">Pilot</h1>
+                  <p class="muted clamp" style="margin: 0; line-height: 1.6">
+                    The garden is found and the first clue appears.
+                  </p>
+                  <div class="pn">
+                    <button class="btn" disabled>
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M15 5l-7 7 7 7" />
+                      </svg>
+                      Previous</button
+                    ><button class="btn primary">
+                      Next
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <section class="panel" aria-label="Episodes">
+                    <div class="row" style="justify-content: space-between">
+                      <h2 style="font-size: 18px">Episodes</h2>
+                      <select aria-label="Season">
+                        <option selected>Season 1</option>
+                        <option>Season 2</option>
+                      </select>
+                    </div>
+                    <div class="ep-scroll">
+                      <ul class="ep-list">
+                        <li>
+                          <a class="ep" href="#" aria-current="true"
+                            ><span class="no">E1</span
+                            ><span
+                              ><b>Pilot</b>
+                              <p>
+                                The garden is found and the first clue appears.
+                              </p></span
+                            ><span
+                              class="muted"
+                              style="font-size: 13px; white-space: nowrap"
+                              >12 min</span
+                            ></a
+                          >
+                        </li>
+                        <li>
+                          <a class="ep" href="#"
+                            ><span class="no">E2</span
+                            ><span
+                              ><b>Roots</b>
+                              <p>A neighbor remembers who planted it.</p></span
+                            ><span
+                              class="muted"
+                              style="font-size: 13px; white-space: nowrap"
+                              >11 min</span
+                            ></a
+                          >
+                        </li>
+                        <li>
+                          <a class="ep" href="#"
+                            ><span class="no">E3</span
+                            ><span
+                              ><b>Night Watering</b>
+                              <p>
+                                Someone is visiting after dark, and it is not
+                                the gardener.
+                              </p></span
+                            ><span
+                              class="muted"
+                              style="font-size: 13px; white-space: nowrap"
+                              >13 min</span
+                            ></a
+                          >
+                        </li>
+                        <li>
+                          <a class="ep" href="#"
+                            ><span class="no">E4</span
+                            ><span
+                              ><b>Thorns</b>
+                              <p>
+                                A warning is carved into the planter boxes.
+                              </p></span
+                            ><span
+                              class="muted"
+                              style="font-size: 13px; white-space: nowrap"
+                              >12 min</span
+                            ></a
+                          >
+                        </li>
+                      </ul>
+                    </div>
+                  </section>
+                </div>
+              </div>
+            </div>
+            <div class="fr" data-f="watch-ep-episodes-error">
+              <div class="topbar">
+                <a
+                  class="btn ghost"
+                  href="#"
+                  aria-label="Back"
+                  style="padding: 0 12px"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M15 5l-7 7 7 7" /></svg
+                  ><span class="desk-only">Back</span></a
+                ><span class="title">Neon Garden · S1 E3</span
+                ><button class="btn ghost" aria-label="Appearance">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+                  </svg>
+                </button>
+              </div>
+              <div class="watch">
+                <div
+                  class="player"
+                  style="--h: 100"
+                  aria-label="Video player (prototype)"
+                >
+                  <div class="proto">Prototype · no video</div>
+                  <div class="big">
+                    <span
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path d="M8 5v14l11-7z" /></svg
+                    ></span>
+                  </div>
+                  <div class="bar">
+                    <div class="track"><i style="width: 34%"></i></div>
+                    <div class="row" style="justify-content: space-between">
+                      <span>4:05 / 12:00</span><span>Quality auto</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="info">
+                  <div class="crumb">
+                    <a href="#">Neon Garden</a> › Season 1 › Episode 3
+                  </div>
+                  <div class="row" style="gap: 8px; flex-wrap: wrap">
+                    <span class="badge">Episode</span
+                    ><span class="muted" style="font-size: 14px"
+                      >S1 E3 · 13 min</span
+                    >
+                  </div>
+                  <h1 tabindex="-1">Night Watering</h1>
+                  <p class="muted clamp" style="margin: 0; line-height: 1.6">
+                    Someone is visiting after dark, and it is not the gardener.
+                  </p>
+                  <div class="pn">
+                    <button class="btn">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M15 5l-7 7 7 7" />
+                      </svg>
+                      Previous</button
+                    ><button class="btn primary">
+                      Next
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <div class="panel" role="status">
+                    <b>Episodes</b
+                    ><span class="muted"
+                      >Episodes are temporarily unavailable.</span
+                    ><button class="btn">Retry episodes</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="fr" data-f="watch-ep-offline">
+              <div class="topbar">
+                <a
+                  class="btn ghost"
+                  href="#"
+                  aria-label="Back"
+                  style="padding: 0 12px"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M15 5l-7 7 7 7" /></svg
+                  ><span class="desk-only">Back</span></a
+                ><span class="title">Neon Garden · S1 E3</span
+                ><button class="btn ghost" aria-label="Appearance">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+                  </svg>
+                </button>
+              </div>
+              <div class="watch">
+                <div
+                  class="player"
+                  style="--h: 100"
+                  aria-label="Video player (prototype)"
+                >
+                  <div class="proto">Prototype · no video</div>
+                  <div class="big">
+                    <span
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path d="M8 5v14l11-7z" /></svg
+                    ></span>
+                  </div>
+                  <div class="bar">
+                    <div class="track"><i style="width: 34%"></i></div>
+                    <div class="row" style="justify-content: space-between">
+                      <span>4:05 / 12:00</span><span>Quality auto</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="info">
+                  <div
+                    class="notice"
+                    role="status"
+                    style="text-align: left; justify-items: start"
+                  >
+                    <b>You are offline.</b
+                    ><span class="muted">Reconnect to play this video.</span>
+                  </div>
+                  <div class="crumb">
+                    <a href="#">Neon Garden</a> › Season 1 › Episode 3
+                  </div>
+                  <div class="row" style="gap: 8px; flex-wrap: wrap">
+                    <span class="badge">Episode</span
+                    ><span class="muted" style="font-size: 14px"
+                      >S1 E3 · 13 min</span
+                    >
+                  </div>
+                  <h1 tabindex="-1">Night Watering</h1>
+                  <p class="muted clamp" style="margin: 0; line-height: 1.6">
+                    Someone is visiting after dark, and it is not the gardener.
+                  </p>
+                  <div class="pn">
+                    <button class="btn">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M15 5l-7 7 7 7" />
+                      </svg>
+                      Previous</button
+                    ><button class="btn primary">
+                      Next
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <section class="panel" aria-label="Episodes">
+                    <div class="row" style="justify-content: space-between">
+                      <h2 style="font-size: 18px">Episodes</h2>
+                      <select aria-label="Season">
+                        <option selected>Season 1</option>
+                        <option>Season 2</option>
+                      </select>
+                    </div>
+                    <div class="ep-scroll">
+                      <ul class="ep-list">
+                        <li>
+                          <a class="ep" href="#"
+                            ><span class="no">E1</span
+                            ><span
+                              ><b>Pilot</b>
+                              <p>
+                                The garden is found and the first clue appears.
+                              </p></span
+                            ><span
+                              class="muted"
+                              style="font-size: 13px; white-space: nowrap"
+                              >12 min</span
+                            ></a
+                          >
+                        </li>
+                        <li>
+                          <a class="ep" href="#"
+                            ><span class="no">E2</span
+                            ><span
+                              ><b>Roots</b>
+                              <p>A neighbor remembers who planted it.</p></span
+                            ><span
+                              class="muted"
+                              style="font-size: 13px; white-space: nowrap"
+                              >11 min</span
+                            ></a
+                          >
+                        </li>
+                        <li>
+                          <a class="ep" href="#" aria-current="true"
+                            ><span class="no">E3</span
+                            ><span
+                              ><b>Night Watering</b>
+                              <p>
+                                Someone is visiting after dark, and it is not
+                                the gardener.
+                              </p></span
+                            ><span
+                              class="muted"
+                              style="font-size: 13px; white-space: nowrap"
+                              >13 min</span
+                            ></a
+                          >
+                        </li>
+                        <li>
+                          <a class="ep" href="#"
+                            ><span class="no">E4</span
+                            ><span
+                              ><b>Thorns</b>
+                              <p>
+                                A warning is carved into the planter boxes.
+                              </p></span
+                            ><span
+                              class="muted"
+                              style="font-size: 13px; white-space: nowrap"
+                              >12 min</span
+                            ></a
+                          >
+                        </li>
+                      </ul>
+                    </div>
+                  </section>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- static:end -->
     <script>
       const I = {
         play: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>',
