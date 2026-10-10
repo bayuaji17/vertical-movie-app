@@ -1,6 +1,6 @@
 # Modul: Alur detail dan tonton publik
 
-> Status: **Backlog** · 10 Oktober 2026 · Pengguna menyetujui URL bersih tanpa `?type=` dan navigasi `/videos/:slug` → `/watch/:slug`, serta meminta UI/UX lebih baik di desktop dan mobile. Plan: [implementation-plan](../plans/watch-flow/implementation-plan.md), context: [repository-context](../plans/watch-flow/repository-context.md). Base SHA `f1b1d184fe6d410d976495c65bbeef75ad85cc83`.
+> Status: **WFLOW-001–002 Done**; WFLOW-003–009 Backlog · 10 Oktober 2026 · Pengguna menyetujui URL bersih tanpa `?type=` dan navigasi `/videos/:slug` → `/watch/:slug`, serta meminta UI/UX lebih baik di desktop dan mobile. Plan: [implementation-plan](../plans/watch-flow/implementation-plan.md), context: [repository-context](../plans/watch-flow/repository-context.md). Base SHA `f1b1d184fe6d410d976495c65bbeef75ad85cc83`.
 
 ## Tujuan modul
 
@@ -24,11 +24,11 @@ Sebagai pengunjung, saya ingin mencari judul dari halaman Browse tanpa menekan t
 
 ## Task: WFLOW-001 — Setujui desain dan keputusan D1–D7
 
-- Status: Review
+- Status: Done
 - Owner: Pengguna (keputusan) / agent (spesifikasi)
 - Prioritas: 1
 - Referensi: WFLOW-US-02/03; plan bagian Keputusan dan usulan
-- Diperbarui: 2026-10-10
+- Diperbarui: 2026-10-11
 - Dependensi: tidak ada
 - Ukuran: sedang
 
@@ -39,8 +39,8 @@ Tulis [watch-flow](../design/watch-flow.md) (layout, state, breakpoint, copy) da
 ### Acceptance criteria
 
 - [x] Spesifikasi dan preview ditulis, termasuk state Browse + search (debounce 300 ms tanpa submit).
-- [ ] D1–D7 dicatat beserta pemberi persetujuan dan tanggal.
-- [ ] Preview 390 dan 1440 px Light/Dark untuk Browse, detail dan watch disetujui pengguna.
+- [x] D1–D7 dicatat beserta pemberi persetujuan dan tanggal (pengguna, 11 Oktober 2026).
+- [x] Preview Browse, detail dan watch disetujui pengguna (11 Oktober 2026). Persetujuan atas preview HTML, bukan PNG 390/1440 (PNG tidak dibuat).
 
 ### Validasi
 
@@ -48,18 +48,18 @@ Tulis [watch-flow](../design/watch-flow.md) (layout, state, breakpoint, copy) da
 
 ### Hasil dan bukti
 
-10 Oktober 2026: `docs/design/watch-flow.md` dan `docs/design/watch-flow-preview.html` dibuat. Preview memakai token `apps/web/src/styles.css`, container query per viewport dan debounce 300 ms nyata terhadap fixture. Render smoke dengan stub DOM: 138 kombinasi viewport/tema/layar/state tanpa error; tampilan visual belum dilihat di browser oleh agent dan PNG belum dibuat (tidak ada browser di lingkungan). Menunggu persetujuan pengguna, terutama D6 (Series pada Browse/search) yang mengubah keputusan 8 Oktober 2026.
+10 Oktober 2026: `docs/design/watch-flow.md` dan `docs/design/watch-flow-preview.html` dibuat. Preview memakai token `apps/web/src/styles.css`, container query per viewport dan debounce 300 ms nyata terhadap fixture. Render smoke dengan stub DOM: 138 kombinasi viewport/tema/layar/state tanpa error; tampilan visual belum dilihat di browser oleh agent dan PNG belum dibuat (tidak ada browser di lingkungan). Pengguna menyetujui 11 Oktober 2026 dengan "oke setuju" setelah melihat preview di panel aplikasi (versi statis tanpa skrip, commit `2a016c4`); D1–D7 diterima sebagaimana direkomendasikan, termasuk D6 (Series pada Browse/search, mengubah keputusan 8 Oktober 2026). Demo debounce langsung hanya diverifikasi pengguna bila dibuka di browser; tidak ada catatan hasilnya.
 
 ### Commit task
 
 - Pesan: `docs(web): add watch flow design (WFLOW-001)`
-- SHA: belum dibuat
-- Hook/checks: belum dijalankan
-- Ledger: dicatat pada update dokumentasi berikutnya
+- SHA: `b844ae0` (desain) dan `2a016c4` (fallback tanpa skrip), 10 Oktober 2026; catatan persetujuan pada commit berikutnya
+- Hook/checks: Husky dan commitlint lulus pada kedua commit
+- Ledger: SHA dicatat pada commit persetujuan ini
 
 ### Blocker atau tindak lanjut
 
-Menunggu persetujuan pengguna.
+Tidak ada.
 
 ## Task: WFLOW-002 — URL bersih untuk detail dan watch
 
@@ -347,7 +347,7 @@ Tidak ada.
 
 ## Task: WFLOW-009 — Search Browse dengan debounce
 
-- Status: Backlog
+- Status: Ready
 - Owner: agent
 - Prioritas: 9
 - Referensi: WFLOW-US-04; [desain](../design/watch-flow.md#browse-dan-search); API `GET /catalog` (`search`, `kind`, cursor)
@@ -384,4 +384,4 @@ Belum ada.
 
 ### Blocker atau tindak lanjut
 
-D6 (apakah Series ikut pada Browse/search) harus diputuskan sebelum implementasi.
+D6 disetujui 11 Oktober 2026: Browse berpindah ke `GET /catalog` dan filter bertambah "Series"; implementasi harus memperbarui keputusan homepage 8 Oktober 2026 pada PRD/dokumen terkait.

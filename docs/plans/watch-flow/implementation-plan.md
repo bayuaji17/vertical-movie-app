@@ -2,7 +2,7 @@
 
 ## Plan metadata
 
-- Status: **proposed** (10 Oktober 2026). Arah URL bersih dan navigasi `/videos/:slug` → `/watch/:slug` disetujui pengguna 10 Oktober 2026; usulan UI/UX di bawah belum disetujui sampai WFLOW-001.
+- Status: **approved** (11 Oktober 2026). Pengguna menyetujui URL bersih/navigasi (10 Oktober 2026) dan desain beserta D1–D7 ("oke setuju", 11 Oktober 2026); WFLOW-001–002 selesai lokal, WFLOW-003–009 menunggu implementasi.
 - Date: 10 Oktober 2026; decision owner: pengguna.
 - Repository: `bayuaji17/vertical-movie-app`; base ref: `main`; base SHA: `f1b1d184fe6d410d976495c65bbeef75ad85cc83`.
 - Context: [repository-context.md](repository-context.md), disimpan sebelum plan ini.
@@ -20,7 +20,7 @@ Disetujui pengguna (10 Oktober 2026):
 - Hapus `?type=...` dari `/videos/:slug` dan `/watch/:slug`; navigasi ke detail memakai `/videos/:slug` dan ke tonton memakai `/watch/:slug`.
 - Perbaiki UI/UX desktop dan mobile, terutama video tunggal dan Series dengan episode.
 
-Usulan (perlu persetujuan di WFLOW-001, ditandai **D**):
+Keputusan desain (disetujui pengguna 11 Oktober 2026, ditandai **D**):
 
 - **D1** Konteks "kembali" tidak lagi di URL. Tombol Back memakai riwayat router bila entri sebelumnya berada di aplikasi, jika tidak jatuh ke `/` (filter homepage `?type=` tetap ada di `/`, dan dihilangkan dari URL bila `all`).
 - **D2** `/titles/$kind/$slug` dialihkan ke `/videos/:slug` dan Film/Standalone memakai satu komponen detail; Series tetap di `/series/:slug`.
@@ -122,12 +122,13 @@ Perubahan frontend saja; rollback dengan revert commit. Redirect legacy dipertah
 
 ## Open decisions
 
-1. D1–D7 di atas (pengguna memilih saat WFLOW-001).
+1. D1–D7 disetujui 11 Oktober 2026; tidak ada keputusan terbuka untuk desain.
 2. Auto-advance episode berikutnya setelah selesai: ditunda; perlu keputusan produk karena PRD melarang autoplay.
 3. Series di grid homepage: di luar plan ini.
 
 ## Execution history
 
 - 10 Oktober 2026: context dan plan ditulis; branch `feat/watch-flow-redesign` dibuat dari `main` (`f1b1d18`). Belum ada implementasi.
+- 11 Oktober 2026: pengguna menyetujui preview dan D1–D7 ("oke setuju"); WFLOW-001 Done, WFLOW-009 Ready. D6 mengubah keputusan homepage 8 Oktober 2026 (Series ikut di Browse/search).
 - 10 Oktober 2026: WFLOW-002 selesai lokal (`b401c47`). WFLOW-001: [desain](../../design/watch-flow.md) dan [preview HTML](../../design/watch-flow-preview.html) ditulis, termasuk input search debounce; menunggu persetujuan D1–D7. WFLOW-009 ditambahkan untuk search.
 - 10 Oktober 2026: pengguna memutuskan commit GEN-007 (`8ce7d1e`, `7af059a`) tetap berada di branch ini; branch dibuat dari `f1b1d18` sehingga belum memuat merge PR #27 di `main`. Pekerjaan watch-flow berikutnya mengikuti plan ini.

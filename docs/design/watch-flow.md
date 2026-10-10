@@ -1,6 +1,6 @@
 # Alur detail dan tonton publik — WFLOW-001
 
-> Status: **proposed — menunggu persetujuan pengguna** · 10 Oktober 2026 · branch `feat/watch-flow-redesign`. Persetujuan dicatat pada [WFLOW-001](../tasks/watch-flow.md#task-wflow-001--setujui-desain-dan-keputusan-d1d7). Prototype bukan bukti API, HLS, atau perilaku runtime.
+> Status: **disetujui pengguna** 11 Oktober 2026 ("oke setuju", atas preview dan keputusan D1–D7 sebagaimana direkomendasikan) · disusun 10 Oktober 2026 · branch `feat/watch-flow-redesign`. Persetujuan dicatat pada [WFLOW-001](../tasks/watch-flow.md#task-wflow-001--setujui-desain-dan-keputusan-d1d7). Prototype bukan bukti API, HLS, atau perilaku runtime.
 
 ## Artefak review
 
@@ -71,7 +71,7 @@ Rasio 9:16 tidak pernah di-crop atau di-stretch: lebar player diturunkan dari ti
 - `prefers-reduced-motion` memperlambat spinner dan tidak memakai animasi lain; skeleton hanya pulse opacity.
 - Light/Dark/System memakai token semantik yang sama dengan [design system](design-system.md); tanpa warna hard-coded pada runtime.
 
-## Keputusan yang diminta
+## Keputusan (disetujui pengguna 11 Oktober 2026)
 
 | ID  | Keputusan                                                                                                                                         | Rekomendasi                                                                                                                                     |
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -85,4 +85,4 @@ Rasio 9:16 tidak pernah di-crop atau di-stretch: lebar player diturunkan dari ti
 
 ## Evidence dan batas
 
-Prototype diperiksa dengan render smoke terhadap seluruh kombinasi viewport/tema/layar/state (138 kombinasi tanpa error) menggunakan stub DOM; tampilan visual belum dilihat di browser oleh agent dan PNG belum dibuat. Preview tidak membuktikan API, cache, SSR, navigasi riwayat, player, aksesibilitas atau performa.
+Pengguna menyetujui preview dan D1–D7 dengan satu pernyataan ("oke setuju") tanpa perubahan per butir; D6 mengubah keputusan 8 Oktober 2026 (homepage khusus Film/Standalone) menjadi Browse dan search yang menyertakan Series. Prototype diperiksa dengan render smoke terhadap seluruh kombinasi viewport/tema/layar/state (138 kombinasi tanpa error) menggunakan stub DOM; tampilan visual belum dilihat di browser oleh agent dan PNG belum dibuat. Preview tidak membuktikan API, cache, SSR, navigasi riwayat, player, aksesibilitas atau performa.
