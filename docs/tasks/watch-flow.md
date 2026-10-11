@@ -148,6 +148,8 @@ Diimplementasikan 11 Oktober 2026 pada `feat/watch-flow-redesign`.
 
 Belum terbukti: tata letak 320/390/768/1024/1440 px, "Read more", CTA sticky, state offline/stale/error di browser; tampilan genre dengan data nyata (film dev tidak punya genre; hanya diuji unit); build produksi lulus (`bun run build`, 2/2 task).
 
+Bukti browser lokal 11 Oktober 2026 (WFLOW-008; Chromium headless 1187, API fixture, dev dan build): lolos tanpa overflow 320–1440 px; di 390 px CTA "Watch now" lebar penuh dan berada di dalam viewport, "Read more" muncul dan memperluas (`aria-expanded`); di 1440 px tidak ada "Read more", kolom poster 360 px, genre tampil. Temuan nyata dari screenshot: baris grid melar oleh poster 640 px (celah vertikal besar antara judul, sinopsis dan CTA di ≥1024 px) → diperbaiki dengan baris ke-4 fleksibel (`lg:grid-rows-[auto_auto_auto_1fr]`, poster `row-span-4`), terverifikasi: judul→sinopsis 50 px, sinopsis→CTA 20 px. Offline/stale/error belum dicoba di browser.
+
 ### Commit task
 
 - Pesan: `feat(web): redesign film and standalone detail (WFLOW-003)`
@@ -195,6 +197,8 @@ Diimplementasikan 11 Oktober 2026 pada `feat/watch-flow-redesign`.
 
 Belum terbukti: render Series nyata (database dev tidak memiliki Series; belum ada fixture), tata letak 320–1440 px, pemilih season, Load more/retry dengan data nyata, dan CTA di browser. Satu-satunya pemeriksaan halaman adalah status 404.
 
+Bukti browser lokal 11 Oktober 2026 (WFLOW-008; Chromium headless 1187, API fixture, dev dan build): "Play S1 E1" mengarah ke `/watch/neon-garden-s1e1`, ringkasan "2 seasons · 5 episodes", season pertama menampilkan 3 episode, Season 2 lewat keyboard (Space) menampilkan 2 episode dan `aria-pressed`, baris episode ≥44 px (92 px). Load more episodes, retry dan >100 episode belum dicoba.
+
 ### Commit task
 
 - Pesan: `feat(web): redesign series detail with season selector (WFLOW-004)`
@@ -241,6 +245,8 @@ Diimplementasikan 11 Oktober 2026 pada `feat/watch-flow-redesign`.
 - Command aktual: `bun test apps/web/test/public-*.test.ts* apps/web/test/content-client.test.ts` → 40 pass/0 fail; `bun run check-types` 3/3 sukses; `bun run lint` sukses; `bun run build` sukses. Dev server lokal: `/watch/test-film-1` → 200 dengan top bar `h-14`, `aria-label="Back to details"`, kelas lebar `svh`, tanpa header 80 px, `h1` dan tombol Details; `/watch/no-such-zz` → 404; `/watch/test-film-1?type=all` → 307 ke URL bersih.
 
 Belum terbukti: ukuran dan visibilitas kontrol pada 390×844/1440×900, tanpa overflow 320–1920 px, fokus `h1`, dan alur playback (renewal/retry/offline) di browser. Browser worker publik yang ada (`public-film-catalog-browser-worker.mjs` dan lain-lain) memakai mock API daftar `/videos` dan teks lama, sudah usang sejak WFLOW-009 dan WFLOW-005, dan tidak dijalankan; penulisan ulang menjadi bagian WFLOW-008.
+
+Bukti browser lokal 11 Oktober 2026 (WFLOW-008; Chromium headless 1187, API fixture, dev dan build): top bar 56 px, player 9:16 persis (rasio 0,5625; 390×693 dan 448×796), kontrol terlihat tanpa scroll (bawah 749/844 dan 876/900), judul top bar "Neon Garden · S1 E2", info di bawah player pada 390 px dan di kanan pada 1440 px. Temuan: pada error playback di desktop, teks "Playback unavailable" dan tombol Retry berada di bawah lipatan 900 px (hanya pada state error; belum diubah). Playback HLS nyata tidak diuji (fixture menjawab 503).
 
 ### Commit task
 
@@ -291,6 +297,8 @@ Diimplementasikan 11 Oktober 2026 pada `feat/watch-flow-redesign` (commit kode `
 
 Belum terbukti: halaman watch Episode nyata (database dev tidak punya Series/episode), kartu Up next dan event `ended`, Previous/Next lintas season, scroll ke baris aktif, fokus `h1`, pemuatan halaman lanjutan untuk Series >100 episode, dan semua tampilan di browser.
 
+Bukti browser lokal 11 Oktober 2026 (WFLOW-008; Chromium headless 1187, API fixture, dev dan build): Next/Previous berjalan sebagai navigasi SPA (penanda `window` tetap hidup), fokus pindah ke `h1` judul episode baru, Next melintasi season dan select season di panel mengikuti (S2), Previous nonaktif di episode pertama, episode terakhir menampilkan "all caught up" dan "Back to series", kartu Up next muncul setelah `ended` dan berada di dalam kotak player di atas kontrol. Temuan nyata: (1) Router menimpa `aria-current` baris episode menjadi `"page"`, sehingga pencarian `[aria-current="true"]` untuk scroll ke baris aktif tidak pernah cocok dan test render server (router di `/`) tidak menangkapnya → selector dan test diganti ke `"page"`; (2) kartu Up next diposisikan terhadap pembungkus yang ikut memuat pesan error sehingga menimpa bar kontrol → kini memakai kotak 9:16 yang sama dengan player, dengan pemeriksaan geometri di worker. Scroll ke baris aktif pada daftar panjang belum dicoba (fixture hanya 3 episode).
+
 ### Commit task
 
 - Pesan: `feat(web): add episode panel and navigation to watch (WFLOW-006)`
@@ -338,6 +346,8 @@ Dikerjakan 11 Oktober 2026 pada `feat/watch-flow-redesign`.
 
 Belum terbukti: tindakan keyboard (urutan tab, Escape/Clear, panah pada ToggleGroup), fokus terlihat dan tidak tertutup CTA sticky, kontras Light/Dark di layar, reduced-motion di browser, perilaku hook `useBrowseSearch`/`useEpisodeNav` (tanpa DOM interaktif) dan alur klien (navigasi, Up next, scroll ke baris aktif). Pembuktian tersebut berada pada WFLOW-008.
 
+Bukti browser lokal 11 Oktober 2026 (WFLOW-008; Chromium headless 1187, API fixture, dev dan build): tidak ada error halaman pada 320–1440 px; Tab pertama adalah skip link, urutan Tab header → Back → Read more → Play → Season; kontrol terfokus mempunyai ring (shadow `ring-3` 30% opasitas), CTA sticky tidak pernah menutup kontrol terfokus; reduced-motion mematikan pulse skeleton; kontras teks ≥4,5:1 (Light: isi 19,8, muted 4,74, badge 16,12; Dark: 14,97, 7,37, 11,55). Temuan: ring fokus bawaan komponen Button hanya 30% opasitas sehingga tampak pucat; kontras indikator fokus belum diukur dan menjadi tindak lanjut tingkat design system. Pembaca layar nyata tidak diuji.
+
 ### Commit task
 
 - Pesan: `test(web): cover watch flow behavior (WFLOW-007)`
@@ -351,23 +361,23 @@ Tidak ada.
 
 ## Task: WFLOW-008 — Bukti browser, dokumentasi dan penutupan
 
-- Status: Backlog
+- Status: Review (bukti browser lokal terhadap API fixture; playback nyata, offline, Safari/Firefox dan perangkat fisik belum)
 - Owner: agent
 - Prioritas: 8
 - Referensi: plan bagian Test and verification strategy
-- Diperbarui: 2026-10-10
+- Diperbarui: 2026-10-11
 - Dependensi: WFLOW-007, WFLOW-009
 - Ukuran: kecil
 
 ### Ruang lingkup
 
-Bukti browser dev/build, penulisan ulang browser worker publik (`public-film-catalog-browser-worker.mjs`, `public-content-browser-worker.mjs`, `public-catalog-browser-worker.mjs`) agar sesuai Browse `/catalog`, top bar watch dan tautan baru, perbarui `docs/README.md`, PRD dan arsitektur (rute aktif), catat hasil dan batas.
+Bukti browser dev/build memakai worker baru `public-watch-flow-browser-worker.mjs` dan API fixture `public-watch-flow-fixture-api.ts` (menggantikan tiga worker publik lama yang ditandai STALE), perbarui `docs/README.md`, PRD dan arsitektur (rute aktif), catat hasil dan batas.
 
 ### Acceptance criteria
 
-- [ ] Matriks 320/390/768/1024/1440 px, Light/Dark/System, keyboard dan reduced-motion tercatat dengan hasil aktual.
-- [ ] `bun run check-types`, `lint`, `build`, `docs:check`, Prettier dan `git diff --check` lulus dan dicatat.
-- [ ] Batas yang tidak terbukti (perangkat fisik, Safari, production) dicatat.
+- [x] Matriks 320/390/768/1024/1440 px (overflow dan error halaman pada tujuh halaman), Light/Dark lewat `prefers-color-scheme` (mode System; tombol tema eksplisit tidak diklik), keyboard dan reduced-motion tercatat dengan hasil aktual (lihat bawah).
+- [x] `bun run check-types`, `lint`, `build`, `docs:check`, Prettier dan `git diff --check` lulus dan dicatat.
+- [x] Batas yang tidak terbukti (playback nyata, offline, perangkat fisik, Safari/Firefox, pembaca layar, production) dicatat.
 
 ### Validasi
 
@@ -375,13 +385,26 @@ Lihat acceptance criteria.
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 11 Oktober 2026 pada `feat/watch-flow-redesign`.
+
+**Cara menjalankan (lokal, tanpa menyentuh database):** API fixture `FIXTURE_PORT=3101 REAL_API=http://localhost:3001 bun apps/web/test/public-watch-flow-fixture-api.ts` (menyajikan katalog, Series dengan 2 season, episode, Film; meneruskan jalur lain ke API dev; playback sengaja 503), web dev atau build di depannya (`PORT=3100 API_INTERNAL_URL=http://localhost:3101 bun run --cwd apps/web dev` atau `PORT=3200 API_INTERNAL_URL=http://localhost:3101 bun apps/web/.output/server/index.mjs`), lalu `bun apps/web/test/public-watch-flow-browser-worker.mjs <base> <URL modul playwright> "<path chromium atau kosong>" <folder screenshot>`. Playwright 1.55.0 dan Chromium 1187 dipasang di folder sementara di luar repo; di WSL ini library `libnspr4`/`libnss3` diambil dari paket Debian tanpa sudo dan dimuat lewat `LD_LIBRARY_PATH`.
+
+**Hasil:**
+
+- Dev server (Vite, 11 Oktober 2026): 70/74 lolos; empat kegagalan: dua adalah bug skrip (pencocokan nama "Details" juga menangkap "Back to details"; pemeriksaan CTA sticky ikut menghitung kontainer saat fokus keluar dari halaman) dan dua adalah bug kode nyata (`aria-current` episode menjadi `"page"`; lihat WFLOW-006) yang diperbaiki lalu diperiksa ulang (6/6 pada pemeriksaan terarah, termasuk celah vertikal detail desktop).
+- Build produksi (`bun run build`, server Nitro, port 3200): **78/78 lolos** setelah perbaikan, kurang dari 2 menit. Cakupan: 7 halaman × 5 lebar tanpa overflow/error halaman; Browse (20 kartu + Load more → 29), debounce/IME/Clear/Escape/kosong/riwayat/Back; URL lama; detail Film dan Series; halaman watch Episode dan Film; keyboard, fokus, reduced-motion dan kontras.
+- Dua temuan visual tambahan dari screenshot yang diperbaiki di sini: kartu Up next menimpa bar kontrol (kini memakai kotak 9:16 player; pemeriksaan geometri baru) dan celah vertikal detail desktop.
+- Screenshot terpilih (390 dan 1440 px, Light/Dark untuk Browse, detail Film, detail Series dan watch Episode, plus pencarian dan Up next) berada di `docs/design/watch-flow-implemented-*.png`; poster tampil sebagai fallback karena fixture mengirim SVG, bukan WebP seperti API asli.
+- Worker lama (`public-film-catalog-browser-worker.mjs`, `public-content-browser-worker.mjs`, `public-catalog-browser-worker.mjs`) diberi komentar STALE di baris pertama dan tidak dijalankan; cakupannya yang belum dipindahkan: offline/retry cover, antrean poster bertanda tangan, renewal playback HLS, dan SSR tanpa kebocoran.
+- Command akhir: `bun test apps/web/test/public-*.test.ts* apps/web/test/content-client.test.ts` → 61 pass/0 fail; `bun run check-types` 3/3 sukses; `bun run lint` sukses; `bun run build` sukses; `bun run docs:check`, Prettier dan `git diff --check` lulus (lihat commit).
+
+**Batas yang tidak terbukti:** playback HLS nyata dan renewal (fixture 503), data dari API/DB asli (fixture), mode offline dan error server pada Browse/detail/watch, scroll restoration saat Back dan scroll ke baris aktif pada daftar episode panjang, Series >100 episode, tombol tema eksplisit dan mode System di perangkat, lebar 1920 px, Firefox/Safari, perangkat fisik, pembaca layar, kontras indikator fokus. **Tindak lanjut:** (1) ring fokus komponen Button hanya 30% opasitas; (2) pada error playback di desktop, Retry berada di bawah lipatan; (3) hapus `nextEpisodeOptions`/klien `next` yang tidak dipakai web; (4) pindahkan cakupan worker lama yang masih relevan; (5) hapus kode HomePage lama yang tidak dirujuk route mana pun.
 
 ### Commit task
 
 - Pesan: `docs(web): close watch flow (WFLOW-008)`
 - SHA: belum dibuat
-- Hook/checks: belum dijalankan
+- Hook/checks: dijalankan saat commit
 - Ledger: dicatat pada update dokumentasi berikutnya
 
 ### Blocker atau tindak lanjut
@@ -425,6 +448,8 @@ Diimplementasikan 11 Oktober 2026 pada `feat/watch-flow-redesign`.
 - Test: `bun test apps/web/test/public-*.test.ts*` → 26 pass/0 fail (baru: `public-browse-loader.test.ts`, kasus URL/filter pada `public-navigation.test.ts`); `bun run check-types` 3/3 sukses; `bun run lint` sukses; `bun run build` sukses. Dev server lokal (API 3001, web 3000, PostgreSQL/MinIO): `/?type=all` → 307 ke `/`; `/?q=%20a%20` → 307 ke `/?q=a`; `/`, `/?type=series`, `/?q=a`, `/?type=film&q=test`, `/?q=zzzzqqq` → 200 dengan input terisi dan ringkasan ("1 result for “a”", "0 results for “zzzzqqq”", "No videos in this category"); tautan kartu `/videos/test-film-1`; HTML tanpa signed URL; poster `/api/catalog/movie/…/poster` → 200. Dev DB hanya berisi satu Film.
 
 Belum terbukti: debounce 300 ms dan satu request per rangkaian ketikan di browser, IME, Clear/Escape/fokus, spinner/skeleton, Back/Forward menyinkronkan draft, offline, dan tampilan 390/1440 px (tidak ada browser; `useBrowseSearch` tidak diuji unit karena tanpa DOM, hanya util debounce dan loader). Seri/Standalone/jumlah halaman >1 belum diuji dengan data dev nyata.
+
+Bukti browser lokal 11 Oktober 2026 (WFLOW-008; Chromium headless 1187, API fixture, dev dan build): mengetik "garden" 6 karakter dengan jeda 60 ms mengirim tepat satu permintaan `/api/catalog?...search=garden` dan tidak ada permintaan perantara; riwayat tidak bertambah per ketikan; URL menjadi `?q=garden`; ringkasan "1 result for “garden”"; Clear mengosongkan `q` dan fokus tetap di input; Escape mengosongkan; hasil kosong menampilkan "No results for “zzzzqq”" + Clear search; komposisi IME (CDP `Input.imeSetComposition`) tidak mengirim permintaan sampai teks dikomit; filter mempertahankan `q` (`?type=series&q=night`); Back memulihkan filter dan isi input; Back to browse dari detail yang dibuka di Browse memulihkan `?type=film`, dari kunjungan langsung ke `/`; Load more menambah sisa judul hingga 29. Search saat offline dan error server belum dicoba.
 
 ### Commit task
 

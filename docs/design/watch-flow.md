@@ -85,4 +85,6 @@ Rasio 9:16 tidak pernah di-crop atau di-stretch: lebar player diturunkan dari ti
 
 ## Evidence dan batas
 
+Hasil implementasi (screenshot Chromium terhadap API fixture, 11 Oktober 2026; 390 dan 1440 px, Light/Dark untuk Browse, detail Film, detail Series dan watch Episode, plus pencarian dan Up next) berada di `watch-flow-implemented-*.png` pada folder ini; ringkasan bukti dan batas ada pada [WFLOW-008](../tasks/watch-flow.md#task-wflow-008--bukti-browser-dokumentasi-dan-penutupan). Poster tampil sebagai fallback karena fixture mengirim SVG.
+
 Pengguna menyetujui preview dan D1–D7 dengan satu pernyataan ("oke setuju") tanpa perubahan per butir; D6 mengubah keputusan 8 Oktober 2026 (homepage khusus Film/Standalone) menjadi Browse dan search yang menyertakan Series. Prototype diperiksa dengan render smoke terhadap seluruh kombinasi viewport/tema/layar/state (138 kombinasi tanpa error) menggunakan stub DOM; tampilan visual belum dilihat di browser oleh agent dan PNG belum dibuat. Preview tidak membuktikan API, cache, SSR, navigasi riwayat, player, aksesibilitas atau performa.

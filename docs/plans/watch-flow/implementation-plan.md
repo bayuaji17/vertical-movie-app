@@ -129,6 +129,7 @@ Perubahan frontend saja; rollback dengan revert commit. Redirect legacy dipertah
 ## Execution history
 
 - 10 Oktober 2026: context dan plan ditulis; branch `feat/watch-flow-redesign` dibuat dari `main` (`f1b1d18`). Belum ada implementasi.
+- 11 Oktober 2026: WFLOW-008: bukti browser lokal (Chromium, API fixture): dev 70/74 lalu perbaikan, build 78/78; empat bug ditemukan dan diperbaiki (aria-current "page", kartu Up next, celah vertikal detail, dua bug skrip); worker baru `public-watch-flow-browser-worker.mjs`. Plan dianggap implemented lokal; status modul Review menunggu uji playback nyata/offline/perangkat fisik.
 - 11 Oktober 2026: WFLOW-007 dikerjakan (Review): test render server untuk Browse, detail, Series dan watch; perbaikan reduced-motion skeleton, cover dekoratif dan scroll-padding CTA sticky.
 - 11 Oktober 2026: WFLOW-006 diimplementasikan lokal (Review): panel episode, Previous/Next dari daftar episode, kartu Up next; `NextEpisode`/`next` tidak lagi dipakai halaman watch.
 - 11 Oktober 2026: WFLOW-005 diimplementasikan lokal (Review): `WatchShell` top bar 56 px, lebar player dari tinggi viewport, rail info; browser worker publik usang dan ditulis ulang di WFLOW-008.
