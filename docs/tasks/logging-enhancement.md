@@ -96,7 +96,7 @@ Tidak ada.
 
 ## Task: LOG-003 — Request/response API yang lebih kaya
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 3
 - Referensi: LOG-US-01/02/03; [plan](../plans/logging-enhancement/implementation-plan.md)
@@ -110,9 +110,9 @@ Perkaya `plugins/logger.ts`: query tersanitasi, header terpilih, ukuran request/
 
 ### Acceptance criteria
 
-- [ ] Semua jalur (200/4xx/5xx/404) menghasilkan pasangan request/response dengan ID sama dan respons tidak berubah.
-- [ ] `x-request-id` UUID valid dipakai ulang, selain itu dibuat baru, dan dikembalikan di header respons.
-- [ ] Cookie/Authorization tidak pernah muncul; body tidak muncul bila `LOG_HTTP_BODIES` mati atau rute dikecualikan.
+- [x] Semua jalur (200/4xx/5xx/404) menghasilkan pasangan request/response dengan ID sama dan respons tidak berubah.
+- [x] `x-request-id` UUID valid dipakai ulang, selain itu dibuat baru, dan dikembalikan di header respons.
+- [x] Cookie/Authorization tidak pernah muncul; body tidak muncul bila `LOG_HTTP_BODIES` mati atau rute dikecualikan.
 
 ### Validasi
 
@@ -120,7 +120,7 @@ Test `app.handle` dengan sink injeksi (termasuk kasus redaksi); `bun test` API.
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 11 Oktober 2026. `plugins/logger.ts` kini memakai `@repo/log`: `http.request` memuat method, path (500 karakter), query dengan nilai sensitif/bertanda tangan `[redacted]`, `contentType`, `requestBytes`, `origin` dan `userAgent` terpotong; `http.response` memuat status, durasi, `responseBytes` (string/biner/Response dengan content-length; objek hanya pada level debug) dan `errorCode`; level `info`, `warn` (4xx) dan `error` (5xx). `x-request-id` UUID dari peer dipakai ulang, selain itu dibuat baru, dan selalu dikembalikan di header respons (juga `Response` kustom dan 404). Body (D1): `LOG_HTTP_BODIES=true` mencatat `http.body` (arah request/response, JSON terredaksi, 2 KB) pada level debug, tidak untuk `/auth`, `/media/uploads`, `/playback`, `/poster`, `Response`/stream/biner dan non-JSON. Test `plugins/logger.test.ts` diperbarui dan diperluas (header ID, query, ukuran, level, redaksi, body hidup/mati, rute dikecualikan); `app.test.ts` menyesuaikan header dan event baru. `bun test src` (apps/api): 192 pass, 1 fail — `truncated JPEG data fails the awaited native decode` gagal juga pada baseline tanpa perubahan ini (diverifikasi dengan stash), tidak terkait logging.
 
 ### Commit task
 
@@ -135,7 +135,7 @@ Tidak ada.
 
 ## Task: LOG-004 — Log error API terstruktur
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 4
 - Referensi: LOG-US-01/02/03; [plan](../plans/logging-enhancement/implementation-plan.md)
@@ -149,8 +149,8 @@ Catat 5xx dan `ContentError` pada handler error dengan kode, status, nama/pesan,
 
 ### Acceptance criteria
 
-- [ ] Setiap 5xx meninggalkan event `http.error` dengan `requestId`.
-- [ ] 4xx yang diharapkan tercatat pada level `warn`/`info` tanpa stack.
+- [x] Setiap 5xx meninggalkan event `http.error` dengan `requestId`.
+- [x] 4xx yang diharapkan tercatat pada level `warn`/`info` tanpa stack.
 
 ### Validasi
 
@@ -158,7 +158,7 @@ Test error handler dengan sink injeksi.
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 11 Oktober 2026 bersama LOG-003 (satu plugin). Observer `onError` global mencatat `http.error` dengan `requestId`, method, path, status dan `errorCode` hasil klasifikasi yang sama dengan pemeta error (`mapContentError`, validasi/parse → 422 `VALIDATION_ERROR`, `NOT_FOUND` → 404, sisanya 500 `INTERNAL_ERROR`), ditambah nama, pesan, kode dan rantai penyebab terpotong; stack hanya bila status ≥500 dan `NODE_ENV` bukan production. Level: 5xx `error`, 404/422 `info`, 4xx lain `warn`. Pesan validasi tidak dicatat karena memuat input yang dikirim (hanya teks tetap "Request input is invalid."). `errorCode` juga muncul pada `http.response`. Diuji pada jalur domain (409), handler melempar (500, bertumpuk plugin) dan validasi/parse (422).
 
 ### Commit task
 

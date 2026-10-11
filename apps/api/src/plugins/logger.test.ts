@@ -6,6 +6,9 @@ import { ContentError } from "../shared/content-error";
 
 type RecordEntry = {
   timestamp: string;
+  level?: string;
+  component?: string;
+  errorCode?: string;
   event: string;
   requestId: string;
   method: string;
@@ -14,11 +17,18 @@ type RecordEntry = {
   durationMs?: number;
 };
 
-function capture() {
+function capture(
+  config: { level: "debug"; format: "json"; bodies: boolean } = {
+    level: "debug",
+    format: "json",
+    bodies: false,
+  },
+) {
   const lines: string[] = [];
   const records: RecordEntry[] = [];
   const listeners = new Set<() => void>();
   return {
+    config,
     lines,
     records,
     write(line: string) {
@@ -82,16 +92,22 @@ describe("console request logger", () => {
     const response = await pending;
     expect(await response.text()).toBe("done");
     await log.completed();
-    expect(log.records[1]).toEqual({
-      ...log.records[0],
+    expect(log.records[1]).toMatchObject({
+      level: "info",
+      component: "api",
       event: "http.response",
+      requestId: log.records[0].requestId,
+      method: "GET",
+      path: "/slow",
       status: 200,
       durationMs: 18.13,
+      responseBytes: 4,
     });
+    expect(log.records[0]).toMatchObject({ query: { token: "[redacted]" } });
     expect(log.records[0].requestId).toMatch(
       /^[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}$/,
     );
-    expect(response.headers.has("x-request-id")).toBe(false);
+    expect(response.headers.get("x-request-id")).toBe(log.records[0].requestId);
   });
 
   it("reports the actual status for regular, custom, Response and early results", async () => {
@@ -192,7 +208,23 @@ describe("console request logger", () => {
         .filter((r) => r.event === "http.response")
         .map((r) => r.status),
     ).toEqual(cases.map(([, s]) => s));
-    expect(log.lines.join("\n")).not.toContain("private");
+    const text = log.lines.join("\n");
+    const errors = log.records.filter((r) => r.event === "http.error");
+    expect(errors.map((r) => [r.errorCode, r.level])).toEqual([
+      ["CONFLICT", "warn"],
+      ["INTERNAL_ERROR", "error"],
+      ["INTERNAL_ERROR", "error"],
+      ["VALIDATION_ERROR", "info"],
+      ["VALIDATION_ERROR", "info"],
+    ]);
+    expect(text).toContain("private failure");
+    expect(text).toContain('"stack"');
+    // Validation messages embed the submitted input and are never logged.
+    expect(text).not.toContain("Expected string");
+    expect(text).not.toContain('"found"');
+    expect(
+      log.records.find((r) => r.event === "http.response" && r.status === 409),
+    ).toMatchObject({ errorCode: "CONFLICT" });
   });
 
   it("isolates concurrent requests and separate instances", async () => {
@@ -272,11 +304,14 @@ describe("console request logger", () => {
     expect(
       log.records.find((r) => r.event === "http.request" && r.path !== "/login")
         ?.path,
-    ).toBe(longPath.slice(0, 512));
+    ).toBe(longPath.slice(0, 500) + "…");
     expect(Object.keys(log.records[0]).sort()).toEqual([
+      "component",
       "event",
+      "level",
       "method",
       "path",
+      "query",
       "requestId",
       "timestamp",
     ]);
@@ -321,5 +356,129 @@ describe("console request logger", () => {
       await completion.promise;
       expect(writes).toBe(2);
     }
+  });
+});
+
+describe("request ids, response details and optional bodies", () => {
+  const id = "3f2b8c1e-0d4a-4b7e-9a51-6c2d7e8f9a10";
+  const noBodies = { level: "debug", format: "json", bodies: false } as const;
+  const withBodies = { ...noBodies, bodies: true } as const;
+
+  it("reuses a valid UUID x-request-id, replaces anything else and echoes it on every response", async () => {
+    const log = capture();
+    const app = new Elysia()
+      .use(createRequestLogger(log))
+      .get("/ok", () => "ok")
+      .get("/custom", () => new Response("x", { status: 201 }));
+    const reused = await app.handle(
+      request("/ok", { headers: { "x-request-id": id } }),
+    );
+    expect(reused.headers.get("x-request-id")).toBe(id);
+    const replaced = await app.handle(
+      request("/ok", { headers: { "x-request-id": "forged value" } }),
+    );
+    expect(replaced.headers.get("x-request-id")).not.toBe("forged value");
+    expect(replaced.headers.get("x-request-id")).toMatch(/^[\da-f-]{36}$/);
+    const custom = await app.handle(request("/custom"));
+    expect(custom.status).toBe(201);
+    expect(custom.headers.get("x-request-id")).toBeTruthy();
+    const missing = await app.handle(request("/nope"));
+    expect(missing.status).toBe(404);
+    expect(missing.headers.get("x-request-id")).toBeTruthy();
+    await log.completed(4);
+    expect(log.records.find((r) => r.event === "http.request")?.requestId).toBe(
+      id,
+    );
+  });
+
+  it("records query, sizes and levels per status without leaking secrets", async () => {
+    const log = capture();
+    const app = new Elysia()
+      .use(createRequestLogger(log))
+      .post("/upload", () => ({ ok: true }));
+    await app.handle(
+      request("/upload?page=2&token=abc&X-Amz-Signature=sig", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "content-length": "12",
+          cookie: "session=secret",
+          authorization: "Bearer secret",
+          "user-agent": "test-agent",
+        },
+        body: '{"a":"bbbb"}',
+      }),
+    );
+    await log.completed();
+    const [req, res] = log.records;
+    expect(req).toMatchObject({
+      level: "info",
+      query: {
+        page: "2",
+        token: "[redacted]",
+        "X-Amz-Signature": "[redacted]",
+      },
+      contentType: "application/json",
+      requestBytes: 12,
+      userAgent: "test-agent",
+    });
+    expect(res).toMatchObject({
+      level: "info",
+      status: 200,
+      responseBytes: 11,
+    });
+    expect(log.lines.join("\n")).not.toMatch(/secret|abc|sig"/);
+  });
+
+  it("logs redacted, bounded JSON bodies only when enabled and never for private routes", async () => {
+    const off = capture(noBodies);
+    const on = capture(withBodies);
+    const routes = (log: ReturnType<typeof capture>) =>
+      new Elysia()
+        .use(createRequestLogger(log))
+        .post("/items", ({ body }) => ({ saved: body, password: "p-resp" }))
+        .post("/api/auth/sign-in", ({ body }) => ({ token: "t", body }))
+        .post("/admin/media/uploads", ({ body }) => body);
+    const send = (
+      app: ReturnType<typeof routes>,
+      path: string,
+      body: unknown,
+    ) =>
+      app.handle(
+        request(path, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(body),
+        }),
+      );
+    const quiet = routes(off);
+    await send(quiet, "/items", { name: "film", password: "p-req" });
+    await off.completed();
+    expect(off.records.some((r) => r.event === "http.body")).toBe(false);
+
+    const app = routes(on);
+    await send(app, "/items", {
+      name: "film",
+      password: "p-req",
+      a: "x".repeat(900),
+      b: "y".repeat(900),
+      c: "z".repeat(900),
+      d: "w".repeat(900),
+      e: "v".repeat(900),
+    });
+    await send(app, "/api/auth/sign-in", {
+      email: "a@b.c",
+      password: "p-auth",
+    });
+    await send(app, "/admin/media/uploads", { part: "etag" });
+    await on.completed(3);
+    const bodies = on.records.filter((r) => r.event === "http.body") as Array<
+      RecordEntry & { direction: string; body: string; truncated: boolean }
+    >;
+    expect(bodies.map((b) => b.direction)).toEqual(["request", "response"]);
+    expect(bodies[0]!.truncated).toBe(true);
+    expect(bodies[0]!.body.length).toBeLessThanOrEqual(2048);
+    expect(bodies[0]!.body).toContain("film");
+    expect(on.lines.join("\n")).not.toMatch(/p-req|p-resp|p-auth|etag|a@b\.c/);
   });
 });

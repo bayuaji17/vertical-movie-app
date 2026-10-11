@@ -143,6 +143,7 @@ it("logs every route family, auth Responses and mapped errors without changing H
   }
   const app = createApp({
     requestLogger: {
+      config: { level: "debug", format: "json", bodies: false },
       write(line) {
         const record = JSON.parse(line);
         records.push(record);
@@ -227,7 +228,7 @@ it("logs every route family, auth Responses and mapped errors without changing H
       });
     });
     await new Promise<void>((resolve) => setImmediate(resolve));
-    const pair = records.slice(from);
+    const pair = records.slice(from).filter((r) => r.event !== "http.error");
     expect(pair).toHaveLength(2);
     expect(pair[0]).toMatchObject({ event: "http.request", path });
     expect(pair[1]).toMatchObject({
@@ -237,7 +238,7 @@ it("logs every route family, auth Responses and mapped errors without changing H
       requestId: pair[0].requestId,
     });
     expect(pair[1].durationMs).toBeGreaterThanOrEqual(0);
-    expect(response.headers.has("x-request-id")).toBe(false);
+    expect(response.headers.get("x-request-id")).toBe(pair[0].requestId);
   }
   expect(JSON.stringify(records)).not.toContain("secret");
 });
@@ -247,6 +248,7 @@ it("logs the admin guard's forbidden and dependency failures with their final st
     const completion = Promise.withResolvers<number>();
     const app = createApp({
       requestLogger: {
+        config: { level: "debug", format: "json", bodies: false },
         write(line) {
           const record = JSON.parse(line);
           if (record.event === "http.response")
