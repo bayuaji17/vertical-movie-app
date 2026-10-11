@@ -2,7 +2,7 @@
 
 ## Plan metadata
 
-- Status: **proposed** (11 Oktober 2026), menunggu persetujuan pengguna atas keputusan D1–D5; belum ada implementasi.
+- Status: **approved** (11 Oktober 2026). Pengguna menyetujui D1–D5 sebagaimana direkomendasikan ("setuju semua, langsung kerjakan semua"); skrip CLI tetap tidak ikut.
 - Date: 11 Oktober 2026; decision owner: pengguna.
 - Repository: `bayuaji17/vertical-movie-app`; base ref: `main`; base SHA: `ddcb2b1e8badfa816d798505bc5107113da05061`.
 - Context: [repository-context.md](repository-context.md).
@@ -13,7 +13,7 @@
 
 Operator dapat mengikuti satu request dari web ke API sampai respons, dan mengikuti setiap job media dari diambil sampai selesai/gagal beserta progres tiap tahap, hanya dari output console, tanpa membocorkan rahasia.
 
-## Keputusan yang diusulkan (perlu persetujuan, ditandai **D**)
+## Keputusan (disetujui pengguna 11 Oktober 2026, ditandai **D**)
 
 - **D1 Body request/response.** Default tidak dicatat. Dengan `LOG_HTTP_BODIES=true` (ditolak saat `NODE_ENV=production`) JSON body dicatat terpotong 2 KB dengan redaksi nilai pada kunci sensitif; multipart, biner, rute `/api/auth/*`, upload part, dan respons berisi URL bertanda tangan/playback tidak pernah dicatat. Ini membalik pengecualian "payload" pada plan APILOG sehingga perlu persetujuan eksplisit.
 - **D2 Level dan format.** `LOG_LEVEL=debug|info|warn|error` (default `debug` di development, `info` di production) dan `LOG_FORMAT=json|pretty` (default `pretty` satu baris berwarna di development, `json` di production). Tanpa library; satu modul `apps/api/src/shared/log.ts`.
@@ -79,4 +79,5 @@ D1–D5 di atas; plus apakah skrip CLI (`provision`, `reset`, `migrate`, seed) i
 
 ## Execution history
 
-- 11 Oktober 2026: context dan plan ditulis pada `feat/logging-enhancement`; belum ada implementasi.
+- 11 Oktober 2026: context dan plan ditulis pada `feat/logging-enhancement`.
+- 11 Oktober 2026: pengguna menyetujui D1–D5 dan meminta seluruh LOG-002–009 dikerjakan; modul log bersama dibuat sebagai paket `@repo/log` karena API dan web sama-sama membutuhkannya.

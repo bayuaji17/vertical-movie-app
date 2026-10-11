@@ -20,7 +20,7 @@ Sebagai pengembang, saya ingin level dan format log yang dapat dikonfigurasi dan
 
 ## Task: LOG-001 — Setujui keputusan D1–D5
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 1
 - Referensi: LOG-US-01/02/03; [plan](../plans/logging-enhancement/implementation-plan.md)
@@ -34,7 +34,7 @@ Pengguna memutuskan D1 (body opsional dev-only), D2 (level/format), D3 (`x-reque
 
 ### Acceptance criteria
 
-- [ ] Keputusan dicatat beserta pemberi persetujuan dan tanggal.
+- [x] Keputusan dicatat beserta pemberi persetujuan dan tanggal.
 
 ### Validasi
 
@@ -42,7 +42,7 @@ Pengguna memutuskan D1 (body opsional dev-only), D2 (level/format), D3 (`x-reque
 
 ### Hasil dan bukti
 
-Belum ada.
+Pengguna menyetujui D1–D5 sebagaimana direkomendasikan pada 11 Oktober 2026 ("setuju semua, langsung kerjakan semua"); skrip CLI tidak ikut dipindah. Dicatat pada plan.
 
 ### Commit task
 
@@ -57,7 +57,7 @@ Tidak ada.
 
 ## Task: LOG-002 — Modul log bersama dan konfigurasi env
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 2
 - Referensi: LOG-US-01/02/03; [plan](../plans/logging-enhancement/implementation-plan.md)
@@ -67,13 +67,13 @@ Tidak ada.
 
 ### Ruang lingkup
 
-`apps/api/src/shared/log.ts` (level, format json/pretty, redaksi, sink injeksi, tidak pernah melempar), `config/log-env.ts` untuk `LOG_LEVEL`/`LOG_FORMAT`/`LOG_HTTP_BODIES` (ditolak di production), `.env.example` dan `docs/guides/environment.md`.
+Paket baru `packages/log` (`@repo/log`, dipakai API, worker dan web; pengecualian aturan "paket bersama" karena kedua aplikasi memerlukannya): level, format json/pretty, redaksi, sink injeksi, tidak pernah melempar, `loadLogEnv` untuk `LOG_LEVEL`/`LOG_FORMAT`/`LOG_HTTP_BODIES` (ditolak di production), `.env.example` dan `docs/guides/environment.md`.
 
 ### Acceptance criteria
 
-- [ ] Level menyaring event; format json dan pretty memuat field sama.
-- [ ] Redaksi menutup kunci sensitif, query, URL bertanda tangan dan rantai error; sink yang gagal tidak melempar.
-- [ ] Env tidak valid ditolak dengan pesan jelas; body tidak dapat aktif di production.
+- [x] Level menyaring event; format json dan pretty memuat field sama.
+- [x] Redaksi menutup kunci sensitif, query, URL bertanda tangan dan rantai error; sink yang gagal tidak melempar.
+- [x] Env tidak valid ditolak dengan pesan jelas; body tidak dapat aktif di production.
 
 ### Validasi
 
@@ -81,7 +81,7 @@ Tidak ada.
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 11 Oktober 2026. `packages/log/src/index.ts`: `createLogger(component)` (debug/info/warn/error, `child`), format JSON dan pretty (warna hanya pada TTY dan tanpa `NO_COLOR`), `redact` (kunci sensitif, URL bertanda tangan, string 500 karakter, kedalaman 4, 20 item), `redactQuery`, `errorFields` (nama, pesan, kode, rantai 3 penyebab, stack hanya bila diminta), `loadLogEnv` (`LOG_LEVEL`, `LOG_FORMAT`, `LOG_HTTP_BODIES`; production → info/json dan body ditolak), `requestIdFrom`/`isRequestId` (hanya UUID dari peer yang dipakai ulang). Test `packages/log/src/log.test.ts` 10 pass. Dependensi `workspace:*` pada API dan web, `bun.lock` diperbarui; `.env.example` dan `docs/guides/environment.md` memuat variabel baru.
 
 ### Commit task
 
