@@ -123,7 +123,8 @@ export function RenameGenreForm({
     try {
       const outcome = await submitRename(
         genre,
-        (id, input) => mutation.mutateAsync({ id, input }),
+        (id, input, expectedUpdatedAt) =>
+          mutation.mutateAsync({ id, input, expectedUpdatedAt }),
         values,
       )
       if (outcome.status === 'invalid') {

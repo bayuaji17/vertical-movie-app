@@ -1,32 +1,49 @@
 import { z } from 'zod'
 import { watchVideoSchema } from '../catalog/content-model'
+import type { CatalogFilters } from '../catalog/public-catalog-model'
 
-export type CatalogType = 'all' | 'film' | 'standalone'
-export const catalogTypes = ['all', 'film', 'standalone'] as const
+export type CatalogType = 'all' | 'film' | 'standalone' | 'series'
+export type BrowseFilterType = Exclude<CatalogType, 'all'>
+export const catalogTypes = ['all', 'film', 'standalone', 'series'] as const
+export const searchMaxLength = 200
 export function catalogType(value: unknown): CatalogType {
-  return value === 'film' || value === 'standalone' ? value : 'all'
+  return value === 'film' || value === 'standalone' || value === 'series'
+    ? value
+    : 'all'
 }
-export function catalogSearch(search: Record<string, unknown>): {
-  type?: CatalogType
-} {
-  return { type: catalogType(search.type) }
+// Search text is trimmed and bounded to 200 Unicode code points (API limit).
+export function normalizeQuery(value: unknown) {
+  return typeof value === 'string'
+    ? [...value.trim()].slice(0, searchMaxLength).join('').trim()
+    : ''
 }
-export const catalogPageSize = 20
-export const catalogKinds = {
-  all: 'movie,standalone',
+// `all` and an empty query are defaults and stay out of the URL.
+export function browseSearch(
+  type: CatalogType,
+  q?: string,
+): { type?: BrowseFilterType; q?: string } {
+  const query = normalizeQuery(q)
+  return {
+    ...(type === 'all' ? {} : { type }),
+    ...(query ? { q: query } : {}),
+  }
+}
+export function catalogSearch(search: Record<string, unknown>) {
+  return browseSearch(catalogType(search.type), normalizeQuery(search.q))
+}
+const apiKinds = {
+  all: 'all',
   film: 'movie',
   standalone: 'standalone',
+  series: 'series',
 } as const
+export function browseFilters(type: CatalogType, q: string): CatalogFilters {
+  return { search: normalizeQuery(q), kind: apiKinds[type], genreId: 'all' }
+}
 export const publicVideoSchema = watchVideoSchema.refine(
   (v) => v.kind !== 'episode',
 )
 export type PublicVideo = z.infer<typeof publicVideoSchema>
-export const publicVideoPageSchema = z
-  .object({
-    items: z.array(publicVideoSchema).max(catalogPageSize),
-    nextCursor: z.string().min(1).max(2048).nullable(),
-  })
-  .strict()
 export const signedPosterSchema = z
   .object({
     videoId: z.string().uuid(),

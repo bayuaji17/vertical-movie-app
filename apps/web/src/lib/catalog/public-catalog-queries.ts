@@ -1,8 +1,11 @@
 import { createIsomorphicFn } from '@tanstack/react-start'
 import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
-import type { QueryClient } from '@tanstack/react-query'
-import { createPublicCatalogClient } from './catalog-client'
-import type { PublicCatalogClient } from './catalog-client'
+import type { InfiniteData, QueryClient } from '@tanstack/react-query'
+import {
+  createPublicCatalogClient,
+  CatalogRequestError,
+} from './catalog-client'
+import type { PublicCatalogClient, PublicCatalogPage } from './catalog-client'
 import {
   readCatalogPageOnServer,
   readCatalogGenresOnServer,
@@ -14,6 +17,7 @@ import {
   catalogSort,
   defaultCatalogFilters,
   sameFilters,
+  itemIdentity,
 } from './public-catalog-model'
 import type { CatalogFilters } from './public-catalog-model'
 
@@ -102,6 +106,44 @@ export function catalogFeaturedOptions(
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
   })
+}
+export function catalogItems(pages: PublicCatalogPage[] = []) {
+  return [
+    ...new Map(
+      pages.flatMap((p) => p.items).map((item) => [itemIdentity(item), item]),
+    ).values(),
+  ]
+}
+/** Browse restarts a traversal from page one; stale cursors are never reused. */
+export async function restartBrowseCatalog(
+  client: QueryClient,
+  filters: CatalogFilters,
+  api: PublicCatalogClient = transport,
+) {
+  const queryKey = catalogQueryKey(filters)
+  await client.cancelQueries({ queryKey, exact: true })
+  await client.resetQueries({ queryKey, exact: true })
+  return client.infiniteQuery(catalogInfiniteOptions(filters, api))
+}
+/** Route loader read for Browse: failures become a status, never a fake page. */
+export async function loadBrowseCatalog(
+  client: QueryClient,
+  filters: CatalogFilters,
+  api: PublicCatalogClient = transport,
+) {
+  try {
+    const cached = client.getQueryData<InfiniteData<PublicCatalogPage>>(
+      catalogQueryKey(filters),
+    )
+    if (typeof window !== 'undefined' && !navigator.onLine)
+      return { status: cached ? null : 503 }
+    if (cached?.pages.some((p) => p.expiresAt <= Date.now()))
+      await restartBrowseCatalog(client, filters, api)
+    else await client.infiniteQuery(catalogInfiniteOptions(filters, api))
+    return { status: null }
+  } catch (error) {
+    return { status: error instanceof CatalogRequestError ? error.status : 503 }
+  }
 }
 export type CatalogBootstrap = {
   catalogFailed: boolean

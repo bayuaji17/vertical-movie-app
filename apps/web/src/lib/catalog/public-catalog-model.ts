@@ -73,7 +73,7 @@ export const defaultCatalogFilters: CatalogFilters = {
   kind: 'all',
   genreId: 'all',
 }
-export const catalogPageSize = 6
+export const catalogPageSize = 20
 export const catalogSort = 'publishedAt-desc_id-asc_kind-asc'
 export function normalizeFilters(filters: CatalogFilters) {
   return { ...filters, search: filters.search.trim().toLowerCase() }

@@ -13,6 +13,7 @@ import {
   publicItem,
 } from './content-model'
 import type { ContentKind } from './content-model'
+import { episodePageSize } from './season-model'
 
 export function createPublicContentClient(
   base: string,
@@ -65,7 +66,7 @@ export function createPublicContentClient(
     validSlug(slug)
     signal.throwIfAborted()
     const r = await client.catalog.series({ slug }).episodes.get({
-      query: { limit: '20', ...(cursor ? { cursor } : {}) },
+      query: { limit: String(episodePageSize), ...(cursor ? { cursor } : {}) },
       fetch: { signal },
     })
     const p = check(r, episodePageSchema, signal)

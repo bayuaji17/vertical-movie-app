@@ -74,10 +74,7 @@ export function CatalogDetailDialog({
                   item.kind === 'series' ? (
                     <Link to="/series/$slug" params={{ slug: item.slug }} />
                   ) : (
-                    <Link
-                      to="/titles/$kind/$slug"
-                      params={{ kind: item.kind, slug: item.slug }}
-                    />
+                    <Link to="/videos/$slug" params={{ slug: item.slug }} />
                   )
                 }
               >

@@ -1,41 +1,53 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import {
+  catalogInfiniteOptions,
   catalogItems,
-  catalogKey,
-  catalogOptions,
-  restartCatalog,
-} from '#/lib/public/catalog-queries'
+  catalogQueryKey,
+  restartBrowseCatalog,
+} from '#/lib/catalog/public-catalog-queries'
+import { browseFilters } from '#/lib/public/catalog-model'
 import type { CatalogType } from '#/lib/public/catalog-model'
-import type { PublicVideoPage } from '#/lib/public/catalog-client'
+import type { PublicCatalogPage } from '#/lib/catalog/catalog-client'
 import type { InfiniteData } from '@tanstack/react-query'
 import { usePublicOnline } from './use-public-online'
 
-export function usePublicCatalog(type: CatalogType, status: number | null) {
+export function usePublicCatalog(
+  type: CatalogType,
+  q: string,
+  status: number | null,
+) {
+  const filters = useMemo(() => browseFilters(type, q), [type, q])
   const client = useQueryClient(),
     online = usePublicOnline(),
     loadingMore = useRef(false),
     refreshing = useRef(false),
-    wasOnline = useRef(true)
+    wasOnline = useRef(true),
+    key = catalogQueryKey(filters)
   const query = useInfiniteQuery({
-    ...catalogOptions(type),
-    enabled: online && (!status || !!client.getQueryData(catalogKey(type))),
+    ...catalogInfiniteOptions(filters),
+    // The route loader and explicit refresh own freshness; returning from a
+    // detail page must not refetch or move already loaded pages.
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    enabled: online && (!status || !!client.getQueryData(key)),
   })
   const refresh = useCallback(async () => {
     if (!online || refreshing.current) return
     refreshing.current = true
     try {
-      await restartCatalog(client, type)
+      await restartBrowseCatalog(client, filters)
     } catch {
       /* Query state owns the public error. */
     } finally {
       refreshing.current = false
     }
-  }, [online, client, type])
+  }, [online, client, filters])
   useEffect(() => {
     const check = () => {
-      const data = client.getQueryData<InfiniteData<PublicVideoPage>>(
-        catalogKey(type),
+      const data = client.getQueryData<InfiniteData<PublicCatalogPage>>(
+        catalogQueryKey(filters),
       )
       if (
         navigator.onLine &&
@@ -46,9 +58,12 @@ export function usePublicCatalog(type: CatalogType, status: number | null) {
     window.addEventListener('focus', check)
     return () => {
       window.removeEventListener('focus', check)
-      void client.cancelQueries({ queryKey: catalogKey(type), exact: true })
+      void client.cancelQueries({
+        queryKey: catalogQueryKey(filters),
+        exact: true,
+      })
     }
-  }, [client, type, refresh])
+  }, [client, filters, refresh])
   useEffect(() => {
     if (online && !wasOnline.current) void refresh()
     wasOnline.current = online
@@ -71,6 +86,7 @@ export function usePublicCatalog(type: CatalogType, status: number | null) {
   return {
     query,
     items: catalogItems(query.data?.pages),
+    total: query.data?.pages.at(-1)?.total ?? 0,
     online,
     refresh,
     more,

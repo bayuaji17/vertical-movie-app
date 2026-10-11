@@ -1,6 +1,6 @@
 # Halaman Genres admin
 
-> Status: implemented lokal (tanpa bukti browser), spesifikasi komponen · 10 Oktober 2026 · Keputusan pengguna pada [plan](../plans/admin-genres/implementation-plan.md#keputusan-pengguna-10-oktober-2026). Tanpa mockup raster; spesifikasi ini bukan bukti implementasi.
+> Status: implemented lokal termasuk rename/hapus (tanpa bukti browser), spesifikasi komponen · 10 Oktober 2026 · Keputusan pengguna pada [plan](../plans/admin-genres/implementation-plan.md#keputusan-pengguna-10-oktober-2026). Tanpa mockup raster; spesifikasi ini bukan bukti implementasi.
 
 Rute `/admin/genres` memakai admin shell yang ada (Rhea, Light/Dark/System). Item sidebar "Genres" (ikon tag) berada setelah Content dan sebelum Settings, juga pada drawer mobile.
 
@@ -16,7 +16,7 @@ Rute `/admin/genres` memakai admin shell yang ada (Rhea, Light/Dark/System). Ite
 
 ## Aksi Rename dan Delete
 
-Dialog dan state dibangun terhadap `GenresClient`. Saat API belum menyediakan edit/hapus (`canEdit=false`), tombol tampil nonaktif dengan penjelasan "Editing genres isn't available yet" dan tidak memanggil API. Dialog menutup state: validasi nama/slug, konflik slug (409), genre masih dipakai (409), tidak ditemukan (404), tidak pasti (jaringan) dengan instruksi memeriksa daftar, dan tidak ada replay otomatis.
+Rename dan Delete memakai `PATCH/DELETE /admin/genres/:id` (GEN-API-001). Setiap baris menampilkan "Used by N items" atau "Not used yet"; Delete nonaktif bila genre dipakai konten (API tetap menolak dengan 409). Rename mengirim token `expectedUpdatedAt` dari baris yang dibaca; konflik versi, slug bentrok, genre dipakai, tidak ditemukan dan hasil tidak pasti punya pesan sendiri tanpa replay otomatis.
 
 ## State
 

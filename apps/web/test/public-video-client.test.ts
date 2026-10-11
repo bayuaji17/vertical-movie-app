@@ -17,7 +17,7 @@ const video: PublicVideo = {
   seriesSlug: null,
 }
 const signal = () => new AbortController().signal
-test('public video transport canonicalizes URL filter/cursor, strips credentials and keeps metadata unsigned', async () => {
+test('public video transport strips credentials, keeps metadata unsigned and canonicalizes browse URLs', async () => {
   const requests: Request[] = []
   const api = createPublicVideoClient(
     'http://web.test/api',
@@ -29,52 +29,46 @@ test('public video transport canonicalizes URL filter/cursor, strips credentials
       requests.push(request)
       expect(request.headers.has('cookie')).toBe(false)
       expect(request.headers.has('authorization')).toBe(false)
-      return Response.json(
-        new URL(request.url).pathname.endsWith('/a-film')
-          ? video
-          : { items: [video], nextCursor: 'next' },
-      )
+      return Response.json(video)
     },
     () => 100,
   )
-  const page = await api.page('all', null, signal())
-  expect(page.expiresAt).toBe(60_100)
-  expect(new URL(requests[0].url).searchParams.get('kinds')).toBe(
-    'movie,standalone',
-  )
-  expect(new URL(requests[0].url).searchParams.get('limit')).toBe('20')
-  await api.page('film', 'next', signal())
-  expect(new URL(requests[1].url).searchParams.get('kinds')).toBe('movie')
-  expect(new URL(requests[1].url).searchParams.get('cursor')).toBe('next')
-  expect((await api.detail(video.slug, signal())).item).toEqual(video)
-  expect(JSON.stringify(page)).not.toMatch(
+  const detail = await api.detail(video.slug, signal())
+  expect(detail.expiresAt).toBe(60_100)
+  expect(new URL(requests[0].url).pathname).toBe('/api/videos/' + video.slug)
+  expect(detail.item).toEqual(video)
+  expect(JSON.stringify(detail)).not.toMatch(
     /posterUrl|masterUrl|Signature|sourceKey/,
   )
-  expect(catalogSearch({ type: 'series', host: 'attacker' })).toEqual({
-    type: 'all',
+  expect(catalogSearch({ type: 'bogus', host: 'attacker' })).toEqual({})
+  expect(catalogSearch({ type: 'all', q: '  ' })).toEqual({})
+  expect(catalogSearch({ type: 'film' })).toEqual({ type: 'film' })
+  expect(catalogSearch({ type: 'series', q: ' Night ' })).toEqual({
+    type: 'series',
+    q: 'Night',
   })
 })
-test('public failures and malformed DTOs never become empty pages or clear admin state', async () => {
+test('public failures and malformed DTOs never become success or clear admin state', async () => {
   const query = new QueryClient()
   query.setQueryData(['admin', 'sentinel'], 'keep')
   for (const status of [401, 403, 404, 503]) {
     const api = createPublicVideoClient('http://web.test/api', async () =>
       Response.json({ error: 'private diagnostics' }, { status }),
     )
-    await expect(api.page('all', null, signal())).rejects.toMatchObject({
+    await expect(api.detail(video.slug, signal())).rejects.toMatchObject({
       status,
     })
   }
   for (const body of [
-    { items: [], nextCursor: null, sourceKey: 'private' },
-    { items: [{ ...video, kind: 'episode' }], nextCursor: null },
-    { items: [video], nextCursor: null, posterUrl: 'signed' },
-    { items: [{ ...video, durationMs: 0 }], nextCursor: null },
+    { ...video, sourceKey: 'private' },
+    { ...video, posterUrl: 'signed' },
+    { ...video, durationMs: 0 },
+    { ...video, slug: 'another-film' },
   ])
     await expect(
       createPublicVideoClient('http://web.test/api', async () =>
         Response.json(body),
-      ).page('all', null, signal()),
+      ).detail(video.slug, signal()),
     ).rejects.toMatchObject({ status: 502 })
   await expect(
     createPublicVideoClient('http://web.test/api', async () =>
@@ -96,15 +90,15 @@ test('pre-aborted signals and invalid slugs stop before I/O; late aborted data c
   const api = createPublicVideoClient('http://web.test/api', async () => {
     reads++
     controller.abort()
-    return Response.json({ items: [], nextCursor: null })
+    return Response.json(video)
   })
   await expect(api.detail('Bad/slug', signal())).rejects.toBeInstanceOf(
     CatalogRequestError,
   )
   expect(reads).toBe(0)
-  await expect(api.page('all', null, controller.signal)).rejects.toThrow()
+  await expect(api.detail(video.slug, controller.signal)).rejects.toThrow()
   expect(reads).toBe(1)
-  await expect(api.page('all', null, controller.signal)).rejects.toThrow()
+  await expect(api.detail(video.slug, controller.signal)).rejects.toThrow()
   expect(reads).toBe(1)
 })
 test('signed poster requires matching identity, safe WebP URL and bounded future expiry', async () => {

@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import { RiPlayFill } from '@remixicon/react'
 import { AppearanceMenu } from '#/components/catalog/appearance-menu'
 import { Separator } from '#/components/ui/separator'
+import { browseSearch } from '#/lib/public/catalog-model'
 import type { CatalogType } from '#/lib/public/catalog-model'
 
 export function PublicShell({
@@ -26,7 +27,7 @@ export function PublicShell({
         <div className="mx-auto flex min-h-20 max-w-[1440px] items-center justify-between gap-3 px-4 sm:px-6 lg:px-10">
           <Link
             to="/"
-            search={{ type }}
+            search={browseSearch(type)}
             className="flex min-h-11 min-w-0 items-center gap-3 rounded-xl font-heading text-lg font-bold outline-none focus-visible:ring-2 focus-visible:ring-ring sm:text-xl"
             aria-label={`${settings.siteName} home`}
           >
@@ -43,7 +44,7 @@ export function PublicShell({
           >
             <Link
               to="/"
-              search={{ type }}
+              search={browseSearch(type)}
               className="hidden min-h-11 items-center rounded-lg text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring sm:inline-flex"
             >
               Browse

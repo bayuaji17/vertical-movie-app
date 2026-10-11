@@ -10,14 +10,17 @@ export type Genre = {
   slug: string
   createdAt: string
   updatedAt: string
+  // Videos and series that currently carry this genre.
+  usageCount: number
 }
 export type GenrePage = { items: Genre[]; nextCursor: string | null }
 export type GenreInput = { name: string; slug?: string }
 
 export class GenresApiError extends PrivateApiError {}
 
-// Rename/remove have no admin API yet (GEN-API-001). Callers must check
-// `canEdit` first; the live adapter never calls an endpoint that is missing.
+// `canEdit` reflects the live API: rename and delete exist (GEN-API-001). A
+// client without them (or a read-only fixture) reports false and the UI keeps
+// the actions disabled instead of calling a missing endpoint.
 export type GenresClient = {
   readonly canEdit: boolean
   list: (
@@ -26,7 +29,11 @@ export type GenresClient = {
     signal?: AbortSignal,
   ) => Promise<GenrePage>
   create: (input: GenreInput) => Promise<Genre>
-  rename: (id: string, input: GenreInput) => Promise<Genre>
+  rename: (
+    id: string,
+    input: GenreInput,
+    expectedUpdatedAt: string,
+  ) => Promise<Genre>
   remove: (id: string) => Promise<void>
 }
 
@@ -50,7 +57,11 @@ export function verifiedGenre(value: unknown): Genre {
     !('createdAt' in value) ||
     typeof value.createdAt !== 'string' ||
     !('updatedAt' in value) ||
-    typeof value.updatedAt !== 'string'
+    typeof value.updatedAt !== 'string' ||
+    !('usageCount' in value) ||
+    typeof value.usageCount !== 'number' ||
+    !Number.isInteger(value.usageCount) ||
+    value.usageCount < 0
   )
     return invalidResponse()
   return {
@@ -59,6 +70,7 @@ export function verifiedGenre(value: unknown): Genre {
     slug: value.slug,
     createdAt: value.createdAt,
     updatedAt: value.updatedAt,
+    usageCount: value.usageCount,
   }
 }
 export function verifiedGenrePage(value: unknown): GenrePage {
@@ -91,13 +103,6 @@ const unwrap = <T>(
     error: (status, code, message) => new GenresApiError(status, code, message),
   })
 
-const editUnavailable = () =>
-  new GenresApiError(
-    501,
-    'GENRES_EDIT_UNAVAILABLE',
-    "Editing genres isn't available yet.",
-  )
-
 export function createGenresClient(
   baseUrl: string,
   queryClient: QueryClient,
@@ -105,7 +110,7 @@ export function createGenresClient(
 ): GenresClient {
   const api = createPrivateApiClient(baseUrl, queryClient, fetcher)
   return {
-    canEdit: false,
+    canEdit: true,
     async list(search, cursor, signal) {
       return verifiedGenrePage(
         await unwrap(
@@ -119,8 +124,19 @@ export function createGenresClient(
     async create(input) {
       return verifiedGenre(await unwrap(api.admin.genres.post(input)))
     },
-    rename: () => Promise.reject(editUnavailable()),
-    remove: () => Promise.reject(editUnavailable()),
+    async rename(id, input, expectedUpdatedAt) {
+      const genre = verifiedGenre(
+        await unwrap(
+          api.admin.genres({ id }).patch({ ...input, expectedUpdatedAt }),
+        ),
+      )
+      if (genre.id !== id) return invalidResponse()
+      return genre
+    },
+    async remove(id) {
+      const result = await unwrap(api.admin.genres({ id }).delete())
+      if (result.id !== id) invalidResponse()
+    },
   }
 }
 export function browserGenresClient(queryClient: QueryClient) {

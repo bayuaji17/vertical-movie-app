@@ -21,6 +21,7 @@ export function memoryGenresClient(
     slug: row.slug ?? slugifyGenreName(row.name),
     createdAt: row.createdAt ?? '2026-10-10T00:00:00.000Z',
     updatedAt: row.updatedAt ?? '2026-10-10T00:00:00.000Z',
+    usageCount: row.usageCount ?? 0,
   }))
   const calls: string[] = []
   const conflict = (slug: string, ignore?: string) =>
@@ -51,28 +52,33 @@ export function memoryGenresClient(
         slug,
         createdAt: '2026-10-10T01:00:00.000Z',
         updatedAt: '2026-10-10T01:00:00.000Z',
+        usageCount: 0,
       }
       rows.push(row)
       return row
     },
-    async rename(id, input) {
+    async rename(id, input, expectedUpdatedAt) {
       calls.push(`rename:${id}`)
       if (!client.canEdit)
         throw new GenresApiError(501, 'GENRES_EDIT_UNAVAILABLE', 'unavailable')
       const row = rows.find((candidate) => candidate.id === id)
       if (!row) throw new GenresApiError(404, 'GENRE_NOT_FOUND', 'missing')
+      if (row.updatedAt !== expectedUpdatedAt)
+        throw new GenresApiError(409, 'GENRE_VERSION_CONFLICT', 'stale')
       const slug = input.slug ?? row.slug
       if (conflict(slug, id))
         throw new GenresApiError(409, 'SLUG_CONFLICT', 'Slug conflict')
       row.name = input.name
       row.slug = slug
+      row.updatedAt = '2026-10-10T02:00:00.000Z'
       return { ...row }
     },
     async remove(id) {
       calls.push(`remove:${id}`)
       if (!client.canEdit)
         throw new GenresApiError(501, 'GENRES_EDIT_UNAVAILABLE', 'unavailable')
-      if (options.inUse?.includes(id))
+      const target = rows.find((row) => row.id === id)
+      if (options.inUse?.includes(id) || (target && target.usageCount > 0))
         throw new GenresApiError(409, 'GENRE_IN_USE', 'in use')
       const index = rows.findIndex((row) => row.id === id)
       if (index < 0) throw new GenresApiError(404, 'GENRE_NOT_FOUND', 'missing')

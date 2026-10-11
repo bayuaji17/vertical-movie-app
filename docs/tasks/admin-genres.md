@@ -1,6 +1,6 @@
 # Modul: Genre multi-pilih dan manajemen genre
 
-> Status: GEN-001–006 Done lokal (10 Oktober 2026); bukti browser tidak ada; rename/delete nonaktif sampai GEN-API-001. Plan: [implementation-plan](../plans/admin-genres/implementation-plan.md), context: [repository-context](../plans/admin-genres/repository-context.md), desain: [admin-genres](../design/admin-genres.md).
+> Status: GEN-001–007 dan GEN-API-001 Done lokal (10 Oktober 2026); rename/hapus genre aktif (API + frontend); belum dibuktikan di browser. Plan: [implementation-plan](../plans/admin-genres/implementation-plan.md), context: [repository-context](../plans/admin-genres/repository-context.md), desain: [admin-genres](../design/admin-genres.md).
 
 ## Tujuan modul
 
@@ -231,37 +231,79 @@ Smoke browser; `bun run docs:check`.
 
 Tidak ada.
 
-## Task: GEN-API-001 — (Di luar scope frontend) PATCH/DELETE/usageCount pada genres
+## Task: GEN-API-001 — PATCH/DELETE/usageCount pada genres
 
-- Status: Backlog
+- Status: Done
 - Owner: Pengembang/agent pelaksana
 - Prioritas: 8
-- Referensi: plan Open decisions
+- Referensi: plan admin-genres; keputusan pengguna 10 Oktober 2026 ("lanjut ke edit dan hapus")
 - Diperbarui: 2026-10-10
-- Dependensi: GEN-006 (dikerjakan setelah frontend selesai, sesuai keputusan pengguna)
-- Ukuran: sedang; API + migration
+- Dependensi: GEN-006
+- Ukuran: sedang; API tanpa migration
 
 ### Ruang lingkup
 
-Usulan: `PATCH /admin/genres/:id`, `DELETE /admin/genres/:id` (409 bila dipakai), `usageCount` pada list; perlu versi/token konflik. **Belum disetujui; tidak dikerjakan oleh plan frontend.**
+`PATCH /admin/genres/:id` (name dan/atau slug, token `expectedUpdatedAt`), `DELETE /admin/genres/:id` dan `usageCount` pada setiap genre (create, list, patch). Tanpa perubahan schema: konkurensi memakai `updatedAt` (dibandingkan pada ketelitian milidetik) alih-alih kolom versi baru, dan penggunaan dihitung dari `video_genres` + `series_genres`. Kontrak diusulkan agent dan diikuti sesuai persetujuan umum pengguna; tinjau bila ingin kolom versi.
 
 ### Acceptance criteria
 
-- [ ] Kontrak disetujui pengguna sebelum implementasi.
+- [x] PATCH hanya berhasil bila `expectedUpdatedAt` sama dengan nilai yang dibaca; token usang → 409 `GENRE_VERSION_CONFLICT`, id tidak ada → 404; dua edit dari bacaan yang sama hanya satu yang menang.
+- [x] Slug bentrok → 409 `SLUG_CONFLICT`; body ketat (tanpa field lain, slug/ panjang divalidasi), minimal name atau slug.
+- [x] DELETE ditolak 409 `GENRE_IN_USE` bila video/series masih memakai genre; berhasil bila tidak dipakai; kedua kali → 404.
+- [x] Cache katalog diinvalidasi setelah edit/hapus yang berhasil, tidak setelah yang gagal.
+- [x] Setiap operasi privat melewati guard admin sebelum service (401/403).
 
 ### Validasi
 
-Tes API bun:test, migration/preservation bila schema berubah.
+`bun test ./src` (API), bukti PostgreSQL dedicated `content:runtime:proof`, `bunx tsc --noEmit`.
 
 ### Hasil dan bukti
 
-Belum dikerjakan.
+10 Oktober 2026: modul `apps/api/src/modules/genres` (model, repository dengan UPDATE bersyarat dan hitung pemakaian, service, route); `databaseErrorCode` pada `shared/content-error.ts`. **Temuan dari PostgreSQL nyata:** FK `ON DELETE RESTRICT` menghasilkan SQLSTATE `23001` (restrict_violation) pada `cause.errno`, bukan `23503`; unit test dengan error buatan awalnya lolos dengan kode keliru dan baru terdeteksi oleh proof DB, sehingga service menangani keduanya. Unit/HTTP: 9 test (62 assertion) pada modul genres; `bun test ./src` 187 pass. Proof DB dedicated (`vertical_movie_app_content_test`): runtime + HTTP 16 pass, termasuk hitung pemakaian video+series, token usang, balapan dua edit, slug bentrok, id tidak ada, delete ditolak saat dipakai, delete berhasil setelah dilepas, delete kedua 404. Jumlah operasi OpenAPI pada `content-http-proof` naik 34 → 36 (kontrak berubah sengaja).
 
 ### Commit task
 
-- Pesan: feat(api): manage genres (GEN-API-001)
-- SHA: belum dibuat
+- Pesan: feat(api): edit and delete genres with usage counts (GEN-API-001)
+- SHA: 9ecc268
 
 ### Blocker atau tindak lanjut
 
-Menunggu keputusan pengguna.
+Production migration tidak diperlukan (tanpa schema). Rollout API production tetap terpisah.
+
+## Task: GEN-007 — Aktifkan edit dan hapus genre di frontend
+
+- Status: Done
+- Owner: Pengembang/agent pelaksana
+- Prioritas: 9
+- Referensi: GEN-API-001, GEN-004
+- Diperbarui: 2026-10-10
+- Dependensi: GEN-API-001
+- Ukuran: sedang
+
+### Ruang lingkup
+
+Klien live memanggil PATCH/DELETE (`canEdit=true`), `usageCount` pada tipe dan validasi respons, token `expectedUpdatedAt` dari baris yang dibaca, penolakan respons untuk id lain, daftar menampilkan "Used by N items"/"Not used yet", tombol Delete nonaktif untuk genre yang dipakai (API tetap menolak), invalidasi cache genre dan konten, pesan `GENRE_VERSION_CONFLICT`.
+
+### Acceptance criteria
+
+- [x] Rename mengirim hanya perubahan beserta token yang dibaca; delete memanggil endpoint nyata; respons untuk id lain ditolak sebagai tidak valid.
+- [x] `usageCount` divalidasi (bilangan bulat ≥ 0) dan ditampilkan; genre yang dipakai tidak dapat dihapus dari UI.
+- [x] Adapter fixture hanya untuk test; tidak ada mock aktif di runtime.
+- [x] Cache konten untuk admin yang sama diinvalidasi setelah edit/hapus; identitas lain tidak terpengaruh.
+
+### Validasi
+
+`bun test ./apps/web/test`, `bunx tsc --noEmit` (tipe Eden dari API), ESLint.
+
+### Hasil dan bukti
+
+10 Oktober 2026: `genres-client.ts`, `genres-queries.ts`, `genres-actions.ts`, `genres-usage.ts`, `genres-manager.tsx`, `genre-dialogs.tsx`; test klien/dialog/halaman diperbarui dan ditambah. `bun test ./apps/web/test` 309 pass (57 file); tsc dan ESLint lulus. **Belum terbukti:** rename/hapus di browser terhadap API dev; layout baris dengan teks pemakaian pada 320–1440 px.
+
+### Commit task
+
+- Pesan: feat(web): enable genre rename and delete with usage counts (GEN-007)
+- SHA: 8ce7d1e
+
+### Blocker atau tindak lanjut
+
+Tidak ada.

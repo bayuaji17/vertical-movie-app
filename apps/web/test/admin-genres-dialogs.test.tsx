@@ -22,6 +22,7 @@ const drama = {
   slug: 'drama',
   createdAt: '2026-10-10T00:00:00.000Z',
   updatedAt: '2026-10-10T00:00:00.000Z',
+  usageCount: 0,
 }
 
 test('rename form is prefilled, labelled and warns that slug changes affect links', () => {
@@ -75,8 +76,11 @@ test('rename sends only what changed and rejects no-op, invalid and conflicting 
     { name: 'Drama', id: drama.id },
     { name: 'Comedy' },
   ])
-  const save = (id: string, input: { name: string; slug?: string }) =>
-    client.rename(id, input)
+  const save = (
+    id: string,
+    input: { name: string; slug?: string },
+    token: string,
+  ) => client.rename(id, input, token)
   const same = { name: 'Drama', slug: 'drama', slugTouched: true }
 
   expect(renameInput(drama, same)).toEqual({ name: 'Drama' })
