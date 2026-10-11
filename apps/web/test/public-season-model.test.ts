@@ -1,6 +1,7 @@
 import { expect, test } from 'bun:test'
 import {
   activeSeason,
+  episodeNeighbors,
   episodeLabel,
   seasonNumbers,
   seriesSummary,
@@ -42,4 +43,28 @@ test('season count is only claimed once every episode page is loaded', () => {
   expect(seriesSummary(1, 1, true)).toBe('1 season · 1 episode')
   expect(seriesSummary(150, 1, false)).toBe('150 episodes')
   expect(seriesSummary(3, 0, true)).toBe('3 episodes')
+})
+test('neighbors cross season boundaries and ask for more pages at the edge of the loaded list', () => {
+  const list = sortedEpisodes([
+    { items: [episode(1, 1), episode(1, 2), episode(2, 1)] },
+  ])
+  const middle = episodeNeighbors(list, list[1].id)
+  expect(middle.previous?.slug).toBe('s1-e1')
+  expect(middle.next?.slug).toBe('s2-e1')
+  expect(middle.needsMore).toBe(false)
+  const first = episodeNeighbors(list, list[0].id)
+  expect(first.previous).toBeUndefined()
+  expect(first.next?.slug).toBe('s1-e2')
+  const last = episodeNeighbors(list, list[2].id)
+  expect(last.previous?.slug).toBe('s1-e2')
+  expect(last.next).toBeUndefined()
+  expect(last.needsMore).toBe(true)
+  const missing = episodeNeighbors(list, 'not-loaded')
+  expect(missing).toEqual({
+    index: -1,
+    previous: undefined,
+    next: undefined,
+    needsMore: true,
+  })
+  expect(episodeNeighbors([], 'x').needsMore).toBe(true)
 })

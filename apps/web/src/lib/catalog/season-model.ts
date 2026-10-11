@@ -33,3 +33,13 @@ export function seriesSummary(
 }
 export const episodeLabel = (e: PublicEpisode) =>
   `S${e.seasonNumber} E${e.episodeNumber}`
+/** Neighbors of the current episode; `needsMore` while a neighbor may sit on an unloaded page. */
+export function episodeNeighbors(episodes: PublicEpisode[], currentId: string) {
+  const index = episodes.findIndex((e) => e.id === currentId)
+  return {
+    index,
+    previous: index > 0 ? episodes.at(index - 1) : undefined,
+    next: index >= 0 ? episodes.at(index + 1) : undefined,
+    needsMore: index === -1 || index === episodes.length - 1,
+  }
+}

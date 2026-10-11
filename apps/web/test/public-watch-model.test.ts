@@ -32,6 +32,8 @@ test('top bar title leads episodes with their position', () => {
   expect(watchHeadline(film)).toBe('A video')
   expect(watchHeadline({ ...film, kind: 'standalone' })).toBe('A video')
   expect(watchHeadline(episode)).toBe('S1 E3 · A video')
+  expect(watchHeadline(episode, 'Neon Garden')).toBe('Neon Garden · S1 E3')
+  expect(watchHeadline(film, 'Ignored')).toBe('A video')
 })
 test('Back goes to the series, the film details or Browse', () => {
   expect(watchBackTarget(episode)).toEqual({ to: 'series', slug: 'a-series' })

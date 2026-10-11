@@ -20,6 +20,9 @@ interface VerticalVideoPlayerProps {
   src?: string
   poster?: string
   loadPlayback?: (signal: AbortSignal) => Promise<PlaybackInfo>
+  /** Optional hooks for hosts (for example an Up next card); playback logic is unaffected. */
+  onEnded?: () => void
+  onPlay?: () => void
 }
 function PlaybackObserver({
   onQuality,
@@ -46,6 +49,8 @@ export function VerticalVideoPlayer({
   src,
   poster,
   loadPlayback,
+  onEnded,
+  onPlay,
 }: VerticalVideoPlayerProps) {
   const [result, setResult] = useState<{
       info: PlaybackInfo
@@ -202,7 +207,11 @@ export function VerticalVideoPlayer({
               preload="metadata"
               onLoadedMetadata={loaded}
               onCanPlay={playable}
-              onPlay={checkExpiry}
+              onPlay={() => {
+                checkExpiry()
+                onPlay?.()
+              }}
+              onEnded={onEnded}
               onSeeking={checkExpiry}
               onError={failed}
             />

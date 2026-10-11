@@ -160,3 +160,15 @@ export async function loadWatchMetadata(client: QueryClient, slug: string) {
   setContentHttpStatus(status(result))
   return { status: status(result) }
 }
+/** Optional watch-page context (series title and episode list); failures are ignored. */
+export async function loadEpisodeContext(
+  client: QueryClient,
+  seriesSlug: string,
+  api: Pick<PublicContentClient, 'detail' | 'episodes'> = transport,
+) {
+  if (typeof window !== 'undefined' && !navigator.onLine) return
+  await Promise.allSettled([
+    client.query(contentDetailOptions('series', seriesSlug, api)),
+    client.infiniteQuery(contentEpisodesOptions(seriesSlug, api)),
+  ])
+}

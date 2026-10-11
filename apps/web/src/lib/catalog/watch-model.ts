@@ -11,11 +11,13 @@ export const watchKindLabel = {
   episode: 'Episode',
 } as const
 
-/** Top bar title: episodes lead with their position so it survives truncation. */
-export function watchHeadline(video: WatchVideo) {
-  return video.kind === 'episode'
-    ? `S${video.seasonNumber} E${video.episodeNumber} · ${video.title}`
-    : video.title
+/** Top bar title: "Series · S1 E3" once the series is known, else "S1 E3 · Episode". */
+export function watchHeadline(video: WatchVideo, seriesTitle?: string) {
+  if (video.kind !== 'episode') return video.title
+  const position = `S${video.seasonNumber} E${video.episodeNumber}`
+  return seriesTitle
+    ? `${seriesTitle} · ${position}`
+    : `${position} · ${video.title}`
 }
 /** Where the top bar Back control goes: the series, the film's details, or Browse. */
 export function watchBackTarget(video: WatchVideo | undefined): WatchBack {

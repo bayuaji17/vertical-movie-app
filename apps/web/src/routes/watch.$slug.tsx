@@ -3,13 +3,22 @@ import {
   publicMeta,
   settingsFromMatches,
 } from '#/lib/settings/presentation'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { createFileRoute, Link, notFound } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ContentFailure } from '#/components/catalog/content-page'
 import { cn } from 'cn'
 import { Skeleton } from '#/components/ui/skeleton'
 import { WatchShell } from '#/components/public/watch-shell'
+import { EpisodePanel } from '#/components/public/episode-panel'
+import { useEpisodeNav } from '#/hooks/use-episode-nav'
+import type { EpisodeNav } from '#/hooks/use-episode-nav'
+import { episodeLabel } from '#/lib/catalog/season-model'
+import {
+  RiArrowLeftSLine,
+  RiArrowRightSLine,
+  RiPlayFill,
+} from '@remixicon/react'
 import { ClampedText } from '#/components/public/detail-layout'
 import { stripLegacyTypeSearch } from '#/lib/public/catalog-navigation'
 import { isMissingContent } from '#/lib/public/missing-content'
@@ -21,10 +30,10 @@ import { CatalogRequestError } from '#/lib/catalog/catalog-client'
 import {
   loadWatchMetadata,
   watchMetadataOptions,
-  nextEpisodeOptions,
+  loadEpisodeContext,
   publicContentBrowser,
 } from '#/lib/catalog/content-queries'
-import type { WatchVideo } from '#/lib/catalog/content-model'
+import type { PublicEpisode, WatchVideo } from '#/lib/catalog/content-model'
 import {
   watchBackTarget,
   watchHeadline,
@@ -39,6 +48,8 @@ export const Route = createFileRoute('/watch/$slug')({
     const video = context.queryClient.getQueryData<{ item: WatchVideo }>(
       watchMetadataOptions(params.slug).queryKey,
     )?.item
+    if (!result.status && video?.kind === 'episode' && video.seriesSlug)
+      await loadEpisodeContext(context.queryClient, video.seriesSlug)
     return {
       ...result,
       metadata: video
@@ -77,10 +88,11 @@ function Watch() {
     query.error instanceof CatalogRequestError
       ? query.error.status
       : (bootstrap.status ?? 503)
-  const video = query.data?.item
+  const video = query.data?.item,
+    nav = useEpisodeNav(video)
   return (
     <WatchShell
-      title={video ? watchHeadline(video) : 'Watch'}
+      title={video ? watchHeadline(video, nav.seriesTitle) : 'Watch'}
       back={watchBackTarget(video)}
     >
       {!online && (
@@ -89,7 +101,7 @@ function Watch() {
         </p>
       )}
       {video ? (
-        <WatchContent key={video.id} video={video} />
+        <WatchContent key={video.id} video={video} nav={nav} />
       ) : query.isFetching || (!query.isError && !bootstrap.status) ? (
         <WatchSkeleton />
       ) : (
@@ -129,29 +141,128 @@ function WatchSkeleton() {
 // The first mount is the page load; later mounts are client navigations
 // (for example moving to the next episode) and move focus to the title.
 let firstWatchMount = true
-function WatchContent({ video }: { video: WatchVideo }) {
+function StepButton({
+  episode,
+  direction,
+}: {
+  episode: PublicEpisode | undefined
+  direction: 'Previous' | 'Next'
+}) {
+  const prev = direction === 'Previous'
+  const text = prev ? (
+    <>
+      <RiArrowLeftSLine data-icon="inline-start" aria-hidden="true" />
+      Previous
+    </>
+  ) : (
+    <>
+      Next
+      <RiArrowRightSLine data-icon="inline-end" aria-hidden="true" />
+    </>
+  )
+  if (!episode)
+    return (
+      <Button
+        variant={prev ? 'outline' : 'default'}
+        className="min-h-11"
+        disabled
+      >
+        {text}
+      </Button>
+    )
+  return (
+    <Button
+      variant={prev ? 'outline' : 'default'}
+      className="min-h-11"
+      aria-label={`${direction} episode · ${episodeLabel(episode)}`}
+      nativeButton={false}
+      role="link"
+      render={
+        <Link
+          to="/watch/$slug"
+          params={{ slug: episode.slug }}
+          preload={false}
+        />
+      }
+    >
+      {text}
+    </Button>
+  )
+}
+function UpNext({ episode }: { episode: PublicEpisode }) {
+  return (
+    <div
+      role="status"
+      className="absolute inset-x-3 bottom-16 z-10 flex flex-col gap-2 rounded-2xl bg-black/85 p-3 text-white"
+    >
+      <span className="text-xs text-white/80">
+        Up next · {episodeLabel(episode)}
+      </span>
+      <span className="font-semibold [overflow-wrap:anywhere]">
+        {episode.title}
+      </span>
+      <Button
+        className="min-h-11"
+        nativeButton={false}
+        role="link"
+        render={
+          <Link
+            to="/watch/$slug"
+            params={{ slug: episode.slug }}
+            preload={false}
+          />
+        }
+      >
+        <RiPlayFill data-icon="inline-start" aria-hidden="true" />
+        Play next
+      </Button>
+    </div>
+  )
+}
+function WatchContent({ video, nav }: { video: WatchVideo; nav: EpisodeNav }) {
   const load = useCallback(
     (signal: AbortSignal) =>
       publicContentBrowser().playback(video.slug, video.id, signal),
     [video.slug, video.id],
   )
-  const heading = useRef<HTMLHeadingElement>(null)
+  const heading = useRef<HTMLHeadingElement>(null),
+    [ended, setEnded] = useState(false)
   useEffect(() => {
     if (firstWatchMount) firstWatchMount = false
     else heading.current?.focus({ preventScroll: true })
   }, [])
+  const episode = video.kind === 'episode'
   return (
     <div className={layout}>
-      <div className={stage}>
-        <VerticalVideoPlayer key={video.id} loadPlayback={load} />
+      <div className={cn('relative', stage)}>
+        <VerticalVideoPlayer
+          key={video.id}
+          loadPlayback={load}
+          onEnded={() => setEnded(true)}
+          onPlay={() => setEnded(false)}
+        />
+        {ended && nav.next && <UpNext episode={nav.next} />}
       </div>
       <div className="mx-auto flex w-full max-w-xl min-w-0 flex-col items-start gap-4 px-4 lg:mx-0 lg:max-w-none lg:px-0">
+        {episode && nav.seriesSlug && (
+          <nav
+            aria-label="Breadcrumb"
+            className="text-sm text-muted-foreground"
+          >
+            <Link
+              to="/series/$slug"
+              params={{ slug: nav.seriesSlug }}
+              className="underline-offset-4 hover:underline"
+            >
+              {nav.seriesTitle ?? 'Series'}
+            </Link>
+            {` › Season ${video.seasonNumber} › Episode ${video.episodeNumber}`}
+          </nav>
+        )}
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <Badge variant="secondary">{watchKindLabel[video.kind]}</Badge>
           <span className="text-sm text-muted-foreground">
-            {video.kind === 'episode'
-              ? `Season ${video.seasonNumber} · Episode ${video.episodeNumber} · `
-              : ''}
+            {episode ? `S${video.seasonNumber} E${video.episodeNumber} · ` : ''}
             {Math.ceil(video.durationMs / 60000)} min
           </span>
         </div>
@@ -166,7 +277,7 @@ function WatchContent({ video }: { video: WatchVideo }) {
           text={video.synopsis}
           clampClass="line-clamp-3 lg:line-clamp-none"
         />
-        {video.kind !== 'episode' && (
+        {!episode && (
           <Button
             variant="outline"
             className="min-h-11"
@@ -183,70 +294,28 @@ function WatchContent({ video }: { video: WatchVideo }) {
             Details
           </Button>
         )}
-        {video.kind === 'episode' &&
-          video.seriesSlug &&
-          video.seasonNumber &&
-          video.episodeNumber && (
-            <NextEpisode
-              key={video.id}
-              video={video}
-              seriesSlug={video.seriesSlug}
-              season={video.seasonNumber}
-              episode={video.episodeNumber}
-            />
-          )}
+        {episode && nav.seriesSlug && (
+          <>
+            <div className="grid w-full grid-cols-2 gap-2">
+              <StepButton episode={nav.previous} direction="Previous" />
+              <StepButton episode={nav.next} direction="Next" />
+            </div>
+            {nav.atEnd && (
+              <p role="status" className="text-sm text-muted-foreground">
+                You’re all caught up.{' '}
+                <Link
+                  to="/series/$slug"
+                  params={{ slug: nav.seriesSlug }}
+                  className="underline underline-offset-4"
+                >
+                  Back to series
+                </Link>
+              </p>
+            )}
+            <EpisodePanel nav={nav} video={video} />
+          </>
+        )}
       </div>
     </div>
-  )
-}
-function NextEpisode({
-  video,
-  seriesSlug,
-  season,
-  episode,
-}: {
-  video: WatchVideo
-  seriesSlug: string
-  season: number
-  episode: number
-}) {
-  const next = useQuery(
-    nextEpisodeOptions(video.slug, seriesSlug, season, episode),
-  )
-  if (next.isError)
-    return (
-      <div role="status" className="space-y-3">
-        <p>The next episode is temporarily unavailable.</p>
-        <Button
-          variant="outline"
-          className="min-h-11"
-          disabled={next.isFetching}
-          onClick={() => {
-            void next.refetch()
-          }}
-        >
-          Retry next episode
-        </Button>
-      </div>
-    )
-  if (next.isPending || next.isFetching)
-    return <p role="status">Checking next episode…</p>
-  return next.data ? (
-    <Button
-      className="min-h-11"
-      nativeButton={false}
-      role="link"
-      render={
-        <Link
-          to="/watch/$slug"
-          params={{ slug: next.data.slug }}
-          preload={false}
-        />
-      }
-    >
-      Next episode · S{next.data.seasonNumber} E{next.data.episodeNumber}
-    </Button>
-  ) : (
-    <p role="status">No more episodes are currently available.</p>
   )
 }

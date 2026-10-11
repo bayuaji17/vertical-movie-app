@@ -8,6 +8,7 @@ import {
 import { RiPlayFill } from '@remixicon/react'
 import { PublicShell } from './public-shell'
 import { PublicFailure } from './catalog-states'
+import { EpisodeRow } from './episode-row'
 import {
   BackToBrowse,
   DetailCta,
@@ -40,7 +41,6 @@ import {
   seriesSummary,
   sortedEpisodes,
 } from '#/lib/catalog/season-model'
-import type { PublicEpisode } from '#/lib/catalog/content-model'
 
 const tabLimit = 4
 
@@ -84,40 +84,6 @@ function SeasonPicker({
         </ToggleGroupItem>
       ))}
     </ToggleGroup>
-  )
-}
-function EpisodeRow({ episode }: { episode: PublicEpisode }) {
-  return (
-    <li>
-      <Link
-        to="/watch/$slug"
-        params={{ slug: episode.slug }}
-        preload={false}
-        className="grid min-h-11 grid-cols-[40px_minmax(0,1fr)_auto] items-start gap-3 rounded-2xl border p-3 outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        <span
-          aria-hidden="true"
-          className="grid size-10 place-items-center rounded-xl bg-muted font-heading text-sm font-semibold"
-        >
-          E{episode.episodeNumber}
-        </span>
-        <span className="min-w-0">
-          <span className="block font-semibold [overflow-wrap:anywhere]">
-            <span className="sr-only">
-              Season {episode.seasonNumber}, episode {episode.episodeNumber}
-              :{' '}
-            </span>
-            {episode.title}
-          </span>
-          <span className="mt-0.5 line-clamp-2 text-sm text-muted-foreground [overflow-wrap:anywhere]">
-            {episode.synopsis}
-          </span>
-        </span>
-        <span className="text-sm whitespace-nowrap text-muted-foreground">
-          {Math.ceil(episode.durationMs / 60000)} min
-        </span>
-      </Link>
-    </li>
   )
 }
 export function SeriesDetail({
