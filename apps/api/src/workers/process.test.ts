@@ -74,3 +74,16 @@ test.skipIf(process.platform !== "linux")(
   },
   25000,
 );
+test("a failing tool keeps a bounded stderr tail for the worker log", async () => {
+  const noisy =
+    "for (let i=0;i<2000;i++) console.error('line '+i+' /tmp/job-x/source');";
+  const failure = await runMediaProcess(
+    [process.execPath, "-e", noisy + "process.exit(3)"],
+    { timeoutSeconds: 5 },
+  ).catch((error: unknown) => error);
+  expect(failure).toMatchObject({ code: "MEDIA_PROCESS_FAILED" });
+  const diagnostics = (failure as { diagnostics?: string }).diagnostics ?? "";
+  expect(diagnostics.length).toBeLessThanOrEqual(4096);
+  expect(diagnostics).toContain("line 1999");
+  expect(diagnostics).not.toContain("line 0 ");
+});

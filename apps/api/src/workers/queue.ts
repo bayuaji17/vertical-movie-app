@@ -50,6 +50,13 @@ export function createMediaQueue(client: SQL, config: WorkerEnv) {
       const expired =
         await client`SELECT id,asset_id AS "assetId",generation,kind,attempts,failures,lease_token AS "leaseToken",lease_until AS "leaseUntil" FROM media_jobs WHERE execution_mode='worker' AND state='running' AND lease_until<=now() ORDER BY lease_until LIMIT 100`;
       let recovered = 0;
+      const jobs: {
+        jobId: string;
+        assetId: string;
+        attempt: number;
+        dead: boolean;
+        retryInSeconds?: number;
+      }[] = [];
       for (const raw of expired) {
         const job = raw as JobClaim;
         const dead = job.failures + 1 >= config.maxAttempts,
@@ -65,8 +72,16 @@ export function createMediaQueue(client: SQL, config: WorkerEnv) {
           return rows.length;
         });
         recovered += changed;
+        if (changed)
+          jobs.push({
+            jobId: job.id,
+            assetId: job.assetId,
+            attempt: job.attempts,
+            dead,
+            ...(dead ? {} : { retryInSeconds: delay }),
+          });
       }
-      return { recovered };
+      return { recovered, jobs };
     },
     async stopped(job: JobClaim) {
       await client`UPDATE media_job_attempts SET stopped_at=coalesce(stopped_at,now()) WHERE token=${job.leaseToken}::uuid`;

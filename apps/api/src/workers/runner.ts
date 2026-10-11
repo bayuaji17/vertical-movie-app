@@ -1,4 +1,5 @@
 import { mkdir, mkdtemp, rm, statfs } from "node:fs/promises";
+import { createLogger, errorFields, type Logger } from "@repo/log";
 import { join, resolve, sep } from "node:path";
 import { createHash } from "node:crypto";
 import type { S3Client } from "bun";
@@ -10,6 +11,7 @@ import type { MediaQueue, JobClaim } from "./queue";
 import { MediaProcessError } from "./process";
 import { probe, videoFacts, verifyEbml } from "./probe";
 import { transcodeHls, transcodePoster } from "./transcode";
+import { createProgressLog } from "./progress-log";
 const mime = (file: string) =>
   file.endsWith(".m3u8")
     ? "application/vnd.apple.mpegurl"
@@ -21,6 +23,7 @@ const mime = (file: string) =>
           ? "image/webp"
           : "application/octet-stream";
 export function createJobRunner({
+  log = createLogger("worker"),
   repo,
   queue,
   native,
@@ -28,6 +31,7 @@ export function createJobRunner({
   storageEnv,
   workerEnv,
 }: {
+  log?: Logger;
   repo: MediaRepository;
   queue: MediaQueue;
   native: S3Client;
@@ -36,6 +40,28 @@ export function createJobRunner({
   workerEnv: WorkerEnv;
 }) {
   return async function run(job: JobClaim, shutdown?: AbortSignal) {
+    const jobLog = log.child({
+      jobId: job.id,
+      assetId: job.assetId,
+      kind: job.kind,
+      attempt: job.attempts,
+      generation: job.generation,
+    });
+    const startedAt = performance.now();
+    let stageName = "init",
+      stageStartedAt = startedAt;
+    const begin = (name: string) => {
+      stageName = name;
+      stageStartedAt = performance.now();
+      jobLog.info("job.stage", { stage: name, phase: "start" });
+    };
+    const end = (fields: Record<string, unknown> = {}) =>
+      jobLog.info("job.stage", {
+        stage: stageName,
+        phase: "done",
+        durationMs: Math.round(performance.now() - stageStartedAt),
+        ...fields,
+      });
     const controller = new AbortController();
     const abort = () => controller.abort();
     shutdown?.addEventListener("abort", abort, { once: true });
@@ -47,8 +73,20 @@ export function createJobRunner({
       if (heartbeatRunning) return;
       heartbeatRunning = true;
       try {
-        if (!(await queue.heartbeat(job, progress))) controller.abort();
-      } catch {
+        if (await queue.heartbeat(job, progress))
+          jobLog.debug("job.heartbeat", {
+            stage: stageName,
+            progressSeconds: progress,
+          });
+        else {
+          jobLog.warn("job.lease_lost", {
+            stage: stageName,
+            progressSeconds: progress,
+          });
+          controller.abort();
+        }
+      } catch (error) {
+        jobLog.warn("job.heartbeat_error", errorFields(error));
         controller.abort();
       } finally {
         heartbeatRunning = false;
@@ -56,10 +94,13 @@ export function createJobRunner({
     }, workerEnv.heartbeatSeconds * 1000);
     const deadline = setTimeout(abort, workerEnv.hardTimeoutSeconds * 1000);
     try {
+      begin("disk_check");
       await mkdir(workerEnv.workdir, { recursive: true, mode: 0o700 });
       const space = await statfs(workerEnv.workdir);
       if (space.bavail * space.bsize < workerEnv.minFreeBytes)
         throw new MediaProcessError("MEDIA_RESOURCE_DISK");
+      end({ freeBytes: space.bavail * space.bsize });
+      begin("load_asset");
       const asset = await repo.store.asset(job.assetId);
       if (
         !asset ||
@@ -85,6 +126,8 @@ export function createJobRunner({
       dir = await mkdtemp(
         join(workerEnv.workdir, "job-" + job.leaseToken + "-"),
       );
+      end({ sizeBytes: Number(asset.sizeBytes) });
+      begin("download");
       const source = join(dir, "source"),
         hash = createHash("sha256"),
         writer = Bun.file(source).writer();
@@ -117,9 +160,12 @@ export function createJobRunner({
         throw new MediaProcessError("MEDIA_CANCELLED");
       if (BigInt(downloaded) !== asset.sizeBytes)
         throw new MediaProcessError("MEDIA_SOURCE_CHANGED");
+      end({ bytes: downloaded });
+      begin("verify");
       const sha256 = hash.digest("hex");
       if (upload.expectedSha256 !== null && sha256 !== upload.expectedSha256)
         throw new MediaProcessError("MEDIA_SOURCE_CHANGED");
+      end({ sha256: sha256.slice(0, 12) });
       let facts: Record<string, unknown>,
         files: string[],
         tiers: {
@@ -135,6 +181,7 @@ export function createJobRunner({
         });
         if (!owner.kind)
           throw new MediaProcessError("MEDIA_SOURCE_UNAVAILABLE");
+        begin("probe");
         await verifyEbml(source, upload.filename);
         const verified = videoFacts(
           await probe(source, workerEnv.ffprobe, controller.signal),
@@ -142,6 +189,21 @@ export function createJobRunner({
           upload.filename,
           downloaded,
         );
+        end({
+          mediaDurationMs: verified.durationMs,
+          width: verified.width,
+          height: verified.height,
+          codec: verified.codec,
+          fps: verified.fps,
+          hasAudio: verified.hasAudio,
+          hdr: verified.hdr,
+          container: verified.container,
+        });
+        begin("transcode");
+        const progressLog = createProgressLog({
+          log: jobLog,
+          totalSeconds: verified.durationMs / 1000,
+        });
         const result = await transcodeHls(source, join(dir, "hls"), verified, {
           ffmpeg: workerEnv.ffmpeg,
           ffprobe: workerEnv.ffprobe,
@@ -152,14 +214,28 @@ export function createJobRunner({
             Math.ceil((verified.durationMs / 1000) * workerEnv.timeoutFactor),
           ),
           stallSeconds: workerEnv.stallSeconds,
+          onPlan: (planned) =>
+            jobLog.info("job.stage", {
+              stage: "transcode",
+              phase: "plan",
+              renditions: planned.map((t) => t.name),
+              mediaDurationMs: verified.durationMs,
+            }),
           onProgress: (seconds) => {
             progress = seconds;
+            progressLog.report(seconds);
           },
+        });
+        end({
+          percent: 100,
+          renditions: result.tiers.map((t) => t.name),
+          files: result.files.length,
         });
         files = result.files;
         tiers = result.tiers;
         facts = { ...verified, profile: "hls-v1" };
       } else {
+        begin("transcode");
         await mkdir(join(dir, "hls"));
         facts = await transcodePoster(
           source,
@@ -171,7 +247,10 @@ export function createJobRunner({
           controller.signal,
         );
         files = ["poster.webp"];
+        end({ files: 1 });
       }
+      begin("upload");
+      let uploadedBytes = 0;
       for (const file of files) {
         if (controller.signal.aborted)
           throw new MediaProcessError("MEDIA_CANCELLED");
@@ -190,7 +269,10 @@ export function createJobRunner({
           checked.contentType !== mime(file)
         )
           throw new MediaProcessError("MEDIA_OUTPUT_VERIFY_FAILED");
+        uploadedBytes += payload.size;
       }
+      end({ files: files.length, bytes: uploadedBytes });
+      begin("commit");
       await repo.transact(async (store) => {
         await store.owner(
           {
@@ -246,6 +328,12 @@ export function createJobRunner({
         });
         await store.stopAttempt(job.leaseToken, now);
       });
+      end();
+      jobLog.info("job.completed", {
+        totalMs: Math.round(performance.now() - startedAt),
+        files: files.length,
+        renditions: tiers.length,
+      });
       return { state: "succeeded" as const };
     } catch (error) {
       const errno = (error as { code?: string })?.code;
@@ -267,7 +355,42 @@ export function createJobRunner({
         code.startsWith("MEDIA_INVALID_") ||
         code.startsWith("MEDIA_ANIMATED_") ||
         ["MEDIA_SOURCE_CHANGED", "MEDIA_SOURCE_UNAVAILABLE"].includes(code);
-      await queue.fail(job, code, terminal, pause);
+      const dead =
+        !pause && (terminal || job.failures + 1 >= workerEnv.maxAttempts);
+      const recorded = await queue.fail(job, code, terminal, pause);
+      const workdir = resolve(workerEnv.workdir);
+      const stderr =
+        error instanceof MediaProcessError && error.diagnostics
+          ? error.diagnostics
+              .split(workdir)
+              .join("<workdir>")
+              .split("\n")
+              .filter((line) => line.trim())
+              .slice(-20)
+          : undefined;
+      const fields = {
+        stage: stageName,
+        stageDurationMs: Math.round(performance.now() - stageStartedAt),
+        totalMs: Math.round(performance.now() - startedAt),
+        code,
+        terminal,
+        dead,
+        failures: job.failures + (pause ? 0 : 1),
+        maxAttempts: workerEnv.maxAttempts,
+        ...(dead
+          ? {}
+          : {
+              retryInSeconds: pause
+                ? 300
+                : (workerEnv.retryDelays[job.failures] ?? 300),
+            }),
+        recorded,
+        ...errorFields(error, process.env.NODE_ENV !== "production"),
+        ffmpegStderr: stderr,
+      };
+      if (pause) jobLog.warn("job.paused", fields);
+      else if (dead) jobLog.error("job.failed", fields);
+      else jobLog.warn("job.failed", fields);
       return { state: pause ? ("paused" as const) : ("failed" as const), code };
     } finally {
       clearInterval(heartbeat);

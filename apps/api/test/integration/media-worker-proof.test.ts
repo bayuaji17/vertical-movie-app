@@ -1,5 +1,6 @@
 import { proveBrowserPlayback } from "./media-playback-fixture";
 import { createHash } from "node:crypto";
+import { createLogger } from "@repo/log";
 import { PublicationService } from "../../src/modules/publication/service";
 import { PlaybackService } from "../../src/modules/playback/service";
 import { CatalogService } from "../../src/modules/catalog/service";
@@ -192,7 +193,12 @@ test(
       expect(
         await queue.heartbeat({ ...job, leaseToken: crypto.randomUUID() }, 0),
       ).toBe(false);
+      const workerRecords: Array<Record<string, unknown>> = [];
       const run = createJobRunner({
+        log: createLogger("worker", {
+          config: { level: "debug", format: "json", bodies: false },
+          write: (line) => void workerRecords.push(JSON.parse(line)),
+        }),
         repo,
         queue,
         native,
@@ -201,6 +207,32 @@ test(
         workerEnv,
       });
       expect(await run(job)).toEqual({ state: "succeeded" });
+      // Every stage of a real job is logged in order, tagged with the job and asset.
+      expect(
+        workerRecords
+          .filter((r) => r.event === "job.stage" && r.phase === "done")
+          .map((r) => r.stage),
+      ).toEqual([
+        "disk_check",
+        "load_asset",
+        "download",
+        "verify",
+        "probe",
+        "transcode",
+        "upload",
+        "commit",
+      ]);
+      expect(
+        workerRecords.every(
+          (r) => r.jobId === job.id && r.assetId === session.assetId,
+        ),
+      ).toBe(true);
+      expect(workerRecords.at(-1)).toMatchObject({ event: "job.completed" });
+      const percents = workerRecords
+        .filter((r) => r.phase === "progress")
+        .map((r) => r.percent as number);
+      expect([...percents].sort((a, b) => a - b)).toEqual(percents);
+      expect(JSON.stringify(workerRecords)).not.toContain(job.leaseToken);
       const asset = await repo.store.asset(session.assetId);
       expect(asset?.state).toBe("ready");
       expect(asset?.sha256).toHaveLength(64);

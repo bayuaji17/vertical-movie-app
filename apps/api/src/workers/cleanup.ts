@@ -1,4 +1,5 @@
 import type { SQL } from "bun";
+import { createLogger, errorFields, type Logger } from "@repo/log";
 import { readdir, rm, stat } from "node:fs/promises";
 import { join, resolve, sep } from "node:path";
 import type { MediaRepository } from "../modules/media/repository";
@@ -6,6 +7,7 @@ import type { MultipartStorage } from "../storage/multipart";
 import type { StorageEnv } from "../config/storage-env";
 import type { WorkerEnv } from "../config/worker-env";
 export function createMediaCleanup({
+  log = createLogger("worker"),
   client,
   repo,
   storage,
@@ -13,6 +15,7 @@ export function createMediaCleanup({
   workerEnv,
   now = () => new Date(),
 }: {
+  log?: Logger;
   client: SQL;
   repo: MediaRepository;
   storage: MultipartStorage;
@@ -76,8 +79,13 @@ export function createMediaCleanup({
             });
         });
         originals++;
-      } catch {
-        /* Claims persist for idempotent retry; never delete metadata. */
+      } catch (error) {
+        // Claims persist for idempotent retry; never delete metadata.
+        log.warn("cleanup.item_failed", {
+          target: "original",
+          assetId: item.id,
+          ...errorFields(error),
+        });
       }
     }
     const attempts =
@@ -96,8 +104,13 @@ export function createMediaCleanup({
           await storage.remove(key);
         await client`UPDATE media_job_attempts SET cleaned_at=${now()} WHERE token=${a.token}::uuid`;
         partials++;
-      } catch {
-        /* Failed prefixes remain discoverable next sweep. */
+      } catch (error) {
+        // Failed prefixes remain discoverable next sweep.
+        log.warn("cleanup.item_failed", {
+          target: "attempt_outputs",
+          attempt: a.token,
+          ...errorFields(error),
+        });
       }
     }
     // On Linux an independent timeout process bounds orphaned FFmpeg after worker death.
@@ -119,8 +132,12 @@ export function createMediaCleanup({
         )
           await rm(path, { recursive: true, force: true });
       }
-    } catch {
-      /* Temp recovery repeats without affecting bucket assets. */
+    } catch (error) {
+      // Temp recovery repeats without affecting bucket assets.
+      log.warn("cleanup.item_failed", {
+        target: "workdir",
+        ...errorFields(error),
+      });
     }
     return { originals, partials };
   };

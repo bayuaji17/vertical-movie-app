@@ -211,7 +211,7 @@ Tidak ada.
 
 ## Task: LOG-006 — Log worker: siklus hidup dan tahap job
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 6
 - Referensi: LOG-US-01/02/03; [plan](../plans/logging-enhancement/implementation-plan.md)
@@ -225,8 +225,8 @@ Tidak ada.
 
 ### Acceptance criteria
 
-- [ ] Satu job menghasilkan urutan tahap lengkap dengan `jobId`/`assetId`/`attempt` pada setiap event.
-- [ ] Kegagalan mencatat kode dan penyebab terpotong tanpa path privat/rahasia.
+- [x] Satu job menghasilkan urutan tahap lengkap dengan `jobId`/`assetId`/`attempt` pada setiap event.
+- [x] Kegagalan mencatat kode dan penyebab terpotong tanpa path privat/rahasia.
 
 ### Validasi
 
@@ -234,7 +234,7 @@ Test runner dengan job palsu; integrasi PostgreSQL/FFmpeg di suite terpisah.
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 11 Oktober 2026. `workers/index.ts`: `worker.start` (konkurensi, poll, lease, heartbeat, retry, threads, batas, level log), `job.claimed` (jobId, assetId, kind, attempt, failures, slot), `worker.paused`, `worker.dependency_error` (menggantikan `catch {}` yang menelan penyebab, dengan nama/pesan/penyebab), `worker.stopping`/`worker.stopped`. `workers/runner.ts`: logger anak per job (jobId, assetId, kind, attempt, generation) dengan `job.stage` fase `start`/`done` + durasi untuk `disk_check` (freeBytes), `load_asset` (sizeBytes), `download` (bytes), `verify` (sha256 12 karakter), `probe` (mediaDurationMs, resolusi, codec, fps, audio, hdr, container), `transcode`, `upload` (files, bytes), `commit`; `job.completed` (totalMs, files, renditions); `job.failed`/`job.paused` (stage, durasi tahap dan total, kode MEDIA_*, terminal/dead, failures/maxAttempts, retryInSeconds, apakah tercatat di antrean, nama/pesan/penyebab, stack hanya di luar production); `job.lease_lost`, `job.heartbeat_error` dan `job.heartbeat` (debug). Poster dan sumber memakai tahap yang sama. Bukti nyata: suite integrasi `bun run --cwd apps/api media:worker:proof` (FFmpeg, PostgreSQL uji khusus, MinIO) lulus (1 test, 68 assertion) dan kini menegaskan urutan delapan tahap, `jobId`/`assetId` pada setiap event, `job.completed` terakhir dan progres monoton; log nyata menampilkan satu job 2,2 detik dan satu kegagalan `MEDIA_SOURCE_CHANGED` pada tahap verify.
 
 ### Commit task
 
@@ -249,7 +249,7 @@ Tidak ada.
 
 ## Task: LOG-007 — Log worker: progres transcode, retry, recovery dan cleanup
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 7
 - Referensi: LOG-US-01/02/03; [plan](../plans/logging-enhancement/implementation-plan.md)
@@ -263,8 +263,8 @@ Progres FFmpeg (`-progress`) per 10% durasi atau 15 detik, stderr FFmpeg 4 KB te
 
 ### Acceptance criteria
 
-- [ ] Progres monoton dan tidak lebih sering dari batas; selalu ada event 100% atau gagal.
-- [ ] Recovery dan cleanup mencatat jumlah item.
+- [x] Progres monoton dan tidak lebih sering dari batas; selalu ada event 100% atau gagal.
+- [x] Recovery dan cleanup mencatat jumlah item.
 
 ### Validasi
 
@@ -272,7 +272,7 @@ Unit throttle progres; satu job nyata di suite integrasi.
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 11 Oktober 2026. `workers/progress-log.ts` (`createProgressLog`): progres transcode dari `-progress` FFmpeg dicatat setiap 10% durasi media atau 15 detik (yang lebih dulu), tidak mengulang persen, tidak mundur, aman untuk durasi 0 atau progres melebihi durasi; event `job.stage` fase `progress` (percent, mediaSeconds, elapsedMs) dan `plan` (daftar rendition), serta fase `done` dengan percent 100. `MediaProcessError` membawa 4 KB terakhir stderr (`diagnostics`) yang dicatat saat gagal sebagai maksimal 20 baris dengan path workdir diganti `<workdir>` (tidak pernah dikirim ke klien). `queue.recover` mengembalikan daftar job (jobId, assetId, attempt, dead, retryInSeconds) sehingga `queue.recover` dan `job.lease_expired` dicatat; `cleanup` mencatat jumlah (originals, partials, uploadSessions, durasi) dan `cleanup.item_failed` pada kegagalan yang sebelumnya diam. Test: `progress-log.test.ts` (3), `process.test.ts` (stderr terbatas), integrasi worker (lihat LOG-006).
 
 ### Commit task
 

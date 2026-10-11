@@ -1,3 +1,4 @@
+import { createLogger, errorFields, loadLogEnv } from "@repo/log";
 import { createMediaCleanup } from "./cleanup";
 import { loadDatabaseUrl } from "../config/env";
 import { loadStorageEnv } from "../config/storage-env";
@@ -9,7 +10,9 @@ import { createStorageClient } from "../storage/s3";
 import { createMultipartStorage } from "../storage/multipart";
 import { createMediaQueue } from "./queue";
 import { createJobRunner } from "./runner";
+const log = createLogger("worker");
 async function main() {
+  loadLogEnv();
   const storageEnv = loadStorageEnv(),
     workerEnv = loadWorkerEnv(),
     database = createDatabase(loadDatabaseUrl()),
@@ -19,6 +22,7 @@ async function main() {
     queue = createMediaQueue(database.client, workerEnv),
     media = new MediaService(repo, storage, storageEnv),
     run = createJobRunner({
+      log,
       repo,
       queue,
       native,
@@ -27,6 +31,7 @@ async function main() {
       workerEnv,
     });
   const cleanup = createMediaCleanup({
+    log,
     client: database.client,
     repo,
     storage,
@@ -42,6 +47,7 @@ async function main() {
   const stop = () => {
     if (stopping) return;
     stopping = true;
+    log.info("worker.stopping", { graceSeconds: workerEnv.shutdownSeconds });
     grace = setTimeout(
       () => controller.abort(),
       workerEnv.shutdownSeconds * 1000,
@@ -50,7 +56,8 @@ async function main() {
   process.once("SIGTERM", stop);
   process.once("SIGINT", stop);
   const sleep = () => Bun.sleep(workerEnv.pollSeconds * 1000);
-  async function slot(maintenance: boolean) {
+  async function slot(index: number) {
+    const maintenance = index === 0;
     while (!stopping) {
       try {
         const now = Date.now();
@@ -59,12 +66,29 @@ async function main() {
           now - lastRecovery >= workerEnv.recoverySeconds * 1000
         ) {
           lastRecovery = now;
-          await queue.recover();
+          const recovery = await queue.recover();
+          if (recovery.recovered > 0)
+            log.warn("queue.recover", { recovered: recovery.recovered });
+          else log.debug("queue.recover", { recovered: 0 });
+          for (const job of recovery.jobs) log.warn("job.lease_expired", job);
         }
         if (maintenance && now - lastCleanup >= 3600000) {
           lastCleanup = now;
-          await media.cleanup();
-          await cleanup();
+          const startedAt = performance.now();
+          const sessions = await media.cleanup();
+          const cleaned = await cleanup();
+          const fields = {
+            ...cleaned,
+            uploadSessions: sessions.cleaned,
+            durationMs: Math.round(performance.now() - startedAt),
+          };
+          if (
+            cleaned.originals > 0 ||
+            cleaned.partials > 0 ||
+            sessions.cleaned > 0
+          )
+            log.info("cleanup", fields);
+          else log.debug("cleanup", fields);
         }
         if (now < pauseUntil) {
           await sleep();
@@ -75,23 +99,47 @@ async function main() {
           await sleep();
           continue;
         }
+        log.info("job.claimed", {
+          jobId: job.id,
+          assetId: job.assetId,
+          kind: job.kind,
+          attempt: job.attempts,
+          failures: job.failures,
+          slot: index,
+        });
         const result = await run(job, controller.signal);
         if (result.state === "paused" && !stopping) {
           pauseUntil = Date.now() + 300000;
-          console.error("Media worker paused: " + result.code);
-        } else console.info("Media job " + job.id + ": " + result.state);
-      } catch {
-        console.error("Media worker dependency unavailable; retrying.");
+          log.warn("worker.paused", {
+            code: result.code,
+            jobId: job.id,
+            resumeInSeconds: 300,
+          });
+        }
+      } catch (error) {
+        log.error("worker.dependency_error", {
+          retryInSeconds: workerEnv.pollSeconds,
+          ...errorFields(error, process.env.NODE_ENV !== "production"),
+        });
         await sleep();
       }
     }
   }
-  console.info(
-    "Media worker started with concurrency " + workerEnv.concurrency,
-  );
+  log.info("worker.start", {
+    concurrency: workerEnv.concurrency,
+    pollSeconds: workerEnv.pollSeconds,
+    leaseSeconds: workerEnv.leaseSeconds,
+    heartbeatSeconds: workerEnv.heartbeatSeconds,
+    maxAttempts: workerEnv.maxAttempts,
+    retryDelays: workerEnv.retryDelays,
+    threads: workerEnv.threads,
+    shutdownSeconds: workerEnv.shutdownSeconds,
+    hardTimeoutSeconds: workerEnv.hardTimeoutSeconds,
+    logLevel: log.config.level,
+  });
   try {
     await Promise.all(
-      Array.from({ length: workerEnv.concurrency }, (_, i) => slot(i === 0)),
+      Array.from({ length: workerEnv.concurrency }, (_, i) => slot(i)),
     );
   } finally {
     if (grace) clearTimeout(grace);
@@ -100,10 +148,14 @@ async function main() {
     process.removeListener("SIGINT", stop);
     storage.close();
     await database.client.close();
+    log.info("worker.stopped");
   }
 }
 if (import.meta.main)
-  main().catch(() => {
-    console.error("Media worker failed to start; check server configuration.");
+  main().catch((error) => {
+    log.error("worker.start_failed", {
+      hint: "check server configuration",
+      ...errorFields(error, process.env.NODE_ENV !== "production"),
+    });
     process.exitCode = 1;
   });

@@ -15,9 +15,14 @@ export async function transcodeHls(
     ffmpeg?: string;
     ffprobe?: string;
     threads?: number;
+    /** Called once the rendition ladder is chosen, before FFmpeg starts. */
+    onPlan?: (
+      tiers: { name: string; width: number; height: number; bitrate: number }[],
+    ) => void;
   } = {},
 ) {
   const tiers = ladder(facts);
+  options.onPlan?.(tiers);
   await mkdir(directory, { recursive: true });
   for (let i = 0; i < tiers.length; i++)
     await mkdir(join(directory, String(i)), { recursive: true });
