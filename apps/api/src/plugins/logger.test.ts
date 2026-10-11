@@ -341,6 +341,7 @@ describe("console request logger", () => {
       const app = new Elysia()
         .use(
           createRequestLogger({
+            config: { level: "debug", format: "json", bodies: false },
             write: () => {
               writes++;
               if (writes === 2) completion.resolve();

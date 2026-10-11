@@ -14,7 +14,7 @@ Kontrak aktif metadata, runbook migrasi dan proof ada pada [Video Operations](..
 
 ## Logging request HTTP
 
-> Disetujui pengguna dan implemented/verified lokal 7 Oktober 2026. Bukti dan commit per task: [API Request Logging](../tasks/api-request-logging.md).
+> Diperbarui 11 Oktober 2026: format, level dan field kini mengikuti bagian [Log terstruktur](#log-terstruktur) di bawah (record JSON contoh di bagian ini adalah bentuk awal 7 Oktober 2026). Disetujui pengguna dan implemented/verified lokal 7 Oktober 2026. Bukti dan commit per task: [API Request Logging](../tasks/api-request-logging.md).
 
 `createApp` memasang `createRequestLogger` dari `apps/api/src/plugins/logger.ts` sebelum semua route/module/OpenAPI. Logging selalu aktif pada development dan hasil build/start; tidak memerlukan library logging, env tambahan atau konfigurasi frontend. Setiap request yang mencapai proses API mencetak dua record JSON satu baris melalui `console.log`:
 
@@ -45,6 +45,35 @@ curl -i http://localhost:3001/route-yang-tidak-ada
 Browser business gateway menghapus prefix `/api`; request browser `/api/admin/videos` tercatat sebagai `/admin/videos`. Request yang ditolak gateway sebelum mencapai API, transfer part upload dan objek media yang langsung menuju MinIO/R2 tidak tercatat oleh logger API. Log hanya menuju console/stdout; penyimpanan atau rotasinya mengikuti process manager deployment. Jika proses berhenti sebelum request selesai, completion bisa tidak ada. `durationMs` adalah waktu proses sampai hook completion, bukan jaminan durasi transfer atau penerimaan seluruh byte oleh client.
 
 Test menginjeksi `requestLogger.write`, clock monotonic dan timestamp melalui factory/plugin serta menunggu event completion asynchronous. Test memakai `app.handle` tanpa port; demo terminal terpisah membuktikan development dan build/start. Tidak ada perubahan schema/migrasi untuk logging.
+
+## Log terstruktur
+
+> Disetujui pengguna dan implemented 11 Oktober 2026; rencana, keputusan D1–D5 dan evidence: [plan](../plans/logging-enhancement/implementation-plan.md) dan [backlog LOG](../tasks/logging-enhancement.md). Lingkup: API, worker media dan server web; skrip CLI (provision/reset/migrate/seed) tetap output polos.
+
+Semua proses memakai paket `@repo/log` (`packages/log`, tanpa library eksternal): satu record per baris dengan `timestamp`, `level` (`debug|info|warn|error`), `component` (`api`, `worker`, `web`), `event` dan field spesifik. Konfigurasi (lihat [environment](environment.md)): `LOG_LEVEL` (default `debug` di development, `info` pada production, `warn` saat `NODE_ENV=test`), `LOG_FORMAT` (`pretty` satu baris berwarna di development, `json` pada production) dan `LOG_HTTP_BODIES` (default `false`, ditolak pada production). Penulisan log tidak pernah melempar: sink yang gagal tidak mengubah respons HTTP atau job.
+
+**Redaksi.** Kunci bernama password, secret, token, authorization, cookie, signature, credential, api key, session, private, `x-amz-*`, serta parameter query dan URL bertanda tangan diganti `[redacted]`; string dipotong 500 karakter, objek dibatasi kedalaman 4 dan 20 item. Cookie dan `Authorization` tidak pernah dicatat. Pesan error validasi tidak dicatat karena memuat input yang dikirim.
+
+**Korelasi.** Header `x-request-id`: server web membuat UUID (atau memakai UUID valid dari klien), meneruskannya ke API pada gateway `/api/*` dan pada pembacaan SSR, API memakainya ulang (nilai lain diganti UUID baru) dan mengembalikannya di setiap respons; respons halaman SSR juga membawanya. Satu ID muncul di log web dan API.
+
+| Event                                                                                                 | Component   | Isi utama                                                                                                                                                                |
+| ----------------------------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `http.request` / `http.response`                                                                      | api         | method, path, query tersanitasi, `contentType`, `requestBytes`, `origin`, `userAgent`; status, `durationMs`, `responseBytes`, `errorCode`; level 4xx `warn`, 5xx `error` |
+| `http.error`                                                                                          | api         | status, `errorCode` (kode domain atau `VALIDATION_ERROR`/`NOT_FOUND`/`INTERNAL_ERROR`), nama/pesan/penyebab, stack hanya untuk 5xx di luar production                    |
+| `http.body`                                                                                           | api         | hanya `LOG_HTTP_BODIES=true`: arah, body JSON terredaksi maksimal 2 KB; tidak untuk `/auth`, `/media/uploads`, `/playback`, `/poster`, stream/biner                      |
+| `gateway.request` / `gateway.error`                                                                   | web         | target (`auth`/`business`), status, `upstreamStatus`, durasi, `errorCode` gateway (timeout 504, tidak tersedia 503, dibatalkan 499, dll.)                                |
+| `ssr.api_error` / `ssr.api` (debug)                                                                   | web         | operasi pembacaan server-side, status, durasi                                                                                                                            |
+| `api.start`/`api.stopping`/`api.stopped`, `process.uncaught_exception`, `process.unhandled_rejection` | api, worker | konfigurasi log, penutupan, crash dengan penyebab lalu exit 1                                                                                                            |
+| `worker.*`, `job.*`, `queue.recover`, `cleanup*`                                                      | worker      | lihat [operasi media](../operations/media.md#mengikuti-job-worker-dari-log)                                                                                              |
+
+Contoh menelusuri satu request dengan `jq` (production/JSON) atau `grep` (development):
+
+```sh
+bun run dev --filter=api --filter=web 2>&1 | grep 3f2b8c1e-0d4a-4b7e-9a51-6c2d7e8f9a10
+jq -c 'select(.requestId=="3f2b8c1e-0d4a-4b7e-9a51-6c2d7e8f9a10")' server.log
+```
+
+Body request/response hanya untuk debugging lokal: jalankan API dengan `LOG_HTTP_BODIES=true` dan lihat event `http.body` yang membawa `requestId` yang sama dengan `http.request`.
 
 ## Struktur folder tujuan
 

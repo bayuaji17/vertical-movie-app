@@ -2,7 +2,7 @@
 
 ## Plan metadata
 
-- Status: **approved** (11 Oktober 2026). Pengguna menyetujui D1–D5 sebagaimana direkomendasikan ("setuju semua, langsung kerjakan semua"); skrip CLI tetap tidak ikut.
+- Status: **implemented lokal** (LOG-001–008 Done, LOG-009 Review; 11 Oktober 2026). Disetujui (11 Oktober 2026). Pengguna menyetujui D1–D5 sebagaimana direkomendasikan ("setuju semua, langsung kerjakan semua"); skrip CLI tetap tidak ikut.
 - Date: 11 Oktober 2026; decision owner: pengguna.
 - Repository: `bayuaji17/vertical-movie-app`; base ref: `main`; base SHA: `ddcb2b1e8badfa816d798505bc5107113da05061`.
 - Context: [repository-context.md](repository-context.md).
@@ -81,3 +81,5 @@ D1–D5 di atas; plus apakah skrip CLI (`provision`, `reset`, `migrate`, seed) i
 
 - 11 Oktober 2026: context dan plan ditulis pada `feat/logging-enhancement`.
 - 11 Oktober 2026: pengguna menyetujui D1–D5 dan meminta seluruh LOG-002–009 dikerjakan; modul log bersama dibuat sebagai paket `@repo/log` karena API dan web sama-sama membutuhkannya.
+
+- 11 Oktober 2026: LOG-002–009 diimplementasikan lokal: paket `@repo/log`, request/response/error API, log worker per tahap dengan progres, gateway/SSR web dan korelasi `x-request-id`, dokumentasi; bukti nyata lewat suite integrasi worker dan API+web dev. Belum: unggahan manual via admin dengan worker berjalan.

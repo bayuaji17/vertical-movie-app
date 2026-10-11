@@ -31,6 +31,16 @@ import {
   generateAuthOpenAPISchema,
 } from "@repo/auth/server";
 
+import {
+  createLogger,
+  errorFields,
+  installProcessLogging,
+  loadLogEnv,
+} from "@repo/log";
+
+const logConfig = loadLogEnv();
+const log = createLogger("api", { config: logConfig });
+installProcessLogging(log);
 const env = loadApiEnv();
 const storage = env.storage ? createStorageClient(env.storage) : undefined;
 const database = createDatabase(env.databaseUrl);
@@ -122,15 +132,24 @@ const shutdown = () => {
   if (isShuttingDown) return;
   isShuttingDown = true;
 
-  void app.stop().catch(() => {
-    console.error("API shutdown did not complete cleanly.");
-    process.exitCode = 1;
-  });
+  log.info("api.stopping");
+  void app
+    .stop()
+    .then(() => log.info("api.stopped"))
+    .catch((error) => {
+      log.error("api.shutdown_failed", errorFields(error));
+      process.exitCode = 1;
+    });
 };
 
 process.once("SIGINT", shutdown);
 process.once("SIGTERM", shutdown);
 
-console.log(
-  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`,
-);
+log.info("api.start", {
+  host: app.server?.hostname,
+  port: app.server?.port,
+  logLevel: logConfig.level,
+  logFormat: logConfig.format,
+  logBodies: logConfig.bodies,
+  nodeEnv: process.env.NODE_ENV ?? "development",
+});

@@ -1,4 +1,9 @@
-import { createLogger, errorFields, loadLogEnv } from "@repo/log";
+import {
+  createLogger,
+  errorFields,
+  installProcessLogging,
+  loadLogEnv,
+} from "@repo/log";
 import { createMediaCleanup } from "./cleanup";
 import { loadDatabaseUrl } from "../config/env";
 import { loadStorageEnv } from "../config/storage-env";
@@ -13,6 +18,7 @@ import { createJobRunner } from "./runner";
 const log = createLogger("worker");
 async function main() {
   loadLogEnv();
+  installProcessLogging(log);
   const storageEnv = loadStorageEnv(),
     workerEnv = loadWorkerEnv(),
     database = createDatabase(loadDatabaseUrl()),

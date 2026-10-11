@@ -1,6 +1,6 @@
 # Modul: Peningkatan logging
 
-> Status: **Backlog** · 11 Oktober 2026 · Pengguna meminta peningkatan log untuk semua bagian, terutama progres worker dan request/response API (11 Oktober 2026). Plan: [implementation-plan](../plans/logging-enhancement/implementation-plan.md), context: [repository-context](../plans/logging-enhancement/repository-context.md). Base SHA `ddcb2b1e8badfa816d798505bc5107113da05061`.
+> Status: **LOG-001–008 Done, LOG-009 Review** · 11 Oktober 2026 · Pengguna meminta peningkatan log untuk semua bagian, terutama progres worker dan request/response API (11 Oktober 2026). Plan: [implementation-plan](../plans/logging-enhancement/implementation-plan.md), context: [repository-context](../plans/logging-enhancement/repository-context.md). Base SHA `ddcb2b1e8badfa816d798505bc5107113da05061`.
 
 ## Tujuan modul
 
@@ -173,7 +173,7 @@ Tidak ada.
 
 ## Task: LOG-005 — Log web dan korelasi request
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 5
 - Referensi: LOG-US-01/02/03; [plan](../plans/logging-enhancement/implementation-plan.md)
@@ -187,8 +187,8 @@ Gateway web membuat dan meneruskan `x-request-id`, mencatat `gateway.request` (s
 
 ### Acceptance criteria
 
-- [ ] ID yang sama muncul pada log web dan API untuk satu request.
-- [ ] Tidak ada cookie/token/body dalam log web.
+- [x] ID yang sama muncul pada log web dan API untuk satu request.
+- [x] Tidak ada cookie/token/body dalam log web.
 
 ### Validasi
 
@@ -196,7 +196,7 @@ Test gateway/reader dengan sink injeksi; pemeriksaan manual dev.
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 11 Oktober 2026. Gateway web (`auth-gateway.ts`, dipakai gateway auth dan bisnis) dibungkus: `requestIdFrom` memakai UUID valid dari klien atau membuat baru, meneruskan `x-request-id` ke API, mengembalikannya di respons dan mencatat `gateway.request` (target, method, path, query terredaksi, status, `upstreamStatus`, durasi, `errorCode` gateway; level `info`, `warn` 4xx, `error` 5xx, 499 `info`) serta `gateway.error` untuk exception tak terduga. Pembacaan SSR (`catalog.server.ts`, `content.server.ts`, `catalog-reader.server.ts`) meneruskan ID halaman dan mencatat `ssr.api_error` (404/422 `info` tanpa stack, 5xx `warn`, abort `debug`) lewat `observeServerRead` (`lib/server/log.server.ts`); `start.ts` mengembalikan `x-request-id` pada respons halaman termasuk 404/503 yang dibangun ulang. Test `apps/web/test/gateway-log.test.ts` (5): ID diteruskan/dikembalikan/dicatat, ID palsu diganti, cookie/credential tidak muncul, 503/504/404/502/499 dan gateway auth. Gateway test lama tetap lulus. Bukti nyata (API dan web dev, DB dev): permintaan halaman `/series/does-not-exist-zz` dengan `x-request-id: 3f2b8c1e-…` menghasilkan `ssr.api_error` di web dan dua pasang `http.request`/`http.error`/`http.response` di API dengan ID yang sama (episodes dan details), dan `GET /api/catalog?...` lewat gateway mencatat `gateway.request` di web dan `http.request` dengan ID yang sama di API; halaman 200 dan 404 mengembalikan header ID. Temuan: API lama yang masih berjalan di port yang sama sempat menerima sebagian request (bukan bug kode).
 
 ### Commit task
 
@@ -287,7 +287,7 @@ Tidak ada.
 
 ## Task: LOG-008 — Log proses dan pembersihan console.*
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 8
 - Referensi: LOG-US-01/02/03; [plan](../plans/logging-enhancement/implementation-plan.md)
@@ -301,8 +301,8 @@ Startup/shutdown API dan worker lewat logger, `uncaughtException`/`unhandledReje
 
 ### Acceptance criteria
 
-- [ ] Tidak ada `console.*` langsung pada kode aplikasi API/web server selain yang diputuskan.
-- [ ] Kegagalan start dan kesalahan tak tertangani tercatat dengan level `error`.
+- [x] Tidak ada `console.*` langsung pada kode aplikasi API/web server selain yang diputuskan.
+- [x] Kegagalan start dan kesalahan tak tertangani tercatat dengan level `error`.
 
 ### Validasi
 
@@ -310,7 +310,7 @@ Startup/shutdown API dan worker lewat logger, `uncaughtException`/`unhandledReje
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 11 Oktober 2026. `packages/log`: `installProcessLogging` mencatat `process.uncaught_exception` dan `process.unhandled_rejection` dengan penyebab lalu exit 1 (perilaku bawaan runtime); dipasang pada API dan worker. API mencatat `api.start` (host, port, level, format, body, NODE_ENV), `api.stopping`, `api.stopped` dan `api.shutdown_failed`; worker (LOG-006). `console.*` pada kode aplikasi API dan server web dihapus; yang tersisa hanya sink bawaan paket log dan skrip CLI yang diputuskan tetap polos (`provision-cli`, `reset-cli`, `migrate`, seed). Pemeriksaan `grep` memastikan tidak ada `console.` lain. Default tes tenang (`LOG_LEVEL` `warn` saat `NODE_ENV=test`).
 
 ### Commit task
 
@@ -325,7 +325,7 @@ Tidak ada.
 
 ## Task: LOG-009 — Dokumentasi, bukti dan penutupan
 
-- Status: Backlog
+- Status: Review (dokumentasi dan bukti nyata ada; unggahan lewat UI admin dev belum diikuti)
 - Owner: agent
 - Prioritas: 9
 - Referensi: LOG-US-01/02/03; [plan](../plans/logging-enhancement/implementation-plan.md)
@@ -349,7 +349,9 @@ Lihat acceptance criteria.
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 11 Oktober 2026. Dokumentasi: [Log terstruktur](../guides/api-development.md#log-terstruktur) (field, level, redaksi, korelasi, tabel event, contoh pencarian), [environment](../guides/environment.md) (`LOG_LEVEL`, `LOG_FORMAT`, `LOG_HTTP_BODIES`), [Mengikuti job worker dari log](../operations/media.md#mengikuti-job-worker-dari-log) dan README docs. Bukti nyata: suite integrasi `media:worker:proof` (FFmpeg, PostgreSQL uji khusus dan MinIO) menghasilkan log delapan tahap berurutan dengan progres transcode dan satu kegagalan `MEDIA_SOURCE_CHANGED`; API+web dev membuktikan korelasi ID. Command akhir: `bun run check-types` 4/4 sukses (termasuk `@repo/log`); `bun run lint` sukses; `bun run build` sukses; `bun test` `packages/log` 11 pass; `apps/api` `bun test src` 196 pass dan 1 fail yang sudah ada sebelumnya (`truncated JPEG data fails the awaited native decode`, gagal juga pada baseline); web gateway dan publik 77 pass; integrasi `media:worker:proof` 1 pass (68 assertion).
+
+Belum terbukti: satu unggahan lewat UI admin pada development yang diikuti dari log worker nyata (bukti memakai suite integrasi, bukan unggahan manual), log worker pada production/R2, volume dan biaya log pada beban tinggi, `LOG_HTTP_BODIES=true` terhadap trafik admin sungguhan, dan mode `LOG_FORMAT=json` pada proses nyata (diuji lewat unit/integrasi). Jalankan worker (`bun run --cwd apps/api worker`) lalu unggah video dari admin untuk memeriksa urutan log secara langsung.
 
 ### Commit task
 

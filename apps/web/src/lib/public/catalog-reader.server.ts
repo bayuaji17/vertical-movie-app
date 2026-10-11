@@ -5,6 +5,7 @@ import {
   setResponseStatus,
 } from '@tanstack/react-start/server'
 import { apiOriginFromOrigin } from '../api/client'
+import { observeServerRead, ssrRequestId } from '../server/log.server'
 import { CatalogRequestError } from '../catalog/catalog-client'
 import { createPublicVideoClient } from './catalog-client'
 
@@ -21,14 +22,20 @@ const reader = createServerOnlyFn((signal: AbortSignal) => {
     fetch(input, {
       ...init,
       signal: combined,
-      headers: { accept: 'application/json' },
+      headers: {
+        accept: 'application/json',
+        'x-request-id': ssrRequestId(),
+      },
       credentials: 'omit',
       redirect: 'error',
     }),
   )
 })
 export const readPublicVideoOnServer = createServerOnlyFn(
-  (slug: string, signal: AbortSignal) => reader(signal).detail(slug, signal),
+  (slug: string, signal: AbortSignal) =>
+    observeServerRead('video.detail', () =>
+      reader(signal).detail(slug, signal),
+    ),
 )
 export const setPublicStatusOnServer = createServerOnlyFn(
   (status: number | null) =>

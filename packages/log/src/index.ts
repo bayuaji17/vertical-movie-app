@@ -35,9 +35,13 @@ export function loadLogEnv(
   source: Record<string, string | undefined> = process.env,
 ): LogConfig {
   const production = source.NODE_ENV === "production";
-  const level = (
-    source.LOG_LEVEL ?? (production ? "info" : "debug")
-  ).toLowerCase();
+  // Tests stay quiet unless a level is requested or a sink is injected.
+  const fallback = production
+    ? "info"
+    : source.NODE_ENV === "test"
+      ? "warn"
+      : "debug";
+  const level = (source.LOG_LEVEL ?? fallback).toLowerCase();
   if (!(level in order))
     throw new Error("LOG_LEVEL harus debug, info, warn atau error.");
   const format = (
@@ -244,4 +248,30 @@ export function createLogger(
     config,
     enabled,
   };
+}
+
+type ProcessLike = {
+  on(
+    event: "uncaughtException" | "unhandledRejection",
+    listener: (reason: unknown) => void,
+  ): unknown;
+};
+/**
+ * Log crashes that would otherwise only reach stderr as a raw stack, then exit
+ * non-zero as the runtime would have done by default.
+ */
+export function installProcessLogging(
+  log: Logger,
+  proc: ProcessLike = process,
+  exit: (code: number) => void = (code) => process.exit(code),
+) {
+  const crash = (event: string) => (reason: unknown) => {
+    log.error(
+      event,
+      errorFields(reason, process.env.NODE_ENV !== "production"),
+    );
+    exit(1);
+  };
+  proc.on("uncaughtException", crash("process.uncaught_exception"));
+  proc.on("unhandledRejection", crash("process.unhandled_rejection"));
 }

@@ -2,6 +2,7 @@ import { expect, test } from "bun:test";
 import {
   createLogger,
   errorFields,
+  installProcessLogging,
   isRequestId,
   loadLogEnv,
   redact,
@@ -131,6 +132,7 @@ test("log env defaults follow NODE_ENV and invalid values are rejected", () => {
     format: "pretty",
     bodies: false,
   });
+  expect(loadLogEnv({ NODE_ENV: "test" }).level).toBe("warn");
   expect(loadLogEnv({ NODE_ENV: "production" })).toEqual({
     level: "info",
     format: "json",
@@ -165,4 +167,26 @@ test("only UUID request IDs from peers are reused", () => {
   );
   expect(isRequestId(fresh)).toBe(true);
   expect(fresh).not.toBe("not-a-uuid-fake");
+});
+
+test("process crashes are logged with their cause before exiting non-zero", () => {
+  const { log, lines } = capture();
+  const handlers = new Map<string, (reason: unknown) => void>();
+  const exits: number[] = [];
+  installProcessLogging(
+    log,
+    { on: (event, listener) => void handlers.set(event, listener) },
+    (code) => void exits.push(code),
+  );
+  handlers.get("uncaughtException")!(new Error("boom"));
+  handlers.get("unhandledRejection")!("rejected");
+  expect(lines.map((l) => JSON.parse(l).event)).toEqual([
+    "process.uncaught_exception",
+    "process.unhandled_rejection",
+  ]);
+  expect(JSON.parse(lines[0]!)).toMatchObject({
+    level: "error",
+    message: "boom",
+  });
+  expect(exits).toEqual([1, 1]);
 });
