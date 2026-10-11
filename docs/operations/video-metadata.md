@@ -199,3 +199,12 @@ Commands yang dijalankan lokal (Bun1.4.2; query counters/test receipts rinci pad
 - bun run --cwd apps/api db:migrate sudah diterapkan pada development di SSET-002: journal11→12,17 tabel existing byte-equivalent snapshots. Jangan jalankan destructive proof pada development. Migration produksi tetap memerlukan rollout terotorisasi.
 
 Built proof memakai temporary origins; jalankan root bun run build setelah browser proof untuk mengembalikan bundle konfigurasi development. Tidak ada dependency/env baru. Task local commits menjaga unrelated files; push/PR/merge/deployment tidak termasuk implementasi ini. Tidak ada fleet consistency, R2 staging, Safari/device atau production performance claim.
+
+## Data contoh lokal — 11 Oktober 2026
+
+Untuk mengisi database development dengan metadata contoh: `bun run --cwd apps/api db:seed:sample` (tambahkan `-- --dry-run` untuk melihat rencana, `-- --remove` untuk menghapus contoh yang belum disentuh). Skrip `apps/api/src/db/seed-sample-content.ts` memakai service yang sama dengan API admin (aturan slug, versi dan tautan genre berlaku) dan membaca `DATABASE_URL` dari `apps/api/.env`; satu pengguna admin harus sudah ada (`admin:provision`).
+
+- Isi: 8 genre, 6 Film, 4 Standalone dan 3 Series (Kos 17 dengan 2 season, Lorong Waktu, Dapur Mak Ratna) dengan 15 episode; teks Indonesia (`originalLanguage: id`), data berada di `sample-content-data.ts`.
+- Semua berstatus draft, tanpa media dan tanpa konfirmasi hak; tidak ada yang publik sampai admin mengunggah media, mengonfirmasi hak dan mempublikasikan lewat alur admin yang ada.
+- Idempoten: slug yang sudah ada dilewati dan tidak diubah. `--remove` hanya menghapus video contoh yang masih draft tanpa media (dan Series contoh yang tidak punya episode tersisa); genre tidak dihapus.
+- Hanya untuk development lokal; jangan dijalankan pada production. Tidak membuktikan alur upload, worker, publikasi atau tonton.
