@@ -97,7 +97,7 @@ test('episodes are server cursors with null EOF; 404 alone means no next', async
     (await api.episodes('a-series', 'opaque-cursor', signal())).nextCursor,
   ).toBeNull()
   expect(new URL(calls[0]).searchParams.get('cursor')).toBe('opaque-cursor')
-  expect(new URL(calls[0]).searchParams.get('limit')).toBe('20')
+  expect(new URL(calls[0]).searchParams.get('limit')).toBe('100')
   expect(await api.next('episode-1', signal())).toBeNull()
   const outage = createPublicContentClient('https://web.test/api', async () =>
     Response.json({ error: {} }, { status: 503 }),

@@ -9,7 +9,7 @@ import {
 } from '#/lib/catalog/content-queries'
 import type { CatalogItem } from '#/lib/catalog/public-catalog-model'
 import { createFileRoute, notFound } from '@tanstack/react-router'
-import { ContentPage } from '#/components/catalog/content-page'
+import { SeriesDetail } from '#/components/public/series-detail'
 import { isMissingContent } from '#/lib/public/missing-content'
 
 export const Route = createFileRoute('/series/$slug')({
@@ -37,15 +37,11 @@ export const Route = createFileRoute('/series/$slug')({
       ),
     }
   },
-  component: () => {
-    const { slug } = Route.useParams()
-    return (
-      <ContentPage
-        key={slug}
-        kind="series"
-        slug={slug}
-        bootstrap={Route.useLoaderData()}
-      />
-    )
-  },
+  component: () => (
+    <SeriesDetail
+      key={Route.useParams().slug}
+      slug={Route.useParams().slug}
+      bootstrap={Route.useLoaderData()}
+    />
+  ),
 })

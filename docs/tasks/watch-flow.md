@@ -161,11 +161,11 @@ Tidak ada.
 
 ## Task: WFLOW-004 — Detail Series dengan season selector dan CTA
 
-- Status: Backlog
+- Status: Review (diimplementasikan lokal; belum dilihat di browser dan belum dicoba dengan data Series nyata)
 - Owner: agent
 - Prioritas: 4
 - Referensi: WFLOW-US-02/03; desain WFLOW-001
-- Diperbarui: 2026-10-10
+- Diperbarui: 2026-10-11
 - Dependensi: WFLOW-001, WFLOW-002
 - Ukuran: sedang
 
@@ -175,9 +175,9 @@ Ringkasan season/episode, CTA "Play S1 E1", pemilih season (tabs/select), baris 
 
 ### Acceptance criteria
 
-- [ ] CTA mengarah ke episode pertama yang tersedia; tidak tampil bila belum ada episode.
-- [ ] Pindah season hanya menampilkan episode season tersebut dan dapat dioperasikan keyboard.
-- [ ] Load more/retry/invalid-cursor tetap berfungsi; baris tautan ≥44 px.
+- [x] CTA mengarah ke episode pertama yang tersedia; tidak tampil bila belum ada episode (logika `sortedEpisodes`/`first` diuji unit; render belum dilihat).
+- [ ] Pindah season hanya menampilkan episode season tersebut dan dapat dioperasikan keyboard (pemilih season memakai ToggleGroup/NativeSelect; belum dicoba di browser).
+- [ ] Load more/retry/invalid-cursor tetap berfungsi; baris tautan ≥44 px (logika dipindahkan dari `EpisodeList` tanpa perubahan perilaku; belum dicoba di browser).
 
 ### Validasi
 
@@ -185,13 +185,21 @@ Test komponen; browser dengan Series ≥2 season.
 
 ### Hasil dan bukti
 
-Belum ada.
+Diimplementasikan 11 Oktober 2026 pada `feat/watch-flow-redesign`.
+
+- `SeriesDetail` (`components/public/series-detail.tsx`) menggantikan `ContentPage`/`EpisodeList`/`ContentShell` pada `/series/:slug` dan memakai `PublicShell` yang sama dengan Film/Standalone. Pola header, sinopsis ter-clamp dan CTA sticky diekstrak ke `components/public/detail-layout.tsx` dan dipakai juga oleh `VideoDetail`. Header menampilkan badge Series, ringkasan ("2 seasons · 6 episodes" hanya bila semua halaman episode sudah dimuat, selain itu "N episodes"), genre, sinopsis dan CTA "Play S1 E1" ke episode pertama. Pemilih season tampil bila ≥2 season: ToggleGroup untuk ≤4, `NativeSelect` untuk >4; hanya episode season terpilih yang tampil; pilihan kembali ke season pertama bila season hilang. Baris episode: nomor "E1", judul, sinopsis 2 baris, durasi, seluruh baris tautan ke `/watch/:slug` (≥44 px) dengan label sr-only "Season N, episode M". Load more, retry, cursor tidak valid, skeleton, paused dan kosong dipertahankan dari implementasi sebelumnya.
+- `lib/catalog/season-model.ts` (urutan/dedup episode, daftar season, season aktif, ringkasan) dengan test `public-season-model.test.ts`. Halaman episode dinaikkan dari 20 ke 100 (maksimum API) agar season yang umum lengkap dalam satu permintaan; `content-client.test.ts` diperbarui. API tidak diubah dan tidak menyediakan jumlah season, jadi daftar season berasal dari episode yang sudah dimuat.
+- `components/catalog/content-page.tsx` kini hanya berisi `ContentFailure`/`ContentLoading` (dipakai halaman watch). Kartu Series pada Browse membawa state `fromBrowse` sehingga Back memulihkan filter/pencarian.
+- Penyimpangan dari desain: pemilih season memakai ToggleGroup (tombol pressed), bukan `role="tablist"`.
+- Command aktual: `bun test apps/web/test/public-*.test.ts* apps/web/test/content-client.test.ts` → 37 pass/0 fail; `bun run check-types` 3/3 sukses; `bun run lint` sukses; `bun run build` sukses. Dev server lokal: `/series/no-such-zz` → 404; `/videos/test-film-1` tetap 200 setelah ekstraksi layout; `GET /api/catalog?kind=series` kosong.
+
+Belum terbukti: render Series nyata (database dev tidak memiliki Series; belum ada fixture), tata letak 320–1440 px, pemilih season, Load more/retry dengan data nyata, dan CTA di browser. Satu-satunya pemeriksaan halaman adalah status 404.
 
 ### Commit task
 
 - Pesan: `feat(web): redesign series detail with season selector (WFLOW-004)`
 - SHA: belum dibuat
-- Hook/checks: belum dijalankan
+- Hook/checks: dijalankan saat commit
 - Ledger: dicatat pada update dokumentasi berikutnya
 
 ### Blocker atau tindak lanjut

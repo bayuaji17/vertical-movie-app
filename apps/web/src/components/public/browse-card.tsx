@@ -31,6 +31,7 @@ export function BrowseCard({ item }: { item: CatalogItem }) {
         <Link
           to="/series/$slug"
           params={{ slug: item.slug }}
+          state={browseEntryState}
           preload={false}
           className={link}
         >
