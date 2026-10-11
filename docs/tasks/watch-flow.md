@@ -113,23 +113,23 @@ Tidak ada.
 
 ## Task: WFLOW-003 — Detail Film/Standalone responsif
 
-- Status: Backlog
+- Status: Review (diimplementasikan lokal; layout belum dilihat di browser)
 - Owner: agent
 - Prioritas: 3
 - Referensi: WFLOW-US-02; desain WFLOW-001
-- Diperbarui: 2026-10-10
+- Diperbarui: 2026-10-11
 - Dependensi: WFLOW-001, WFLOW-002
 - Ukuran: sedang
 
 ### Ruang lingkup
 
-Satu komponen detail untuk Film/Standalone di `/videos/:slug`; `/titles/$kind/$slug` dialihkan (D2); `catalog-detail-dialog` dan `featured-film` menautkan ke `/videos/:slug`; genre, durasi, sinopsis ter-clamp, CTA lebar penuh di mobile.
+Satu komponen detail untuk Film/Standalone di `/videos/:slug`; `/titles/$kind/$slug` dialihkan (D2); `catalog-detail-dialog` menautkan ke `/videos/:slug` (`featured-film` sudah menautkan ke `/watch/:slug` dan membuka dialog untuk detail); genre, durasi, sinopsis ter-clamp, CTA lebar penuh di mobile.
 
 ### Acceptance criteria
 
-- [ ] Layout sesuai desain di 320/390/768/1024/1440 px tanpa overflow.
-- [ ] State loading/offline/stale/error/404 berfungsi seperti sebelumnya.
-- [ ] `/titles/movie|standalone/:slug` mengalihkan ke `/videos/:slug`; kind/slug tidak valid tetap 404.
+- [ ] Layout sesuai desain di 320/390/768/1024/1440 px tanpa overflow (belum dilihat di browser).
+- [ ] State loading/offline/stale/error/404 berfungsi seperti sebelumnya (404 diverifikasi lewat curl; sisanya mempertahankan logika lama, belum dilihat di browser).
+- [x] `/titles/movie|standalone/:slug` mengalihkan ke `/videos/:slug`; kind/slug tidak valid tetap 404.
 
 ### Validasi
 
@@ -137,13 +137,22 @@ Test komponen dan browser.
 
 ### Hasil dan bukti
 
-Belum ada.
+Diimplementasikan 11 Oktober 2026 pada `feat/watch-flow-redesign`.
+
+- `VideoDetail` ditulis ulang mengikuti [desain](../design/watch-flow.md#detail-filmstandalone-videosslug): mobile poster 132 px di samping badge/durasi/judul/genre, sinopsis 4 baris dengan "Read more" (hanya bila benar-benar terpotong, diukur dengan `ResizeObserver` pada hook `use-text-clamp.ts`), CTA "Watch now" lebar penuh menempel di bawah dengan safe-area; ≥640 px poster 220 px dan CTA inline; ≥1024 px poster 360 px kiri, kolom kanan h1 48 px, sinopsis penuh dan CTA. Satu grid dengan `lg:contents`; skeleton memakai dimensi yang sama. Poster tetap `PublicPoster` (signed, antrean/retry yang ada).
+- Genre: `loadVideoDetail` memuat `/videos/:slug` lalu detail katalog (`/catalog/details/:kind/:slug`) sebagai tambahan non-fatal; komponen hanya membaca cache (`enabled: false`) sehingga tidak ada request baru dan genre tampil pada SSR. Kegagalan genre tidak mengubah status halaman.
+- `/titles/$kind/$slug` kini hanya `beforeLoad`: kind selain movie/standalone atau slug tidak valid → `notFound()`, selainnya redirect `replace` ke `/videos/:slug` (slug tak ada tetap 404 di rute tujuan).
+- Test baru `apps/web/test/public-video-detail-loader.test.ts` (cache video+genre, genre gagal tidak menggagalkan halaman, video gagal tidak meminta genre).
+- Command aktual: `bun test apps/web/test/public-*.test.ts*` → 28 pass/0 fail; `bun run check-types` 3/3 sukses; `bun run lint` sukses; `bun run build` sukses. Dev server lokal (API 3001, web 3000): `/titles/movie|standalone/test-film-1` → 307 ke `/videos/test-film-1` lalu 200; `/titles/series/x` dan `/titles/movie/Bad_Slug` → 404; `/videos/no-such-zz` dan `/titles/movie/no-such-zz` → 404 pada `/videos/no-such-zz`; `/videos/test-film-1?type=all` → 200 pada URL bersih; HTML berisi h1, badge Film, "1 min", CTA ke `/watch/test-film-1`, tanpa signed URL.
+- Catatan dev: request pertama setelah Vite dimulai atau dimuat ulang sempat 500/503 selama kompilasi dingin (dan saat lint/tsc berjalan bersamaan); setelah hangat semua 200 stabil. Bukan perilaku production.
+
+Belum terbukti: tata letak 320/390/768/1024/1440 px, "Read more", CTA sticky, state offline/stale/error di browser; tampilan genre dengan data nyata (film dev tidak punya genre; hanya diuji unit); build produksi lulus (`bun run build`, 2/2 task).
 
 ### Commit task
 
 - Pesan: `feat(web): redesign film and standalone detail (WFLOW-003)`
 - SHA: belum dibuat
-- Hook/checks: belum dijalankan
+- Hook/checks: dijalankan saat commit
 - Ledger: dicatat pada update dokumentasi berikutnya
 
 ### Blocker atau tindak lanjut

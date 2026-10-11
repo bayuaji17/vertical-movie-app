@@ -3,7 +3,7 @@ import {
   publicMeta,
   settingsFromMatches,
 } from '#/lib/settings/presentation'
-import { videoOptions, loadVideo } from '#/lib/public/catalog-queries'
+import { videoOptions, loadVideoDetail } from '#/lib/public/catalog-queries'
 import type { PublicVideoDetail } from '#/lib/public/catalog-client'
 import { createFileRoute, notFound } from '@tanstack/react-router'
 import { VideoDetail } from '#/components/public/video-detail'
@@ -14,7 +14,7 @@ import { isMissingContent } from '#/lib/public/missing-content'
 export const Route = createFileRoute('/videos/$slug')({
   beforeLoad: ({ location }) => stripLegacyTypeSearch(location),
   loader: async ({ context, params }) => {
-    const result = await loadVideo(context.queryClient, params.slug)
+    const result = await loadVideoDetail(context.queryClient, params.slug)
     setPublicHttpStatus(result.status)
     if (isMissingContent(result.status)) throw notFound()
     const video = context.queryClient.getQueryData<PublicVideoDetail>(

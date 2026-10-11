@@ -2,7 +2,10 @@ import { queryOptions } from '@tanstack/react-query'
 import type { QueryClient } from '@tanstack/react-query'
 import { CatalogRequestError } from '../catalog/catalog-client'
 import { readPublicVideo } from './catalog-reader'
+import { contentDetailOptions } from '../catalog/content-queries'
+import type { PublicContentClient } from '../catalog/content-client'
 import type { PublicVideoClient } from './catalog-client'
+import type { PublicVideo } from './catalog-model'
 
 const metadata = { detail: readPublicVideo }
 const remaining = (expiry: number, updated: number) =>
@@ -21,15 +24,44 @@ export function videoOptions(
       remaining(q.state.data?.expiresAt ?? 0, q.state.dataUpdatedAt),
   })
 }
-export async function loadVideo(client: QueryClient, slug: string) {
+export async function loadVideo(
+  client: QueryClient,
+  slug: string,
+  api: Pick<PublicVideoClient, 'detail'> = metadata,
+) {
   try {
     if (typeof window !== 'undefined' && !navigator.onLine)
       return {
-        status: client.getQueryData(videoOptions(slug).queryKey) ? null : 503,
+        status: client.getQueryData(videoOptions(slug, api).queryKey)
+          ? null
+          : 503,
       }
-    await client.query(videoOptions(slug))
+    await client.query(videoOptions(slug, api))
     return { status: null }
   } catch (error) {
     return { status: error instanceof CatalogRequestError ? error.status : 503 }
   }
+}
+/** Detail loader: the video decides the page status; genres are optional extras. */
+export async function loadVideoDetail(
+  client: QueryClient,
+  slug: string,
+  apis: {
+    video?: Pick<PublicVideoClient, 'detail'>
+    content?: Pick<PublicContentClient, 'detail'>
+  } = {},
+) {
+  const result = await loadVideo(client, slug, apis.video)
+  if (result.status || (typeof window !== 'undefined' && !navigator.onLine))
+    return result
+  const video = client.getQueryData<{ item: PublicVideo }>(
+    videoOptions(slug, apis.video).queryKey,
+  )?.item
+  if (video && video.kind !== 'episode')
+    try {
+      await client.query(contentDetailOptions(video.kind, slug, apis.content))
+    } catch {
+      /* Genres are display-only; the page works without them. */
+    }
+  return result
 }
