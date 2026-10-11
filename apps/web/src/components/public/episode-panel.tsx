@@ -24,7 +24,7 @@ export function EpisodePanel({
   // Keep the playing episode visible inside the scrolling list without moving the page.
   useEffect(() => {
     const box = list.current,
-      row = box?.querySelector<HTMLElement>('[aria-current="true"]')
+      row = box?.querySelector<HTMLElement>('[aria-current="page"]')
     if (box && row)
       box.scrollTop =
         row.offsetTop - box.clientHeight / 2 + row.clientHeight / 2

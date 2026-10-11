@@ -122,7 +122,7 @@ test('episode rows name season and episode and mark only the current one', async
       <EpisodeRow episode={episode(2, 1)} />
     </ul>,
   )
-  expect(current.match(/aria-current="true"/g)).toHaveLength(1)
+  expect(current.match(/aria-current="page"/g)).toHaveLength(1)
   expect(current).toContain('href="/watch/s1-e2"')
   expect(current).toContain('Season 1, episode 2: ')
   expect(current).toContain('Season 2, episode 1: ')
@@ -132,7 +132,7 @@ test('episode panel offers a season select only for several seasons and exposes 
   const many = await renderPublic(<EpisodePanel nav={nav()} video={watching} />)
   expect(many).toContain('aria-label="Season"')
   expect(many).toContain('aria-label="Season 1 episodes"')
-  expect(many.match(/aria-current="true"/g)).toHaveLength(1)
+  expect(many.match(/aria-current="page"/g)).toHaveLength(1)
   expect(many).not.toContain('s2-e1')
   const single = await renderPublic(
     <EpisodePanel

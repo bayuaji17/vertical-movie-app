@@ -1,3 +1,5 @@
+// STALE since WFLOW-009/005 (11 Oct 2026): this worker mocks the removed GET /videos list and
+// the old watch page controls. Use public-watch-flow-browser-worker.mjs for the current flow.
 import assert from 'node:assert/strict'
 import { mkdirSync } from 'node:fs'
 import { dirname } from 'node:path'

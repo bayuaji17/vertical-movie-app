@@ -90,32 +90,36 @@ function StepButton({
   )
 }
 function UpNext({ episode }: { episode: PublicEpisode }) {
+  // Same 9:16 box as the player, so the card sits above its controls even when
+  // an error message makes the stage wrapper taller than the video.
   return (
-    <div
-      role="status"
-      className="absolute inset-x-3 bottom-16 z-10 flex flex-col gap-2 rounded-2xl bg-black/85 p-3 text-white"
-    >
-      <span className="text-xs text-white/80">
-        Up next · {episodeLabel(episode)}
-      </span>
-      <span className="font-semibold [overflow-wrap:anywhere]">
-        {episode.title}
-      </span>
-      <Button
-        className="min-h-11"
-        nativeButton={false}
-        role="link"
-        render={
-          <Link
-            to="/watch/$slug"
-            params={{ slug: episode.slug }}
-            preload={false}
-          />
-        }
+    <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex aspect-[9/16] items-end p-3 pb-16">
+      <div
+        role="status"
+        className="pointer-events-auto flex w-full flex-col gap-2 rounded-2xl bg-black/85 p-3 text-white"
       >
-        <RiPlayFill data-icon="inline-start" aria-hidden="true" />
-        Play next
-      </Button>
+        <span className="text-xs text-white/80">
+          Up next · {episodeLabel(episode)}
+        </span>
+        <span className="font-semibold [overflow-wrap:anywhere]">
+          {episode.title}
+        </span>
+        <Button
+          className="min-h-11"
+          nativeButton={false}
+          role="link"
+          render={
+            <Link
+              to="/watch/$slug"
+              params={{ slug: episode.slug }}
+              preload={false}
+            />
+          }
+        >
+          <RiPlayFill data-icon="inline-start" aria-hidden="true" />
+          Play next
+        </Button>
+      </div>
     </div>
   )
 }

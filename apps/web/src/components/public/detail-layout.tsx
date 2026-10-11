@@ -10,10 +10,11 @@ import { useTextClamp } from '#/hooks/use-text-clamp'
 // Shared by Film/Standalone and Series detail: poster beside the title on
 // mobile, poster column on the left from 1024 px (see docs/design/watch-flow.md).
 export const detailLayout =
-  'grid gap-5 lg:grid-cols-[360px_minmax(0,1fr)] lg:items-start lg:gap-x-12 lg:gap-y-5'
+  'grid gap-5 lg:grid-cols-[360px_minmax(0,1fr)] lg:grid-rows-[auto_auto_auto_1fr] lg:items-start lg:gap-x-12 lg:gap-y-5'
 export const detailHeader =
   'grid grid-cols-[132px_minmax(0,1fr)] items-end gap-4 sm:grid-cols-[220px_minmax(0,1fr)] sm:gap-7 lg:contents'
-export const detailPosterSlot = 'lg:col-start-1 lg:row-span-3 lg:row-start-1'
+// The poster spans a fourth flexible row so its height never stretches the text rows.
+export const detailPosterSlot = 'lg:col-start-1 lg:row-span-4 lg:row-start-1'
 export const detailTitleSlot =
   'flex min-w-0 flex-col gap-2.5 lg:col-start-2 lg:row-start-1'
 

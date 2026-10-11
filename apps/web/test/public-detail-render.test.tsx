@@ -194,7 +194,7 @@ test('episode watch page links the series, steps across seasons and marks the pl
   expect(html).toContain('aria-label="Next episode · S2 E1"')
   expect(html).toContain('href="/watch/s1-e1"')
   expect(html).toContain('href="/watch/s2-e1"')
-  expect(html.match(/aria-current="true"/g)).toHaveLength(1)
+  expect(html.match(/aria-current="page"/g)).toHaveLength(1)
   expect(html).toContain('aria-label="Episodes"')
   expect(html).not.toContain('Up next')
   expect(html).toContain('100svh-3.5rem')

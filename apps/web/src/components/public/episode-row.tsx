@@ -15,7 +15,7 @@ export function EpisodeRow({
         to="/watch/$slug"
         params={{ slug: episode.slug }}
         preload={false}
-        aria-current={current ? 'true' : undefined}
+        aria-current={current ? 'page' : undefined}
         className={cn(
           'grid min-h-11 grid-cols-[40px_minmax(0,1fr)_auto] items-start gap-3 rounded-2xl border p-3 outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring',
           current && 'border-primary bg-primary/10',
