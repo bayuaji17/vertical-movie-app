@@ -1,0 +1,365 @@
+# Modul: Peningkatan logging
+
+> Status: **LOG-001–008 Done, LOG-009 Review** · 11 Oktober 2026 · Pengguna meminta peningkatan log untuk semua bagian, terutama progres worker dan request/response API (11 Oktober 2026). Plan: [implementation-plan](../plans/logging-enhancement/implementation-plan.md), context: [repository-context](../plans/logging-enhancement/repository-context.md). Base SHA `ddcb2b1e8badfa816d798505bc5107113da05061`.
+
+## Tujuan modul
+
+Operator dapat mengikuti request web → API dan setiap job media beserta progresnya dari console, tanpa rahasia dalam log. Referensi: [plan APILOG](../plans/api-request-logging/implementation-plan.md), [panduan API](../guides/api-development.md#logging-request-http).
+
+## User story: LOG-US-01
+
+Sebagai operator, saya ingin melihat request dan response API (termasuk error) dengan ID yang sama di web dan API, sehingga saya dapat menelusuri sumber kegagalan.
+
+## User story: LOG-US-02
+
+Sebagai operator, saya ingin melihat setiap tahap dan progres job media (download, verify, probe, transcode, upload, retry), sehingga saya tahu job berjalan, macet atau gagal dan alasannya.
+
+## User story: LOG-US-03
+
+Sebagai pengembang, saya ingin level dan format log yang dapat dikonfigurasi dan aman dari kebocoran rahasia, sehingga debugging lokal nyaman dan production tetap bersih.
+
+## Task: LOG-001 — Setujui keputusan D1–D5
+
+- Status: Done
+- Owner: agent
+- Prioritas: 1
+- Referensi: LOG-US-01/02/03; [plan](../plans/logging-enhancement/implementation-plan.md)
+- Diperbarui: 2026-10-11
+- Dependensi: tidak ada
+- Ukuran: sedang
+
+### Ruang lingkup
+
+Pengguna memutuskan D1 (body opsional dev-only), D2 (level/format), D3 (`x-request-id`), D4 (granularitas progres), D5 (detail error) dan apakah skrip CLI ikut; catat pemberi persetujuan dan tanggal pada plan.
+
+### Acceptance criteria
+
+- [x] Keputusan dicatat beserta pemberi persetujuan dan tanggal.
+
+### Validasi
+
+`bun run docs:check`, Prettier, `git diff --check`.
+
+### Hasil dan bukti
+
+Pengguna menyetujui D1–D5 sebagaimana direkomendasikan pada 11 Oktober 2026 ("setuju semua, langsung kerjakan semua"); skrip CLI tidak ikut dipindah. Dicatat pada plan.
+
+### Commit task
+
+- Pesan: `docs(api): ... (LOG-001)`
+- SHA: belum dibuat
+- Hook/checks: belum dijalankan
+- Ledger: dicatat pada update dokumentasi berikutnya
+
+### Blocker atau tindak lanjut
+
+Tidak ada.
+
+## Task: LOG-002 — Modul log bersama dan konfigurasi env
+
+- Status: Done
+- Owner: agent
+- Prioritas: 2
+- Referensi: LOG-US-01/02/03; [plan](../plans/logging-enhancement/implementation-plan.md)
+- Diperbarui: 2026-10-11
+- Dependensi: LOG-001
+- Ukuran: sedang
+
+### Ruang lingkup
+
+Paket baru `packages/log` (`@repo/log`, dipakai API, worker dan web; pengecualian aturan "paket bersama" karena kedua aplikasi memerlukannya): level, format json/pretty, redaksi, sink injeksi, tidak pernah melempar, `loadLogEnv` untuk `LOG_LEVEL`/`LOG_FORMAT`/`LOG_HTTP_BODIES` (ditolak di production), `.env.example` dan `docs/guides/environment.md`.
+
+### Acceptance criteria
+
+- [x] Level menyaring event; format json dan pretty memuat field sama.
+- [x] Redaksi menutup kunci sensitif, query, URL bertanda tangan dan rantai error; sink yang gagal tidak melempar.
+- [x] Env tidak valid ditolak dengan pesan jelas; body tidak dapat aktif di production.
+
+### Validasi
+
+`bun test` modul log dan env; `bun run check-types`.
+
+### Hasil dan bukti
+
+Dikerjakan 11 Oktober 2026. `packages/log/src/index.ts`: `createLogger(component)` (debug/info/warn/error, `child`), format JSON dan pretty (warna hanya pada TTY dan tanpa `NO_COLOR`), `redact` (kunci sensitif, URL bertanda tangan, string 500 karakter, kedalaman 4, 20 item), `redactQuery`, `errorFields` (nama, pesan, kode, rantai 3 penyebab, stack hanya bila diminta), `loadLogEnv` (`LOG_LEVEL`, `LOG_FORMAT`, `LOG_HTTP_BODIES`; production → info/json dan body ditolak), `requestIdFrom`/`isRequestId` (hanya UUID dari peer yang dipakai ulang). Test `packages/log/src/log.test.ts` 10 pass. Dependensi `workspace:*` pada API dan web, `bun.lock` diperbarui; `.env.example` dan `docs/guides/environment.md` memuat variabel baru.
+
+### Commit task
+
+- Pesan: `feat(api): ... (LOG-002)`
+- SHA: belum dibuat
+- Hook/checks: belum dijalankan
+- Ledger: dicatat pada update dokumentasi berikutnya
+
+### Blocker atau tindak lanjut
+
+Tidak ada.
+
+## Task: LOG-003 — Request/response API yang lebih kaya
+
+- Status: Done
+- Owner: agent
+- Prioritas: 3
+- Referensi: LOG-US-01/02/03; [plan](../plans/logging-enhancement/implementation-plan.md)
+- Diperbarui: 2026-10-11
+- Dependensi: LOG-002
+- Ukuran: sedang
+
+### Ruang lingkup
+
+Perkaya `plugins/logger.ts`: query tersanitasi, header terpilih, ukuran request/response, `errorCode`, `x-request-id` masuk/keluar, body JSON opsional (D1) terpotong 2 KB dengan pengecualian auth/multipart/URL bertanda tangan.
+
+### Acceptance criteria
+
+- [x] Semua jalur (200/4xx/5xx/404) menghasilkan pasangan request/response dengan ID sama dan respons tidak berubah.
+- [x] `x-request-id` UUID valid dipakai ulang, selain itu dibuat baru, dan dikembalikan di header respons.
+- [x] Cookie/Authorization tidak pernah muncul; body tidak muncul bila `LOG_HTTP_BODIES` mati atau rute dikecualikan.
+
+### Validasi
+
+Test `app.handle` dengan sink injeksi (termasuk kasus redaksi); `bun test` API.
+
+### Hasil dan bukti
+
+Dikerjakan 11 Oktober 2026. `plugins/logger.ts` kini memakai `@repo/log`: `http.request` memuat method, path (500 karakter), query dengan nilai sensitif/bertanda tangan `[redacted]`, `contentType`, `requestBytes`, `origin` dan `userAgent` terpotong; `http.response` memuat status, durasi, `responseBytes` (string/biner/Response dengan content-length; objek hanya pada level debug) dan `errorCode`; level `info`, `warn` (4xx) dan `error` (5xx). `x-request-id` UUID dari peer dipakai ulang, selain itu dibuat baru, dan selalu dikembalikan di header respons (juga `Response` kustom dan 404). Body (D1): `LOG_HTTP_BODIES=true` mencatat `http.body` (arah request/response, JSON terredaksi, 2 KB) pada level debug, tidak untuk `/auth`, `/media/uploads`, `/playback`, `/poster`, `Response`/stream/biner dan non-JSON. Test `plugins/logger.test.ts` diperbarui dan diperluas (header ID, query, ukuran, level, redaksi, body hidup/mati, rute dikecualikan); `app.test.ts` menyesuaikan header dan event baru. `bun test src` (apps/api): 192 pass, 1 fail — `truncated JPEG data fails the awaited native decode` gagal juga pada baseline tanpa perubahan ini (diverifikasi dengan stash), tidak terkait logging.
+
+### Commit task
+
+- Pesan: `feat(api): ... (LOG-003)`
+- SHA: belum dibuat
+- Hook/checks: belum dijalankan
+- Ledger: dicatat pada update dokumentasi berikutnya
+
+### Blocker atau tindak lanjut
+
+Tidak ada.
+
+## Task: LOG-004 — Log error API terstruktur
+
+- Status: Done
+- Owner: agent
+- Prioritas: 4
+- Referensi: LOG-US-01/02/03; [plan](../plans/logging-enhancement/implementation-plan.md)
+- Diperbarui: 2026-10-11
+- Dependensi: LOG-002
+- Ukuran: sedang
+
+### Ruang lingkup
+
+Catat 5xx dan `ContentError` pada handler error dengan kode, status, nama/pesan, rantai penyebab terpotong dan stack hanya di development.
+
+### Acceptance criteria
+
+- [x] Setiap 5xx meninggalkan event `http.error` dengan `requestId`.
+- [x] 4xx yang diharapkan tercatat pada level `warn`/`info` tanpa stack.
+
+### Validasi
+
+Test error handler dengan sink injeksi.
+
+### Hasil dan bukti
+
+Dikerjakan 11 Oktober 2026 bersama LOG-003 (satu plugin). Observer `onError` global mencatat `http.error` dengan `requestId`, method, path, status dan `errorCode` hasil klasifikasi yang sama dengan pemeta error (`mapContentError`, validasi/parse → 422 `VALIDATION_ERROR`, `NOT_FOUND` → 404, sisanya 500 `INTERNAL_ERROR`), ditambah nama, pesan, kode dan rantai penyebab terpotong; stack hanya bila status ≥500 dan `NODE_ENV` bukan production. Level: 5xx `error`, 404/422 `info`, 4xx lain `warn`. Pesan validasi tidak dicatat karena memuat input yang dikirim (hanya teks tetap "Request input is invalid."). `errorCode` juga muncul pada `http.response`. Diuji pada jalur domain (409), handler melempar (500, bertumpuk plugin) dan validasi/parse (422).
+
+### Commit task
+
+- Pesan: `feat(api): ... (LOG-004)`
+- SHA: belum dibuat
+- Hook/checks: belum dijalankan
+- Ledger: dicatat pada update dokumentasi berikutnya
+
+### Blocker atau tindak lanjut
+
+Tidak ada.
+
+## Task: LOG-005 — Log web dan korelasi request
+
+- Status: Done
+- Owner: agent
+- Prioritas: 5
+- Referensi: LOG-US-01/02/03; [plan](../plans/logging-enhancement/implementation-plan.md)
+- Diperbarui: 2026-10-11
+- Dependensi: LOG-003
+- Ukuran: sedang
+
+### Ruang lingkup
+
+Gateway web membuat dan meneruskan `x-request-id`, mencatat `gateway.request` (status, upstream status, durasi, timeout/abort/ukuran) dan `ssr.api_error` untuk kegagalan fetch server-side.
+
+### Acceptance criteria
+
+- [x] ID yang sama muncul pada log web dan API untuk satu request.
+- [x] Tidak ada cookie/token/body dalam log web.
+
+### Validasi
+
+Test gateway/reader dengan sink injeksi; pemeriksaan manual dev.
+
+### Hasil dan bukti
+
+Dikerjakan 11 Oktober 2026. Gateway web (`auth-gateway.ts`, dipakai gateway auth dan bisnis) dibungkus: `requestIdFrom` memakai UUID valid dari klien atau membuat baru, meneruskan `x-request-id` ke API, mengembalikannya di respons dan mencatat `gateway.request` (target, method, path, query terredaksi, status, `upstreamStatus`, durasi, `errorCode` gateway; level `info`, `warn` 4xx, `error` 5xx, 499 `info`) serta `gateway.error` untuk exception tak terduga. Pembacaan SSR (`catalog.server.ts`, `content.server.ts`, `catalog-reader.server.ts`) meneruskan ID halaman dan mencatat `ssr.api_error` (404/422 `info` tanpa stack, 5xx `warn`, abort `debug`) lewat `observeServerRead` (`lib/server/log.server.ts`); `start.ts` mengembalikan `x-request-id` pada respons halaman termasuk 404/503 yang dibangun ulang. Test `apps/web/test/gateway-log.test.ts` (5): ID diteruskan/dikembalikan/dicatat, ID palsu diganti, cookie/credential tidak muncul, 503/504/404/502/499 dan gateway auth. Gateway test lama tetap lulus. Bukti nyata (API dan web dev, DB dev): permintaan halaman `/series/does-not-exist-zz` dengan `x-request-id: 3f2b8c1e-…` menghasilkan `ssr.api_error` di web dan dua pasang `http.request`/`http.error`/`http.response` di API dengan ID yang sama (episodes dan details), dan `GET /api/catalog?...` lewat gateway mencatat `gateway.request` di web dan `http.request` dengan ID yang sama di API; halaman 200 dan 404 mengembalikan header ID. Temuan: API lama yang masih berjalan di port yang sama sempat menerima sebagian request (bukan bug kode).
+
+### Commit task
+
+- Pesan: `feat(web): ... (LOG-005)`
+- SHA: belum dibuat
+- Hook/checks: belum dijalankan
+- Ledger: dicatat pada update dokumentasi berikutnya
+
+### Blocker atau tindak lanjut
+
+Tidak ada.
+
+## Task: LOG-006 — Log worker: siklus hidup dan tahap job
+
+- Status: Done
+- Owner: agent
+- Prioritas: 6
+- Referensi: LOG-US-01/02/03; [plan](../plans/logging-enhancement/implementation-plan.md)
+- Diperbarui: 2026-10-11
+- Dependensi: LOG-002
+- Ukuran: sedang
+
+### Ruang lingkup
+
+`worker.start/stop`, `job.claimed`, `job.stage` (disk_check, load_asset, download, verify, probe, transcode, upload, commit) dengan durasi, `job.completed`, `job.failed` (kode MEDIA_*, terminal/retry, penundaan), `job.paused`, `job.lease_lost`; ganti `console.*` dan `catch {}` yang menelan penyebab.
+
+### Acceptance criteria
+
+- [x] Satu job menghasilkan urutan tahap lengkap dengan `jobId`/`assetId`/`attempt` pada setiap event.
+- [x] Kegagalan mencatat kode dan penyebab terpotong tanpa path privat/rahasia.
+
+### Validasi
+
+Test runner dengan job palsu; integrasi PostgreSQL/FFmpeg di suite terpisah.
+
+### Hasil dan bukti
+
+Dikerjakan 11 Oktober 2026. `workers/index.ts`: `worker.start` (konkurensi, poll, lease, heartbeat, retry, threads, batas, level log), `job.claimed` (jobId, assetId, kind, attempt, failures, slot), `worker.paused`, `worker.dependency_error` (menggantikan `catch {}` yang menelan penyebab, dengan nama/pesan/penyebab), `worker.stopping`/`worker.stopped`. `workers/runner.ts`: logger anak per job (jobId, assetId, kind, attempt, generation) dengan `job.stage` fase `start`/`done` + durasi untuk `disk_check` (freeBytes), `load_asset` (sizeBytes), `download` (bytes), `verify` (sha256 12 karakter), `probe` (mediaDurationMs, resolusi, codec, fps, audio, hdr, container), `transcode`, `upload` (files, bytes), `commit`; `job.completed` (totalMs, files, renditions); `job.failed`/`job.paused` (stage, durasi tahap dan total, kode MEDIA_*, terminal/dead, failures/maxAttempts, retryInSeconds, apakah tercatat di antrean, nama/pesan/penyebab, stack hanya di luar production); `job.lease_lost`, `job.heartbeat_error` dan `job.heartbeat` (debug). Poster dan sumber memakai tahap yang sama. Bukti nyata: suite integrasi `bun run --cwd apps/api media:worker:proof` (FFmpeg, PostgreSQL uji khusus, MinIO) lulus (1 test, 68 assertion) dan kini menegaskan urutan delapan tahap, `jobId`/`assetId` pada setiap event, `job.completed` terakhir dan progres monoton; log nyata menampilkan satu job 2,2 detik dan satu kegagalan `MEDIA_SOURCE_CHANGED` pada tahap verify.
+
+### Commit task
+
+- Pesan: `feat(api): ... (LOG-006)`
+- SHA: belum dibuat
+- Hook/checks: belum dijalankan
+- Ledger: dicatat pada update dokumentasi berikutnya
+
+### Blocker atau tindak lanjut
+
+Tidak ada.
+
+## Task: LOG-007 — Log worker: progres transcode, retry, recovery dan cleanup
+
+- Status: Done
+- Owner: agent
+- Prioritas: 7
+- Referensi: LOG-US-01/02/03; [plan](../plans/logging-enhancement/implementation-plan.md)
+- Diperbarui: 2026-10-11
+- Dependensi: LOG-006
+- Ukuran: sedang
+
+### Ruang lingkup
+
+Progres FFmpeg (`-progress`) per 10% durasi atau 15 detik, stderr FFmpeg 4 KB terakhir saat gagal, jadwal retry/backoff, jumlah hasil `queue.recover` dan `cleanup`.
+
+### Acceptance criteria
+
+- [x] Progres monoton dan tidak lebih sering dari batas; selalu ada event 100% atau gagal.
+- [x] Recovery dan cleanup mencatat jumlah item.
+
+### Validasi
+
+Unit throttle progres; satu job nyata di suite integrasi.
+
+### Hasil dan bukti
+
+Dikerjakan 11 Oktober 2026. `workers/progress-log.ts` (`createProgressLog`): progres transcode dari `-progress` FFmpeg dicatat setiap 10% durasi media atau 15 detik (yang lebih dulu), tidak mengulang persen, tidak mundur, aman untuk durasi 0 atau progres melebihi durasi; event `job.stage` fase `progress` (percent, mediaSeconds, elapsedMs) dan `plan` (daftar rendition), serta fase `done` dengan percent 100. `MediaProcessError` membawa 4 KB terakhir stderr (`diagnostics`) yang dicatat saat gagal sebagai maksimal 20 baris dengan path workdir diganti `<workdir>` (tidak pernah dikirim ke klien). `queue.recover` mengembalikan daftar job (jobId, assetId, attempt, dead, retryInSeconds) sehingga `queue.recover` dan `job.lease_expired` dicatat; `cleanup` mencatat jumlah (originals, partials, uploadSessions, durasi) dan `cleanup.item_failed` pada kegagalan yang sebelumnya diam. Test: `progress-log.test.ts` (3), `process.test.ts` (stderr terbatas), integrasi worker (lihat LOG-006).
+
+### Commit task
+
+- Pesan: `feat(api): ... (LOG-007)`
+- SHA: belum dibuat
+- Hook/checks: belum dijalankan
+- Ledger: dicatat pada update dokumentasi berikutnya
+
+### Blocker atau tindak lanjut
+
+Tidak ada.
+
+## Task: LOG-008 — Log proses dan pembersihan console.*
+
+- Status: Done
+- Owner: agent
+- Prioritas: 8
+- Referensi: LOG-US-01/02/03; [plan](../plans/logging-enhancement/implementation-plan.md)
+- Diperbarui: 2026-10-11
+- Dependensi: LOG-003, LOG-004, LOG-006
+- Ukuran: sedang
+
+### Ruang lingkup
+
+Startup/shutdown API dan worker lewat logger, `uncaughtException`/`unhandledRejection`; `console.*` aplikasi diganti (skrip CLI sesuai keputusan LOG-001).
+
+### Acceptance criteria
+
+- [x] Tidak ada `console.*` langsung pada kode aplikasi API/web server selain yang diputuskan.
+- [x] Kegagalan start dan kesalahan tak tertangani tercatat dengan level `error`.
+
+### Validasi
+
+`grep` `console.` pada `apps/api/src` dan web server; `bun test`.
+
+### Hasil dan bukti
+
+Dikerjakan 11 Oktober 2026. `packages/log`: `installProcessLogging` mencatat `process.uncaught_exception` dan `process.unhandled_rejection` dengan penyebab lalu exit 1 (perilaku bawaan runtime); dipasang pada API dan worker. API mencatat `api.start` (host, port, level, format, body, NODE_ENV), `api.stopping`, `api.stopped` dan `api.shutdown_failed`; worker (LOG-006). `console.*` pada kode aplikasi API dan server web dihapus; yang tersisa hanya sink bawaan paket log dan skrip CLI yang diputuskan tetap polos (`provision-cli`, `reset-cli`, `migrate`, seed). Pemeriksaan `grep` memastikan tidak ada `console.` lain. Default tes tenang (`LOG_LEVEL` `warn` saat `NODE_ENV=test`).
+
+### Commit task
+
+- Pesan: `feat(api): ... (LOG-008)`
+- SHA: belum dibuat
+- Hook/checks: belum dijalankan
+- Ledger: dicatat pada update dokumentasi berikutnya
+
+### Blocker atau tindak lanjut
+
+Tidak ada.
+
+## Task: LOG-009 — Dokumentasi, bukti dan penutupan
+
+- Status: Review (dokumentasi dan bukti nyata ada; unggahan lewat UI admin dev belum diikuti)
+- Owner: agent
+- Prioritas: 9
+- Referensi: LOG-US-01/02/03; [plan](../plans/logging-enhancement/implementation-plan.md)
+- Diperbarui: 2026-10-11
+- Dependensi: LOG-005, LOG-007, LOG-008
+- Ukuran: kecil
+
+### Ruang lingkup
+
+Perbarui guide API (field event, contoh `jq`), `environment.md`, runbook media (cara mengikuti job), README docs; bukti job nyata di dev dan batas.
+
+### Acceptance criteria
+
+- [ ] Field event, env dan contoh debugging terdokumentasi.
+- [ ] Satu unggahan nyata di dev diikuti dari log (tahap dan progres) dan dicatat.
+- [ ] `check-types`, `lint`, `build`, `docs:check` lulus dan dicatat.
+
+### Validasi
+
+Lihat acceptance criteria.
+
+### Hasil dan bukti
+
+Dikerjakan 11 Oktober 2026. Dokumentasi: [Log terstruktur](../guides/api-development.md#log-terstruktur) (field, level, redaksi, korelasi, tabel event, contoh pencarian), [environment](../guides/environment.md) (`LOG_LEVEL`, `LOG_FORMAT`, `LOG_HTTP_BODIES`), [Mengikuti job worker dari log](../operations/media.md#mengikuti-job-worker-dari-log) dan README docs. Bukti nyata: suite integrasi `media:worker:proof` (FFmpeg, PostgreSQL uji khusus dan MinIO) menghasilkan log delapan tahap berurutan dengan progres transcode dan satu kegagalan `MEDIA_SOURCE_CHANGED`; API+web dev membuktikan korelasi ID. Command akhir: `bun run check-types` 4/4 sukses (termasuk `@repo/log`); `bun run lint` sukses; `bun run build` sukses; `bun test` `packages/log` 11 pass; `apps/api` `bun test src` 196 pass dan 1 fail yang sudah ada sebelumnya (`truncated JPEG data fails the awaited native decode`, gagal juga pada baseline); web gateway dan publik 77 pass; integrasi `media:worker:proof` 1 pass (68 assertion).
+
+Belum terbukti: satu unggahan lewat UI admin pada development yang diikuti dari log worker nyata (bukti memakai suite integrasi, bukan unggahan manual), log worker pada production/R2, volume dan biaya log pada beban tinggi, `LOG_HTTP_BODIES=true` terhadap trafik admin sungguhan, dan mode `LOG_FORMAT=json` pada proses nyata (diuji lewat unit/integrasi). Jalankan worker (`bun run --cwd apps/api worker`) lalu unggah video dari admin untuk memeriksa urutan log secara langsung.
+
+### Commit task
+
+- Pesan: `docs(api): ... (LOG-009)`
+- SHA: belum dibuat
+- Hook/checks: belum dijalankan
+- Ledger: dicatat pada update dokumentasi berikutnya
+
+### Blocker atau tindak lanjut
+
+Tidak ada.

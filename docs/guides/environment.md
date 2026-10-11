@@ -15,23 +15,26 @@ Perintah `cp` cukup dijalankan sekali; jika `.env` sudah ada, tambahkan variabel
 
 ## API — `apps/api/.env`
 
-| Variabel                                   | Kegunaan                                                                                         | Status                                               |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------- |
-| `PORT`                                     | Port API; default starter 3001.                                                                  | Aktif pada dev dan start.                            |
-| `DATABASE_URL`                             | Koneksi PostgreSQL untuk Drizzle, data auth, dan queue persisten.                                | URL divalidasi saat API start; koneksi saat dipakai. |
-| `BETTER_AUTH_URL`                          | Origin publik web untuk Better Auth, misalnya `http://localhost:3000`; tanpa suffix `/api/auth`. | Dipakai saat startup API.                            |
-| `BETTER_AUTH_SECRET`                       | Secret autentikasi acak dengan entropi tinggi, minimal 32 karakter.                              | Wajib diisi saat API start.                          |
-| `WEB_ORIGIN`                               | Origin web yang harus sama dengan `BETTER_AUTH_URL` untuk login same-origin.                     | Dipakai saat startup API.                            |
-| `STORAGE_PROVIDER`                         | Selector `minio` untuk development atau `r2` untuk production.                                   | Aktif jika selector diisi; profile divalidasi.       |
-| `S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET`    | Endpoint API S3, region dan bucket sesuai profil provider.                                       | Aktif pada API/worker; wajib saat media aktif.       |
-| `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | Kredensial storage khusus server.                                                                | Wajib diisi saat integrasi storage.                  |
-| `S3_SESSION_TOKEN`                         | Token tambahan bila memakai kredensial storage sementara.                                        | Opsional.                                            |
-| `FFMPEG_PATH`, `FFPROBE_PATH`              | Lokasi executable transcode dan pemeriksaan media; nilai contoh mengandalkan `PATH`.             | Aktif pada worker terpisah.                          |
-| `MEDIA_PLAYBACK_BASE_URL`                  | Origin/path delivery seluruh objek HLS setelah mekanisme akses ditetapkan.                       | Aktif; kosong = WEB_ORIGIN/api, wajib same origin.   |
-| `MEDIA_WORKER_CONCURRENCY`                 | Maksimal job video aktif per instance worker; default 1, dapat diatur melalui env server.        | Aktif pada worker, default1; command terpisah.       |
-| `MEDIA_POSTER_MAX_PIXELS`                  | Batas pixel decode poster; default 16.777.216, rentang 2.073.600–16.777.216.                     | Aktif pada endpoint request poster.                  |
-| `MEDIA_POSTER_PROCESS_CONCURRENCY`         | Maksimal proses poster aktif per instance API; default 1, rentang 1–4 tanpa queue menunggu.      | Aktif pada processor Bun.Image.                      |
-| `MEDIA_POSTER_PROCESS_TIMEOUT_SECONDS`     | Deadline logis proses; default 20 detik, rentang 1–120.                                          | Pembatas response; native terminal tetap ditunggu.   |
+| Variabel                                   | Kegunaan                                                                                                                                                      | Status                                               |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| `PORT`                                     | Port API; default starter 3001.                                                                                                                               | Aktif pada dev dan start.                            |
+| `DATABASE_URL`                             | Koneksi PostgreSQL untuk Drizzle, data auth, dan queue persisten.                                                                                             | URL divalidasi saat API start; koneksi saat dipakai. |
+| `BETTER_AUTH_URL`                          | Origin publik web untuk Better Auth, misalnya `http://localhost:3000`; tanpa suffix `/api/auth`.                                                              | Dipakai saat startup API.                            |
+| `BETTER_AUTH_SECRET`                       | Secret autentikasi acak dengan entropi tinggi, minimal 32 karakter.                                                                                           | Wajib diisi saat API start.                          |
+| `LOG_LEVEL`                                | `debug`, `info`, `warn` atau `error`; default `debug` di development dan `info` pada `NODE_ENV=production`.                                                   | Aktif pada API dan worker.                           |
+| `LOG_FORMAT`                               | `pretty` (satu baris berwarna) atau `json`; default `pretty` di development dan `json` pada production.                                                       | Aktif pada API dan worker.                           |
+| `LOG_HTTP_BODIES`                          | `true` mencatat body JSON request/response terredaksi (maks. 2 KB) kecuali auth, multipart dan URL bertanda tangan; ditolak pada production; default `false`. | Aktif pada API.                                      |
+| `WEB_ORIGIN`                               | Origin web yang harus sama dengan `BETTER_AUTH_URL` untuk login same-origin.                                                                                  | Dipakai saat startup API.                            |
+| `STORAGE_PROVIDER`                         | Selector `minio` untuk development atau `r2` untuk production.                                                                                                | Aktif jika selector diisi; profile divalidasi.       |
+| `S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET`    | Endpoint API S3, region dan bucket sesuai profil provider.                                                                                                    | Aktif pada API/worker; wajib saat media aktif.       |
+| `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | Kredensial storage khusus server.                                                                                                                             | Wajib diisi saat integrasi storage.                  |
+| `S3_SESSION_TOKEN`                         | Token tambahan bila memakai kredensial storage sementara.                                                                                                     | Opsional.                                            |
+| `FFMPEG_PATH`, `FFPROBE_PATH`              | Lokasi executable transcode dan pemeriksaan media; nilai contoh mengandalkan `PATH`.                                                                          | Aktif pada worker terpisah.                          |
+| `MEDIA_PLAYBACK_BASE_URL`                  | Origin/path delivery seluruh objek HLS setelah mekanisme akses ditetapkan.                                                                                    | Aktif; kosong = WEB_ORIGIN/api, wajib same origin.   |
+| `MEDIA_WORKER_CONCURRENCY`                 | Maksimal job video aktif per instance worker; default 1, dapat diatur melalui env server.                                                                     | Aktif pada worker, default1; command terpisah.       |
+| `MEDIA_POSTER_MAX_PIXELS`                  | Batas pixel decode poster; default 16.777.216, rentang 2.073.600–16.777.216.                                                                                  | Aktif pada endpoint request poster.                  |
+| `MEDIA_POSTER_PROCESS_CONCURRENCY`         | Maksimal proses poster aktif per instance API; default 1, rentang 1–4 tanpa queue menunggu.                                                                   | Aktif pada processor Bun.Image.                      |
+| `MEDIA_POSTER_PROCESS_TIMEOUT_SECONDS`     | Deadline logis proses; default 20 detik, rentang 1–120.                                                                                                       | Pembatas response; native terminal tetap ditunggu.   |
 
 Nilai database dalam sampel hanya contoh lokal. Menyalin env belum membuat database, tabel, bucket, akun admin, atau worker. Queue menggunakan PostgreSQL yang sama; tidak memerlukan Redis. Konfigurasi melalui env dan concurrency default 1 disetujui pada nomor 7 di bawah; angka retry 3 attempt/jeda 60–300 detik, encoding max(900 detik,3×durasi), stall 300 detik, heartbeat 15/lease 120/recovery 30 detik juga sudah disetujui. Worker runtime menerapkan parameter tersebut.
 
@@ -119,12 +122,13 @@ Hard deadline/shutdown/thread/disk merupakan kandidat teknis aktif yang dapat di
 
 ## Web — `apps/web/.env`
 
-| Variabel           | Kegunaan                                                                             | Status                                                  |
-| ------------------ | ------------------------------------------------------------------------------------ | ------------------------------------------------------- |
-| `PORT`             | Port Vite dev server dan server production Nitro/Bun; default 3000.                  | Aktif.                                                  |
-| `HOST`             | Alamat bind; sampel lokal memakai `127.0.0.1`.                                       | Aktif pada dev dan server production.                   |
-| `VITE_API_URL`     | Origin web publik untuk browser client API dan Better Auth melalui gateway.          | Dipakai sebagai konfigurasi publik saat build.          |
-| `API_INTERNAL_URL` | Upstream tetap Elysia untuk server TanStack Start, misalnya `http://localhost:3001`. | Khusus server saat dev/run; tidak masuk bundle browser. |
+| Variabel                  | Kegunaan                                                                                 | Status                                                  |
+| ------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| `PORT`                    | Port Vite dev server dan server production Nitro/Bun; default 3000.                      | Aktif.                                                  |
+| `HOST`                    | Alamat bind; sampel lokal memakai `127.0.0.1`.                                           | Aktif pada dev dan server production.                   |
+| `VITE_API_URL`            | Origin web publik untuk browser client API dan Better Auth melalui gateway.              | Dipakai sebagai konfigurasi publik saat build.          |
+| `API_INTERNAL_URL`        | Upstream tetap Elysia untuk server TanStack Start, misalnya `http://localhost:3001`.     | Khusus server saat dev/run; tidak masuk bundle browser. |
+| `LOG_LEVEL`, `LOG_FORMAT` | Sama seperti API untuk log gateway/SSR server web (`LOG_HTTP_BODIES` tidak dipakai web). | Khusus server; tidak masuk bundle browser.              |
 
 `PORT` dev harus integer 1–65535. Vite menolak port yang sedang dipakai agar origin tidak bergeser tanpa diketahui. Argumen CLI `--port`/`--host` dapat dipakai untuk override saat dev. Untuk setup auth lokal, `VITE_API_URL`, `BETTER_AUTH_URL`, dan `WEB_ORIGIN` memakai origin web yang sama; `API_INTERNAL_URL` menunjuk ke server API yang tidak diekspos browser. Gateway membaca nilai ini saat setiap handler server berjalan dan meneruskan browser melalui origin web.
 

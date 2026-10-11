@@ -2,10 +2,19 @@ import { settingsServerCache } from '../settings/server-cache.server'
 import type { SettingsServerCache } from '../settings/server-cache.server'
 import { projectPrivateSettings } from '../settings/model'
 import { isDisabledAuthPath } from '@repo/auth/server'
+import {
+  errorFields,
+  redactQuery,
+  requestIdFrom,
+  requestIdHeader,
+} from '@repo/log'
+import type { Logger } from '@repo/log'
+import { webLog } from './web-log'
 
 type GatewayTarget = 'auth' | 'business'
 
 type GatewayDependencies = {
+  log?: Logger
   settingsCache?: SettingsServerCache
   now?: () => number
   getApiInternalUrl?: () => string | undefined
@@ -68,15 +77,18 @@ const responseHeaderAllowlist = [
   'www-authenticate',
 ] as const
 
+const gatewayErrorCodes = new WeakMap<Response, string>()
 function errorResponse(
   status: number,
   code: string,
   message: string,
 ): Response {
-  return Response.json(
+  const response = Response.json(
     { error: { code, message } },
     { status, headers: { 'cache-control': 'private, no-store' } },
   )
+  gatewayErrorCodes.set(response, code)
+  return response
 }
 
 function getApiOrigin(value: string | undefined): string | undefined {
@@ -216,7 +228,12 @@ export function createAuthGateway(
   const defaultTimeoutMs = dependencies.timeoutMs ?? 10_000
   const maxRequestBodyBytes = dependencies.maxRequestBodyBytes ?? 1_048_576
 
-  return async (request) => {
+  const log = dependencies.log ?? webLog
+  const handle = async (
+    request: Request,
+    requestId: string,
+    upstream: { status?: number },
+  ): Promise<Response> => {
     const incomingUrl = new URL(request.url)
     if (!targetPaths[target](incomingUrl.pathname)) {
       return errorResponse(
@@ -364,12 +381,14 @@ export function createAuthGateway(
         body = result.body
       }
 
+      const upstreamHeaders = forwardedRequestHeaders(
+        request,
+        target === 'auth' || privateBusiness,
+      )
+      upstreamHeaders.set(requestIdHeader, requestId)
       const requestInit: RequestInit = {
         method: request.method,
-        headers: forwardedRequestHeaders(
-          request,
-          target === 'auth' || privateBusiness,
-        ),
+        headers: upstreamHeaders,
         redirect: 'manual',
         signal: abortController.signal,
       }
@@ -377,6 +396,7 @@ export function createAuthGateway(
       const upstreamRequest = new Request(upstreamUrl, requestInit)
       settingsDispatched = settingsWrite
       const upstreamResponse = await fetcher(upstreamRequest)
+      upstream.status = upstreamResponse.status
       if (
         settingsWrite &&
         (upstreamResponse.status >= 500 ||
@@ -508,5 +528,47 @@ export function createAuthGateway(
         'The authentication service is temporarily unavailable.',
       )
     }
+  }
+
+  return async (request) => {
+    const requestId = requestIdFrom(request.headers)
+    const started = performance.now()
+    const upstream: { status?: number } = {}
+    let response: Response
+    try {
+      response = await handle(request, requestId, upstream)
+    } catch (error) {
+      log.error('gateway.error', {
+        requestId,
+        target,
+        method: request.method,
+        path: new URL(request.url).pathname.slice(0, 512),
+        ...errorFields(error, process.env.NODE_ENV !== 'production'),
+      })
+      throw error
+    }
+    try {
+      response.headers.set(requestIdHeader, requestId)
+    } catch {
+      // A response with immutable headers still reaches the client unchanged.
+    }
+    const url = new URL(request.url)
+    const { status } = response
+    const fields = {
+      requestId,
+      target,
+      method: request.method,
+      path: url.pathname.slice(0, 512),
+      query: url.search ? redactQuery(url.searchParams) : undefined,
+      status,
+      upstreamStatus: upstream.status,
+      durationMs: Math.round((performance.now() - started) * 100) / 100,
+      errorCode: gatewayErrorCodes.get(response),
+    }
+    if (status >= 500) log.error('gateway.request', fields)
+    else if (status === 499) log.info('gateway.request', fields)
+    else if (status >= 400) log.warn('gateway.request', fields)
+    else log.info('gateway.request', fields)
+    return response
   }
 }

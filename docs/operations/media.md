@@ -71,6 +71,28 @@ TTL signing ceil(2×durationMs/1000) detik. Playback DTO dan playlist private,no
 
 MinIO development melalui STORAGE_PROVIDER=minio. Production memilih r2 dengan HTTPS account.r2.cloudflarestorage.com/region auto; NODE_ENV=production menolak MinIO. Jangan expose S3 credentials pada VITE_*. MEDIA_PLAYBACK_BASE_URL default WEB_ORIGIN/api dan harus sama origin. Browser perlu bisa menjangkau signed S3 endpoint dan CORS GET/PUT/HEAD/Range/ETag. Domain internal Docker tidak boleh mengganti hostname URL yang telah ditandatangani. R2 staging belum diuji.
 
+## Mengikuti job worker dari log
+
+Diimplementasikan 11 Oktober 2026 ([LOG-006/007](../tasks/logging-enhancement.md)). Worker mencatat setiap job dengan `jobId`, `assetId`, `kind` (`source`/`poster`), `attempt` dan `generation` pada setiap event; atur `LOG_LEVEL`/`LOG_FORMAT` ([environment](../guides/environment.md)). Urutan untuk satu job sukses:
+
+1. `worker.start` (konfigurasi), lalu `job.claimed` (attempt, failures, slot).
+2. `job.stage` dengan `phase=start` dan `phase=done` (+ `durationMs`) untuk `disk_check` (`freeBytes`), `load_asset` (`sizeBytes`), `download` (`bytes`), `verify` (`sha256` 12 karakter), `probe` (`mediaDurationMs`, resolusi, codec, fps, audio, hdr; hanya sumber), `transcode`, `upload` (`files`, `bytes`), `commit`.
+3. Selama `transcode`: `phase=plan` (daftar rendition) lalu `phase=progress` dengan `percent`, `mediaSeconds` dan `elapsedMs` setiap 10% durasi atau 15 detik (yang lebih dulu), diakhiri `phase=done percent=100`.
+4. `job.completed` dengan `totalMs`, jumlah file dan rendition.
+
+Kegagalan dan kondisi lain:
+
+| Event                                                                                 | Arti dan field                                                                                                                                                                                                                                                                                                                                |
+| ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `job.failed`                                                                          | `stage` tempat gagal, durasi tahap/total, `code` (`MEDIA_*`), `terminal`, `dead`, `failures`/`maxAttempts`, `retryInSeconds` bila akan diulang, `recorded` (false bila lease sudah hilang), nama/pesan/penyebab; `ffmpegStderr` (maksimal 20 baris terakhir, path workdir menjadi `<workdir>`). Level `error` bila `dead`, selain itu `warn`. |
+| `job.paused` / `worker.paused`                                                        | Masalah resource/konfigurasi/pembatalan; job diulang setelah 300 detik tanpa menambah `failures`.                                                                                                                                                                                                                                             |
+| `job.lease_lost`, `job.heartbeat_error`                                               | Heartbeat gagal atau lease diambil alih; job dibatalkan. `job.heartbeat` (debug) menunjukkan progres tiap heartbeat.                                                                                                                                                                                                                          |
+| `queue.recover`, `job.lease_expired`                                                  | Job `running` yang lease-nya habis dipulihkan: jumlah, `dead` atau `retryInSeconds`.                                                                                                                                                                                                                                                          |
+| `cleanup`, `cleanup.item_failed`                                                      | Jumlah hasil sapuan (original, partial, upload session, durasi) dan item yang gagal dibersihkan (`target`, id, penyebab).                                                                                                                                                                                                                     |
+| `worker.dependency_error`, `worker.start_failed`, `worker.stopping`, `worker.stopped` | Database/storage tidak tersedia (diulang setelah `pollSeconds`), gagal start, penutupan dengan masa tenggang.                                                                                                                                                                                                                                 |
+
+Contoh: `bun run --cwd apps/api worker 2>&1 | grep "jobId=<id>"` (development) atau `jq -c 'select(.jobId=="<id>")'` (JSON). Bukti nyata: `bun run --cwd apps/api media:worker:proof` menegaskan delapan tahap berurutan dan tag job/aset pada setiap event.
+
 ## Retensi dan failure recovery
 
 Original sukses dihapus paling cepat tujuh hari setelah HLS verified-ready; terminal failed source tujuh hari setelah failed_at, tanpa job aktif. Original provenance/metadata/tombstone tetap tersedia. Owner archived mempertahankan semua file valid yang masih ada; archive yang terjadi setelah deletion claim tidak dapat mengembalikan original. Cleanup dengan claim persisten dapat diteruskan idempotently setelah crash.

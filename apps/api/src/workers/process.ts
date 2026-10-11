@@ -1,5 +1,9 @@
 export class MediaProcessError extends Error {
-  constructor(public readonly code: string) {
+  constructor(
+    public readonly code: string,
+    /** Last 4 KB of the tool's stderr; logged by the worker, never returned to clients. */
+    public readonly diagnostics?: string,
+  ) {
     super(code);
   }
 }
@@ -103,7 +107,7 @@ export async function runMediaProcess(
   try {
     const code = await p.exited;
     await Promise.all([stdout, stderr]);
-    if (reason) throw new MediaProcessError(reason);
+    if (reason) throw new MediaProcessError(reason, diagnostics.slice(-4096));
     if (code !== 0) {
       const failure =
         code === 126 || code === 127
@@ -123,7 +127,7 @@ export async function runMediaProcess(
                       )
                     ? "MEDIA_INVALID_DECODE"
                     : "MEDIA_PROCESS_FAILED";
-      throw new MediaProcessError(failure);
+      throw new MediaProcessError(failure, diagnostics.slice(-4096));
     }
     return output;
   } finally {

@@ -1,6 +1,7 @@
 import { createServerOnlyFn } from '@tanstack/react-start'
 import { getRequest, setResponseHeader } from '@tanstack/react-start/server'
 import { apiOriginFromOrigin } from '../api/client'
+import { observeServerRead, ssrRequestId } from '../server/log.server'
 import {
   createPublicCatalogClient,
   CatalogRequestError,
@@ -21,7 +22,10 @@ const serverClient = createServerOnlyFn((signal: AbortSignal) => {
     fetch(input, {
       ...init,
       signal: combined,
-      headers: { accept: 'application/json' },
+      headers: {
+        accept: 'application/json',
+        'x-request-id': ssrRequestId(),
+      },
       credentials: 'omit',
       redirect: 'error',
     }),
@@ -29,11 +33,19 @@ const serverClient = createServerOnlyFn((signal: AbortSignal) => {
 })
 export const readCatalogPageOnServer = createServerOnlyFn(
   (filters: CatalogFilters, cursor: string | null, signal: AbortSignal) =>
-    serverClient(signal).page(filters, cursor, signal),
+    observeServerRead('catalog.page', () =>
+      serverClient(signal).page(filters, cursor, signal),
+    ),
 )
 export const readCatalogGenresOnServer = createServerOnlyFn(
-  (signal: AbortSignal) => serverClient(signal).genres(signal),
+  (signal: AbortSignal) =>
+    observeServerRead('catalog.genres', () =>
+      serverClient(signal).genres(signal),
+    ),
 )
 export const readCatalogFeaturedOnServer = createServerOnlyFn(
-  (signal: AbortSignal) => serverClient(signal).featured(signal),
+  (signal: AbortSignal) =>
+    observeServerRead('catalog.featured', () =>
+      serverClient(signal).featured(signal),
+    ),
 )
