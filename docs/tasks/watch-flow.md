@@ -304,11 +304,11 @@ Bila halaman episode tidak cukup menentukan Previous, ajukan endpoint API sebaga
 
 ## Task: WFLOW-007 — Test dan aksesibilitas
 
-- Status: Backlog
+- Status: Review (test render server dan audit statis; keyboard, fokus terlihat dan kontras belum diukur di browser)
 - Owner: agent
 - Prioritas: 7
 - Referensi: PRD-07/08
-- Diperbarui: 2026-10-10
+- Diperbarui: 2026-10-11
 - Dependensi: WFLOW-003, WFLOW-004, WFLOW-006
 - Ukuran: kecil
 
@@ -318,8 +318,8 @@ Lengkapi test unit/komponen, landmark dan label, urutan fokus, target 44 px, red
 
 ### Acceptance criteria
 
-- [ ] Test perilaku baru lulus dan berada di samping modulnya.
-- [ ] Tidak ada pelanggaran a11y yang diketahui pada tiga halaman (landmark, `h1` tunggal, label tombol, fokus terlihat).
+- [x] Test perilaku baru lulus dan berada di samping modulnya (`apps/web/test`, pola repo).
+- [ ] Tidak ada pelanggaran a11y yang diketahui pada tiga halaman: landmark, `h1` tunggal, label tombol dan target 44 px diperiksa lewat test render server; fokus terlihat hanya diperiksa lewat kelas `focus-visible`, urutan tab dan kontras belum diukur di browser.
 
 ### Validasi
 
@@ -327,13 +327,22 @@ Lengkapi test unit/komponen, landmark dan label, urutan fokus, target 44 px, red
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 11 Oktober 2026 pada `feat/watch-flow-redesign`.
+
+- Test render server memakai router memori dan klien Query yang diisi cache (`test/public-render.tsx`), sehingga komponen publik dirender nyata (bukan hanya logika):
+  - `public-a11y.test.tsx`: kartu Browse (satu tautan bernama, poster dekoratif `alt=""`, target `min-h-11`), search (`role="search"`, label, `maxLength=200`, Clear hanya bila ada teks dan tidak saat nonaktif, spinner `aria-hidden` dan `motion-reduce`), `EpisodeRow` (nama "Season N, episode M", satu `aria-current`), `EpisodePanel` (select season hanya untuk ≥2 season, daftar berlabel, error + Retry, loading berstatus), `WatchShell` (skip link sebelum `header`, `main` fokusable, Back bernama untuk tiga target, bilah 56 px, satu `h1`), placeholder loading.
+  - `public-browse-render.test.tsx`: Browse penuh dengan cache terisi (kartu Film/Series/Standalone, tautan benar, empat tombol filter, "3 titles", "1 result for “night”", Load more hanya bila ada cursor, kosong/kategori kosong/error untuk pencarian dan daftar, teks pencarian tidak dipantulkan sebagai markup).
+  - `public-detail-render.test.tsx`: `SeriesDetail` (CTA "Play S1 E1", ringkasan season hanya bila semua halaman termuat, hanya season pertama, tanpa CTA saat kosong, 404), `VideoDetail` (genre, CTA sticky, Back), `WatchContent` (breadcrumb, Previous/Next lintas season, satu `aria-current`, tetangga hilang disabled, "all caught up", Film tanpa kontrol episode).
+- Perbaikan yang ditemukan audit: `Skeleton` kini `motion-reduce:animate-none` (berlaku di seluruh aplikasi); cover kartu Browse dekoratif (`Poster` mendapat prop `alt`) agar tidak dibaca ganda dengan judul; CTA sticky mobile menandai `data-sticky-cta` dan `scroll-padding-bottom: 6rem` (<640 px) supaya fokus keyboard tidak tertutup; CSS hasil build diperiksa. `WatchContent`, `StepButton`, `UpNext` dan `WatchSkeleton` dipindah dari route ke `components/public/watch-content.tsx` agar dapat diuji.
+- Command aktual: `bun test apps/web/test/public-*.test.ts* apps/web/test/content-client.test.ts` → 61 pass/0 fail; `bun run check-types` 3/3 sukses; `bun run lint` sukses; `bun run build` sukses. Dev server lokal: `/watch/test-film-1`, `/videos/test-film-1`, `/`, `/?q=a` → 200; `/series/no-such-zz` → 404.
+
+Belum terbukti: tindakan keyboard (urutan tab, Escape/Clear, panah pada ToggleGroup), fokus terlihat dan tidak tertutup CTA sticky, kontras Light/Dark di layar, reduced-motion di browser, perilaku hook `useBrowseSearch`/`useEpisodeNav` (tanpa DOM interaktif) dan alur klien (navigasi, Up next, scroll ke baris aktif). Pembuktian tersebut berada pada WFLOW-008.
 
 ### Commit task
 
 - Pesan: `test(web): cover watch flow behavior (WFLOW-007)`
 - SHA: belum dibuat
-- Hook/checks: belum dijalankan
+- Hook/checks: dijalankan saat commit
 - Ledger: dicatat pada update dokumentasi berikutnya
 
 ### Blocker atau tindak lanjut

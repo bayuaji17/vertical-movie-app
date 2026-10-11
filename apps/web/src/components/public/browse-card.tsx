@@ -26,7 +26,7 @@ export function BrowseCard({ item }: { item: CatalogItem }) {
       data-catalog-id={`${item.kind}:${item.id}`}
       className="relative min-w-0"
     >
-      <Poster item={item} />
+      <Poster item={item} alt="" />
       {item.kind === 'series' ? (
         <Link
           to="/series/$slug"

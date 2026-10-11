@@ -97,7 +97,10 @@ export function DetailSynopsis({ text }: { text: string }) {
 /** Sticky at the bottom of the viewport on phones, inline from 640 px. */
 export function DetailCta({ children }: { children: ReactNode }) {
   return (
-    <div className="sticky bottom-0 z-10 -mx-4 border-t bg-background/90 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur sm:static sm:m-0 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none lg:col-start-2 lg:row-start-3">
+    <div
+      data-sticky-cta
+      className="sticky bottom-0 z-10 -mx-4 border-t bg-background/90 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur sm:static sm:m-0 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none lg:col-start-2 lg:row-start-3"
+    >
       {children}
     </div>
   )

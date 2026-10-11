@@ -506,3 +506,10 @@ body {
   );
   clip-path: inset(-1px);
 }
+
+/* The sticky mobile CTA must not hide the element that receives keyboard focus. */
+@media (max-width: 639px) {
+  html:has([data-sticky-cta]) {
+    scroll-padding-bottom: 6rem;
+  }
+}

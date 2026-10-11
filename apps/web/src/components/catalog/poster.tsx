@@ -6,10 +6,13 @@ const fallback = '/images/catalog/poster-fallback.svg'
 export function Poster({
   item,
   eager = false,
+  alt,
   className,
 }: {
   item: CatalogItem
   eager?: boolean
+  /** Pass "" when a neighboring link already names the title (decorative image). */
+  alt?: string
   className?: string
 }) {
   const [failedSource, setFailedSource] = useState<string | null>(null)
@@ -32,7 +35,7 @@ export function Poster({
       <img
         ref={imageRef}
         src={failed ? fallback : item.poster}
-        alt={`Poster for ${item.title}`}
+        alt={alt ?? `Poster for ${item.title}`}
         width={900}
         height={1600}
         loading={eager ? 'eager' : 'lazy'}
