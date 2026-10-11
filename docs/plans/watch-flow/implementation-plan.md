@@ -129,6 +129,7 @@ Perubahan frontend saja; rollback dengan revert commit. Redirect legacy dipertah
 ## Execution history
 
 - 10 Oktober 2026: context dan plan ditulis; branch `feat/watch-flow-redesign` dibuat dari `main` (`f1b1d18`). Belum ada implementasi.
+- 11 Oktober 2026: WFLOW-006 diimplementasikan lokal (Review): panel episode, Previous/Next dari daftar episode, kartu Up next; `NextEpisode`/`next` tidak lagi dipakai halaman watch.
 - 11 Oktober 2026: WFLOW-005 diimplementasikan lokal (Review): `WatchShell` top bar 56 px, lebar player dari tinggi viewport, rail info; browser worker publik usang dan ditulis ulang di WFLOW-008.
 - 11 Oktober 2026: WFLOW-004 diimplementasikan lokal (Review): detail Series dengan CTA, pemilih season dan baris episode baru; halaman episode 100.
 - 11 Oktober 2026: WFLOW-003 diimplementasikan lokal (Review): detail Film/Standalone responsif, `/titles/$kind/$slug` dialihkan ke `/videos/:slug`.

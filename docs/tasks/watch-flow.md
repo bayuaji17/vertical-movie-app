@@ -255,11 +255,11 @@ Tidak ada.
 
 ## Task: WFLOW-006 — Panel episode, Previous/Next dan Up next
 
-- Status: Backlog
+- Status: Review (diimplementasikan lokal; belum dirender dengan episode nyata atau dilihat di browser)
 - Owner: agent
 - Prioritas: 6
 - Referensi: WFLOW-US-03
-- Diperbarui: 2026-10-10
+- Diperbarui: 2026-10-11
 - Dependensi: WFLOW-005
 - Ukuran: sedang
 
@@ -269,10 +269,10 @@ Panel episode pada watch (season selector, episode aktif, load more), tombol Pre
 
 ### Acceptance criteria
 
-- [ ] Episode aktif ditandai `aria-current` dan terlihat di daftar.
-- [ ] Previous/Next berfungsi lintas season; disabled/hilang di batas dengan teks yang jelas.
-- [ ] Pindah episode tidak me-reload halaman penuh dan memindahkan fokus ke judul.
-- [ ] Tidak ada autoplay; Up next hanya tombol.
+- [ ] Episode aktif ditandai `aria-current` dan terlihat di daftar (penanda dan scroll ke baris aktif ditulis; belum dilihat).
+- [x] Previous/Next berfungsi lintas season; disabled di batas dengan teks yang jelas (logika `episodeNeighbors` diuji unit; tombol belum dilihat dengan data nyata).
+- [ ] Pindah episode tidak me-reload halaman penuh dan memindahkan fokus ke judul (tautan SPA dan fokus `h1` ditulis; belum dicoba).
+- [x] Tidak ada autoplay; Up next hanya tombol (kartu hanya tampil setelah event `ended`, berisi tautan "Play next").
 
 ### Validasi
 
@@ -280,13 +280,22 @@ Test komponen dengan klien palsu; browser dengan Series ≥2 season dan >20 epis
 
 ### Hasil dan bukti
 
-Belum ada.
+Diimplementasikan 11 Oktober 2026 pada `feat/watch-flow-redesign` (commit kode `07665a3`).
+
+- Data: `useEpisodeNav` (`hooks/use-episode-nav.ts`) memuat judul Series (`contentDetailOptions('series')`) dan daftar episode (`contentEpisodesOptions`, 100 per halaman), mengurutkannya, mencari tetangga lewat `episodeNeighbors` (`lib/catalog/season-model.ts`), dan memuat halaman berikutnya selama tetangga belum diketahui (episode aktif di luar halaman termuat atau di tepi daftar, maksimum 20 halaman). Tidak ada endpoint API baru. Loader watch memanggil `loadEpisodeContext` (non-fatal) sehingga judul Series dan daftar episode sudah di cache; kegagalan diabaikan.
+- Rail untuk episode: breadcrumb "Series › Season N › Episode M" (tautan ke `/series/:slug`), badge, `h1`, sinopsis, tombol Previous/Next (dua kolom, nama aksesibel "Previous/Next episode · S1 E2"; disabled bila tidak ada tetangga), pesan "You’re all caught up. Back to series" pada episode terakhir (hanya bila semua halaman termuat), dan `EpisodePanel` (select season, daftar episode dengan `EpisodeRow` bersama Series, episode aktif `aria-current` dan di-scroll ke tengah daftar tanpa menggeser halaman, maksimum 340 px tinggi pada ≥1024 px, skeleton, error + Retry episodes). Judul top bar menjadi "Series · S1 E3".
+- Up next: `VerticalVideoPlayer` mendapat dua prop opsional (`onEnded`, `onPlay`) yang hanya diteruskan ke elemen video; logika renewal/retry tidak diubah. Kartu "Up next · S1 E4 / judul / Play next" tampil di atas kontrol player setelah `ended` dan hilang saat diputar lagi; tanpa autoplay/countdown.
+- Dihapus: komponen `NextEpisode` (memakai `/videos/:slug/next`) pada halaman watch. `nextEpisodeOptions` dan klien `next` masih ada di `lib/catalog` dan tidak dipakai web lagi; pembersihannya menjadi tindak lanjut.
+- Test baru/diperbarui: `public-episode-context.test.ts` (loader konteks episode dan kegagalannya), `public-season-model.test.ts` (tetangga lintas season, tepi daftar, belum termuat), `public-watch-model.test.ts` (judul top bar dengan judul Series).
+- Command aktual: `bun test apps/web/test/public-*.test.ts* apps/web/test/content-client.test.ts` → 43 pass/0 fail; `bun run check-types` 3/3 sukses; `bun run lint` sukses; `bun run build` sukses. Dev server lokal: `/watch/test-film-1` → 200 dengan tombol Details dan tanpa panel episode/Previous/Next; `/watch/no-such-zz` → 404.
+
+Belum terbukti: halaman watch Episode nyata (database dev tidak punya Series/episode), kartu Up next dan event `ended`, Previous/Next lintas season, scroll ke baris aktif, fokus `h1`, pemuatan halaman lanjutan untuk Series >100 episode, dan semua tampilan di browser.
 
 ### Commit task
 
 - Pesan: `feat(web): add episode panel and navigation to watch (WFLOW-006)`
-- SHA: belum dibuat
-- Hook/checks: belum dijalankan
+- SHA: `07665a3` (kode); catatan bukti pada commit dokumentasi berikutnya
+- Hook/checks: Husky dan commitlint lulus pada commit kode
 - Ledger: dicatat pada update dokumentasi berikutnya
 
 ### Blocker atau tindak lanjut
