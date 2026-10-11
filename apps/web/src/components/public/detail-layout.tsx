@@ -54,15 +54,22 @@ export function DetailSkeleton({ label }: { label: string }) {
     </div>
   )
 }
-export function DetailSynopsis({ text }: { text: string }) {
+/** Collapsed text with "Read more" on phones; the control only shows when text overflows. */
+export function ClampedText({
+  text,
+  clampClass = 'line-clamp-4',
+}: {
+  text: string
+  clampClass?: string
+}) {
   const clamp = useTextClamp()
   return (
-    <div className="flex min-w-0 flex-col items-start gap-1 lg:col-start-2 lg:row-start-2">
+    <div className="flex min-w-0 flex-col items-start gap-1">
       <p
         ref={clamp.ref}
         className={cn(
           'max-w-2xl text-base leading-relaxed whitespace-pre-line text-muted-foreground [overflow-wrap:anywhere]',
-          !clamp.expanded && 'line-clamp-4 lg:line-clamp-none',
+          !clamp.expanded && clampClass,
         )}
       >
         {text}
@@ -77,6 +84,13 @@ export function DetailSynopsis({ text }: { text: string }) {
           {clamp.expanded ? 'Show less' : 'Read more'}
         </Button>
       )}
+    </div>
+  )
+}
+export function DetailSynopsis({ text }: { text: string }) {
+  return (
+    <div className="min-w-0 lg:col-start-2 lg:row-start-2">
+      <ClampedText text={text} clampClass="line-clamp-4 lg:line-clamp-none" />
     </div>
   )
 }

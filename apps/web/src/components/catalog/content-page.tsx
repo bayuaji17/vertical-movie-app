@@ -1,6 +1,5 @@
 import { Link } from '@tanstack/react-router'
 import { Button } from '#/components/ui/button'
-import { Skeleton } from '#/components/ui/skeleton'
 
 export function ContentFailure({
   status,
@@ -35,21 +34,6 @@ export function ContentFailure({
         >
           Back to catalog
         </Button>
-      </div>
-    </div>
-  )
-}
-export function ContentLoading() {
-  return (
-    <div
-      role="status"
-      aria-label="Loading title"
-      className="grid gap-6 sm:grid-cols-[180px_1fr]"
-    >
-      <Skeleton className="aspect-[9/16] w-40" />
-      <div className="space-y-4">
-        <Skeleton className="h-10 w-3/4" />
-        <Skeleton className="h-24 w-full" />
       </div>
     </div>
   )

@@ -208,11 +208,11 @@ Tidak ada.
 
 ## Task: WFLOW-005 — Layout watch desktop dan mobile
 
-- Status: Backlog
+- Status: Review (diimplementasikan lokal; ukuran dan perilaku player belum dilihat di browser)
 - Owner: agent
 - Prioritas: 5
 - Referensi: WFLOW-US-02; skill `videojs`; desain WFLOW-001
-- Diperbarui: 2026-10-10
+- Diperbarui: 2026-10-11
 - Dependensi: WFLOW-001, WFLOW-002
 - Ukuran: sedang
 
@@ -222,9 +222,9 @@ Top bar ramping, player dengan tinggi dibatasi viewport (`svh`), rail info deskt
 
 ### Acceptance criteria
 
-- [ ] Player 9:16 tanpa crop/stretch dan kontrolnya terlihat tanpa scroll pada 390×844 dan 1440×900.
-- [ ] Tidak ada layout shift berarti saat metadata dimuat; tidak ada overflow 320–1920 px.
-- [ ] Renewal, Retry playback dan offline tetap berfungsi (test player existing lulus).
+- [ ] Player 9:16 tanpa crop/stretch dan kontrolnya terlihat tanpa scroll pada 390×844 dan 1440×900 (lebar diturunkan dari tinggi viewport lewat CSS dan terverifikasi pada CSS hasil build; belum diukur di browser).
+- [ ] Tidak ada layout shift berarti saat metadata dimuat; tidak ada overflow 320–1920 px (skeleton memakai lebar yang sama dengan player; belum diukur).
+- [x] Renewal, Retry playback dan offline tetap berfungsi (`vertical-video-player.tsx` tidak diubah; test publik existing lulus; perilaku runtime belum dicoba).
 
 ### Validasi
 
@@ -232,13 +232,21 @@ Test komponen; browser dev/build; test player existing.
 
 ### Hasil dan bukti
 
-Belum ada.
+Diimplementasikan 11 Oktober 2026 pada `feat/watch-flow-redesign`.
+
+- `WatchShell` (`components/public/watch-shell.tsx`) menggantikan `PublicShell` pada `/watch/:slug`: top bar sticky 56 px (Back kontekstual, judul terpotong, menu tema) dan footer Site Settings bila ada. Back: episode → `/series/:slug` ("Back to series"), Film/Standalone → `/videos/:slug` ("Back to details"), selain itu Browse; label teks "Back" hanya pada ≥1024 px, nama aksesibel tetap lengkap. Tombol "Back to browse" terpisah dihapus (sesuai desain).
+- Tata letak: lebar player diturunkan dari tinggi tersisa, `min(100%, (100svh − 56 px) × 9/16)` pada mobile/tablet (di tengah) dan `(100svh − 56 px − 48 px) × 9/16` pada ≥1024 px dengan rail 560 px di kanan; mobile edge-to-edge, info di bawah player. CSS hasil build diperiksa: `width: min(100%, 56.25svh - 1.97rem)` dan `calc(56.25svh - 3.66rem)`. Rail: badge jenis, durasi (dengan S/E untuk episode), `h1`, sinopsis ter-clamp 3 baris dengan "Read more" (`ClampedText` dibagi dengan detail), tombol "Details" untuk Film/Standalone, dan tombol Next episode yang ada (panel episode, Previous dan Up next adalah WFLOW-006).
+- Skeleton `WatchSkeleton` berlebar sama dengan player; `ContentLoading` yang tidak terpakai dihapus. Fokus berpindah ke `h1` pada mount berikutnya (navigasi klien, misalnya episode berikutnya), bukan pada pemuatan halaman pertama.
+- `lib/catalog/watch-model.ts` (judul top bar dan target Back) dengan test `public-watch-model.test.ts`.
+- Command aktual: `bun test apps/web/test/public-*.test.ts* apps/web/test/content-client.test.ts` → 40 pass/0 fail; `bun run check-types` 3/3 sukses; `bun run lint` sukses; `bun run build` sukses. Dev server lokal: `/watch/test-film-1` → 200 dengan top bar `h-14`, `aria-label="Back to details"`, kelas lebar `svh`, tanpa header 80 px, `h1` dan tombol Details; `/watch/no-such-zz` → 404; `/watch/test-film-1?type=all` → 307 ke URL bersih.
+
+Belum terbukti: ukuran dan visibilitas kontrol pada 390×844/1440×900, tanpa overflow 320–1920 px, fokus `h1`, dan alur playback (renewal/retry/offline) di browser. Browser worker publik yang ada (`public-film-catalog-browser-worker.mjs` dan lain-lain) memakai mock API daftar `/videos` dan teks lama, sudah usang sejak WFLOW-009 dan WFLOW-005, dan tidak dijalankan; penulisan ulang menjadi bagian WFLOW-008.
 
 ### Commit task
 
 - Pesan: `feat(web): redesign watch layout (WFLOW-005)`
 - SHA: belum dibuat
-- Hook/checks: belum dijalankan
+- Hook/checks: dijalankan saat commit
 - Ledger: dicatat pada update dokumentasi berikutnya
 
 ### Blocker atau tindak lanjut
@@ -335,7 +343,7 @@ Tidak ada.
 
 ### Ruang lingkup
 
-Bukti browser dev/build, perbarui `docs/README.md`, PRD dan arsitektur (rute aktif), catat hasil dan batas.
+Bukti browser dev/build, penulisan ulang browser worker publik (`public-film-catalog-browser-worker.mjs`, `public-content-browser-worker.mjs`, `public-catalog-browser-worker.mjs`) agar sesuai Browse `/catalog`, top bar watch dan tautan baru, perbarui `docs/README.md`, PRD dan arsitektur (rute aktif), catat hasil dan batas.
 
 ### Acceptance criteria
 

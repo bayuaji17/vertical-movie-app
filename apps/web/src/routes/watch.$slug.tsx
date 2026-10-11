@@ -3,14 +3,14 @@ import {
   publicMeta,
   settingsFromMatches,
 } from '#/lib/settings/presentation'
-import { useCallback } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { createFileRoute, Link, notFound } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import {
-  ContentLoading,
-  ContentFailure,
-} from '#/components/catalog/content-page'
-import { PublicShell } from '#/components/public/public-shell'
+import { ContentFailure } from '#/components/catalog/content-page'
+import { cn } from 'cn'
+import { Skeleton } from '#/components/ui/skeleton'
+import { WatchShell } from '#/components/public/watch-shell'
+import { ClampedText } from '#/components/public/detail-layout'
 import { stripLegacyTypeSearch } from '#/lib/public/catalog-navigation'
 import { isMissingContent } from '#/lib/public/missing-content'
 import { usePublicOnline } from '#/hooks/use-public-online'
@@ -25,6 +25,11 @@ import {
   publicContentBrowser,
 } from '#/lib/catalog/content-queries'
 import type { WatchVideo } from '#/lib/catalog/content-model'
+import {
+  watchBackTarget,
+  watchHeadline,
+  watchKindLabel,
+} from '#/lib/catalog/watch-model'
 
 export const Route = createFileRoute('/watch/$slug')({
   beforeLoad: ({ location }) => stripLegacyTypeSearch(location),
@@ -72,122 +77,126 @@ function Watch() {
     query.error instanceof CatalogRequestError
       ? query.error.status
       : (bootstrap.status ?? 503)
+  const video = query.data?.item
   return (
-    <PublicShell>
+    <WatchShell
+      title={video ? watchHeadline(video) : 'Watch'}
+      back={watchBackTarget(video)}
+    >
       {!online && (
-        <p role="status" className="mb-5 text-muted-foreground">
+        <p role="status" className="px-4 pt-4 text-muted-foreground">
           You are offline. Reconnect to play this video.
         </p>
       )}
-      {query.data ? (
-        <WatchContent key={query.data.item.id} video={query.data.item} />
+      {video ? (
+        <WatchContent key={video.id} video={video} />
       ) : query.isFetching || (!query.isError && !bootstrap.status) ? (
-        <ContentLoading />
+        <WatchSkeleton />
       ) : (
-        <ContentFailure
-          status={status}
-          busy={query.isFetching}
-          onRetry={() => {
-            void query.refetch()
-          }}
-        />
+        <div className="mx-auto max-w-3xl p-4">
+          <ContentFailure
+            status={status}
+            busy={query.isFetching}
+            onRetry={() => {
+              void query.refetch()
+            }}
+          />
+        </div>
       )}
-    </PublicShell>
+    </WatchShell>
   )
 }
+// Width follows the height left under the 56 px top bar so the 9:16 stage
+// never needs a scroll to reach its controls; desktop also leaves 24 px padding.
+const stage =
+  'mx-auto w-[min(100%,calc((100svh-3.5rem)*9/16))] lg:mx-0 lg:w-[calc((100svh-3.5rem-3rem)*9/16)] lg:overflow-hidden lg:rounded-2xl'
+const layout =
+  'grid gap-5 pb-10 lg:grid-cols-[auto_minmax(0,560px)] lg:items-start lg:justify-center lg:gap-12 lg:px-10 lg:pt-6'
+function WatchSkeleton() {
+  return (
+    <div role="status" aria-label="Loading video" className={layout}>
+      <Skeleton
+        className={cn('aspect-[9/16] rounded-none lg:rounded-2xl', stage)}
+      />
+      <div className="flex flex-col gap-4 px-4 lg:px-0">
+        <Skeleton className="h-6 w-1/3" />
+        <Skeleton className="h-8 w-3/4" />
+        <Skeleton className="h-20 w-full" />
+      </div>
+    </div>
+  )
+}
+// The first mount is the page load; later mounts are client navigations
+// (for example moving to the next episode) and move focus to the title.
+let firstWatchMount = true
 function WatchContent({ video }: { video: WatchVideo }) {
   const load = useCallback(
     (signal: AbortSignal) =>
       publicContentBrowser().playback(video.slug, video.id, signal),
     [video.slug, video.id],
   )
+  const heading = useRef<HTMLHeadingElement>(null)
+  useEffect(() => {
+    if (firstWatchMount) firstWatchMount = false
+    else heading.current?.focus({ preventScroll: true })
+  }, [])
   return (
-    <>
-      <div className="flex flex-wrap gap-3">
-        {video.kind === 'episode' && video.seriesSlug ? (
+    <div className={layout}>
+      <div className={stage}>
+        <VerticalVideoPlayer key={video.id} loadPlayback={load} />
+      </div>
+      <div className="mx-auto flex w-full max-w-xl min-w-0 flex-col items-start gap-4 px-4 lg:mx-0 lg:max-w-none lg:px-0">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <Badge variant="secondary">{watchKindLabel[video.kind]}</Badge>
+          <span className="text-sm text-muted-foreground">
+            {video.kind === 'episode'
+              ? `Season ${video.seasonNumber} · Episode ${video.episodeNumber} · `
+              : ''}
+            {Math.ceil(video.durationMs / 60000)} min
+          </span>
+        </div>
+        <h1
+          ref={heading}
+          tabIndex={-1}
+          className="font-heading text-2xl leading-tight font-bold [overflow-wrap:anywhere] outline-none lg:text-3xl"
+        >
+          {video.title}
+        </h1>
+        <ClampedText
+          text={video.synopsis}
+          clampClass="line-clamp-3 lg:line-clamp-none"
+        />
+        {video.kind !== 'episode' && (
           <Button
             variant="outline"
             className="min-h-11"
             nativeButton={false}
             role="link"
             render={
-              <Link to="/series/$slug" params={{ slug: video.seriesSlug }} />
+              <Link
+                to="/videos/$slug"
+                params={{ slug: video.slug }}
+                preload={false}
+              />
             }
           >
-            Back to series
+            Details
           </Button>
-        ) : (
-          video.kind !== 'episode' && (
-            <Button
-              variant="outline"
-              className="min-h-11"
-              nativeButton={false}
-              role="link"
-              render={
-                <Link
-                  to="/videos/$slug"
-                  params={{ slug: video.slug }}
-                  preload={false}
-                />
-              }
-            >
-              Back to details
-            </Button>
-          )
         )}
-        <Button
-          variant="ghost"
-          className="min-h-11"
-          nativeButton={false}
-          role="link"
-          render={<Link to="/" preload={false} />}
-        >
-          Back to browse
-        </Button>
+        {video.kind === 'episode' &&
+          video.seriesSlug &&
+          video.seasonNumber &&
+          video.episodeNumber && (
+            <NextEpisode
+              key={video.id}
+              video={video}
+              seriesSlug={video.seriesSlug}
+              season={video.seasonNumber}
+              episode={video.episodeNumber}
+            />
+          )}
       </div>
-      <div className="grid items-start gap-7 md:grid-cols-[minmax(240px,360px)_1fr]">
-        <div className="mx-auto w-full max-w-[360px]">
-          <VerticalVideoPlayer key={video.id} loadPlayback={load} />
-        </div>
-        <div className="flex min-w-0 flex-col items-start gap-5">
-          <Badge variant="secondary">
-            {video.kind === 'movie'
-              ? 'Film'
-              : video.kind === 'standalone'
-                ? 'Standalone'
-                : 'Episode'}
-          </Badge>
-          <h1 className="font-heading text-3xl font-bold break-words">
-            {video.title}
-          </h1>
-          <p className="max-w-2xl whitespace-pre-line text-muted-foreground">
-            {video.synopsis}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            {video.kind === 'episode'
-              ? 'Season ' +
-                video.seasonNumber +
-                ' · Episode ' +
-                video.episodeNumber +
-                ' · '
-              : ''}
-            {Math.ceil(video.durationMs / 60000)} min
-          </p>
-          {video.kind === 'episode' &&
-            video.seriesSlug &&
-            video.seasonNumber &&
-            video.episodeNumber && (
-              <NextEpisode
-                key={video.id}
-                video={video}
-                seriesSlug={video.seriesSlug}
-                season={video.seasonNumber}
-                episode={video.episodeNumber}
-              />
-            )}
-        </div>
-      </div>
-    </>
+    </div>
   )
 }
 function NextEpisode({
