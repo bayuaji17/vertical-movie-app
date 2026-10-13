@@ -56,12 +56,30 @@ export function isPublicCatalogPoster(request: Request) {
   )
 }
 
+// Small private WebP thumbnail of an item's cover for the admin list.
+export function isAdminContentCover(request: Request) {
+  return (
+    request.method === 'GET' &&
+    /^\/api\/admin\/content\/(?:film|standalone|series)\/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}\/cover$/i.test(
+      new URL(request.url).pathname,
+    )
+  )
+}
+// Statuses an image route may return; anything else is a gateway error.
+function imageStatuses(request: Request) {
+  if (isPublicCatalogPoster(request)) return [200, 404, 422, 500, 503]
+  if (isAdminContentCover(request))
+    return [200, 304, 401, 403, 404, 422, 500, 503]
+  return undefined
+}
+
 const requestHeaderAllowlist = new Set([
   'accept',
   'authorization',
   'content-encoding',
   'content-type',
   'cookie',
+  'if-none-match',
   'origin',
   'user-agent',
 ])
@@ -403,10 +421,11 @@ export function createAuthGateway(
           ![200, 401, 403, 409, 422].includes(upstreamResponse.status))
       )
         expireSettingsWrite()
+      const imageAllowed =
+        target === 'business' ? imageStatuses(request) : undefined
       if (
-        target === 'business' &&
-        isPublicCatalogPoster(request) &&
-        (![200, 404, 422, 500, 503].includes(upstreamResponse.status) ||
+        imageAllowed &&
+        (!imageAllowed.includes(upstreamResponse.status) ||
           (upstreamResponse.status === 200 &&
             upstreamResponse.headers
               .get('content-type')
@@ -451,6 +470,13 @@ export function createAuthGateway(
         }
         const cache = upstreamResponse.headers.get('cache-control')
         if (!privateBusiness && cache === 'private, max-age=60')
+          headers.set('cache-control', cache)
+        // Thumbnails may be kept briefly by the browser (ETag revalidation).
+        if (
+          isAdminContentCover(request) &&
+          cache === 'private, max-age=300' &&
+          [200, 304].includes(upstreamResponse.status)
+        )
           headers.set('cache-control', cache)
       }
       const noBodyStatus = [204, 205, 304].includes(upstreamResponse.status)

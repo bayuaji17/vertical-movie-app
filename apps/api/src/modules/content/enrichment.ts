@@ -8,6 +8,8 @@ import {
   videos,
 } from "../../db/schema";
 import type { ContentConnection } from "../../shared/content-db";
+import { coverVersion } from "./cover-service";
+import { coverKey } from "./cover-repository";
 import {
   hls,
   poster,
@@ -32,10 +34,17 @@ export type RowExtras = {
   genres: string[];
   genreCount: number;
   mediaState?: MediaState;
+  coverVersion?: string;
   seasonCount?: number;
   episodeCount?: number;
 };
 const maxGenres = 3;
+// Output prefix of the verified cover, or null when there is none.
+const coverPrefix = sql<
+  string | null
+>`CASE WHEN COALESCE(${posterReady}, false) THEN ${posterJob.outputPrefix} END`;
+const version = (prefix: string | null) =>
+  prefix ? { coverVersion: coverVersion(coverKey(prefix)) } : {};
 
 // A job counts only for the generation the asset currently has.
 const currentJob = (states: string) =>
@@ -74,6 +83,7 @@ export async function videoExtras(db: ContentConnection, ids: string[]) {
       id: videos.id,
       releaseYear: videos.releaseYear,
       mediaState,
+      coverPrefix,
     })
     .from(videos)
     .leftJoin(source, eq(videos.sourceAssetId, source.id))
@@ -95,6 +105,7 @@ export async function videoExtras(db: ContentConnection, ids: string[]) {
       {
         releaseYear: row.releaseYear,
         mediaState: row.mediaState,
+        ...version(row.coverPrefix),
         ...shown(names.get(row.id)),
       },
     ]),
@@ -104,8 +115,10 @@ export async function videoExtras(db: ContentConnection, ids: string[]) {
 /** Extra columns for one page of Series rows; archived seasons/episodes are not counted. */
 export async function seriesExtras(db: ContentConnection, ids: string[]) {
   const rows = await db
-    .select({ id: series.id, releaseYear: series.releaseYear })
+    .select({ id: series.id, releaseYear: series.releaseYear, coverPrefix })
     .from(series)
+    .leftJoin(poster, eq(series.posterAssetId, poster.id))
+    .leftJoin(posterJob, eq(poster.readyJobId, posterJob.id))
     .where(inArray(series.id, ids));
   const counts = new Map(
     (
@@ -139,6 +152,7 @@ export async function seriesExtras(db: ContentConnection, ids: string[]) {
         releaseYear: row.releaseYear,
         seasonCount: counts.get(row.id)?.seasonCount ?? 0,
         episodeCount: counts.get(row.id)?.episodeCount ?? 0,
+        ...version(row.coverPrefix),
         ...shown(names.get(row.id)),
       },
     ]),

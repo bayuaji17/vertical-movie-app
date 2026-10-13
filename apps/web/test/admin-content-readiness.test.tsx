@@ -2,8 +2,10 @@ import { expect, test } from 'bun:test'
 import { renderToString } from 'react-dom/server'
 import { ContentMeta } from '../src/components/admin/content-meta'
 import { ContentReadiness } from '../src/components/admin/content-readiness'
+import { ContentThumb } from '../src/components/admin/content-thumb'
 import type { ContentItem } from '../src/lib/admin/content-client'
 import {
+  coverThumbUrl,
   genreChips,
   readiness,
   seriesSummary,
@@ -123,4 +125,26 @@ test('meta shows year, genres and series size, and nothing when there is none', 
     ),
   )
   expect(show).toContain('2 seasons · 8 episodes · 2020')
+})
+
+test('a thumbnail is only requested when the API reported a verified cover', () => {
+  expect(coverThumbUrl(item())).toBeUndefined()
+  expect(coverThumbUrl(item({ coverVersion: 'abc123' }))).toBe(
+    `/api/admin/content/film/${item().id}/cover?v=abc123`,
+  )
+  expect(coverThumbUrl(item({ type: 'series', coverVersion: 'a b' }))).toBe(
+    `/api/admin/content/series/${item().id}/cover?v=a%20b`,
+  )
+  const withCover = strip(
+    renderToString(<ContentThumb item={item({ coverVersion: 'abc123' })} />),
+  )
+  expect(withCover).toContain('loading="lazy"')
+  expect(withCover).toContain('alt="Cover of Midnight Harbor"')
+  expect(withCover).toContain('decoding="async"')
+  expect(withCover).toContain('width="32"')
+  // Without a cover the placeholder keeps the same space and is hidden from screen readers.
+  const none = strip(renderToString(<ContentThumb item={item()} />))
+  expect(none).not.toContain('<img')
+  expect(none).toContain('aria-hidden="true"')
+  expect(none).toContain('h-14 w-8')
 })

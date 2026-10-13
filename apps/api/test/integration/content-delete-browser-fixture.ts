@@ -49,8 +49,24 @@ async function keys(bucket: string) {
   } while (token);
   return out.sort();
 }
-const put = (bucket: string, key: string) =>
-  sdk.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: "proof" }));
+const put = (
+  bucket: string,
+  key: string,
+  body: string | Uint8Array = "proof",
+) => sdk.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: body }));
+// A real 1080x1920 WebP, so the admin thumbnail endpoint has something to resize.
+let coverBytes: Promise<Uint8Array> | undefined;
+const cover = () =>
+  (coverBytes ??= Bun.file(
+    new URL("../fixtures/media/browser-cover-crop.png", import.meta.url),
+  )
+    .bytes()
+    .then((png) =>
+      new Bun.Image(png)
+        .resize(1080, 1920, { fit: "fill" })
+        .webp({ quality: 80 })
+        .bytes(),
+    ));
 
 async function seed(origin: string, file: string) {
   const bucket =
@@ -104,6 +120,11 @@ async function seed(origin: string, file: string) {
     await put(bucket, `uploads/${m.sessionId}/original`);
     await put(bucket, `outputs/${m.assetId}/${m.jobId}/x/0/index.m3u8`);
     await put(bucket, `outputs/${m.assetId}/${m.jobId}/x/0/seg0.ts`);
+    if (kind === "poster") {
+      const [job] =
+        await client`SELECT output_prefix FROM media_jobs WHERE id=${m.jobId}::uuid`;
+      await put(bucket, `${job.output_prefix}poster.webp`, await cover());
+    }
     return m;
   };
   const movie = async (title: string, patch = "") => {

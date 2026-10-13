@@ -1,5 +1,6 @@
 import { ContentRowActions } from './content-row-actions'
 import { ContentTitleLink } from './content-title-link'
+import { ContentThumb } from './content-thumb'
 import { ContentMeta } from './content-meta'
 import { ContentReadiness } from './content-readiness'
 import { ContentStatus } from './content-status'
@@ -174,8 +175,13 @@ export function ContentList({
                   {data.items.map((item) => (
                     <TableRow key={item.id}>
                       <TableCell className="max-w-xs whitespace-normal">
-                        <ContentTitleLink item={item} />
-                        <ContentMeta item={item} />
+                        <div className="flex items-center gap-3">
+                          <ContentThumb item={item} />
+                          <div className="min-w-0">
+                            <ContentTitleLink item={item} />
+                            <ContentMeta item={item} />
+                          </div>
+                        </div>
                       </TableCell>
                       <TableCell>
                         <ContentStatus item={item} />
@@ -201,15 +207,18 @@ export function ContentList({
               {data.items.map((item) => (
                 <li key={item.id}>
                   <Card>
-                    <CardContent className="space-y-2">
-                      <div className="flex items-start justify-between gap-3">
-                        <ContentTitleLink item={item} slug={false} />
-                        <ContentStatus item={item} />
-                      </div>
-                      <ContentMeta item={item} />
-                      <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
-                        <ContentReadiness item={item} />
-                        <ContentUpdated value={item.updatedAt} />
+                    <CardContent className="flex items-start gap-3">
+                      <ContentThumb item={item} />
+                      <div className="min-w-0 flex-1 space-y-2">
+                        <div className="flex items-start justify-between gap-3">
+                          <ContentTitleLink item={item} slug={false} />
+                          <ContentStatus item={item} />
+                        </div>
+                        <ContentMeta item={item} />
+                        <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
+                          <ContentReadiness item={item} />
+                          <ContentUpdated value={item.updatedAt} />
+                        </div>
                       </div>
                     </CardContent>
                     <CardFooter>

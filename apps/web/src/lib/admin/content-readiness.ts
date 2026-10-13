@@ -106,3 +106,12 @@ export function genreChips(item: ContentItem) {
     more: Math.max(0, total - shownGenres),
   }
 }
+
+/**
+ * Same-origin URL of the list thumbnail, or undefined when the API reported no
+ * verified cover. `v` changes with the cover so a replaced one is never stale.
+ */
+export function coverThumbUrl(item: ContentItem) {
+  if (!item.coverVersion) return undefined
+  return `/api/admin/content/${item.type}/${item.id}/cover?v=${encodeURIComponent(item.coverVersion)}`
+}

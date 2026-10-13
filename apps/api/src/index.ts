@@ -18,6 +18,8 @@ import { loadApiEnv } from "./config/env";
 import { createStorageClient } from "./storage/s3";
 import { createApp } from "./app";
 import { ContentPageService } from "./modules/content/service";
+import { AdminCoverService } from "./modules/content/cover-service";
+import { createCoverStore } from "./modules/content/cover-repository";
 import { createContentPageRepository } from "./modules/content/repository";
 import { createDatabase } from "./db/client";
 import { SeriesService } from "./modules/series/service";
@@ -68,6 +70,14 @@ const app = createApp({
   contentPageService: new ContentPageService(
     createContentPageRepository(database.db),
   ),
+  adminCoverService:
+    env.storage && storage
+      ? new AdminCoverService(
+          createCoverStore(database.db),
+          storage,
+          env.storage,
+        )
+      : undefined,
   storage,
   catalogService,
   catalogPosterService:

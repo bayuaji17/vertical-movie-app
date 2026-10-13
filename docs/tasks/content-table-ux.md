@@ -1,6 +1,6 @@
 # Modul: UI dan UX tabel Content admin
 
-> Status: **CTBL-001–009 Done; CTBL-010–012 Backlog (approved)** · 13 Oktober 2026 · Pengguna meminta peningkatan UI/UX tabel Content. Plan: [implementation-plan](../plans/content-table-ux/implementation-plan.md), context: [repository-context](../plans/content-table-ux/repository-context.md). Plan disetujui pengguna 13 Oktober 2026.
+> Status: **CTBL-001–009 and 011 Done; CTBL-010, 012 Backlog (approved)** · 13 Oktober 2026 · Pengguna meminta peningkatan UI/UX tabel Content. Plan: [implementation-plan](../plans/content-table-ux/implementation-plan.md), context: [repository-context](../plans/content-table-ux/repository-context.md). Plan disetujui pengguna 13 Oktober 2026.
 
 ## Tujuan modul
 
@@ -412,7 +412,7 @@ Tidak ada.
 
 ## Task: CTBL-011 — Thumbnail sampul pada daftar
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 11
 - Referensi: CTBL-US-01; plan non-goals
@@ -426,8 +426,8 @@ Pengguna mengizinkan thumbnail ditambahkan (13 Oktober 2026); dikerjakan terakhi
 
 ### Acceptance criteria
 
-- [ ] Pendekatan, batas ukuran/cache dan batas biaya dikonfirmasi tertulis di awal task.
-- [ ] Bila disetujui: thumbnail tidak membocorkan URL privat, memuat lazy, memiliki teks alternatif dan fallback saat belum ada sampul.
+- [x] Pendekatan, batas ukuran/cache dan batas biaya ditetapkan di awal task (lihat hasil).
+- [x] Bila disetujui: thumbnail tidak membocorkan URL privat, memuat lazy, memiliki teks alternatif dan fallback saat belum ada sampul.
 
 ### Validasi
 
@@ -435,7 +435,7 @@ Ditentukan setelah keputusan.
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 13 Oktober 2026. Keputusan awal: endpoint privat yang men-stream lewat API (bukan URL bertanda tangan per baris) dengan **thumbnail yang dikecilkan di server**, karena satu-satunya objek sampul adalah WebP 1080×1920 (≈300 KB) sehingga satu halaman 25 baris akan mengirim ≈7,5 MB bila disajikan penuh. API: `modules/catalog/poster-service.ts` mengekstrak `readWebpObject` (baca WebP dengan batas ukuran, abort/timeout, pemeriksaan RIFF/WEBP) yang dipakai bersama; poster publik tidak berubah (26 test unit katalog + `public-catalog-poster-proof` lulus). `modules/content/cover-repository.ts` (sampul terverifikasi dengan predikat `posterReady` yang sama; tipe harus cocok), `cover-service.ts` (`AdminCoverService`: WebP maks. 90×160 kualitas 70 via `Bun.Image`, cache memori LRU 512 entri/4 MB, maks. dua resize bersamaan, timeout 10 detik, ETag dari hash key, `If-None-Match` → 304 tanpa baca storage, `Cache-Control: private, max-age=300`), route `GET /admin/content/:type/:id/cover` (admin-only, params divalidasi) dan field `coverVersion` pada baris daftar (hanya bila sampul terverifikasi). Gateway web: `isAdminContentCover` (hanya GET path persis), respons dibatasi `image/webp` ≤ 256 KB dengan status yang dikenal, `cache-control` dan `If-None-Match` diteruskan hanya untuk route ini, route admin lain tetap `private, no-store`; `tooling/catalog-poster-dev.ts` mengarahkan path ini ke Nitro pada Vite dev (Nitro dev melewati `Sec-Fetch-Dest: image`; hanya dev). Web: `content-thumb.tsx` (`<img>` lazy 32×56 dengan alt "Cover of <judul>", placeholder sama ukuran bila belum ada sampul atau gagal), `coverThumbUrl`, dipasang di tabel dan kartu mobile. Test: API `cover-service.test.ts` (8 test: header, resize nyata kecil ≥4× dari sumber, cache satu kali, 304 untuk ETag/weak/daftar/`*`, 404/503, LRU, maksimum dua resize, route admin-only + 422), integrasi `content-list-extras-proof.test.ts` (kini 5 test: `coverVersion` ⇔ `store.cover` ⇔ predikat siap; tipe harus cocok; Series), web `business-gateway.test.ts` (2 test baru), `catalog-poster-dev.test.ts` (1 test baru), `admin-content-readiness.test.tsx` (thumbnail). Smoke browser (stack nyata): `<img>` film Mobile memuat `image/webp` 90×160 dengan `private, max-age=300` dan ETag, thumbnail Series tampil, item tanpa sampul memakai placeholder, anonim → 401 `private, no-store`, permintaan bersyarat melalui gateway 200 → 304 dengan cache-control, mobile tanpa scroll horizontal, tanpa page error. `tsc --noEmit` API dan web bersih.
 
 ### Commit task
 

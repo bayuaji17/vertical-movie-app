@@ -10,6 +10,8 @@ import {
   videos,
 } from "../../src/db/schema";
 import { CatalogStore } from "../../src/modules/catalog/repository";
+import { createCoverStore } from "../../src/modules/content/cover-repository";
+import { coverVersion } from "../../src/modules/content/cover-service";
 import { createContentPageRepository } from "../../src/modules/content/repository";
 import { ContentPageService } from "../../src/modules/content/service";
 
@@ -263,3 +265,59 @@ test("the extras cost does not grow with the table: a 25-row page over 10,000 ro
   // Generous bound to catch an accidental N+1 or full scan, not a benchmark.
   expect(Math.max(...timings)).toBeLessThan(1500);
 }, 60000);
+
+test("covers: the list's coverVersion and the cover store agree with each other and the readiness predicate", async () => {
+  const store = createCoverStore(database.db);
+  const withCover = await film("Has Cover");
+  await verified(withCover, "poster");
+  const without = await film("No Cover Yet");
+  const pending = await film("Unverified Cover");
+  const p = await verified(pending, "poster");
+  await database.client`UPDATE media_assets SET facts=NULL WHERE id=${p.assetId}::uuid`;
+
+  const item = async (title: string) =>
+    (await service.list({ type: "film", search: title })).items.find(
+      (i) => i.title === title,
+    )!;
+  const row = await store.cover("film", withCover);
+  expect(row?.key.endsWith("/poster.webp")).toBe(true);
+  expect(row).toMatchObject({ provider: "minio", bucket: "test-bucket" });
+  expect((await item("Has Cover")).coverVersion).toBe(coverVersion(row!.key));
+  // No verified cover: nothing to show and nothing to fetch.
+  for (const [title, id] of [
+    ["No Cover Yet", without],
+    ["Unverified Cover", pending],
+  ] as const) {
+    expect((await item(title)).coverVersion).toBeUndefined();
+    expect(await store.cover("film", id)).toBeUndefined();
+  }
+  // The type must match the item.
+  expect(await store.cover("standalone", withCover)).toBeUndefined();
+  expect(await store.cover("series", withCover)).toBeUndefined();
+
+  const seriesId = crypto.randomUUID();
+  await database.db
+    .insert(series)
+    .values({
+      id: seriesId,
+      title: "Covered Show",
+      slug: "covered-show",
+      ...owner,
+    });
+  const sp = await attachMedia(
+    database.client,
+    { seriesId },
+    "poster",
+    "succeeded",
+    "completed",
+    "test-bucket",
+    by,
+  );
+  await database.client`UPDATE media_assets SET facts='{"width":1080}'::jsonb WHERE id=${sp.assetId}::uuid`;
+  const show = (await service.list({ type: "series", search: "Covered" }))
+    .items[0]!;
+  const seriesRow = await store.cover("series", seriesId);
+  expect(seriesRow).toBeDefined();
+  expect(show.coverVersion).toBe(coverVersion(seriesRow!.key));
+  expect(await store.cover("film", seriesId)).toBeUndefined();
+});

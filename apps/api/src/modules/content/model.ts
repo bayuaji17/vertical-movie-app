@@ -66,6 +66,9 @@ export const ContentPageItem = t.Object({
       t.Literal("ready"),
     ]),
   ),
+  // Present only when a verified cover exists; it changes when the cover does
+  // and is meant as the cache-busting `v` of the thumbnail URL.
+  coverVersion: t.Optional(t.String()),
   // Series only; archived seasons and episodes are not counted.
   seasonCount: t.Optional(t.Integer({ minimum: 0 })),
   episodeCount: t.Optional(t.Integer({ minimum: 0 })),
