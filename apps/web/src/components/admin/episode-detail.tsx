@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import type { Episode, Season } from '#/lib/admin/series-client'
 import type { AdminSeries } from './series-resource'
 import { episodeHref, seasonHref } from '#/lib/admin/series-form-state'
@@ -7,6 +7,7 @@ import { ContentStatus } from './content-status'
 import { OwnerPublicationMedia } from './owner-publication'
 import { Card, CardHeader, CardTitle, CardContent } from '#/components/ui/card'
 import { Button } from '#/components/ui/button'
+import { DeleteContent } from './delete-content'
 
 export function EpisodeDetailView({
   series,
@@ -19,6 +20,7 @@ export function EpisodeDetailView({
   seasons: Season[]
   stale: boolean
 }) {
+  const navigate = useNavigate()
   const season = seasons.find((row) => row.id === episode.seasonId),
     editable =
       episode.publicationStatus === 'draft' &&
@@ -101,6 +103,30 @@ export function EpisodeDetailView({
         parentPublished={series.data.publicationStatus === 'published'}
         parentActive={!series.data.archivedAt && !!season && !season.archivedAt}
       />
+      <Card>
+        <CardHeader>
+          <CardTitle>Delete</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <p className="text-sm text-muted-foreground">
+            Permanently delete this episode and its uploaded media. Only draft
+            or archived episodes can be deleted.
+          </p>
+          <DeleteContent
+            target={{
+              kind: 'episode',
+              id: episode.id,
+              title: episode.title,
+              version: episode.rowVersion,
+              publicationStatus: episode.publicationStatus,
+              archivedAt: episode.archivedAt,
+            }}
+            onDeleted={() =>
+              navigate({ to: seasonHref(series.data.id, episode.seasonId) })
+            }
+          />
+        </CardContent>
+      </Card>
     </div>
   )
 }

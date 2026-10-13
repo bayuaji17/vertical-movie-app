@@ -1,3 +1,4 @@
+import { createLogger, type Logger } from "@repo/log";
 import type { series, seasons } from "../../db/schema";
 import {
   ContentError,
@@ -96,6 +97,90 @@ export class SeriesService {
         return dto;
       });
   }
+  /** Permanently delete a season and its episodes; a season with published episodes in a published series must be archived first. */
+  async removeSeason(id: string, expectedVersion: number, actor: string) {
+    const repo = this.repo(),
+      initial = await repo.store.getSeason(id);
+    if (!initial) notFound();
+    const result = await repo.transact(async (store) => {
+      const parent = await store.get(initial.seriesId, true);
+      if (!parent) notFound();
+      const season = await store.getSeason(id, true);
+      if (!season) notFound();
+      if (season.rowVersion !== expectedVersion)
+        throw new ContentError(
+          "CONTENT_VERSION_CONFLICT",
+          "Content has changed; reload before deleting.",
+        );
+      if (
+        !season.archivedAt &&
+        parent.publicationStatus === "published" &&
+        (await store.seasonHasPublished(id))
+      )
+        throw new ContentError(
+          "CONTENT_STATE_CONFLICT",
+          "This season has published episodes. Archive them first.",
+        );
+      const videoIds = await store.episodeIds([id], true);
+      const removed = await store.purge({
+        videoIds,
+        seasonIds: [id],
+        seriesIds: [],
+      });
+      return { season, parent, removed };
+    });
+    this.invalidate();
+    this.log.info("content.deleted", {
+      kind: "season",
+      id,
+      seriesId: result.parent.id,
+      seasonNumber: result.season.seasonNumber,
+      archived: result.season.archivedAt !== null,
+      actor,
+      removed: result.removed,
+    });
+    return { id, kind: "season" as const, removed: result.removed };
+  }
+  /** Permanently delete a draft or archived series with its seasons, episodes and assets. */
+  async remove(id: string, expectedVersion: number, actor: string) {
+    const repo = this.repo();
+    if (!(await repo.store.get(id))) notFound();
+    const result = await repo.transact(async (store) => {
+      const row = await store.get(id, true);
+      if (!row) notFound();
+      if (row.rowVersion !== expectedVersion)
+        throw new ContentError(
+          "CONTENT_VERSION_CONFLICT",
+          "Content has changed; reload before deleting.",
+        );
+      if (row.publicationStatus === "published")
+        throw new ContentError(
+          "CONTENT_STATE_CONFLICT",
+          "Published content cannot be deleted. Archive it first.",
+        );
+      const seasonIds = await store.seasonIds(id, true);
+      const videoIds = await store.episodeIds(seasonIds, true);
+      const removed = await store.purge({
+        videoIds,
+        seasonIds,
+        seriesIds: [id],
+      });
+      return { row, removed };
+    });
+    this.invalidate();
+    this.log.info("content.deleted", {
+      kind: "series",
+      id,
+      slug: result.row.slug,
+      title: result.row.title,
+      status: result.row.publicationStatus,
+      archived: result.row.archivedAt !== null,
+      everPublished: result.row.firstPublishedAt !== null,
+      actor,
+      removed: result.removed,
+    });
+    return { id, kind: "series" as const, removed: result.removed };
+  }
   async archiveSeason(id: string, version: number, actor: string) {
     const repo = this.repo(),
       initial = await repo.store.getSeason(id);
@@ -136,6 +221,7 @@ export class SeriesService {
     private readonly repository?: SeriesRepository,
     private readonly runtime: RuntimeDependencies = defaultRuntime,
     private readonly invalidate: () => void = () => {},
+    private readonly log: Logger = createLogger("api"),
   ) {}
   private repo() {
     return this.repository ?? unavailable();

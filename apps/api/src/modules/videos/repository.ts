@@ -13,6 +13,7 @@ import type {
   ContentConnection,
 } from "../../shared/content-db";
 import { assertGenreIds } from "../../shared/content-db";
+import { purgeContent, type PurgeScope } from "../../shared/content-delete";
 export class VideosStore {
   constructor(private readonly db: ContentConnection) {}
   async sourceAvailability(
@@ -46,6 +47,9 @@ export class VideosStore {
         .where(and(eq(videos.id, id), eq(videos.rowVersion, version)))
         .returning()
     )[0];
+  }
+  purge(scope: PurgeScope) {
+    return purgeContent(this.db, scope);
   }
   async get(id: string, lock = false) {
     const q = this.db.select().from(videos).where(eq(videos.id, id)).limit(1);

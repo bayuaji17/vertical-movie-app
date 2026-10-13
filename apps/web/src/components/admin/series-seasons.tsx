@@ -4,6 +4,7 @@ import type { AdminSeries } from './series-resource'
 import { seasonsHref, seriesHref } from '#/lib/admin/series-form-state'
 import { AdminPageHeading } from './page-heading'
 import { Button } from '#/components/ui/button'
+import { DeleteContent } from './delete-content'
 import { Card, CardHeader, CardTitle, CardContent } from '#/components/ui/card'
 import { Badge } from '#/components/ui/badge'
 import {
@@ -112,6 +113,18 @@ export function SeriesSeasonsView({
                       Edit season
                     </Button>
                   )}
+                  <DeleteContent
+                    compact
+                    target={{
+                      kind: 'season',
+                      id: season.id,
+                      title:
+                        'Season ' +
+                        season.seasonNumber +
+                        (season.title ? ' · ' + season.title : ''),
+                      version: season.rowVersion,
+                    }}
+                  />
                 </div>
               </CardContent>
             </Card>

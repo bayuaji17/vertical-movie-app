@@ -1,12 +1,15 @@
 import { ContentNextStep } from './content-next-step'
+import { DeleteContent } from './delete-content'
 import { ContentStatus } from './content-status'
 import { ContentFiltersPanel } from './content-filters'
 import { ContentPagination } from './content-pagination'
 import { useEffect } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import type { ContentFilters } from '#/lib/admin/content-client'
+import type { ContentFilters, ContentItem } from '#/lib/admin/content-client'
 import { contentLabels } from '#/lib/admin/content-client'
+import { deleteBlock } from '#/lib/admin/delete-state'
+import type { DeleteTarget } from '#/lib/admin/delete-state'
 import { contentListOptions } from '#/lib/admin/content-queries'
 import { contentErrorMessage } from '#/lib/admin/content-errors'
 import { useContentApi } from '#/hooks/use-content-api'
@@ -38,6 +41,15 @@ import {
   TableCaption,
 } from '#/components/ui/table'
 
+const deleteTarget = (item: ContentItem): DeleteTarget => ({
+  kind: item.type === 'film' ? 'movie' : item.type,
+  id: item.id,
+  title: item.title,
+  version: item.rowVersion,
+  publicationStatus: item.publicationStatus,
+  archivedAt: item.archivedAt,
+})
+const deletable = (item: ContentItem) => !deleteBlock(deleteTarget(item))
 export function ContentList({
   filters,
   onChange,
@@ -153,7 +165,12 @@ export function ContentList({
                       </time>
                     </TableCell>
                     <TableCell>
-                      <ContentNextStep item={item} />
+                      <div className="flex flex-wrap items-center gap-2">
+                        <ContentNextStep item={item} />
+                        {deletable(item) && (
+                          <DeleteContent compact target={deleteTarget(item)} />
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -180,8 +197,11 @@ export function ContentList({
                     </time>
                   </p>
                 </CardContent>
-                <CardFooter>
+                <CardFooter className="flex flex-wrap items-center gap-2">
                   <ContentNextStep item={item} />
+                  {deletable(item) && (
+                    <DeleteContent compact target={deleteTarget(item)} />
+                  )}
                 </CardFooter>
               </Card>
             ))}

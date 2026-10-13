@@ -277,3 +277,21 @@ it("logs the admin guard's forbidden and dependency failures with their final st
     expect(await response.text()).not.toContain("private dependency details");
   }
 });
+
+it("passes the unread JSON body of auth requests through to the auth handler", async () => {
+  const app = createApp({
+    getSession: async () => null,
+    auth: {
+      handler: async (input) => Response.json(await input.json()),
+    },
+  });
+  const response = await app.handle(
+    new Request("http://localhost/api/auth/sign-in/email", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email: "admin@example.test" }),
+    }),
+  );
+  expect(response.status).toBe(200);
+  expect(await response.json()).toEqual({ email: "admin@example.test" });
+});
