@@ -70,6 +70,8 @@ function createAuthRoutes(auth?: AppDependencies["auth"]) {
       return auth.handler(request);
     },
     {
+      // Better Auth reads the request body itself; Elysia must not consume it first.
+      parse: "none",
       detail: { hide: true },
     },
   );
