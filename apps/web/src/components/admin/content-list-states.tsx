@@ -31,7 +31,7 @@ export function ContentListSkeleton({ pageSize }: { pageSize: number }) {
         <Table>
           <TableHeader>
             <TableRow>
-              {['Title', 'Type', 'Status', 'Updated', 'Actions'].map(
+              {['Title', 'Status', 'Readiness', 'Updated', 'Actions'].map(
                 (label) => (
                   <TableHead key={label}>{label}</TableHead>
                 ),
@@ -41,7 +41,7 @@ export function ContentListSkeleton({ pageSize }: { pageSize: number }) {
           <TableBody>
             {rows.map((row) => (
               <TableRow key={row}>
-                {[40, 16, 20, 20, 36].map((width, cell) => (
+                {[45, 18, 24, 20, 36].map((width, cell) => (
                   <TableCell key={cell}>
                     <Skeleton className="h-6" style={{ width: `${width}%` }} />
                   </TableCell>
@@ -136,20 +136,19 @@ export function ContentResultSummary({
   filtered: boolean
   onClear: () => void
 }) {
+  // Without a search or filter there is nothing to report; keep the live
+  // region so the first announcement is not lost, but take no space.
+  if (!filtered) return <p role="status" className="sr-only" />
   return (
     <div className="mb-3 flex min-h-11 flex-wrap items-center gap-x-3 text-sm text-muted-foreground">
       <p role="status">
-        {filtered
-          ? `${total} ${total === 1 ? 'result' : 'results'}${
-              search ? ` for “${search}”` : ''
-            } · ${statusLabel}`
-          : ''}
+        {`${total} ${total === 1 ? 'result' : 'results'}${
+          search ? ` for “${search}”` : ''
+        } · ${statusLabel}`}
       </p>
-      {filtered && (
-        <Button variant="ghost" className="min-h-11" onClick={onClear}>
-          Clear all
-        </Button>
-      )}
+      <Button variant="ghost" className="min-h-11" onClick={onClear}>
+        Clear all
+      </Button>
     </div>
   )
 }

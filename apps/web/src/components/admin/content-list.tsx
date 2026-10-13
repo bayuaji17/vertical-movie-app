@@ -1,5 +1,7 @@
 import { ContentRowActions } from './content-row-actions'
 import { ContentTitleLink } from './content-title-link'
+import { ContentMeta } from './content-meta'
+import { ContentReadiness } from './content-readiness'
 import { ContentStatus } from './content-status'
 import { ContentUpdated } from './content-updated'
 import {
@@ -15,7 +17,7 @@ import { useEffect } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import type { ContentFilters } from '#/lib/admin/content-client'
-import { contentLabels, contentStatusLabels } from '#/lib/admin/content-client'
+import { contentStatusLabels } from '#/lib/admin/content-client'
 import { clearedFilters, isFiltered } from '#/lib/admin/content-list-state'
 import { contentListOptions } from '#/lib/admin/content-queries'
 import { contentErrorMessage } from '#/lib/admin/content-errors'
@@ -133,13 +135,13 @@ export function ContentList({
                     filters={filters}
                     onChange={onChange}
                   />
-                  <TableHead>Type</TableHead>
                   <ContentSortHead
                     label="Status"
                     column="status"
                     filters={filters}
                     onChange={onChange}
                   />
+                  <TableHead>Readiness</TableHead>
                   <ContentSortHead
                     label="Updated"
                     column="updated"
@@ -154,10 +156,13 @@ export function ContentList({
                   <TableRow key={item.id}>
                     <TableCell className="max-w-xs whitespace-normal">
                       <ContentTitleLink item={item} />
+                      <ContentMeta item={item} />
                     </TableCell>
-                    <TableCell>{contentLabels[item.type]}</TableCell>
                     <TableCell>
                       <ContentStatus item={item} />
+                    </TableCell>
+                    <TableCell>
+                      <ContentReadiness item={item} />
                     </TableCell>
                     <TableCell>
                       <ContentUpdated value={item.updatedAt} />
@@ -179,10 +184,11 @@ export function ContentList({
                       <ContentTitleLink item={item} slug={false} />
                       <ContentStatus item={item} />
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      {contentLabels[item.type]} ·{' '}
+                    <ContentMeta item={item} />
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
+                      <ContentReadiness item={item} />
                       <ContentUpdated value={item.updatedAt} />
-                    </p>
+                    </div>
                   </CardContent>
                   <CardFooter>
                     <ContentRowActions item={item} />

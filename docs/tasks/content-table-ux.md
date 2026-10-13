@@ -1,6 +1,6 @@
 # Modul: UI dan UX tabel Content admin
 
-> Status: **CTBL-001–007 Done; CTBL-008–012 Backlog (approved)** · 13 Oktober 2026 · Pengguna meminta peningkatan UI/UX tabel Content. Plan: [implementation-plan](../plans/content-table-ux/implementation-plan.md), context: [repository-context](../plans/content-table-ux/repository-context.md). Plan disetujui pengguna 13 Oktober 2026.
+> Status: **CTBL-001–008 Done; CTBL-009–012 Backlog (approved)** · 13 Oktober 2026 · Pengguna meminta peningkatan UI/UX tabel Content. Plan: [implementation-plan](../plans/content-table-ux/implementation-plan.md), context: [repository-context](../plans/content-table-ux/repository-context.md). Plan disetujui pengguna 13 Oktober 2026.
 
 ## Tujuan modul
 
@@ -296,7 +296,7 @@ Persetujuan daftar field dan anggaran performa (D7).
 
 ## Task: CTBL-008 — UI kolom tahap B dan kepadatan responsif
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 8
 - Referensi: CTBL-US-01/03; P7, P11; D6, D8
@@ -310,9 +310,9 @@ Kolom Readiness (teks + ikon, bukan hanya warna), genre (maks. 2 chip + "+N"), t
 
 ### Acceptance criteria
 
-- [ ] Readiness menjelaskan apa yang kurang untuk draft ("Needs video", "Processing", "Ready to publish", "Failed").
-- [ ] Tidak ada teks terpotong tanpa akses penuh (title/tooltip) dan tanpa scroll horizontal pada 390 px.
-- [ ] Kolom tidak mengurangi kinerja render halaman 100 baris secara nyata.
+- [x] Readiness menjelaskan apa yang kurang untuk draft ("Needs video", "Processing", "Ready to publish", "Failed").
+- [x] Tidak ada teks terpotong tanpa akses penuh (title/tooltip) dan tanpa scroll horizontal pada 390 px.
+- [x] Kolom tidak mengurangi kinerja render halaman 100 baris secara nyata.
 
 ### Validasi
 
@@ -320,7 +320,7 @@ Test komponen; browser desktop/mobile.
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 13 Oktober 2026. `lib/admin/content-readiness.ts` (`readiness`: Live untuk published; Needs video/Needs cover/Uploading/Processing/Failed/Ready to publish dari `mediaState`; Series draft tanpa episode = Needs episodes; archived atau API lama tanpa field = tidak mengklaim apa pun; `seriesSummary` "N seasons · M episodes"; `genreChips` maks. 2 + "+N"), `components/admin/content-readiness.tsx` (ikon + teks + tooltip, spinner dihentikan oleh `motion-reduce`), `content-meta.tsx` (tahun, genre, ringkasan Series di bawah judul). Tabel kini Title (slug + meta) · Status · Readiness · Updated · Actions; kolom Type dihapus karena tab jenis sudah menentukannya; kartu mobile: judul + status, meta, readiness + waktu relatif, lalu aksi; skeleton mengikuti kolom baru. `ContentResultSummary` hanya memesan ruang saat ada pencarian/filter (celah kosong 60 px pada screenshot dihapus). Test: `admin-content-readiness.test.tsx` (6 test, 31 assertion). Fixture browser diperluas (fakta aset, sampul, genre, tahun). Smoke browser (stack nyata): baris Film menunjukkan Uploading, Live, Ready to publish, dan Needs cover dengan "2024 · Comedy · Drama · +1"; Series menunjukkan "2 seasons · 3 episodes · 2021" dan genre; tab mobile 390 px tanpa scroll horizontal dan tanpa page error. `tsc --noEmit` dan eslint bersih.
 
 ### Commit task
 
