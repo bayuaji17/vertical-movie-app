@@ -26,10 +26,31 @@ export type VideoPatch = Parameters<
 export type SeriesPatch = Parameters<
   ReturnType<Eden['admin']['series']>['patch']
 >[0]
+export const contentStatuses = [
+  'active',
+  'draft',
+  'published',
+  'archived',
+  'all',
+] as const
+export type ContentStatus = (typeof contentStatuses)[number]
+export const contentStatusLabels: Record<ContentStatus, string> = {
+  active: 'Active',
+  draft: 'Draft',
+  published: 'Published',
+  archived: 'Archived',
+  all: 'All',
+}
+export const contentSorts = ['updated', 'created', 'title', 'status'] as const
+export type ContentSort = (typeof contentSorts)[number]
+export type ContentOrder = 'asc' | 'desc'
 export type ContentFilters = {
   type: ContentType
   search: string
-  includeArchived: boolean
+  status: ContentStatus
+  sort: ContentSort
+  // Only set when it differs from the natural order of `sort`.
+  order?: ContentOrder
   page: number
   pageSize: number
 }
@@ -88,8 +109,6 @@ export function createContentClient(
             ...filters,
             page: String(filters.page),
             pageSize: String(filters.pageSize),
-            includeArchived: String(filters.includeArchived) as
-              'true' | 'false',
           },
           fetch: { signal },
         }),

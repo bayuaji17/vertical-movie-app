@@ -16,7 +16,9 @@ const filters = {
   search: 'rain',
   page: 2,
   pageSize: 3,
-  includeArchived: true,
+  status: 'all',
+  sort: 'title',
+  order: 'desc',
 } as const
 test('Eden forwards typed filters, credentials, no-store and AbortSignal', async () => {
   const controller = new AbortController()
@@ -29,6 +31,10 @@ test('Eden forwards typed filters, credentials, no-store and AbortSignal', async
       expect(u.pathname).toBe('/api/admin/content')
       expect(u.searchParams.get('pageSize')).toBe('3')
       expect(u.searchParams.get('type')).toBe('film')
+      expect(u.searchParams.get('status')).toBe('all')
+      expect(u.searchParams.get('sort')).toBe('title')
+      expect(u.searchParams.get('order')).toBe('desc')
+      expect(u.searchParams.has('includeArchived')).toBe(false)
       expect(request.credentials).toBe('include')
       expect(request.cache).toBe('no-store')
       expect(init?.signal).toBe(controller.signal)

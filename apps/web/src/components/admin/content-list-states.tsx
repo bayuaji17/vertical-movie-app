@@ -121,3 +121,35 @@ export function ContentEmpty({
     </Empty>
   )
 }
+
+/** Says how many results the current search/filters found, with a way out. */
+export function ContentResultSummary({
+  total,
+  search,
+  statusLabel,
+  filtered,
+  onClear,
+}: {
+  total: number
+  search: string
+  statusLabel: string
+  filtered: boolean
+  onClear: () => void
+}) {
+  return (
+    <div className="mb-3 flex min-h-11 flex-wrap items-center gap-x-3 text-sm text-muted-foreground">
+      <p role="status">
+        {filtered
+          ? `${total} ${total === 1 ? 'result' : 'results'}${
+              search ? ` for “${search}”` : ''
+            } · ${statusLabel}`
+          : ''}
+      </p>
+      {filtered && (
+        <Button variant="ghost" className="min-h-11" onClick={onClear}>
+          Clear all
+        </Button>
+      )}
+    </div>
+  )
+}

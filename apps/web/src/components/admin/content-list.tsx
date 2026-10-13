@@ -5,15 +5,18 @@ import { ContentUpdated } from './content-updated'
 import {
   ContentEmpty,
   ContentListSkeleton,
+  ContentResultSummary,
   emptyReason,
 } from './content-list-states'
+import { ContentSortHead } from './content-sort-head'
 import { ContentFiltersPanel } from './content-filters'
 import { ContentPagination } from './content-pagination'
 import { useEffect } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import type { ContentFilters } from '#/lib/admin/content-client'
-import { contentLabels } from '#/lib/admin/content-client'
+import { contentLabels, contentStatusLabels } from '#/lib/admin/content-client'
+import { clearedFilters, isFiltered } from '#/lib/admin/content-list-state'
 import { contentListOptions } from '#/lib/admin/content-queries'
 import { contentErrorMessage } from '#/lib/admin/content-errors'
 import { useContentApi } from '#/hooks/use-content-api'
@@ -63,6 +66,13 @@ export function ContentList({
         }
       />
       <ContentFiltersPanel filters={filters} onChange={onChange} />
+      <ContentResultSummary
+        total={data?.total ?? 0}
+        search={filters.search}
+        statusLabel={contentStatusLabels[filters.status]}
+        filtered={!!data && isFiltered(filters)}
+        onClear={() => onChange(clearedFilters)}
+      />
       {query.isError && (
         <Alert variant="destructive" className="mb-4" role="alert">
           <AlertTitle>
@@ -89,13 +99,8 @@ export function ContentList({
       ) : null}
       {data?.items.length === 0 ? (
         <ContentEmpty
-          reason={emptyReason(
-            data.total,
-            filters.search !== '' || filters.includeArchived,
-          )}
-          onClear={() =>
-            onChange({ search: '', includeArchived: false, page: 1 })
-          }
+          reason={emptyReason(data.total, isFiltered(filters))}
+          onClear={() => onChange(clearedFilters)}
           onFirstPage={() => onChange({ page: 1 })}
         />
       ) : null}
@@ -115,11 +120,26 @@ export function ContentList({
               </TableCaption>
               <TableHeader>
                 <TableRow>
-                  {['Title', 'Type', 'Status', 'Updated', 'Actions'].map(
-                    (label) => (
-                      <TableHead key={label}>{label}</TableHead>
-                    ),
-                  )}
+                  <ContentSortHead
+                    label="Title"
+                    column="title"
+                    filters={filters}
+                    onChange={onChange}
+                  />
+                  <TableHead>Type</TableHead>
+                  <ContentSortHead
+                    label="Status"
+                    column="status"
+                    filters={filters}
+                    onChange={onChange}
+                  />
+                  <ContentSortHead
+                    label="Updated"
+                    column="updated"
+                    filters={filters}
+                    onChange={onChange}
+                  />
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

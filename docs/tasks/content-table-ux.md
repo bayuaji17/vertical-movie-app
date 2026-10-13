@@ -1,6 +1,6 @@
 # Modul: UI dan UX tabel Content admin
 
-> Status: **CTBL-001–004 Done; CTBL-005–012 Backlog (approved)** · 13 Oktober 2026 · Pengguna meminta peningkatan UI/UX tabel Content. Plan: [implementation-plan](../plans/content-table-ux/implementation-plan.md), context: [repository-context](../plans/content-table-ux/repository-context.md). Plan disetujui pengguna 13 Oktober 2026.
+> Status: **CTBL-001–005 Done; CTBL-006–012 Backlog (approved)** · 13 Oktober 2026 · Pengguna meminta peningkatan UI/UX tabel Content. Plan: [implementation-plan](../plans/content-table-ux/implementation-plan.md), context: [repository-context](../plans/content-table-ux/repository-context.md). Plan disetujui pengguna 13 Oktober 2026.
 
 ## Tujuan modul
 
@@ -178,7 +178,7 @@ Persetujuan D4 (perubahan default urutan).
 
 ## Task: CTBL-005 — UI filter, urutan dan pencarian
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 5
 - Referensi: CTBL-US-02/03; P3, P5, P6, P11; D2, D4, D5, D8
@@ -192,10 +192,10 @@ Kontrol status segmented, header terurut dengan `aria-sort`, tombol clear dan `E
 
 ### Acceptance criteria
 
-- [ ] Filter, urutan, pencarian dan halaman tercermin di URL; nilai default tidak ditulis; URL lama tetap valid.
-- [ ] Header terurut mengumumkan arah (`aria-sort`) dan dapat dioperasikan dengan keyboard.
-- [ ] Pada 390 px kontrol filter berada di sheet dan daftar muncul lebih tinggi di layar dibanding sebelumnya.
-- [ ] "Clear all" mengembalikan default dan halaman 1.
+- [x] Filter, urutan, pencarian dan halaman tercermin di URL; nilai default tidak ditulis; URL lama tetap valid.
+- [x] Header terurut mengumumkan arah (`aria-sort`) dan dapat dioperasikan dengan keyboard.
+- [x] Pada 390 px kontrol filter berada di sheet dan daftar muncul lebih tinggi di layar dibanding sebelumnya.
+- [x] "Clear all" mengembalikan default dan halaman 1.
 
 ### Validasi
 
@@ -203,7 +203,7 @@ Test state/komponen; skenario browser desktop/mobile.
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 13 Oktober 2026. State dan URL: `lib/admin/content-client.ts` (`ContentStatus`, `ContentSort`, `ContentFilters` dengan `status`, `sort`, `order?`), `lib/admin/content-list-state.ts` (`contentSearch` menormalisasi dan mengonversi `includeArchived` lama menjadi `status=all`; `defaultOrder`/`effectiveOrder`/`canonicalOrder` agar urutan natural tidak ditulis ke URL; `sortPatch`, `ariaSort`, `isFiltered`, `activeFilterCount`, `clearedFilters`), route memakai `stripSearchParams(contentSearchDefaults)` sehingga nilai default tidak muncul di URL. UI: `content-filters.tsx` (segmented status Active/Draft/Published/Archived/All, kontrol "Sort by" + tombol arah, pencarian judul/slug dengan tombol clear, `Esc` mengosongkan, `/` memfokuskan lewat `hooks/use-search-shortcut.ts`, sheet "Filters" pada mobile dengan badge jumlah aktif), `content-sort-head.tsx` (header Title/Status/Updated dengan `aria-sort`), `ContentResultSummary` ("N results for “…” · Status" + "Clear all", `role=status`); "Clear filters" pada empty state. Penyimpangan kecil dari plan D8: tab jenis tetap terlihat di mobile dan sheet menerapkan pilihan langsung (tombol Clear filters/Done, tanpa Apply). Test: `admin-content-list.test.ts` (normalisasi, URL lama, urutan natural, `sortPatch`, filter aktif), `admin-content-client.test.ts` (query `status/sort/order`, tanpa `includeArchived`), `admin-content-filters.test.tsx` (6 test: kontrol, target 44 px, tombol clear, badge, `aria-sort`, ringkasan). Smoke browser (API + worker + web dev nyata, database/bucket uji): filter Draft/Published mengubah URL menjadi `?status=…` dan daftar; Title asc/desc dengan `aria-sort`; memilih kembali Last updated menghapus `sort` dari URL; `/` memfokuskan pencarian; pencarian slug `browser-draft` menemukan satu item dengan ringkasan; `Esc` mengosongkan dan menghapus `search` dari URL; hasil kosong → "Clear filters" memulihkan daftar; URL lama `?includeArchived=true` menampilkan item archived; mobile 390 px: sheet Filters mengubah status, badge "1 active", tanpa scroll horizontal, tanpa page error. `bun run lint`, `tsc --noEmit` bersih.
 
 ### Commit task
 
