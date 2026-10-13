@@ -4,6 +4,7 @@ import { ContentFiltersPanel } from '../src/components/admin/content-filters'
 import { ContentResultSummary } from '../src/components/admin/content-list-states'
 import { ContentSortHead } from '../src/components/admin/content-sort-head'
 import { contentSearch } from '../src/lib/admin/content-list-state'
+import { statusCount, typeCount } from '../src/lib/admin/content-counts'
 
 const strip = (html: string) => html.replaceAll('<!-- -->', '')
 const panel = (query: Record<string, unknown> = {}) =>
@@ -100,4 +101,51 @@ test('the result summary only appears for a search or filter and offers Clear al
   )
   expect(view({ filtered: true })).toContain('Clear all')
   expect(view({})).toContain('role="status"')
+})
+
+const film = { total: 12, draft: 5, published: 4, archived: 3, unpublished: 0 }
+const counts = {
+  film,
+  standalone: { total: 2, draft: 1, published: 0, archived: 1, unpublished: 0 },
+  series: { total: 3, draft: 1, published: 1, archived: 0, unpublished: 1 },
+  episode: { total: 0, draft: 0, published: 0, archived: 0, unpublished: 0 },
+}
+test('counts follow the list filters: active hides archived, all includes it', () => {
+  expect(statusCount(film, 'active')).toBe(9)
+  expect(statusCount(film, 'all')).toBe(12)
+  expect(statusCount(film, 'draft')).toBe(5)
+  expect(statusCount(film, 'published')).toBe(4)
+  expect(statusCount(film, 'archived')).toBe(3)
+  // Series "unpublished" is active but is neither draft nor published.
+  expect(statusCount(counts.series, 'active')).toBe(3)
+  expect(typeCount(counts, 'standalone', 'archived')).toBe(1)
+  expect(typeCount(undefined, 'film', 'active')).toBeUndefined()
+})
+test('tabs and status chips show counts when known and nothing before that', () => {
+  const view = (query: Record<string, unknown>, value?: typeof counts) =>
+    strip(
+      renderToString(
+        <ContentFiltersPanel
+          filters={contentSearch(query)}
+          onChange={() => {}}
+          counts={value}
+        />,
+      ),
+    )
+  const without = view({})
+  expect(without).not.toContain('tabular-nums')
+  const html = view({ type: 'film', status: 'draft' }, counts)
+  // Type tabs use the selected status; chips use the selected type.
+  expect(html).toContain(
+    'Film<span class="ml-1.5 text-xs text-muted-foreground tabular-nums">5<span class="sr-only"> items</span>',
+  )
+  expect(html).toContain(
+    'Standalone<span class="ml-1.5 text-xs text-muted-foreground tabular-nums">1<',
+  )
+  expect(html).toContain(
+    'Active<span class="ml-1.5 text-xs text-muted-foreground tabular-nums">9<',
+  )
+  expect(html).toContain(
+    'All<span class="ml-1.5 text-xs text-muted-foreground tabular-nums">12<',
+  )
 })

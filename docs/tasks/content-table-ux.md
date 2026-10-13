@@ -1,6 +1,6 @@
 # Modul: UI dan UX tabel Content admin
 
-> Status: **CTBL-001–005 Done; CTBL-006–012 Backlog (approved)** · 13 Oktober 2026 · Pengguna meminta peningkatan UI/UX tabel Content. Plan: [implementation-plan](../plans/content-table-ux/implementation-plan.md), context: [repository-context](../plans/content-table-ux/repository-context.md). Plan disetujui pengguna 13 Oktober 2026.
+> Status: **CTBL-001–006 Done; CTBL-007–012 Backlog (approved)** · 13 Oktober 2026 · Pengguna meminta peningkatan UI/UX tabel Content. Plan: [implementation-plan](../plans/content-table-ux/implementation-plan.md), context: [repository-context](../plans/content-table-ux/repository-context.md). Plan disetujui pengguna 13 Oktober 2026.
 
 ## Tujuan modul
 
@@ -218,7 +218,7 @@ Tidak ada selain CTBL-004.
 
 ## Task: CTBL-006 — Jumlah pada tab jenis dan chip status
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 6
 - Referensi: CTBL-US-02; P4; D3
@@ -232,9 +232,9 @@ Badge jumlah pada tab jenis dan chip status dari `GET /admin/dashboard/summary` 
 
 ### Acceptance criteria
 
-- [ ] Jumlah tampil tanpa menahan daftar dan sesuai dengan `total` bila filter sama.
-- [ ] Jumlah diperbarui setelah publish, archive, buat dan hapus tanpa muat ulang.
-- [ ] Kegagalan summary tidak merusak daftar.
+- [x] Jumlah tampil tanpa menahan daftar dan sesuai dengan `total` bila filter sama.
+- [x] Jumlah diperbarui setelah publish, archive, buat dan hapus tanpa muat ulang.
+- [x] Kegagalan summary tidak merusak daftar.
 
 ### Validasi
 
@@ -242,7 +242,7 @@ Test komponen dan invalidasi; browser.
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 13 Oktober 2026. `lib/admin/content-counts.ts` (`statusCount`, `typeCount`: `active` = total − archived, `all` = total, lainnya langsung; maknanya sama dengan filter daftar), `components/admin/content-count.tsx` (angka kecil + `sr-only` "items", tidak dirender sebelum angka ada), `content-filters.tsx` (tab jenis menampilkan jumlah untuk status terpilih, chip status menampilkan jumlah untuk jenis terpilih, juga pada sheet mobile), `content-list.tsx` memakai `useDashboardSummary` yang sudah ada (polling 30 detik, abort/private-effect tetap) sehingga kegagalan summary hanya menyembunyikan angka. Test: 2 test baru pada `admin-content-filters.test.tsx` (aturan hitung termasuk Series `unpublished`, render angka). Smoke browser (stack nyata, database uji): sebelum hapus Film 4/Standalone 0/Series 1 dan Active 4/Draft 3/Published 1/Archived 0/All 4 sama dengan "Showing 1–4 of 4"; setelah menghapus satu draft dari menu tanpa muat ulang menjadi Film 3, Draft 2, Active 3, "Showing 1–3 of 3"; pada filter Archived tab Standalone menunjukkan 1. Tanpa page error. `tsc --noEmit` bersih.
 
 ### Commit task
 

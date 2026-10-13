@@ -23,6 +23,9 @@ import {
 } from '#/lib/admin/content-list-state'
 import type { ContentListControls } from '#/lib/admin/content-list-state'
 import { useSearchShortcut } from '#/hooks/use-search-shortcut'
+import { statusCount, typeCount } from '#/lib/admin/content-counts'
+import type { ContentCounts } from '#/lib/admin/content-counts'
+import { ContentCount } from './content-count'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import { FieldGroup, Field, FieldLabel } from '#/components/ui/field'
@@ -54,11 +57,13 @@ const sortLabels: Record<ContentSort, string> = {
 const isStatus = (value: unknown): value is ContentStatus =>
   contentStatuses.some((status) => status === value)
 
+type WithCounts = { counts?: ContentCounts }
 function StatusFilter({
   filters,
   onChange,
   className,
-}: ContentListControls & { className?: string }) {
+  counts,
+}: ContentListControls & WithCounts & { className?: string }) {
   return (
     <ToggleGroup
       aria-label="Status"
@@ -77,6 +82,9 @@ function StatusFilter({
           value={status}
         >
           {contentStatusLabels[status]}
+          <ContentCount
+            value={counts && statusCount(counts[filters.type], status)}
+          />
         </ToggleGroupItem>
       ))}
     </ToggleGroup>
@@ -128,7 +136,11 @@ function SortControls({ filters, onChange }: ContentListControls) {
 
 // Status and sorting live in a sheet on narrow screens so the list starts
 // close to the top; every choice applies immediately, as on desktop.
-function MobileFilters({ filters, onChange }: ContentListControls) {
+function MobileFilters({
+  filters,
+  onChange,
+  counts,
+}: ContentListControls & WithCounts) {
   const count = activeFilterCount(filters)
   return (
     <Sheet>
@@ -155,6 +167,7 @@ function MobileFilters({ filters, onChange }: ContentListControls) {
             <StatusFilter
               filters={filters}
               onChange={onChange}
+              counts={counts}
               className="flex w-full flex-wrap"
             />
           </div>
@@ -185,7 +198,8 @@ function MobileFilters({ filters, onChange }: ContentListControls) {
 export function ContentFiltersPanel({
   filters,
   onChange,
-}: ContentListControls) {
+  counts,
+}: ContentListControls & WithCounts) {
   const [search, setSearch] = useState(filters.search)
   const input = useRef<HTMLInputElement>(null)
   useSearchShortcut(input)
@@ -221,6 +235,7 @@ export function ContentFiltersPanel({
               value={type}
             >
               {contentLabels[type]}
+              <ContentCount value={typeCount(counts, type, filters.status)} />
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
@@ -263,10 +278,10 @@ export function ContentFiltersPanel({
             )}
           </InputGroup>
         </Field>
-        <MobileFilters filters={filters} onChange={onChange} />
+        <MobileFilters filters={filters} onChange={onChange} counts={counts} />
       </div>
       <div className="hidden flex-wrap items-center justify-between gap-3 sm:flex">
-        <StatusFilter filters={filters} onChange={onChange} />
+        <StatusFilter filters={filters} onChange={onChange} counts={counts} />
         <SortControls filters={filters} onChange={onChange} />
       </div>
     </FieldGroup>

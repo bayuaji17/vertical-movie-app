@@ -20,6 +20,7 @@ import { clearedFilters, isFiltered } from '#/lib/admin/content-list-state'
 import { contentListOptions } from '#/lib/admin/content-queries'
 import { contentErrorMessage } from '#/lib/admin/content-errors'
 import { useContentApi } from '#/hooks/use-content-api'
+import { useDashboardSummary } from '#/hooks/use-dashboard-summary'
 import { AdminPageHeading } from './page-heading'
 import { Button } from '#/components/ui/button'
 import { Alert, AlertTitle, AlertDescription } from '#/components/ui/alert'
@@ -44,6 +45,8 @@ export function ContentList({
   const { client, identity } = useContentApi()
   const query = useQuery(contentListOptions(client, identity, filters))
   const data = query.data
+  // Counts for the tabs and status chips; a failure only hides the numbers.
+  const counts = useDashboardSummary().query.data?.content
   useEffect(() => {
     if (!data || query.isFetching || query.isError) return
     const lastPage = Math.max(1, data.totalPages)
@@ -65,7 +68,11 @@ export function ContentList({
           </Button>
         }
       />
-      <ContentFiltersPanel filters={filters} onChange={onChange} />
+      <ContentFiltersPanel
+        filters={filters}
+        onChange={onChange}
+        counts={counts}
+      />
       <ContentResultSummary
         total={data?.total ?? 0}
         search={filters.search}
