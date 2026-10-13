@@ -1,6 +1,6 @@
 # Modul: UI dan UX tabel Content admin
 
-> Status: **CTBL-001–011 Done; CTBL-012 Backlog (approved)** · 13 Oktober 2026 · Pengguna meminta peningkatan UI/UX tabel Content. Plan: [implementation-plan](../plans/content-table-ux/implementation-plan.md), context: [repository-context](../plans/content-table-ux/repository-context.md). Plan disetujui pengguna 13 Oktober 2026.
+> Status: **CTBL-001–012 Done (implemented lokal, mode dev; produksi belum)** · 13 Oktober 2026 · Pengguna meminta peningkatan UI/UX tabel Content. Plan: [implementation-plan](../plans/content-table-ux/implementation-plan.md), context: [repository-context](../plans/content-table-ux/repository-context.md). Plan disetujui pengguna 13 Oktober 2026.
 
 ## Tujuan modul
 
@@ -450,7 +450,7 @@ Tidak ada selain CTBL-008.
 
 ## Task: CTBL-012 — Dokumentasi dan penutupan
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 12
 - Referensi: CTBL-US-01/02/03
@@ -464,8 +464,8 @@ Perbarui runbook kontrak daftar (`docs/operations/video-metadata.md`), model/ars
 
 ### Acceptance criteria
 
-- [ ] Kontrak query/respons baru dan perilaku UI terdokumentasi pada pemilik kanoniknya.
-- [ ] `check-types`, `lint`, `build`, `docs:check` lulus dan hasilnya dicatat.
+- [x] Kontrak query/respons baru dan perilaku UI terdokumentasi pada pemilik kanoniknya.
+- [x] `check-types`, `lint`, `build`, `docs:check` lulus dan hasilnya dicatat.
 
 ### Validasi
 
@@ -473,7 +473,7 @@ Lihat acceptance criteria.
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 13 Oktober 2026. Runbook [Daftar Content admin — UI](../operations/video-metadata.md#daftar-content-admin--ui-ctbl-13-oktober-2026) (filter, urutan, URL, baris, aksi, mobile, footer, bukti dan batas), kontrak API pada bagian daftar `GET /admin/content` (status/sort/order/slug, ringkasan baris, cover endpoint) di runbook yang sama, [ikhtisar arsitektur](../architecture/overview.md) dan [panduan API](../guides/api-development.md) (jumlah endpoint), `docs/README.md` (status implemented lokal) dan [plan](../plans/content-table-ux/implementation-plan.md) (status, penyimpangan yang dicatat). Gate (diamati 13 Oktober 2026): `bun run check-types` 4/4, `bun run lint` bersih, `bun run build` 2/2, `bun run docs:check` lulus; API `bun test src` 209 lulus + 1 gagal sebelumnya, integrasi konten 9 lulus, `content:delete:proof` 7 lulus; web `bun test` 388 lulus + 1 gagal sebelumnya; browser 7/7 (tabel) dan 8/8 (hapus). Ledger SHA: CTBL-001 `388c4ae`, CTBL-002 `32750e7`, CTBL-003 `9086a56`, CTBL-004 `ce2ee45`, CTBL-005 `b3ef5ea`, CTBL-006 `039ea2f`, CTBL-007 `4a2643d`, CTBL-008 `e488194`, CTBL-009 `1316087`, CTBL-011 `c5b5792`, CTBL-010 `8a48c81`. Batas: mode dev saja, tanpa build produksi/R2/FFmpeg nyata; migrasi index `0013` sudah diterapkan ke database development (data tidak berubah) dan memerlukan otorisasi untuk produksi; push/PR/merge belum dilakukan dan branch ini bertumpuk di atas branch hapus konten (rebase setelah PR hapus di-merge).
 
 ### Commit task
 

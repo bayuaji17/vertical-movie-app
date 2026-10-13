@@ -2,7 +2,7 @@
 
 ## Plan metadata
 
-- Status: **approved** (13 Oktober 2026). Pengguna menyetujui seluruh keputusan D1–D9 beserta rekomendasi D3 (jumlah dari dashboard summary), D4 (default urutan `updated desc`), D7 (field baru dengan anggaran performa; `genres` dibuang lebih dulu bila melewati anggaran) dan thumbnail sampul CTBL-011 ("setuju semua, commit plannya, dan lakukan implementasi"). Implementasi dimulai pada branch `feat/content-table-ux`.
+- Status: **implemented (lokal, mode dev)** — disetujui pengguna 13 Oktober 2026 (D1–D9 beserta rekomendasi D3, D4, D7 dan thumbnail CTBL-011; "setuju semua, commit plannya, dan lakukan implementasi"); CTBL-001–012 selesai pada branch `feat/content-table-ux`. Belum diverifikasi pada build produksi/R2; push, PR, merge dan rollout produksi menunggu otorisasi.
 - Date: 13 Oktober 2026; decision owner: pengguna.
 - Repository: `bayuaji17/vertical-movie-app`; base ref: `main` (lihat SHA pada context).
 - Context: [repository-context.md](repository-context.md).
@@ -117,6 +117,7 @@ Hanya perubahan lokal pada branch fitur; push/PR/merge dan migrasi produksi meme
 
 ## Execution history
 
+- 13 Oktober 2026: CTBL-002–012 selesai (lihat bukti dan SHA pada [backlog](../../tasks/content-table-ux.md)). Penyimpangan dari plan yang dicatat: tab jenis tetap terlihat di mobile dan sheet menerapkan langsung (D8); `mediaState` memakai enam nilai (D7); thumbnail dikecilkan di server dengan cache memori terbatas (CTBL-011); halaman tanpa hasil tidak menampilkan footer pagination (CTBL-009).
 - 13 Oktober 2026: pengguna menyetujui plan; CTBL-001 selesai; implementasi dimulai dari CTBL-002.
 - 13 Oktober 2026: pengguna mengizinkan thumbnail sampul masuk scope (CTBL-011, terakhir); rekomendasi D3/D4/D7 diberikan, persetujuan menunggu.
 - 13 Oktober 2026: context dan plan ditulis (status proposed); menunggu keputusan pengguna atas D1–D9.
