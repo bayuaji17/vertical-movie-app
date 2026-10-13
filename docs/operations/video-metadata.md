@@ -26,7 +26,7 @@ Pada 3 Oktober 2026, backend metadata mendukung `standalone`, `movie`, dan `epis
 
 ## Endpoint dan akses
 
-Path Elysia adalah `/admin/series`, `/admin/genres`, dan `/admin/videos`; daftar lengkap kontrak ada pada [plan](../plans/video/implementation-plan.md#kontrak-endpoint-tahap-a). Better Auth tetap `/api/auth/*`, dokumentasi Scalar `/openapi` dan `/openapi/json`.
+Path Elysia adalah `/admin/series`, `/admin/genres`, `/admin/videos` dan `/admin/seasons` (termasuk `DELETE` untuk draft/archived, lihat [Hapus konten](#hapus-konten-draft-dan-archived--13-oktober-2026)); daftar lengkap kontrak ada pada [plan](../plans/video/implementation-plan.md#kontrak-endpoint-tahap-a). Better Auth tetap `/api/auth/*`, dokumentasi Scalar `/openapi` dan `/openapi/json`.
 
 Setiap endpoint konten membaca sesi native tanpa cookie cache, lalu memeriksa role admin, ban, dan expiry. Response privat memakai `Cache-Control: private, no-store`. Unauthorized 401, non-admin/banned 403, auth dependency unavailable 503. Field metadata divalidasi ketat; unknown fields dan status publikasi buatan client ditolak 422. Error domain memakai `{error:{code,message,requestId}}`; duplicate slug/nomor dan stale version menghasilkan 409.
 
@@ -208,3 +208,17 @@ Untuk mengisi database development dengan metadata contoh: `bun run --cwd apps/a
 - Semua berstatus draft, tanpa media dan tanpa konfirmasi hak; tidak ada yang publik sampai admin mengunggah media, mengonfirmasi hak dan mempublikasikan lewat alur admin yang ada.
 - Idempoten: slug yang sudah ada dilewati dan tidak diubah. `--remove` hanya menghapus video contoh yang masih draft tanpa media (dan Series contoh yang tidak punya episode tersisa); genre tidak dihapus.
 - Hanya untuk development lokal; jangan dijalankan pada production. Tidak membuktikan alur upload, worker, publikasi atau tonton.
+
+## Hapus konten draft dan archived — 13 Oktober 2026
+
+Status: implemented dan terverifikasi lokal (DEL-001–007). Aturan, urutan hapus dan tombstone: [model data](../architecture/video-data-model.md#penghapusan-konten--13-oktober-2026); worker: [Media Operations](media.md#hapus-konten-dan-sapuan-tombstone--13-oktober-2026).
+
+```sh
+curl -X DELETE "$API/admin/videos/<video-id>?expectedVersion=3" -b cookie.txt
+curl -X DELETE "$API/admin/seasons/<season-id>?expectedVersion=2" -b cookie.txt
+curl -X DELETE "$API/admin/series/<series-id>?expectedVersion=1" -b cookie.txt
+```
+
+Response 200: `{"id":"…","kind":"movie|standalone|episode|season|series","removed":{"series":0,"seasons":0,"videos":1,"assets":2,"uploadSessions":2,"jobs":2,"storageObjects":6}}`. Error: 401/403 (auth), 404 `CONTENT_NOT_FOUND`, 409 `CONTENT_VERSION_CONFLICT`, 409 `CONTENT_STATE_CONFLICT` (published), 409 `CONTENT_BUSY` (upload/job aktif), 422 (`expectedVersion` bukan bilangan bulat positif).
+
+Admin UI: tombol **Delete** pada detail konten, detail episode, daftar season dan daftar konten (tabel dan kartu). Konten published menampilkan tombol nonaktif dengan alasan "Archive it first"; Series meminta judul diketik persis; setelah sukses halaman kembali ke daftar, cache admin dibatalkan dan toast menampilkan ringkasan. Penghapusan **tidak dapat dibatalkan** dan membebaskan slug. Konsekuensi untuk Series: semua season dan episode (termasuk yang published) ikut terhapus. Rollout produksi memerlukan otorisasi tersendiri; tidak ada backup otomatis, jadi buat backup lebih dulu bila perlu.

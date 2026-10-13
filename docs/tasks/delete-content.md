@@ -1,6 +1,6 @@
 # Modul: Hapus konten draft dan archived
 
-> Status: **DEL-001–007 Done**; DEL-008 Backlog · 13 Oktober 2026 · Pengguna meminta fitur hapus untuk konten draft dan archived. Plan: [implementation-plan](../plans/delete-content/implementation-plan.md), context: [repository-context](../plans/delete-content/repository-context.md).
+> Status: **DEL-001–008 Done (implemented lokal; produksi belum)** · 13 Oktober 2026 · Pengguna meminta fitur hapus untuk konten draft dan archived. Plan: [implementation-plan](../plans/delete-content/implementation-plan.md), context: [repository-context](../plans/delete-content/repository-context.md).
 
 ## Tujuan modul
 
@@ -296,7 +296,7 @@ Tidak ada.
 
 ## Task: DEL-008 — Dokumentasi dan penutupan
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 8
 - Referensi: DEL-US-01/02/03; [plan](../plans/delete-content/implementation-plan.md)
@@ -310,8 +310,8 @@ Perbarui runbook metadata/media, model data video, README docs, panduan API; cat
 
 ### Acceptance criteria
 
-- [ ] Kontrak, aturan, urutan hapus, tombstone dan perilaku worker terdokumentasi.
-- [ ] `check-types`, `lint`, `build`, `docs:check` lulus dan dicatat.
+- [x] Kontrak, aturan, urutan hapus, tombstone dan perilaku worker terdokumentasi.
+- [x] `check-types`, `lint`, `build`, `docs:check` lulus dan dicatat.
 
 ### Validasi
 
@@ -319,7 +319,7 @@ Lihat acceptance criteria.
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 13 Oktober 2026. Diperbarui: [model data](../architecture/video-data-model.md#penghapusan-konten--13-oktober-2026) (aturan, urutan hapus, tombstone, kontrak), [PRD](../product/prd.md) dan [aturan global](../product/global-rules.md) (pengecualian retensi), [Media Operations](../operations/media.md#hapus-konten-dan-sapuan-tombstone--13-oktober-2026) (sapuan worker, key aman, pemeriksaan operator), [runbook metadata](../operations/video-metadata.md#hapus-konten-draft-dan-archived--13-oktober-2026) (curl, error, UI), [panduan API](../guides/api-development.md) (jumlah endpoint dan aturan `parse: "none"`) dan [README docs](../README.md). Batas: belum diuji pada produksi/R2 maupun dengan FFmpeg nyata; rollout produksi dan push/PR/merge memerlukan otorisasi sendiri. Hasil gate (13 Oktober 2026, diamati): `bun run check-types` 4/4 lulus; `bun run lint` bersih; `bun run build` 2/2 lulus; `bun run docs:check` lulus; `bun test src` API 199 lulus + 1 gagal sebelumnya (`truncated JPEG data fails the awaited native decode`); `bun test` web 354 lulus + 1 gagal sebelumnya (`title route rejects unknown kinds and malformed slugs with notFound()`); `bun run --cwd apps/api content:delete:proof` 7 test/49 assertion lulus. Kedua kegagalan juga terjadi tanpa perubahan fitur ini. Ledger SHA task: DEL-001–005 `3e43003`, DEL-006 `7224e55`, perbaikan login `f6818bc`, DEL-007 `ca8cb4d`.
 
 ### Commit task
 

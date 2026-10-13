@@ -99,3 +99,4 @@ D1–D6 di atas. Pertanyaan tambahan: apakah Series published dengan semua episo
 - 13 Oktober 2026: DEL-001–005 selesai (backend): tabel tombstone, `purgeContent`, DELETE video/season/series, sapuan worker; integrasi PostgreSQL+MinIO lulus.
 - 13 Oktober 2026: DEL-006 selesai: UI admin (klien, hook, dialog konfirmasi, integrasi detail/episode/season/daftar) dengan test komponen; check-types, lint, build lulus.
 - 13 Oktober 2026: DEL-007 selesai: bukti browser (desktop + mobile) pada database/bucket uji dan sapuan worker; ditemukan dan diperbaiki bug login 500 (`parse: "none"` pada `/api/auth/*`).
+- 13 Oktober 2026: DEL-008 selesai: dokumentasi (model data, PRD, aturan global, runbook media/metadata, panduan API, README) dan gate check-types/lint/build/docs:check. Status: implemented lokal; push/PR/merge dan produksi menunggu otorisasi.

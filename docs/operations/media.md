@@ -101,6 +101,16 @@ Upload resume 24h; explicit abort segera; invalid completed upload serta output 
 
 Pada failure cek processing.failureCode/jobState lewat status upload, log worker kode stabil, space direktori kerja, config profil dan keberadaan FFmpeg. Worker menangani transient retry/expired lease otomatis. Tidak tersedia manual reprocess endpoint setelah job terminal; koreksi upload dilakukan pada draft melalui session baru. FFmpeg raw stderr, credential dan signed URL tidak ditulis log.
 
+## Hapus konten dan sapuan tombstone — 13 Oktober 2026
+
+Menghapus konten draft/archived ([aturan dan urutan](../architecture/video-data-model.md#penghapusan-konten--13-oktober-2026)) menghapus baris DB dalam satu transaksi dan mencatat **tombstone** untuk setiap objek storage. Worker (slot maintenance, bukan slot job) menyapu tombstone tiap 60 detik: `createTombstoneSweep` di `apps/api/src/workers/tombstones.ts` memproses 50 baris per sapuan untuk provider/bucket aktif saja, menghapus objek atau semua key di bawah prefix, lalu mengisi `deleted_at`.
+
+- **Keamanan key:** hanya key aplikasi yang dihapus — `sources/<uuid>/original`, `sources/<uuid>/poster-original`, `uploads/<uuid>/original`, dan prefix `outputs/<uuid>/`. Key lain ditolak dan dicatat gagal; tombstone untuk bucket/provider lain tidak disentuh.
+- **Kegagalan:** storage down tidak menghilangkan tombstone; `attempts` bertambah dan `last_error` diisi, sapuan berikutnya mengulang. Setelah 20 percobaan baris dibiarkan untuk operator. Baris selesai dipangkas setelah 7 hari.
+- **Log:** `cleanup.tombstones` (jumlah tombstone/objek/gagal/pending) dan `cleanup.tombstone_failed`. Contoh bukti: `tombstones=21 objects=28 failed=0 pending=0`.
+- **Pemeriksaan operator:** `SELECT count(*) FROM media_storage_tombstones WHERE deleted_at IS NULL` harus menuju 0 dalam beberapa menit selama worker hidup. Tanpa worker, file tetap di storage sampai worker berjalan; jangan menghapus objek manual yang tidak punya tombstone.
+- **Bukti:** `bun run --cwd apps/api content:delete:proof` (PostgreSQL + MinIO uji) dan browser: `apps/api/test/integration/content-delete-browser-fixture.ts` + `apps/web/test/admin-delete-browser-worker.mjs` (langkah pada [backlog DEL-007](../tasks/delete-content.md)). Rollout produksi (R2) belum diverifikasi dan memerlukan otorisasi sendiri.
+
 ## Migrasi development
 
 0006_media-upload, 0007_media-jobs, 0008_media-publication generated/reviewed dan applied melalui command resmi. Journal development 6→7→9; snapshot auth dan metadata existing utuh (user/account/session masing-masing1,rate_limit3; metadata existing kosong). Backup sebelum 0006: /home/bandev/backups/vertical-movie-app/media-before-0006-1791112537710.sql; sebelum 0007/0008: media-before-0007-0008-1791116342579.sql pada directory yang sama, permissions 0700/0600. Full restore belum dibuktikan.
