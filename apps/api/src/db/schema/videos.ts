@@ -86,5 +86,9 @@ export const videos = pgTable(
     index("videos_kind_list_idx")
       .on(t.kind, t.createdAt.desc(), t.id.desc())
       .where(sql`${t.archivedAt} IS NULL`),
+    // Admin list sorted by last change (the default order).
+    index("videos_kind_updated_idx")
+      .on(t.kind, t.updatedAt.desc(), t.id.desc())
+      .where(sql`${t.archivedAt} IS NULL`),
   ],
 );

@@ -6,6 +6,21 @@ export const ContentType = t.Union([
   t.Literal("standalone"),
   t.Literal("series"),
 ]);
+// `active` hides archived items (the default); `all` includes them.
+export const ContentStatusFilter = t.Union([
+  t.Literal("active"),
+  t.Literal("draft"),
+  t.Literal("published"),
+  t.Literal("archived"),
+  t.Literal("all"),
+]);
+export const ContentSort = t.Union([
+  t.Literal("updated"),
+  t.Literal("created"),
+  t.Literal("title"),
+  t.Literal("status"),
+]);
+export const ContentOrder = t.Union([t.Literal("asc"), t.Literal("desc")]);
 export const ContentPageQuery = t.Object(
   {
     type: ContentType,
@@ -15,6 +30,9 @@ export const ContentPageQuery = t.Object(
     includeArchived: t.Optional(
       t.Union([t.Literal("true"), t.Literal("false")]),
     ),
+    status: t.Optional(ContentStatusFilter),
+    sort: t.Optional(ContentSort),
+    order: t.Optional(ContentOrder),
   },
   { additionalProperties: false },
 );

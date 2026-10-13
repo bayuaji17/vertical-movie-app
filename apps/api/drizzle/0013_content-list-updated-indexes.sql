@@ -1,0 +1,2 @@
+CREATE INDEX "series_admin_updated_idx" ON "series" USING btree ("updated_at" DESC NULLS LAST,"id" DESC NULLS LAST) WHERE "series"."archived_at" IS NULL;--> statement-breakpoint
+CREATE INDEX "videos_kind_updated_idx" ON "videos" USING btree ("kind","updated_at" DESC NULLS LAST,"id" DESC NULLS LAST) WHERE "videos"."archived_at" IS NULL;

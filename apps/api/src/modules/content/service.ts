@@ -4,7 +4,8 @@ import type { ContentPageRepository } from "./repository";
 
 export class ContentPageService {
   constructor(private readonly repository?: ContentPageRepository) {}
-  list(input: ContentPageInput) {
+  list(query: ContentPageInput) {
+    const { includeArchived, ...input } = query;
     const page = Number(input.page ?? 1),
       pageSize = Number(input.pageSize ?? 10);
     if (
@@ -16,12 +17,17 @@ export class ContentPageService {
       pageSize > 100
     )
       invalid("Page must be 1–1000000 and pageSize must be 1–100.");
+    const sort = input.sort ?? "updated";
     return (this.repository ?? unavailable()).list({
       ...input,
       page,
       pageSize,
       search: input.search?.trim(),
-      includeArchived: input.includeArchived === "true",
+      // `status` wins; the older includeArchived flag maps to active/all.
+      status: input.status ?? (includeArchived === "true" ? "all" : "active"),
+      sort,
+      order:
+        input.order ?? (sort === "title" || sort === "status" ? "asc" : "desc"),
     });
   }
 }

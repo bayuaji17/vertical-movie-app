@@ -48,5 +48,8 @@ export const series = pgTable(
     index("series_admin_list_idx")
       .on(t.createdAt.desc(), t.id.desc())
       .where(sql`${t.archivedAt} IS NULL`),
+    index("series_admin_updated_idx")
+      .on(t.updatedAt.desc(), t.id.desc())
+      .where(sql`${t.archivedAt} IS NULL`),
   ],
 );

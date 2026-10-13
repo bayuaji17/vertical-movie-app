@@ -1,6 +1,6 @@
 # Modul: UI dan UX tabel Content admin
 
-> Status: **CTBL-001–003 Done; CTBL-004–012 Backlog (approved)** · 13 Oktober 2026 · Pengguna meminta peningkatan UI/UX tabel Content. Plan: [implementation-plan](../plans/content-table-ux/implementation-plan.md), context: [repository-context](../plans/content-table-ux/repository-context.md). Plan disetujui pengguna 13 Oktober 2026.
+> Status: **CTBL-001–004 Done; CTBL-005–012 Backlog (approved)** · 13 Oktober 2026 · Pengguna meminta peningkatan UI/UX tabel Content. Plan: [implementation-plan](../plans/content-table-ux/implementation-plan.md), context: [repository-context](../plans/content-table-ux/repository-context.md). Plan disetujui pengguna 13 Oktober 2026.
 
 ## Tujuan modul
 
@@ -138,7 +138,7 @@ Memerlukan PR hapus konten sudah di-merge (konflik pada `content-list.tsx`/`dele
 
 ## Task: CTBL-004 — API: filter status, urutan dan pencarian slug
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 4
 - Referensi: CTBL-US-02; P3, P5, P6; D2, D4, D5
@@ -152,10 +152,10 @@ Memerlukan PR hapus konten sudah di-merge (konflik pada `content-list.tsx`/`dele
 
 ### Acceptance criteria
 
-- [ ] Tanpa parameter baru, hasil kompatibel (kecuali default urutan bila D4 disetujui) dan `includeArchived=true` setara `status=all`.
-- [ ] Parameter tidak valid → 422; unknown query tetap ditolak.
-- [ ] Urutan stabil dan pagination konsisten dengan tie-breaker; pencarian slug meng-escape wildcard.
-- [ ] Migrasi diterapkan ke database development tanpa mengubah data; EXPLAIN memakai index baru.
+- [x] Tanpa parameter baru, hasil kompatibel (kecuali default urutan bila D4 disetujui) dan `includeArchived=true` setara `status=all`.
+- [x] Parameter tidak valid → 422; unknown query tetap ditolak.
+- [x] Urutan stabil dan pagination konsisten dengan tie-breaker; pencarian slug meng-escape wildcard.
+- [x] Migrasi diterapkan ke database development tanpa mengubah data; EXPLAIN memakai index baru.
 
 ### Validasi
 
@@ -163,7 +163,7 @@ Test unit/HTTP (`app.handle`), integrasi PostgreSQL pada database uji, `bun run 
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 13 Oktober 2026. `GET /admin/content` menerima `status` (`active|draft|published|archived|all`), `sort` (`updated|created|title|status`) dan `order`; `includeArchived` lama dipetakan ke `all`/`active` (status menang); pencarian cocok judul atau slug dengan wildcard literal; urutan default menjadi `updated desc` dengan tie-breaker `id` searah (`modules/content/{model,service,repository}.ts`). Migrasi `drizzle/0013_content-list-updated-indexes.sql` (`videos_kind_updated_idx`, `series_admin_updated_idx`, parsial `archived_at IS NULL`) dihasilkan `drizzle-kit generate` tanpa drift lain dan diterapkan ke database development dengan `bun run --cwd apps/api db:migrate`: video 28, series 3, aset 16, pengguna 1 tidak berubah; journal 13 → 14; kedua index ada. Test: `src/modules/content/index.test.ts` (6 test; default, validasi 422, pemetaan flag lama) dan integrasi PostgreSQL `content-pages-proof.test.ts` (4 test, 73 assertion; status per jenis, urutan updated/created/title/status, slug, wildcard literal, Series `unpublished`, dan EXPLAIN yang memakai kedua index) dijalankan dengan `CONTENT_TEST_DATABASE_URL` mengarah ke database uji `vertical_movie_app_content_test` yang sudah ada (variabel tidak ada di `.env`, diberikan lewat perintah). Kontrak didokumentasikan di `docs/operations/video-metadata.md`.
 
 ### Commit task
 
