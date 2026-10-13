@@ -12,15 +12,16 @@ export async function attachMedia(
   jobState: "succeeded" | "running" | "queued" = "succeeded",
   sessionStatus: "completed" | "pending" = "completed",
   bucket = "test-bucket",
+  by = actor,
 ) {
   const assetId = crypto.randomUUID(),
     jobId = crypto.randomUUID(),
     sessionId = crypto.randomUUID();
   const prefix = `outputs/${assetId}/${jobId}/${crypto.randomUUID()}/`;
   await client`INSERT INTO media_assets (id,video_id,series_id,kind,provider,bucket,object_key,state,size_bytes,content_type,sha256,created_by)
-    VALUES (${assetId}::uuid,${owner.videoId ?? null}::uuid,${owner.seriesId ?? null}::uuid,${kind},'minio',${bucket},${"sources/" + assetId + "/original"},'ready',1000,'video/webm',${sha},${actor})`;
+    VALUES (${assetId}::uuid,${owner.videoId ?? null}::uuid,${owner.seriesId ?? null}::uuid,${kind},'minio',${bucket},${"sources/" + assetId + "/original"},'ready',1000,'video/webm',${sha},${by})`;
   await client`INSERT INTO upload_sessions (id,asset_id,video_id,series_id,kind,actor_id,idempotency_key,request_hash,filename,staging_key,upload_id,status,size_bytes,part_size_bytes,part_count,expires_at,completed_at,created_at)
-    VALUES (${sessionId}::uuid,${assetId}::uuid,${owner.videoId ?? null}::uuid,${owner.seriesId ?? null}::uuid,${kind},${actor},${crypto.randomUUID()}::uuid,${sha},'a.webm',${"uploads/" + sessionId + "/original"},'upload-id',${sessionStatus},1000,5242880,1,now()+interval '1 day',${sessionStatus === "completed" ? new Date() : null},now())`;
+    VALUES (${sessionId}::uuid,${assetId}::uuid,${owner.videoId ?? null}::uuid,${owner.seriesId ?? null}::uuid,${kind},${by},${crypto.randomUUID()}::uuid,${sha},'a.webm',${"uploads/" + sessionId + "/original"},'upload-id',${sessionStatus},1000,5242880,1,now()+interval '1 day',${sessionStatus === "completed" ? new Date() : null},now())`;
   if (jobState === "succeeded")
     await client`INSERT INTO media_jobs (id,asset_id,generation,kind,state,attempts,output_prefix,output_files,finished_at)
       VALUES (${jobId}::uuid,${assetId}::uuid,1,${kind},'succeeded',1,${prefix},'["master.m3u8"]'::jsonb,now())`;

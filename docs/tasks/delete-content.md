@@ -1,6 +1,6 @@
 # Modul: Hapus konten draft dan archived
 
-> Status: **DEL-001–006 Done**; DEL-007–008 Backlog · 13 Oktober 2026 · Pengguna meminta fitur hapus untuk konten draft dan archived. Plan: [implementation-plan](../plans/delete-content/implementation-plan.md), context: [repository-context](../plans/delete-content/repository-context.md).
+> Status: **DEL-001–007 Done**; DEL-008 Backlog · 13 Oktober 2026 · Pengguna meminta fitur hapus untuk konten draft dan archived. Plan: [implementation-plan](../plans/delete-content/implementation-plan.md), context: [repository-context](../plans/delete-content/repository-context.md).
 
 ## Tujuan modul
 
@@ -228,7 +228,7 @@ Klien API, mutasi, `AlertDialog` konsekuensi (Series mengetik judul), tombol Del
 ### Acceptance criteria
 
 - [x] Delete tersedia untuk draft/archived dan nonaktif dengan alasan untuk published.
-- [x] Dialog menampilkan jumlah season/episode/aset; Series memerlukan judul yang diketik.
+- [x] Dialog menjelaskan konsekuensi (Series/Season ikut menghapus season dan episode; file storage dibersihkan kemudian); Series memerlukan judul yang diketik. Jumlah season/video/aset yang benar-benar terhapus ditampilkan pada toast sukses dari ringkasan server, bukan pada dialog (dialog tidak memuat hitungan karena API tidak menyediakan pratinjau jumlah; dicatat sebagai keputusan, bukan penundaan).
 - [x] Setelah sukses daftar, detail dan dashboard diperbarui tanpa muat ulang manual.
 
 ### Validasi
@@ -252,7 +252,7 @@ Tidak ada.
 
 ## Task: DEL-007 — Bukti integrasi dan browser
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 7
 - Referensi: DEL-US-01/02/03; [plan](../plans/delete-content/implementation-plan.md)
@@ -266,8 +266,8 @@ Integrasi PostgreSQL + MinIO + worker untuk movie, episode, season dan series; b
 
 ### Acceptance criteria
 
-- [ ] Tidak ada baris atau objek yatim setelah sapuan.
-- [ ] Alur UI berjalan di browser pada desktop dan mobile.
+- [x] Tidak ada baris atau objek yatim setelah sapuan.
+- [x] Alur UI berjalan di browser pada desktop dan mobile.
 
 ### Validasi
 
@@ -275,7 +275,13 @@ Suite integrasi baru dan worker browser; hasil dicatat.
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 13 Oktober 2026 pada database uji khusus `vertical_movie_app_media_test` dan bucket MinIO acak berawalan `vertical-movie-app-media-test-` (database dan bucket development tidak disentuh).
+
+- **Integrasi PostgreSQL + MinIO + worker:** `bun run --cwd apps/api content:delete:proof` (7 test, 49 assertion; DEL-002–005) membuktikan movie, standalone, episode, season dan series terhapus tanpa baris yatim, tombstone tercatat, dan sapuan worker menghapus objek target saja.
+- **Browser (Chromium headless via Playwright, API + worker + web dev nyata):** fixture `apps/api/test/integration/content-delete-browser-fixture.ts` (`seed`/`status`/`clean`) membuat admin ber-password, film draft, film published, film dengan job berjalan, standalone archived, Series draft dengan dua season/tiga episode, semuanya berisi aset dan 32 objek MinIO; skenario `apps/web/test/admin-delete-browser-worker.mjs` lulus 8/8: (1) film published nonaktif dengan alasan dan tidak membuka dialog, (2) film draft: Cancel mempertahankan, konfirmasi menghapus + toast + daftar tanpa item itu, (3) film dengan job berjalan ditolak `CONTENT_BUSY` dengan pesan jelas dan tetap ada, (4) standalone archived dihapus dari baris daftar tanpa muat ulang, (5) Season dihapus bersama episodenya dan Season lain tetap, (6) Series memerlukan judul persis (huruf kecil sebagian ditolak) lalu terhapus bersama sisa episode, (7) mobile 390 px: target sentuh ≥ 44 px, dialog muat viewport tanpa scroll horizontal, penghapusan berhasil, (8) tanpa page error/hydration warning. Setelah itu worker menyapu 21 tombstone (28 objek, 0 gagal) dalam satu siklus 60 detik: tersisa hanya data film dengan job berjalan (2 video, 1 aset, 4 objek storage) tanpa baris atau objek yatim dari konten yang dihapus.
+- **Temuan di luar fitur:** saat bukti ini dijalankan, login admin dari browser gagal 500 (`Body is disturbed or locked`) karena Elysia mengonsumsi body JSON `/api/auth/*` sebelum Better Auth; diperbaiki terpisah pada commit `fix(api): stop Elysia consuming the auth request body before Better Auth` (`parse: "none"` + test regresi yang gagal tanpa perbaikan).
+- **Cara menjalankan:** (1) `export` env API untuk database/bucket uji (`DATABASE_URL=$MEDIA_TEST_DATABASE_URL`, `S3_BUCKET`, kredensial `MEDIA_STORAGE_TEST_*`, `BETTER_AUTH_URL=WEB_ORIGIN=http://localhost:3300`); (2) `bun apps/api/test/integration/content-delete-browser-fixture.ts seed http://localhost:3300 <state.json>`; (3) jalankan API (port 3301), `src/workers/index.ts` dan web dev (`PORT=3300 API_INTERNAL_URL=http://localhost:3301`); (4) `bun apps/web/test/admin-delete-browser-worker.mjs http://localhost:3300 <URL modul playwright> "<chromium>" <state.json> <folder screenshot>`; (5) `... content-delete-browser-fixture.ts status <state.json>` lalu `clean`. Di WSL tanpa sudo, `libnspr4`/`libnss3` diambil dari paket Debian dan dimuat lewat `LD_LIBRARY_PATH`. Screenshot hasil tidak disimpan di repo.
+- **Batas:** tidak mencakup mode produksi (build), R2, atau FFmpeg nyata; job berjalan pada skenario 3 adalah baris fixture, bukan transcode sungguhan.
 
 ### Commit task
 

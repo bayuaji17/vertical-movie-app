@@ -1,0 +1,216 @@
+import {
+  CreateBucketCommand,
+  DeleteBucketCommand,
+  DeleteObjectsCommand,
+  ListObjectsV2Command,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
+import { createAdminAuthServer } from "@repo/auth/server";
+import { resetMediaDatabase } from "./media-fixture";
+import { attachMedia, counts } from "./content-delete-fixture";
+import { VideosService } from "../../src/modules/videos/service";
+import { createVideosRepository } from "../../src/modules/videos/repository";
+import { SeriesService } from "../../src/modules/series/service";
+import { createSeriesRepository } from "../../src/modules/series/repository";
+
+// Browser proof harness for deleting draft/archived content.
+//   seed   <origin> <state.json>  reset the dedicated DB + private bucket, create an admin and sample content
+//   status <state.json>           print row counts and the objects still in the bucket
+//   clean  <state.json>           empty and remove the private bucket
+// Only vertical_movie_app_media_test (guarded by resetMediaDatabase) and a random
+// vertical-movie-app-media-test-* bucket are touched.
+export const adminEmail = "delete-browser@example.test";
+export const adminPassword = "delete-browser-proof-2026";
+const endpoint = Bun.env.MEDIA_STORAGE_TEST_ENDPOINT;
+if (
+  endpoint !== "http://localhost:9000" &&
+  endpoint !== "http://127.0.0.1:9000"
+)
+  throw new Error("Loopback MinIO required.");
+const sdk = new S3Client({
+  endpoint,
+  region: "us-east-1",
+  forcePathStyle: true,
+  credentials: {
+    accessKeyId: Bun.env.MEDIA_STORAGE_TEST_ACCESS_KEY_ID!,
+    secretAccessKey: Bun.env.MEDIA_STORAGE_TEST_SECRET_ACCESS_KEY!,
+  },
+});
+async function keys(bucket: string) {
+  const out: string[] = [];
+  let token: string | undefined;
+  do {
+    const page = await sdk.send(
+      new ListObjectsV2Command({ Bucket: bucket, ContinuationToken: token }),
+    );
+    out.push(...(page.Contents ?? []).map((o) => o.Key!));
+    token = page.NextContinuationToken;
+  } while (token);
+  return out.sort();
+}
+const put = (bucket: string, key: string) =>
+  sdk.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: "proof" }));
+
+async function seed(origin: string, file: string) {
+  const bucket =
+    "vertical-movie-app-media-test-" + crypto.randomUUID().slice(0, 8);
+  await sdk.send(new CreateBucketCommand({ Bucket: bucket }));
+  const database = await resetMediaDatabase();
+  const { client, db } = database;
+  await client`DELETE FROM "user" WHERE id='media-admin'`;
+  const auth = createAdminAuthServer({
+    database: db,
+    origin,
+    secret: Bun.env.BETTER_AUTH_SECRET!,
+    secureCookies: false,
+  });
+  const admin = await auth.api.createUser({
+    body: {
+      email: adminEmail,
+      name: "Delete Browser Admin",
+      password: adminPassword,
+      role: "admin",
+    },
+  });
+  const actor = admin.user.id;
+  const videos = new VideosService(
+    createVideosRepository(db),
+    undefined,
+    () => {},
+  );
+  const series = new SeriesService(
+    createSeriesRepository(db),
+    undefined,
+    () => {},
+  );
+  const media = async (
+    owner: { videoId?: string; seriesId?: string },
+    kind: "source" | "poster" = "source",
+    jobState: "succeeded" | "running" = "succeeded",
+  ) => {
+    const m = await attachMedia(
+      client,
+      owner,
+      kind,
+      jobState,
+      jobState === "running" ? "pending" : "completed",
+      bucket,
+      actor,
+    );
+    await put(bucket, `sources/${m.assetId}/original`);
+    await put(bucket, `uploads/${m.sessionId}/original`);
+    await put(bucket, `outputs/${m.assetId}/${m.jobId}/x/0/index.m3u8`);
+    await put(bucket, `outputs/${m.assetId}/${m.jobId}/x/0/seg0.ts`);
+    return m;
+  };
+  const movie = async (title: string, patch = "") => {
+    const v = await videos.create({ kind: "movie", title }, actor);
+    if (patch) await client.unsafe(patch.replaceAll("$id", v.id));
+    return v;
+  };
+  const draft = await movie("Browser Draft Film");
+  await media({ videoId: draft.id });
+  const mobile = await movie("Browser Mobile Film");
+  await media({ videoId: mobile.id });
+  const live = await movie(
+    "Browser Live Film",
+    "UPDATE videos SET publication_status='published',published_at=now(),first_published_at=now() WHERE id='$id'::uuid",
+  );
+  const busy = await movie("Browser Busy Film");
+  await media({ videoId: busy.id }, "source", "running");
+  const archived = await videos.create(
+    { kind: "standalone", title: "Browser Archived Short" },
+    actor,
+  );
+  await media({ videoId: archived.id });
+  await client`UPDATE videos SET publication_status='archived',archived_at=now(),published_at=NULL,first_published_at=now() WHERE id=${archived.id}::uuid`;
+  const show = await series.create({ title: "Browser Draft Series" }, actor);
+  const season2 = await series.createSeason(
+    show.series.id,
+    { seasonNumber: 2 },
+    actor,
+  );
+  await media({ seriesId: show.series.id }, "poster");
+  const episodes: string[] = [];
+  for (const [seasonId, n] of [
+    [show.defaultSeason.id, 1],
+    [show.defaultSeason.id, 2],
+    [season2.id, 1],
+  ] as const) {
+    const e = await videos.create(
+      {
+        kind: "episode",
+        title: `Browser Episode ${episodes.length + 1}`,
+        seasonId,
+        episodeNumber: n,
+      },
+      actor,
+    );
+    await media({ videoId: e.id });
+    episodes.push(e.id);
+  }
+  const state = {
+    bucket,
+    admin: { email: adminEmail, password: adminPassword },
+    ids: {
+      draft: draft.id,
+      mobile: mobile.id,
+      live: live.id,
+      busy: busy.id,
+      archived: archived.id,
+      series: show.series.id,
+      season1: show.defaultSeason.id,
+      season2: season2.id,
+      episodes,
+    },
+    seeded: await counts(client),
+    objects: (await keys(bucket)).length,
+  };
+  await Bun.write(file, JSON.stringify(state, null, 2));
+  await client.close();
+  console.log(
+    JSON.stringify({ bucket, seeded: state.seeded, objects: state.objects }),
+  );
+}
+async function status(file: string) {
+  const state = await Bun.file(file).json();
+  const { createDatabase } = await import("../../src/db/client");
+  const { mediaTestUrl } = await import("./media-fixture");
+  const database = createDatabase(mediaTestUrl());
+  const [pending] =
+    await database.client`SELECT count(*)::int n FROM media_storage_tombstones WHERE deleted_at IS NULL`;
+  const [done] =
+    await database.client`SELECT count(*)::int n FROM media_storage_tombstones WHERE deleted_at IS NOT NULL`;
+  const left = await keys(state.bucket);
+  console.log(
+    JSON.stringify({
+      counts: await counts(database.client),
+      tombstones: { pending: pending.n, swept: done.n },
+      objects: left.length,
+      keys: process.argv.includes("--keys") ? left : undefined,
+    }),
+  );
+  await database.client.close();
+}
+async function clean(file: string) {
+  const state = await Bun.file(file).json();
+  const left = await keys(state.bucket);
+  if (left.length)
+    await sdk.send(
+      new DeleteObjectsCommand({
+        Bucket: state.bucket,
+        Delete: { Objects: left.map((Key) => ({ Key })) },
+      }),
+    );
+  await sdk.send(new DeleteBucketCommand({ Bucket: state.bucket }));
+  console.log("bucket removed");
+}
+const [mode, a, b] = Bun.argv.slice(2);
+if (mode === "seed") await seed(a!, b!);
+else if (mode === "status") await status(a!);
+else if (mode === "clean") await clean(a!);
+else
+  throw new Error(
+    "usage: seed <origin> <state> | status <state> | clean <state>",
+  );
