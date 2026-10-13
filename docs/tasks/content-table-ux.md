@@ -1,6 +1,6 @@
 # Modul: UI dan UX tabel Content admin
 
-> Status: **CTBL-001–009 and 011 Done; CTBL-010, 012 Backlog (approved)** · 13 Oktober 2026 · Pengguna meminta peningkatan UI/UX tabel Content. Plan: [implementation-plan](../plans/content-table-ux/implementation-plan.md), context: [repository-context](../plans/content-table-ux/repository-context.md). Plan disetujui pengguna 13 Oktober 2026.
+> Status: **CTBL-001–011 Done; CTBL-012 Backlog (approved)** · 13 Oktober 2026 · Pengguna meminta peningkatan UI/UX tabel Content. Plan: [implementation-plan](../plans/content-table-ux/implementation-plan.md), context: [repository-context](../plans/content-table-ux/repository-context.md). Plan disetujui pengguna 13 Oktober 2026.
 
 ## Tujuan modul
 
@@ -374,7 +374,7 @@ Tidak ada.
 
 ## Task: CTBL-010 — Bukti integrasi dan browser
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 10
 - Referensi: CTBL-US-01/02/03; plan bagian Validasi
@@ -388,8 +388,8 @@ Skenario browser pada database dan bucket uji (pola [DEL-007](delete-content.md)
 
 ### Acceptance criteria
 
-- [ ] Seluruh skenario lulus dan dicatat dengan perintah dan hasil aktual.
-- [ ] Tidak ada regresi pada alur hapus, publish dan dashboard.
+- [x] Seluruh skenario lulus dan dicatat dengan perintah dan hasil aktual.
+- [x] Tidak ada regresi pada alur hapus, publish dan dashboard.
 
 ### Validasi
 
@@ -397,7 +397,7 @@ Suite integrasi API, worker browser, `bun test` web/API.
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 13 Oktober 2026 pada database uji `vertical_movie_app_media_test` dan bucket MinIO acak berawalan `vertical-movie-app-media-test-` (database dan bucket development tidak disentuh), dengan API + worker + web dev nyata dan Chromium headless (Playwright). Fixture `apps/api/test/integration/content-delete-browser-fixture.ts` diperluas (fakta aset, sampul WebP nyata 1080×1920 di storage, genre, tahun). Worker baru `apps/web/test/admin-content-table-browser-worker.mjs` lulus **7/7**: (1) baris menampilkan status, Readiness (Uploading, Live, Ready to publish, Needs cover), tahun/genre/"+1", jumlah tab "Film 4 / Standalone 0 / Series 1" dan thumbnail 90×160 nyata hanya untuk item bersampul, tanpa scroll horizontal; (2) filter status (URL `?status=draft`, ringkasan "3 results · Draft"), urut judul naik/turun dengan `aria-sort`, "Clear all", `/` memfokuskan pencarian, pencarian slug, `Esc` mengosongkan, empty state + "Clear filters", dan URL lama `?includeArchived=true`; (3) kembali dari detail memulihkan filter, sort dan page size; (4) menu ⋯ dengan keyboard (Details/Edit draft/Delete), fokus kembali ke pemicu, nama aksi unik per baris, header sort lewat Enter; (5) hapus dari menu memperbarui daftar dan jumlah, memindahkan fokus ke "Content list" dan thumbnail lain tetap termuat; (6) mobile 390 px: sheet Filters + badge "1 active", thumbnail, scroll pulih, footer ≤ 90 px, target ≥ 44 px, tanpa scroll horizontal; (7) tanpa page error/hydration warning. Worker hapus DEL-007 disesuaikan dengan UI baru (judul sebagai tautan, hapus lewat menu, filter status, judul season bernama) dan tetap lulus **8/8** (tidak ada regresi hapus). Setelah penghapusan worker menyapu tombstone (3 diproses, 0 tertunda). Gate: `bun run check-types` 4/4, `bun run lint` bersih, `bun run build` 2/2; API `bun test src` 209 lulus + 1 gagal sebelumnya (`truncated JPEG data…`); integrasi `content-pages-proof` + `content-list-extras-proof` 9 lulus; `content:delete:proof` 7 lulus; web `bun test` 388 lulus + 1 gagal sebelumnya (`title route rejects unknown kinds…`). Batas: mode dev (bukan build produksi), tanpa FFmpeg/R2 nyata; job "berjalan" adalah baris fixture. Cara menjalankan: seperti DEL-007 (seed → API/worker/web → worker browser), memakai `admin-content-table-browser-worker.mjs`.
 
 ### Commit task
 
