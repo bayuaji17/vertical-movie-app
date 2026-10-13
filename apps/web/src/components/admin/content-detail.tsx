@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import type { ContentDetail } from '#/lib/admin/content-client'
 import { contentLabels } from '#/lib/admin/content-client'
@@ -13,6 +13,8 @@ import { Badge } from '#/components/ui/badge'
 import { OwnerPublicationMedia } from './owner-publication'
 import { VideoPublicationMedia } from './publication-panel'
 import { seasonsHref } from '#/lib/admin/series-form-state'
+import { contentSearch } from '#/lib/admin/content-list-state'
+import { DeleteContent } from './delete-content'
 
 function MetadataRows({
   rows,
@@ -40,6 +42,7 @@ export function ContentDetailView({
   metadataStale?: boolean
 }) {
   const d = detail.data
+  const navigate = useNavigate()
   const editable = isEditableContent(detail)
   const names =
     detail.type === 'series'
@@ -230,6 +233,34 @@ export function ContentDetailView({
           metadataStale={metadataStale}
         />
       ) : null}
+      <Card>
+        <CardHeader>
+          <CardTitle>Delete</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Permanently delete this{' '}
+            {detail.type === 'series'
+              ? 'series, its seasons and episodes'
+              : 'video'}{' '}
+            and its uploaded media. Only draft or archived content can be
+            deleted.
+          </p>
+          <DeleteContent
+            target={{
+              kind: detail.type === 'series' ? 'series' : detail.data.kind,
+              id: d.id,
+              title: d.title,
+              version: d.rowVersion,
+              publicationStatus: d.publicationStatus,
+              archivedAt: d.archivedAt,
+            }}
+            onDeleted={() =>
+              navigate({ to: '/admin/content', search: contentSearch({}) })
+            }
+          />
+        </CardContent>
+      </Card>
     </div>
   )
 }

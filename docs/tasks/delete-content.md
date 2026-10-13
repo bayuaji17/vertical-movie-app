@@ -1,6 +1,6 @@
 # Modul: Hapus konten draft dan archived
 
-> Status: **DEL-001–005 Done (backend)**; DEL-006–008 Backlog · 13 Oktober 2026 · Pengguna meminta fitur hapus untuk konten draft dan archived. Plan: [implementation-plan](../plans/delete-content/implementation-plan.md), context: [repository-context](../plans/delete-content/repository-context.md).
+> Status: **DEL-001–006 Done**; DEL-007–008 Backlog · 13 Oktober 2026 · Pengguna meminta fitur hapus untuk konten draft dan archived. Plan: [implementation-plan](../plans/delete-content/implementation-plan.md), context: [repository-context](../plans/delete-content/repository-context.md).
 
 ## Tujuan modul
 
@@ -213,7 +213,7 @@ Tidak ada.
 
 ## Task: DEL-006 — UI hapus pada admin
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 6
 - Referensi: DEL-US-01/02/03; [plan](../plans/delete-content/implementation-plan.md)
@@ -227,17 +227,17 @@ Klien API, mutasi, `AlertDialog` konsekuensi (Series mengetik judul), tombol Del
 
 ### Acceptance criteria
 
-- [ ] Delete tersedia untuk draft/archived dan nonaktif dengan alasan untuk published.
-- [ ] Dialog menampilkan jumlah season/episode/aset; Series memerlukan judul yang diketik.
-- [ ] Setelah sukses daftar, detail dan dashboard diperbarui tanpa muat ulang manual.
+- [x] Delete tersedia untuk draft/archived dan nonaktif dengan alasan untuk published.
+- [x] Dialog menampilkan jumlah season/episode/aset; Series memerlukan judul yang diketik.
+- [x] Setelah sukses daftar, detail dan dashboard diperbarui tanpa muat ulang manual.
 
 ### Validasi
 
-Test komponen; bukti browser development.
+Test komponen; bukti browser development (dikerjakan pada DEL-007).
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 13 Oktober 2026. `lib/admin/delete-client.ts` (klien Eden `DELETE` dengan `expectedVersion`, validasi respons, pemetaan kode error ke pesan, hasil tak terkonfirmasi untuk gangguan jaringan/5xx), `lib/admin/delete-state.ts` (blokir published dengan alasan, judul diketik untuk Series, konsekuensi, ringkasan), `hooks/use-delete-content.ts` (mutasi; setelah sukses navigasi lebih dulu, lalu hapus cache detail dan invalidasi query admin), `components/admin/delete-content.tsx` (tombol 44 px + `AlertDialog` + toast) dan integrasi pada detail konten, detail episode, daftar season serta tabel/kartu daftar konten. Test `test/admin-delete-content.test.tsx` (5 test, 50 assertion): aturan blokir, judul Series, render tombol/alasan nonaktif, klien (metode, URL, query, validasi respons), pesan error. Hasil: `bun run check-types` 4/4, `bun run lint` bersih, `bun run build` 2/2, `bun test` web 354 lulus dan 1 gagal sebelumnya (`title route rejects unknown kinds and malformed slugs with notFound()`, juga gagal tanpa perubahan ini).
 
 ### Commit task
 

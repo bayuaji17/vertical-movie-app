@@ -97,3 +97,4 @@ D1–D6 di atas. Pertanyaan tambahan: apakah Series published dengan semua episo
 - 13 Oktober 2026: context dan plan ditulis pada `feat/delete-draft-archived`; belum ada implementasi.
 
 - 13 Oktober 2026: DEL-001–005 selesai (backend): tabel tombstone, `purgeContent`, DELETE video/season/series, sapuan worker; integrasi PostgreSQL+MinIO lulus.
+- 13 Oktober 2026: DEL-006 selesai: UI admin (klien, hook, dialog konfirmasi, integrasi detail/episode/season/daftar) dengan test komponen; check-types, lint, build lulus.
