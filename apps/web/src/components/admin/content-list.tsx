@@ -1,5 +1,5 @@
-import { ContentNextStep } from './content-next-step'
-import { DeleteContent } from './delete-content'
+import { ContentRowActions } from './content-row-actions'
+import { ContentTitleLink } from './content-title-link'
 import { ContentStatus } from './content-status'
 import { ContentUpdated } from './content-updated'
 import {
@@ -12,24 +12,15 @@ import { ContentPagination } from './content-pagination'
 import { useEffect } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import type { ContentFilters, ContentItem } from '#/lib/admin/content-client'
+import type { ContentFilters } from '#/lib/admin/content-client'
 import { contentLabels } from '#/lib/admin/content-client'
-import { deleteBlock } from '#/lib/admin/delete-state'
-import type { DeleteTarget } from '#/lib/admin/delete-state'
 import { contentListOptions } from '#/lib/admin/content-queries'
 import { contentErrorMessage } from '#/lib/admin/content-errors'
 import { useContentApi } from '#/hooks/use-content-api'
 import { AdminPageHeading } from './page-heading'
 import { Button } from '#/components/ui/button'
-import { Badge } from '#/components/ui/badge'
 import { Alert, AlertTitle, AlertDescription } from '#/components/ui/alert'
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardFooter,
-} from '#/components/ui/card'
+import { Card, CardContent, CardFooter } from '#/components/ui/card'
 import {
   Table,
   TableHeader,
@@ -40,15 +31,6 @@ import {
   TableCaption,
 } from '#/components/ui/table'
 
-const deleteTarget = (item: ContentItem): DeleteTarget => ({
-  kind: item.type === 'film' ? 'movie' : item.type,
-  id: item.id,
-  title: item.title,
-  version: item.rowVersion,
-  publicationStatus: item.publicationStatus,
-  archivedAt: item.archivedAt,
-})
-const deletable = (item: ContentItem) => !deleteBlock(deleteTarget(item))
 export function ContentList({
   filters,
   onChange,
@@ -144,9 +126,7 @@ export function ContentList({
                 {data.items.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell className="max-w-xs whitespace-normal">
-                      <span className="break-words font-medium">
-                        {item.title}
-                      </span>
+                      <ContentTitleLink item={item} />
                     </TableCell>
                     <TableCell>{contentLabels[item.type]}</TableCell>
                     <TableCell>
@@ -156,44 +136,34 @@ export function ContentList({
                       <ContentUpdated value={item.updatedAt} />
                     </TableCell>
                     <TableCell>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <ContentNextStep item={item} />
-                        {deletable(item) && (
-                          <DeleteContent compact target={deleteTarget(item)} />
-                        )}
-                      </div>
+                      <ContentRowActions item={item} />
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </div>
-          <div className="grid gap-3 lg:hidden">
+          <ul className="grid gap-3 lg:hidden">
             {data.items.map((item) => (
-              <Card key={item.id}>
-                <CardHeader>
-                  <CardTitle className="break-words">{item.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap items-center gap-2 text-sm">
-                    <Badge variant="secondary">
-                      {contentLabels[item.type]}
-                    </Badge>
-                    <ContentStatus item={item} />
-                  </div>
-                  <p className="mt-3 text-sm text-muted-foreground">
-                    Updated <ContentUpdated value={item.updatedAt} />
-                  </p>
-                </CardContent>
-                <CardFooter className="flex flex-wrap items-center gap-2">
-                  <ContentNextStep item={item} />
-                  {deletable(item) && (
-                    <DeleteContent compact target={deleteTarget(item)} />
-                  )}
-                </CardFooter>
-              </Card>
+              <li key={item.id}>
+                <Card>
+                  <CardContent className="space-y-2">
+                    <div className="flex items-start justify-between gap-3">
+                      <ContentTitleLink item={item} slug={false} />
+                      <ContentStatus item={item} />
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {contentLabels[item.type]} ·{' '}
+                      <ContentUpdated value={item.updatedAt} />
+                    </p>
+                  </CardContent>
+                  <CardFooter>
+                    <ContentRowActions item={item} />
+                  </CardFooter>
+                </Card>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       ) : null}
       <ContentPagination

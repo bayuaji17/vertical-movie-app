@@ -1,6 +1,6 @@
 # Modul: UI dan UX tabel Content admin
 
-> Status: **CTBL-001–002 Done; CTBL-003–012 Backlog (approved)** · 13 Oktober 2026 · Pengguna meminta peningkatan UI/UX tabel Content. Plan: [implementation-plan](../plans/content-table-ux/implementation-plan.md), context: [repository-context](../plans/content-table-ux/repository-context.md). Plan disetujui pengguna 13 Oktober 2026.
+> Status: **CTBL-001–003 Done; CTBL-004–012 Backlog (approved)** · 13 Oktober 2026 · Pengguna meminta peningkatan UI/UX tabel Content. Plan: [implementation-plan](../plans/content-table-ux/implementation-plan.md), context: [repository-context](../plans/content-table-ux/repository-context.md). Plan disetujui pengguna 13 Oktober 2026.
 
 ## Tujuan modul
 
@@ -98,7 +98,7 @@ Tidak ada.
 
 ## Task: CTBL-003 — Aksi baris: aksi utama + menu ⋯
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 3
 - Referensi: CTBL-US-01/03; P1, P2, D1
@@ -112,10 +112,10 @@ Judul menjadi tautan ke detail; satu tombol utama per baris dari `nextStep`; `Dr
 
 ### Acceptance criteria
 
-- [ ] Paling banyak satu tombol utama terlihat per baris; aksi sekunder hanya melalui menu.
-- [ ] Menu dapat dioperasikan dengan keyboard dan mengembalikan fokus ke pemicu; dialog hapus tidak tertutup saat menu menutup.
-- [ ] Alur hapus DEL-006 tetap berfungsi (navigasi, toast, invalidasi) dan tes lama lulus.
-- [ ] Target sentuh ≥ 44 px dan tanpa scroll horizontal pada 390 px.
+- [x] Paling banyak satu tombol utama terlihat per baris; aksi sekunder hanya melalui menu.
+- [x] Menu dapat dioperasikan dengan keyboard dan mengembalikan fokus ke pemicu; dialog hapus tidak tertutup saat menu menutup.
+- [x] Alur hapus DEL-006 tetap berfungsi (dialog tidak tertutup saat menu menutup; navigasi/toast/invalidasi memakai komponen yang sama) dan tes lama lulus; skenario hapus penuh dari menu diuji ulang pada CTBL-010.
+- [x] Target sentuh ≥ 44 px dan tanpa scroll horizontal pada 390 px.
 
 ### Validasi
 
@@ -123,7 +123,7 @@ Test komponen; skenario browser (desktop dan mobile) termasuk keyboard.
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 13 Oktober 2026. `lib/admin/row-actions.ts` (`rowActions`: aksi utama dari `nextStep`, item menu Details/Edit/Delete, alasan blokir hapus), `components/admin/content-row-actions.tsx` (tombol utama + `DropdownMenu` bernama "Actions for <judul>", Delete destruktif terakhir setelah separator, nonaktif dengan teks "Archive it first" untuk published), `content-title-link.tsx` (judul sebagai tautan + slug), `delete-content.tsx` dipecah menjadi `DeleteDialog` (terkontrol, dimiliki baris) dan `DeleteContent` (tombol + dialog; tetap dipakai pada detail/episode/season), `content-list.tsx` (tabel dan daftar kartu mobile `<ul>` memakai komponen yang sama; `ContentNextStep` dihapus). Test: `admin-next-step.test.tsx` diperbarui (aksi utama tunggal, menu bernama, isi menu per status). Smoke browser (Chromium headless, API + worker + web dev nyata, database/bucket uji): menu berisi Details/Edit draft/Delete untuk draft, dialog tetap terbuka setelah menu menutup, fokus kembali ke pemicu setelah Cancel, Delete nonaktif (`aria-disabled`) dengan alasan pada film published, pemicu 44×44 px dan tanpa scroll horizontal pada 390 px. `bun run lint` dan `tsc --noEmit` bersih. Skenario hapus penuh dari menu dan worker DEL-007 disesuaikan pada CTBL-010.
 
 ### Commit task
 
