@@ -1,6 +1,6 @@
 # Modul: UI dan UX tabel Content admin
 
-> Status: **CTBL-001–006 Done; CTBL-007–012 Backlog (approved)** · 13 Oktober 2026 · Pengguna meminta peningkatan UI/UX tabel Content. Plan: [implementation-plan](../plans/content-table-ux/implementation-plan.md), context: [repository-context](../plans/content-table-ux/repository-context.md). Plan disetujui pengguna 13 Oktober 2026.
+> Status: **CTBL-001–007 Done; CTBL-008–012 Backlog (approved)** · 13 Oktober 2026 · Pengguna meminta peningkatan UI/UX tabel Content. Plan: [implementation-plan](../plans/content-table-ux/implementation-plan.md), context: [repository-context](../plans/content-table-ux/repository-context.md). Plan disetujui pengguna 13 Oktober 2026.
 
 ## Tujuan modul
 
@@ -257,7 +257,7 @@ Tidak ada selain CTBL-004.
 
 ## Task: CTBL-007 — API: field tambahan per baris (tahap B)
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 7
 - Referensi: CTBL-US-01; P7; D6, D7
@@ -267,13 +267,13 @@ Tidak ada selain CTBL-004.
 
 ### Ruang lingkup
 
-`ContentPageItem` menambah field opsional `mediaState` (`none|uploading|processing|ready|failed`), `releaseYear`, `genres[]` (maks. 3), `seasonCount`, `episodeCount` melalui agregasi dalam satu query pada transaksi repeatable-read yang sama; tanpa N+1.
+`ContentPageItem` menambah field opsional `mediaState` (`needs-video|needs-cover|uploading|processing|failed|ready`; menggantikan `none` agar Readiness dapat menyebut apa yang kurang), `releaseYear`, `genres[]` (maks. 3), `seasonCount`, `episodeCount` melalui agregasi dalam satu query pada transaksi repeatable-read yang sama; tanpa N+1.
 
 ### Acceptance criteria
 
-- [ ] Nilai `mediaState` konsisten dengan aturan kesiapan publikasi yang sudah ada (tidak memperkenalkan definisi baru yang berbeda).
-- [ ] Field baru opsional; klien lama tidak rusak; kontrak Eden dan OpenAPI diperbarui.
-- [ ] EXPLAIN pada data uji ≥ 10 ribu baris memenuhi anggaran yang disetujui (usulan p95 < 150 ms untuk 25 baris); bila tidak, subset field.
+- [x] Nilai `mediaState` konsisten dengan aturan kesiapan publikasi yang sudah ada (tidak memperkenalkan definisi baru yang berbeda).
+- [x] Field baru opsional; klien lama tidak rusak; kontrak Eden dan OpenAPI diperbarui.
+- [x] EXPLAIN pada data uji ≥ 10 ribu baris memenuhi anggaran yang disetujui (usulan p95 < 150 ms untuk 25 baris); bila tidak, subset field.
 
 ### Validasi
 
@@ -281,7 +281,7 @@ Test unit/HTTP, integrasi PostgreSQL, benchmark/EXPLAIN dicatat.
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 13 Oktober 2026. `modules/catalog/visibility.ts`: predikat `ready` dipecah menjadi `sourceReady` + `posterReady` (`ready` tetap gabungan yang sama, tanpa perubahan perilaku; test publikasi/katalog lulus). `modules/content/enrichment.ts` (`videoExtras`, `seriesExtras`) menghitung per halaman, lewat query kedua berdasarkan id halaman dalam transaksi repeatable-read yang sama (bukan N+1 dan tidak bergantung ukuran tabel): `mediaState` (`ready` dari predikat kanonik; `failed`/`processing` dari job generasi aktif pada aset source/poster; `uploading` dari upload session aktif; `needs-cover` bila video siap tetapi sampul belum; selain itu `needs-video`), `releaseYear`, `genres` (maks. 3, abjad) + `genreCount`, serta `seasonCount`/`episodeCount` Series (archived tidak dihitung). `model.ts` menambah field opsional; kontrak Eden/OpenAPI ikut. Bukti `test/integration/content-list-extras-proof.test.ts` (4 test, 26 assertion, database uji): semua enam keadaan termasuk job generasi lama diabaikan, paritas `ready` dengan `CatalogStore.readyForPublish` untuk tujuh kasus, genre dan jumlah, hitungan Series (season/episode archived dikecualikan), serta pengukuran 10.000 baris tambahan: halaman 25/25/25/100 baris dengan sort judul = 29.8/34.1/30.7/35.2 ms pada run terakhir (38.6–46.3 ms pada run sebelumnya), jauh di bawah anggaran 150 ms, jadi `genres` tidak perlu dibuang. Regresi: `content-pages-proof` (4 test), `media-publication-proof` + `public-catalog-poster-proof` (4 test), `media-series-proof` + `admin-series-proof` (6 test) lulus; `bun test src` API 201 lulus + 1 gagal sebelumnya (`truncated JPEG data…`); `tsc --noEmit` bersih. Dokumentasi kontrak ditambahkan ke `docs/operations/video-metadata.md`.
 
 ### Commit task
 

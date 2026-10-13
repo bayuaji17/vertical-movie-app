@@ -5,7 +5,9 @@ export const source = alias(mediaAssets, "playable_source"),
   poster = alias(mediaAssets, "playable_poster"),
   hls = alias(mediaJobs, "playable_hls"),
   posterJob = alias(mediaJobs, "playable_poster_job");
-export const ready = and(
+// The verified video (source + HLS) and the verified cover are separate facts so
+// admin readiness can say which one is missing; `ready` is both, unchanged.
+export const sourceReady = and(
   eq(source.kind, "source"),
   eq(source.state, "ready"),
   isNotNull(source.facts),
@@ -16,6 +18,8 @@ export const ready = and(
   eq(hls.assetId, source.id),
   isNotNull(hls.outputFiles),
   isNotNull(hls.outputPrefix),
+);
+export const posterReady = and(
   eq(poster.kind, "poster"),
   eq(poster.state, "ready"),
   isNotNull(poster.facts),
@@ -25,6 +29,7 @@ export const ready = and(
   isNotNull(posterJob.outputFiles),
   isNotNull(posterJob.outputPrefix),
 );
+export const ready = and(sourceReady, posterReady);
 export const publishedParent = and(
   eq(series.publicationStatus, "published"),
   isNull(series.archivedAt),

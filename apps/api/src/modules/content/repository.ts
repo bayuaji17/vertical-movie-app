@@ -13,6 +13,7 @@ import {
 import { videos, series } from "../../db/schema";
 import type { ContentDatabase } from "../../shared/content-db";
 import type { ContentPageInput, ContentPage } from "./model";
+import { seriesExtras, videoExtras } from "./enrichment";
 
 export type PageFilter = Omit<
   ContentPageInput,
@@ -88,9 +89,18 @@ export function createContentPageRepository(
             .orderBy(direction(sortKey), direction(table.id))
             .limit(input.pageSize)
             .offset((input.page - 1) * input.pageSize);
+          // Extra columns are looked up for this page's ids only, in the same
+          // snapshot, so their cost does not depend on the size of the table.
+          const ids = rows.map((row) => row.id);
+          const extras = !ids.length
+            ? new Map()
+            : input.type === "series"
+              ? await seriesExtras(tx, ids)
+              : await videoExtras(tx, ids);
           return {
             items: rows.map((row) => ({
               ...row,
+              ...extras.get(row.id),
               type: input.type,
               archivedAt: row.archivedAt?.toISOString() ?? null,
               createdAt: row.createdAt.toISOString(),

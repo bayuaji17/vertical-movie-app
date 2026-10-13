@@ -51,6 +51,24 @@ export const ContentPageItem = t.Object({
   createdAt: t.String(),
   updatedAt: t.String(),
   rowVersion: t.Integer(),
+  // Row summary for the admin list; all optional so older clients keep working.
+  releaseYear: t.Optional(t.Nullable(t.Integer())),
+  genres: t.Optional(t.Array(t.String(), { maxItems: 3 })),
+  genreCount: t.Optional(t.Integer({ minimum: 0 })),
+  // Film/Standalone only: what is still missing before it can be published.
+  mediaState: t.Optional(
+    t.Union([
+      t.Literal("needs-video"),
+      t.Literal("needs-cover"),
+      t.Literal("uploading"),
+      t.Literal("processing"),
+      t.Literal("failed"),
+      t.Literal("ready"),
+    ]),
+  ),
+  // Series only; archived seasons and episodes are not counted.
+  seasonCount: t.Optional(t.Integer({ minimum: 0 })),
+  episodeCount: t.Optional(t.Integer({ minimum: 0 })),
 });
 export const ContentPageDto = t.Object({
   items: t.Array(ContentPageItem),
