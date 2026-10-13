@@ -1,3 +1,4 @@
+import { createLogger, type Logger } from "@repo/log";
 import type { videos } from "../../db/schema";
 import {
   notFound,
@@ -91,6 +92,43 @@ export class VideosService {
     });
     this.invalidate();
     return result;
+  }
+  /** Permanently delete a draft or archived video; published videos must be archived first. */
+  async remove(id: string, expectedVersion: number, actor: string) {
+    const repo = this.repo();
+    if (!(await repo.store.get(id))) notFound();
+    const result = await repo.transact(async (store) => {
+      const row = await store.get(id, true);
+      if (!row) notFound();
+      if (row.rowVersion !== expectedVersion)
+        throw new ContentError(
+          "CONTENT_VERSION_CONFLICT",
+          "Content has changed; reload before deleting.",
+        );
+      if (row.publicationStatus === "published")
+        throw new ContentError(
+          "CONTENT_STATE_CONFLICT",
+          "Published content cannot be deleted. Archive it first.",
+        );
+      const removed = await store.purge({
+        videoIds: [id],
+        seasonIds: [],
+        seriesIds: [],
+      });
+      return { row, removed };
+    });
+    this.invalidate();
+    this.log.info("content.deleted", {
+      kind: result.row.kind,
+      id,
+      slug: result.row.slug,
+      title: result.row.title,
+      status: result.row.publicationStatus,
+      everPublished: result.row.firstPublishedAt !== null,
+      actor,
+      removed: result.removed,
+    });
+    return { id, kind: result.row.kind, removed: result.removed };
   }
   async update(id: string, input: PatchVideoInput, actor: string) {
     requireChanges(input);
@@ -222,6 +260,7 @@ export class VideosService {
     private readonly repository?: VideosRepository,
     private readonly runtime: RuntimeDependencies = defaultRuntime,
     private readonly invalidate = () => {},
+    private readonly log: Logger = createLogger("api"),
   ) {}
   private repo() {
     return this.repository ?? unavailable();

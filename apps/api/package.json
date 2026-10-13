@@ -33,7 +33,8 @@
     "media:series:proof": "bun test ./test/integration/media-series-proof.test.ts",
     "media:migration:proof": "bun test ./test/integration/media-migration-proof.test.ts",
     "media:format:proof": "bun test ./test/integration/media-format-proof.test.ts",
-    "db:seed:sample": "bun run src/db/seed-sample-content.ts"
+    "db:seed:sample": "bun run src/db/seed-sample-content.ts",
+    "content:delete:proof": "bun test ./test/integration/content-delete-proof.test.ts ./test/integration/content-delete-storage-proof.test.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1146.0",

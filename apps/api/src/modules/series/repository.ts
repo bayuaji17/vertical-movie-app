@@ -1,10 +1,20 @@
-import { and, eq, isNull, isNotNull, desc, ilike, sql } from "drizzle-orm";
+import {
+  and,
+  eq,
+  inArray,
+  isNull,
+  isNotNull,
+  desc,
+  ilike,
+  sql,
+} from "drizzle-orm";
 import { series, seasons, seriesGenres, videos } from "../../db/schema";
 import type {
   ContentDatabase,
   ContentConnection,
 } from "../../shared/content-db";
 import { assertGenreIds } from "../../shared/content-db";
+import { purgeContent, type PurgeScope } from "../../shared/content-delete";
 import type { ParsedList } from "../../shared/content-pagination";
 export class SeriesStore {
   constructor(private readonly db: ContentConnection) {}
@@ -24,6 +34,24 @@ export class SeriesStore {
           .limit(1)
       ).length > 0
     );
+  }
+  purge(scope: PurgeScope) {
+    return purgeContent(this.db, scope);
+  }
+  async seasonIds(seriesId: string, lock = false) {
+    const q = this.db
+      .select({ id: seasons.id })
+      .from(seasons)
+      .where(eq(seasons.seriesId, seriesId));
+    return (await (lock ? q.for("update") : q)).map((r) => r.id);
+  }
+  async episodeIds(seasonIds: string[], lock = false) {
+    if (!seasonIds.length) return [];
+    const q = this.db
+      .select({ id: videos.id })
+      .from(videos)
+      .where(inArray(videos.seasonId, seasonIds));
+    return (await (lock ? q.for("update") : q)).map((r) => r.id);
   }
   async getSeason(id: string, lock = false) {
     const q = this.db.select().from(seasons).where(eq(seasons.id, id)).limit(1);

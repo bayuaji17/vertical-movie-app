@@ -1,4 +1,8 @@
-import { ArchiveBody } from "../../shared/content-model";
+import {
+  ArchiveBody,
+  DeleteQuery,
+  DeleteResultDto,
+} from "../../shared/content-model";
 import { t } from "elysia";
 import { CreateSeasonBody, PatchSeasonBody, SeasonDto } from "./model";
 import { Elysia } from "elysia";
@@ -182,6 +186,48 @@ export function createSeriesModule({
           tags: ["Series"],
           summary: "Archive season",
           operationId: "archiveSeason",
+          security: [{ betterAuthSessionCookie: [] }],
+        },
+      },
+    )
+    .delete(
+      "/admin/seasons/:id",
+      ({ params, query, adminSession }) =>
+        service.removeSeason(
+          params.id,
+          Number(query.expectedVersion),
+          adminSession.user.id,
+        ),
+      {
+        requireAdmin: true,
+        params: IdParams,
+        query: DeleteQuery,
+        response: { 200: DeleteResultDto, ...ErrorResponses },
+        detail: {
+          tags: ["Series"],
+          summary: "Permanently delete a season and its episodes",
+          operationId: "deleteSeason",
+          security: [{ betterAuthSessionCookie: [] }],
+        },
+      },
+    )
+    .delete(
+      "/admin/series/:id",
+      ({ params, query, adminSession }) =>
+        service.remove(
+          params.id,
+          Number(query.expectedVersion),
+          adminSession.user.id,
+        ),
+      {
+        requireAdmin: true,
+        params: IdParams,
+        query: DeleteQuery,
+        response: { 200: DeleteResultDto, ...ErrorResponses },
+        detail: {
+          tags: ["Series"],
+          summary: "Permanently delete a draft or archived series",
+          operationId: "deleteSeries",
           security: [{ betterAuthSessionCookie: [] }],
         },
       },

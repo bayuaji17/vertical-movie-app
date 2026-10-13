@@ -1,6 +1,6 @@
 # Modul: Hapus konten draft dan archived
 
-> Status: **Backlog** · 13 Oktober 2026 · Pengguna meminta fitur hapus untuk konten draft dan archived. Plan: [implementation-plan](../plans/delete-content/implementation-plan.md), context: [repository-context](../plans/delete-content/repository-context.md).
+> Status: **DEL-001–005 Done (backend)**; DEL-006–008 Backlog · 13 Oktober 2026 · Pengguna meminta fitur hapus untuk konten draft dan archived. Plan: [implementation-plan](../plans/delete-content/implementation-plan.md), context: [repository-context](../plans/delete-content/repository-context.md).
 
 ## Tujuan modul
 
@@ -20,7 +20,7 @@ Sebagai admin, saya ingin konfirmasi yang menjelaskan konsekuensinya dan penolak
 
 ## Task: DEL-001 — Setujui keputusan D1–D6
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 1
 - Referensi: DEL-US-01/02/03; [plan](../plans/delete-content/implementation-plan.md)
@@ -34,7 +34,7 @@ Pengguna memutuskan D1 (yang boleh dihapus), D2 (hard delete), D3 (cascade), D4 
 
 ### Acceptance criteria
 
-- [ ] Keputusan dicatat beserta pemberi persetujuan dan tanggal.
+- [x] Keputusan dicatat beserta pemberi persetujuan dan tanggal.
 
 ### Validasi
 
@@ -42,7 +42,7 @@ Pengguna memutuskan D1 (yang boleh dihapus), D2 (hard delete), D3 (cascade), D4 
 
 ### Hasil dan bukti
 
-Belum ada.
+Pengguna menyetujui D1–D6 sebagaimana direkomendasikan pada 13 Oktober 2026 ("setuju semua, langsung kerjakan"). Dicatat pada plan.
 
 ### Commit task
 
@@ -57,7 +57,7 @@ Tidak ada.
 
 ## Task: DEL-002 — Skema tombstone storage dan primitif repository
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 2
 - Referensi: DEL-US-01/02/03; [plan](../plans/delete-content/implementation-plan.md)
@@ -71,9 +71,9 @@ Tabel `media_storage_tombstones` dan migrasi Drizzle; primitif repository untuk 
 
 ### Acceptance criteria
 
-- [ ] Migrasi additive dan dapat diterapkan di development tanpa mengubah data.
-- [ ] Primitif menghapus seluruh turunan sebuah pemilik dan mencatat tombstone untuk setiap objek/prefix.
-- [ ] Kegagalan di tengah membatalkan seluruh transaksi.
+- [x] Migrasi additive dan dapat diterapkan di development tanpa mengubah data.
+- [x] Primitif menghapus seluruh turunan sebuah pemilik dan mencatat tombstone untuk setiap objek/prefix.
+- [x] Kegagalan di tengah membatalkan seluruh transaksi.
 
 ### Validasi
 
@@ -81,7 +81,7 @@ Integrasi PostgreSQL uji khusus; `db:migrate` pada development.
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 13 Oktober 2026. Tabel `media_storage_tombstones` (`db/schema/tombstones.ts`, migrasi `0012_storage-tombstones.sql`, additive) dengan unique (provider, bucket, kind, key), check kind/key dan indeks pending. `shared/content-delete.ts` (`purgeContent`): mengunci aset, sesi upload dan job; menolak `CONTENT_BUSY` bila ada sesi `initializing|pending|completing|aborting` atau job `queued|running|retry`; mencatat tombstone (objek sumber, prefix `outputs/<assetId>/`, kunci staging); memutus FK melingkar (`videos.poster_asset_id|source_asset_id`, `series.poster_asset_id`, `media_assets.ready_job_id`); menghapus berurutan attempts → renditions → jobs → upload_sessions → media_assets → content_operations → video_genres/series_genres → videos → seasons → series; seluruhnya dalam transaksi pemanggil. Migrasi diterapkan ke database dev lokal (`db:migrate`: 13 baris jurnal, tabel ada, 28 video dan 3 series tidak berubah).
 
 ### Commit task
 
@@ -96,7 +96,7 @@ Tidak ada.
 
 ## Task: DEL-003 — Hapus video, movie, standalone dan episode
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 3
 - Referensi: DEL-US-01/02/03; [plan](../plans/delete-content/implementation-plan.md)
@@ -110,9 +110,9 @@ Tidak ada.
 
 ### Acceptance criteria
 
-- [ ] Draft dan archived terhapus beserta relasinya; published ditolak.
-- [ ] Upload berjalan atau job aktif menghasilkan 409 dengan pesan tindakan.
-- [ ] Ulangan menghasilkan 404; slug dan nomor episode dapat dipakai ulang.
+- [x] Draft dan archived terhapus beserta relasinya; published ditolak.
+- [x] Upload berjalan atau job aktif menghasilkan 409 dengan pesan tindakan.
+- [x] Ulangan menghasilkan 404; slug dan nomor episode dapat dipakai ulang.
 
 ### Validasi
 
@@ -120,7 +120,7 @@ Test HTTP `app.handle`; integrasi PostgreSQL.
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 13 Oktober 2026. `DELETE /admin/videos/:id?expectedVersion=n` (`deleteVideo`, admin-only): `VideosService.remove` mengunci baris, memeriksa versi (`CONTENT_VERSION_CONFLICT`), menolak published (`CONTENT_STATE_CONFLICT`, "Archive it first"), memanggil `purge`, lalu invalidasi cache katalog dan log `content.deleted` (tipe, slug, judul, status, pernah tayang, admin, jumlah yang dihapus). Respons 200 `{id, kind, removed}`; ulangan menghasilkan 404. Test: `videos/index.test.ts` (tanpa admin 401, query tidak valid 422, ringkasan) dan integrasi PostgreSQL (`content-delete-proof.test.ts`): film draft dengan genre, dua aset, dua sesi upload, job/attempt/rendition dan operasi → semua baris hilang, tombstone tercatat, genre tetap, slug dapat dibuat ulang, log tercatat; published/versi usang/job berjalan/upload pending ditolak tanpa mengubah apa pun (rollback); archived yang pernah tayang dapat dihapus.
 
 ### Commit task
 
@@ -135,7 +135,7 @@ Tidak ada.
 
 ## Task: DEL-004 — Hapus season dan series (cascade)
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 4
 - Referensi: DEL-US-01/02/03; [plan](../plans/delete-content/implementation-plan.md)
@@ -149,9 +149,9 @@ Tidak ada.
 
 ### Acceptance criteria
 
-- [ ] Series menghapus semua season, episode, relasi genre dan aset poster.
-- [ ] Season menghapus episodenya; season/series published atau sibuk ditolak.
-- [ ] Tidak ada baris yatim setelah penghapusan.
+- [x] Series menghapus semua season, episode, relasi genre dan aset poster.
+- [x] Season menghapus episodenya; season/series published atau sibuk ditolak.
+- [x] Tidak ada baris yatim setelah penghapusan.
 
 ### Validasi
 
@@ -159,7 +159,7 @@ Test HTTP; integrasi PostgreSQL dengan Series berisi dua season dan beberapa epi
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 13 Oktober 2026. `DELETE /admin/seasons/:id` (`deleteSeason`) dan `/admin/series/:id` (`deleteSeries`): `SeriesService.removeSeason`/`remove` dengan aturan yang sama; Series published ditolak; Season dengan episode published pada Series published (dan Season tidak archived) ditolak; cascade mengumpulkan season dan episode (termasuk episode berstatus published di bawah Series draft yang sudah tersembunyi) sesuai D3. Test: `series/index.test.ts` (admin-only, validasi versi, ringkasan) dan integrasi: Series dengan dua season, tiga episode berisi aset dan poster dihapus bersih (1 series, 2 season, 3 video, 4 aset) dengan genre tetap; Series published ditolak, archived dihapus, episode sibuk memblokir seluruh Series (tidak ada yang berubah); Season dihapus bersama episodenya dan Season published diblokir; versi usang ditolak.
 
 ### Commit task
 
@@ -174,7 +174,7 @@ Tidak ada.
 
 ## Task: DEL-005 — Sapuan tombstone di worker
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 5
 - Referensi: DEL-US-01/02/03; [plan](../plans/delete-content/implementation-plan.md)
@@ -188,9 +188,9 @@ Sapuan tiap 60 detik pada slot maintenance: hapus objek atau semua key prefix da
 
 ### Acceptance criteria
 
-- [ ] Objek source, poster, output dan staging terhapus setelah konten dihapus.
-- [ ] Kegagalan storage tidak menghilangkan tombstone dan diulang pada sapuan berikutnya.
-- [ ] Tidak pernah menghapus objek di luar tombstone atau bucket lain.
+- [x] Objek source, poster, output dan staging terhapus setelah konten dihapus.
+- [x] Kegagalan storage tidak menghilangkan tombstone dan diulang pada sapuan berikutnya.
+- [x] Tidak pernah menghapus objek di luar tombstone atau bucket lain.
 
 ### Validasi
 
@@ -198,7 +198,7 @@ Integrasi MinIO + worker; test unit sapuan dengan storage palsu.
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 13 Oktober 2026. `workers/tombstones.ts` (`createTombstoneSweep`) dipanggil tiap 60 detik pada slot maintenance (`workers/index.ts`): memproses 50 tombstone per sapuan untuk provider/bucket aktif, hanya menghapus kunci aplikasi (regex `sources/<uuid>/(original|poster-original)`, `uploads/<uuid>/original`, prefix `outputs/<uuid>/`), menandai `deleted_at`, menambah `attempts`/`last_error` saat gagal (maksimum 20 percobaan, lalu tertinggal untuk operator), memangkas baris selesai setelah 7 hari, dan mencatat `cleanup.tombstones`/`cleanup.tombstone_failed`. Bukti nyata (`content-delete-storage-proof.test.ts`, MinIO + PostgreSQL uji): menghapus film membiarkan enam objek di storage (API tidak menyentuh storage) dan mencatat tombstone; sapuan pertama gagal sekali, ulangan menghapus empat objek target (source, staging, dua keluaran HLS) sementara dua objek film lain tetap ada; kunci tidak aman dan tombstone bucket lain tidak disentuh. `bun run --cwd apps/api content:delete:proof`: 7 test, 49 assertion lulus.
 
 ### Commit task
 

@@ -7,5 +7,6 @@ export * from "./media";
 export * from "./upload";
 export * from "./jobs";
 export * from "./operations";
+export * from "./tombstones";
 
 export * from "./site-settings";

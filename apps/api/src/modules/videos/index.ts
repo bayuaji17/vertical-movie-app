@@ -1,4 +1,8 @@
-import { ArchiveBody } from "../../shared/content-model";
+import {
+  ArchiveBody,
+  DeleteQuery,
+  DeleteResultDto,
+} from "../../shared/content-model";
 import { PatchVideoBody } from "./model";
 import { IdParams } from "../../shared/content-model";
 import { VideoListQuery, VideoListDto, VideoDetailDto } from "./model";
@@ -88,6 +92,27 @@ export function createVideosModule({
           tags: ["Videos"],
           summary: "Archive draft or published video",
           operationId: "archiveVideo",
+          security: [{ betterAuthSessionCookie: [] }],
+        },
+      },
+    )
+    .delete(
+      "/admin/videos/:id",
+      ({ params, query, adminSession }) =>
+        service.remove(
+          params.id,
+          Number(query.expectedVersion),
+          adminSession.user.id,
+        ),
+      {
+        requireAdmin: true,
+        params: IdParams,
+        query: DeleteQuery,
+        response: { 200: DeleteResultDto, ...ErrorResponses },
+        detail: {
+          tags: ["Videos"],
+          summary: "Permanently delete a draft or archived video",
+          operationId: "deleteVideo",
           security: [{ betterAuthSessionCookie: [] }],
         },
       },

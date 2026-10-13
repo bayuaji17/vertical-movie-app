@@ -75,6 +75,35 @@ export const ErrorResponse = t.Object({
     requestId: t.String(),
   }),
 });
+export const DeleteQuery = t.Object(
+  { expectedVersion: t.String({ pattern: "^[1-9][0-9]{0,9}$" }) },
+  { additionalProperties: false },
+);
+export const DeleteResultDto = t.Object(
+  {
+    id: Uuid,
+    kind: t.Union([
+      t.Literal("movie"),
+      t.Literal("standalone"),
+      t.Literal("episode"),
+      t.Literal("season"),
+      t.Literal("series"),
+    ]),
+    removed: t.Object(
+      {
+        series: t.Integer(),
+        seasons: t.Integer(),
+        videos: t.Integer(),
+        assets: t.Integer(),
+        uploadSessions: t.Integer(),
+        jobs: t.Integer(),
+        storageObjects: t.Integer(),
+      },
+      { additionalProperties: false },
+    ),
+  },
+  { additionalProperties: false },
+);
 export const ErrorResponses = {
   401: ErrorResponse,
   403: ErrorResponse,

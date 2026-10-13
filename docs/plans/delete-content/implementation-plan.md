@@ -2,7 +2,7 @@
 
 ## Plan metadata
 
-- Status: **proposed** (13 Oktober 2026), menunggu persetujuan keputusan D1–D6; belum ada implementasi.
+- Status: **approved** (13 Oktober 2026). Pengguna menyetujui D1–D6 ("setuju semua, langsung kerjakan"); backend DEL-002–005 implemented lokal, UI dan penutupan menyusul.
 - Date: 13 Oktober 2026; decision owner: pengguna.
 - Repository: `bayuaji17/vertical-movie-app`; base ref: `main`.
 - Context: [repository-context.md](repository-context.md).
@@ -13,7 +13,7 @@
 
 Admin dapat menghapus permanen Film, Standalone, Episode, Season dan Series yang berstatus draft atau archived (dan unpublished), termasuk metadata, relasi genre, aset dan seluruh objek storage terkait, tanpa meninggalkan baris yatim, objek yatim, atau akses publik baru.
 
-## Keputusan yang diusulkan (perlu persetujuan, ditandai **D**)
+## Keputusan (disetujui pengguna 13 Oktober 2026, ditandai **D**)
 
 - **D1 Yang boleh dihapus.** Video (movie/standalone/episode), Season dan Series yang **tidak published**: draft/unpublished atau archived (video `draft|archived`; Series/Season `draft|unpublished` atau `archived_at` terisi). Konten **published** ditolak (`409 CONTENT_STATE_CONFLICT`, "Archive it first"). Konten archived yang pernah tayang (`firstPublishedAt`) tetap boleh dihapus.
 - **D2 Hapus permanen.** Hard delete dengan dialog konfirmasi, tanpa soft-delete atau masa tenggang (draft/archived tidak publik). Slug dan nomor episode kembali bebas.
@@ -95,3 +95,5 @@ D1–D6 di atas. Pertanyaan tambahan: apakah Series published dengan semua episo
 ## Execution history
 
 - 13 Oktober 2026: context dan plan ditulis pada `feat/delete-draft-archived`; belum ada implementasi.
+
+- 13 Oktober 2026: DEL-001–005 selesai (backend): tabel tombstone, `purgeContent`, DELETE video/season/series, sapuan worker; integrasi PostgreSQL+MinIO lulus.

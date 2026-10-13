@@ -5,6 +5,7 @@ import {
   loadLogEnv,
 } from "@repo/log";
 import { createMediaCleanup } from "./cleanup";
+import { createTombstoneSweep } from "./tombstones";
 import { loadDatabaseUrl } from "../config/env";
 import { loadStorageEnv } from "../config/storage-env";
 import { loadWorkerEnv } from "../config/worker-env";
@@ -44,10 +45,17 @@ async function main() {
     profile: storageEnv,
     workerEnv,
   });
+  const sweepTombstones = createTombstoneSweep({
+    log,
+    client: database.client,
+    storage,
+    profile: storageEnv,
+  });
   let stopping = false,
     pauseUntil = 0,
     lastRecovery = 0,
-    lastCleanup = 0;
+    lastCleanup = 0,
+    lastTombstones = 0;
   const controller = new AbortController();
   let grace: ReturnType<typeof setTimeout> | undefined;
   const stop = () => {
@@ -77,6 +85,10 @@ async function main() {
             log.warn("queue.recover", { recovered: recovery.recovered });
           else log.debug("queue.recover", { recovered: 0 });
           for (const job of recovery.jobs) log.warn("job.lease_expired", job);
+        }
+        if (maintenance && now - lastTombstones >= 60000) {
+          lastTombstones = now;
+          await sweepTombstones();
         }
         if (maintenance && now - lastCleanup >= 3600000) {
           lastCleanup = now;
