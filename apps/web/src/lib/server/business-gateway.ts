@@ -1,4 +1,8 @@
-import { createAuthGateway, isPublicCatalogPoster } from './auth-gateway'
+import {
+  createAuthGateway,
+  isAdminContentCover,
+  isPublicCatalogPoster,
+} from './auth-gateway'
 
 export function businessRequestTimeoutMs(
   request: Request,
@@ -28,6 +32,8 @@ export function createBusinessGateway(
     maxResponseBodyBytesForRequest: (request) =>
       isPublicCatalogPoster(request)
         ? 5_000_000
-        : (dependencies.maxRequestBodyBytes ?? 1_048_576),
+        : isAdminContentCover(request)
+          ? 262_144
+          : (dependencies.maxRequestBodyBytes ?? 1_048_576),
   })
 }

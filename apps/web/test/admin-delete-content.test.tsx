@@ -172,3 +172,9 @@ test('server refusals become readable messages and unconfirmed outcomes are flag
     unconfirmed: true,
   })
 })
+
+test('the compact delete button names the item so every row is distinguishable', () => {
+  const html = render(target({ title: 'Neon Garden' }), true)
+  expect(html).toContain('<span class="sr-only"> Neon Garden</span>')
+  expect(html).not.toContain('Delete film')
+})

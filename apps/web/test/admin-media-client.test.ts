@@ -237,7 +237,8 @@ test('confirmed completion invalidates owner, metadata detail and lists; cleanup
     list = contentKeys.list(identity, {
       type: 'film',
       search: '',
-      includeArchived: false,
+      status: 'active',
+      sort: 'updated',
       page: 1,
       pageSize: 10,
     })

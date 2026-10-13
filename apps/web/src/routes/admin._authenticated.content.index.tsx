@@ -1,11 +1,15 @@
 import { useCallback } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, stripSearchParams } from '@tanstack/react-router'
 import { ContentList } from '#/components/admin/content-list'
-import { contentSearch } from '#/lib/admin/content-list-state'
+import {
+  contentSearch,
+  contentSearchDefaults,
+} from '#/lib/admin/content-list-state'
 import type { ContentFilters } from '#/lib/admin/content-client'
 
 export const Route = createFileRoute('/admin/_authenticated/content/')({
   validateSearch: contentSearch,
+  search: { middlewares: [stripSearchParams(contentSearchDefaults)] },
   head: () => ({
     meta: [
       { title: 'Content · Vertical Movie' },
@@ -21,6 +25,7 @@ function ContentPage() {
     (patch: Partial<ContentFilters>) => {
       void navigate({
         search: (previous) => ({ ...previous, ...patch }),
+        // Typing or clearing the search must not fill the history with entries.
         replace: 'search' in patch,
       })
     },

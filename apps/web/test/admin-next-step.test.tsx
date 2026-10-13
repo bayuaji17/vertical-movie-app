@@ -7,7 +7,10 @@ import {
   createRouter,
 } from '@tanstack/react-router'
 import { renderToString } from 'react-dom/server'
-import { ContentNextStep } from '../src/components/admin/content-next-step'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ContentRowActions } from '../src/components/admin/content-row-actions'
+import { AdminSessionContext } from '../src/lib/auth/session-context'
+import { rowActions } from '../src/lib/admin/row-actions'
 import type { ContentItem } from '../src/lib/admin/content-client'
 import { isOpenDraft, nextStep, nextStepHref } from '../src/lib/admin/next-step'
 
@@ -65,30 +68,36 @@ async function render(value: ContentItem) {
   const index = createRoute({
     getParentRoute: () => root,
     path: '/',
-    component: () => <ContentNextStep item={value} />,
+    component: () => <ContentRowActions item={value} />,
   })
   const router = createRouter({
     routeTree: root.addChildren([index]),
     history: createMemoryHistory({ initialEntries: ['/'] }),
   })
   await router.load()
-  return renderToString(<RouterProvider router={router} />).replaceAll(
-    '<!-- -->',
-    '',
-  )
+  return renderToString(
+    <QueryClientProvider client={new QueryClient()}>
+      <AdminSessionContext value={{ user: { id: 'admin-1' } } as never}>
+        <RouterProvider router={router} />
+      </AdminSessionContext>
+    </QueryClientProvider>,
+  ).replaceAll('<!-- -->', '')
 }
 
-test('draft rows offer Continue setup plus Details, and name the title for screen readers', async () => {
+test('a draft row has one primary action and a named menu; nothing else is visible', async () => {
   const value = item()
   const html = await render(value)
   expect(html).toContain('Continue setup')
   expect(html).toContain(`href="/admin/content/film/${value.id}/setup"`)
-  expect(html).toContain('Details')
-  expect(html).toContain('Midnight Harbor')
-  expect(html).not.toContain('>Edit')
+  expect(html).toContain('aria-label="Actions for Midnight Harbor"')
+  // Secondary actions stay inside the closed menu.
+  expect(html).not.toContain('Details')
+  expect(html).not.toContain('Edit draft')
+  expect(html).not.toContain('Delete')
+  expect(html.match(/<a /g)).toHaveLength(1)
 })
 
-test('series drafts go to seasons; live and archived rows only offer View', async () => {
+test('series drafts go to seasons; live and archived rows offer View', async () => {
   const series = item({ type: 'series' })
   const seriesHtml = await render(series)
   expect(seriesHtml).toContain('Manage episodes')
@@ -97,5 +106,28 @@ test('series drafts go to seasons; live and archived rows only offer View', asyn
   const live = await render(item({ publicationStatus: 'published' }))
   expect(live).toContain('View')
   expect(live).not.toContain('Continue setup')
-  expect(live).not.toContain('Details')
+})
+
+test('menu contents follow the row state: details and edit for drafts, delete always last', () => {
+  const draft = rowActions(item())
+  expect(draft).toMatchObject({ details: true, edit: true })
+  expect(draft.deleteBlock).toBeUndefined()
+  expect(draft.deleteTarget).toMatchObject({
+    kind: 'movie',
+    title: 'Midnight Harbor',
+  })
+  expect(rowActions(item({ type: 'series' })).deleteTarget.kind).toBe('series')
+
+  const live = rowActions(item({ publicationStatus: 'published' }))
+  expect(live).toMatchObject({ details: false, edit: false })
+  expect(live.deleteBlock).toContain('Archive it first')
+
+  const archived = rowActions(
+    item({
+      archivedAt: '2026-10-10T00:00:00.000Z',
+      publicationStatus: 'published',
+    }),
+  )
+  expect(archived).toMatchObject({ details: false, edit: false })
+  expect(archived.deleteBlock).toBeUndefined()
 })

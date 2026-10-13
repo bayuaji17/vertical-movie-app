@@ -27,6 +27,106 @@ import {
 } from '#/lib/admin/delete-state'
 import type { DeleteTarget } from '#/lib/admin/delete-state'
 
+/** Confirmation dialog, controlled by the owner so it survives a closing menu. */
+export function DeleteDialog({
+  target,
+  open,
+  onOpenChange,
+  onDeleted,
+}: {
+  target: DeleteTarget
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onDeleted?: (result: DeleteResult) => void | Promise<void>
+}) {
+  const [typed, setTyped] = useState('')
+  const remove = useDeleteContent()
+  const input = useId()
+  const label = deleteKindLabel(target.kind)
+  const typedRequired = requiresTypedTitle(target.kind)
+  const ready = !typedRequired || titleMatches(target.title, typed)
+  const failure = remove.error ? deleteFailure(remove.error) : undefined
+  function close(next: boolean) {
+    if (remove.pending) return
+    onOpenChange(next)
+    if (!next) {
+      setTyped('')
+      remove.reset()
+    }
+  }
+  return (
+    <AlertDialog open={open} onOpenChange={close}>
+      <AlertDialogContent className="w-[calc(100vw-2rem)]">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="break-words">
+            Delete “{target.title}”?
+          </AlertDialogTitle>
+          <AlertDialogDescription render={<div />}>
+            <ul className="list-disc space-y-1 pl-5 text-left">
+              {deleteConsequences(target.kind).map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        {typedRequired && (
+          <div className="space-y-2">
+            <Label htmlFor={input}>
+              Type <strong className="break-words">{target.title}</strong> to
+              confirm
+            </Label>
+            <Input
+              id={input}
+              autoComplete="off"
+              className="min-h-11"
+              value={typed}
+              disabled={remove.pending}
+              onChange={(event) => setTyped(event.target.value)}
+            />
+          </div>
+        )}
+        {failure && (
+          <Alert variant="destructive" role="alert">
+            <AlertTitle>
+              {failure.unconfirmed
+                ? 'Could not confirm the result'
+                : 'Could not delete'}
+            </AlertTitle>
+            <AlertDescription>{failure.message}</AlertDescription>
+          </Alert>
+        )}
+        <AlertDialogFooter>
+          <AlertDialogCancel className="min-h-11" disabled={remove.pending}>
+            Cancel
+          </AlertDialogCancel>
+          <Button
+            variant="destructive"
+            className="min-h-11"
+            disabled={remove.pending || !ready}
+            onClick={() => {
+              void remove
+                .run(target, async (result) => {
+                  toast.add({
+                    title: 'Deleted',
+                    description: deleteSummaryText(
+                      target.title,
+                      result.removed,
+                    ),
+                  })
+                  onOpenChange(false)
+                  await onDeleted?.(result)
+                })
+                .catch(() => undefined)
+            }}
+          >
+            {remove.pending ? 'Deleting...' : `Delete ${label}`}
+          </Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  )
+}
+
 /**
  * "Delete" button with a confirmation dialog. Published content shows why it
  * cannot be deleted instead; the server enforces the same rule.
@@ -40,24 +140,10 @@ export function DeleteContent({
   onDeleted?: (result: DeleteResult) => void | Promise<void>
   compact?: boolean
 }) {
-  const [open, setOpen] = useState(false),
-    [typed, setTyped] = useState('')
-  const remove = useDeleteContent()
+  const [open, setOpen] = useState(false)
   const block = deleteBlock(target),
-    reason = useId(),
-    input = useId()
+    reason = useId()
   const label = deleteKindLabel(target.kind)
-  const typedRequired = requiresTypedTitle(target.kind)
-  const ready = !typedRequired || titleMatches(target.title, typed)
-  const failure = remove.error ? deleteFailure(remove.error) : undefined
-  function close(next: boolean) {
-    if (remove.pending) return
-    setOpen(next)
-    if (!next) {
-      setTyped('')
-      remove.reset()
-    }
-  }
   return (
     <>
       <div className="flex flex-col items-start gap-1">
@@ -71,7 +157,12 @@ export function DeleteContent({
           }}
         >
           <RiDeleteBinLine data-icon="inline-start" aria-hidden="true" />
-          Delete {compact ? '' : label}
+          Delete
+          {compact ? (
+            <span className="sr-only"> {target.title}</span>
+          ) : (
+            ` ${label}`
+          )}
         </Button>
         {block && !compact && (
           <p id={reason} className="text-sm text-muted-foreground">
@@ -84,75 +175,12 @@ export function DeleteContent({
           </span>
         )}
       </div>
-      <AlertDialog open={open} onOpenChange={close}>
-        <AlertDialogContent className="w-[calc(100vw-2rem)]">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="break-words">
-              Delete “{target.title}”?
-            </AlertDialogTitle>
-            <AlertDialogDescription render={<div />}>
-              <ul className="list-disc space-y-1 pl-5 text-left">
-                {deleteConsequences(target.kind).map((line) => (
-                  <li key={line}>{line}</li>
-                ))}
-              </ul>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          {typedRequired && (
-            <div className="space-y-2">
-              <Label htmlFor={input}>
-                Type <strong className="break-words">{target.title}</strong> to
-                confirm
-              </Label>
-              <Input
-                id={input}
-                autoComplete="off"
-                className="min-h-11"
-                value={typed}
-                disabled={remove.pending}
-                onChange={(event) => setTyped(event.target.value)}
-              />
-            </div>
-          )}
-          {failure && (
-            <Alert variant="destructive" role="alert">
-              <AlertTitle>
-                {failure.unconfirmed
-                  ? 'Could not confirm the result'
-                  : 'Could not delete'}
-              </AlertTitle>
-              <AlertDescription>{failure.message}</AlertDescription>
-            </Alert>
-          )}
-          <AlertDialogFooter>
-            <AlertDialogCancel className="min-h-11" disabled={remove.pending}>
-              Cancel
-            </AlertDialogCancel>
-            <Button
-              variant="destructive"
-              className="min-h-11"
-              disabled={remove.pending || !ready}
-              onClick={() => {
-                void remove
-                  .run(target, async (result) => {
-                    toast.add({
-                      title: 'Deleted',
-                      description: deleteSummaryText(
-                        target.title,
-                        result.removed,
-                      ),
-                    })
-                    setOpen(false)
-                    await onDeleted?.(result)
-                  })
-                  .catch(() => undefined)
-              }}
-            >
-              {remove.pending ? 'Deleting...' : `Delete ${label}`}
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteDialog
+        target={target}
+        open={open}
+        onOpenChange={setOpen}
+        onDeleted={onDeleted}
+      />
     </>
   )
 }

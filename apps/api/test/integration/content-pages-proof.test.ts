@@ -18,30 +18,26 @@ beforeAll(async () => {
     createdAt: new Date("2026-10-05T00:00:00Z"),
     archivedAt: i === 42 ? new Date() : null,
   }));
-  await database.db
-    .insert(videos)
-    .values(
-      entries.map((v) => ({
-        ...v,
-        kind: "movie" as const,
-        publicationStatus: v.archivedAt
-          ? ("archived" as const)
-          : ("draft" as const),
-      })),
-    );
-  await database.db
-    .insert(videos)
-    .values(
-      entries.map((v) => ({
-        ...v,
-        id: crypto.randomUUID(),
-        slug: `standalone-${v.slug}`,
-        kind: "standalone" as const,
-        publicationStatus: v.archivedAt
-          ? ("archived" as const)
-          : ("draft" as const),
-      })),
-    );
+  await database.db.insert(videos).values(
+    entries.map((v) => ({
+      ...v,
+      kind: "movie" as const,
+      publicationStatus: v.archivedAt
+        ? ("archived" as const)
+        : ("draft" as const),
+    })),
+  );
+  await database.db.insert(videos).values(
+    entries.map((v) => ({
+      ...v,
+      id: crypto.randomUUID(),
+      slug: `standalone-${v.slug}`,
+      kind: "standalone" as const,
+      publicationStatus: v.archivedAt
+        ? ("archived" as const)
+        : ("draft" as const),
+    })),
+  );
   await database.db.insert(series).values(entries);
 }, 20000);
 afterAll(async () => database?.client.close());
@@ -97,4 +93,139 @@ test("count and rows stay consistent while another connection changes the catalo
   expect((await service.list({ type: "film", pageSize: "100" })).total).toBe(
     54,
   );
+});
+test("status filters, sorting and slug search return the right rows in a stable order", async () => {
+  const at = (hour: number) => new Date(`2026-10-06T0${hour}:00:00Z`);
+  const row = (
+    title: string,
+    slug: string,
+    status: "draft" | "published" | "archived",
+    updated: number,
+    created: number,
+  ) => ({
+    id: crypto.randomUUID(),
+    kind: "movie" as const,
+    title,
+    slug,
+    publicationStatus: status,
+    archivedAt: status === "archived" ? at(1) : null,
+    ...(status === "published"
+      ? { publishedAt: at(1), firstPublishedAt: at(1) }
+      : {}),
+    createdBy: "content-admin",
+    updatedBy: "content-admin",
+    updatedAt: at(updated),
+    createdAt: at(created),
+  });
+  await database.db
+    .insert(videos)
+    .values([
+      row("Zeta Beta", "z-beta", "published", 3, 4),
+      row("zeta alpha", "z-alpha", "draft", 2, 3),
+      row("Zeta Gamma", "z-gamma", "archived", 1, 2),
+      row("Zeta Delta", "special-slug-term", "draft", 4, 1),
+    ]);
+  const titles = async (
+    input: Omit<Parameters<typeof service.list>[0], "type" | "search"> & {
+      search?: string;
+    },
+  ) =>
+    (await service.list({ type: "film", search: "zeta", ...input })).items.map(
+      (item) => item.title,
+    );
+
+  // Default: active (no archived), by last update, newest first.
+  expect(await titles({})).toEqual(["Zeta Delta", "Zeta Beta", "zeta alpha"]);
+  expect(await titles({ status: "all" })).toEqual([
+    "Zeta Delta",
+    "Zeta Beta",
+    "zeta alpha",
+    "Zeta Gamma",
+  ]);
+  expect(await titles({ status: "archived" })).toEqual(["Zeta Gamma"]);
+  expect(await titles({ status: "draft" })).toEqual([
+    "Zeta Delta",
+    "zeta alpha",
+  ]);
+  expect(await titles({ status: "published" })).toEqual(["Zeta Beta"]);
+  // The legacy flag keeps working.
+  expect(await titles({ includeArchived: "true" })).toHaveLength(4);
+  expect(await titles({ includeArchived: "false" })).toHaveLength(3);
+
+  expect(await titles({ sort: "updated", order: "asc" })).toEqual([
+    "zeta alpha",
+    "Zeta Beta",
+    "Zeta Delta",
+  ]);
+  expect(await titles({ sort: "created", status: "all" })).toEqual([
+    "Zeta Beta",
+    "zeta alpha",
+    "Zeta Gamma",
+    "Zeta Delta",
+  ]);
+  // Case-insensitive title order, A to Z by default for text columns.
+  expect(await titles({ sort: "title" })).toEqual([
+    "zeta alpha",
+    "Zeta Beta",
+    "Zeta Delta",
+  ]);
+  expect(await titles({ sort: "title", order: "desc" })).toEqual([
+    "Zeta Delta",
+    "Zeta Beta",
+    "zeta alpha",
+  ]);
+  // Shown status (archived wins over the stored one), id breaks ties.
+  const byStatus = await service.list({
+    type: "film",
+    search: "zeta",
+    status: "all",
+    sort: "status",
+  });
+  expect(byStatus.items.map((i) => i.publicationStatus)).toEqual([
+    "archived",
+    "draft",
+    "draft",
+    "published",
+  ]);
+  expect(byStatus.items[1]!.id < byStatus.items[2]!.id).toBe(true);
+
+  // Search matches slugs as well as titles, with literal wildcards.
+  expect(await titles({ search: "special-slug" })).toEqual(["Zeta Delta"]);
+  expect(await titles({ search: "z_alpha" })).toEqual([]);
+  expect(await titles({ search: "z-alpha" })).toEqual(["zeta alpha"]);
+
+  // Series: "unpublished" is active but is not a draft.
+  await database.db.insert(series).values({
+    id: crypto.randomUUID(),
+    title: "Zeta Series",
+    slug: "zeta-series",
+    publicationStatus: "unpublished",
+    createdBy: "content-admin",
+    updatedBy: "content-admin",
+  });
+  const names = async (status: "active" | "draft" | "all") =>
+    (await service.list({ type: "series", search: "zeta", status })).items.map(
+      (i) => i.title,
+    );
+  expect(await names("active")).toEqual(["Zeta Series"]);
+  expect(await names("all")).toEqual(["Zeta Series"]);
+  expect(await names("draft")).toEqual([]);
+});
+test("the updated-order and kind-updated indexes are used for the default list", async () => {
+  await database.client.unsafe("SET enable_seqscan = off");
+  const plan = async (sqlText: string) =>
+    (await database.client.unsafe(`EXPLAIN ${sqlText}`))
+      .map((r: Record<string, string>) => Object.values(r)[0])
+      .join("\n");
+  expect(
+    await plan(
+      `SELECT id FROM videos WHERE archived_at IS NULL AND kind='movie' ORDER BY updated_at DESC, id DESC LIMIT 10`,
+    ),
+  ).toContain("videos_kind_updated_idx");
+  expect(
+    await plan(
+      `SELECT id FROM series WHERE archived_at IS NULL ORDER BY updated_at DESC, id DESC LIMIT 10`,
+    ),
+  ).toContain("series_admin_updated_idx");
+  await database.client.unsafe("RESET enable_seqscan");
 });

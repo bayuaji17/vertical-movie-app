@@ -49,8 +49,24 @@ async function keys(bucket: string) {
   } while (token);
   return out.sort();
 }
-const put = (bucket: string, key: string) =>
-  sdk.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: "proof" }));
+const put = (
+  bucket: string,
+  key: string,
+  body: string | Uint8Array = "proof",
+) => sdk.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: body }));
+// A real 1080x1920 WebP, so the admin thumbnail endpoint has something to resize.
+let coverBytes: Promise<Uint8Array> | undefined;
+const cover = () =>
+  (coverBytes ??= Bun.file(
+    new URL("../fixtures/media/browser-cover-crop.png", import.meta.url),
+  )
+    .bytes()
+    .then((png) =>
+      new Bun.Image(png)
+        .resize(1080, 1920, { fit: "fill" })
+        .webp({ quality: 80 })
+        .bytes(),
+    ));
 
 async function seed(origin: string, file: string) {
   const bucket =
@@ -98,10 +114,17 @@ async function seed(origin: string, file: string) {
       bucket,
       actor,
     );
+    // Verified facts make a succeeded asset count for the readiness predicate.
+    await client`UPDATE media_assets SET facts='{"durationMs":600000}'::jsonb WHERE id=${m.assetId}::uuid`;
     await put(bucket, `sources/${m.assetId}/original`);
     await put(bucket, `uploads/${m.sessionId}/original`);
     await put(bucket, `outputs/${m.assetId}/${m.jobId}/x/0/index.m3u8`);
     await put(bucket, `outputs/${m.assetId}/${m.jobId}/x/0/seg0.ts`);
+    if (kind === "poster") {
+      const [job] =
+        await client`SELECT output_prefix FROM media_jobs WHERE id=${m.jobId}::uuid`;
+      await put(bucket, `${job.output_prefix}poster.webp`, await cover());
+    }
     return m;
   };
   const movie = async (title: string, patch = "") => {
@@ -113,6 +136,7 @@ async function seed(origin: string, file: string) {
   await media({ videoId: draft.id });
   const mobile = await movie("Browser Mobile Film");
   await media({ videoId: mobile.id });
+  await media({ videoId: mobile.id }, "poster"); // video + cover: ready to publish
   const live = await movie(
     "Browser Live Film",
     "UPDATE videos SET publication_status='published',published_at=now(),first_published_at=now() WHERE id='$id'::uuid",
@@ -150,6 +174,18 @@ async function seed(origin: string, file: string) {
     await media({ videoId: e.id });
     episodes.push(e.id);
   }
+  // Genres and a year, so the list has something to summarise.
+  const genreIds = {
+    drama: crypto.randomUUID(),
+    scifi: crypto.randomUUID(),
+    comedy: crypto.randomUUID(),
+  };
+  await client`INSERT INTO genres (id,slug,name) VALUES (${genreIds.drama}::uuid,'drama','Drama'),(${genreIds.scifi}::uuid,'sci-fi','Sci-Fi'),(${genreIds.comedy}::uuid,'comedy','Comedy')`;
+  for (const g of Object.values(genreIds))
+    await client`INSERT INTO video_genres (video_id,genre_id) VALUES (${draft.id}::uuid,${g}::uuid)`;
+  await client`INSERT INTO series_genres (series_id,genre_id) VALUES (${show.series.id}::uuid,${genreIds.drama}::uuid)`;
+  await client`UPDATE videos SET release_year=2024 WHERE id=${draft.id}::uuid`;
+  await client`UPDATE series SET release_year=2021 WHERE id=${show.series.id}::uuid`;
   const state = {
     bucket,
     admin: { email: adminEmail, password: adminPassword },

@@ -36,12 +36,14 @@ import {
 import type { S3Client } from "bun";
 import { createContentModule } from "./modules/content";
 import type { ContentPageService } from "./modules/content/service";
+import type { AdminCoverService } from "./modules/content/cover-service";
 
 type AppDependencies = {
   settingsService?: SettingsService;
   dashboardService?: DashboardService;
   requestLogger?: RequestLoggerDependencies;
   contentPageService?: ContentPageService;
+  adminCoverService?: AdminCoverService;
   storage?: S3Client;
   mediaService?: MediaService;
   catalogService?: CatalogService;
@@ -82,6 +84,7 @@ export function createApp({
   dashboardService,
   requestLogger,
   contentPageService,
+  adminCoverService,
   storage,
   mediaService,
   catalogService,
@@ -113,7 +116,13 @@ export function createApp({
     .use(createSeriesModule({ service: seriesService, getSession }))
     .use(createVideosModule({ service: videosService, getSession }))
     .use(createGenresModule({ service: genresService, getSession }))
-    .use(createContentModule({ service: contentPageService, getSession }))
+    .use(
+      createContentModule({
+        service: contentPageService,
+        covers: adminCoverService,
+        getSession,
+      }),
+    )
     .use(createDashboardModule({ service: dashboardService, getSession }))
     .use(createSettingsModule({ service: settingsService, getSession }))
     .use(createMediaModule({ service: mediaService, getSession }))

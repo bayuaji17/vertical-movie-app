@@ -56,23 +56,32 @@ async function list(page, { type = 'Film', archived = false } = {}) {
       k.startsWith('__react'),
     ),
   )
+  // Type tabs and status chips are toggle buttons that carry a count.
   if (type !== 'Film')
-    await page
-      .getByRole('tab', { name: type })
-      .or(page.getByText(type, { exact: true }).first())
-      .first()
-      .click()
-  if (archived)
-    await page.getByRole('checkbox', { name: 'Include archived' }).check()
+    await page.getByRole('button', { name: new RegExp(`^${type}\\b`) }).click()
+  if (archived) {
+    await page.getByRole('button', { name: /^Archived\b/ }).click()
+    await page.waitForURL(/status=archived/)
+  }
+  // The footer is absent when nothing is listed; the empty state says so instead.
   await page
     .getByText(/^Showing \d+/)
+    .or(page.getByText(/^No (matching )?content/))
     .first()
     .waitFor({ timeout: 60000 })
   await page.waitForTimeout(500)
 }
-// Visible "Details"/"View" action of an item (table row on desktop, card on mobile).
+// The title link of an item (table row on desktop, card on mobile).
 const entry = (page, title) =>
-  page.getByRole('button', { name: new RegExp(`^(Details|View) ${title}$`) })
+  page.getByRole('link', { name: title, exact: true })
+// Delete is a menu item behind "Actions for <title>".
+async function deleteFromRow(page, title) {
+  await page
+    .getByRole('button', { name: `Actions for ${title}` })
+    .first()
+    .click()
+  await page.getByRole('menuitem', { name: /Delete/ }).click()
+}
 const row = (page, title) => page.getByRole('row').filter({ hasText: title })
 async function open(page, title, opts) {
   await list(page, opts)
@@ -89,6 +98,11 @@ const present = async (page, title, opts) => {
   await list(page, opts)
   return (await entry(page, title).count()) > 0
 }
+// The season card title; the delete button also names its season for screen readers.
+const seasonTitle = (page, n) =>
+  page
+    .locator('[data-slot="card-title"]')
+    .filter({ hasText: new RegExp(`^Season ${n}$`) })
 const dialog = (page) => page.getByRole('alertdialog')
 const toast = (page) => page.getByText('Deleted', { exact: true })
 
@@ -147,9 +161,7 @@ try {
 
   // 4. archived standalone deleted straight from the list
   await list(page, { type: 'Standalone', archived: true })
-  await row(page, 'Browser Archived Short')
-    .getByRole('button', { name: /^Delete/ })
-    .click()
+  await deleteFromRow(page, 'Browser Archived Short')
   await dialog(page)
     .getByRole('button', { name: 'Delete video' })
     .or(
@@ -169,7 +181,7 @@ try {
   // 5. season, then series with typed title
   const seasons = `${base}/admin/series/${state.ids.series}/seasons`
   await page.goto(seasons, { waitUntil: 'domcontentloaded', timeout: 90000 })
-  await page.getByText('Season 2', { exact: true }).first().waitFor()
+  await seasonTitle(page, 2).first().waitFor()
   await shot(page, '6-seasons-before')
   await page
     .getByRole('button', { name: /^Delete/ })
@@ -179,10 +191,8 @@ try {
     .getByText('All episodes of this season are deleted with it.')
     .waitFor()
   await dialog(page).getByRole('button', { name: 'Delete season' }).click()
-  await page
-    .getByText('Season 2', { exact: true })
-    .waitFor({ state: 'detached' })
-  await page.getByText('Season 1', { exact: true }).first().waitFor()
+  await seasonTitle(page, 2).waitFor({ state: 'detached' })
+  await seasonTitle(page, 1).first().waitFor()
   await shot(page, '7-season-deleted')
   ok('season: deleted with its episodes; the other season stays')
 

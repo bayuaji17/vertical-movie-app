@@ -6,6 +6,21 @@ export const ContentType = t.Union([
   t.Literal("standalone"),
   t.Literal("series"),
 ]);
+// `active` hides archived items (the default); `all` includes them.
+export const ContentStatusFilter = t.Union([
+  t.Literal("active"),
+  t.Literal("draft"),
+  t.Literal("published"),
+  t.Literal("archived"),
+  t.Literal("all"),
+]);
+export const ContentSort = t.Union([
+  t.Literal("updated"),
+  t.Literal("created"),
+  t.Literal("title"),
+  t.Literal("status"),
+]);
+export const ContentOrder = t.Union([t.Literal("asc"), t.Literal("desc")]);
 export const ContentPageQuery = t.Object(
   {
     type: ContentType,
@@ -15,6 +30,9 @@ export const ContentPageQuery = t.Object(
     includeArchived: t.Optional(
       t.Union([t.Literal("true"), t.Literal("false")]),
     ),
+    status: t.Optional(ContentStatusFilter),
+    sort: t.Optional(ContentSort),
+    order: t.Optional(ContentOrder),
   },
   { additionalProperties: false },
 );
@@ -33,6 +51,27 @@ export const ContentPageItem = t.Object({
   createdAt: t.String(),
   updatedAt: t.String(),
   rowVersion: t.Integer(),
+  // Row summary for the admin list; all optional so older clients keep working.
+  releaseYear: t.Optional(t.Nullable(t.Integer())),
+  genres: t.Optional(t.Array(t.String(), { maxItems: 3 })),
+  genreCount: t.Optional(t.Integer({ minimum: 0 })),
+  // Film/Standalone only: what is still missing before it can be published.
+  mediaState: t.Optional(
+    t.Union([
+      t.Literal("needs-video"),
+      t.Literal("needs-cover"),
+      t.Literal("uploading"),
+      t.Literal("processing"),
+      t.Literal("failed"),
+      t.Literal("ready"),
+    ]),
+  ),
+  // Present only when a verified cover exists; it changes when the cover does
+  // and is meant as the cache-busting `v` of the thumbnail URL.
+  coverVersion: t.Optional(t.String()),
+  // Series only; archived seasons and episodes are not counted.
+  seasonCount: t.Optional(t.Integer({ minimum: 0 })),
+  episodeCount: t.Optional(t.Integer({ minimum: 0 })),
 });
 export const ContentPageDto = t.Object({
   items: t.Array(ContentPageItem),

@@ -1,36 +1,33 @@
-import { ContentNextStep } from './content-next-step'
-import { DeleteContent } from './delete-content'
+import { ContentRowActions } from './content-row-actions'
+import { ContentTitleLink } from './content-title-link'
+import { ContentThumb } from './content-thumb'
+import { ContentMeta } from './content-meta'
+import { ContentReadiness } from './content-readiness'
 import { ContentStatus } from './content-status'
+import { ContentUpdated } from './content-updated'
+import {
+  ContentEmpty,
+  ContentListSkeleton,
+  ContentResultSummary,
+  emptyReason,
+} from './content-list-states'
+import { ContentSortHead } from './content-sort-head'
 import { ContentFiltersPanel } from './content-filters'
 import { ContentPagination } from './content-pagination'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import type { ContentFilters, ContentItem } from '#/lib/admin/content-client'
-import { contentLabels } from '#/lib/admin/content-client'
-import { deleteBlock } from '#/lib/admin/delete-state'
-import type { DeleteTarget } from '#/lib/admin/delete-state'
+import type { ContentFilters } from '#/lib/admin/content-client'
+import { contentStatusLabels } from '#/lib/admin/content-client'
+import { clearedFilters, isFiltered } from '#/lib/admin/content-list-state'
 import { contentListOptions } from '#/lib/admin/content-queries'
 import { contentErrorMessage } from '#/lib/admin/content-errors'
 import { useContentApi } from '#/hooks/use-content-api'
+import { useDashboardSummary } from '#/hooks/use-dashboard-summary'
 import { AdminPageHeading } from './page-heading'
 import { Button } from '#/components/ui/button'
-import { Badge } from '#/components/ui/badge'
 import { Alert, AlertTitle, AlertDescription } from '#/components/ui/alert'
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardFooter,
-} from '#/components/ui/card'
-import {
-  Empty,
-  EmptyHeader,
-  EmptyTitle,
-  EmptyDescription,
-} from '#/components/ui/empty'
-import { Skeleton } from '#/components/ui/skeleton'
+import { Card, CardContent, CardFooter } from '#/components/ui/card'
 import {
   Table,
   TableHeader,
@@ -41,15 +38,6 @@ import {
   TableCaption,
 } from '#/components/ui/table'
 
-const deleteTarget = (item: ContentItem): DeleteTarget => ({
-  kind: item.type === 'film' ? 'movie' : item.type,
-  id: item.id,
-  title: item.title,
-  version: item.rowVersion,
-  publicationStatus: item.publicationStatus,
-  archivedAt: item.archivedAt,
-})
-const deletable = (item: ContentItem) => !deleteBlock(deleteTarget(item))
 export function ContentList({
   filters,
   onChange,
@@ -60,6 +48,20 @@ export function ContentList({
   const { client, identity } = useContentApi()
   const query = useQuery(contentListOptions(client, identity, filters))
   const data = query.data
+  // A deleted row takes the focused control with it; once the list has
+  // refreshed, focus goes to the results instead of falling back to <body>.
+  const afterDelete = () => {
+    refocus.current = true
+  }
+  const results = useRef<HTMLDivElement>(null)
+  const refocus = useRef(false)
+  useEffect(() => {
+    if (!refocus.current || query.isFetching) return
+    refocus.current = false
+    results.current?.focus()
+  }, [query.isFetching])
+  // Counts for the tabs and status chips; a failure only hides the numbers.
+  const counts = useDashboardSummary().query.data?.content
   useEffect(() => {
     if (!data || query.isFetching || query.isError) return
     const lastPage = Math.max(1, data.totalPages)
@@ -81,7 +83,18 @@ export function ContentList({
           </Button>
         }
       />
-      <ContentFiltersPanel filters={filters} onChange={onChange} />
+      <ContentFiltersPanel
+        filters={filters}
+        onChange={onChange}
+        counts={counts}
+      />
+      <ContentResultSummary
+        total={data?.total ?? 0}
+        search={filters.search}
+        statusLabel={contentStatusLabels[filters.status]}
+        filtered={!!data && isFiltered(filters)}
+        onClear={() => onChange(clearedFilters)}
+      />
       {query.isError && (
         <Alert variant="destructive" className="mb-4" role="alert">
           <AlertTitle>
@@ -103,122 +116,130 @@ export function ContentList({
           </AlertDescription>
         </Alert>
       )}
-      {query.isPending ? (
-        <div role="status" aria-label="Loading content" className="space-y-3">
-          {[1, 2, 3].map((i) => (
-            <Skeleton className="h-32" key={i} />
-          ))}
-          <span className="sr-only">Loading content...</span>
-        </div>
-      ) : null}
-      {data?.items.length === 0 ? (
-        <Empty className="border">
-          <EmptyHeader>
-            <EmptyTitle>
-              {data.total > 0
-                ? 'No content on this page'
-                : filters.search
-                  ? 'No matching content'
-                  : 'No content yet'}
-            </EmptyTitle>
-            <EmptyDescription>
-              {data.total > 0
-                ? 'Select an available page below.'
-                : filters.search
-                  ? 'Try another title or change your filters.'
-                  : 'Create your first draft to get started.'}
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      ) : null}
-      {data && data.items.length > 0 ? (
-        <>
-          <div className="hidden rounded-3xl border bg-card p-4 lg:block">
-            <Table>
-              <TableCaption className="sr-only">
-                Content metadata for the selected filters
-              </TableCaption>
-              <TableHeader>
-                <TableRow>
-                  {['Title', 'Type', 'Status', 'Updated', 'Actions'].map(
-                    (label) => (
-                      <TableHead key={label}>{label}</TableHead>
-                    ),
-                  )}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.items.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="max-w-xs whitespace-normal">
-                      <span className="break-words font-medium">
-                        {item.title}
-                      </span>
-                    </TableCell>
-                    <TableCell>{contentLabels[item.type]}</TableCell>
-                    <TableCell>
-                      <ContentStatus item={item} />
-                    </TableCell>
-                    <TableCell>
-                      <time dateTime={item.updatedAt}>
-                        {item.updatedAt.slice(0, 10)}
-                      </time>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <ContentNextStep item={item} />
-                        {deletable(item) && (
-                          <DeleteContent compact target={deleteTarget(item)} />
-                        )}
-                      </div>
-                    </TableCell>
+      <div
+        ref={results}
+        tabIndex={-1}
+        role="region"
+        aria-label="Content list"
+        className="outline-none"
+      >
+        {query.isPending ? (
+          <ContentListSkeleton pageSize={filters.pageSize} />
+        ) : null}
+        {data?.items.length === 0 ? (
+          <ContentEmpty
+            reason={emptyReason(data.total, isFiltered(filters))}
+            onClear={() => onChange(clearedFilters)}
+            onFirstPage={() => onChange({ page: 1 })}
+          />
+        ) : null}
+        {data && data.items.length > 0 ? (
+          <div
+            aria-busy={query.isFetching}
+            className={
+              query.isFetching
+                ? 'opacity-60 transition-opacity'
+                : 'transition-opacity'
+            }
+          >
+            <div className="hidden rounded-3xl border bg-card p-4 lg:block">
+              <Table>
+                <TableCaption className="sr-only">
+                  Content metadata for the selected filters
+                </TableCaption>
+                <TableHeader>
+                  <TableRow>
+                    <ContentSortHead
+                      label="Title"
+                      column="title"
+                      filters={filters}
+                      onChange={onChange}
+                    />
+                    <ContentSortHead
+                      label="Status"
+                      column="status"
+                      filters={filters}
+                      onChange={onChange}
+                    />
+                    <TableHead>Readiness</TableHead>
+                    <ContentSortHead
+                      label="Updated"
+                      column="updated"
+                      filters={filters}
+                      onChange={onChange}
+                    />
+                    <TableHead>Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {data.items.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell className="max-w-xs whitespace-normal">
+                        <div className="flex items-center gap-3">
+                          <ContentThumb item={item} />
+                          <div className="min-w-0">
+                            <ContentTitleLink item={item} />
+                            <ContentMeta item={item} />
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <ContentStatus item={item} />
+                      </TableCell>
+                      <TableCell>
+                        <ContentReadiness item={item} />
+                      </TableCell>
+                      <TableCell>
+                        <ContentUpdated value={item.updatedAt} />
+                      </TableCell>
+                      <TableCell>
+                        <ContentRowActions
+                          item={item}
+                          onDeleted={afterDelete}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            <ul className="grid gap-3 lg:hidden">
+              {data.items.map((item) => (
+                <li key={item.id}>
+                  <Card>
+                    <CardContent className="flex items-start gap-3">
+                      <ContentThumb item={item} />
+                      <div className="min-w-0 flex-1 space-y-2">
+                        <div className="flex items-start justify-between gap-3">
+                          <ContentTitleLink item={item} slug={false} />
+                          <ContentStatus item={item} />
+                        </div>
+                        <ContentMeta item={item} />
+                        <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
+                          <ContentReadiness item={item} />
+                          <ContentUpdated value={item.updatedAt} />
+                        </div>
+                      </div>
+                    </CardContent>
+                    <CardFooter>
+                      <ContentRowActions item={item} onDeleted={afterDelete} />
+                    </CardFooter>
+                  </Card>
+                </li>
+              ))}
+            </ul>
           </div>
-          <div className="grid gap-3 lg:hidden">
-            {data.items.map((item) => (
-              <Card key={item.id}>
-                <CardHeader>
-                  <CardTitle className="break-words">{item.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap items-center gap-2 text-sm">
-                    <Badge variant="secondary">
-                      {contentLabels[item.type]}
-                    </Badge>
-                    <ContentStatus item={item} />
-                  </div>
-                  <p className="mt-3 text-sm text-muted-foreground">
-                    Updated{' '}
-                    <time dateTime={item.updatedAt}>
-                      {item.updatedAt.slice(0, 10)}
-                    </time>
-                  </p>
-                </CardContent>
-                <CardFooter className="flex flex-wrap items-center gap-2">
-                  <ContentNextStep item={item} />
-                  {deletable(item) && (
-                    <DeleteContent compact target={deleteTarget(item)} />
-                  )}
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-        </>
-      ) : null}
+        ) : null}
+      </div>
       <ContentPagination
         filters={filters}
         onChange={onChange}
         data={data}
         pending={query.isFetching}
       />
-      {query.isFetching && !query.isPending && (
-        <p role="status" className="mt-4 text-sm text-muted-foreground">
-          Refreshing content...
-        </p>
-      )}
+      <p role="status" className="sr-only">
+        {query.isFetching && !query.isPending ? 'Refreshing content...' : ''}
+      </p>
     </>
   )
 }
