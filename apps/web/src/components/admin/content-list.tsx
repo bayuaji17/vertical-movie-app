@@ -1,6 +1,12 @@
 import { ContentNextStep } from './content-next-step'
 import { DeleteContent } from './delete-content'
 import { ContentStatus } from './content-status'
+import { ContentUpdated } from './content-updated'
+import {
+  ContentEmpty,
+  ContentListSkeleton,
+  emptyReason,
+} from './content-list-states'
 import { ContentFiltersPanel } from './content-filters'
 import { ContentPagination } from './content-pagination'
 import { useEffect } from 'react'
@@ -24,13 +30,6 @@ import {
   CardContent,
   CardFooter,
 } from '#/components/ui/card'
-import {
-  Empty,
-  EmptyHeader,
-  EmptyTitle,
-  EmptyDescription,
-} from '#/components/ui/empty'
-import { Skeleton } from '#/components/ui/skeleton'
 import {
   Table,
   TableHeader,
@@ -104,35 +103,29 @@ export function ContentList({
         </Alert>
       )}
       {query.isPending ? (
-        <div role="status" aria-label="Loading content" className="space-y-3">
-          {[1, 2, 3].map((i) => (
-            <Skeleton className="h-32" key={i} />
-          ))}
-          <span className="sr-only">Loading content...</span>
-        </div>
+        <ContentListSkeleton pageSize={filters.pageSize} />
       ) : null}
       {data?.items.length === 0 ? (
-        <Empty className="border">
-          <EmptyHeader>
-            <EmptyTitle>
-              {data.total > 0
-                ? 'No content on this page'
-                : filters.search
-                  ? 'No matching content'
-                  : 'No content yet'}
-            </EmptyTitle>
-            <EmptyDescription>
-              {data.total > 0
-                ? 'Select an available page below.'
-                : filters.search
-                  ? 'Try another title or change your filters.'
-                  : 'Create your first draft to get started.'}
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
+        <ContentEmpty
+          reason={emptyReason(
+            data.total,
+            filters.search !== '' || filters.includeArchived,
+          )}
+          onClear={() =>
+            onChange({ search: '', includeArchived: false, page: 1 })
+          }
+          onFirstPage={() => onChange({ page: 1 })}
+        />
       ) : null}
       {data && data.items.length > 0 ? (
-        <>
+        <div
+          aria-busy={query.isFetching}
+          className={
+            query.isFetching
+              ? 'opacity-60 transition-opacity'
+              : 'transition-opacity'
+          }
+        >
           <div className="hidden rounded-3xl border bg-card p-4 lg:block">
             <Table>
               <TableCaption className="sr-only">
@@ -160,9 +153,7 @@ export function ContentList({
                       <ContentStatus item={item} />
                     </TableCell>
                     <TableCell>
-                      <time dateTime={item.updatedAt}>
-                        {item.updatedAt.slice(0, 10)}
-                      </time>
+                      <ContentUpdated value={item.updatedAt} />
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap items-center gap-2">
@@ -191,10 +182,7 @@ export function ContentList({
                     <ContentStatus item={item} />
                   </div>
                   <p className="mt-3 text-sm text-muted-foreground">
-                    Updated{' '}
-                    <time dateTime={item.updatedAt}>
-                      {item.updatedAt.slice(0, 10)}
-                    </time>
+                    Updated <ContentUpdated value={item.updatedAt} />
                   </p>
                 </CardContent>
                 <CardFooter className="flex flex-wrap items-center gap-2">
@@ -206,7 +194,7 @@ export function ContentList({
               </Card>
             ))}
           </div>
-        </>
+        </div>
       ) : null}
       <ContentPagination
         filters={filters}
@@ -214,11 +202,9 @@ export function ContentList({
         data={data}
         pending={query.isFetching}
       />
-      {query.isFetching && !query.isPending && (
-        <p role="status" className="mt-4 text-sm text-muted-foreground">
-          Refreshing content...
-        </p>
-      )}
+      <p role="status" className="sr-only">
+        {query.isFetching && !query.isPending ? 'Refreshing content...' : ''}
+      </p>
     </>
   )
 }

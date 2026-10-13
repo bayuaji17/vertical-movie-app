@@ -71,7 +71,12 @@ export function DeleteContent({
           }}
         >
           <RiDeleteBinLine data-icon="inline-start" aria-hidden="true" />
-          Delete {compact ? '' : label}
+          Delete
+          {compact ? (
+            <span className="sr-only"> {target.title}</span>
+          ) : (
+            ` ${label}`
+          )}
         </Button>
         {block && !compact && (
           <p id={reason} className="text-sm text-muted-foreground">

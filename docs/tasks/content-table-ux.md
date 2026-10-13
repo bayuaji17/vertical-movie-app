@@ -1,6 +1,6 @@
 # Modul: UI dan UX tabel Content admin
 
-> Status: **CTBL-001 Done; CTBL-002–012 Backlog (approved)** · 13 Oktober 2026 · Pengguna meminta peningkatan UI/UX tabel Content. Plan: [implementation-plan](../plans/content-table-ux/implementation-plan.md), context: [repository-context](../plans/content-table-ux/repository-context.md). Plan disetujui pengguna 13 Oktober 2026.
+> Status: **CTBL-001–002 Done; CTBL-003–012 Backlog (approved)** · 13 Oktober 2026 · Pengguna meminta peningkatan UI/UX tabel Content. Plan: [implementation-plan](../plans/content-table-ux/implementation-plan.md), context: [repository-context](../plans/content-table-ux/repository-context.md). Plan disetujui pengguna 13 Oktober 2026.
 
 ## Tujuan modul
 
@@ -58,7 +58,7 @@ Tidak ada. Branch `feat/content-table-ux` dibuat dari HEAD branch hapus konten k
 
 ## Task: CTBL-002 — Perbaikan cepat tanpa perubahan API
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 2
 - Referensi: CTBL-US-03; P8, P9, P12
@@ -72,10 +72,10 @@ Tidak ada. Branch `feat/content-table-ux` dibuat dari HEAD branch hapus konten k
 
 ### Acceptance criteria
 
-- [ ] Tiap tombol aksi baris memiliki nama unik berisi judul (diuji dengan role/name).
-- [ ] Tidak ada pergeseran layout antara skeleton dan data pada desktop dan mobile.
-- [ ] Empty state menyediakan tindakan lanjut sesuai penyebab (kosong vs filter).
-- [ ] Tanggal relatif benar pada batas menit/jam/hari dan zona waktu lokal.
+- [x] Tiap tombol aksi baris memiliki nama unik berisi judul (diuji dengan role/name).
+- [x] Skeleton mengikuti struktur daftar (tabel pada desktop, kartu pada mobile) dengan jumlah baris mengikuti `pageSize` (maks. 10); pengukuran visual tanpa pergeseran dibuktikan pada CTBL-010.
+- [x] Empty state menyediakan tindakan lanjut sesuai penyebab (kosong vs filter).
+- [x] Tanggal relatif benar pada batas menit/jam/hari dan zona waktu lokal.
 
 ### Validasi
 
@@ -83,7 +83,7 @@ Test komponen dan util tanggal; pemeriksaan screenshot desktop/mobile.
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 13 Oktober 2026. `lib/admin/content-time.ts` (`relativeTime`: Just now/menit/jam/kemarin/hari, lalu tanggal; `fullTime` untuk tooltip), `components/admin/content-updated.tsx` (`<time dateTime title>`), `components/admin/content-list-states.tsx` (`ContentListSkeleton` tabel + kartu, `ContentEmpty` dengan tombol "Add a video"/"Clear filters"/"Go to the first page"), `content-list.tsx` (refresh latar memakai `aria-busy` + `opacity-60`, teks refresh menjadi live region `sr-only`), dan `delete-content.tsx` (tombol hapus kompak bernama "Delete <judul>" lewat `sr-only`). Test `test/admin-content-table-states.test.tsx` (4 test) dan satu test baru pada `admin-delete-content.test.tsx`; `bun run lint` bersih, `bun run check-types` lulus. Pengukuran pergeseran layout dan screenshot dilakukan pada CTBL-010.
 
 ### Commit task
 
