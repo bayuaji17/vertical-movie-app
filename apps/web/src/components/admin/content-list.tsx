@@ -13,7 +13,7 @@ import {
 import { ContentSortHead } from './content-sort-head'
 import { ContentFiltersPanel } from './content-filters'
 import { ContentPagination } from './content-pagination'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import type { ContentFilters } from '#/lib/admin/content-client'
@@ -47,6 +47,18 @@ export function ContentList({
   const { client, identity } = useContentApi()
   const query = useQuery(contentListOptions(client, identity, filters))
   const data = query.data
+  // A deleted row takes the focused control with it; once the list has
+  // refreshed, focus goes to the results instead of falling back to <body>.
+  const afterDelete = () => {
+    refocus.current = true
+  }
+  const results = useRef<HTMLDivElement>(null)
+  const refocus = useRef(false)
+  useEffect(() => {
+    if (!refocus.current || query.isFetching) return
+    refocus.current = false
+    results.current?.focus()
+  }, [query.isFetching])
   // Counts for the tabs and status chips; a failure only hides the numbers.
   const counts = useDashboardSummary().query.data?.content
   useEffect(() => {
@@ -103,102 +115,113 @@ export function ContentList({
           </AlertDescription>
         </Alert>
       )}
-      {query.isPending ? (
-        <ContentListSkeleton pageSize={filters.pageSize} />
-      ) : null}
-      {data?.items.length === 0 ? (
-        <ContentEmpty
-          reason={emptyReason(data.total, isFiltered(filters))}
-          onClear={() => onChange(clearedFilters)}
-          onFirstPage={() => onChange({ page: 1 })}
-        />
-      ) : null}
-      {data && data.items.length > 0 ? (
-        <div
-          aria-busy={query.isFetching}
-          className={
-            query.isFetching
-              ? 'opacity-60 transition-opacity'
-              : 'transition-opacity'
-          }
-        >
-          <div className="hidden rounded-3xl border bg-card p-4 lg:block">
-            <Table>
-              <TableCaption className="sr-only">
-                Content metadata for the selected filters
-              </TableCaption>
-              <TableHeader>
-                <TableRow>
-                  <ContentSortHead
-                    label="Title"
-                    column="title"
-                    filters={filters}
-                    onChange={onChange}
-                  />
-                  <ContentSortHead
-                    label="Status"
-                    column="status"
-                    filters={filters}
-                    onChange={onChange}
-                  />
-                  <TableHead>Readiness</TableHead>
-                  <ContentSortHead
-                    label="Updated"
-                    column="updated"
-                    filters={filters}
-                    onChange={onChange}
-                  />
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.items.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="max-w-xs whitespace-normal">
-                      <ContentTitleLink item={item} />
-                      <ContentMeta item={item} />
-                    </TableCell>
-                    <TableCell>
-                      <ContentStatus item={item} />
-                    </TableCell>
-                    <TableCell>
-                      <ContentReadiness item={item} />
-                    </TableCell>
-                    <TableCell>
-                      <ContentUpdated value={item.updatedAt} />
-                    </TableCell>
-                    <TableCell>
-                      <ContentRowActions item={item} />
-                    </TableCell>
+      <div
+        ref={results}
+        tabIndex={-1}
+        role="region"
+        aria-label="Content list"
+        className="outline-none"
+      >
+        {query.isPending ? (
+          <ContentListSkeleton pageSize={filters.pageSize} />
+        ) : null}
+        {data?.items.length === 0 ? (
+          <ContentEmpty
+            reason={emptyReason(data.total, isFiltered(filters))}
+            onClear={() => onChange(clearedFilters)}
+            onFirstPage={() => onChange({ page: 1 })}
+          />
+        ) : null}
+        {data && data.items.length > 0 ? (
+          <div
+            aria-busy={query.isFetching}
+            className={
+              query.isFetching
+                ? 'opacity-60 transition-opacity'
+                : 'transition-opacity'
+            }
+          >
+            <div className="hidden rounded-3xl border bg-card p-4 lg:block">
+              <Table>
+                <TableCaption className="sr-only">
+                  Content metadata for the selected filters
+                </TableCaption>
+                <TableHeader>
+                  <TableRow>
+                    <ContentSortHead
+                      label="Title"
+                      column="title"
+                      filters={filters}
+                      onChange={onChange}
+                    />
+                    <ContentSortHead
+                      label="Status"
+                      column="status"
+                      filters={filters}
+                      onChange={onChange}
+                    />
+                    <TableHead>Readiness</TableHead>
+                    <ContentSortHead
+                      label="Updated"
+                      column="updated"
+                      filters={filters}
+                      onChange={onChange}
+                    />
+                    <TableHead>Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {data.items.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell className="max-w-xs whitespace-normal">
+                        <ContentTitleLink item={item} />
+                        <ContentMeta item={item} />
+                      </TableCell>
+                      <TableCell>
+                        <ContentStatus item={item} />
+                      </TableCell>
+                      <TableCell>
+                        <ContentReadiness item={item} />
+                      </TableCell>
+                      <TableCell>
+                        <ContentUpdated value={item.updatedAt} />
+                      </TableCell>
+                      <TableCell>
+                        <ContentRowActions
+                          item={item}
+                          onDeleted={afterDelete}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            <ul className="grid gap-3 lg:hidden">
+              {data.items.map((item) => (
+                <li key={item.id}>
+                  <Card>
+                    <CardContent className="space-y-2">
+                      <div className="flex items-start justify-between gap-3">
+                        <ContentTitleLink item={item} slug={false} />
+                        <ContentStatus item={item} />
+                      </div>
+                      <ContentMeta item={item} />
+                      <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
+                        <ContentReadiness item={item} />
+                        <ContentUpdated value={item.updatedAt} />
+                      </div>
+                    </CardContent>
+                    <CardFooter>
+                      <ContentRowActions item={item} onDeleted={afterDelete} />
+                    </CardFooter>
+                  </Card>
+                </li>
+              ))}
+            </ul>
           </div>
-          <ul className="grid gap-3 lg:hidden">
-            {data.items.map((item) => (
-              <li key={item.id}>
-                <Card>
-                  <CardContent className="space-y-2">
-                    <div className="flex items-start justify-between gap-3">
-                      <ContentTitleLink item={item} slug={false} />
-                      <ContentStatus item={item} />
-                    </div>
-                    <ContentMeta item={item} />
-                    <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
-                      <ContentReadiness item={item} />
-                      <ContentUpdated value={item.updatedAt} />
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <ContentRowActions item={item} />
-                  </CardFooter>
-                </Card>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
+        ) : null}
+      </div>
       <ContentPagination
         filters={filters}
         onChange={onChange}

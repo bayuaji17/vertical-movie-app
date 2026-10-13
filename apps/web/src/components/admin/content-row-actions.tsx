@@ -18,7 +18,13 @@ import { seasonsHref } from '#/lib/admin/series-form-state'
  * One primary action and a "⋯" menu. Delete sits last, apart from the primary
  * action. Its dialog belongs to the row so it outlives the closing menu.
  */
-export function ContentRowActions({ item }: { item: ContentItem }) {
+export function ContentRowActions({
+  item,
+  onDeleted,
+}: {
+  item: ContentItem
+  onDeleted?: () => void
+}) {
   const [deleting, setDeleting] = useState(false)
   const actions = rowActions(item)
   const { primary } = actions
@@ -118,6 +124,7 @@ export function ContentRowActions({ item }: { item: ContentItem }) {
         target={actions.deleteTarget}
         open={deleting}
         onOpenChange={setDeleting}
+        onDeleted={onDeleted}
       />
     </div>
   )

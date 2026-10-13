@@ -1,6 +1,6 @@
 # Modul: UI dan UX tabel Content admin
 
-> Status: **CTBL-001–008 Done; CTBL-009–012 Backlog (approved)** · 13 Oktober 2026 · Pengguna meminta peningkatan UI/UX tabel Content. Plan: [implementation-plan](../plans/content-table-ux/implementation-plan.md), context: [repository-context](../plans/content-table-ux/repository-context.md). Plan disetujui pengguna 13 Oktober 2026.
+> Status: **CTBL-001–009 Done; CTBL-010–012 Backlog (approved)** · 13 Oktober 2026 · Pengguna meminta peningkatan UI/UX tabel Content. Plan: [implementation-plan](../plans/content-table-ux/implementation-plan.md), context: [repository-context](../plans/content-table-ux/repository-context.md). Plan disetujui pengguna 13 Oktober 2026.
 
 ## Tujuan modul
 
@@ -335,7 +335,7 @@ Tidak ada selain CTBL-007.
 
 ## Task: CTBL-009 — Footer pagination ringkas dan pemulihan konteks
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 9
 - Referensi: CTBL-US-03; P10; D9
@@ -349,9 +349,9 @@ Footer "Showing 1–10 of 28" + Prev/Next + nomor halaman dengan select "Rows" k
 
 ### Acceptance criteria
 
-- [ ] Footer memakai ≤ 1 baris pada desktop dan ≤ 2 baris pada mobile.
-- [ ] Kembali dari detail memulihkan filter, halaman dan scroll.
-- [ ] Setelah hapus fokus tidak hilang ke `body`.
+- [x] Footer memakai ≤ 1 baris pada desktop dan ≤ 2 baris pada mobile.
+- [x] Kembali dari detail memulihkan filter, halaman dan scroll.
+- [x] Setelah hapus fokus tidak hilang ke `body`.
 
 ### Validasi
 
@@ -359,7 +359,7 @@ Test komponen; browser.
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 13 Oktober 2026. `content-pagination.tsx` ditulis ulang: satu blok ringkas berisi "Showing 1–10 of 28", Previous/Next dengan nomor halaman (nomor hanya pada layar lebar; layar sempit membaca "Page X of Y") dan pilihan "Rows" kecil; tanpa input Custom (URL tetap menerima `pageSize` 1–100 dan nilai tak biasa tetap muncul sebagai opsi lewat `pageSizeOptions`); satu halaman = tanpa navigasi, hasil kosong = tanpa footer (empty state sudah punya tombol). `content-list.tsx`: area hasil menjadi `region` "Content list" dengan `tabIndex=-1`; setelah penghapusan dari daftar dan refresh selesai, fokus dipindah ke region itu (bukan jatuh ke `<body>`); pemulihan scroll memakai `scrollRestoration` router yang sudah aktif dan filter/halaman ada di URL. Test: `admin-content-pagination.test.tsx` (6 test, 25 assertion). Smoke browser (stack nyata): footer desktop setinggi 44 px (satu baris kontrol) dan mobile 76 px (dua baris); Next → `?pageSize=1&page=2`, halaman 4 menonaktifkan Next, Rows 25 mengembalikan satu halaman tanpa navigasi; membuka detail lalu kembali memulihkan URL `?status=draft&sort=title&pageSize=2`; scroll 260 px pada mobile pulih tepat 260 px setelah kembali dari detail; setelah menghapus film dari menu, fokus berada pada "Content list"; tanpa page error. `tsc --noEmit` dan eslint bersih.
 
 ### Commit task
 

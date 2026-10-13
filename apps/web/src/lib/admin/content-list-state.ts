@@ -110,3 +110,8 @@ export type ContentListControls = {
   filters: ContentFilters
   onChange: (patch: Partial<ContentFilters>) => void
 }
+
+export const pageSizes = [10, 25, 50, 100] as const
+/** The usual sizes, plus the current one when a link carries another value. */
+export const pageSizeOptions = (current: number): number[] =>
+  [...new Set<number>([...pageSizes, current])].sort((a, b) => a - b)
