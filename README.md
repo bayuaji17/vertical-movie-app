@@ -11,7 +11,7 @@ Bun workspaces and Turborepo run two applications:
 
 ## Getting started
 
-Use Bun 1.4.2 and install dependencies from the repository root:
+Use Bun 1.4.3 and install dependencies from the repository root:
 
 ```sh
 bun install --frozen-lockfile
