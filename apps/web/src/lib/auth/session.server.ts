@@ -1,7 +1,7 @@
 import { createServerOnlyFn } from '@tanstack/react-start'
 import {
+  appendResponseHeader,
   getRequest,
-  getResponseHeaders,
   setResponseHeader,
   setResponseStatus,
 } from '@tanstack/react-start/server'
@@ -21,9 +21,9 @@ export const readSessionOnServer = createServerOnlyFn(
       signal: options.signal
         ? AbortSignal.any([request.signal, options.signal])
         : request.signal,
+      // Appends; setResponseHeader('set-cookie', …) would replace every cookie.
       onSetCookie: (cookies) => {
-        const headers = getResponseHeaders()
-        for (const cookie of cookies) headers.append('set-cookie', cookie)
+        for (const cookie of cookies) appendResponseHeader('set-cookie', cookie)
       },
     })
   },
