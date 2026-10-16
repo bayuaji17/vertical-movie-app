@@ -1,6 +1,6 @@
 # Modul: poster video tidak hilang karena kedaluwarsa
 
-> Status: **POSTER-001–004 Done; POSTER-005–006 Backlog (approved)** · 16 Oktober 2026 · Pengguna melaporkan poster video menjadi kosong bila halaman dibiarkan lama; presigned URL dipertahankan. Plan: [implementation-plan](../plans/poster-no-expiry/implementation-plan.md), context: [repository-context](../plans/poster-no-expiry/repository-context.md). Plan disetujui pengguna 16 Oktober 2026.
+> Status: **POSTER-001–005 Done; POSTER-006 Backlog (approved)** · 16 Oktober 2026 · Pengguna melaporkan poster video menjadi kosong bila halaman dibiarkan lama; presigned URL dipertahankan. Plan: [implementation-plan](../plans/poster-no-expiry/implementation-plan.md), context: [repository-context](../plans/poster-no-expiry/repository-context.md). Plan disetujui pengguna 16 Oktober 2026.
 
 ## Tujuan modul
 
@@ -170,7 +170,7 @@ Tidak ada.
 
 ## Task: POSTER-005 — Web: poster player stabil
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 5
 - Referensi: POSTER-US-01; D4
@@ -184,8 +184,8 @@ Tidak ada.
 
 ### Acceptance criteria
 
-- [ ] Atribut `poster` tidak berubah selama pemasangan walau `playback` diperbarui.
-- [ ] Tidak ada kedip saat pembaruan; test komponen/state lulus.
+- [x] Atribut `poster` tidak berubah selama pemasangan walau `playback` diperbarui.
+- [x] Tidak ada kedip saat pembaruan; test komponen/state lulus.
 
 ### Validasi
 
@@ -193,7 +193,7 @@ Test komponen; browser pada POSTER-006.
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 16 Oktober 2026. `lib/public/stable-poster.ts` (`nextStablePoster`: poster diambil dari respons playback pertama untuk satu sumber dan dipertahankan; sumber lain mendapat poster sendiri) dan `components/vertical-video-player.tsx` memakai hasilnya untuk atribut `poster` pada `HlsJsVideo` sehingga pembaruan playback (yang hanya menyegarkan HLS) tidak mengganti URL poster maupun memicu muat ulang. Test: `public-stable-poster.test.ts` (2 test: dipertahankan walau URL baru/kosong datang, sumber berbeda). `tsc --noEmit` dan eslint bersih. Bukti browser menyusul pada POSTER-006.
 
 ### Commit task
 
