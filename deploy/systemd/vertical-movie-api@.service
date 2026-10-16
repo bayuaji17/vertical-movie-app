@@ -1,0 +1,31 @@
+# Optional: one API process per CPU core. On Linux Bun/Elysia listen with SO_REUSEPORT, so several
+# instances share PORT and the kernel spreads connections. Use INSTEAD of vertical-movie-api.service:
+#   sudo systemctl disable --now vertical-movie-api
+#   sudo systemctl enable --now vertical-movie-api@1 vertical-movie-api@2
+# Caches (catalog metadata, cover thumbnails) are per instance; the catalog relies on its 60 s TTL.
+[Unit]
+Description=Vertical Movie API instance %i (Bun, shares the port via SO_REUSEPORT)
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=vmovie
+Group=vmovie
+WorkingDirectory=/opt/vertical-movie/current/apps/api
+EnvironmentFile=/etc/vertical-movie/api.env
+ExecStart=/usr/local/bin/bun dist/index.js
+Restart=always
+RestartSec=3
+LimitNOFILE=65536
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+
+[Install]
+WantedBy=multi-user.target
