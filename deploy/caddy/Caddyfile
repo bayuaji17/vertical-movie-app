@@ -1,0 +1,20 @@
+# Without Docker: Caddy on the host in front of the web service on 127.0.0.1:3000.
+# Install Caddy from its apt repository, put this in /etc/caddy/Caddyfile, then
+#   sudo systemctl reload caddy
+# Replace movies.example.com and the e-mail address.
+{
+	email admin@example.com
+}
+
+movies.example.com {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	reverse_proxy 127.0.0.1:3000
+}

@@ -1,0 +1,26 @@
+[Unit]
+Description=Vertical Movie API (Bun)
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=vmovie
+Group=vmovie
+WorkingDirectory=/opt/vertical-movie-app/apps/api
+EnvironmentFile=/etc/vertical-movie/api.env
+ExecStart=/usr/local/bin/bun dist/index.js
+Restart=always
+RestartSec=3
+LimitNOFILE=65536
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+
+[Install]
+WantedBy=multi-user.target
