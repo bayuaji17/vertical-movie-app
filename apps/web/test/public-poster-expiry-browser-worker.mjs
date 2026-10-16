@@ -1,0 +1,182 @@
+import assert from 'node:assert/strict'
+// Usage: bun public-poster-expiry-browser-worker.mjs <base> <playwright module URL> <chromium path|""> <state.json> <screenshot dir> [--baseline] [--real-wait]
+// Needs the stack from `scripts/browser-proof.sh up --public` (a published, playable film with a real cover).
+//
+// Default: proves a displayed poster is never lost, however long the page is left open
+// (a fake clock jumps ahead hours at a time; the server keeps real time).
+// --baseline: records what the code does today without asserting success (POSTER-002).
+// --real-wait: also waits past the real lifetime of the first presigned URL and checks storage rejects it.
+const [base, moduleURL, executablePath, stateFile, shots, ...flags] =
+  process.argv.slice(2)
+const baseline = flags.includes('--baseline'),
+  realWait = flags.includes('--real-wait')
+const { chromium } = await import(moduleURL)
+const state = await Bun.file(stateFile).json()
+const slug = state.ids.public.slug
+const browser = await chromium.launch({
+  headless: true,
+  ...(executablePath ? { executablePath } : {}),
+})
+const errors = []
+const results = []
+const ok = (name) => (results.push(name), console.log('ok -', name))
+const note = (name) => console.log('note -', name)
+const hour = 3_600_000
+
+async function open(viewport, path) {
+  const context = await browser.newContext({ viewport })
+  const page = await context.newPage()
+  const requests = []
+  page.on('request', (r) => {
+    const u = r.url()
+    if (/\/poster(\.webp)?(\?|$)/.test(u) || /\/playback(\?|$)/.test(u))
+      requests.push({
+        at: Date.now(),
+        url: u.replace(/\?.*/, '') + (u.includes('?') ? '?…' : ''),
+      })
+  })
+  page.on('pageerror', (e) => errors.push(e.message))
+  page.on('console', (m) => {
+    if (
+      m.type() === 'error' &&
+      /hydration|Minified React error/i.test(m.text())
+    )
+      errors.push(m.text())
+  })
+  await page.clock.install()
+  await page.goto(base + path, {
+    waitUntil: 'domcontentloaded',
+    timeout: 90000,
+  })
+  return { context, page, requests }
+}
+// What the viewer sees where the poster should be.
+const posterState = (page) =>
+  page.evaluate(() => {
+    const frame = document.querySelector('[data-public-poster]')
+    const img = frame?.querySelector('img')
+    return {
+      frame: !!frame,
+      img: !!img,
+      loaded: !!img && img.complete && img.naturalWidth > 0,
+      expires: img ? new URL(img.src).searchParams.get('X-Amz-Expires') : null,
+      unavailable: /Cover unavailable/.test(frame?.textContent ?? ''),
+      skeleton: !!frame?.querySelector('[data-slot="skeleton"]'),
+    }
+  })
+const waitLoaded = (page) =>
+  page.waitForFunction(
+    () => {
+      const img = document.querySelector('[data-public-poster] img')
+      return !!img && img.complete && img.naturalWidth > 0
+    },
+    null,
+    { timeout: 60000 },
+  )
+
+try {
+  // 1. detail page poster
+  const { context, page, requests } = await open(
+    { width: 1280, height: 900 },
+    `/videos/${slug}`,
+  )
+  await waitLoaded(page)
+  const first = await posterState(page)
+  note(`first poster: loaded=${first.loaded}, X-Amz-Expires=${first.expires}`)
+  await page.screenshot({ path: `${shots}/poster-0-initial.png` })
+  assert.ok(first.loaded)
+
+  const seen = []
+  const lifetime = Number(first.expires) * 1000
+  // Jump ahead in steps of a bit more than one lifetime (baseline) or hours (fixed).
+  const steps = baseline ? 4 : 12
+  const jump = baseline ? lifetime + 30_000 : 2.5 * hour
+  for (let i = 1; i <= steps; i++) {
+    await page.clock.fastForward(jump)
+    await page.waitForTimeout(1200)
+    const s = await posterState(page)
+    seen.push(s)
+    note(
+      `after +${((i * jump) / hour).toFixed(2)} h: img=${s.img} loaded=${s.loaded} unavailable=${s.unavailable} skeleton=${s.skeleton}`,
+    )
+    if (!baseline)
+      assert.ok(
+        s.loaded,
+        `poster must stay loaded after +${((i * jump) / hour).toFixed(2)} h`,
+      )
+  }
+  await page.screenshot({ path: `${shots}/poster-1-after-idle.png` })
+  note(`poster requests made while idle: ${requests.length}`)
+  if (baseline) {
+    const lost = seen.some((s) => !s.loaded)
+    note(`baseline: poster was lost at some point = ${lost}`)
+    ok(`baseline recorded (lost=${lost})`)
+  } else {
+    assert.ok(seen.every((s) => s.loaded))
+    ok(
+      `detail poster stayed loaded across ${((steps * jump) / hour).toFixed(0)} h of idle time (${requests.length} background renewals)`,
+    )
+    // Never a blank/skeleton/unavailable frame at any sampled moment.
+    assert.ok(seen.every((s) => !s.unavailable && !s.skeleton))
+    ok('no "Cover unavailable" or skeleton state at any sampled moment')
+  }
+
+  // 2. the player poster
+  const watch = await open({ width: 390, height: 844 }, `/watch/${slug}`)
+  await watch.page.waitForFunction(
+    () => document.querySelector('video')?.poster,
+    null,
+    { timeout: 60000 },
+  )
+  const poster0 = await watch.page.evaluate(
+    () => document.querySelector('video').poster,
+  )
+  const expires0 = new URL(poster0).searchParams.get('X-Amz-Expires')
+  note(`player poster X-Amz-Expires=${expires0}`)
+  const urls = new Set([poster0])
+  for (let i = 0; i < 4; i++) {
+    await watch.page.clock.fastForward(
+      baseline ? lifetime + 30_000 : 2.5 * hour,
+    )
+    await watch.page.waitForTimeout(1000)
+    urls.add(
+      await watch.page.evaluate(
+        () => document.querySelector('video')?.poster ?? '',
+      ),
+    )
+  }
+  note(`distinct player poster URLs over the idle period: ${urls.size}`)
+  await watch.page.screenshot({ path: `${shots}/poster-2-player.png` })
+  if (!baseline) {
+    assert.ok(
+      [...urls].every(Boolean),
+      'the player poster attribute never becomes empty',
+    )
+    assert.equal(urls.size, 1, 'the player poster does not change while idle')
+    ok('player poster stayed the same and never became empty while idle')
+  }
+  await watch.context.close()
+
+  // 3. what storage really does with the first URL once its lifetime has passed
+  if (realWait) {
+    const url = (
+      await (await fetch(`http://localhost:3301/videos/${slug}/poster`)).json()
+    ).posterUrl
+    const ttl = Number(new URL(url).searchParams.get('X-Amz-Expires'))
+    note(`waiting ${ttl + 5} real seconds for the presigned URL to expire…`)
+    assert.equal((await fetch(url)).status, 200)
+    await Bun.sleep((ttl + 5) * 1000)
+    const status = (await fetch(url)).status
+    note(`old URL after expiry → HTTP ${status}`)
+    if (baseline) ok(`real expiry confirmed (HTTP ${status})`)
+  }
+  await context.close()
+
+  if (!baseline) {
+    assert.deepEqual(errors, [], errors.join('\n'))
+    ok('no page errors or hydration warnings')
+  }
+  console.log(JSON.stringify({ passed: results.length, baseline }))
+} finally {
+  await browser.close()
+}

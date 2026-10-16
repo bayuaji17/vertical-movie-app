@@ -68,7 +68,7 @@ const cover = () =>
         .bytes(),
     ));
 
-async function seed(origin: string, file: string) {
+async function seed(origin: string, file: string, flags: string[] = []) {
   const bucket =
     "vertical-movie-app-media-test-" + crypto.randomUUID().slice(0, 8);
   await sdk.send(new CreateBucketCommand({ Bucket: bucket }));
@@ -186,6 +186,26 @@ async function seed(origin: string, file: string) {
   await client`INSERT INTO series_genres (series_id,genre_id) VALUES (${show.series.id}::uuid,${genreIds.drama}::uuid)`;
   await client`UPDATE videos SET release_year=2024 WHERE id=${draft.id}::uuid`;
   await client`UPDATE series SET release_year=2021 WHERE id=${show.series.id}::uuid`;
+  // --public: one published film that is fully playable (verified 60 s video and
+  // cover, rights, synopsis) so public pages and presigned posters can be proven.
+  let publicFilm: { id: string; slug: string } | undefined;
+  if (flags.includes("--public")) {
+    const film = await videos.create(
+      {
+        kind: "movie",
+        title: "Public Poster Film",
+        slug: "public-poster-film",
+        synopsis: "A published film used to prove posters in the browser.",
+      },
+      actor,
+    );
+    const source = await media({ videoId: film.id });
+    await client`UPDATE media_assets SET facts='{"durationMs":60000}'::jsonb WHERE id=${source.assetId}::uuid`;
+    const cover = await media({ videoId: film.id }, "poster");
+    await client`UPDATE media_jobs SET output_files='["poster.webp"]'::jsonb WHERE id=${cover.jobId}::uuid`;
+    await client`UPDATE videos SET publication_status='published',published_at=now(),first_published_at=now(),rights_confirmed_at=now(),rights_confirmed_by=${actor} WHERE id=${film.id}::uuid`;
+    publicFilm = { id: film.id, slug: "public-poster-film" };
+  }
   const state = {
     bucket,
     admin: { email: adminEmail, password: adminPassword },
@@ -193,6 +213,7 @@ async function seed(origin: string, file: string) {
       draft: draft.id,
       mobile: mobile.id,
       live: live.id,
+      public: publicFilm,
       busy: busy.id,
       archived: archived.id,
       series: show.series.id,
@@ -243,7 +264,7 @@ async function clean(file: string) {
   console.log("bucket removed");
 }
 const [mode, a, b] = Bun.argv.slice(2);
-if (mode === "seed") await seed(a!, b!);
+if (mode === "seed") await seed(a!, b!, Bun.argv.slice(5));
 else if (mode === "status") await status(a!);
 else if (mode === "clean") await clean(a!);
 else

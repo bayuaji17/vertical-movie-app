@@ -1,6 +1,6 @@
 # Modul: poster video tidak hilang karena kedaluwarsa
 
-> Status: **POSTER-001 Done; POSTER-002–006 Backlog (approved)** · 16 Oktober 2026 · Pengguna melaporkan poster video menjadi kosong bila halaman dibiarkan lama; presigned URL dipertahankan. Plan: [implementation-plan](../plans/poster-no-expiry/implementation-plan.md), context: [repository-context](../plans/poster-no-expiry/repository-context.md). Plan disetujui pengguna 16 Oktober 2026.
+> Status: **POSTER-001–002 Done; POSTER-003–006 Backlog (approved)** · 16 Oktober 2026 · Pengguna melaporkan poster video menjadi kosong bila halaman dibiarkan lama; presigned URL dipertahankan. Plan: [implementation-plan](../plans/poster-no-expiry/implementation-plan.md), context: [repository-context](../plans/poster-no-expiry/repository-context.md). Plan disetujui pengguna 16 Oktober 2026.
 
 ## Tujuan modul
 
@@ -54,7 +54,7 @@ Tidak ada.
 
 ## Task: POSTER-002 — Reproduksi dan baseline
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 2
 - Referensi: POSTER-US-01
@@ -68,8 +68,8 @@ Worker browser dengan jam palsu (Playwright `clock`) pada kode saat ini: Film pu
 
 ### Acceptance criteria
 
-- [ ] Kegagalan terbukti dan terdokumentasi (screenshot, permintaan jaringan, TTL yang diamati).
-- [ ] Skenario yang sama disimpan sebagai uji yang harus lulus setelah perbaikan.
+- [x] Kegagalan terbukti dan terdokumentasi (screenshot, permintaan jaringan, TTL yang diamati).
+- [x] Skenario yang sama disimpan sebagai uji yang harus lulus setelah perbaikan (worker yang sama tanpa `--baseline`, dijalankan pada POSTER-006).
 
 ### Validasi
 
@@ -77,7 +77,7 @@ Worker browser pada database/bucket uji.
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 16 Oktober 2026 pada database uji dan bucket MinIO acak (bukan development), API + worker + web dev nyata, Chromium headless dengan jam palsu Playwright (`page.clock`). Harness kini ter-commit: `scripts/browser-proof.sh` (`libs`, `up [--public]`, `web`, `run`, `down`; state di `~/.cache/vertical-movie-proof`), fixture `content-delete-browser-fixture.ts` mendapat opsi `--public` (satu film published yang benar-benar siap: video 60 detik + sampul WebP nyata + hak + sinopsis), dan worker `apps/web/test/public-poster-expiry-browser-worker.mjs` (`--baseline` hanya mencatat, tanpa flag menegaskan perilaku akhir, `--real-wait` menunggu kedaluwarsa nyata). **Hasil baseline pada kode saat ini:** URL poster halaman detail `X-Amz-Expires=120` (video 60 detik × 2); setelah jam dimajukan 150 detik (melewati TTL) `<img>` sudah dilepas dan frame menampilkan "Cover unavailable" (`img=false loaded=false unavailable=true`), dan keadaan itu menetap pada lompatan berikutnya; selama itu terjadi 3 permintaan poster/playback. Kedaluwarsa nyata terkonfirmasi: setelah menunggu 125 detik URL lama dijawab storage **HTTP 403** (sebelumnya 200). Poster `<video>` pada halaman watch juga memakai `X-Amz-Expires=120`; selama diam atributnya tidak berubah dan tidak kosong, tetapi URL-nya sudah tidak valid sehingga pemuatan ulang akan gagal. Hipotesis plan terbukti untuk poster halaman detail; untuk player yang terbukti adalah URL pendek, bukan gambar yang hilang selama diam.
 
 ### Commit task
 
