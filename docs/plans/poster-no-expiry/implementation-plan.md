@@ -2,7 +2,7 @@
 
 ## Plan metadata
 
-- Status: **approved** (16 Oktober 2026). Pengguna menyetujui URL poster berumur panjang dan gambar yang tampil tidak pernah dilepas (D1, D2–D5 untuk poster), serta menetapkan URL video (HLS) berumur `2 × durasi` dengan default 1 jam (D7). D6 (kuantisasi) tidak disetujui dan tidak dikerjakan. Implementasi menunggu perintah pengguna.
+- Status: **implemented (lokal, mode dev)** — disetujui pengguna 16 Oktober 2026 (poster 24 jam + gambar tidak dilepas, HLS `2×durasi` default 1 jam; D6 tidak dikerjakan); POSTER-001–006 selesai pada branch `fix/poster-no-expiry`. Push, PR, merge dan rollout produksi menunggu otorisasi.
 - Date: 16 Oktober 2026; decision owner: pengguna.
 - Repository: `bayuaji17/vertical-movie-app`; base ref: `main` (SHA pada context).
 - Context: [repository-context.md](repository-context.md).
@@ -74,4 +74,5 @@ Lokal pada branch fitur; push/PR/merge dan rollout produksi memerlukan otorisasi
 ## Execution history
 
 - 16 Oktober 2026: context dan plan ditulis; direvisi sesudah klarifikasi pengguna (presigned dipertahankan, rute stabil/ETag dikeluarkan dari scope).
+- 16 Oktober 2026: POSTER-002–006 selesai (lihat bukti dan SHA pada [backlog](../../tasks/poster-no-expiry.md)). Catatan implementasi: logika pembaruan dipisah ke `PosterController` yang murni; controller dibuat di dalam efek karena React dev (StrictMode) memasang-membersihkan-memasang ulang dan `dispose()` tidak boleh dipakai ulang; `PosterQueue` dan skema poster bertanda tangan dipertahankan.
 - 16 Oktober 2026: pengguna menyetujui poster 24 jam + gambar tidak dilepas, menetapkan HLS `2×durasi` default 1 jam (D7); D6 tidak dikerjakan. POSTER-001 selesai.

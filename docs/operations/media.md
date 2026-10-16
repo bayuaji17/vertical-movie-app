@@ -111,6 +111,14 @@ Menghapus konten draft/archived ([aturan dan urutan](../architecture/video-data-
 - **Pemeriksaan operator:** `SELECT count(*) FROM media_storage_tombstones WHERE deleted_at IS NULL` harus menuju 0 dalam beberapa menit selama worker hidup. Tanpa worker, file tetap di storage sampai worker berjalan; jangan menghapus objek manual yang tidak punya tombstone.
 - **Bukti:** `bun run --cwd apps/api content:delete:proof` (PostgreSQL + MinIO uji) dan browser: `apps/api/test/integration/content-delete-browser-fixture.ts` + `apps/web/test/admin-delete-browser-worker.mjs` (langkah pada [backlog DEL-007](../tasks/delete-content.md)). Rollout produksi (R2) belum diverifikasi dan memerlukan otorisasi sendiri.
 
+## Poster yang tidak hilang karena kedaluwarsa — 16 Oktober 2026
+
+Status: implemented dan terverifikasi lokal (POSTER-001–006). Plan: [poster-no-expiry](../plans/poster-no-expiry/implementation-plan.md), backlog: [POSTER](../tasks/poster-no-expiry.md).
+
+- **Umur URL:** poster presigned berumur `MEDIA_POSTER_URL_TTL_SECONDS` (default 24 jam) dan tidak bergantung pada durasi video; URL video (playlist/init/segmen) berumur `max(2×durasi, MEDIA_HLS_URL_TTL_SECONDS)` (default 1 jam, efektif 1 jam karena durasi maksimum 30 menit). Rentang kedua env 60–604800 detik (batas SigV4), divalidasi saat API start. Kompromi: URL lama yang sudah terbit tetap berlaku sampai habis setelah unpublish/archive (URL baru langsung ditolak).
+- **Klien:** `PosterController` (`apps/web/src/lib/public/poster-controller.ts`) memastikan poster yang sudah tampil **tidak pernah dihapus**. URL baru diminta pada 80% umur dan saat tab terlihat/`focus`/`online`, dipreload dengan `new Image()` dan baru ditukar bila berhasil; kegagalan mencoba lagi dengan backoff 2/5/15/30/60 detik tanpa batas; "Cover unavailable" + "Retry cover" hanya bila belum pernah ada poster. Poster `<video>` diambil sekali dari respons playback pertama dan tidak berubah saat playback diperbarui (`stable-poster.ts`). Mekanisme pembaruan HLS di player tidak berubah.
+- **Bukti ulang:** `scripts/browser-proof.sh libs` (sekali), `up --public`, `web dev`, lalu `scripts/browser-proof.sh run test/public-poster-expiry-browser-worker.mjs` (tanpa flag = harus lulus; `--baseline` mencatat perilaku lama; `--real-wait` menunggu kedaluwarsa nyata), dan `down`. Memakai database `vertical_movie_app_media_test` dan bucket uji acak, tidak pernah data development.
+
 ## Migrasi development
 
 0006_media-upload, 0007_media-jobs, 0008_media-publication generated/reviewed dan applied melalui command resmi. Journal development 6→7→9; snapshot auth dan metadata existing utuh (user/account/session masing-masing1,rate_limit3; metadata existing kosong). Backup sebelum 0006: /home/bandev/backups/vertical-movie-app/media-before-0006-1791112537710.sql; sebelum 0007/0008: media-before-0007-0008-1791116342579.sql pada directory yang sama, permissions 0700/0600. Full restore belum dibuktikan.

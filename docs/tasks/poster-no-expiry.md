@@ -1,6 +1,6 @@
 # Modul: poster video tidak hilang karena kedaluwarsa
 
-> Status: **POSTER-001–005 Done; POSTER-006 Backlog (approved)** · 16 Oktober 2026 · Pengguna melaporkan poster video menjadi kosong bila halaman dibiarkan lama; presigned URL dipertahankan. Plan: [implementation-plan](../plans/poster-no-expiry/implementation-plan.md), context: [repository-context](../plans/poster-no-expiry/repository-context.md). Plan disetujui pengguna 16 Oktober 2026.
+> Status: **POSTER-001–006 Done (implemented lokal, mode dev; produksi belum)** · 16 Oktober 2026 · Pengguna melaporkan poster video menjadi kosong bila halaman dibiarkan lama; presigned URL dipertahankan. Plan: [implementation-plan](../plans/poster-no-expiry/implementation-plan.md), context: [repository-context](../plans/poster-no-expiry/repository-context.md). Plan disetujui pengguna 16 Oktober 2026.
 
 ## Tujuan modul
 
@@ -208,7 +208,7 @@ Tidak ada.
 
 ## Task: POSTER-006 — Bukti dan penutupan
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 6
 - Referensi: POSTER-US-01/02
@@ -222,8 +222,8 @@ Ulangi skenario POSTER-002: poster detail dan player tetap tampil setelah jam di
 
 ### Acceptance criteria
 
-- [ ] Semua skenario lulus dengan hasil aktual dicatat.
-- [ ] `check-types`, `lint`, `build`, `docs:check` lulus dan dicatat.
+- [x] Semua skenario lulus dengan hasil aktual dicatat.
+- [x] `check-types`, `lint`, `build`, `docs:check` lulus dan dicatat.
 
 ### Validasi
 
@@ -231,7 +231,7 @@ Worker browser, suite relevan, gate akhir.
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 16 Oktober 2026 pada database uji dan bucket MinIO acak (bukan development), API + worker + web dev nyata dan Chromium headless dengan jam palsu Playwright; film published sungguhan (video 60 detik + sampul WebP nyata) dari `scripts/browser-proof.sh up --public`. **Baseline (POSTER-002, kode lama):** poster halaman detail hilang menjadi "Cover unavailable" setelah jam dimajukan melewati TTL 120 detik; URL lama ditolak storage dengan HTTP 403 setelah kedaluwarsa nyata. **Sesudah perbaikan** `public-poster-expiry-browser-worker.mjs` lulus **8/8**: URL poster berumur 86400 detik dan HLS ≈3600 detik untuk video 60 detik (`playback.expiresAt`); poster halaman detail tetap termuat pada 12 sampel selama 30 jam waktu idle (tiap 2,5 jam) tanpa pernah menjadi skeleton/"Cover unavailable" (7 permintaan poster: API + unduhan gambar); poster player tetap satu URL dan tidak pernah kosong selama idle; offline 30 jam → poster bertahan, setelah online URL baru diminta diam-diam dan poster tetap tampil; tab tersembunyi 30 jam lalu terlihat → tidak pernah kosong (1 permintaan pembaruan); mobile 390 px bertahan 30 jam tanpa scroll horizontal; tanpa page error/hydration warning. Temuan saat pembuktian: controller yang dibuat dengan `useMemo` dan di-`dispose()` pada cleanup mati selamanya di React dev (StrictMode memasang-membersihkan-memasang) sehingga permintaan poster tidak pernah terjadi; diperbaiki dengan membuat controller di dalam efek. Gate (diamati 16 Oktober 2026): `bun run check-types` 4/4, `lint` bersih, `build` 2/2, `docs:check` lulus; API `bun test src` 215 lulus + 1 gagal sebelumnya (`truncated JPEG data…`); proof integrasi `public-film-catalog`, `media-worker`, `public-content` 6 lulus; web `bun test` 399 lulus + 1 gagal sebelumnya (`title route rejects unknown kinds…`). Ledger SHA: POSTER-001 `d7271b0`, POSTER-002 `c2f398f`, POSTER-003 `4adbff4`, POSTER-004 `584bb0c`, POSTER-005 `76b374a`. Batas: mode dev (bukan build produksi), jam palsu untuk waktu klien sedangkan storage memakai waktu nyata (kedaluwarsa nyata dibuktikan terpisah pada baseline), tanpa R2/FFmpeg nyata; unpublish menutup URL baru tetapi URL yang sudah terbit tetap berlaku sampai habis (poster 24 jam, video 1 jam).
 
 ### Commit task
 

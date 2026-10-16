@@ -85,6 +85,22 @@ try {
   note(`first poster: loaded=${first.loaded}, X-Amz-Expires=${first.expires}`)
   await page.screenshot({ path: `${shots}/poster-0-initial.png` })
   assert.ok(first.loaded)
+  if (!baseline) {
+    // The poster URL lives a day (not 2 x the 60 s video), the video URL an hour.
+    assert.equal(first.expires, '86400')
+    const playback = await (
+      await fetch(`http://localhost:3301/videos/${slug}/playback`)
+    ).json()
+    const hls = Date.parse(playback.expiresAt) - Date.now()
+    assert.ok(hls > 3_590_000 && hls <= 3_600_000, `HLS lifetime ${hls}`)
+    assert.equal(
+      new URL(playback.posterUrl).searchParams.get('X-Amz-Expires'),
+      '86400',
+    )
+    ok(
+      'poster URL lifetime is 24 h and the HLS lifetime is 1 h for a 60 s video',
+    )
+  }
 
   const seen = []
   const lifetime = Number(first.expires) * 1000
@@ -106,7 +122,7 @@ try {
       )
   }
   await page.screenshot({ path: `${shots}/poster-1-after-idle.png` })
-  note(`poster requests made while idle: ${requests.length}`)
+  note(`poster requests while idle (API + image fetches): ${requests.length}`)
   if (baseline) {
     const lost = seen.some((s) => !s.loaded)
     note(`baseline: poster was lost at some point = ${lost}`)
@@ -114,7 +130,7 @@ try {
   } else {
     assert.ok(seen.every((s) => s.loaded))
     ok(
-      `detail poster stayed loaded across ${((steps * jump) / hour).toFixed(0)} h of idle time (${requests.length} background renewals)`,
+      `detail poster stayed loaded across ${((steps * jump) / hour).toFixed(0)} h of idle time (${requests.length} poster requests, API and image)`,
     )
     // Never a blank/skeleton/unavailable frame at any sampled moment.
     assert.ok(seen.every((s) => !s.unavailable && !s.skeleton))
@@ -132,6 +148,7 @@ try {
     () => document.querySelector('video').poster,
   )
   const expires0 = new URL(poster0).searchParams.get('X-Amz-Expires')
+  if (!baseline) assert.equal(expires0, '86400')
   note(`player poster X-Amz-Expires=${expires0}`)
   const urls = new Set([poster0])
   for (let i = 0; i < 4; i++) {
@@ -170,7 +187,77 @@ try {
     note(`old URL after expiry → HTTP ${status}`)
     if (baseline) ok(`real expiry confirmed (HTTP ${status})`)
   }
+  if (!baseline) {
+    // 4. offline for a long time, then back online: the poster stays, then renews quietly
+    const before = requests.length
+    await context.setOffline(true)
+    await page.evaluate(() => window.dispatchEvent(new Event('offline')))
+    await page.clock.fastForward(30 * hour)
+    await page.waitForTimeout(800)
+    assert.ok((await posterState(page)).loaded, 'poster stays while offline')
+    await context.setOffline(false)
+    await page.evaluate(() => window.dispatchEvent(new Event('online')))
+    await page.clock.fastForward(1000)
+    await page.waitForTimeout(1500)
+    const back = await posterState(page)
+    assert.ok(back.loaded && !back.unavailable && !back.skeleton)
+    assert.ok(
+      requests.length > before,
+      'a new URL was requested after coming back online',
+    )
+    ok('offline for 30 h: poster stays; back online it renews quietly')
+
+    // 5. tab hidden for a long time, then shown again
+    await page.evaluate(() => {
+      Object.defineProperty(document, 'visibilityState', {
+        configurable: true,
+        get: () => 'hidden',
+      })
+      document.dispatchEvent(new Event('visibilitychange'))
+    })
+    await page.clock.fastForward(30 * hour)
+    await page.waitForTimeout(500)
+    assert.ok(
+      (await posterState(page)).loaded,
+      'poster stays while the tab is hidden',
+    )
+    const hiddenRequests = requests.length
+    await page.evaluate(() => {
+      Object.defineProperty(document, 'visibilityState', {
+        configurable: true,
+        get: () => 'visible',
+      })
+      document.dispatchEvent(new Event('visibilitychange'))
+      window.dispatchEvent(new Event('focus'))
+    })
+    await page.waitForTimeout(1500)
+    const shown = await posterState(page)
+    assert.ok(shown.loaded && !shown.unavailable && !shown.skeleton)
+    note(`requests while hidden→visible: ${requests.length - hiddenRequests}`)
+    ok('tab hidden for 30 h then shown: poster never blank')
+  }
   await context.close()
+
+  if (!baseline) {
+    // 6. mobile
+    const mobile = await open({ width: 390, height: 844 }, `/videos/${slug}`)
+    await waitLoaded(mobile.page)
+    for (let i = 0; i < 6; i++) {
+      await mobile.page.clock.fastForward(5 * hour)
+      await mobile.page.waitForTimeout(700)
+      assert.ok((await posterState(mobile.page)).loaded)
+    }
+    assert.ok(
+      await mobile.page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    )
+    await mobile.page.screenshot({ path: `${shots}/poster-3-mobile.png` })
+    ok(
+      'mobile 390 px: poster stays across 30 h of idle time, no horizontal scroll',
+    )
+    await mobile.context.close()
+  }
 
   if (!baseline) {
     assert.deepEqual(errors, [], errors.join('\n'))

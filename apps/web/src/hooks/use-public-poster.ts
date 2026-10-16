@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { publicVideoBrowser } from '#/lib/public/catalog-reader'
 import { PosterQueue } from '#/lib/public/poster-state'
 import { PosterController } from '#/lib/public/poster-controller'
@@ -46,9 +46,11 @@ export function usePublicPoster(video: PublicVideo) {
   const [visible, setVisible] = useState(false),
     [view, setView] = useState<PosterView>(start)
   const online = usePublicOnline()
-  const controller = useMemo(() => {
-    if (typeof window === 'undefined') return undefined
-    return new PosterController({
+  // Created in an effect so every mount gets a live controller (React may mount,
+  // clean up and mount again; a disposed controller must never be reused).
+  const [controller, setController] = useState<PosterController>()
+  useEffect(() => {
+    const next = new PosterController({
       request: (signal) => {
         // Always a fresh URL: the cached one is what is about to expire.
         browserQueue().invalidate(video)
@@ -57,11 +59,13 @@ export function usePublicPoster(video: PublicVideo) {
       preload: preloadImage,
       onChange: setView,
     })
-  }, [video])
-  useEffect(() => {
     setView(start)
-    return () => controller?.dispose()
-  }, [controller])
+    setController(next)
+    return () => {
+      next.dispose()
+      setController(undefined)
+    }
+  }, [video])
   useEffect(() => {
     const element = ref.current
     if (!element) return
