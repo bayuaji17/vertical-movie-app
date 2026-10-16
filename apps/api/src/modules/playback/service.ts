@@ -10,6 +10,8 @@ import {
 } from "../../shared/content-error";
 import type { CatalogStore, PlayableRow } from "../catalog/repository";
 import { rewriteManifest } from "./manifest";
+import { defaultUrlLifetimes } from "../../config/playback-env";
+import type { UrlLifetimes } from "../../config/playback-env";
 export class PlaybackService {
   constructor(
     private readonly store?: CatalogStore,
@@ -17,6 +19,7 @@ export class PlaybackService {
     private readonly baseUrl?: string,
     private readonly profile?: { provider: string; bucket: string },
     private readonly now = () => new Date(),
+    private readonly lifetimes: UrlLifetimes = defaultUrlLifetimes,
   ) {}
   private dependencies() {
     if (!this.store || !this.native || !this.baseUrl || !this.profile)
@@ -34,7 +37,15 @@ export class PlaybackService {
         ? await store.preview(identifier)
         : (await store.playable({ slug: identifier, limit: 1 }))[0];
     if (!row) notFound();
-    return { row, ...playbackReadiness(row, profile) };
+    const readiness = playbackReadiness(row, profile);
+    // Playlist and segment URLs live at least as long as the configured minimum;
+    // posters have their own, much longer lifetime (a picture is not the video).
+    return {
+      row,
+      ...readiness,
+      ttl: Math.max(readiness.ttl, this.lifetimes.hlsMinSeconds),
+      posterTtl: this.lifetimes.posterSeconds,
+    };
   }
   private route(row: PlayableRow, preview: boolean) {
     const { base } = this.dependencies();
@@ -43,7 +54,7 @@ export class PlaybackService {
       : base + "/playback/videos/" + row.video.slug;
   }
   async info(identifier: string, preview = false) {
-    const { row, ttl } = await this.row(identifier, preview),
+    const { row, ttl, posterTtl } = await this.row(identifier, preview),
       { native } = this.dependencies();
     const poster = row.posterJob.outputPrefix + "poster.webp";
     posterReadiness(row);
@@ -52,20 +63,22 @@ export class PlaybackService {
       title: row.video.title,
       durationMs: Number(row.source.facts!.durationMs),
       masterUrl: this.route(row, preview) + "/master.m3u8",
-      posterUrl: native.presign(poster, { expiresIn: ttl }),
+      posterUrl: native.presign(poster, { expiresIn: posterTtl }),
       expiresAt: new Date(this.now().getTime() + ttl * 1000).toISOString(),
     };
   }
   async poster(slug: string) {
-    const { row, ttl } = await this.row(slug, false);
+    const { row, posterTtl } = await this.row(slug, false);
     posterReadiness(row);
     const { native } = this.dependencies();
     return {
       videoId: row.video.id,
       posterUrl: native.presign(row.posterJob.outputPrefix + "poster.webp", {
-        expiresIn: ttl,
+        expiresIn: posterTtl,
       }),
-      expiresAt: new Date(this.now().getTime() + ttl * 1000).toISOString(),
+      expiresAt: new Date(
+        this.now().getTime() + posterTtl * 1000,
+      ).toISOString(),
     };
   }
   async playlist(

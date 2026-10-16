@@ -435,8 +435,9 @@ test(
       expect((await catalog.list({})).items).toHaveLength(1);
       if (browserProof) await proveBrowserPlayback(app, id);
       const dto = await playback.info(id);
+      // Video URLs live max(2 x duration, 1 h).
       expect(Date.parse(dto.expiresAt) - Date.now()).toBeLessThanOrEqual(
-        durationMs * 2,
+        Math.max(durationMs * 2, 3_600_000),
       );
       const playlist = await playback.playlist(id, undefined);
       expect(playlist.headers.get("cache-control")).toBe("private, no-store");

@@ -1,6 +1,6 @@
 # Modul: poster video tidak hilang karena kedaluwarsa
 
-> Status: **POSTER-001–002 Done; POSTER-003–006 Backlog (approved)** · 16 Oktober 2026 · Pengguna melaporkan poster video menjadi kosong bila halaman dibiarkan lama; presigned URL dipertahankan. Plan: [implementation-plan](../plans/poster-no-expiry/implementation-plan.md), context: [repository-context](../plans/poster-no-expiry/repository-context.md). Plan disetujui pengguna 16 Oktober 2026.
+> Status: **POSTER-001–003 Done; POSTER-004–006 Backlog (approved)** · 16 Oktober 2026 · Pengguna melaporkan poster video menjadi kosong bila halaman dibiarkan lama; presigned URL dipertahankan. Plan: [implementation-plan](../plans/poster-no-expiry/implementation-plan.md), context: [repository-context](../plans/poster-no-expiry/repository-context.md). Plan disetujui pengguna 16 Oktober 2026.
 
 ## Tujuan modul
 
@@ -92,7 +92,7 @@ Tidak ada.
 
 ## Task: POSTER-003 — API: TTL poster terpisah dan dapat diatur
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 3
 - Referensi: POSTER-US-02; D1, D5
@@ -106,9 +106,9 @@ Env `MEDIA_POSTER_URL_TTL_SECONDS` (default 86400, valid 60–604800) untuk URL 
 
 ### Acceptance criteria
 
-- [ ] Umur URL poster mengikuti env dan tidak bergantung pada durasi; umur URL HLS = `max(2×durasi, env)` (default 1 jam) dan `expiresAt` konsisten.
-- [ ] Nilai di luar rentang atau bukan bilangan bulat ditolak saat start dengan pesan jelas.
-- [ ] Test unit/HTTP dan proof playback yang ada lulus.
+- [x] Umur URL poster mengikuti env dan tidak bergantung pada durasi; umur URL HLS = `max(2×durasi, env)` (default 1 jam) dan `expiresAt` konsisten.
+- [x] Nilai di luar rentang atau bukan bilangan bulat ditolak saat start dengan pesan jelas.
+- [x] Test unit/HTTP dan proof playback yang ada lulus.
 
 ### Validasi
 
@@ -116,7 +116,7 @@ Env `MEDIA_POSTER_URL_TTL_SECONDS` (default 86400, valid 60–604800) untuk URL 
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 16 Oktober 2026. `config/playback-env.ts`: `loadUrlLifetimes()` (`MEDIA_POSTER_URL_TTL_SECONDS` default 86400, `MEDIA_HLS_URL_TTL_SECONDS` default 3600, bilangan bulat 60–604800, divalidasi saat API start dengan pesan yang menyebut variabelnya), `urlLifetimeBounds`, `defaultUrlLifetimes`; `index.ts` memvalidasi di awal dan menyuntikkan ke `PlaybackService` (parameter ke-6). `PlaybackService`: TTL HLS = `max(2×durasi, hlsMinSeconds)` untuk `info().expiresAt` dan presign playlist/init/segmen; URL poster pada `info()` dan `poster()` memakai `posterSeconds` dan `expiresAt`-nya mengikuti itu. Test: `playback-env.test.ts` (3 test), `playback/service.test.ts` diperbarui (durasi 600000/1800000/1333 ms → HLS 3600 detik dan poster 86400; kombinasi `max(2×durasi, minimum)`; poster dapat diatur 120 detik–7 hari dan bebas durasi; revoke tetap menutup URL baru), proof integrasi `public-film-catalog-proof` (`X-Amz-Expires=86400`), `media-worker-proof` dan `public-content-proof` lulus (6 test). `bun test src` API 215 lulus + 1 gagal sebelumnya (`truncated JPEG data…`); `tsc --noEmit` bersih. Dokumentasi: `apps/api/.env.example`, `docs/guides/environment.md` (dua env baru dan TTL), `docs/operations/media.md`, `docs/architecture/overview.md`.
 
 ### Commit task
 
