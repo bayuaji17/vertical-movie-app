@@ -24,10 +24,12 @@ x-restart: &restart
       max-file: "5"
 x-api-env: &api-env
   env_file: ../../apps/api/.env.production
-  environment: &api-overrides
-    # Inside Docker the database is the "postgres" service, whatever the env file says.
+  environment:
+    &api-overrides # Inside Docker the database is the "postgres" service, whatever the env file says.
     DATABASE_URL: postgresql://vmovie:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@postgres:5432/vertical_movie_app
     NODE_ENV: production
+    # The sample env file says 127.0.0.1 (bare metal); in a container the API must listen on all interfaces.
+    HOST: 0.0.0.0
 
 services:
   postgres:

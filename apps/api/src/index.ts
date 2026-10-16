@@ -139,7 +139,7 @@ const app = createApp({
   ),
 })
   .onStop(() => multipart?.close())
-  .listen(env.port);
+  .listen({ port: env.port, ...(env.host ? { hostname: env.host } : {}) });
 
 let isShuttingDown = false;
 const shutdown = () => {
