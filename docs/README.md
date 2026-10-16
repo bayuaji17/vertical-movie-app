@@ -46,15 +46,16 @@ Konsep visual: [dashboard light](design/dashboard-light-shadcn.prompt.md), [dash
 
 ## Panduan development dan runbook
 
-| Dokumen                                                | Tanggung jawab                                                            |
-| ------------------------------------------------------ | ------------------------------------------------------------------------- |
-| [Workflow development](guides/development-workflow.md) | Modul → story → task, status dan kriteria selesai.                        |
-| [API development](guides/api-development.md)           | Inferensi Eden, lifecycle Elysia, auth, storage/worker dan pengujian Bun. |
-| [Environment](guides/environment.md)                   | Setup env, konfigurasi publik/server dan variabel aktif/planned.          |
-| [Template task](templates/task.md)                     | Backlog, acceptance criteria dan evidence.                                |
-| [Operasi auth](operations/auth.md)                     | Native provision/reset/recovery, maintenance dan rollout.                 |
-| [Operasi metadata video](operations/video-metadata.md) | Endpoint metadata, migration/recovery dan proof dedicated.                |
-| [Operasi media](operations/media.md)                   | Upload, worker, HLS, publication/playback, cleanup dan gerbang rollout.   |
+| Dokumen                                                | Tanggung jawab                                                                                         |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| [Workflow development](guides/development-workflow.md) | Modul → story → task, status dan kriteria selesai.                                                     |
+| [API development](guides/api-development.md)           | Inferensi Eden, lifecycle Elysia, auth, storage/worker dan pengujian Bun.                              |
+| [Environment](guides/environment.md)                   | Setup env, konfigurasi publik/server dan variabel aktif/planned.                                       |
+| [Template task](templates/task.md)                     | Backlog, acceptance criteria dan evidence.                                                             |
+| [Operasi auth](operations/auth.md)                     | Native provision/reset/recovery, maintenance dan rollout.                                              |
+| [Operasi metadata video](operations/video-metadata.md) | Endpoint metadata, migration/recovery dan proof dedicated.                                             |
+| [Operasi media](operations/media.md)                   | Upload, worker, HLS, publication/playback, cleanup dan gerbang rollout.                                |
+| [Deploy production di VPS](operations/deployment.md)   | Docker Compose dan tanpa Docker (systemd), Bun 1.4.3, R2, migrasi, admin, operasi dan troubleshooting. |
 
 ## Context dan plan per fitur
 
@@ -77,6 +78,8 @@ Plan awal katalog Film/Standalone: [context historis](plans/public-catalog/repos
 Detail dan tonton dari katalog: [context](plans/public-content-watch/repository-context.md), [plan detail](plans/public-content-watch/implementation-plan.md) dan [backlog PCW](tasks/public-content-watch.md). Pengguna meminta lanjut dan memilih Film/Standalone/Series beserta season/episode 7 Oktober 2026. PCW-000–008 implemented/verified lokal 8 Oktober 2026: detail Film/Standalone, Series dengan episode per season, watch HLS dan Next manual. Proof PostgreSQL/MinIO/FFmpeg serta Chromium development/build tersedia pada backlog. Evidence lokal PCW merupakan riwayat; source telah masuk baseline main melalui 85f6350 (#11), sebelum hooks65127a1. Progress/autoplay/editor/production bukan scope.
 
 Hapus konten draft dan archived (API DELETE video/season/series, tombstone storage + worker, UI dengan konfirmasi): [context](plans/delete-content/repository-context.md), [plan](plans/delete-content/implementation-plan.md) dan [backlog DEL](tasks/delete-content.md); pengguna meminta 13 Oktober 2026, D1–D6 disetujui; DEL-001–005 (API DELETE, tombstone, sapuan worker) implemented lokal dengan bukti integrasi PostgreSQL/MinIO, UI admin (DEL-006) implemented, bukti browser (DEL-007) lulus 8/8 dengan API, worker dan MinIO nyata; dokumentasi penutup (DEL-008) selesai; rollout produksi belum diotorisasi (branch `feat/delete-draft-archived`).
+
+Persiapan deploy production di VPS (sample env production, Dockerfile/compose/Caddy, unit systemd/nginx, panduan dengan dan tanpa Docker, runtime Bun 1.4.3): [context](plans/production-deployment/repository-context.md), [plan](plans/production-deployment/implementation-plan.md), [backlog DEP](tasks/production-deployment.md) dan [runbook deploy](operations/deployment.md); diminta pengguna 16 Oktober 2026, **implemented dan terverifikasi sebagian lokal** (Docker end-to-end tanpa HTTPS/R2 nyata; lihat batas di runbook).
 
 Poster video yang sudah tampil tidak boleh hilang karena kedaluwarsa (presigned URL dipertahankan; umur URL poster dilepas dari durasi, klien memperbarui diam-diam): [context](plans/poster-no-expiry/repository-context.md), [plan](plans/poster-no-expiry/implementation-plan.md) dan [backlog POSTER](tasks/poster-no-expiry.md); pengguna melaporkan 16 Oktober 2026, status **implemented lokal** 16 Oktober 2026 (poster 24 jam + gambar tidak dilepas, HLS `max(2×durasi, 1 jam)`; POSTER-001–006 Done, bukti browser 8/8 mode dev, runbook di [Media Operations](operations/media.md#poster-yang-tidak-hilang-karena-kedaluwarsa--16-oktober-2026)).
 
