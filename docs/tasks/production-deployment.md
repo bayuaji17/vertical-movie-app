@@ -1,6 +1,6 @@
 # Modul: persiapan deploy production di VPS
 
-> Status: **DEP-001–006 Done (implemented, terverifikasi sebagian lokal)** · 16 Oktober 2026 · Pengguna meminta sample env production, pembaruan README dan panduan deploy VPS dengan dan tanpa Docker dengan Bun terbaru. Plan: [implementation-plan](../plans/production-deployment/implementation-plan.md), context: [repository-context](../plans/production-deployment/repository-context.md), runbook: [deployment](../operations/deployment.md).
+> Status: **DEP-001–007 Done (implemented, terverifikasi sebagian lokal)** · 16 Oktober 2026 · Pengguna meminta sample env production, pembaruan README dan panduan deploy VPS dengan dan tanpa Docker dengan Bun terbaru. Plan: [implementation-plan](../plans/production-deployment/implementation-plan.md), context: [repository-context](../plans/production-deployment/repository-context.md), runbook: [deployment](../operations/deployment.md).
 
 ## Tujuan modul
 
@@ -204,7 +204,9 @@ Dikerjakan 16 Oktober 2026 (lihat runbook dan pembaruan `README.md`/`AGENTS.md`/
 
 Tidak ada.
 
-(m, h) => h + "Dikerjakan 16 Oktober 2026 (diamati): `bun run check-types` 4/4, `bun run lint` bersih, `bun run build` 2/2 (menghasilkan `apps/api/dist/db/migrate.js`), `bun run docs:check` lulus; API `bun test src` 218 lulus + 1 gagal sebelumnya (`truncated JPEG data fails the awaited native decode`, juga gagal di `main`); build/uji image dan stack seperti pada DEP-002\u2013004. Ledger SHA: DEP-001 `45fd6d6`, DEP-002/003 `2f3698f`, DEP-004 `1129a95`. **Batas:** HTTPS/ACME pada domain nyata, Cloudflare R2 nyata (upload, HLS, CORS), transcoding dalam container pada job nyata, startup systemd, nginx, PostgreSQL selain 18, restore backup dan ukuran VPS belum terbukti; push, PR, merge dan rollout produksi menunggu otorisasi."
+### Hasil dan bukti
+
+Dikerjakan 16 Oktober 2026 (diamati): `bun run check-types` 4/4, `bun run lint` bersih, `bun run build` 2/2 (menghasilkan `apps/api/dist/db/migrate.js`), `bun run docs:check` lulus; API `bun test src` 218 lulus + 1 gagal sebelumnya (`truncated JPEG data fails the awaited native decode`, juga gagal di `main`); build/uji image dan stack seperti pada DEP-002–004. Ledger SHA: DEP-001 `45fd6d6`, DEP-002/003 `2f3698f`, DEP-004 `1129a95`. **Batas:** HTTPS/ACME pada domain nyata, Cloudflare R2 nyata (upload, HLS, CORS), transcoding dalam container pada job nyata, startup systemd, nginx, PostgreSQL selain 18, restore backup dan ukuran VPS belum terbukti; push, PR, merge dan rollout produksi menunggu otorisasi.
 
 ### Commit task
 
@@ -216,3 +218,41 @@ Tidak ada.
 ### Blocker atau tindak lanjut
 
 Tidak ada.
+
+## Task: DEP-007 — Praktik terbaik tanpa Docker (Bun, Turborepo, Elysia, TanStack Start)
+
+- Status: Done
+- Owner: agent
+- Prioritas: 2
+- Referensi: DEP-US-02
+- Diperbarui: 2026-10-16
+- Dependensi: DEP-004, DEP-005
+- Ukuran: sedang
+
+### Ruang lingkup
+
+Menilai jalur tanpa Docker terhadap dokumentasi resmi Elysia, TanStack Start dan Turborepo, lalu menyesuaikan artefak dan panduan: `turbo.json` (`passThroughEnv` untuk `dev`/`start`), variabel opsional `HOST` pada API, `deploy/scripts/release.sh` (rilis atomik, migrasi eksplisit, rollback), unit systemd yang membaca `/opt/vertical-movie/current`, template `vertical-movie-api@.service`, serta bagian 6 dan 10 pada [deployment](../operations/deployment.md).
+
+### Acceptance criteria
+
+- [x] Setiap praktik pada bagian 10 menyebut sumber resmi, penerapan di repo dan bukti yang benar-benar diamati.
+- [x] `bun run start` tidak lagi membuang variabel shell yang tidak terdaftar; `HOST` memvalidasi nilainya dan menjaga perilaku default.
+- [x] Skrip rilis diuji: rilis baru, rilis ulang, rilis dengan origin berbeda, `--rollback` dan kegagalan health check yang kembali otomatis.
+
+### Validasi
+
+`bun test src/config` (45 lulus), `systemd-analyze verify`, uji sandbox `release.sh` dengan `systemctl` palsu, `bun run docs:check`.
+
+### Hasil dan bukti
+
+Dikerjakan 16 Oktober 2026 (diamati): API tanpa `HOST` mendengarkan `*:3399`, dengan `HOST=127.0.0.1` hanya loopback; dua instance API berbagi satu port lewat `SO_REUSEPORT` (12 permintaan terbagi 6/6, ≈74 MB RSS per instance); bundle JS ≈80 MB RSS vs `--compile` ≈75 MB sehingga `--compile` tidak dipakai. **Batas:** `release.sh` diuji di sandbox dengan `systemctl` palsu, bukan pada systemd/VPS nyata; shutdown rapi lewat systemd belum diuji.
+
+### Commit task
+
+- Pesan: `fix: pass shell env to turbo dev and start tasks` (`2fbd9d7`), `feat(api): add optional HOST to choose the listen address` (`38c24ed`), lalu commit rilis atomik dan dokumentasi (SHA dicatat pada update berikutnya)
+- Hook/checks: dijalankan oleh hook commit; lihat riwayat commit
+- Ledger: dicatat pada update dokumentasi berikutnya
+
+### Blocker atau tindak lanjut
+
+Uji `release.sh` pada VPS nyata sebelum rollout produksi.

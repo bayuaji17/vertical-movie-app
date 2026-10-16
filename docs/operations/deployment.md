@@ -32,7 +32,7 @@ Dua jalur yang setara. Pilih satu:
 - Browser hanya berbicara ke **satu origin** (domain Anda). Server web meneruskan `/api/*` ke API; **API, worker dan PostgreSQL tidak dibuka ke internet**.
 - Browser mengunggah video/cover dan mengambil poster serta segmen HLS **langsung ke R2** lewat URL presigned, jadi bucket memerlukan CORS (bagian 3).
 - Worker adalah proses terpisah dari API: tanpa worker, upload tidak diproses menjadi HLS.
-- Migrasi database **tidak** berjalan otomatis; Anda menjalankannya sebagai langkah eksplisit (bagian 5.4 dan 6.6).
+- Migrasi database **tidak** berjalan otomatis; Anda menjalankannya sebagai langkah eksplisit (bagian 5.4 dan 6.7).
 
 ## 2. Prasyarat
 
@@ -88,6 +88,7 @@ Aturan yang harus konsisten (kesalahan paling umum):
 | `VITE_API_URL`                                                             | Dipakai **saat build** (masuk bundle browser) **dan** saat runtime. Mengubahnya berarti **build ulang** web. Nilai yang salah → login/mutasi admin ditolak (`ORIGIN_FORBIDDEN`). |
 | `API_INTERNAL_URL` (web)                                                   | Alamat API dari sisi server web: `http://127.0.0.1:3001` (non-Docker) atau `http://api:3001` (Docker, diatur compose).                                                           |
 | `STORAGE_PROVIDER=r2`, `S3_ENDPOINT`, `S3_REGION=auto`, `S3_BUCKET`, kunci | Dari bagian 3. Endpoint harus `https://<account>.r2.cloudflarestorage.com` (validasi startup menolak bentuk lain).                                                               |
+| `HOST` (API, opsional)                                                     | Alamat listen API. Kosong = semua interface. Tanpa Docker: `127.0.0.1` (hanya proxy lokal yang menjangkau API). Docker: compose menyetel `0.0.0.0`.                              |
 | `NODE_ENV=production`, `LOG_FORMAT=json`                                   | Sudah di sample. `LOG_HTTP_BODIES` ditolak pada production.                                                                                                                      |
 | `MEDIA_POSTER_URL_TTL_SECONDS`, `MEDIA_HLS_URL_TTL_SECONDS`                | Umur URL presigned (default 24 jam dan 1 jam). Penjelasan: [Poster yang tidak hilang](media.md#poster-yang-tidak-hilang-karena-kedaluwarsa--16-oktober-2026).                    |
 
@@ -169,7 +170,16 @@ Caddy meminta sertifikat Let's Encrypt otomatis pada permintaan pertama ke `http
 
 ## 6. Jalur B — tanpa Docker
 
-Semua proses berjalan langsung di host sebagai pengguna non-root `vmovie` di bawah **systemd**. Contoh untuk Debian 13.
+Semua proses berjalan langsung di host sebagai pengguna non-root `vmovie` di bawah **systemd**, dengan **rilis atomik**: tiap versi dibangun di direktori sendiri dan `current` (symlink) dialihkan hanya setelah build berhasil, dengan health check dan rollback otomatis. Alasan dan sumber tiap pilihan ada di [bagian 10](#10-praktik-terbaik-bun-turborepo-elysia-dan-tanstack-start). Contoh untuk Debian 13.
+
+```text
+/opt/vertical-movie/
+├── repo/                           clone Git (hanya untuk fetch dan export ref)
+├── releases/<sha>-<hash origin>/   satu direktori per rilis (build lengkap, tidak diubah lagi)
+├── current  -> releases/...        rilis yang sedang dijalankan service
+└── previous -> releases/...        rilis sebelumnya (untuk --rollback)
+/etc/vertical-movie/{api.env,web.env}   konfigurasi (di luar rilis)
+```
 
 ### 6.1 Paket sistem
 
@@ -178,106 +188,106 @@ sudo apt update
 sudo apt install -y curl unzip git ca-certificates ffmpeg
 ```
 
-`unzip` diperlukan installer Bun; `ffmpeg` (termasuk `ffprobe`) diperlukan worker. PostgreSQL dan reverse proxy dipasang di 6.2 dan 6.7.
+`unzip` diperlukan installer Bun; `ffmpeg` (termasuk `ffprobe`) diperlukan worker. PostgreSQL dan reverse proxy dipasang di 6.2 dan 6.9.
 
 ### 6.2 PostgreSQL
 
 Aplikasi diuji pada **PostgreSQL 18** (Debian 13 menyediakan 17; untuk 18 tambahkan repo PGDG: `sudo apt install -y postgresql-common && sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh`, lalu `sudo apt install -y postgresql-18`). Buat role dan database:
 
 ```sh
-sudo -u postgres psql <<'EOF'
-CREATE ROLE vmovie LOGIN PASSWORD 'GANTI_DENGAN_PASSWORD_HEX';
-CREATE DATABASE vertical_movie_app OWNER vmovie;
-EOF
+sudo -u postgres psql -c "CREATE ROLE vmovie LOGIN PASSWORD 'GANTI_DENGAN_PASSWORD_HEX';"
+sudo -u postgres psql -c "CREATE DATABASE vertical_movie_app OWNER vmovie;"
 ```
 
 Biarkan PostgreSQL hanya mendengarkan `localhost` (default). Samakan password dengan `DATABASE_URL`.
 
 ### 6.3 Bun 1.4.3
 
-Pasang **versi yang dipin** ke `/usr/local/bin/bun` sehingga semua service memakai biner yang sama:
+Pasang **versi yang dipin** ke `/usr/local/bin/bun` sehingga semua service dan proses build memakai biner yang sama:
 
 ```sh
 curl -fsSL https://bun.sh/install | sudo BUN_INSTALL=/usr/local bash -s "bun-v1.4.3"
 bun --version      # 1.4.3
 ```
 
-### 6.4 Pengguna, kode dan build
+### 6.4 Pengguna, direktori dan clone
 
 ```sh
 sudo useradd --system --home-dir /var/lib/vmovie --create-home --shell /usr/sbin/nologin vmovie
-sudo git clone https://github.com/bayuaji17/vertical-movie-app.git /opt/vertical-movie-app
-sudo chown -R vmovie:vmovie /opt/vertical-movie-app
-sudo -u vmovie -H bash -c '
-  cd /opt/vertical-movie-app &&
-  HUSKY=0 bun install --frozen-lockfile &&
-  VITE_API_URL=https://movies.example.com bun run build'
+sudo install -d -o vmovie -g vmovie /opt/vertical-movie /opt/vertical-movie/releases
+sudo -u vmovie -H git clone https://github.com/bayuaji17/vertical-movie-app.git /opt/vertical-movie/repo
 ```
-
-`VITE_API_URL` pada build **harus** origin publik yang sama dengan di env runtime (bagian 4). Hasilnya: `apps/api/dist` (API, worker, migrasi) dan `apps/web/.output`.
 
 ### 6.5 Konfigurasi dan direktori kerja
 
 ```sh
 sudo install -d -m 750 -o root -g vmovie /etc/vertical-movie
-sudo install -m 640 -o root -g vmovie /opt/vertical-movie-app/apps/api/.env.production.example /etc/vertical-movie/api.env
-sudo install -m 640 -o root -g vmovie /opt/vertical-movie-app/apps/web/.env.production.example /etc/vertical-movie/web.env
+sudo install -m 640 -o root -g vmovie /opt/vertical-movie/repo/apps/api/.env.production.example /etc/vertical-movie/api.env
+sudo install -m 640 -o root -g vmovie /opt/vertical-movie/repo/apps/web/.env.production.example /etc/vertical-movie/web.env
 sudo install -d -m 750 -o vmovie -g vmovie /var/tmp/vertical-movie-worker
 sudoedit /etc/vertical-movie/api.env     # bagian 4 (DATABASE_URL ke 127.0.0.1, domain, secret, R2)
 sudoedit /etc/vertical-movie/web.env
 ```
 
-Catatan: systemd membaca `KEY=value` apa adanya (tanpa komentar di akhir baris); nilai dengan spasi harus diberi tanda kutip.
+`HOST=127.0.0.1` pada `api.env` membuat API hanya dapat dijangkau dari mesin itu (Elysia/Bun mendengarkan semua interface bila `HOST` kosong). systemd membaca `KEY=value` apa adanya (tanpa komentar di akhir baris); nilai dengan spasi harus diberi tanda kutip.
 
-### 6.6 Migrasi dan admin pertama
-
-```sh
-sudo -u vmovie -H bash -c '
-  cd /opt/vertical-movie-app/apps/api &&
-  set -a && . /etc/vertical-movie/api.env && set +a &&
-  bun run db:migrate:start'                       # "Database migrations applied."
-
-sudo -u vmovie -H bash -c '
-  cd /opt/vertical-movie-app/apps/api &&
-  set -a && . /etc/vertical-movie/api.env && set +a &&
-  bun run admin:provision -- you@example.com "Nama Admin"'   # prompt password tersembunyi
-```
-
-### 6.7 Service systemd dan reverse proxy
+### 6.6 Service systemd
 
 ```sh
-sudo cp /opt/vertical-movie-app/deploy/systemd/*.service /etc/systemd/system/
+sudo cp /opt/vertical-movie/repo/deploy/systemd/*.service /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable --now vertical-movie-api vertical-movie-worker vertical-movie-web
-systemctl status vertical-movie-api vertical-movie-worker vertical-movie-web
+sudo systemctl enable vertical-movie-api vertical-movie-worker vertical-movie-web   # dimulai oleh rilis pertama
 ```
 
-Unit ada di [`deploy/systemd/`](../../deploy/systemd/): API, worker (`TimeoutStopSec=75`, `Nice=10`) dan web, semuanya `Restart=always` dengan pembatasan hak akses dasar (`NoNewPrivileges`, `ProtectSystem`, `ProtectHome`).
+Unit ada di [`deploy/systemd/`](../../deploy/systemd/): API, worker (`TimeoutStopSec=75`, `Nice=10`) dan web, semuanya `Restart=always`, menjalankan `bun` langsung dari `/opt/vertical-movie/current/...` dengan pembatasan hak akses dasar (`NoNewPrivileges`, `ProtectSystem`, `ProtectHome`). Satu API per core: gunakan template [`vertical-movie-api@.service`](../../deploy/systemd/vertical-movie-api@.service) (bagian 10).
 
-Reverse proxy — pilih **Caddy** (sertifikat otomatis):
+### 6.7 Rilis pertama (build, migrasi, jalankan)
+
+Skrip [`deploy/scripts/release.sh`](../../deploy/scripts/release.sh) mengambil ref Git, membangun dengan `bun install --frozen-lockfile` dan `bun run build` (Turborepo) sebagai pengguna `vmovie`, memeriksa artefak, menerapkan migrasi **hanya bila `--migrate` diberikan** (sebelum pengalihan), mengalihkan `current`, me-restart service, menunggu health check (`/api/site-settings` lewat web → API → database) dan **mengembalikan rilis sebelumnya otomatis bila tidak sehat**.
+
+```sh
+export VITE_API_URL=https://movies.example.com      # origin publik: masuk ke bundle web
+sudo --preserve-env=VITE_API_URL /opt/vertical-movie/repo/deploy/scripts/release.sh main --migrate
+```
+
+`main` dapat diganti tag atau SHA. Build pertama beberapa menit. Nama rilis memuat SHA **dan** hash `VITE_API_URL` karena bundle web berisi origin itu.
+
+### 6.8 Admin pertama
+
+```sh
+sudo -u vmovie -H bash -c 'cd /opt/vertical-movie/current/apps/api && set -a && . /etc/vertical-movie/api.env && set +a && bun run admin:provision -- you@example.com "Nama Admin"'
+```
+
+Perintah meminta password admin pada prompt tersembunyi (12–128 karakter).
+
+### 6.9 Reverse proxy
+
+Pilih **Caddy** (sertifikat otomatis):
 
 ```sh
 sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https
 curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
 curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
 sudo apt update && sudo apt install -y caddy
-sudo cp /opt/vertical-movie-app/deploy/caddy/Caddyfile /etc/caddy/Caddyfile   # ganti domain dan e-mail
+sudo cp /opt/vertical-movie/repo/deploy/caddy/Caddyfile /etc/caddy/Caddyfile   # ganti domain dan e-mail
 sudo systemctl reload caddy
 ```
 
 atau **nginx** + certbot: [`deploy/nginx/vertical-movie.conf`](../../deploy/nginx/vertical-movie.conf) (langkah certbot di komentar file). Ikuti [petunjuk instalasi Caddy](https://caddyserver.com/docs/install#debian-ubuntu-raspbian) bila repo di atas berubah.
 
-### 6.8 Operasi harian
+### 6.10 Operasi harian
 
-| Tujuan          | Perintah                                                                                                                                                                                                |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Lihat log       | `journalctl -u vertical-movie-api -u vertical-movie-worker -u vertical-movie-web -f` (JSON satu baris)                                                                                                  |
-| Restart         | `sudo systemctl restart vertical-movie-worker`                                                                                                                                                          |
-| Update          | `cd /opt/vertical-movie-app && sudo -u vmovie git pull`, ulangi build (6.4), jalankan migrasi bila ada (6.6), lalu `sudo systemctl restart vertical-movie-api vertical-movie-worker vertical-movie-web` |
-| Rollback        | `sudo -u vmovie git checkout <tag/sha lama>`, build ulang, restart. Migrasi bersifat additive; bila skema berubah jauh, pulihkan dari backup.                                                           |
-| Ubah versi Bun  | `sudo /usr/local/bin/bun upgrade` (atau pasang ulang dengan tag lain di 6.3), perbarui `engines.bun` di repo, build ulang dan restart semua service                                                     |
-| Backup database | `sudo -u postgres pg_dump -Fc vertical_movie_app > /var/backups/vmovie-$(date +%F).dump` (jadwalkan dengan cron/systemd timer)                                                                          |
-| Restore         | hentikan `api`/`worker`, `sudo -u postgres pg_restore -d vertical_movie_app --clean --if-exists backup.dump`, mulai lagi                                                                                |
+| Tujuan          | Perintah                                                                                                                                                         |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Lihat log       | `journalctl -u vertical-movie-api -u vertical-movie-worker -u vertical-movie-web -f` (JSON satu baris)                                                           |
+| Restart         | `sudo systemctl restart vertical-movie-worker`                                                                                                                   |
+| Update          | `sudo --preserve-env=VITE_API_URL /opt/vertical-movie/repo/deploy/scripts/release.sh <tag/sha>` (tambahkan `--migrate` bila rilis memuat migrasi baru)           |
+| Rollback        | `sudo /opt/vertical-movie/repo/deploy/scripts/release.sh --rollback` (kembali ke `previous`; migrasi bersifat additive, bila skema berubah jauh pulihkan backup) |
+| Ubah versi Bun  | pasang ulang dengan tag lain (6.3), perbarui `engines.bun`/`bun-types` di repo, lalu rilis baru                                                                  |
+| Backup database | `sudo -u postgres pg_dump -Fc vertical_movie_app > /var/backups/vmovie-$(date +%F).dump` (jadwalkan dengan cron/systemd timer)                                   |
+| Restore         | hentikan `api`/`worker`, `sudo -u postgres pg_restore -d vertical_movie_app --clean --if-exists backup.dump`, mulai lagi                                         |
+
+Rilis lama dipangkas otomatis (default 3 terbaru; `current` dan `previous` tidak pernah dihapus; atur dengan `KEEP`).
 
 ---
 
@@ -304,20 +314,42 @@ Jalankan berurutan; berhenti di langkah pertama yang gagal dan lihat [troublesho
 
 ## 9. Troubleshooting
 
-| Gejala                                                                 | Penyebab umum dan tindakan                                                                                                                                                                          |
-| ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| API/worker berhenti saat start dengan pesan `... wajib/harus ...`      | Validasi env: pesan menyebut variabel. Contoh: `Production proyek ini memerlukan STORAGE_PROVIDER=r2`, `BETTER_AUTH_SECRET wajib ... 32 karakter`, `BETTER_AUTH_URL dan WEB_ORIGIN harus ... sama`. |
-| Login berhasil di API tetapi mutasi admin gagal 403 `ORIGIN_FORBIDDEN` | `VITE_API_URL` runtime atau build tidak sama dengan origin publik. Perbaiki env **dan build ulang web** (bagian 4).                                                                                 |
-| Halaman publik `503`, `/api/...` 502/504                               | Web tidak dapat menjangkau API: `API_INTERNAL_URL` salah, API belum sehat (`docker compose ps` / `systemctl status`), atau migrasi belum dijalankan (cek log API).                                  |
-| Error `relation ... does not exist` di log API                         | Migrasi belum diterapkan (langkah 5.4 / 6.6).                                                                                                                                                       |
-| Unggah gagal di browser (CORS), poster/HLS kosong                      | CORS bucket R2 belum dipasang atau origin berbeda dari domain Anda (bagian 3). Periksa konsol browser.                                                                                              |
-| Unggahan selesai tetapi tidak pernah diproses                          | Worker tidak berjalan atau FFmpeg tidak ditemukan (`FFMPEG_PATH`), atau ruang kosong di `MEDIA_WORKER_WORKDIR` < `MEDIA_WORKER_MIN_FREE_BYTES`. Lihat log worker.                                   |
-| Caddy gagal mendapat sertifikat                                        | DNS belum mengarah ke VPS, port 80/443 tertutup, atau `DOMAIN`/`ACME_EMAIL` salah; lihat `docker compose logs caddy` / `journalctl -u caddy`.                                                       |
-| `admin:provision` gagal                                                | Admin sudah ada (hanya satu yang diizinkan) atau skema belum dimigrasikan; lihat [Auth Operations](auth.md).                                                                                        |
+| Gejala                                                                 | Penyebab umum dan tindakan                                                                                                                                                                                            |
+| ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| API/worker berhenti saat start dengan pesan `... wajib/harus ...`      | Validasi env: pesan menyebut variabel. Contoh: `Production proyek ini memerlukan STORAGE_PROVIDER=r2`, `BETTER_AUTH_SECRET wajib ... 32 karakter`, `BETTER_AUTH_URL dan WEB_ORIGIN harus ... sama`.                   |
+| Login berhasil di API tetapi mutasi admin gagal 403 `ORIGIN_FORBIDDEN` | `VITE_API_URL` runtime atau build tidak sama dengan origin publik. Perbaiki env **dan build ulang web** (bagian 4).                                                                                                   |
+| Halaman publik `503`, `/api/...` 502/504                               | Web tidak dapat menjangkau API: `API_INTERNAL_URL` salah, API belum sehat (`docker compose ps` / `systemctl status`), atau migrasi belum dijalankan (cek log API).                                                    |
+| Error `relation ... does not exist` di log API                         | Migrasi belum diterapkan (langkah 5.4 / 6.7).                                                                                                                                                                         |
+| Unggah gagal di browser (CORS), poster/HLS kosong                      | CORS bucket R2 belum dipasang atau origin berbeda dari domain Anda (bagian 3). Periksa konsol browser.                                                                                                                |
+| Unggahan selesai tetapi tidak pernah diproses                          | Worker tidak berjalan atau FFmpeg tidak ditemukan (`FFMPEG_PATH`), atau ruang kosong di `MEDIA_WORKER_WORKDIR` < `MEDIA_WORKER_MIN_FREE_BYTES`. Lihat log worker.                                                     |
+| `release.sh` keluar dengan "health check gagal"                        | Rilis baru dibatalkan dan rilis sebelumnya dipulihkan otomatis. Lihat `journalctl -u vertical-movie-api -u vertical-movie-web`; biasanya env salah atau migrasi belum diterapkan (jalankan ulang dengan `--migrate`). |
+| Caddy gagal mendapat sertifikat                                        | DNS belum mengarah ke VPS, port 80/443 tertutup, atau `DOMAIN`/`ACME_EMAIL` salah; lihat `docker compose logs caddy` / `journalctl -u caddy`.                                                                         |
+| `admin:provision` gagal                                                | Admin sudah ada (hanya satu yang diizinkan) atau skema belum dimigrasikan; lihat [Auth Operations](auth.md).                                                                                                          |
+
+## 10. Praktik terbaik: Bun, Turborepo, Elysia dan TanStack Start
+
+Ringkasan keputusan untuk jalur tanpa Docker, dibandingkan dengan dokumentasi resmi masing-masing ([Elysia — deploy to production](https://elysiajs.com/patterns/deploy), [TanStack Start — hosting](https://tanstack.com/start/latest/docs/framework/react/guide/hosting), dan dokumen Turborepo yang terpasang di `node_modules/turbo/docs`). Kolom bukti adalah hasil pengukuran atau percobaan lokal pada 16 Oktober 2026.
+
+| Praktik                                                               | Sumber                                                                                              | Penerapan di repo ini                                                                                                                                                                                                                        | Bukti                                                                                                                                                    |
+| --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Jalankan API dari bundle JS dengan `NODE_ENV=production`              | Elysia: "compile to JavaScript", `NODE_ENV=production bun ./dist/index.js`                          | `bun build --target=bun` lalu `bun dist/index.js` (API, worker, migrasi).                                                                                                                                                                    | RSS ≈ 80 MB (bundle), ≈ 84 MB (+ `--minify-whitespace --minify-syntax`), ≈ 75 MB (`--compile`).                                                          |
+| Binary `bun build --compile` bersifat opsional                        | Elysia menyebut penghematan memori 2–3× dibanding development                                       | **Tidak dipakai**: bundle kita sudah production sehingga penghematan tidak terukur; binary 94 MB per layanan dan path berbasis `import.meta.dir` (migrasi) tidak cocok; satu biner `bun` yang dipin lebih mudah dioperasikan dan di-upgrade. | Pengukuran di atas. Bila tetap ingin: `bun build --compile --minify-whitespace --minify-syntax --target bun --outfile server src/index.ts`.              |
+| Elysia mendengarkan `0.0.0.0` otomatis, jadi ikat ke loopback         | Elysia: "binds to 0.0.0.0 automatically"                                                            | Variabel opsional `HOST` pada API (`HOST=127.0.0.1` di `api.env`); web sudah mendukung `HOST`. Kosong = semua interface (perilaku lama, dipakai Docker, di mana compose menyetel `0.0.0.0`).                                                 | Tanpa `HOST`: `*:3399`. Dengan `HOST=127.0.0.1`: `127.0.0.1:3399` dan akses lewat IP host ditolak.                                                       |
+| Elysia single-thread: satu instance per core lewat `SO_REUSEPORT`     | Elysia: cluster mode; "on Bun, Elysia uses SO_REUSEPORT by default" (Linux)                         | Template unit `vertical-movie-api@.service`: `systemctl enable --now vertical-movie-api@1 vertical-movie-api@2` (nonaktifkan unit tunggal). Cache per instance (katalog 60 detik, thumbnail) sudah mengandalkan TTL.                         | Dua instance berbagi satu port; 12 permintaan terbagi 6/6; ≈ 74 MB per instance. Mulai dengan satu; tambah bila CPU API (poster, auth) jenuh.            |
+| Web: Nitro preset `bun`, jalankan `.output/server/index.mjs`          | TanStack Start hosting: `nitro({ preset: 'bun' })`, `bun run build`; jalur Bun memerlukan React 19  | `vite.config.ts` sudah demikian (React ^19.2; Nitro dipin ke `3.0.260610-beta` karena plugin "masih aktif dikembangkan", naikkan versinya secara sengaja). Alternatif `server.ts` referensi (preload aset) tidak diperlukan.                 | Aset hashed dikirim `Cache-Control: public, max-age=31536000, immutable` + `ETag`; kompresi oleh Caddy/nginx.                                            |
+| Web **tidak** mendukung `reusePort`                                   | (tidak dibahas dokumen)                                                                             | Satu instance web; bila perlu skala, jalankan beberapa instance di port berbeda (`PORT=3010`, dst.) dan daftarkan semuanya ke `reverse_proxy 127.0.0.1:3000 127.0.0.1:3010`.                                                                 | Instance kedua pada port yang sama gagal `EADDRINUSE`.                                                                                                   |
+| Turborepo untuk build/CI, **bukan** supervisor runtime                | Turborepo Strict Mode: hanya variabel di `env`/`globalEnv`/`passThroughEnv` yang diteruskan ke task | systemd menjalankan `bun` langsung. Di `turbo.json`, task `dev`/`start` memakai `passThroughEnv: ["*"]` agar `bun run start` tidak membuang variabel shell yang tidak terdaftar.                                                             | Sebelumnya `MEDIA_POSTER_URL_TTL_SECONDS=5` (tidak valid) diam-diam diabaikan lewat `bun run start`; sesudahnya API gagal start dengan pesan yang benar. |
+| Variabel build harus masuk hash cache                                 | Turborepo: `env` dan framework inference (`VITE_*`)                                                 | `web#build` mendeklarasikan `VITE_API_URL`; nama rilis juga memuat hash origin.                                                                                                                                                              | Dua build commit yang sama dengan `VITE_API_URL` berbeda menghasilkan bundle berbeda (origin masing-masing tertanam).                                    |
+| `turbo prune` hanya untuk Docker                                      | Turborepo: `turbo prune` menghasilkan sub-monorepo + lockfile terpangkas                            | Bare-metal membangun seluruh workspace dengan `bun install --frozen-lockfile`; `prune` tidak diperlukan. Build non-TTY memakai `--ui=stream`; telemetri dimatikan (`TURBO_TELEMETRY_DISABLED=1`).                                            | Rilis diuji penuh: install, build, pemeriksaan artefak dan pengalihan.                                                                                   |
+| Rilis atomik, migrasi eksplisit sebelum pengalihan, rollback otomatis | Praktik deploy umum; aturan rollout repo (migrasi tidak otomatis, additive)                         | `deploy/scripts/release.sh`: build di direktori baru, `ln -sfn` + `mv -Tf` atomik, health check, rollback otomatis, pangkas rilis lama.                                                                                                      | Diuji: rilis baru, rilis ulang (tidak dibangun ulang), rilis dengan origin lain, `--rollback`, kegagalan health check kembali ke rilis lama.             |
+| Shutdown yang rapi                                                    | systemd `TimeoutStopSec`; Elysia `app.stop()`                                                       | API menangani `SIGTERM`/`SIGINT` (`app.stop()`); worker menyelesaikan atau melepas job dalam `MEDIA_WORKER_SHUTDOWN_SECONDS=60` (`TimeoutStopSec=75`).                                                                                       | Perilaku kode; tidak diuji dengan systemd nyata.                                                                                                         |
+
+Aturan tambahan: pin versi Bun yang sama di `engines.bun`, `bun-types`, installer (6.3) dan `BUN_VERSION` Docker, dan upgrade bersamaan. Jangan menjalankan `bun --watch` atau `bun run dev` di server produksi.
 
 ## Yang sudah dan belum terbukti
 
 Diamati pada 16 Oktober 2026 di mesin pengembangan Linux (Docker 29, Compose 5):
 
 - **Terbukti:** semua target image dibangun (`api` 338 MB, `web` 364 MB, `worker` ≈1 GB, `tools`); `docker compose config` valid; stack dijalankan (PostgreSQL 18 → `migrate` menerapkan 14 migrasi → `api`, `worker`, `web`); `admin:provision` dari container `tools` membuat admin; login lewat gateway web berhasil dan endpoint admin menjawab 200 dengan sesi dan 401 tanpa sesi; Bun **1.4.3** di semua container, proses berjalan sebagai pengguna non-root `bun`, FFmpeg 7.1 ada di worker, log JSON, hanya satu port yang dipublikasikan; Caddyfile (compose dan host) lolos `caddy validate`; unit systemd lolos `systemd-analyze verify`; langkah instalasi jalur tanpa Docker diuji pada container `debian:13-slim` bersih (`unzip`, Bun **1.4.3** lewat installer terpin ke `/usr/local/bin`, `ffmpeg` dan `ffprobe` 7.1.5 dari apt; pemasangan FFmpeg menarik banyak paket dan dapat memakan beberapa menit); sample env API valid menurut seluruh loader env (test otomatis).
-- **Belum terbukti:** HTTPS/ACME pada domain nyata; **Cloudflare R2 nyata** (upload, HLS, CORS, kebijakan token; "R2 staging belum diuji" juga tercatat di [Media Operations](media.md)); transcoding dalam container pada job nyata; startup service systemd dan konfigurasi nginx; PostgreSQL selain 18; restore backup; ukuran VPS dan performa.
+- **Terbukti (jalur tanpa Docker, 16 Oktober 2026):** `HOST=127.0.0.1` membuat API hanya mendengarkan loopback (tanpa `HOST` tetap semua interface); `bun run start` kini meneruskan variabel shell (`passThroughEnv`); `deploy/scripts/release.sh` diuji di sandbox dengan `systemctl` palsu (build + migrasi penuh, rilis ulang tanpa build, rilis dengan origin lain, `--rollback`, health check gagal → rollback otomatis); dua instance API berbagi satu port lewat `SO_REUSEPORT`; `vertical-movie-api@.service` lolos `systemd-analyze verify`.
+- **Belum terbukti:** `release.sh` pada systemd dan VPS nyata; HTTPS/ACME pada domain nyata; **Cloudflare R2 nyata** (upload, HLS, CORS, kebijakan token; "R2 staging belum diuji" juga tercatat di [Media Operations](media.md)); transcoding dalam container pada job nyata; startup service systemd dan konfigurasi nginx; PostgreSQL selain 18; restore backup; ukuran VPS dan performa.
