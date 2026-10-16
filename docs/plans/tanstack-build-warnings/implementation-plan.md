@@ -177,3 +177,7 @@ Tidak ada keputusan produk yang menghalangi scope directive. Optimasi chunk/upgr
 ### Remote delivery — 2026-10-05
 
 Pengguna meminta push, buka PR dan merge; squash diizinkan khusus `fix/tanstack-build-warnings`. Receipt WEB-BUILD-004 disertakan sebelum push. Pemeriksaan freshness remote tidak menunjukkan commit baru pada `origin/main`; perubahan source tetap sama dengan hasil quality gates WEB-BUILD-004. Pekerjaan desain lokal tidak masuk delivery. Hasil PR/merge dicatat setelah operasi berhasil.
+
+- Receipt documentation closure: `893f6d1a094351f3465bbe36ed2e07dd2f72e014`; docs:check 47/336, Prettier/whitespace dan hooks lint/types/Commitlint lulus. Source tidak berubah dari WEB-BUILD-004.
+- [PR #5](https://github.com/bayuaji17/vertical-movie-app/pull/5) dipush/dibuat dan squash merge berhasil ke `main`, commit `c5406282f8f3c86563ba7112ec43d2aa17f97da2`. GitHub melaporkan MERGED; tree hasil merge identik dengan branch head yang diverifikasi.
+- Branch source tetap lokal/remote pada `893f6d1a094351f3465bbe36ed2e07dd2f72e014`; checkout lokal `main` diselaraskan dengan `origin/main`. Receipt remote ini dicatat setelah merge untuk update dokumentasi task berikutnya.
