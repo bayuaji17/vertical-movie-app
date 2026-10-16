@@ -16,7 +16,6 @@ export function PublicPoster({ video }: { video: PublicVideo }) {
     >
       {cover.source ? (
         <img
-          key={cover.source}
           src={cover.source}
           alt={`Poster for ${video.title}`}
           width={900}

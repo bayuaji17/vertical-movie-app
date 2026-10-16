@@ -1,7 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { publicVideoBrowser } from '#/lib/public/catalog-reader'
 import { PosterQueue } from '#/lib/public/poster-state'
-import type { PublicVideo, SignedPoster } from '#/lib/public/catalog-model'
+import { PosterController } from '#/lib/public/poster-controller'
+import type { PosterView } from '#/lib/public/poster-controller'
+import type { PublicVideo } from '#/lib/public/catalog-model'
 import { usePublicOnline } from './use-public-online'
 
 let queue: PosterQueue | undefined
@@ -12,15 +14,54 @@ function browserQueue() {
     publicVideoBrowser().poster(video, signal),
   ))
 }
+function preloadImage(url: string, signal: AbortSignal) {
+  return new Promise<void>((resolve, reject) => {
+    const image = new Image()
+    const stop = () => {
+      image.onload = image.onerror = null
+      image.src = ''
+      reject(signal.reason ?? new Error('aborted'))
+    }
+    if (signal.aborted) return stop()
+    signal.addEventListener('abort', stop, { once: true })
+    image.onload = () => {
+      signal.removeEventListener('abort', stop)
+      resolve()
+    }
+    image.onerror = () => {
+      signal.removeEventListener('abort', stop)
+      reject(new Error('Poster image failed to load.'))
+    }
+    image.src = url
+  })
+}
+const start: PosterView = { src: undefined, failed: false, busy: false }
+
+/**
+ * The poster of a video page. Its URL is temporary, but a poster that is on
+ * screen is never removed: new URLs are fetched and preloaded in the background.
+ */
 export function usePublicPoster(video: PublicVideo) {
-  const ref = useRef<HTMLDivElement>(null),
-    automatic = useRef(0)
+  const ref = useRef<HTMLDivElement>(null)
   const [visible, setVisible] = useState(false),
-    [revision, setRevision] = useState(0)
-  const [packet, setPacket] = useState<SignedPoster | null>(null),
-    [failed, setFailed] = useState(false),
-    [busy, setBusy] = useState(false)
+    [view, setView] = useState<PosterView>(start)
   const online = usePublicOnline()
+  const controller = useMemo(() => {
+    if (typeof window === 'undefined') return undefined
+    return new PosterController({
+      request: (signal) => {
+        // Always a fresh URL: the cached one is what is about to expire.
+        browserQueue().invalidate(video)
+        return browserQueue().request(video, signal)
+      },
+      preload: preloadImage,
+      onChange: setView,
+    })
+  }, [video])
+  useEffect(() => {
+    setView(start)
+    return () => controller?.dispose()
+  }, [controller])
   useEffect(() => {
     const element = ref.current
     if (!element) return
@@ -50,76 +91,29 @@ export function usePublicPoster(video: PublicVideo) {
     }
   }, [])
   useEffect(() => {
-    automatic.current = 0
-    setPacket(null)
-    setFailed(false)
-  }, [video.id, video.slug])
-  const renew = useCallback(() => {
-    browserQueue().invalidate(video)
-    setPacket(null)
-    setFailed(false)
-    setRevision((v) => v + 1)
-  }, [video])
+    controller?.setActive(visible && online)
+  }, [controller, visible, online])
+  // Coming back to the tab or the network may mean the URL needs renewing.
   useEffect(() => {
-    if (!visible || !online) return
-    const controller = new AbortController()
-    setBusy(true)
-    browserQueue()
-      .request(video, controller.signal)
-      .then((value) => {
-        if (!controller.signal.aborted) {
-          setPacket(value)
-          setFailed(false)
-        }
-      })
-      .catch(() => {
-        if (controller.signal.aborted) return
-        if (automatic.current < 1) {
-          automatic.current++
-          renew()
-        } else {
-          setPacket(null)
-          setFailed(true)
-        }
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setBusy(false)
-      })
-    return () => controller.abort()
-  }, [visible, online, video, revision, renew])
-  useEffect(() => {
-    if (!visible || !packet) return
-    const timer = setTimeout(
-      () => {
-        setPacket(null)
-        if (online && automatic.current < 1) {
-          automatic.current++
-          renew()
-        } else setFailed(true)
-      },
-      Math.max(0, Date.parse(packet.expiresAt) - Date.now()),
-    )
-    return () => clearTimeout(timer)
-  }, [visible, packet, online, renew])
-  const onError = () => {
-    setPacket(null)
-    if (visible && online && automatic.current < 1) {
-      automatic.current++
-      renew()
-    } else setFailed(true)
-  }
+    if (!controller) return
+    const check = () => {
+      if (document.visibilityState === 'visible') controller.check()
+    }
+    document.addEventListener('visibilitychange', check)
+    window.addEventListener('focus', check)
+    return () => {
+      document.removeEventListener('visibilitychange', check)
+      window.removeEventListener('focus', check)
+    }
+  }, [controller])
+  const onError = useCallback(() => controller?.imageFailed(), [controller])
+  const retry = useCallback(() => controller?.retry(), [controller])
   return {
     ref,
-    source:
-      packet?.videoId === video.id && Date.parse(packet.expiresAt) > Date.now()
-        ? packet.posterUrl
-        : undefined,
-    failed: failed || !online,
-    busy,
+    source: view.src,
+    failed: view.failed || (!view.src && !online),
+    busy: view.busy,
     onError,
-    retry: () => {
-      automatic.current = 0
-      renew()
-    },
+    retry,
   }
 }

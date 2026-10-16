@@ -101,7 +101,7 @@ test('pre-aborted signals and invalid slugs stop before I/O; late aborted data c
   await expect(api.detail(video.slug, controller.signal)).rejects.toThrow()
   expect(reads).toBe(1)
 })
-test('signed poster requires matching identity, safe WebP URL and bounded future expiry', async () => {
+test('signed poster requires matching identity, safe WebP URL and an expiry in the next 7 days', async () => {
   const now = Date.parse('2026-10-08T00:00:00.000Z')
   const poster = {
     videoId: video.id,
@@ -116,12 +116,20 @@ test('signed poster requires matching identity, safe WebP URL and bounded future
       () => now,
     )
   expect(await api(poster).poster(video, signal())).toEqual(poster)
+  // The lifetime is set on the server and does not depend on the video's duration.
+  for (const lifetime of [3_600_000, 86_400_000, 7 * 86_400_000]) {
+    const long = {
+      ...poster,
+      expiresAt: new Date(now + lifetime).toISOString(),
+    }
+    expect(await api(long).poster(video, signal())).toEqual(long)
+  }
   for (const value of [
     { ...poster, videoId: '00000000-0000-4000-8000-000000000002' },
     { ...poster, posterUrl: 'https://user:password@storage.test/poster.webp' },
     { ...poster, posterUrl: 'https://storage.test/master.m3u8' },
     { ...poster, expiresAt: new Date(now).toISOString() },
-    { ...poster, expiresAt: new Date(now + 3_600_000).toISOString() },
+    { ...poster, expiresAt: new Date(now + 8 * 86_400_000).toISOString() },
     { ...poster, masterUrl: '/hls' },
   ])
     await expect(api(value).poster(video, signal())).rejects.toMatchObject({

@@ -44,6 +44,9 @@ export const publicVideoSchema = watchVideoSchema.refine(
   (v) => v.kind !== 'episode',
 )
 export type PublicVideo = z.infer<typeof publicVideoSchema>
+// Longest poster URL lifetime the API may issue (SigV4 allows 7 days; the same
+// bound as urlLifetimeBounds.max in apps/api/src/config/playback-env.ts).
+export const posterMaxLifetimeMs = 7 * 24 * 3_600_000
 export const signedPosterSchema = z
   .object({
     videoId: z.string().uuid(),

@@ -1,6 +1,6 @@
 # Modul: poster video tidak hilang karena kedaluwarsa
 
-> Status: **POSTER-001–003 Done; POSTER-004–006 Backlog (approved)** · 16 Oktober 2026 · Pengguna melaporkan poster video menjadi kosong bila halaman dibiarkan lama; presigned URL dipertahankan. Plan: [implementation-plan](../plans/poster-no-expiry/implementation-plan.md), context: [repository-context](../plans/poster-no-expiry/repository-context.md). Plan disetujui pengguna 16 Oktober 2026.
+> Status: **POSTER-001–004 Done; POSTER-005–006 Backlog (approved)** · 16 Oktober 2026 · Pengguna melaporkan poster video menjadi kosong bila halaman dibiarkan lama; presigned URL dipertahankan. Plan: [implementation-plan](../plans/poster-no-expiry/implementation-plan.md), context: [repository-context](../plans/poster-no-expiry/repository-context.md). Plan disetujui pengguna 16 Oktober 2026.
 
 ## Tujuan modul
 
@@ -131,7 +131,7 @@ Tidak ada selain POSTER-001.
 
 ## Task: POSTER-004 — Web: poster yang sudah tampil tidak dilepas
 
-- Status: Backlog
+- Status: Done
 - Owner: agent
 - Prioritas: 4
 - Referensi: POSTER-US-01; D2, D3, D5
@@ -141,13 +141,13 @@ Tidak ada selain POSTER-001.
 
 ### Ruang lingkup
 
-Tulis ulang `usePublicPoster`/`PublicPoster`: simpan URL terakhir yang termuat; pembaruan diam-diam pada 80% umur dan pada `visibilitychange`/`focus`/`online`; preload dengan `new Image()` lalu tukar `src` hanya bila berhasil; backoff 2/5/15/30/60 detik; fallback "Cover unavailable" hanya bila belum pernah ada gambar; validasi TTL klien memakai batas bersama (bukan `2×durasi+30 dtk`). Perbarui `PosterQueue`/test yang terdampak.
+Tulis ulang `usePublicPoster`/`PublicPoster` (logika dipisah ke `PosterController` murni agar dapat diuji; `PosterQueue` dan `signedPosterSchema` dipertahankan karena presign tetap dipakai): simpan URL terakhir yang termuat; pembaruan diam-diam pada 80% umur dan pada `visibilitychange`/`focus`/`online`; preload dengan `new Image()` lalu tukar `src` hanya bila berhasil; backoff 2/5/15/30/60 detik; fallback "Cover unavailable" hanya bila belum pernah ada gambar; validasi TTL klien memakai batas bersama (bukan `2×durasi+30 dtk`). Perbarui `PosterQueue`/test yang terdampak.
 
 ### Acceptance criteria
 
-- [ ] Tidak ada jalur kode yang menghapus gambar yang sudah tampil karena waktu atau kegagalan pembaruan.
-- [ ] Timer dan listener dibersihkan saat unmount; tidak ada permintaan ganda bersamaan.
-- [ ] Fallback dan retry berfungsi saat gambar belum pernah termuat; target sentuh ≥ 44 px.
+- [x] Tidak ada jalur kode yang menghapus gambar yang sudah tampil karena waktu atau kegagalan pembaruan.
+- [x] Timer dan listener dibersihkan saat unmount; tidak ada permintaan ganda bersamaan.
+- [x] Fallback dan retry berfungsi saat gambar belum pernah termuat; target sentuh ≥ 44 px.
 
 ### Validasi
 
@@ -155,7 +155,7 @@ Test state/komponen dengan jam palsu; browser pada POSTER-006.
 
 ### Hasil dan bukti
 
-Belum ada.
+Dikerjakan 16 Oktober 2026. `lib/public/poster-controller.ts` (`PosterController`, murni dengan timer/request/preload diinjeksi): poster ditampilkan hanya setelah URL-nya berhasil dimuat (`new Image()`), disimpan, dan **tidak pernah dihapus** — pembaruan dilakukan di latar belakang pada 80% umur URL dan lewat `check()` saat tab terlihat/`focus`/`online`, URL baru dipreload dan baru ditukar bila berhasil; kegagalan memakai backoff 2/5/15/30/60 detik tanpa batas; `failed` (fallback "Cover unavailable" + Retry) hanya bila belum pernah ada poster; packet yang sudah kedaluwarsa ditolak; `imageFailed()` meminta URL baru segera; `setActive(false)` menghentikan timer, `dispose()` membatalkan semua. `hooks/use-public-poster.ts` ditulis ulang tipis (IntersectionObserver, `usePublicOnline`, `visibilitychange`/`focus`, preload gambar) dan `public-poster.tsx` tidak lagi me-remount `<img>` (`key` dihapus). `catalog-client.poster()` tidak lagi menolak umur > `2×durasi+30 dtk`; batasnya `posterMaxLifetimeMs` (7 hari, cermin batas API) + 1 menit. Test: `public-poster-controller.test.ts` (9 test dengan jam manual: tampil setelah dimuat lalu diperbarui di 80%, 200 menit dengan TTL 2 menit tanpa pernah kehilangan gambar, kegagalan menahan poster + backoff, fallback hanya bila belum pernah tampil, gambar gagal-preload tidak ditukar, pause/resume, `imageFailed`, retry/dispose, packet kedaluwarsa), `public-video-client.test.ts` diperbarui (1 jam, 24 jam, 7 hari diterima; 8 hari ditolak), `public-video-state` tetap lulus. Bukti browser menyusul pada POSTER-006.
 
 ### Commit task
 
