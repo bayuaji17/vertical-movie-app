@@ -8,6 +8,7 @@ node_modules
 # Local env files; commit only the sample configuration
 .env*
 !.env.example
+!.env.production.example
 
 # Testing
 coverage
