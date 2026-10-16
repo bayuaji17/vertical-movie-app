@@ -66,6 +66,37 @@ bun run build --filter=api
 bun run build --filter=web
 ```
 
+## Production deployment
+
+The whole stack runs on **Bun 1.4.3** (see `engines.bun`) on a single VPS: PostgreSQL, the API, a separate media worker (FFmpeg), the web server and a reverse proxy. Media storage in production is **Cloudflare R2** (`NODE_ENV=production` rejects MinIO). Two supported paths, both described step by step in the [deployment guide](docs/operations/deployment.md):
+
+| Path           | Files                                                                                                                                          | Summary                                                                                                                                                 |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Docker Compose | [`deploy/docker/`](deploy/docker/) (`Dockerfile`, `compose.yaml`, `Caddyfile`, `.env.example`)                                                 | `oven/bun:1.4.3-debian` images, Caddy with automatic HTTPS, only ports 80/443 are published.                                                            |
+| Without Docker | [`deploy/systemd/`](deploy/systemd/), [`deploy/scripts/`](deploy/scripts/), [`deploy/caddy/`](deploy/caddy/), [`deploy/nginx/`](deploy/nginx/) | Bun, FFmpeg and PostgreSQL on the host, systemd services, Caddy or nginx, atomic releases via [`deploy/scripts/release.sh`](deploy/scripts/release.sh). |
+
+Production environment samples (copy, then replace every `CHANGE_ME`; the copies are ignored by Git):
+
+```sh
+cp apps/api/.env.production.example apps/api/.env.production   # API and worker
+cp apps/web/.env.production.example apps/web/.env.production   # web
+cp deploy/docker/.env.example deploy/docker/.env               # Docker Compose only
+```
+
+Docker quick start, from `deploy/docker` after editing those files:
+
+```sh
+docker compose build
+docker compose up -d postgres
+docker compose run --rm migrate        # migrations are always an explicit step
+docker compose --profile tools run --rm tools bun run --cwd apps/api admin:provision -- you@example.com "Admin"
+docker compose up -d
+```
+
+`VITE_API_URL` (the public https origin) is compiled into the web bundle, so it must be set when the web image or `bun run build` runs, and must equal `BETTER_AUTH_URL` and `WEB_ORIGIN`. The guide lists what is verified and what is not (HTTPS on a real domain and a real R2 bucket have not been exercised yet).
+
+On a host without Docker, supervisors (systemd) run `bun` directly from the current release instead of `bun run start`; the guide explains why and how the other Bun, Turborepo, Elysia and TanStack Start practices were applied ([section 10](docs/operations/deployment.md#10-praktik-terbaik-bun-turborepo-elysia-dan-tanstack-start)).
+
 ## Git hooks and commit messages
 
 `bun install` activates Husky. Before each commit, the `pre-commit` hook runs `bun run docs:check`, `bun run lint` and `bun run check-types`. The `commit-msg` hook checks the message with Commitlint and the Conventional Commits rules.

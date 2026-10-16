@@ -7,6 +7,8 @@ export interface ApiEnv {
   poster: PosterEnv;
   storage?: StorageEnv;
   port: number;
+  /** Interface to listen on; unset = all interfaces (Elysia/Bun default). */
+  host?: string;
   databaseUrl: string;
   betterAuthUrl: string;
   betterAuthSecret: string;
@@ -68,6 +70,18 @@ function parseOrigin(name: string, value: string | undefined): string {
   return url.origin;
 }
 
+// A host name, an IPv4 address or an IPv6 address (for example 127.0.0.1, ::1, 0.0.0.0).
+function loadHost(value: string | undefined) {
+  const host = value?.trim();
+  if (!host) return undefined;
+  const valid =
+    /^[A-Za-z0-9]([A-Za-z0-9.-]*[A-Za-z0-9])?$/.test(host) ||
+    (/^[0-9A-Fa-f:]+$/.test(host) && host.includes(":"));
+  if (!valid)
+    throw new Error("HOST harus berupa nama host atau alamat IP yang valid.");
+  return host;
+}
+
 export function loadApiEnv(
   source: Record<string, string | undefined> = Bun.env,
 ): ApiEnv {
@@ -82,6 +96,7 @@ export function loadApiEnv(
     throw new Error("PORT harus berupa bilangan bulat antara 1 dan 65535.");
   }
 
+  const host = loadHost(source.HOST);
   const databaseUrl = loadDatabaseUrl(source);
 
   const secret = source.BETTER_AUTH_SECRET;
@@ -103,6 +118,7 @@ export function loadApiEnv(
       ? { storage: loadStorageEnv(source) }
       : {}),
     port,
+    ...(host ? { host } : {}),
     databaseUrl,
     betterAuthUrl,
     betterAuthSecret: secret,

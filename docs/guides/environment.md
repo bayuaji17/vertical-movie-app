@@ -2,6 +2,10 @@
 
 > Diperbarui 6 Oktober 2026. API media/worker/HLS dan poster request-path aktif pada development MinIO; built-browser MinIO proof poster lulus pada ACOV-009. Production R2 melalui selector env tersedia tetapi proof staging belum dijalankan. Variabel native poster aktif di API; kontrak/command/batas evidence: [Media Operations](../operations/media.md).
 
+## Production
+
+Sample production terpisah dari sample development: [`apps/api/.env.production.example`](../../apps/api/.env.production.example) (API dan worker), [`apps/web/.env.production.example`](../../apps/web/.env.production.example) dan, untuk Docker Compose, [`deploy/docker/.env.example`](../../deploy/docker/.env.example). Perbedaan utama dari development: `NODE_ENV=production`, `LOG_FORMAT=json`, storage **wajib R2** (`STORAGE_PROVIDER=r2`, endpoint `https://<account>.r2.cloudflarestorage.com`, region `auto`; MinIO ditolak), `BETTER_AUTH_URL`/`WEB_ORIGIN`/`VITE_API_URL` berupa origin publik https yang sama, dan tidak ada variabel test. Langkah penggunaan, aturan konsistensi dan troubleshooting: [Deploy production di VPS](../operations/deployment.md). Sample API dijaga valid oleh `apps/api/src/config/production-env-sample.test.ts`.
+
 ## Mulai dari root repo
 
 ```sh
@@ -18,6 +22,7 @@ Perintah `cp` cukup dijalankan sekali; jika `.env` sudah ada, tambahkan variabel
 | Variabel                                   | Kegunaan                                                                                                                                                      | Status                                               |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
 | `PORT`                                     | Port API; default starter 3001.                                                                                                                               | Aktif pada dev dan start.                            |
+| `HOST`                                     | Alamat listen API (opsional; hostname atau IP). Kosong = semua interface. Production tanpa Docker: `127.0.0.1`.                                               | Aktif pada dev dan start.                            |
 | `DATABASE_URL`                             | Koneksi PostgreSQL untuk Drizzle, data auth, dan queue persisten.                                                                                             | URL divalidasi saat API start; koneksi saat dipakai. |
 | `BETTER_AUTH_URL`                          | Origin publik web untuk Better Auth, misalnya `http://localhost:3000`; tanpa suffix `/api/auth`.                                                              | Dipakai saat startup API.                            |
 | `BETTER_AUTH_SECRET`                       | Secret autentikasi acak dengan entropi tinggi, minimal 32 karakter.                                                                                           | Wajib diisi saat API start.                          |

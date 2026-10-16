@@ -1,0 +1,163 @@
+# Production stack on one VPS: PostgreSQL, API, media worker, web and Caddy (automatic HTTPS).
+# Only Caddy publishes ports (80/443). Run from this directory or pass -f deploy/docker/compose.yaml.
+# Guide: docs/operations/deployment.md
+#
+#   cp .env.example .env                                   # then edit (domain, passwords)
+#   cp ../../apps/api/.env.production.example ../../apps/api/.env.production   # then edit
+#   cp ../../apps/web/.env.production.example ../../apps/web/.env.production   # then edit
+#   docker compose build
+#   docker compose up -d postgres
+#   docker compose run --rm migrate                        # explicit, never automatic
+#   docker compose run --rm tools bun run --cwd apps/api admin:provision -- you@example.com "Admin"
+#   docker compose up -d
+name: vertical-movie
+
+x-bun: &bun
+  BUN_VERSION: ${BUN_VERSION:-1.4.3}
+x-restart: &restart
+  restart: unless-stopped
+  # Container logs grow without bound by default; keep at most 5 x 10 MB per service.
+  logging:
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: "5"
+x-api-env: &api-env
+  env_file: ../../apps/api/.env.production
+  environment:
+    &api-overrides # Inside Docker the database is the "postgres" service, whatever the env file says.
+    DATABASE_URL: postgresql://vmovie:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@postgres:5432/vertical_movie_app
+    NODE_ENV: production
+    # The sample env file says 127.0.0.1 (bare metal); in a container the API must listen on all interfaces.
+    HOST: 0.0.0.0
+
+services:
+  postgres:
+    image: postgres:18
+    <<: *restart
+    environment:
+      POSTGRES_USER: vmovie
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: vertical_movie_app
+    volumes:
+      # PostgreSQL 18 images keep versioned data below /var/lib/postgresql.
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vmovie -d vertical_movie_app"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [internal]
+
+  api:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+      target: api
+      args:
+        <<: *bun
+        VITE_API_URL: ${PUBLIC_ORIGIN:?set PUBLIC_ORIGIN in .env}
+    image: vertical-movie-api:${TAG:-latest}
+    <<: [*restart, *api-env]
+    depends_on:
+      postgres: { condition: service_healthy }
+    networks: [internal]
+
+  worker:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+      target: worker
+      args:
+        <<: *bun
+        VITE_API_URL: ${PUBLIC_ORIGIN}
+    image: vertical-movie-worker:${TAG:-latest}
+    <<: [*restart, *api-env]
+    # The worker finishes or releases its current job on SIGTERM (MEDIA_WORKER_SHUTDOWN_SECONDS=60).
+    stop_grace_period: 75s
+    volumes:
+      - worker-tmp:/var/tmp/vertical-movie-worker
+    depends_on:
+      postgres: { condition: service_healthy }
+    networks: [internal]
+
+  web:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+      target: web
+      args:
+        <<: *bun
+        # Compiled into the browser bundle: the public https origin.
+        VITE_API_URL: ${PUBLIC_ORIGIN}
+    image: vertical-movie-web:${TAG:-latest}
+    <<: *restart
+    env_file: ../../apps/web/.env.production
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: "3000"
+      VITE_API_URL: ${PUBLIC_ORIGIN}
+      API_INTERNAL_URL: http://api:3001
+    depends_on:
+      api: { condition: service_healthy }
+    networks: [internal]
+
+  caddy:
+    image: caddy:2
+    <<: *restart
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env}
+      ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      web: { condition: service_healthy }
+    networks: [internal]
+
+  # ---- operator commands (not started by `up`; run with `docker compose run --rm ...`) ----
+  migrate:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+      target: api
+      args:
+        <<: *bun
+        VITE_API_URL: ${PUBLIC_ORIGIN}
+    image: vertical-movie-api:${TAG:-latest}
+    profiles: [tools]
+    <<: *api-env
+    command: ["bun", "dist/db/migrate.js"]
+    depends_on:
+      postgres: { condition: service_healthy }
+    networks: [internal]
+
+  tools:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+      target: tools
+      args:
+        <<: *bun
+        VITE_API_URL: ${PUBLIC_ORIGIN}
+    image: vertical-movie-tools:${TAG:-latest}
+    profiles: [tools]
+    <<: *api-env
+    depends_on:
+      postgres: { condition: service_healthy }
+    networks: [internal]
+
+networks:
+  internal:
+
+volumes:
+  postgres-data:
+  worker-tmp:
+  caddy-data:
+  caddy-config:

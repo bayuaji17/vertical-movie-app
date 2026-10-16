@@ -1,0 +1,26 @@
+[Unit]
+Description=Vertical Movie web (TanStack Start on Bun)
+After=network-online.target vertical-movie-api.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=vmovie
+Group=vmovie
+WorkingDirectory=/opt/vertical-movie/current/apps/web
+EnvironmentFile=/etc/vertical-movie/web.env
+ExecStart=/usr/local/bin/bun .output/server/index.mjs
+Restart=always
+RestartSec=3
+LimitNOFILE=65536
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+
+[Install]
+WantedBy=multi-user.target

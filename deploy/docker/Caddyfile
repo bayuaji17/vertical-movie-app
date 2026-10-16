@@ -1,0 +1,18 @@
+# Used by the compose stack. Caddy gets and renews the certificate by itself.
+{
+	email {$ACME_EMAIL}
+}
+
+{$DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	# The web server is also the gateway to the API (/api/*); the API is never exposed.
+	reverse_proxy web:3000
+}

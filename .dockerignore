@@ -1,0 +1,21 @@
+# Keep the Docker build context small and free of local secrets.
+.git
+.github
+.husky
+.turbo
+**/node_modules
+**/dist
+**/.output
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.production.example
+docs
+deploy
+**/test
+**/*.md
+!**/package.json
+.claude
+.commandcode
+.agents
+skills-lock.json

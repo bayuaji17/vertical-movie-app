@@ -120,3 +120,22 @@ describe("loadDatabaseUrl", () => {
     ).toThrow("PostgreSQL");
   });
 });
+
+describe("loadApiEnv HOST", () => {
+  it("listens on all interfaces unless HOST is set", () => {
+    expect(loadApiEnv(validEnv).host).toBeUndefined();
+    expect(loadApiEnv({ ...validEnv, HOST: " " }).host).toBeUndefined();
+  });
+
+  it("accepts a loopback or any other valid address and host name", () => {
+    for (const host of ["127.0.0.1", "0.0.0.0", "::1", "localhost", "api.internal"])
+      expect(loadApiEnv({ ...validEnv, HOST: host }).host).toBe(host);
+  });
+
+  it("rejects values that are not a host", () => {
+    for (const host of ["http://127.0.0.1", "127.0.0.1:3001", "bad host", "-x", "a/b"])
+      expect(() => loadApiEnv({ ...validEnv, HOST: host })).toThrow(
+        "HOST harus berupa nama host atau alamat IP yang valid.",
+      );
+  });
+});

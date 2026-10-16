@@ -1,0 +1,31 @@
+[Unit]
+Description=Vertical Movie media worker (Bun + FFmpeg)
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=vmovie
+Group=vmovie
+WorkingDirectory=/opt/vertical-movie/current/apps/api
+EnvironmentFile=/etc/vertical-movie/api.env
+ExecStart=/usr/local/bin/bun dist/workers/index.js
+Restart=always
+RestartSec=5
+# SIGTERM lets the worker finish or release its job (MEDIA_WORKER_SHUTDOWN_SECONDS=60).
+TimeoutStopSec=75
+LimitNOFILE=65536
+# Transcoding is heavy: keep it from starving the API and web on a small VPS.
+Nice=10
+# Hardening. The scratch directory (MEDIA_WORKER_WORKDIR) must stay writable.
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=false
+ReadWritePaths=/var/tmp/vertical-movie-worker
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+
+[Install]
+WantedBy=multi-user.target
