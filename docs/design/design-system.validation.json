@@ -1,0 +1,98 @@
+{
+  "colorTokenCount": 31,
+  "themes": {
+    "light": {
+      "mismatch": [],
+      "contrasts": {
+        "background": 19.8,
+        "card": 19.8,
+        "popover": 19.8,
+        "primary": 5.72,
+        "secondary": 16.12,
+        "muted": 4.35,
+        "accent": 16.44,
+        "sidebar": 18.97,
+        "sidebar-primary": 2.96,
+        "sidebar-accent": 16.44
+      },
+      "feedbackMatches": {
+        "success": true,
+        "error": true
+      },
+      "background": "oklch(1 0 0)",
+      "width": 1920,
+      "height": 2155.796875,
+      "count": 31,
+      "imageWidth": 3840,
+      "imageHeight": 4312
+    },
+    "dark": {
+      "mismatch": [],
+      "contrasts": {
+        "background": 14.97,
+        "card": 13.25,
+        "popover": 13.25,
+        "primary": 4.5,
+        "secondary": 11.55,
+        "muted": 5.69,
+        "accent": 11.55,
+        "sidebar": 13.25,
+        "sidebar-primary": 7.52,
+        "sidebar-accent": 11.55
+      },
+      "feedbackMatches": {
+        "success": true,
+        "error": true
+      },
+      "background": "rgb(30, 32, 30)",
+      "width": 1920,
+      "height": 2155.796875,
+      "count": 31,
+      "imageWidth": 3840,
+      "imageHeight": 4312
+    }
+  },
+  "responsive": [
+    {
+      "width": 320,
+      "mode": "light",
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "mode": "dark",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "mode": "light",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "mode": "dark",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "mode": "light",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "mode": "dark",
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "mode": "light",
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "mode": "dark",
+      "overflow": false
+    }
+  ],
+  "browserErrors": []
+}
