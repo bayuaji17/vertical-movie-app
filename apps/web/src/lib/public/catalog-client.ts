@@ -3,7 +3,7 @@ import { createApiClient } from '../api/client'
 import type { ApiFetcher } from '../api/client'
 import { CatalogRequestError } from '../catalog/catalog-client'
 import { contentSlug, watchVideoSchema } from '../catalog/content-model'
-import { signedPosterSchema } from './catalog-model'
+import { posterMaxLifetimeMs, signedPosterSchema } from './catalog-model'
 import type { PublicVideo } from './catalog-model'
 
 export function createPublicVideoClient(
@@ -67,7 +67,8 @@ export function createPublicVideoClient(
       url.hash ||
       !url.pathname.endsWith('/poster.webp') ||
       expiry <= now() ||
-      expiry > now() + Math.ceil((video.durationMs * 2) / 1000) * 1000 + 30_000
+      // The lifetime is configured on the server and independent of the video.
+      expiry > now() + posterMaxLifetimeMs + 60_000
     )
       throw new CatalogRequestError(502)
     return data

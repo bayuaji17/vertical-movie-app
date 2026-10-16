@@ -9,7 +9,7 @@ import { CatalogPosterService } from "./modules/catalog/poster-service";
 import { PublicContentStore } from "./modules/catalog/content-repository";
 import { PublicationService } from "./modules/publication/service";
 import { PlaybackService } from "./modules/playback/service";
-import { loadPlaybackBaseUrl } from "./config/playback-env";
+import { loadPlaybackBaseUrl, loadUrlLifetimes } from "./config/playback-env";
 import { createMultipartStorage } from "./storage/multipart";
 import { createMediaRepository } from "./modules/media/repository";
 import { MediaService } from "./modules/media/service";
@@ -44,6 +44,8 @@ const logConfig = loadLogEnv();
 const log = createLogger("api", { config: logConfig });
 installProcessLogging(log);
 const env = loadApiEnv();
+// Validated at start so a bad value fails fast, not on the first playback request.
+const urlLifetimes = loadUrlLifetimes();
 const storage = env.storage ? createStorageClient(env.storage) : undefined;
 const database = createDatabase(env.databaseUrl);
 const catalogStore = new CatalogStore(database.db),
@@ -95,6 +97,8 @@ const app = createApp({
           storage,
           loadPlaybackBaseUrl(Bun.env.MEDIA_PLAYBACK_BASE_URL, env.webOrigin),
           env.storage,
+          undefined,
+          urlLifetimes,
         )
       : undefined,
   mediaService:

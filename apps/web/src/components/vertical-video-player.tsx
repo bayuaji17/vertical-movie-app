@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { nextStablePoster } from '#/lib/public/stable-poster'
+import type { StablePoster } from '#/lib/public/stable-poster'
 import { Video, videoFeatures } from '@videojs/react/video'
 import { createPlayer, selectQuality, selectError } from '@videojs/react'
 import { HlsJsVideo } from '@videojs/react/media/hlsjs-video'
@@ -60,6 +62,10 @@ export function VerticalVideoPlayer({
     [generation, setGeneration] = useState(0),
     [error, setError] = useState<string>()
   const playback = result?.loader === loadPlayback ? result?.info : undefined
+  // The poster is taken from the first playback response and kept; renewals only refresh HLS.
+  const [stable, setStable] = useState<StablePoster>()
+  const poster0 = nextStablePoster(stable, loadPlayback, playback?.posterUrl)
+  if (poster0 !== stable) setStable(poster0)
   const media = useRef<HTMLVideoElement>(null),
     controller = useRef<AbortController | null>(null),
     mounted = useRef(false),
@@ -202,7 +208,7 @@ export function VerticalVideoPlayer({
                     }
                   : null
               }
-              poster={playback?.posterUrl}
+              poster={poster0?.url}
               playsInline
               preload="metadata"
               onLoadedMetadata={loaded}

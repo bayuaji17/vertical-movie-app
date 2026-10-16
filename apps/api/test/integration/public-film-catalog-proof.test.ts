@@ -115,8 +115,9 @@ test("Film/Standalone SQL traversal, legacy compatibility, mutation invalidation
     expect(response.headers.get("cache-control")).toBe("private, no-store");
     const cover = await response.json();
     expect(cover.videoId).toBe(selected.id);
+    // A poster URL lives a day, however short the video is.
     expect(new URL(cover.posterUrl).searchParams.get("X-Amz-Expires")).toBe(
-      "3",
+      "86400",
     );
     const object = await fetch(cover.posterUrl);
     expect(object.status).toBe(200);
