@@ -11,7 +11,7 @@ Bun workspaces and Turborepo run two applications:
 
 ## Getting started
 
-Use Bun 1.4.3 and install dependencies from the repository root:
+Use Bun 1.4.4 and install dependencies from the repository root:
 
 ```sh
 bun install --frozen-lockfile
@@ -68,11 +68,11 @@ bun run build --filter=web
 
 ## Production deployment
 
-The whole stack runs on **Bun 1.4.3** (see `engines.bun`) on a single VPS: PostgreSQL, the API, a separate media worker (FFmpeg), the web server and a reverse proxy. Media storage in production is **Cloudflare R2** (`NODE_ENV=production` rejects MinIO). Two supported paths, both described step by step in the [deployment guide](docs/operations/deployment.md):
+The whole stack runs on **Bun 1.4.4** (see `engines.bun`) on a single VPS: PostgreSQL, the API, a separate media worker (FFmpeg), the web server and a reverse proxy. Media storage in production is **Cloudflare R2** (`NODE_ENV=production` rejects MinIO). Two supported paths, both described step by step in the [deployment guide](docs/operations/deployment.md):
 
 | Path           | Files                                                                                                                                          | Summary                                                                                                                                                 |
 | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Docker Compose | [`deploy/docker/`](deploy/docker/) (`Dockerfile`, `compose.yaml`, `Caddyfile`, `.env.example`)                                                 | `oven/bun:1.4.3-debian` images, Caddy with automatic HTTPS, only ports 80/443 are published.                                                            |
+| Docker Compose | [`deploy/docker/`](deploy/docker/) (`Dockerfile`, `compose.yaml`, `Caddyfile`, `.env.example`)                                                 | `oven/bun:1.4.4-debian` images, Caddy with automatic HTTPS, only ports 80/443 are published.                                                            |
 | Without Docker | [`deploy/systemd/`](deploy/systemd/), [`deploy/scripts/`](deploy/scripts/), [`deploy/caddy/`](deploy/caddy/), [`deploy/nginx/`](deploy/nginx/) | Bun, FFmpeg and PostgreSQL on the host, systemd services, Caddy or nginx, atomic releases via [`deploy/scripts/release.sh`](deploy/scripts/release.sh). |
 
 Production environment samples (copy, then replace every `CHANGE_ME`; the copies are ignored by Git):

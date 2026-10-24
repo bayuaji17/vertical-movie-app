@@ -47,12 +47,12 @@
     "elysia": "latest"
   },
   "devDependencies": {
-    "bun-types": "1.4.3",
+    "bun-types": "1.4.4",
     "drizzle-kit": "0.31.11",
     "postgres": "3.4.9"
   },
   "engines": {
-    "bun": ">=1.4.3"
+    "bun": ">=1.4.4"
   },
   "module": "dist/index.js"
 }
