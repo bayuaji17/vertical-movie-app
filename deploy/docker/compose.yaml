@@ -13,7 +13,7 @@
 name: vertical-movie
 
 x-bun: &bun
-  BUN_VERSION: ${BUN_VERSION:-1.4.3}
+  BUN_VERSION: ${BUN_VERSION:-1.4.4}
 x-restart: &restart
   restart: unless-stopped
   # Container logs grow without bound by default; keep at most 5 x 10 MB per service.

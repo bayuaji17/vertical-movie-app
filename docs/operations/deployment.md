@@ -1,6 +1,6 @@
 # Deploy production di VPS
 
-> Status: **implemented, terverifikasi sebagian secara lokal** · 16 Oktober 2026 · Plan: [production-deployment](../plans/production-deployment/implementation-plan.md), backlog: [DEP](../tasks/production-deployment.md). Runtime di semua jalur adalah **Bun 1.4.3** (rilis terbaru saat dokumen ini ditulis; sama dengan `engines.bun` di `package.json`). Bagian [Yang sudah dan belum terbukti](#yang-sudah-dan-belum-terbukti) menyebut batasnya dengan jelas.
+> Status: **implemented, terverifikasi sebagian secara lokal** · 16 Oktober 2026 · Plan: [production-deployment](../plans/production-deployment/implementation-plan.md), backlog: [DEP](../tasks/production-deployment.md). Runtime di semua jalur adalah **Bun 1.4.4** (rilis terbaru saat dokumen ini ditulis; sama dengan `engines.bun` di `package.json`). Bagian [Yang sudah dan belum terbukti](#yang-sudah-dan-belum-terbukti) menyebut batasnya dengan jelas.
 
 Dua jalur yang setara. Pilih satu:
 
@@ -98,7 +98,7 @@ API dan worker membaca file env yang sama; nilai yang salah menghentikan proses 
 
 ## 5. Jalur A — Docker Compose
 
-Hanya Docker Engine dengan plugin Compose v2 yang diperlukan; Bun, FFmpeg dan PostgreSQL ada di dalam image. Semua image memakai **`oven/bun:1.4.3-debian`** (versi dari `BUN_VERSION`).
+Hanya Docker Engine dengan plugin Compose v2 yang diperlukan; Bun, FFmpeg dan PostgreSQL ada di dalam image. Semua image memakai **`oven/bun:1.4.4-debian`** (versi dari `BUN_VERSION`).
 
 ### 5.1 Pasang Docker
 
@@ -201,13 +201,13 @@ sudo -u postgres psql -c "CREATE DATABASE vertical_movie_app OWNER vmovie;"
 
 Biarkan PostgreSQL hanya mendengarkan `localhost` (default). Samakan password dengan `DATABASE_URL`.
 
-### 6.3 Bun 1.4.3
+### 6.3 Bun 1.4.4
 
 Pasang **versi yang dipin** ke `/usr/local/bin/bun` sehingga semua service dan proses build memakai biner yang sama:
 
 ```sh
-curl -fsSL https://bun.sh/install | sudo BUN_INSTALL=/usr/local bash -s "bun-v1.4.3"
-bun --version      # 1.4.3
+curl -fsSL https://bun.sh/install | sudo BUN_INSTALL=/usr/local bash -s "bun-v1.4.4"
+bun --version      # 1.4.4
 ```
 
 ### 6.4 Pengguna, direktori dan clone
@@ -350,6 +350,6 @@ Aturan tambahan: pin versi Bun yang sama di `engines.bun`, `bun-types`, installe
 
 Diamati pada 16 Oktober 2026 di mesin pengembangan Linux (Docker 29, Compose 5):
 
-- **Terbukti:** semua target image dibangun (`api` 338 MB, `web` 364 MB, `worker` ≈1 GB, `tools`); `docker compose config` valid; stack dijalankan (PostgreSQL 18 → `migrate` menerapkan 14 migrasi → `api`, `worker`, `web`); `admin:provision` dari container `tools` membuat admin; login lewat gateway web berhasil dan endpoint admin menjawab 200 dengan sesi dan 401 tanpa sesi; Bun **1.4.3** di semua container, proses berjalan sebagai pengguna non-root `bun`, FFmpeg 7.1 ada di worker, log JSON, hanya satu port yang dipublikasikan; Caddyfile (compose dan host) lolos `caddy validate`; unit systemd lolos `systemd-analyze verify`; langkah instalasi jalur tanpa Docker diuji pada container `debian:13-slim` bersih (`unzip`, Bun **1.4.3** lewat installer terpin ke `/usr/local/bin`, `ffmpeg` dan `ffprobe` 7.1.5 dari apt; pemasangan FFmpeg menarik banyak paket dan dapat memakan beberapa menit); sample env API valid menurut seluruh loader env (test otomatis).
+- **Terbukti (diamati pada Bun 1.4.3; peralihan ke 1.4.4 pada 24 Oktober 2026 tidak diuji ulang atas permintaan pengguna):** semua target image dibangun (`api` 338 MB, `web` 364 MB, `worker` ≈1 GB, `tools`); `docker compose config` valid; stack dijalankan (PostgreSQL 18 → `migrate` menerapkan 14 migrasi → `api`, `worker`, `web`); `admin:provision` dari container `tools` membuat admin; login lewat gateway web berhasil dan endpoint admin menjawab 200 dengan sesi dan 401 tanpa sesi; Bun **1.4.3** di semua container, proses berjalan sebagai pengguna non-root `bun`, FFmpeg 7.1 ada di worker, log JSON, hanya satu port yang dipublikasikan; Caddyfile (compose dan host) lolos `caddy validate`; unit systemd lolos `systemd-analyze verify`; langkah instalasi jalur tanpa Docker diuji pada container `debian:13-slim` bersih (`unzip`, Bun **1.4.3** lewat installer terpin ke `/usr/local/bin`, `ffmpeg` dan `ffprobe` 7.1.5 dari apt; pemasangan FFmpeg menarik banyak paket dan dapat memakan beberapa menit); sample env API valid menurut seluruh loader env (test otomatis).
 - **Terbukti (jalur tanpa Docker, 16 Oktober 2026):** `HOST=127.0.0.1` membuat API hanya mendengarkan loopback (tanpa `HOST` tetap semua interface); `bun run start` kini meneruskan variabel shell (`passThroughEnv`); `deploy/scripts/release.sh` diuji di sandbox dengan `systemctl` palsu (build + migrasi penuh, rilis ulang tanpa build, rilis dengan origin lain, `--rollback`, health check gagal → rollback otomatis); dua instance API berbagi satu port lewat `SO_REUSEPORT`; `vertical-movie-api@.service` lolos `systemd-analyze verify`.
 - **Belum terbukti:** `release.sh` pada systemd dan VPS nyata; HTTPS/ACME pada domain nyata; **Cloudflare R2 nyata** (upload, HLS, CORS, kebijakan token; "R2 staging belum diuji" juga tercatat di [Media Operations](media.md)); transcoding dalam container pada job nyata; startup service systemd dan konfigurasi nginx; PostgreSQL selain 18; restore backup; ukuran VPS dan performa.

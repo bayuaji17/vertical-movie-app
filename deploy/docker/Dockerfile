@@ -6,7 +6,7 @@
 #   docker build -f deploy/docker/Dockerfile --target web --build-arg VITE_API_URL=https://movies.example.com -t vertical-movie-web .
 #   docker build -f deploy/docker/Dockerfile --target tools  -t vertical-movie-tools .
 # Normally you use deploy/docker/compose.yaml, which passes these for you.
-ARG BUN_VERSION=1.4.3
+ARG BUN_VERSION=1.4.4
 
 # ---- dependencies (cached until a manifest or the lockfile changes) ----------
 FROM oven/bun:${BUN_VERSION}-debian AS deps

@@ -61,7 +61,7 @@
     "@tanstack/eslint-config": "latest",
     "@tanstack/intent": "^0.4.0",
     "@tanstack/router-cli": "^1.132.0",
-    "bun-types": "1.4.3",
+    "bun-types": "1.4.4",
     "@types/node": "^22.10.2",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
@@ -73,6 +73,6 @@
     "vite": "^8.0.0"
   },
   "engines": {
-    "bun": ">=1.4.3"
+    "bun": ">=1.4.4"
   }
 }
