@@ -1,6 +1,6 @@
 # Modul: persiapan deploy production di VPS
 
-> Status: **DEP-001–007 Done (implemented, terverifikasi sebagian lokal)** · 16 Oktober 2026 · Pengguna meminta sample env production, pembaruan README dan panduan deploy VPS dengan dan tanpa Docker dengan Bun terbaru. Plan: [implementation-plan](../plans/production-deployment/implementation-plan.md), context: [repository-context](../plans/production-deployment/repository-context.md), runbook: [deployment](../operations/deployment.md).
+> Status: **DEP-001–008 Done (implemented, terverifikasi sebagian lokal)** · 16 Oktober 2026 · Pengguna meminta sample env production, pembaruan README dan panduan deploy VPS dengan dan tanpa Docker dengan Bun terbaru. Plan: [implementation-plan](../plans/production-deployment/implementation-plan.md), context: [repository-context](../plans/production-deployment/repository-context.md), runbook: [deployment](../operations/deployment.md).
 
 ## Tujuan modul
 
@@ -256,3 +256,39 @@ Dikerjakan 16 Oktober 2026 (diamati): API tanpa `HOST` mendengarkan `*:3399`, de
 ### Blocker atau tindak lanjut
 
 Uji `release.sh` pada VPS nyata sebelum rollout produksi.
+
+## Task: DEP-008 — Ubuntu 22.04, VPS kecil dan rilis bertag
+
+- Status: Done
+- Owner: agent
+- Prioritas: 2
+- Referensi: DEP-US-02
+- Diperbarui: 2026-10-26
+- Dependensi: DEP-007
+- Ukuran: kecil
+
+### Ruang lingkup
+
+Catatan Ubuntu 22.04 (FFmpeg 4.4.2) dan ukuran VPS 2 vCPU / 2 GB dengan database dan storage eksternal ([deployment 6.11](../operations/deployment.md#611-contoh-ubuntu-2204-2-vcpu--2-gb-database-dan-storage-eksternal)); kebijakan branch `production` dan rilis bertag ([6.12](../operations/deployment.md#612-branch-production-dan-rilis-bertag)); aturan branch di `AGENTS.md`.
+
+### Acceptance criteria
+
+- [x] Perbedaan Ubuntu 22.04 dan pengaturan VPS kecil tercatat dengan angka yang benar-benar diamati dan batas buktinya.
+- [x] Alur `main` → `production` → tag `vX.Y.Z` → GitHub Release → `release.sh <tag>` terdokumentasi.
+
+### Validasi
+
+Container `ubuntu:22.04` (24–26 Oktober 2026): Bun 1.4.4, FFmpeg 4.4.2, `transcodeHls` + `verifyHls` lulus (19 file; klip 20 detik 36,7 detik), `systemd-analyze verify` bersih (systemd 249); `bun run docs:check`.
+
+### Hasil dan bukti
+
+Dikerjakan 26 Oktober 2026. **Batas:** swap, ufw, Caddy/ACME, R2, `?sslmode=require` dengan Bun SQL dan beban transcode di VPS nyata belum terbukti.
+
+### Commit task
+
+- Pesan: `docs: ubuntu 22.04 vps notes and tagged release flow (DEP-008)`
+- SHA: dicatat pada update dokumentasi berikutnya
+
+### Blocker atau tindak lanjut
+
+Uji di VPS nyata sebelum menganggap siap produksi.
