@@ -36,13 +36,13 @@ Dua jalur yang setara. Pilih satu:
 
 ## 2. Prasyarat
 
-| Kebutuhan     | Keterangan                                                                                                                                                                                                                                                                                        |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| VPS           | Linux x86_64, Debian 13 atau Ubuntu 24.04 (yang diuji: Debian 13). Titik awal: 2 vCPU, 4 GB RAM, 40 GB disk. Transcoding memakai CPU dan disk; worker menolak job bila ruang kosong di direktori kerjanya < 10 GiB (`MEDIA_WORKER_MIN_FREE_BYTES`). Ukuran ini **belum diukur** pada beban nyata. |
-| Domain        | Record A/AAAA mengarah ke IP VPS (misalnya `movies.example.com`). Port 80 dan 443 terbuka.                                                                                                                                                                                                        |
-| Cloudflare R2 | Satu bucket **privat** dan satu API token khusus bucket. **Wajib**: `NODE_ENV=production` menolak MinIO (`STORAGE_PROVIDER` harus `r2`).                                                                                                                                                          |
-| Repo          | `git clone` repositori ini di VPS (atau salin artefaknya).                                                                                                                                                                                                                                        |
-| Firewall      | Izinkan hanya SSH, 80 dan 443. Contoh: `sudo ufw allow OpenSSH && sudo ufw allow 80,443/tcp && sudo ufw enable`.                                                                                                                                                                                  |
+| Kebutuhan     | Keterangan                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| VPS           | Linux x86_64, Debian 13, Ubuntu 24.04 atau Ubuntu 22.04 (langkah instalasi diuji pada Debian 13 dan Ubuntu 22.04; lihat [6.11](#611-contoh-ubuntu-2204-2-vcpu--2-gb-database-dan-storage-eksternal) untuk VPS kecil). Titik awal: 2 vCPU, 4 GB RAM, 40 GB disk. Transcoding memakai CPU dan disk; worker menolak job bila ruang kosong di direktori kerjanya < 10 GiB (`MEDIA_WORKER_MIN_FREE_BYTES`). Ukuran ini **belum diukur** pada beban nyata. |
+| Domain        | Record A/AAAA mengarah ke IP VPS (misalnya `movies.example.com`). Port 80 dan 443 terbuka.                                                                                                                                                                                                                                                                                                                                                           |
+| Cloudflare R2 | Satu bucket **privat** dan satu API token khusus bucket. **Wajib**: `NODE_ENV=production` menolak MinIO (`STORAGE_PROVIDER` harus `r2`).                                                                                                                                                                                                                                                                                                             |
+| Repo          | `git clone` repositori ini di VPS (atau salin artefaknya).                                                                                                                                                                                                                                                                                                                                                                                           |
+| Firewall      | Izinkan hanya SSH, 80 dan 443. Contoh: `sudo ufw allow OpenSSH && sudo ufw allow 80,443/tcp && sudo ufw enable`.                                                                                                                                                                                                                                                                                                                                     |
 
 Pengaturan dasar server: login SSH dengan kunci (bukan password), akun non-root dengan `sudo`, pembaruan keamanan otomatis (`unattended-upgrades`), dan jam yang tersinkron (`timedatectl`).
 
@@ -170,7 +170,7 @@ Caddy meminta sertifikat Let's Encrypt otomatis pada permintaan pertama ke `http
 
 ## 6. Jalur B — tanpa Docker
 
-Semua proses berjalan langsung di host sebagai pengguna non-root `vmovie` di bawah **systemd**, dengan **rilis atomik**: tiap versi dibangun di direktori sendiri dan `current` (symlink) dialihkan hanya setelah build berhasil, dengan health check dan rollback otomatis. Alasan dan sumber tiap pilihan ada di [bagian 10](#10-praktik-terbaik-bun-turborepo-elysia-dan-tanstack-start). Contoh untuk Debian 13.
+Semua proses berjalan langsung di host sebagai pengguna non-root `vmovie` di bawah **systemd**, dengan **rilis atomik**: tiap versi dibangun di direktori sendiri dan `current` (symlink) dialihkan hanya setelah build berhasil, dengan health check dan rollback otomatis. Alasan dan sumber tiap pilihan ada di [bagian 10](#10-praktik-terbaik-bun-turborepo-elysia-dan-tanstack-start). Contoh untuk Debian 13; perbedaan Ubuntu 22.04 ada di [6.1](#61-paket-sistem) dan [6.11](#611-contoh-ubuntu-2204-2-vcpu--2-gb-database-dan-storage-eksternal).
 
 ```text
 /opt/vertical-movie/
@@ -188,7 +188,7 @@ sudo apt update
 sudo apt install -y curl unzip git ca-certificates ffmpeg
 ```
 
-`unzip` diperlukan installer Bun; `ffmpeg` (termasuk `ffprobe`) diperlukan worker. PostgreSQL dan reverse proxy dipasang di 6.2 dan 6.9.
+`unzip` diperlukan installer Bun; `ffmpeg` (termasuk `ffprobe`) diperlukan worker. Di Ubuntu 22.04 apt menyediakan FFmpeg **4.4.2** (Debian 13: 7.1); keduanya diuji dengan pipeline transcode aplikasi. Pada Ubuntu, awali dengan `sudo NEEDRESTART_MODE=a apt install ...` agar tidak muncul dialog "restart services", dan tambahkan `gpg` pada langkah Caddy (6.9) bila belum ada. PostgreSQL dan reverse proxy dipasang di 6.2 dan 6.9.
 
 ### 6.2 PostgreSQL
 
@@ -288,6 +288,30 @@ atau **nginx** + certbot: [`deploy/nginx/vertical-movie.conf`](../../deploy/ngin
 | Restore         | hentikan `api`/`worker`, `sudo -u postgres pg_restore -d vertical_movie_app --clean --if-exists backup.dump`, mulai lagi                                         |
 
 Rilis lama dipangkas otomatis (default 3 terbaru; `current` dan `previous` tidak pernah dihapus; atur dengan `KEEP`).
+
+### 6.11 Contoh: Ubuntu 22.04, 2 vCPU / 2 GB, database dan storage eksternal
+
+Konfigurasi satu server untuk API, web dan worker, dengan PostgreSQL dan R2 di luar VPS (lewati 6.2). Pengukuran 16–26 Oktober 2026 pada mesin pengembangan, **bukan** pada VPS ini.
+
+| Aspek                | Hasil / pengaturan                                                                                                                                                                                                                                            |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RAM                  | API ≈ 80 MB, web ≈ 70–80 MB (tanpa data), FFmpeg puncak ≈ 440 MB (1080×1920, 3 rendition, 1 thread); total saat transcode ≈ 1,1–1,3 GB. Aktifkan **swap 2 GB**, termasuk untuk build di server.                                                               |
+| CPU                  | Biarkan `MEDIA_WORKER_CONCURRENCY=1` dan `MEDIA_FFMPEG_THREADS=1`; worker berjalan `Nice=10` sehingga satu core tersisa untuk web/API. Satu API, tanpa template `vertical-movie-api@`.                                                                        |
+| Kecepatan transcode  | Klip 1080×1920 20 detik: 36,7 detik pada FFmpeg 4.4.2 (Ubuntu 22.04, container); 30 detik: 46 detik pada FFmpeg 7.1 yang dipasang satu core. Naikkan `MEDIA_TRANSCODE_TIMEOUT_FACTOR` ke `5` (batas keras `MEDIA_JOB_HARD_TIMEOUT_SECONDS` 7200 detik).       |
+| Disk                 | Turunkan `MEDIA_WORKER_MIN_FREE_BYTES` ke sekitar `4294967296` (4 GiB) pada disk kecil; sumber 1,5 GB membutuhkan ± 4–5 GB ruang kerja.                                                                                                                       |
+| Database             | `DATABASE_URL` ke server eksternal (`?sslmode=require` bila diperlukan; **belum diuji** dengan driver Bun SQL). Pilih region yang sama dengan VPS.                                                                                                            |
+| Terbukti (container) | `ubuntu:22.04`: Bun 1.4.4 lewat installer terpin, FFmpeg 4.4.2, transcode 3 rendition dan `verifyHls` lulus, empat unit systemd lolos `systemd-analyze verify` (systemd 249). **Belum terbukti** di VPS nyata: swap, ufw, Caddy/ACME, R2 dan beban transcode. |
+
+### 6.12 Branch `production` dan rilis bertag
+
+`production` adalah branch jangka panjang yang berisi persis commit yang boleh dipasang di server; `main` tetap tempat integrasi. Alurnya:
+
+1. Gabungkan perubahan ke `main` lewat PR seperti biasa.
+2. Setelah siap dirilis, majukan `production` ke commit tersebut (`git switch production && git merge --ff-only main && git push`) dan beri tag SemVer anotasi: `git tag -a vX.Y.Z -m "..." && git push origin vX.Y.Z`.
+3. Buat GitHub Release dari tag itu dengan catatan perubahan.
+4. Pasang di server dengan tag, bukan nama branch, agar rilis dapat diulang dan di-rollback: `sudo --preserve-env=VITE_API_URL /opt/vertical-movie/repo/deploy/scripts/release.sh vX.Y.Z --migrate`. `release.sh` melakukan `git fetch --tags` sebelum menyelesaikan ref.
+
+Versi pertama: `v0.1.0` (lihat catatan rilis di GitHub). Perubahan skema harus additive agar `--rollback` aman (bagian 6.10).
 
 ---
 
